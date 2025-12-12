@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.application.InMemoryCommandContextDao
 import no.nav.helse.spesialist.application.InMemoryVedtakRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -124,8 +126,7 @@ internal class VurderAutomatiskInnvilgelseTest {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(context))
         val vedtak = vedtakRepository.finn(spleisBehandlingId)
-        assertNotNull(vedtak)
-        assertEquals(true, vedtak.automatiskFattet)
+        assertIs<Vedtak.Automatisk>(vedtak)
         verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDao.manuellSaksbehandling(any(), any(), any(), any()) }
     }

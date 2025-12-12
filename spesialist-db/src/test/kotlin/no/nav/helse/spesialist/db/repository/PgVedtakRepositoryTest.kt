@@ -1,43 +1,80 @@
 package no.nav.helse.spesialist.db.repository
 
+import no.nav.helse.spesialist.application.testing.assertEqualsByMicrosecond
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.postgresql.util.PSQLException
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
+import kotlin.test.assertIs
 
 class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.vedtakRepository
 
     @Test
-    fun `lagre og finn behandling`() {
+    fun `lagre automatisk vedtak og finn vedtak`() {
         // given
-        val vedtak = etVedtak()
+        val lagret = Vedtak.automatisk(lagSpleisBehandlingId())
 
         // when
-        repository.lagre(vedtak)
+        repository.lagre(lagret)
 
         // then
-        val funnet = repository.finn(vedtak.id)
-        assertNotNull(funnet)
-        assertEquals(vedtak.id, funnet.id)
-        assertEquals(vedtak.saksbehandlerIdent, funnet.saksbehandlerIdent)
-        assertEquals(vedtak.beslutterIdent, funnet.beslutterIdent)
-        assertEquals(vedtak.automatiskFattet, funnet.automatiskFattet)
-        assertEquals(vedtak.tidspunkt.truncatedTo(ChronoUnit.MILLIS), funnet.tidspunkt.truncatedTo(ChronoUnit.MILLIS))
+        val funnet = repository.finn(lagret.id)
+        assertIs<Vedtak.Automatisk>(funnet)
+        assertEquals(lagret.id, funnet.id)
+        assertEqualsByMicrosecond(lagret.tidspunkt, funnet.tidspunkt)
+    }
+
+    @Test
+    fun `lagre vedtak _med_ totrinnskontroll og finn vedtak`() {
+        // given
+        val lagret =
+            Vedtak.manueltMedTotrinnskontroll(
+                id = lagSpleisBehandlingId(),
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                beslutterIdent = lagSaksbehandler().ident,
+            )
+
+        // when
+        repository.lagre(lagret)
+
+        // then
+        val funnet = repository.finn(lagret.id)
+        assertIs<Vedtak.ManueltMedTotrinnskontroll>(funnet)
+        assertEquals(lagret.id, funnet.id)
+        assertEquals(lagret.saksbehandlerIdent, funnet.saksbehandlerIdent)
+        assertEquals(lagret.beslutterIdent, funnet.beslutterIdent)
+        assertEqualsByMicrosecond(lagret.tidspunkt, funnet.tidspunkt)
+    }
+
+    @Test
+    fun `lagre vedtak _uten_ totrinnskontroll og finn vedtak`() {
+        // given
+        val lagret =
+            Vedtak.manueltUtenTotrinnskontroll(
+                id = lagSpleisBehandlingId(),
+                saksbehandlerIdent = lagSaksbehandler().ident,
+            )
+
+        // when
+        repository.lagre(lagret)
+
+        // then
+        val funnet = repository.finn(lagret.id)
+        assertIs<Vedtak.ManueltUtenTotrinnskontroll>(funnet)
+        assertEquals(lagret.id, funnet.id)
+        assertEquals(lagret.saksbehandlerIdent, funnet.saksbehandlerIdent)
+        assertEqualsByMicrosecond(lagret.tidspunkt, funnet.tidspunkt)
     }
 
     @Test
     fun `forsøk på å lagre vedtak dobbelt medfører exception`() {
         // given
-        val vedtak = etVedtak()
+        val vedtak = Vedtak.automatisk(lagSpleisBehandlingId())
         repository.lagre(vedtak)
 
         // then
@@ -46,13 +83,4 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
             repository.lagre(vedtak)
         }
     }
-
-    private fun etVedtak() =
-        Vedtak.fraLagring(
-            SpleisBehandlingId(UUID.randomUUID()),
-            automatiskFattet = false,
-            saksbehandlerIdent = lagSaksbehandler().ident,
-            beslutterIdent = lagSaksbehandler().ident,
-            tidspunkt = Instant.now(),
-        )
 }

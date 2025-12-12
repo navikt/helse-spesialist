@@ -13,15 +13,51 @@ class PgVedtakRepository private constructor(
     internal constructor(session: Session) : this(SessionDbQuery(session))
 
     override fun lagre(vedtak: Vedtak) {
+        when (vedtak) {
+            is Vedtak.Automatisk -> lagreAutomatisk(vedtak)
+            is Vedtak.ManueltMedTotrinnskontroll -> lagreManueltMedTotrinnskontroll(vedtak)
+            is Vedtak.ManueltUtenTotrinnskontroll -> lagreManueltUtenTotrinnskontroll(vedtak)
+        }
+    }
+
+    private fun lagreAutomatisk(vedtak: Vedtak.Automatisk) {
         dbQuery.update(
             """
                  INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
                  VALUES(:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
             """,
             "behandlingId" to vedtak.id.value,
-            "fattetAutomatisk" to vedtak.automatiskFattet,
+            "fattetAutomatisk" to true,
+            "saksbehandlerIdent" to null,
+            "beslutterIdent" to null,
+            "tidspunkt" to vedtak.tidspunkt,
+        )
+    }
+
+    private fun lagreManueltMedTotrinnskontroll(vedtak: Vedtak.ManueltMedTotrinnskontroll) {
+        dbQuery.update(
+            """
+                 INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
+                 VALUES(:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
+            """,
+            "behandlingId" to vedtak.id.value,
+            "fattetAutomatisk" to false,
             "saksbehandlerIdent" to vedtak.saksbehandlerIdent,
             "beslutterIdent" to vedtak.beslutterIdent,
+            "tidspunkt" to vedtak.tidspunkt,
+        )
+    }
+
+    private fun lagreManueltUtenTotrinnskontroll(vedtak: Vedtak.ManueltUtenTotrinnskontroll) {
+        dbQuery.update(
+            """
+                 INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
+                 VALUES(:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
+            """,
+            "behandlingId" to vedtak.id.value,
+            "fattetAutomatisk" to false,
+            "saksbehandlerIdent" to vedtak.saksbehandlerIdent,
+            "beslutterIdent" to null,
             "tidspunkt" to vedtak.tidspunkt,
         )
     }
@@ -31,12 +67,29 @@ class PgVedtakRepository private constructor(
             "SELECT fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt FROM vedtak WHERE behandling_id = :behandlingId",
             "behandlingId" to spleisBehandlingId.value,
         ) { row ->
-            Vedtak.fraLagring(
-                id = spleisBehandlingId,
-                automatiskFattet = row.boolean("fattet_automatisk"),
-                saksbehandlerIdent = row.string("saksbehandler_ident"),
-                beslutterIdent = row.string("beslutter_ident"),
-                tidspunkt = row.instant("tidspunkt"),
-            )
+            val tidspunkt = row.instant("tidspunkt")
+            val beslutterIdent = row.stringOrNull("beslutter_ident")
+            when {
+                row.boolean("fattet_automatisk") -> {
+                    Vedtak.Automatisk(spleisBehandlingId, tidspunkt)
+                }
+
+                beslutterIdent != null -> {
+                    Vedtak.ManueltMedTotrinnskontroll(
+                        spleisBehandlingId,
+                        tidspunkt,
+                        row.string("saksbehandler_ident"),
+                        beslutterIdent,
+                    )
+                }
+
+                else -> {
+                    Vedtak.ManueltUtenTotrinnskontroll(
+                        spleisBehandlingId,
+                        tidspunkt,
+                        row.string("saksbehandler_ident"),
+                    )
+                }
+            }
         }
 }

@@ -3,45 +3,41 @@ package no.nav.helse.spesialist.domain
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.Instant
 
-class Vedtak private constructor(
+sealed class Vedtak private constructor(
     id: SpleisBehandlingId,
-    val automatiskFattet: Boolean,
-    val saksbehandlerIdent: String?,
-    val beslutterIdent: String?,
     val tidspunkt: Instant,
 ) : AggregateRoot<SpleisBehandlingId>(id) {
-    companion object {
-        fun fraLagring(
-            id: SpleisBehandlingId,
-            automatiskFattet: Boolean,
-            saksbehandlerIdent: String?,
-            beslutterIdent: String?,
-            tidspunkt: Instant,
-        ) = Vedtak(
-            id = id,
-            automatiskFattet = automatiskFattet,
-            saksbehandlerIdent = saksbehandlerIdent,
-            beslutterIdent = beslutterIdent,
-            tidspunkt = tidspunkt,
-        )
+    class Automatisk(
+        id: SpleisBehandlingId,
+        tidspunkt: Instant,
+    ) : Vedtak(id, tidspunkt)
 
+    class ManueltUtenTotrinnskontroll(
+        id: SpleisBehandlingId,
+        tidspunkt: Instant,
+        val saksbehandlerIdent: String,
+    ) : Vedtak(id, tidspunkt)
+
+    class ManueltMedTotrinnskontroll(
+        id: SpleisBehandlingId,
+        tidspunkt: Instant,
+        val saksbehandlerIdent: String,
+        val beslutterIdent: String,
+    ) : Vedtak(id, tidspunkt)
+
+    companion object {
         fun automatisk(id: SpleisBehandlingId) =
-            Vedtak(
+            Automatisk(
                 id = id,
-                automatiskFattet = true,
-                saksbehandlerIdent = null,
-                beslutterIdent = null,
                 tidspunkt = Instant.now(),
             )
 
         fun manueltUtenTotrinnskontroll(
             id: SpleisBehandlingId,
             saksbehandlerIdent: String,
-        ) = Vedtak(
+        ) = ManueltUtenTotrinnskontroll(
             id = id,
-            automatiskFattet = false,
             saksbehandlerIdent = saksbehandlerIdent,
-            beslutterIdent = null,
             tidspunkt = Instant.now(),
         )
 
@@ -49,9 +45,8 @@ class Vedtak private constructor(
             id: SpleisBehandlingId,
             saksbehandlerIdent: String,
             beslutterIdent: String,
-        ) = Vedtak(
+        ) = ManueltMedTotrinnskontroll(
             id = id,
-            automatiskFattet = false,
             saksbehandlerIdent = saksbehandlerIdent,
             beslutterIdent = beslutterIdent,
             tidspunkt = Instant.now(),

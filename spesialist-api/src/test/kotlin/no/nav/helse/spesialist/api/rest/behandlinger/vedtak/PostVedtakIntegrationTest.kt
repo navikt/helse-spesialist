@@ -34,14 +34,11 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class PostVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
@@ -73,10 +70,8 @@ class PostVedtakIntegrationTest {
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         val vedtak = sessionContext.vedtakRepository.finn(behandling.spleisBehandlingId!!)
-        assertNotNull(vedtak)
-        assertEquals(false, vedtak.automatiskFattet)
+        assertIs<Vedtak.ManueltUtenTotrinnskontroll>(vedtak)
         assertEquals(saksbehandler.ident, vedtak.saksbehandlerIdent)
-        assertNull(vedtak.beslutterIdent)
     }
 
     @Test
@@ -111,8 +106,7 @@ class PostVedtakIntegrationTest {
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         val vedtak = sessionContext.vedtakRepository.finn(behandling.spleisBehandlingId!!)
-        assertNotNull(vedtak)
-        assertEquals(false, vedtak.automatiskFattet)
+        assertIs<Vedtak.ManueltMedTotrinnskontroll>(vedtak)
         assertEquals(saksbehandler.ident, vedtak.saksbehandlerIdent)
         assertEquals(beslutter.ident, vedtak.beslutterIdent)
     }
@@ -427,12 +421,9 @@ class PostVedtakIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.meldingDao.lagre(godkjenningsbehov)
         sessionContext.vedtakRepository.lagre(
-            Vedtak.fraLagring(
+            Vedtak.manueltUtenTotrinnskontroll(
                 behandling.spleisBehandlingId!!,
-                false,
                 saksbehandler.ident,
-                null,
-                Instant.now(),
             ),
         )
 
