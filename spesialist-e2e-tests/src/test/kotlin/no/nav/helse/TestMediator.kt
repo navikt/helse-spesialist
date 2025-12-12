@@ -34,11 +34,12 @@ class TestMediator(
             oppgaveRepository = daos.oppgaveRepository,
             tilgangsgruppehenter = { Either.Success(emptySet()) },
         )
-    private val apiOppgaveService = ApiOppgaveService(
-        oppgaveDao = daos.oppgaveDao,
-        oppgaveService = oppgaveService,
-        sessionFactory = TransactionalSessionFactory(dataSource)
-    )
+    private val apiOppgaveService =
+        ApiOppgaveService(
+            oppgaveDao = daos.oppgaveDao,
+            oppgaveService = oppgaveService,
+            sessionFactory = TransactionalSessionFactory(dataSource),
+        )
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
@@ -47,7 +48,7 @@ class TestMediator(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            sessionFactory = TransactionalSessionFactory(dataSource)
+            sessionFactory = TransactionalSessionFactory(dataSource),
         )
 
     private val stikkprøver =
@@ -55,6 +56,7 @@ class TestMediator(
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
             override fun utsFlereArbeidsgivereForlengelse() = false
+
             override fun selvstendigNæringsdrivendeForlengelse() = false
 
             override fun utsEnArbeidsgiverFørstegangsbehandling() = false
@@ -75,28 +77,30 @@ class TestMediator(
             stikkprøver = stikkprøver,
         )
 
-
     init {
         val sessionFactory = TransactionalSessionFactory(dataSource)
-        val meldingMediator = MeldingMediator(
-            sessionFactory = sessionFactory,
-            personDao = daos.personDao,
-            commandContextDao = daos.commandContextDao,
-            meldingDao = daos.meldingDao,
-            meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
-            kommandofabrikk = kommandofabrikk,
-            dokumentDao = daos.dokumentDao,
-            legacyVarselRepository = LegacyVarselRepository(
-                legacyVarselDao = daos.legacyVarselDao,
-                definisjonDao = daos.definisjonDao
-            ),
-            poisonPillDao = daos.poisonPillDao,
-            ignorerMeldingerForUkjentePersoner = false,
-        )
+        val meldingMediator =
+            MeldingMediator(
+                sessionFactory = sessionFactory,
+                personDao = daos.personDao,
+                commandContextDao = daos.commandContextDao,
+                meldingDao = daos.meldingDao,
+                meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
+                kommandofabrikk = kommandofabrikk,
+                dokumentDao = daos.dokumentDao,
+                legacyVarselRepository =
+                    LegacyVarselRepository(
+                        legacyVarselDao = daos.legacyVarselDao,
+                        definisjonDao = daos.definisjonDao,
+                    ),
+                poisonPillDao = daos.poisonPillDao,
+                ignorerMeldingerForUkjentePersoner = false,
+            )
         RiverSetup(
             mediator = meldingMediator,
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
+            versjonAvKode = "en_versjon",
         ).registrerRivers(testRapid)
     }
 

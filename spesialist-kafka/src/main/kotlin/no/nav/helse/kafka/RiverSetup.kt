@@ -11,6 +11,7 @@ import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -22,6 +23,7 @@ class RiverSetup(
     private val mediator: MeldingMediator,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
     sessionFactory: SessionFactory,
+    versjonAvKode: String,
 ) {
     private val rivers =
         listOf(
@@ -53,7 +55,7 @@ class RiverSetup(
             VarseldefinisjonRiver(mediator),
             VedtaksperiodeNyUtbetalingRiver(mediator),
             BehovtidsbrukMetrikkRiver(),
-            AvsluttetMedVedtakRiver(sessionFactory),
+            AvsluttetMedVedtakRiver(),
             AvsluttetUtenVedtakRiver(mediator),
             MidnattRiver(sessionFactory),
             BehandlingOpprettetRiver(mediator),
@@ -61,7 +63,7 @@ class RiverSetup(
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
             PersonAvstemmingRiver(mediator),
-        ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao) }
+        ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao, sessionFactory, versjonAvKode) }
 
     fun registrerRivers(rapidsConnection: RapidsConnection) {
         val delegatedRapid =
@@ -100,6 +102,8 @@ class RiverSetup(
 class DuplikatsjekkendeRiver(
     private val river: SpesialistRiver,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
+    private val sessionFactory: SessionFactory,
+    private val versjonAvKode: String,
 ) : SpesialistRiver by river {
     override fun onPacket(
         packet: JsonMessage,
@@ -112,7 +116,16 @@ class DuplikatsjekkendeRiver(
             loggInfo("Ignorerer melding $id pga duplikatkontroll")
             return
         }
-        river.onPacket(packet, context, metadata, meterRegistry)
+        if (river is TransaksjonellRiver) {
+            val outbox = Outbox(versjonAvKode)
+            sessionFactory.transactionalSessionScope { transaksjon ->
+                river.transaksjonellOnPacket(packet, outbox, transaksjon)
+            }
+            loggInfo("Melding ${river.eventName} lest")
+            outbox.sendAlle(MessageContextMeldingPubliserer(context))
+        } else {
+            river.onPacket(packet, context, metadata, meterRegistry)
+        }
     }
 
     private fun erDuplikat(id: UUID): Boolean {

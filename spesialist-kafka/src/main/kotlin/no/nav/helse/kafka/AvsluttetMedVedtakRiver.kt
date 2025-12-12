@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.SessionFactory
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.withMDC
 import no.nav.helse.modell.melding.SaksbehandlerIdentOgNavn
@@ -27,6 +24,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
@@ -36,12 +34,12 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.math.BigDecimal
 import java.util.UUID
 
-class AvsluttetMedVedtakRiver(
-    private val sessionFactory: SessionFactory,
-) : SpesialistRiver {
+class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
+    override val eventName = "avsluttet_med_vedtak"
+
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
-            it.requireValue("@event_name", "avsluttet_med_vedtak")
+            it.requireValue("@event_name", eventName)
         }
 
     override fun validations() =
@@ -60,128 +58,111 @@ class AvsluttetMedVedtakRiver(
             it.requireArray("hendelser")
         }
 
-    override fun onPacket(
+    override fun transaksjonellOnPacket(
         packet: JsonMessage,
-        context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry,
+        outbox: Outbox,
+        transaksjon: SessionContext,
     ) {
-        sessionFactory.transactionalSessionScope { transaksjon ->
-            withMDC(
-                buildMap {
-                    put("meldingId", packet["@id"].asText())
-                    put("meldingnavn", MELDINGNAVN)
-                    put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
-                },
-            ) {
-                val meldingJson = packet.toJson()
-                loggInfo("Melding $MELDINGNAVN mottatt", "json:\n$meldingJson")
+        withMDC(
+            buildMap {
+                put("meldingId", packet["@id"].asText())
+                put("meldingnavn", eventName)
+                put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
+            },
+        ) {
+            val meldingJson = packet.toJson()
+            loggInfo("Melding $eventName mottatt", "json:\n$meldingJson")
 
-                try {
-                    val spleisBehandlingId = packet["behandlingId"].asUUID()
+            val spleisBehandlingId = packet["behandlingId"].asUUID()
 
-                    val meldingPubliserer = MessageContextMeldingPubliserer(context)
-                    val outbox = mutableListOf<UtgåendeHendelse>()
+            val vedtak =
+                transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
+                    ?: error("Finner ikke relevant informasjon knyttet til vedtaket")
 
-                    val vedtak =
-                        transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
-                            ?: error("Finner ikke relevant informasjon knyttet til vedtaket")
+            transaksjon.meldingDao.lagre(
+                id = packet["@id"].asUUID(),
+                json = meldingJson,
+                meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
+                vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+            )
+            transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
+                loggInfo("Personen finnes i databasen, behandler melding $eventName", "fødselsnummer: $fødselsnummer")
 
-                    transaksjon.meldingDao.lagre(
-                        id = packet["@id"].asUUID(),
-                        json = meldingJson,
-                        meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
-                        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+                val vedtaksperiode =
+                    vedtaksperioder().finnBehandling(spleisBehandlingId)
+                        ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+                val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
+
+                if (behandling.tags.isEmpty()) {
+                    loggErrorWithNoThrowable(
+                        "Ingen tags funnet for behandling",
+                        "vedtaksperiodeId: ${behandling.vedtaksperiodeId}, spleisBehandlingId: ${behandling.spleisBehandlingId}",
                     )
-                    transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
-                        loggInfo("Personen finnes i databasen, behandler melding $MELDINGNAVN", "fødselsnummer: $fødselsnummer")
+                }
 
-                        val vedtaksperiode =
-                            vedtaksperioder().finnBehandling(spleisBehandlingId)
-                                ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
-                        val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
+                val sisteGodkjenningsbehov: Godkjenningsbehov? =
+                    transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
+                if (sisteGodkjenningsbehov == null) {
+                    loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
+                }
 
-                        if (behandling.tags.isEmpty()) {
-                            loggErrorWithNoThrowable(
-                                "Ingen tags funnet for behandling",
-                                "vedtaksperiodeId: ${behandling.vedtaksperiodeId}, spleisBehandlingId: ${behandling.spleisBehandlingId}",
+                behandling.håndterVedtakFattet()
+
+                val meldingOmVedtak =
+                    when (vedtak) {
+                        is Vedtak.Automatisk -> {
+                            byggVedtaksmelding(
+                                packet = packet,
+                                behandling = behandling,
+                                vedtaksperiode = vedtaksperiode,
+                                godkjenningsbehov = sisteGodkjenningsbehov,
+                                saksbehandlerIdentOgNavn = null,
+                                beslutterIdentOgNavn = null,
+                                automatiskFattet = true,
                             )
                         }
 
-                        val sisteGodkjenningsbehov: Godkjenningsbehov? =
-                            transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
-                        if (sisteGodkjenningsbehov == null) {
-                            loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
+                        is Vedtak.ManueltMedTotrinnskontroll -> {
+                            val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                            val beslutter = transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent) ?: error("Finner ikke beslutter")
+                            byggVedtaksmelding(
+                                packet = packet,
+                                behandling = behandling,
+                                vedtaksperiode = vedtaksperiode,
+                                godkjenningsbehov = sisteGodkjenningsbehov,
+                                saksbehandlerIdentOgNavn =
+                                    SaksbehandlerIdentOgNavn(
+                                        saksbehandler.ident,
+                                        saksbehandler.navn,
+                                    ),
+                                beslutterIdentOgNavn =
+                                    SaksbehandlerIdentOgNavn(
+                                        beslutter.ident,
+                                        beslutter.navn,
+                                    ),
+                                automatiskFattet = false,
+                            )
                         }
 
-                        behandling.håndterVedtakFattet()
-
-                        val meldingOmVedtak =
-                            when (vedtak) {
-                                is Vedtak.Automatisk -> {
-                                    byggVedtaksmelding(
-                                        packet = packet,
-                                        behandling = behandling,
-                                        vedtaksperiode = vedtaksperiode,
-                                        godkjenningsbehov = sisteGodkjenningsbehov,
-                                        saksbehandlerIdentOgNavn = null,
-                                        beslutterIdentOgNavn = null,
-                                        automatiskFattet = true,
-                                    )
-                                }
-
-                                is Vedtak.ManueltMedTotrinnskontroll -> {
-                                    val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
-                                    val beslutter = transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent) ?: error("Finner ikke beslutter")
-                                    byggVedtaksmelding(
-                                        packet = packet,
-                                        behandling = behandling,
-                                        vedtaksperiode = vedtaksperiode,
-                                        godkjenningsbehov = sisteGodkjenningsbehov,
-                                        saksbehandlerIdentOgNavn =
-                                            SaksbehandlerIdentOgNavn(
-                                                saksbehandler.ident,
-                                                saksbehandler.navn,
-                                            ),
-                                        beslutterIdentOgNavn =
-                                            SaksbehandlerIdentOgNavn(
-                                                beslutter.ident,
-                                                beslutter.navn,
-                                            ),
-                                        automatiskFattet = false,
-                                    )
-                                }
-
-                                is Vedtak.ManueltUtenTotrinnskontroll -> {
-                                    val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
-                                    byggVedtaksmelding(
-                                        packet = packet,
-                                        behandling = behandling,
-                                        vedtaksperiode = vedtaksperiode,
-                                        godkjenningsbehov = sisteGodkjenningsbehov,
-                                        saksbehandlerIdentOgNavn =
-                                            SaksbehandlerIdentOgNavn(
-                                                saksbehandler.ident,
-                                                saksbehandler.navn,
-                                            ),
-                                        beslutterIdentOgNavn = null,
-                                        automatiskFattet = false,
-                                    )
-                                }
-                            }
-
-                        outbox.add(meldingOmVedtak)
+                        is Vedtak.ManueltUtenTotrinnskontroll -> {
+                            val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                            byggVedtaksmelding(
+                                packet = packet,
+                                behandling = behandling,
+                                vedtaksperiode = vedtaksperiode,
+                                godkjenningsbehov = sisteGodkjenningsbehov,
+                                saksbehandlerIdentOgNavn =
+                                    SaksbehandlerIdentOgNavn(
+                                        saksbehandler.ident,
+                                        saksbehandler.navn,
+                                    ),
+                                beslutterIdentOgNavn = null,
+                                automatiskFattet = false,
+                            )
+                        }
                     }
-                    outbox.forEach { utgåendeHendelse ->
-                        meldingPubliserer.publiser(
-                            fødselsnummer = packet["fødselsnummer"].asText(),
-                            hendelse = utgåendeHendelse,
-                            årsak = MELDINGNAVN,
-                        )
-                    }
-                } finally {
-                    loggInfo("Melding $MELDINGNAVN lest")
-                }
+
+                outbox.leggTil(fødselsnummer, meldingOmVedtak, eventName)
             }
         }
     }
@@ -403,8 +384,6 @@ class AvsluttetMedVedtakRiver(
         )
 
     companion object {
-        private const val MELDINGNAVN = "AvsluttetMedVedtakMessage"
-
         private const val FASTSATT_ETTER_HOVEDREGEL = "EtterHovedregel"
         private const val FASTSATT_ETTER_SKJØNN = "EtterSkjønn"
         private const val FASTSATT_I_INFOTRYGD = "IInfotrygd"

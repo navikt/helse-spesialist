@@ -68,6 +68,7 @@ class KafkaModule(
                 ),
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
+            versjonAvKode = configuration.versjonAvKode,
         )
 
     fun kobleOppRivers() {
