@@ -76,6 +76,10 @@ class PostVedtakBehandler(
             val saksbehandlerSomFattetVedtaket: Saksbehandler
             val beslutter: Saksbehandler?
 
+            if (transaksjon.vedtakRepository.finn(spleisBehandlingId) != null) {
+                return RestResponse.Error(ApiPostVedtakErrorCode.VEDTAK_ALLEREDE_FATTET)
+            }
+
             val vedtak: Vedtak
 
             if (totrinnsvurdering != null) {
@@ -334,4 +338,5 @@ enum class ApiPostVedtakErrorCode(
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER("Behandlende saksbehandler mangler i totrinnsvurdering", HttpStatusCode.Conflict),
     VARSEL_MANGLER_VARSELDEFINISJON("Varsel mangler varseldefinisjon", HttpStatusCode.BadRequest),
+    VEDTAK_ALLEREDE_FATTET("Vedtaket er allerede fattet", HttpStatusCode.Conflict),
 }

@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varseldefinisjon
+import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
@@ -33,6 +34,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -405,6 +407,55 @@ class PostVedtakIntegrationTest {
               "status": 409,
               "title": "Behandlende saksbehandler mangler i totrinnsvurdering",
               "code": "TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER" 
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!,
+        )
+    }
+
+    @Test
+    fun `gir conflict hvis vedtaket er fattet allerede`() {
+        // Given:
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+        val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        sessionContext.vedtakRepository.lagre(
+            Vedtak.fraLagring(
+                behandling.spleisBehandlingId!!,
+                false,
+                saksbehandler.ident,
+                null,
+                Instant.now(),
+            ),
+        )
+
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
+        sessionContext.oppgaveRepository.lagre(oppgave)
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
+                body = "{}",
+                saksbehandler = saksbehandler,
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.Conflict.value, response.status)
+        assertJsonEquals(
+            """
+            {
+              "type": "about:blank",
+              "status": 409,
+              "title": "Vedtaket er allerede fattet",
+              "code": "VEDTAK_ALLEREDE_FATTET" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
