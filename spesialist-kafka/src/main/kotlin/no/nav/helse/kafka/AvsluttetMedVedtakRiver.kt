@@ -11,6 +11,7 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.withMDC
+import no.nav.helse.modell.melding.SaksbehandlerIdentOgNavn
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
@@ -30,6 +31,7 @@ import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.math.BigDecimal
 import java.util.UUID
@@ -64,39 +66,34 @@ class AvsluttetMedVedtakRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        withMDC(
-            buildMap {
-                put("meldingId", packet["@id"].asText())
-                put("meldingnavn", MELDINGNAVN)
-                put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
-            },
-        ) {
-            val meldingJson = packet.toJson()
-            loggInfo("Melding $MELDINGNAVN mottatt", "json:\n$meldingJson")
+        sessionFactory.transactionalSessionScope { transaksjon ->
+            withMDC(
+                buildMap {
+                    put("meldingId", packet["@id"].asText())
+                    put("meldingnavn", MELDINGNAVN)
+                    put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
+                },
+            ) {
+                val meldingJson = packet.toJson()
+                loggInfo("Melding $MELDINGNAVN mottatt", "json:\n$meldingJson")
 
-            try {
-                val spleisBehandlingId = packet["behandlingId"].asUUID()
-                val erVedtakFattet =
-                    sessionFactory.transactionalSessionScope {
-                        it.midlertidigBehandlingVedtakFattetDao.erVedtakFattet(SpleisBehandlingId(spleisBehandlingId))
-                    }
-                if (erVedtakFattet) {
-                    return@withMDC
-                }
+                try {
+                    val spleisBehandlingId = packet["behandlingId"].asUUID()
 
-                val meldingPubliserer = MessageContextMeldingPubliserer(context)
-                val outbox = mutableListOf<UtgåendeHendelse>()
+                    val meldingPubliserer = MessageContextMeldingPubliserer(context)
+                    val outbox = mutableListOf<UtgåendeHendelse>()
 
-                sessionFactory.transactionalSessionScope { sessionContext ->
-                    sessionContext.meldingDao.lagre(
+                    val vedtak =
+                        transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
+                            ?: error("Finner ikke relevant informasjon knyttet til vedtaket")
+
+                    transaksjon.meldingDao.lagre(
                         id = packet["@id"].asUUID(),
                         json = meldingJson,
                         meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
                         vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                     )
-                }
-                sessionFactory.transactionalSessionScope { sessionContext ->
-                    sessionContext.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
+                    transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
                         loggInfo("Personen finnes i databasen, behandler melding $MELDINGNAVN", "fødselsnummer: $fødselsnummer")
 
                         val vedtaksperiode =
@@ -112,32 +109,79 @@ class AvsluttetMedVedtakRiver(
                         }
 
                         val sisteGodkjenningsbehov: Godkjenningsbehov? =
-                            sessionContext.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
+                            transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
                         if (sisteGodkjenningsbehov == null) {
                             loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
                         }
 
                         behandling.håndterVedtakFattet()
 
-                        outbox.add(
-                            byggVedtaksmelding(
-                                packet = packet,
-                                behandling = behandling,
-                                vedtaksperiode = vedtaksperiode,
-                                godkjenningsbehov = sisteGodkjenningsbehov,
-                            ),
+                        val meldingOmVedtak =
+                            when (vedtak) {
+                                is Vedtak.Automatisk -> {
+                                    byggVedtaksmelding(
+                                        packet = packet,
+                                        behandling = behandling,
+                                        vedtaksperiode = vedtaksperiode,
+                                        godkjenningsbehov = sisteGodkjenningsbehov,
+                                        saksbehandlerIdentOgNavn = null,
+                                        beslutterIdentOgNavn = null,
+                                        automatiskFattet = true,
+                                    )
+                                }
+
+                                is Vedtak.ManueltMedTotrinnskontroll -> {
+                                    val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                                    val beslutter = transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent) ?: error("Finner ikke beslutter")
+                                    byggVedtaksmelding(
+                                        packet = packet,
+                                        behandling = behandling,
+                                        vedtaksperiode = vedtaksperiode,
+                                        godkjenningsbehov = sisteGodkjenningsbehov,
+                                        saksbehandlerIdentOgNavn =
+                                            SaksbehandlerIdentOgNavn(
+                                                saksbehandler.ident,
+                                                saksbehandler.navn,
+                                            ),
+                                        beslutterIdentOgNavn =
+                                            SaksbehandlerIdentOgNavn(
+                                                beslutter.ident,
+                                                beslutter.navn,
+                                            ),
+                                        automatiskFattet = false,
+                                    )
+                                }
+
+                                is Vedtak.ManueltUtenTotrinnskontroll -> {
+                                    val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                                    byggVedtaksmelding(
+                                        packet = packet,
+                                        behandling = behandling,
+                                        vedtaksperiode = vedtaksperiode,
+                                        godkjenningsbehov = sisteGodkjenningsbehov,
+                                        saksbehandlerIdentOgNavn =
+                                            SaksbehandlerIdentOgNavn(
+                                                saksbehandler.ident,
+                                                saksbehandler.navn,
+                                            ),
+                                        beslutterIdentOgNavn = null,
+                                        automatiskFattet = false,
+                                    )
+                                }
+                            }
+
+                        outbox.add(meldingOmVedtak)
+                    }
+                    outbox.forEach { utgåendeHendelse ->
+                        meldingPubliserer.publiser(
+                            fødselsnummer = packet["fødselsnummer"].asText(),
+                            hendelse = utgåendeHendelse,
+                            årsak = MELDINGNAVN,
                         )
                     }
+                } finally {
+                    loggInfo("Melding $MELDINGNAVN lest")
                 }
-                outbox.forEach { utgåendeHendelse ->
-                    meldingPubliserer.publiser(
-                        fødselsnummer = packet["fødselsnummer"].asText(),
-                        hendelse = utgåendeHendelse,
-                        årsak = MELDINGNAVN,
-                    )
-                }
-            } finally {
-                loggInfo("Melding $MELDINGNAVN lest")
             }
         }
     }
@@ -147,6 +191,9 @@ class AvsluttetMedVedtakRiver(
         behandling: LegacyBehandling,
         vedtaksperiode: LegacyVedtaksperiode,
         godkjenningsbehov: Godkjenningsbehov?,
+        saksbehandlerIdentOgNavn: SaksbehandlerIdentOgNavn?,
+        beslutterIdentOgNavn: SaksbehandlerIdentOgNavn?,
+        automatiskFattet: Boolean,
     ): UtgåendeHendelse {
         val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
 
@@ -194,6 +241,9 @@ class AvsluttetMedVedtakRiver(
                 } else {
                     emptyList()
                 } + listOfNotNull(behandling.vedtakBegrunnelse?.toBegrunnelse()),
+            saksbehandler = saksbehandlerIdentOgNavn,
+            beslutter = beslutterIdentOgNavn,
+            automatiskFattet = automatiskFattet,
             sykepengegrunnlagsfakta =
                 if (packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE) {
                     if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {

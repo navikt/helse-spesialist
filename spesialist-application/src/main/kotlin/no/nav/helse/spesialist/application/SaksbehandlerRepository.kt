@@ -8,5 +8,7 @@ interface SaksbehandlerRepository {
 
     fun finn(oid: SaksbehandlerOid): Saksbehandler?
 
+    fun finn(ident: String): Saksbehandler?
+
     fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler>
 }

@@ -28,6 +28,14 @@ class PgSaksbehandlerRepository private constructor(
             "oid" to oid.value,
         ).singleOrNull { it.toSaksbehandler() }
 
+    override fun finn(ident: String): Saksbehandler? =
+        asSQL(
+            """ 
+            SELECT * FROM saksbehandler WHERE ident = :ident
+            """.trimIndent(),
+            "ident" to ident,
+        ).singleOrNull { it.toSaksbehandler() }
+
     override fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler> =
         if (oider.isEmpty()) {
             emptyList()

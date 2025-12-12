@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagAvviksvurderingMedEnArbeidsgiver
@@ -53,6 +54,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("660000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
         initGodkjenningsbehov()
 
         // When:
@@ -109,7 +111,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -123,6 +126,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("660000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         // When:
         testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = omregnetÅrsinntekt))
@@ -178,7 +182,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -192,6 +197,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("660000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
         initGodkjenningsbehov()
 
         // When:
@@ -248,7 +254,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -262,6 +269,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("990000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2", "6GBegrenset")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
         initGodkjenningsbehov()
 
         // When:
@@ -318,7 +326,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -332,6 +341,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("1200000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
         initGodkjenningsbehov()
 
         val skjønnsfastsattBeløp = BigDecimal("650000.00")
@@ -425,7 +435,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -439,6 +450,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("1200000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
         initGodkjenningsbehov()
 
         val skjønnsfastsattBeløp = BigDecimal("650000.00")
@@ -532,7 +544,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -546,6 +559,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.innrapportertÅrsinntekt = BigDecimal("660000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
         initGodkjenningsbehov()
 
         // When:
@@ -591,7 +605,165 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
+            }
+            """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
+    fun `vedtak fattet manuelt med totrinnskontroll`() {
+        // Given:
+        this.utfall = Utfall.INNVILGELSE
+        this.omregnetÅrsinntekt = BigDecimal("600000.00")
+        this.innrapportertÅrsinntekt = BigDecimal("660000.00")
+        this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        setup()
+        val beslutter = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+        sessionContext.vedtakRepository.lagre(Vedtak.manueltMedTotrinnskontroll(behandling.spleisBehandlingId!!, saksbehandler.ident, beslutter.ident))
+        initGodkjenningsbehov()
+
+        // When:
+        testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = omregnetÅrsinntekt))
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(person.id.value, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson =
+            """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "${person.id.value}",
+              "aktørId": "${person.aktørId}",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
+              "behandlingId": "${behandling.spleisBehandlingId?.value}",
+              "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
+              "fom": "${behandling.fom}",
+              "tom": "${behandling.tom}",
+              "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
+              "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlag": $omregnetÅrsinntekt,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+              "utbetalingId": "${behandling.utbetalingId?.value}",
+              "tags": [ ${behandling.tags.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlagsfakta": {
+                "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                "innrapportertÅrsinntekt": $innrapportertÅrsinntekt,
+                "avviksprosent": ${avviksvurdering.avviksprosent},
+                "6G": $seksG,
+                "tags": [],
+                "arbeidsgivere": [
+                  {
+                    "arbeidsgiver": "${vedtaksperiode.organisasjonsnummer}",
+                    "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                    "innrapportertÅrsinntekt": $innrapportertÅrsinntekt
+                  }
+                ],
+                "fastsatt": "EtterHovedregel"
+              },
+              "begrunnelser": [
+                {
+                  "type" : "Innvilgelse",
+                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "perioder" : [
+                    {
+                      "fom" : "${behandling.fom}",
+                      "tom" : "${behandling.tom}"
+                    }
+                  ]
+                }
+              ],
+              "saksbehandler" : {
+                "ident": "${saksbehandler.ident}",
+                "navn": "${saksbehandler.navn}"
+              },
+              "beslutter" : {
+                "ident": "${beslutter.ident}",
+                "navn": "${beslutter.navn}"
+              },
+              "automatiskFattet": false
+            }
+            """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
+    fun `vedtak fattet manuelt uten totrinnskontroll`() {
+        // Given:
+        this.utfall = Utfall.INNVILGELSE
+        this.omregnetÅrsinntekt = BigDecimal("600000.00")
+        this.innrapportertÅrsinntekt = BigDecimal("660000.00")
+        this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.manueltUtenTotrinnskontroll(behandling.spleisBehandlingId!!, saksbehandler.ident))
+        initGodkjenningsbehov()
+
+        // When:
+        testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = omregnetÅrsinntekt))
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(person.id.value, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson =
+            """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "${person.id.value}",
+              "aktørId": "${person.aktørId}",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
+              "behandlingId": "${behandling.spleisBehandlingId?.value}",
+              "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
+              "fom": "${behandling.fom}",
+              "tom": "${behandling.tom}",
+              "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
+              "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlag": $omregnetÅrsinntekt,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+              "utbetalingId": "${behandling.utbetalingId?.value}",
+              "tags": [ ${behandling.tags.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlagsfakta": {
+                "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                "innrapportertÅrsinntekt": $innrapportertÅrsinntekt,
+                "avviksprosent": ${avviksvurdering.avviksprosent},
+                "6G": $seksG,
+                "tags": [],
+                "arbeidsgivere": [
+                  {
+                    "arbeidsgiver": "${vedtaksperiode.organisasjonsnummer}",
+                    "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                    "innrapportertÅrsinntekt": $innrapportertÅrsinntekt
+                  }
+                ],
+                "fastsatt": "EtterHovedregel"
+              },
+              "begrunnelser": [
+                {
+                  "type" : "Innvilgelse",
+                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "perioder" : [
+                    {
+                      "fom" : "${behandling.fom}",
+                      "tom" : "${behandling.tom}"
+                    }
+                  ]
+                }
+              ],
+              "saksbehandler" : {
+                "ident": "${saksbehandler.ident}",
+                "navn": "${saksbehandler.navn}"
+              },
+              "automatiskFattet": false
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)

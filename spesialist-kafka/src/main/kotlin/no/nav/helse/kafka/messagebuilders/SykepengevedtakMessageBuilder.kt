@@ -4,24 +4,27 @@ import no.nav.helse.modell.melding.VedtakFattetMelding
 import java.time.LocalDate
 
 internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
-    mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId,
-        "yrkesaktivitetstype" to yrkesaktivitetstype,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "behandlingId" to behandlingId,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "fom" to fom,
-        "tom" to tom,
-        "skjæringstidspunkt" to skjæringstidspunkt,
-        "hendelser" to hendelser,
-        "sykepengegrunnlag" to sykepengegrunnlag,
-        "vedtakFattetTidspunkt" to vedtakFattetTidspunkt.toString(),
-        "utbetalingId" to utbetalingId,
-        "tags" to tags,
-        "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(),
-        "begrunnelser" to begrunnelser.map { it.tilBegrunnelse(fom = fom, tom = tom) },
-    )
+    buildMap {
+        put("fødselsnummer", fødselsnummer)
+        put("aktørId", aktørId)
+        put("yrkesaktivitetstype", yrkesaktivitetstype)
+        put("vedtaksperiodeId", vedtaksperiodeId)
+        put("behandlingId", behandlingId)
+        put("organisasjonsnummer", organisasjonsnummer)
+        put("fom", fom)
+        put("tom", tom)
+        put("skjæringstidspunkt", skjæringstidspunkt)
+        put("hendelser", hendelser)
+        put("sykepengegrunnlag", sykepengegrunnlag)
+        put("vedtakFattetTidspunkt", vedtakFattetTidspunkt.toString())
+        put("utbetalingId", utbetalingId)
+        put("tags", tags)
+        put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta())
+        put("begrunnelser", begrunnelser.map { it.tilBegrunnelse(fom = fom, tom = tom) })
+        saksbehandler?.let { put("saksbehandler", mapOf("ident" to it.ident, "navn" to it.navn)) }
+        beslutter?.let { put("beslutter", mapOf("ident" to it.ident, "navn" to it.navn)) }
+        put("automatiskFattet", automatiskFattet)
+    }
 
 private fun VedtakFattetMelding.Sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =
     when (this) {

@@ -5,6 +5,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+data class SaksbehandlerIdentOgNavn(
+    val ident: String,
+    val navn: String,
+)
+
 data class VedtakFattetMelding(
     val fødselsnummer: String,
     val aktørId: String,
@@ -22,6 +27,9 @@ data class VedtakFattetMelding(
     val tags: Set<String>,
     val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     val begrunnelser: List<Begrunnelse>,
+    val saksbehandler: SaksbehandlerIdentOgNavn?,
+    val beslutter: SaksbehandlerIdentOgNavn?,
+    val automatiskFattet: Boolean,
 ) : UtgåendeHendelse {
     sealed interface Sykepengegrunnlagsfakta
 

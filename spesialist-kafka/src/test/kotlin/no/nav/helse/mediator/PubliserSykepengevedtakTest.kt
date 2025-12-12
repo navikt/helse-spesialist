@@ -7,9 +7,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.modell.melding.SaksbehandlerIdentOgNavn
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,6 +25,8 @@ internal class PubliserSykepengevedtakTest {
     private val testRapid = TestRapid()
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+    private val saksbehandlerIdentOgNavn = lagSaksbehandler().let { SaksbehandlerIdentOgNavn(it.ident, it.navn) }
+    private val beslutterIdentOgNavn = lagSaksbehandler().let { SaksbehandlerIdentOgNavn(it.ident, it.navn) }
 
     private companion object {
         private const val FØDSELSNUMMER = "12345678910"
@@ -39,21 +43,21 @@ internal class PubliserSykepengevedtakTest {
         private val vedtakFattetTidspunkt = LocalDateTime.now()
     }
 
-    private val personmelding = object : Personmelding {
-        override fun behandle(
-            person: LegacyPerson,
-            kommandostarter: Kommandostarter,
-            sessionContext: SessionContext,
-        ) {
+    private val personmelding =
+        object : Personmelding {
+            override fun behandle(
+                person: LegacyPerson,
+                kommandostarter: Kommandostarter,
+                sessionContext: SessionContext,
+            ) {
+            }
+
+            override fun fødselsnummer(): String = FØDSELSNUMMER
+
+            override val id: UUID = UUID.randomUUID()
+
+            override fun toJson(): String = "{}"
         }
-
-        override fun fødselsnummer(): String = FØDSELSNUMMER
-
-        override val id: UUID = UUID.randomUUID()
-
-        override fun toJson(): String = "{}"
-
-    }
 
     @Test
     fun `vedtak med opphav i infotrygd`() {
@@ -71,12 +75,16 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = BigDecimal("10000.0"),
-                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = BigDecimal("10000.0"),
-                ),
+                sykepengegrunnlagsfakta =
+                    VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
+                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 begrunnelser = emptyList(),
+                beslutter = beslutterIdentOgNavn,
+                saksbehandler = saksbehandlerIdentOgNavn,
+                automatiskFattet = false,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -103,6 +111,11 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(0, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+        assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
+        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
     @Test
@@ -121,24 +134,28 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = BigDecimal("10000.0"),
-                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = BigDecimal("10000.0"),
-                    seksG = BigDecimal("711720.0"),
-                    avviksprosent = BigDecimal("0.0"),
-                    innrapportertÅrsinntekt = BigDecimal("10000.0"),
-                    tags = setOf(),
-                    arbeidsgivere =
-                        listOf(
-                            VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
-                                organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = BigDecimal("10000.0"),
-                                innrapportertÅrsinntekt = BigDecimal("10000.0"),
+                sykepengegrunnlagsfakta =
+                    VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
+                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                        seksG = BigDecimal("711720.0"),
+                        avviksprosent = BigDecimal("0.0"),
+                        innrapportertÅrsinntekt = BigDecimal("10000.0"),
+                        tags = setOf(),
+                        arbeidsgivere =
+                            listOf(
+                                VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                    innrapportertÅrsinntekt = BigDecimal("10000.0"),
+                                ),
                             ),
-                        ),
-                ),
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
                 begrunnelser = emptyList(),
+                beslutter = beslutterIdentOgNavn,
+                saksbehandler = saksbehandlerIdentOgNavn,
+                automatiskFattet = false,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -173,6 +190,11 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(0, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+        assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
+        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
     @Test
@@ -191,29 +213,34 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = BigDecimal("10000.0"),
-                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
-                    tags = setOf(),
-                    omregnetÅrsinntekt = BigDecimal("10000.0"),
-                    seksG = BigDecimal("711720.0"),
-                    avviksprosent = BigDecimal("0.0"),
-                    innrapportertÅrsinntekt = BigDecimal("10000.0"),
-                    arbeidsgivere =
-                        listOf(
-                            VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
-                                organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = BigDecimal("10000.0"),
-                                innrapportertÅrsinntekt = BigDecimal("10000.0"),
+                sykepengegrunnlagsfakta =
+                    VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
+                        tags = setOf(),
+                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                        seksG = BigDecimal("711720.0"),
+                        avviksprosent = BigDecimal("0.0"),
+                        innrapportertÅrsinntekt = BigDecimal("10000.0"),
+                        arbeidsgivere =
+                            listOf(
+                                VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                    innrapportertÅrsinntekt = BigDecimal("10000.0"),
+                                ),
                             ),
-                        ),
-                ),
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                begrunnelser = listOf(
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.DelvisInnvilgelse,
-                        begrunnelse = "En individuell begrunnelse"
-                    )
-                ),
+                begrunnelser =
+                    listOf(
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.DelvisInnvilgelse,
+                            begrunnelse = "En individuell begrunnelse",
+                        ),
+                    ),
+                beslutter = beslutterIdentOgNavn,
+                saksbehandler = saksbehandlerIdentOgNavn,
+                automatiskFattet = false,
             )
         utgåendeMeldingerMediator.hendelse(spleis)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -255,6 +282,11 @@ internal class PubliserSykepengevedtakTest {
             listOf(mapOf("fom" to fom, "tom" to tom)),
             objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][0]["perioder"]),
         )
+        assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
+        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
     @Test
@@ -273,41 +305,46 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = BigDecimal("10000.0"),
-                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = BigDecimal("10000.0"),
-                    seksG = BigDecimal("711720.0"),
-                    avviksprosent = BigDecimal("30.0"),
-                    innrapportertÅrsinntekt = BigDecimal("12000.0"),
-                    tags = setOf(),
-                    arbeidsgivere =
-                        listOf(
-                            VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
-                                organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = BigDecimal("10000.0"),
-                                innrapportertÅrsinntekt = BigDecimal("12000.0"),
-                                skjønnsfastsatt = BigDecimal("13000.0"),
+                sykepengegrunnlagsfakta =
+                    VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
+                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                        seksG = BigDecimal("711720.0"),
+                        avviksprosent = BigDecimal("30.0"),
+                        innrapportertÅrsinntekt = BigDecimal("12000.0"),
+                        tags = setOf(),
+                        arbeidsgivere =
+                            listOf(
+                                VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                    innrapportertÅrsinntekt = BigDecimal("12000.0"),
+                                    skjønnsfastsatt = BigDecimal("13000.0"),
+                                ),
                             ),
-                        ),
-                    skjønnsfastsatt = BigDecimal("13000.0"),
-                    skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                    skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
-                ),
+                        skjønnsfastsatt = BigDecimal("13000.0"),
+                        skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                begrunnelser = listOf(
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
-                        begrunnelse = "Mal"
+                begrunnelser =
+                    listOf(
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
+                            begrunnelse = "Mal",
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
+                            begrunnelse = "Fritekst",
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
+                            begrunnelse = "Konklusjon",
+                        ),
                     ),
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
-                        begrunnelse = "Fritekst"
-                    ),
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
-                        begrunnelse = "Konklusjon"
-                    )
-                ),
+                beslutter = beslutterIdentOgNavn,
+                saksbehandler = saksbehandlerIdentOgNavn,
+                automatiskFattet = false,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -367,6 +404,11 @@ internal class PubliserSykepengevedtakTest {
 
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+        assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
+        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
     @Test
@@ -385,45 +427,50 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = BigDecimal("10000.0"),
-                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = BigDecimal("10000.0"),
-                    seksG = BigDecimal("711720.0"),
-                    avviksprosent = BigDecimal("30.0"),
-                    innrapportertÅrsinntekt = BigDecimal("13000.0"),
-                    tags = setOf(),
-                    arbeidsgivere =
-                        listOf(
-                            VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
-                                organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = BigDecimal("10000.0"),
-                                innrapportertÅrsinntekt = BigDecimal("13000.0"),
-                                skjønnsfastsatt = BigDecimal("13000.0"),
+                sykepengegrunnlagsfakta =
+                    VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
+                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                        seksG = BigDecimal("711720.0"),
+                        avviksprosent = BigDecimal("30.0"),
+                        innrapportertÅrsinntekt = BigDecimal("13000.0"),
+                        tags = setOf(),
+                        arbeidsgivere =
+                            listOf(
+                                VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
+                                    organisasjonsnummer = ORGANISASJONSNUMMER,
+                                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                    innrapportertÅrsinntekt = BigDecimal("13000.0"),
+                                    skjønnsfastsatt = BigDecimal("13000.0"),
+                                ),
                             ),
-                        ),
-                    skjønnsfastsatt = BigDecimal("13000.0"),
-                    skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                    skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
-                ),
+                        skjønnsfastsatt = BigDecimal("13000.0"),
+                        skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
+                    ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                begrunnelser = listOf(
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
-                        begrunnelse = "Mal"
+                begrunnelser =
+                    listOf(
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
+                            begrunnelse = "Mal",
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
+                            begrunnelse = "Fritekst",
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
+                            begrunnelse = "Konklusjon",
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.Avslag,
+                            begrunnelse = "En individuell begrunnelse",
+                        ),
                     ),
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
-                        begrunnelse = "Fritekst"
-                    ),
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
-                        begrunnelse = "Konklusjon"
-                    ),
-                    VedtakFattetMelding.Begrunnelse(
-                        type = VedtakFattetMelding.BegrunnelseType.Avslag,
-                        begrunnelse = "En individuell begrunnelse"
-                    )
-                ),
+                beslutter = beslutterIdentOgNavn,
+                saksbehandler = saksbehandlerIdentOgNavn,
+                automatiskFattet = false,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -490,5 +537,10 @@ internal class PubliserSykepengevedtakTest {
 
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
+        assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
+        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 }

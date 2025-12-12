@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -45,6 +46,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
 
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         initGodkjenningsbehov()
 
@@ -58,7 +60,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -106,9 +109,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -119,6 +123,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2", "6GBegrenset")
 
         setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         initGodkjenningsbehov()
 
@@ -132,7 +137,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -180,9 +186,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                     }
                   ]
                 }
-              ]
+              ],
+              "automatiskFattet": true
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -193,50 +200,58 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
     private lateinit var vedtakBegrunnelse: VedtakBegrunnelse
 
     private fun setup() {
-        this.saksbehandler = lagSaksbehandler()
-            .also(sessionContext.saksbehandlerRepository::lagre)
+        this.saksbehandler =
+            lagSaksbehandler()
+                .also(sessionContext.saksbehandlerRepository::lagre)
 
-        this.person = lagPerson()
-            .also(sessionContext.personRepository::lagre)
+        this.person =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
 
-        this.vedtaksperiode = lagVedtaksperiode(
-            identitetsnummer = person.id,
-            organisasjonsnummer = "SELVSTENDIG"
-        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+        this.vedtaksperiode =
+            lagVedtaksperiode(
+                identitetsnummer = person.id,
+                organisasjonsnummer = "SELVSTENDIG",
+            ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        this.behandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id,
-            tags = behandlingTags,
-            yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
-        ).also(sessionContext.behandlingRepository::lagre)
+        this.behandling =
+            lagBehandling(
+                vedtaksperiodeId = vedtaksperiode.id,
+                tags = behandlingTags,
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+            ).also(sessionContext.behandlingRepository::lagre)
 
-        this.vedtakBegrunnelse = lagVedtakBegrunnelse(
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            utfall = Utfall.INNVILGELSE,
-            saksbehandlerOid = saksbehandler.id
-        ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
+        this.vedtakBegrunnelse =
+            lagVedtakBegrunnelse(
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                utfall = Utfall.INNVILGELSE,
+                saksbehandlerOid = saksbehandler.id,
+            ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
     }
 
     private fun initGodkjenningsbehov() {
         val godkjenningsbehovId = UUID.randomUUID()
-        val godkjenningsbehovJson = lagGodkjenningsbehov(
-            id = godkjenningsbehovId,
-            aktørId = person.aktørId,
-            fødselsnummer = person.id.value,
-            spleisBehandlingId = behandling.spleisBehandlingId!!.value,
-            yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
-            sykepengegrunnlagsfakta = godkjenningsbehovSelvstendigNæringsdrivende(
-                sykepengegrunnlag = BigDecimal(600000),
-                seksG = BigDecimal(666666),
-                beregningsgrunnlag = BigDecimal(600000),
-                pensjonsgivendeInntekter = (2022..2024).map { år -> år to BigDecimal(200000) }
+        val godkjenningsbehovJson =
+            lagGodkjenningsbehov(
+                id = godkjenningsbehovId,
+                aktørId = person.aktørId,
+                fødselsnummer = person.id.value,
+                spleisBehandlingId = behandling.spleisBehandlingId!!.value,
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+                sykepengegrunnlagsfakta =
+                    godkjenningsbehovSelvstendigNæringsdrivende(
+                        sykepengegrunnlag = BigDecimal(600000),
+                        seksG = BigDecimal(666666),
+                        beregningsgrunnlag = BigDecimal(600000),
+                        pensjonsgivendeInntekter = (2022..2024).map { år -> år to BigDecimal(200000) },
+                    ),
             )
-        )
         sessionContext.meldingDao.godkjenningsbehov.add(Godkjenningsbehov.fraJson(godkjenningsbehovJson))
     }
 
     @Language("JSON")
-    private fun fastsattEtterHovedregelMelding(sykepengegrunnlag: BigDecimal) = """
+    private fun fastsattEtterHovedregelMelding(sykepengegrunnlag: BigDecimal) =
+        """
         {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "SELVSTENDIG",
@@ -293,5 +308,5 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
             ]
           }
         }
-    """.trimIndent()
+        """.trimIndent()
 }
