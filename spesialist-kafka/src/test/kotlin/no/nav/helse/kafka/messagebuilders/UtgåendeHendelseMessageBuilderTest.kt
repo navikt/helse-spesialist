@@ -46,207 +46,226 @@ class UtgåendeHendelseMessageBuilderTest {
     private val beslutter = lagSaksbehandler()
     private val beslutterIdent = beslutter.ident
     private val beslutterEpost = beslutter.epost
+
     private fun UtgåendeHendelse.somJson() = this.somJsonMessage(fødselsnummer).toJson()
 
     @Test
     fun `VedtaksperiodeGodkjentManuelt-hendelse uten beslutter`() {
-        val hendelse = VedtaksperiodeGodkjentManuelt(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            beslutterIdent = null,
-            beslutterEpost = null
-        )
+        val hendelse =
+            VedtaksperiodeGodkjentManuelt(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                beslutterIdent = null,
+                beslutterEpost = null,
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_godkjent",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerEpost" to saksbehandlerEpost,
-                "automatiskBehandling" to false,
-                "behandlingId" to behandlingId,
-                "saksbehandler" to mapOf(
-                    "ident" to saksbehandlerIdent,
-                    "epostadresse" to saksbehandlerEpost,
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to saksbehandlerIdent,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
+                    "automatiskBehandling" to false,
+                    "behandlingId" to behandlingId,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to saksbehandlerIdent,
+                            "epostadresse" to saksbehandlerEpost,
+                        ),
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
     @Test
     fun `VedtaksperiodeGodkjentManuelt-hendelse med beslutter`() {
-        val hendelse = VedtaksperiodeGodkjentManuelt(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            beslutterIdent = beslutterIdent,
-            beslutterEpost = beslutterEpost
-        )
+        val hendelse =
+            VedtaksperiodeGodkjentManuelt(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                beslutterIdent = beslutterIdent,
+                beslutterEpost = beslutterEpost,
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_godkjent",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerEpost" to saksbehandlerEpost,
-                "automatiskBehandling" to false,
-                "saksbehandler" to mapOf(
-                    "ident" to saksbehandlerIdent,
-                    "epostadresse" to saksbehandlerEpost,
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to saksbehandlerIdent,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
+                    "automatiskBehandling" to false,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to saksbehandlerIdent,
+                            "epostadresse" to saksbehandlerEpost,
+                        ),
+                    "beslutter" to
+                        mapOf(
+                            "ident" to beslutterIdent,
+                            "epostadresse" to beslutterEpost,
+                        ),
+                    "behandlingId" to behandlingId,
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "beslutter" to mapOf(
-                    "ident" to beslutterIdent,
-                    "epostadresse" to beslutterEpost,
-                ),
-                "behandlingId" to behandlingId,
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
     @Test
     fun `VedtaksperiodeAvvistManuelt-hendelse`() {
-        val hendelse = VedtaksperiodeAvvistManuelt(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            årsak = "En årsak",
-            begrunnelser = listOf("En begrunnelse"),
-            kommentar = "En kommentar",
-        )
+        val hendelse =
+            VedtaksperiodeAvvistManuelt(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                årsak = "En årsak",
+                begrunnelser = listOf("En begrunnelse"),
+                kommentar = "En kommentar",
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_avvist",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerEpost" to saksbehandlerEpost,
-                "automatiskBehandling" to false,
-                "saksbehandler" to mapOf(
-                    "ident" to saksbehandlerIdent,
-                    "epostadresse" to saksbehandlerEpost,
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to saksbehandlerIdent,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
+                    "automatiskBehandling" to false,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to saksbehandlerIdent,
+                            "epostadresse" to saksbehandlerEpost,
+                        ),
+                    "behandlingId" to behandlingId,
+                    "årsak" to "En årsak",
+                    "begrunnelser" to listOf("En begrunnelse"),
+                    "kommentar" to "En kommentar",
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "behandlingId" to behandlingId,
-                "årsak" to "En årsak",
-                "begrunnelser" to listOf("En begrunnelse"),
-                "kommentar" to "En kommentar",
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
     @Test
     fun `VedtaksperiodeAvvistManuelt-hendelse uten årsak, kommentar, begrunnelser`() {
-        val hendelse = VedtaksperiodeAvvistManuelt(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            årsak = null,
-            begrunnelser = null,
-            kommentar = null,
-        )
+        val hendelse =
+            VedtaksperiodeAvvistManuelt(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                årsak = null,
+                begrunnelser = null,
+                kommentar = null,
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_avvist",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerEpost" to saksbehandlerEpost,
-                "automatiskBehandling" to false,
-                "saksbehandler" to mapOf(
-                    "ident" to saksbehandlerIdent,
-                    "epostadresse" to saksbehandlerEpost,
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to saksbehandlerIdent,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
+                    "automatiskBehandling" to false,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to saksbehandlerIdent,
+                            "epostadresse" to saksbehandlerEpost,
+                        ),
+                    "behandlingId" to behandlingId,
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "behandlingId" to behandlingId,
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
     @Test
     fun `VedtaksperiodeGodkjentAutomatisk-hendelse`() {
-        val hendelse = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-        )
+        val hendelse =
+            VedtaksperiodeGodkjentAutomatisk(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_godkjent",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to "Automatisk behandlet",
-                "saksbehandlerEpost" to "tbd@nav.no",
-                "automatiskBehandling" to true,
-                "saksbehandler" to mapOf(
-                    "ident" to "Automatisk behandlet",
-                    "epostadresse" to "tbd@nav.no",
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to "Automatisk behandlet",
+                    "saksbehandlerEpost" to "tbd@nav.no",
+                    "automatiskBehandling" to true,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to "Automatisk behandlet",
+                            "epostadresse" to "tbd@nav.no",
+                        ),
+                    "behandlingId" to behandlingId,
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "behandlingId" to behandlingId,
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
     @Test
     fun `VedtaksperiodeAvvistAutomatisk-hendelse`() {
-        val hendelse = VedtaksperiodeAvvistAutomatisk(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-            årsak = null,
-            begrunnelser = null,
-            kommentar = null,
-        )
+        val hendelse =
+            VedtaksperiodeAvvistAutomatisk(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+                årsak = null,
+                begrunnelser = null,
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_avvist",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to "Automatisk behandlet",
-                "saksbehandlerEpost" to "tbd@nav.no",
-                "automatiskBehandling" to true,
-                "saksbehandler" to mapOf(
-                    "ident" to "Automatisk behandlet",
-                    "epostadresse" to "tbd@nav.no",
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to "Automatisk behandlet",
+                    "saksbehandlerEpost" to "tbd@nav.no",
+                    "automatiskBehandling" to true,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to "Automatisk behandlet",
+                            "epostadresse" to "tbd@nav.no",
+                        ),
+                    "behandlingId" to behandlingId,
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "behandlingId" to behandlingId,
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
@@ -259,68 +278,71 @@ class UtgåendeHendelseMessageBuilderTest {
         val `godkjenningsbehov@opprettet` = LocalDateTime.now()
         val `godkjenningsbehov@id` = UUID.randomUUID()
         val godkjenttidspunkt = LocalDateTime.now()
-        val hendelse = Godkjenningsbehovløsning(
-            godkjent = true,
-            automatiskBehandling = false,
-            godkjenttidspunkt = godkjenttidspunkt,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
-            årsak = "En årsak",
-            begrunnelser = listOf("En begrunnelse"),
-            kommentar = "En kommentar",
-            json = """{ "@event_name": "behov", "@opprettet": "$`godkjenningsbehov@opprettet`", "@id": "$`godkjenningsbehov@id`" }""",
-        )
+        val hendelse =
+            Godkjenningsbehovløsning(
+                godkjent = true,
+                automatiskBehandling = false,
+                godkjenttidspunkt = godkjenttidspunkt,
+                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerEpost = saksbehandlerEpost,
+                saksbehandleroverstyringer = saksbehandleroverstyringer,
+                årsak = "En årsak",
+                begrunnelser = listOf("En begrunnelse"),
+                kommentar = "En kommentar",
+                json = """{ "@event_name": "behov", "@opprettet": "$`godkjenningsbehov@opprettet`", "@id": "$`godkjenningsbehov@id`" }""",
+            )
 
         hendelse.somJson().assertGodkjenningsBehovløsning(
-            payload = mapOf(
-                "godkjent" to true,
-                "automatiskBehandling" to false,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "saksbehandlerEpost" to saksbehandlerEpost,
-                "godkjenttidspunkt" to godkjenttidspunkt,
-                "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                "årsak" to "En årsak",
-                "begrunnelser" to listOf("En begrunnelse"),
-                "kommentar" to "En kommentar",
-            ),
+            payload =
+                mapOf(
+                    "godkjent" to true,
+                    "automatiskBehandling" to false,
+                    "saksbehandlerIdent" to saksbehandlerIdent,
+                    "saksbehandlerEpost" to saksbehandlerEpost,
+                    "godkjenttidspunkt" to godkjenttidspunkt,
+                    "saksbehandleroverstyringer" to saksbehandleroverstyringer,
+                    "årsak" to "En årsak",
+                    "begrunnelser" to listOf("En begrunnelse"),
+                    "kommentar" to "En kommentar",
+                ),
             `opprinnelig@opprettet` = `godkjenningsbehov@opprettet`,
-            `opprinnelig@id` = `godkjenningsbehov@id`
+            `opprinnelig@id` = `godkjenningsbehov@id`,
         )
     }
 
     @Test
-    fun `VedtaksperiodeAvvistAutomatisk-hendelse med årsak, kommentar, begrunnelser`() {
-        val hendelse = VedtaksperiodeAvvistAutomatisk(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype.name,
-            årsak = "En årsak",
-            begrunnelser = listOf("En begrunnelse"),
-            kommentar = "En kommentar",
-        )
+    fun `VedtaksperiodeAvvistAutomatisk-hendelse med årsak og begrunnelser`() {
+        val hendelse =
+            VedtaksperiodeAvvistAutomatisk(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype.name,
+                årsak = "En årsak",
+                begrunnelser = listOf("En begrunnelse"),
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "vedtaksperiode_avvist",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "periodetype" to periodetype.name,
-                "saksbehandlerIdent" to "Automatisk behandlet",
-                "saksbehandlerEpost" to "tbd@nav.no",
-                "automatiskBehandling" to true,
-                "saksbehandler" to mapOf(
-                    "ident" to "Automatisk behandlet",
-                    "epostadresse" to "tbd@nav.no",
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "periodetype" to periodetype.name,
+                    "saksbehandlerIdent" to "Automatisk behandlet",
+                    "saksbehandlerEpost" to "tbd@nav.no",
+                    "automatiskBehandling" to true,
+                    "saksbehandler" to
+                        mapOf(
+                            "ident" to "Automatisk behandlet",
+                            "epostadresse" to "tbd@nav.no",
+                        ),
+                    "behandlingId" to behandlingId,
+                    "årsak" to "En årsak",
+                    "begrunnelser" to listOf("En begrunnelse"),
+                    "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
-                "behandlingId" to behandlingId,
-                "årsak" to "En årsak",
-                "begrunnelser" to listOf("En begrunnelse"),
-                "kommentar" to "En kommentar",
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
-            )
         )
     }
 
@@ -329,28 +351,33 @@ class UtgåendeHendelseMessageBuilderTest {
         // Given:
         val arbeidsgiver1 = lagOrganisasjonsnummer()
         val arbeidsgiver2 = lagOrganisasjonsnummer()
-        val hendelse = InntektsendringerEvent(
-            inntektskilder = listOf(
-                InntektsendringerEvent.Inntektskilde(
-                    inntektskilde = arbeidsgiver1,
-                    inntekter = listOf(
-                        InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, BigDecimal("1000.0")),
-                        InntektsendringerEvent.Inntektskilde.Inntekt(1 feb 2018, 28 feb 2018, BigDecimal("2000.0"))
+        val hendelse =
+            InntektsendringerEvent(
+                inntektskilder =
+                    listOf(
+                        InntektsendringerEvent.Inntektskilde(
+                            inntektskilde = arbeidsgiver1,
+                            inntekter =
+                                listOf(
+                                    InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, BigDecimal("1000.0")),
+                                    InntektsendringerEvent.Inntektskilde.Inntekt(1 feb 2018, 28 feb 2018, BigDecimal("2000.0")),
+                                ),
+                            nullstill = emptyList(),
+                        ),
+                        InntektsendringerEvent.Inntektskilde(
+                            inntektskilde = arbeidsgiver2,
+                            inntekter =
+                                listOf(
+                                    InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, BigDecimal("1500.0")),
+                                ),
+                            nullstill =
+                                listOf(
+                                    InntektsendringerEvent.Inntektskilde.Nullstilling(1 jan 2018, 31 jan 2018),
+                                    InntektsendringerEvent.Inntektskilde.Nullstilling(1 feb 2018, 28 feb 2018),
+                                ),
+                        ),
                     ),
-                    nullstill = emptyList()
-                ),
-                InntektsendringerEvent.Inntektskilde(
-                    inntektskilde = arbeidsgiver2,
-                    inntekter = listOf(
-                        InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, BigDecimal("1500.0")),
-                    ),
-                    nullstill = listOf(
-                        InntektsendringerEvent.Inntektskilde.Nullstilling(1 jan 2018, 31 jan 2018),
-                        InntektsendringerEvent.Inntektskilde.Nullstilling(1 feb 2018, 28 feb 2018),
-                    )
-                ),
-            ),
-        )
+            )
 
         // When:
         val json = hendelse.somJson()
@@ -358,47 +385,52 @@ class UtgåendeHendelseMessageBuilderTest {
         // Then:
         json.assertHendelse(
             eventName = "inntektsendringer",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "inntektsendringer" to listOf(
-                    mapOf(
-                        "inntektskilde" to arbeidsgiver1,
-                        "inntekter" to listOf(
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "inntektsendringer" to
+                        listOf(
                             mapOf(
-                                "fom" to "2018-01-01",
-                                "tom" to "2018-01-31",
-                                "dagsbeløp" to 1000.0
+                                "inntektskilde" to arbeidsgiver1,
+                                "inntekter" to
+                                    listOf(
+                                        mapOf(
+                                            "fom" to "2018-01-01",
+                                            "tom" to "2018-01-31",
+                                            "dagsbeløp" to 1000.0,
+                                        ),
+                                        mapOf(
+                                            "fom" to "2018-02-01",
+                                            "tom" to "2018-02-28",
+                                            "dagsbeløp" to 2000.0,
+                                        ),
+                                    ),
+                                "nullstill" to emptyList<Map<String, Any>>(),
                             ),
                             mapOf(
-                                "fom" to "2018-02-01",
-                                "tom" to "2018-02-28",
-                                "dagsbeløp" to 2000.0
+                                "inntektskilde" to arbeidsgiver2,
+                                "inntekter" to
+                                    listOf(
+                                        mapOf(
+                                            "fom" to "2018-01-01",
+                                            "tom" to "2018-01-31",
+                                            "dagsbeløp" to 1500.0,
+                                        ),
+                                    ),
+                                "nullstill" to
+                                    listOf(
+                                        mapOf(
+                                            "fom" to "2018-01-01",
+                                            "tom" to "2018-01-31",
+                                        ),
+                                        mapOf(
+                                            "fom" to "2018-02-01",
+                                            "tom" to "2018-02-28",
+                                        ),
+                                    ),
                             ),
                         ),
-                        "nullstill" to emptyList<Map<String, Any>>()
-                    ),
-                    mapOf(
-                        "inntektskilde" to arbeidsgiver2,
-                        "inntekter" to listOf(
-                            mapOf(
-                                "fom" to "2018-01-01",
-                                "tom" to "2018-01-31",
-                                "dagsbeløp" to 1500.0
-                            ),
-                        ),
-                        "nullstill" to listOf(
-                            mapOf(
-                                "fom" to "2018-01-01",
-                                "tom" to "2018-01-31",
-                            ),
-                            mapOf(
-                                "fom" to "2018-02-01",
-                                "tom" to "2018-02-28",
-                            ),
-                        )
-                    ),
-                )
-            )
+                ),
         )
         assertValidByJsonSchema(json, "/inntektsendringer.schema.json")
     }
@@ -407,49 +439,57 @@ class UtgåendeHendelseMessageBuilderTest {
     fun `Overstyr tidslinje-hendelse for selvstendig næringsdrivende har yrkesaktivitetstype SELVSTENDIG`() {
         val aktørId = lagAktørId()
         val organisasjonsnummer = "SELVSTENDIG"
-        val dager = listOf(
-            OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
-                dato = LocalDate.parse("2025-02-01"),
-                type = "ventetid",
-                fraType = "tid",
-                grad = 100,
-                fraGrad = 50
+        val dager =
+            listOf(
+                OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
+                    dato = LocalDate.parse("2025-02-01"),
+                    type = "ventetid",
+                    fraType = "tid",
+                    grad = 100,
+                    fraGrad = 50,
+                ),
             )
-        )
 
-        val hendelse = OverstyrtTidslinjeEvent(
-            eksternHendelseId = UUID.randomUUID(),
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            dager = dager
-        )
+        val hendelse =
+            OverstyrtTidslinjeEvent(
+                eksternHendelseId = UUID.randomUUID(),
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                dager = dager,
+            )
 
         hendelse.somJson().assertHendelse(
             eventName = "overstyr_tidslinje",
-            payload = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "dager" to listOf(
-                    mapOf(
-                        "dato" to "2025-02-01",
-                        "type" to "ventetid",
-                        "fraType" to "tid",
-                        "grad" to 100,
-                        "fraGrad" to 50
-                    )
+            payload =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "aktørId" to aktørId,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "dager" to
+                        listOf(
+                            mapOf(
+                                "dato" to "2025-02-01",
+                                "type" to "ventetid",
+                                "fraType" to "tid",
+                                "grad" to 100,
+                                "fraGrad" to 50,
+                            ),
+                        ),
+                    "yrkesaktivitetstype" to "SELVSTENDIG",
                 ),
-                "yrkesaktivitetstype" to "SELVSTENDIG",
-            )
         )
     }
 
-    private fun String.assertHendelse(eventName: String, payload: Map<String, Any>) {
-        val forventedeStandardfelter = mapOf(
-            "@event_name" to eventName,
-            "fødselsnummer" to fødselsnummer,
-        )
+    private fun String.assertHendelse(
+        eventName: String,
+        payload: Map<String, Any>,
+    ) {
+        val forventedeStandardfelter =
+            mapOf(
+                "@event_name" to eventName,
+                "fødselsnummer" to fødselsnummer,
+            )
         val jsonNode = objectMapper.readTree(this) as ObjectNode
         jsonNode.remove("@id")
         jsonNode.remove("@opprettet")
@@ -458,10 +498,14 @@ class UtgåendeHendelseMessageBuilderTest {
         assertEquals(objectMapper.valueToTree(forventedeStandardfelter + payload), jsonNode)
     }
 
-    private fun assertValidByJsonSchema(json: String, schemaResourceName: String) {
-        val schemaJson = javaClass.getResourceAsStream(schemaResourceName)!!.use { inputStream ->
-            inputStream.reader().use(InputStreamReader::readText)
-        }
+    private fun assertValidByJsonSchema(
+        json: String,
+        schemaResourceName: String,
+    ) {
+        val schemaJson =
+            javaClass.getResourceAsStream(schemaResourceName)!!.use { inputStream ->
+                inputStream.reader().use(InputStreamReader::readText)
+            }
         val errors = mutableListOf<ValidationError>()
         val valid =
             JsonSchema.fromDefinition(schemaJson).validate(Json.decodeFromString<JsonElement>(json), errors::add)
@@ -474,7 +518,7 @@ class UtgåendeHendelseMessageBuilderTest {
     private fun String.assertGodkjenningsBehovløsning(
         payload: Map<String, Any>,
         `opprinnelig@id`: UUID,
-        `opprinnelig@opprettet`: LocalDateTime
+        `opprinnelig@opprettet`: LocalDateTime,
     ) {
         val jsonNode = objectMapper.readTree(this) as ObjectNode
         val løsningNode = objectMapper.readTree(this).get("@løsning")

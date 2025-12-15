@@ -37,30 +37,67 @@ data class GodkjenningsbehovData(
     private lateinit var løsning: Løsning
 
     fun medLøsning() =
-        Godkjenningsbehovløsning(
-            godkjent = løsning.godkjent,
-            saksbehandlerIdent = løsning.saksbehandlerIdent,
-            saksbehandlerEpost = løsning.saksbehandlerEpost,
-            godkjenttidspunkt = løsning.godkjenttidspunkt,
-            automatiskBehandling = løsning.automatiskBehandling,
-            årsak = løsning.årsak,
-            begrunnelser = løsning.begrunnelser,
-            kommentar = løsning.kommentar,
-            saksbehandleroverstyringer = løsning.saksbehandleroverstyringer,
-            json = json,
-        )
+        when (val løsning = løsning) {
+            is Løsning.Automatisk -> {
+                Godkjenningsbehovløsning(
+                    godkjent = løsning.godkjent,
+                    saksbehandlerIdent = AUTOMATISK_BEHANDLET_IDENT,
+                    saksbehandlerEpost = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
+                    godkjenttidspunkt = løsning.godkjenttidspunkt,
+                    automatiskBehandling = true,
+                    årsak = løsning.årsak,
+                    begrunnelser = løsning.begrunnelser,
+                    kommentar = null,
+                    saksbehandleroverstyringer = emptyList(),
+                    json = json,
+                )
+            }
 
-    private data class Løsning(
+            is Løsning.Manuelt -> {
+                Godkjenningsbehovløsning(
+                    godkjent = løsning.godkjent,
+                    saksbehandlerIdent = løsning.saksbehandlerIdent,
+                    saksbehandlerEpost = løsning.saksbehandlerEpost,
+                    godkjenttidspunkt = løsning.godkjenttidspunkt,
+                    automatiskBehandling = false,
+                    årsak = løsning.årsak,
+                    begrunnelser = løsning.begrunnelser,
+                    kommentar = løsning.kommentar,
+                    saksbehandleroverstyringer = løsning.saksbehandleroverstyringer,
+                    json = json,
+                )
+            }
+        }
+
+    private sealed class Løsning(
         val godkjent: Boolean,
-        val saksbehandlerIdent: String,
-        val saksbehandlerEpost: String,
         val godkjenttidspunkt: LocalDateTime,
-        val automatiskBehandling: Boolean,
         val årsak: String?,
         val begrunnelser: List<String>?,
-        val kommentar: String?,
-        val saksbehandleroverstyringer: List<UUID>,
-    )
+    ) {
+        class Automatisk(
+            godkjent: Boolean,
+            godkjenttidspunkt: LocalDateTime,
+            årsak: String?,
+            begrunnelser: List<String>?,
+        ) : Løsning(
+                godkjent,
+                godkjenttidspunkt,
+                årsak,
+                begrunnelser,
+            )
+
+        class Manuelt(
+            godkjent: Boolean,
+            godkjenttidspunkt: LocalDateTime,
+            årsak: String?,
+            begrunnelser: List<String>?,
+            val saksbehandlerIdent: String,
+            val saksbehandlerEpost: String,
+            val kommentar: String?,
+            val saksbehandleroverstyringer: List<UUID>,
+        ) : Løsning(godkjent, godkjenttidspunkt, årsak, begrunnelser)
+    }
 
     private companion object {
         private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
@@ -121,17 +158,13 @@ data class GodkjenningsbehovData(
         årsak: String? = null,
         begrunnelser: List<String>? = null,
     ) {
-        løs(
-            automatisk = true,
-            godkjent = godkjent,
-            saksbehandlerIdent = AUTOMATISK_BEHANDLET_IDENT,
-            saksbehandlerEpost = AUTOMATISK_BEHANDLET_EPOSTADRESSE,
-            godkjenttidspunkt = LocalDateTime.now(),
-            årsak = årsak,
-            begrunnelser = begrunnelser,
-            kommentar = null,
-            saksbehandleroverstyringer = emptyList(),
-        )
+        løsning =
+            Løsning.Automatisk(
+                godkjent = godkjent,
+                godkjenttidspunkt = LocalDateTime.now(),
+                årsak = årsak,
+                begrunnelser = begrunnelser,
+            )
     }
 
     private fun løsManuelt(
@@ -144,37 +177,12 @@ data class GodkjenningsbehovData(
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
     ) {
-        løs(
-            automatisk = false,
-            godkjent = godkjent,
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
-            årsak = årsak,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
-        )
-    }
-
-    private fun løs(
-        automatisk: Boolean,
-        godkjent: Boolean,
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime,
-        årsak: String?,
-        begrunnelser: List<String>?,
-        kommentar: String?,
-        saksbehandleroverstyringer: List<UUID>,
-    ) {
         løsning =
-            Løsning(
+            Løsning.Manuelt(
                 godkjent = godkjent,
                 saksbehandlerIdent = saksbehandlerIdent,
                 saksbehandlerEpost = saksbehandlerEpost,
                 godkjenttidspunkt = godkjenttidspunkt,
-                automatiskBehandling = automatisk,
                 årsak = årsak,
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
@@ -200,6 +208,5 @@ data class GodkjenningsbehovData(
             periodetype = periodetype.name,
             årsak = this.løsning.årsak,
             begrunnelser = this.løsning.begrunnelser,
-            kommentar = this.løsning.kommentar,
         )
 }

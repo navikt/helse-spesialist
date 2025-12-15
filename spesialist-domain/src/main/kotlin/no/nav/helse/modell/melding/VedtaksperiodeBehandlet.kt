@@ -11,7 +11,6 @@ data class VedtaksperiodeAvvistAutomatisk(
     val periodetype: String,
     val årsak: String?,
     val begrunnelser: List<String>?,
-    val kommentar: String?,
 ) : UtgåendeHendelse
 
 data class VedtaksperiodeAvvistManuelt(

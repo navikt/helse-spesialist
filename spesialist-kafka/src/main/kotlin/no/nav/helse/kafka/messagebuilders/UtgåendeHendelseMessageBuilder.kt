@@ -49,20 +49,35 @@ internal fun UtgåendeHendelse.eventName() =
         -> "vedtaksperiode_godkjent"
 
         is Godkjenningsbehovløsning -> "behov"
+
         is VedtakFattetMelding -> "vedtak_fattet"
+
         is KlargjørPersonForVisning -> "klargjør_person_for_visning"
+
         is OppdaterPersondata -> "oppdater_persondata"
+
         is HentDokument -> "hent-dokument"
+
         is OppgaveOpprettet -> "oppgave_opprettet"
+
         is OppgaveOppdatert -> "oppgave_oppdatert"
+
         is AnnullertUtbetalingEvent -> "annullering"
+
         is LagtPåVentEvent -> "lagt_på_vent"
+
         is MinimumSykdomsgradVurdertEvent -> "minimum_sykdomsgrad_vurdert"
+
         is OverstyrtArbeidsforholdEvent -> "overstyr_arbeidsforhold"
+
         is OverstyrtInntektOgRefusjonEvent -> "overstyr_inntekt_og_refusjon"
+
         is OverstyrtTidslinjeEvent -> "overstyr_tidslinje"
+
         is SkjønnsfastsattSykepengegrunnlagEvent -> "skjønnsmessig_fastsettelse"
+
         is VarselEndret -> "varsel_endret"
+
         is InntektsendringerEvent -> "inntektsendringer"
     }
 
@@ -131,7 +146,6 @@ private fun VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> =
         put("automatiskBehandling", true)
         årsak?.let { put("årsak", it) }
         begrunnelser?.let { put("begrunnelser", it) }
-        kommentar?.let { put("kommentar", it) }
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
         put("yrkesaktivitetstype", yrkesaktivitetstype)
