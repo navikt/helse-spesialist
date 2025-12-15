@@ -44,7 +44,7 @@ allprojects {
         testImplementation(platform("org.junit:junit-bom:6.0.1"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation(kotlin("test"))
-        testImplementation("io.mockk:mockk:1.14.6")
+        testImplementation("io.mockk:mockk:1.14.7")
     }
 }
 
