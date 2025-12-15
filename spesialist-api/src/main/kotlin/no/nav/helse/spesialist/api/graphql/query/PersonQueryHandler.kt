@@ -278,7 +278,7 @@ class PersonQueryHandler(
         harTilgang: Boolean?,
         fantIkkePersonErrorMsg: String?,
     ) {
-        val saksbehandlerIdent = graphQLContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER).ident
+        val saksbehandlerIdent = graphQLContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER).ident.value
         auditLogTeller.increment()
 
         if (harTilgang == false) {

@@ -217,7 +217,7 @@ data class ApiBeregnetPeriodeResolver(
                         )
                     }
 
-                    PeriodehistorikkType.FJERN_FRA_PA_VENT ->
+                    PeriodehistorikkType.FJERN_FRA_PA_VENT -> {
                         ApiFjernetFraPaVent(
                             id = it.id,
                             type = it.type.tilApiPeriodehistorikkType(),
@@ -225,6 +225,7 @@ data class ApiBeregnetPeriodeResolver(
                             saksbehandlerIdent = it.saksbehandlerIdent,
                             dialogRef = it.dialogRef,
                         )
+                    }
 
                     PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
                         val notattekst = mapNotattekstJson(json = it.json)
@@ -294,7 +295,7 @@ data class ApiBeregnetPeriodeResolver(
                         )
                     }
 
-                    else ->
+                    else -> {
                         ApiPeriodeHistorikkElementNy(
                             id = it.id,
                             type = it.type.tilApiPeriodehistorikkType(),
@@ -302,6 +303,7 @@ data class ApiBeregnetPeriodeResolver(
                             timestamp = it.timestamp,
                             dialogRef = it.dialogRef,
                         )
+                    }
                 }
             }
 
@@ -488,7 +490,7 @@ data class ApiBeregnetPeriodeResolver(
                         saksbehandlerRepository.finn(it.saksbehandlerOid)
                             ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                     ApiAnnullering(
-                        saksbehandlerIdent = saksbehandler.ident,
+                        saksbehandlerIdent = saksbehandler.ident.value,
                         arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
                         personFagsystemId = it.personFagsystemId,
                         tidspunkt = it.tidspunkt,

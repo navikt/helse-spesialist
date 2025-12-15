@@ -20,7 +20,7 @@ class Dialog private constructor(
 
     fun leggTilKommentar(
         tekst: String,
-        saksbehandlerident: String,
+        saksbehandlerident: NAVIdent,
     ): Kommentar =
         Kommentar.Factory
             .ny(

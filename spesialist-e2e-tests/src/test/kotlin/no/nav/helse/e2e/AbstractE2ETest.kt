@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -100,7 +101,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             id = SaksbehandlerOid(value = SAKSBEHANDLER_OID),
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLER_EPOST,
-            ident = SAKSBEHANDLER_IDENT,
+            ident = NAVIdent(SAKSBEHANDLER_IDENT),
         )
     private val enhetsnummerOslo = "0301"
 

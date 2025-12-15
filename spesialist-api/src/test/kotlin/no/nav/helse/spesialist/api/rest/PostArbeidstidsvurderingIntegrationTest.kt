@@ -44,10 +44,11 @@ class PostArbeidstidsvurderingIntegrationTest {
         lagrePerson(Personinfo.Adressebeskyttelse.Fortrolig)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/personer/$aktørId/vurderinger/arbeidstid",
-            saksbehandler = saksbehandler,
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/personer/$aktørId/vurderinger/arbeidstid",
+                saksbehandler = saksbehandler,
+                body = """
                 {
                     "aktørId": "$aktørId",
                     "fødselsnummer": "$fødselsnummer",
@@ -67,7 +68,7 @@ class PostArbeidstidsvurderingIntegrationTest {
                     "initierendeVedtaksperiodeId": "$vedtaksperiodeId"
                 }
             """,
-        )
+            )
 
         // Then:
 
@@ -82,7 +83,7 @@ class PostArbeidstidsvurderingIntegrationTest {
               "code": "MANGLER_TILGANG_TIL_PERSON" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
 
         // Sjekk lagret data
@@ -101,10 +102,11 @@ class PostArbeidstidsvurderingIntegrationTest {
         lagrePerson()
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/personer/$aktørId/vurderinger/arbeidstid",
-            saksbehandler = saksbehandler,
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/personer/$aktørId/vurderinger/arbeidstid",
+                saksbehandler = saksbehandler,
+                body = """
                 {
                     "aktørId": "$aktørId",
                     "fødselsnummer": "$fødselsnummer",
@@ -124,7 +126,7 @@ class PostArbeidstidsvurderingIntegrationTest {
                     "initierendeVedtaksperiodeId": "$vedtaksperiodeId"
                 }
             """,
-        )
+            )
 
         // Then:
 
@@ -139,7 +141,7 @@ class PostArbeidstidsvurderingIntegrationTest {
               "code": "MANGLER_VURDERTE_PERIODER" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
 
         // Sjekk lagret data
@@ -167,10 +169,11 @@ class PostArbeidstidsvurderingIntegrationTest {
         lagrePerson()
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/personer/$aktørId/vurderinger/arbeidstid",
-            saksbehandler = saksbehandler,
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/personer/$aktørId/vurderinger/arbeidstid",
+                saksbehandler = saksbehandler,
+                body = """
                 {
                     "aktørId": "$aktørId",
                     "fødselsnummer": "$fødselsnummer",
@@ -195,8 +198,8 @@ class PostArbeidstidsvurderingIntegrationTest {
                     ],
                     "initierendeVedtaksperiodeId": "$vedtaksperiodeId"
                 }
-            """
-        )
+            """,
+            )
 
         // Then:
 
@@ -239,44 +242,45 @@ class PostArbeidstidsvurderingIntegrationTest {
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
                 fødselsnummer = fødselsnummer,
-                hendelse = MinimumSykdomsgradVurdertEvent(
-                    eksternHendelseId = overstyring.eksternHendelseId,
-                    fødselsnummer = fødselsnummer,
-                    aktørId = aktørId,
-                    saksbehandlerOid = saksbehandler.id.value,
-                    saksbehandlerNavn = saksbehandler.navn,
-                    saksbehandlerIdent = saksbehandler.ident,
-                    saksbehandlerEpost = saksbehandler.epost,
-                    perioderMedMinimumSykdomsgradVurdertOk = overstyring.perioderVurdertOk,
-                    perioderMedMinimumSykdomsgradVurdertIkkeOk = overstyring.perioderVurdertIkkeOk,
-                ),
-                årsak = "vurdering av minimum sykdomsgrad"
-            )
+                hendelse =
+                    MinimumSykdomsgradVurdertEvent(
+                        eksternHendelseId = overstyring.eksternHendelseId,
+                        fødselsnummer = fødselsnummer,
+                        aktørId = aktørId,
+                        saksbehandlerOid = saksbehandler.id.value,
+                        saksbehandlerNavn = saksbehandler.navn,
+                        saksbehandlerIdent = saksbehandler.ident.value,
+                        saksbehandlerEpost = saksbehandler.epost,
+                        perioderMedMinimumSykdomsgradVurdertOk = overstyring.perioderVurdertOk,
+                        perioderMedMinimumSykdomsgradVurdertIkkeOk = overstyring.perioderVurdertIkkeOk,
+                    ),
+                årsak = "vurdering av minimum sykdomsgrad",
+            ),
         )
         integrationTestFixture.assertPubliserteSubsumsjoner(
             lagPublisertSubsumsjon(
                 utfall = "VILKAR_OPPFYLT",
                 fom = okPeriode1Fom,
                 tom = okPeriode1Tom,
-                overstyring = overstyring
+                overstyring = overstyring,
             ),
             lagPublisertSubsumsjon(
                 utfall = "VILKAR_OPPFYLT",
                 fom = okPeriode2Fom,
                 tom = okPeriode2Tom,
-                overstyring = overstyring
+                overstyring = overstyring,
             ),
             lagPublisertSubsumsjon(
                 utfall = "VILKAR_IKKE_OPPFYLT",
                 fom = ikkeOkPeriode1Fom,
                 tom = ikkeOkPeriode1Tom,
-                overstyring = overstyring
+                overstyring = overstyring,
             ),
             lagPublisertSubsumsjon(
                 utfall = "VILKAR_IKKE_OPPFYLT",
                 fom = ikkeOkPeriode2Fom,
                 tom = ikkeOkPeriode2Tom,
-                overstyring = overstyring
+                overstyring = overstyring,
             ),
         )
     }
@@ -288,10 +292,15 @@ class PostArbeidstidsvurderingIntegrationTest {
         ).also(sessionContext.personRepository::lagre)
     }
 
-    private fun lagPublisertSubsumsjon(utfall: String, fom: String, tom: String, overstyring: MinimumSykdomsgrad) =
-        InMemoryMeldingPubliserer.PublisertSubsumsjon(
-            fødselsnummer = fødselsnummer,
-            subsumsjonEvent = SubsumsjonEvent(
+    private fun lagPublisertSubsumsjon(
+        utfall: String,
+        fom: String,
+        tom: String,
+        overstyring: MinimumSykdomsgrad,
+    ) = InMemoryMeldingPubliserer.PublisertSubsumsjon(
+        fødselsnummer = fødselsnummer,
+        subsumsjonEvent =
+            SubsumsjonEvent(
                 id = UUID.randomUUID(), // Blir ikke asserted siden den er autogenerert
                 fødselsnummer = fødselsnummer,
                 paragraf = "8-13",
@@ -300,27 +309,31 @@ class PostArbeidstidsvurderingIntegrationTest {
                 lovverk = "folketrygdloven",
                 lovverksversjon = "2019-01-01",
                 utfall = utfall,
-                input = mapOf(
-                    "fom" to LocalDate.parse(fom),
-                    "tom" to LocalDate.parse(tom),
-                    "initierendeVedtaksperiode" to vedtaksperiodeId,
-                ),
-                output = emptyMap(),
-                sporing = mapOf(
-                    "vedtaksperiode" to listOf(
-                        arbeidsgiver1BerortVedtaksperiodeId,
-                        arbeidsgiver2BerortVedtaksperiodeId
-                    ).map(UUID::toString),
-                    "organisasjonsnummer" to listOf(
-                        arbeidsgiver1Organisasjonsnummer,
-                        arbeidsgiver2Organisasjonsnummer
+                input =
+                    mapOf(
+                        "fom" to LocalDate.parse(fom),
+                        "tom" to LocalDate.parse(tom),
+                        "initierendeVedtaksperiode" to vedtaksperiodeId,
                     ),
-                    "saksbehandler" to listOf(saksbehandler.epost),
-                    "vurdertMinimumSykdomsgrad" to listOf(overstyring.eksternHendelseId.toString())
-                ),
+                output = emptyMap(),
+                sporing =
+                    mapOf(
+                        "vedtaksperiode" to
+                            listOf(
+                                arbeidsgiver1BerortVedtaksperiodeId,
+                                arbeidsgiver2BerortVedtaksperiodeId,
+                            ).map(UUID::toString),
+                        "organisasjonsnummer" to
+                            listOf(
+                                arbeidsgiver1Organisasjonsnummer,
+                                arbeidsgiver2Organisasjonsnummer,
+                            ),
+                        "saksbehandler" to listOf(saksbehandler.epost),
+                        "vurdertMinimumSykdomsgrad" to listOf(overstyring.eksternHendelseId.toString()),
+                    ),
                 tidsstempel = LocalDateTime.now(), // Blir ikke asserted siden den er autogenerert
-                kilde = "spesialist"
+                kilde = "spesialist",
             ),
-            versjonAvKode = "0.0.0"
-        )
+        versjonAvKode = "0.0.0",
+    )
 }

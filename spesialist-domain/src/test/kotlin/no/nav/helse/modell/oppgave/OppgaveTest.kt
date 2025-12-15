@@ -9,9 +9,11 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -31,7 +33,7 @@ internal class OppgaveTest {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
-        private const val SAKSBEHANDLER_IDENT = "Z999999"
+        private val SAKSBEHANDLER_IDENT = NAVIdent("Z999999")
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLER_NAVN = "Hen Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
@@ -44,14 +46,14 @@ internal class OppgaveTest {
             epost: String = SAKSBEHANDLER_EPOST,
             oid: UUID = SAKSBEHANDLER_OID,
             navn: String = SAKSBEHANDLER_NAVN,
-            ident: String = SAKSBEHANDLER_IDENT,
+            ident: NAVIdent = SAKSBEHANDLER_IDENT,
         ) = SaksbehandlerWrapper(
             Saksbehandler(
                 id = SaksbehandlerOid(oid),
                 navn = navn,
                 epost = epost,
                 ident = ident,
-            )
+            ),
         )
     }
 
@@ -60,7 +62,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
 
         inspektør(oppgave) {
@@ -76,7 +78,7 @@ internal class OppgaveTest {
         val saksbehandler = saksbehandler()
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandler,
-            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
         )
 
         inspektør(oppgave) {
@@ -91,7 +93,7 @@ internal class OppgaveTest {
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
                 saksbehandlerWrapper = saksbehandler(),
-                saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE_7)
+                saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE_7),
             )
         }
 
@@ -106,7 +108,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(PÅ_VENT, SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
 
         inspektør(oppgave) {
@@ -121,7 +123,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(PÅ_VENT, STIKKPRØVE)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
 
         inspektør(oppgave) {
@@ -135,7 +137,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave()
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
 
@@ -151,7 +153,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave()
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandler(oid = UUID.randomUUID()),
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
 
@@ -177,7 +179,7 @@ internal class OppgaveTest {
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
                 saksbehandlerWrapper = saksbehandlerUtenTilgang,
-                saksbehandlerTilgangsgrupper = emptySet()
+                saksbehandlerTilgangsgrupper = emptySet(),
             )
         }
 
@@ -194,7 +196,7 @@ internal class OppgaveTest {
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildeling(
                 saksbehandlerWrapper = saksbehandlerUtenTilgang,
-                saksbehandlerTilgangsgrupper = emptySet()
+                saksbehandlerTilgangsgrupper = emptySet(),
             )
         }
 
@@ -211,7 +213,7 @@ internal class OppgaveTest {
         val saksbehandlerMedTilgang = saksbehandler()
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerMedTilgang,
-            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
         )
 
         inspektør(oppgave) {
@@ -226,12 +228,12 @@ internal class OppgaveTest {
         val oppgave = nyOppgave()
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         assertThrows<OppgaveTildeltNoenAndre> {
             oppgave.forsøkTildeling(
                 saksbehandlerWrapper = saksbehandler(oid = UUID.randomUUID()),
-                saksbehandlerTilgangsgrupper = emptySet()
+                saksbehandlerTilgangsgrupper = emptySet(),
             )
         }
 
@@ -278,7 +280,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.sendTilBeslutter(null)
         inspektør(oppgave) {
@@ -311,12 +313,12 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = beslutter,
-            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
         )
         oppgave.sendIRetur(beslutter)
         inspektør(oppgave) {
@@ -472,7 +474,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
@@ -498,7 +500,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.leggPåVent(true, beslutter)
 
@@ -514,7 +516,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.leggPåVent(false, saksbehandlerUtenTilgang)
 
@@ -544,7 +546,7 @@ internal class OppgaveTest {
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
@@ -563,7 +565,7 @@ internal class OppgaveTest {
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
         oppgave.fjernFraPåVent()
@@ -600,7 +602,7 @@ internal class OppgaveTest {
                 utbetalingId = UTBETALING_ID,
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
-                egenskaper = setOf(SØKNAD)
+                egenskaper = setOf(SØKNAD),
             )
         val oppgave2 =
             Oppgave.ny(
@@ -611,7 +613,7 @@ internal class OppgaveTest {
                 utbetalingId = UTBETALING_ID,
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
-                egenskaper = setOf(SØKNAD)
+                egenskaper = setOf(SØKNAD),
             )
         val oppgave3 =
             Oppgave.ny(
@@ -622,7 +624,7 @@ internal class OppgaveTest {
                 utbetalingId = UTBETALING_ID,
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
-                egenskaper = setOf(SØKNAD)
+                egenskaper = setOf(SØKNAD),
             )
         val oppgave4 =
             Oppgave.ny(
@@ -633,7 +635,7 @@ internal class OppgaveTest {
                 utbetalingId = UTBETALING_ID,
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
-                egenskaper = setOf(STIKKPRØVE)
+                egenskaper = setOf(STIKKPRØVE),
             )
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
@@ -648,21 +650,22 @@ internal class OppgaveTest {
         assertNotEquals(gjenopptattOppgave, oppgave3)
         assertNotEquals(gjenopptattOppgave, oppgave4)
 
-        oppgave2.avventerSystem("ANNEN_SAKSBEHANDLER", UUID.randomUUID())
+        oppgave2.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
-    private fun nyOppgave(vararg egenskaper: Egenskap) = Oppgave.ny(
-        id = OPPGAVE_ID,
-        førsteOpprettet = null,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        behandlingId = UTBETALING_ID,
-        utbetalingId = BEHANDLING_ID,
-        hendelseId = UUID.randomUUID(),
-        kanAvvises = true,
-        egenskaper = egenskaper.toSet(),
-    )
+    private fun nyOppgave(vararg egenskaper: Egenskap) =
+        Oppgave.ny(
+            id = OPPGAVE_ID,
+            førsteOpprettet = null,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            behandlingId = UTBETALING_ID,
+            utbetalingId = BEHANDLING_ID,
+            hendelseId = UUID.randomUUID(),
+            kanAvvises = true,
+            egenskaper = egenskaper.toSet(),
+        )
 
     private val observer =
         object : OppgaveObserver {

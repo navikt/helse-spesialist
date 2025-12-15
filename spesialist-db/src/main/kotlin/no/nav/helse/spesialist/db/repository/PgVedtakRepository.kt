@@ -4,6 +4,7 @@ import kotliquery.Session
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
 
@@ -42,8 +43,8 @@ class PgVedtakRepository private constructor(
             """,
             "behandlingId" to vedtak.id.value,
             "fattetAutomatisk" to false,
-            "saksbehandlerIdent" to vedtak.saksbehandlerIdent,
-            "beslutterIdent" to vedtak.beslutterIdent,
+            "saksbehandlerIdent" to vedtak.saksbehandlerIdent.value,
+            "beslutterIdent" to vedtak.beslutterIdent.value,
             "tidspunkt" to vedtak.tidspunkt,
         )
     }
@@ -56,7 +57,7 @@ class PgVedtakRepository private constructor(
             """,
             "behandlingId" to vedtak.id.value,
             "fattetAutomatisk" to false,
-            "saksbehandlerIdent" to vedtak.saksbehandlerIdent,
+            "saksbehandlerIdent" to vedtak.saksbehandlerIdent.value,
             "beslutterIdent" to null,
             "tidspunkt" to vedtak.tidspunkt,
         )
@@ -78,8 +79,8 @@ class PgVedtakRepository private constructor(
                     Vedtak.ManueltMedTotrinnskontroll(
                         spleisBehandlingId,
                         tidspunkt,
-                        row.string("saksbehandler_ident"),
-                        beslutterIdent,
+                        NAVIdent(row.string("saksbehandler_ident")),
+                        NAVIdent(beslutterIdent),
                     )
                 }
 
@@ -87,7 +88,7 @@ class PgVedtakRepository private constructor(
                     Vedtak.ManueltUtenTotrinnskontroll(
                         spleisBehandlingId,
                         tidspunkt,
-                        row.string("saksbehandler_ident"),
+                        NAVIdent(row.string("saksbehandler_ident")),
                     )
                 }
             }

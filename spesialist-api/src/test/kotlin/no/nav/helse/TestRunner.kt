@@ -39,38 +39,45 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 
 object TestRunner {
-    private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also {
-        it.start()
-    }
+    private val mockOAuth2Server: MockOAuth2Server =
+        MockOAuth2Server().also {
+            it.start()
+        }
     private val issuerId = "EntraID"
     private val clientId = "spesialist-dev"
 
-    private val configuration = ApiModule.Configuration(
-        clientId = clientId,
-        issuerUrl = mockOAuth2Server.issuerUrl(issuerId).toString(),
-        jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString(),
-        tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
-        eksponerOpenApi = true,
-        versjonAvKode = "0.0.0"
-    )
+    private val configuration =
+        ApiModule.Configuration(
+            clientId = clientId,
+            issuerUrl = mockOAuth2Server.issuerUrl(issuerId).toString(),
+            jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString(),
+            tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
+            eksponerOpenApi = true,
+            versjonAvKode = "0.0.0",
+        )
 
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
 
     private val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
 
-    private fun token(saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>): String =
-        mockOAuth2Server.issueToken(
-            issuerId = issuerId,
-            audience = clientId,
-            subject = saksbehandler.id.value.toString(),
-            claims = mapOf(
-                "NAVident" to saksbehandler.ident,
-                "preferred_username" to saksbehandler.epost,
-                "oid" to saksbehandler.id.value.toString(),
-                "name" to saksbehandler.navn,
-                "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() }
-            )
-        ).serialize()
+    private fun token(
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+    ): String =
+        mockOAuth2Server
+            .issueToken(
+                issuerId = issuerId,
+                audience = clientId,
+                subject = saksbehandler.id.value.toString(),
+                claims =
+                    mapOf(
+                        "NAVident" to saksbehandler.ident.value,
+                        "preferred_username" to saksbehandler.epost,
+                        "oid" to saksbehandler.id.value.toString(),
+                        "name" to saksbehandler.navn,
+                        "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() },
+                    ),
+            ).serialize()
 
     fun runQuery(
         saksbehandler: Saksbehandler = lagSaksbehandler(),
@@ -79,21 +86,22 @@ object TestRunner {
         @Language("GraphQL") whenever: String,
         then: suspend (response: HttpResponse, body: JsonNode, avhengigheter: Avhengigheter) -> Unit,
     ) {
-        val avhengigheter = Avhengigheter(
-            daos = mockk(relaxed = true),
-            sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory,
-            saksbehandlerMediator = mockk(relaxed = true),
-            restAdapter = mockk(relaxed = true),
-            apiOppgaveService = mockk(relaxed = true),
-            personhåndterer = mockk(relaxed = true),
-            dokumentMediator = mockk(relaxed = true),
-            stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
-            behandlingstatistikk = mockk(relaxed = true),
-            snapshothenter = mockk(relaxed = true),
-            reservasjonshenter = mockk(relaxed = true),
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
-            meldingPubliserer = mockk(relaxed = true),
-        )
+        val avhengigheter =
+            Avhengigheter(
+                daos = mockk(relaxed = true),
+                sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory,
+                saksbehandlerMediator = mockk(relaxed = true),
+                restAdapter = mockk(relaxed = true),
+                apiOppgaveService = mockk(relaxed = true),
+                personhåndterer = mockk(relaxed = true),
+                dokumentMediator = mockk(relaxed = true),
+                stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+                behandlingstatistikk = mockk(relaxed = true),
+                snapshothenter = mockk(relaxed = true),
+                reservasjonshenter = mockk(relaxed = true),
+                tilgangsgruppeUuider = tilgangsgruppeUuider,
+                meldingPubliserer = mockk(relaxed = true),
+            )
         testApplication {
             application {
                 val spesialistSchema =
@@ -116,26 +124,29 @@ object TestRunner {
                     dokumentMediator = avhengigheter.dokumentMediator,
                     sessionFactory = avhengigheter.sessionFactory,
                     meldingPubliserer = avhengigheter.meldingPubliserer,
-                    environmentToggles = object : EnvironmentToggles {
-                        override val kanBeslutteEgneSaker: Boolean = false
-                        override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-                    },
+                    environmentToggles =
+                        object : EnvironmentToggles {
+                            override val kanBeslutteEgneSaker: Boolean = false
+                            override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+                        },
                 )
             }
 
             given(avhengigheter)
 
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
-            val response = client.post("/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                bearerAuth(token(saksbehandler, tilgangsgrupper))
-                setBody(mapOf("query" to whenever))
-            }
+            val response =
+                client.post("/graphql") {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    bearerAuth(token(saksbehandler, tilgangsgrupper))
+                    setBody(mapOf("query" to whenever))
+                }
 
             then(response, response.body(), avhengigheter)
         }

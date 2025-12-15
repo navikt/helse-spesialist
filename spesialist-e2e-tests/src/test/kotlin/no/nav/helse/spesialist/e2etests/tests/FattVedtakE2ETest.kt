@@ -190,7 +190,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
-            assertEquals(saksbehandler.ident, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asText())
         }
     }
 
@@ -238,7 +238,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
-            assertEquals(saksbehandler.ident, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asText())
 
             val historikkinnslag =
                 person["arbeidsgivere"].flatMap { arbeidsgiver ->
@@ -273,7 +273,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             {
               "Godkjenning": {
                 "godkjent": true,
-                "saksbehandlerIdent": "${saksbehandler.ident}",
+                "saksbehandlerIdent": "${saksbehandler.ident.value}",
                 "saksbehandlerEpost": "${saksbehandler.epost}",
                 "automatiskBehandling": false,
                 "saksbehandleroverstyringer": []
@@ -294,15 +294,15 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
               "fødselsnummer": "${testContext.person.fødselsnummer}",
               "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
               "periodetype": "FØRSTEGANGSBEHANDLING",
-              "saksbehandlerIdent": "${saksbehandler.ident}",
+              "saksbehandlerIdent": "${saksbehandler.ident.value}",
               "saksbehandlerEpost": "${saksbehandler.epost}",
               "automatiskBehandling": false,
               "saksbehandler": {
-                "ident": "${saksbehandler.ident}",
+                "ident": "${saksbehandler.ident.value}",
                 "epostadresse": "${saksbehandler.epost}"
               },
               "beslutter": {
-                "ident": "${beslutter.ident}",
+                "ident": "${beslutter.ident.value}",
                 "epostadresse": "${beslutter.epost}"
               },
               "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
@@ -357,7 +357,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
-            assertEquals(saksbehandler.ident, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asText())
         }
 
         // Then:
@@ -383,7 +383,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             {
               "Godkjenning": {
                 "godkjent": true,
-                "saksbehandlerIdent": "${saksbehandler.ident}",
+                "saksbehandlerIdent": "${saksbehandler.ident.value}",
                 "saksbehandlerEpost": "${saksbehandler.epost}",
                 "automatiskBehandling": false,
                 "saksbehandleroverstyringer": []
@@ -404,11 +404,11 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
               "fødselsnummer": "${testContext.person.fødselsnummer}",
               "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
               "periodetype": "FØRSTEGANGSBEHANDLING",
-              "saksbehandlerIdent": "${saksbehandler.ident}",
+              "saksbehandlerIdent": "${saksbehandler.ident.value}",
               "saksbehandlerEpost": "${saksbehandler.epost}",
               "automatiskBehandling": false,
               "saksbehandler": {
-                "ident": "${saksbehandler.ident}",
+                "ident": "${saksbehandler.ident.value}",
                 "epostadresse": "${saksbehandler.epost}"
               },
               "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",

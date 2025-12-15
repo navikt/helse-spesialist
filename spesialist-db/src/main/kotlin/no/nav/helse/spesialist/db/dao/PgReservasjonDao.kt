@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.db.HelseDao
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
@@ -56,7 +57,7 @@ class PgReservasjonDao private constructor(
                             id = SaksbehandlerOid(row.uuid("oid")),
                             navn = row.string("navn"),
                             epost = row.string("epost"),
-                            ident = row.string("ident"),
+                            ident = NAVIdent(row.string("ident")),
                         ),
                     )
                 reservasjon

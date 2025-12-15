@@ -33,7 +33,7 @@ class SaksbehandlerWrapper(
                 oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
-                ident = saksbehandler.ident,
+                ident = saksbehandler.ident.value,
             )
         observers.forEach { it.inntektOgRefusjonOverstyrt(event.fødselsnummer, event) }
     }
@@ -44,7 +44,7 @@ class SaksbehandlerWrapper(
                 oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
-                ident = saksbehandler.ident,
+                ident = saksbehandler.ident.value,
             )
         observers.forEach { it.arbeidsforholdOverstyrt(event.fødselsnummer, event) }
     }
@@ -55,7 +55,7 @@ class SaksbehandlerWrapper(
                 oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
-                ident = saksbehandler.ident,
+                ident = saksbehandler.ident.value,
             )
         val subsumsjonEvent = hendelse.byggSubsumsjon(saksbehandler.epost).byggEvent()
         observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
@@ -66,7 +66,7 @@ class SaksbehandlerWrapper(
         val event =
             hendelse.byggEvent(
                 oid = saksbehandler.id.value,
-                ident = saksbehandler.ident,
+                ident = saksbehandler.ident.value,
             )
         observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
     }
@@ -75,7 +75,7 @@ class SaksbehandlerWrapper(
         val event =
             hendelse.byggEvent(
                 oid = saksbehandler.id.value,
-                ident = saksbehandler.ident,
+                ident = saksbehandler.ident.value,
             )
         observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
     }
@@ -88,13 +88,13 @@ class SaksbehandlerWrapper(
             saksbehandler.epost == other.saksbehandler.epost &&
             saksbehandler.navn == other.saksbehandler.navn &&
             saksbehandler.id.value == other.saksbehandler.id.value &&
-            saksbehandler.ident == other.saksbehandler.ident
+            saksbehandler.ident.value == other.saksbehandler.ident.value
 
     override fun hashCode(): Int {
         var result = saksbehandler.epost.hashCode()
         result = 31 * result + saksbehandler.id.value.hashCode()
         result = 31 * result + saksbehandler.navn.hashCode()
-        result = 31 * result + saksbehandler.ident.hashCode()
+        result = 31 * result + saksbehandler.ident.value.hashCode()
         return result
     }
 }

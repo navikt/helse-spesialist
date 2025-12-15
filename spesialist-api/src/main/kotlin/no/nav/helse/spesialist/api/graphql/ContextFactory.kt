@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
@@ -56,7 +57,7 @@ class ContextFactory(
                     ),
                 navn = getClaim("name").asString(),
                 epost = getClaim("preferred_username").asString(),
-                ident = getClaim("NAVident").asString(),
+                ident = NAVIdent(getClaim("NAVident").asString()),
             )
     }
 }

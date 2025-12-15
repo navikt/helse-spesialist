@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -175,12 +176,12 @@ class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrArbeidsforhold()
 
         every { dataFetchingEnvironment.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER) } returns
-                Saksbehandler(
-                    id = SaksbehandlerOid(value = UUID.randomUUID()),
-                    navn = "epost",
-                    epost = "navn",
-                    ident = "A123456"
-                )
+            Saksbehandler(
+                id = SaksbehandlerOid(value = UUID.randomUUID()),
+                navn = "epost",
+                epost = "navn",
+                ident = NAVIdent("A123456"),
+            )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns emptySet()
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
@@ -306,34 +307,38 @@ class OverstyringE2ETest : AbstractE2ETest() {
 
     private val personQuery =
         PersonQuery(
-            handler = PersonQueryHandler(
-                personoppslagService = PersonService(
-                    personApiDao = daos.personApiDao,
-                    vergemålApiDao = daos.vergemålApiDao,
-                    tildelingApiDao = daos.tildelingApiDao,
-                    arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
-                    overstyringApiDao = daos.overstyringApiDao,
-                    risikovurderingApiDao = daos.risikovurderingApiDao,
-                    varselRepository = daos.varselApiRepository,
-                    oppgaveApiDao = daos.oppgaveApiDao,
-                    periodehistorikkApiDao = daos.periodehistorikkApiDao,
-                    notatDao = daos.notatApiDao,
-                    påVentApiDao = daos.påVentApiDao,
-                    apiOppgaveService = mockk(relaxed = true),
-                    saksbehandlerMediator = mockk(relaxed = true),
-                    stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
-                    personhåndterer = object : Personhåndterer {
-                        override fun oppdaterPersondata(fødselsnummer: String) {}
-                        override fun klargjørPersonForVisning(fødselsnummer: String) {}
-                    },
-                    snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
-                    reservasjonshenter = mockk(relaxed = true),
-                    sessionFactory = sessionFactory,
-                    vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
-                    stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                    annulleringRepository = daos.annulleringRepository,
-                    saksbehandlerRepository = daos.saksbehandlerRepository,
+            handler =
+                PersonQueryHandler(
+                    personoppslagService =
+                        PersonService(
+                            personApiDao = daos.personApiDao,
+                            vergemålApiDao = daos.vergemålApiDao,
+                            tildelingApiDao = daos.tildelingApiDao,
+                            arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
+                            overstyringApiDao = daos.overstyringApiDao,
+                            risikovurderingApiDao = daos.risikovurderingApiDao,
+                            varselRepository = daos.varselApiRepository,
+                            oppgaveApiDao = daos.oppgaveApiDao,
+                            periodehistorikkApiDao = daos.periodehistorikkApiDao,
+                            notatDao = daos.notatApiDao,
+                            påVentApiDao = daos.påVentApiDao,
+                            apiOppgaveService = mockk(relaxed = true),
+                            saksbehandlerMediator = mockk(relaxed = true),
+                            stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+                            personhåndterer =
+                                object : Personhåndterer {
+                                    override fun oppdaterPersondata(fødselsnummer: String) {}
+
+                                    override fun klargjørPersonForVisning(fødselsnummer: String) {}
+                                },
+                            snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
+                            reservasjonshenter = mockk(relaxed = true),
+                            sessionFactory = sessionFactory,
+                            vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                            stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
+                            annulleringRepository = daos.annulleringRepository,
+                            saksbehandlerRepository = daos.saksbehandlerRepository,
+                        ),
                 ),
-            ),
         )
 }

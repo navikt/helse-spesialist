@@ -77,7 +77,7 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
                             transaksjon.saksbehandlerRepository.finn(vurdering.saksbehandlerId)
                                 ?: error("Finner ikke saksbehandler som vurderte varselet")
                         ApiVarsel.ApiVarselvurdering(
-                            ident = saksbehandler.ident,
+                            ident = saksbehandler.ident.value,
                             tidsstempel = vurdering.tidspunkt,
                         )
                     },

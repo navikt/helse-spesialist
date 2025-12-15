@@ -132,12 +132,12 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                                 godkjenningsbehov = sisteGodkjenningsbehov,
                                 saksbehandlerIdentOgNavn =
                                     SaksbehandlerIdentOgNavn(
-                                        saksbehandler.ident,
+                                        saksbehandler.ident.value,
                                         saksbehandler.navn,
                                     ),
                                 beslutterIdentOgNavn =
                                     SaksbehandlerIdentOgNavn(
-                                        beslutter.ident,
+                                        beslutter.ident.value,
                                         beslutter.navn,
                                     ),
                                 automatiskFattet = false,
@@ -153,7 +153,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                                 godkjenningsbehov = sisteGodkjenningsbehov,
                                 saksbehandlerIdentOgNavn =
                                     SaksbehandlerIdentOgNavn(
-                                        saksbehandler.ident,
+                                        saksbehandler.ident.value,
                                         saksbehandler.navn,
                                     ),
                                 beslutterIdentOgNavn = null,

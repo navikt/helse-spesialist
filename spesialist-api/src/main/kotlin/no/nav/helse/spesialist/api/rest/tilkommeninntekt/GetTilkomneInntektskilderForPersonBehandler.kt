@@ -97,11 +97,11 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
                                                         event.metadata.tidspunkt
                                                             .atZone(ZoneId.of("Europe/Oslo"))
                                                             .toLocalDateTime(),
-                                                    utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
+                                                    utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent.value,
                                                     notatTilBeslutter = event.metadata.notatTilBeslutter,
                                                 )
                                             when (event) {
-                                                is TilkommenInntektOpprettetEvent ->
+                                                is TilkommenInntektOpprettetEvent -> {
                                                     ApiTilkommenInntektOpprettetEvent(
                                                         metadata = metadata,
                                                         organisasjonsnummer = event.organisasjonsnummer,
@@ -113,23 +113,27 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
                                                         periodebelop = event.periodebeløp,
                                                         ekskluderteUkedager = event.ekskluderteUkedager.sorted(),
                                                     )
+                                                }
 
-                                                is TilkommenInntektEndretEvent ->
+                                                is TilkommenInntektEndretEvent -> {
                                                     ApiTilkommenInntektEndretEvent(
                                                         metadata = metadata,
                                                         endringer = event.endringer.toApiEndringer(),
                                                     )
+                                                }
 
-                                                is TilkommenInntektFjernetEvent ->
+                                                is TilkommenInntektFjernetEvent -> {
                                                     ApiTilkommenInntektFjernetEvent(
                                                         metadata = metadata,
                                                     )
+                                                }
 
-                                                is TilkommenInntektGjenopprettetEvent ->
+                                                is TilkommenInntektGjenopprettetEvent -> {
                                                     ApiTilkommenInntektGjenopprettetEvent(
                                                         metadata = metadata,
                                                         endringer = event.endringer.toApiEndringer(),
                                                     )
+                                                }
                                             }
                                         },
                                 )

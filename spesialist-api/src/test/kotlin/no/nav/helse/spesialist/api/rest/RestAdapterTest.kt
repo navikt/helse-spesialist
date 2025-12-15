@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.UUID
@@ -27,35 +28,44 @@ class RestAdapterTest {
     @Test
     fun `Uhåndtert feil returnerer HttpProblem med Internal Server Error uten code`() {
         val responseTextSlot = slot<TextContent>()
-        val call = mockk<RoutingCall>(relaxed = true) {
-            coEvery { respond(capture(responseTextSlot), any()) } returns Unit
-            every { principal<JWTPrincipal>() } returns mockk(relaxed = true) {
-                every { payload } returns mockk(relaxed = true) {
-                    val claim = mockk<Claim>(relaxed = true) {
-                        every { asString() } returns UUID.randomUUID().toString()
+        val call =
+            mockk<RoutingCall>(relaxed = true) {
+                coEvery { respond(capture(responseTextSlot), any()) } returns Unit
+                every { principal<JWTPrincipal>() } returns
+                    mockk(relaxed = true) {
+                        every { payload } returns
+                            mockk(relaxed = true) {
+                                val claim =
+                                    mockk<Claim>(relaxed = true) {
+                                        every { asString() } returns UUID.randomUUID().toString()
+                                    }
+                                every { getClaim("oid") } returns claim
+                                every { getClaim("name") } returns claim
+                                every { getClaim("preferred_username") } returns claim
+                                every { getClaim("NAVident") } returns
+                                    mockk<Claim>(relaxed = true) {
+                                        every { asString() } returns lagSaksbehandler().ident.value
+                                    }
+                                every { getClaim("groups") } returns null
+                            }
                     }
-                    every { getClaim("oid") } returns claim
-                    every { getClaim("name") } returns claim
-                    every { getClaim("preferred_username") } returns claim
-                    every { getClaim("NAVident") } returns claim
-                    every { getClaim("groups") } returns null
-                }
             }
-        }
 
-        val adapter = RestAdapter(
-            sessionFactory = sessionFactory,
-            tilgangsgruppeUuider = IntegrationTestFixture.tilgangsgruppeUuider,
-            meldingPubliserer = integrationTestFixture.meldingPubliserer,
-            versjonAvKode = "0.0.0",
-        )
+        val adapter =
+            RestAdapter(
+                sessionFactory = sessionFactory,
+                tilgangsgruppeUuider = IntegrationTestFixture.tilgangsgruppeUuider,
+                meldingPubliserer = integrationTestFixture.meldingPubliserer,
+                versjonAvKode = "0.0.0",
+            )
 
         runBlocking {
             adapter.behandle(Unit, call, UnitUnitErrorGetBehandler())
         }
 
         assertEquals(
-            """{"type":"about:blank","status":500,"title":"Internal Server Error"}""", responseTextSlot.captured.text
+            """{"type":"about:blank","status":500,"title":"Internal Server Error"}""",
+            responseTextSlot.captured.text,
         )
     }
 
@@ -64,7 +74,7 @@ class RestAdapterTest {
             resource: Unit,
             saksbehandler: Saksbehandler,
             tilgangsgrupper: Set<Tilgangsgruppe>,
-            transaksjon: SessionContext
+            transaksjon: SessionContext,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
 
         override fun openApi(config: RouteConfig) {}

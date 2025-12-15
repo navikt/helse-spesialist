@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent.Metadata
 import java.math.BigDecimal
@@ -15,7 +16,7 @@ sealed interface TilkommenInntektEvent {
         val tilkommenInntektId: TilkommenInntektId,
         val sekvensnummer: Int,
         val tidspunkt: Instant,
-        val utførtAvSaksbehandlerIdent: String,
+        val utførtAvSaksbehandlerIdent: NAVIdent,
         val notatTilBeslutter: String,
         val totrinnsvurderingId: TotrinnsvurderingId,
     )

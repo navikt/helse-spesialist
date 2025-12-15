@@ -45,7 +45,7 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
             {
               "Godkjenning": {
                 "godkjent": false,
-                "saksbehandlerIdent": "${saksbehandler.ident}",
+                "saksbehandlerIdent": "${saksbehandler.ident.value}",
                 "saksbehandlerEpost": "${saksbehandler.epost}",
                 "automatiskBehandling": false,
                 "årsak" : "Her er en årsak",
@@ -68,10 +68,10 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
               "@event_name": "vedtaksperiode_avvist",
               "fødselsnummer": "${testContext.person.fødselsnummer}",
               "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
-              "saksbehandlerIdent": "${saksbehandler.ident}",
+              "saksbehandlerIdent": "${saksbehandler.ident.value}",
               "saksbehandlerEpost": "${saksbehandler.epost}",
               "saksbehandler": {
-                "ident": "${saksbehandler.ident}",
+                "ident": "${saksbehandler.ident.value}",
                 "epostadresse": "${saksbehandler.epost}"
               },
               "automatiskBehandling": false,

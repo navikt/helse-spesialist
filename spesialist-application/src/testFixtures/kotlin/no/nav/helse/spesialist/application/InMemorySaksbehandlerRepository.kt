@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.application
 
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 
@@ -14,5 +15,5 @@ class InMemorySaksbehandlerRepository :
             ident = original.ident,
         )
 
-    override fun finn(ident: String): Saksbehandler? = alle().find { it.ident == ident }
+    override fun finn(ident: NAVIdent): Saksbehandler? = alle().find { it.ident == ident }
 }

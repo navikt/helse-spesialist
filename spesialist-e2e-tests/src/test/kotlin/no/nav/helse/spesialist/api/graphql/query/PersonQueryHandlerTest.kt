@@ -42,7 +42,6 @@ import java.util.UUID
 import kotlin.test.assertContains
 
 class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
-
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `henter person`() {
@@ -53,7 +52,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
     }
 
     @Test
@@ -80,8 +79,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med identifikator $FØDSELSNUMMER",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med identifikator $FØDSELSNUMMER",
+            Level.WARN,
         )
     }
 
@@ -93,8 +92,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID",
+            Level.WARN,
         )
     }
 
@@ -106,8 +105,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$PERSONPSEUDOID operation=PersonQuery msg=Finner ikke data for person med identifikator $PERSONPSEUDOID",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$PERSONPSEUDOID operation=PersonQuery msg=Finner ikke data for person med identifikator $PERSONPSEUDOID",
+            Level.WARN,
         )
     }
 
@@ -121,8 +120,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$AKTØRID operation=PersonQuery msg=Finner ikke data for person med identifikator $AKTØRID",
+            Level.WARN,
         )
     }
 
@@ -136,7 +135,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         logglytter.assertIngenLoggingFor(
             fødselsnummer = FØDSELSNUMMER,
             aktørid = AKTØRID,
-            personPseudoId = PERSONPSEUDOID.toString()
+            personPseudoId = PERSONPSEUDOID.toString(),
         )
     }
 
@@ -153,8 +152,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(500, extensions["code"].asInt())
         assertEquals(setOf(dNummer, FØDSELSNUMMER), extensions["fodselsnumre"].map(JsonNode::asText).toSet())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$AKTØRID operation=PersonQuery msg=Mer enn ett fødselsnummer for personen",
+            Level.WARN,
         )
     }
 
@@ -165,13 +164,14 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig))
 
         val logglytter = Logglytter()
-        val body = runQuery(
-            query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
-            tilgangsgruppe = Tilgangsgruppe.KODE_7,
-        )
+        val body =
+            runQuery(
+                query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
+                tilgangsgruppe = Tilgangsgruppe.KODE_7,
+            )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER", Level.INFO)
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER", Level.INFO)
     }
 
     @Test
@@ -184,8 +184,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
+            Level.WARN,
         )
     }
 
@@ -196,13 +196,14 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(erEgenAnsatt = true))
 
         val logglytter = Logglytter()
-        val body = runQuery(
-            query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
-            tilgangsgruppe = Tilgangsgruppe.EGEN_ANSATT,
-        )
+        val body =
+            runQuery(
+                query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
+                tilgangsgruppe = Tilgangsgruppe.EGEN_ANSATT,
+            )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
-        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
     }
 
     @Test
@@ -215,8 +216,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
+            Level.WARN,
         )
     }
 
@@ -231,8 +232,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Feil ved henting av snapshot for person",
-            Level.WARN
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery msg=Feil ved henting av snapshot for person",
+            Level.WARN,
         )
     }
 
@@ -393,7 +394,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runPersonQuery()
 
         val hendelse =
-            body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["hendelser"].first()
+            body["data"]["person"]["arbeidsgivere"]
+                .first()["generasjoner"]
+                .first()["perioder"]
+                .first()["hendelser"]
+                .first()
         assertNotNull(hendelse)
         assertEquals(eksternDokumentId.toString(), hendelse["eksternDokumentId"].textValue())
     }
@@ -402,15 +407,15 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
         every { vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(any(), any()) } returns
-                listOf(
-                    VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase(
-                        type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-                        begrunnelse = avslagsbegrunnelse,
-                        opprettet = LocalDateTime.now(),
-                        saksbehandlerIdent = "AIDENT",
-                        invalidert = false,
-                    ),
-                )
+            listOf(
+                VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase(
+                    type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                    begrunnelse = avslagsbegrunnelse,
+                    opprettet = LocalDateTime.now(),
+                    saksbehandlerIdent = "AIDENT",
+                    invalidert = false,
+                ),
+            )
 
         val personRef = opprettPerson()
         opprettArbeidsgiver()
@@ -424,7 +429,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runPersonQuery()
 
         val avslag =
-            body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["avslag"].first()
+            body["data"]["person"]["arbeidsgivere"]
+                .first()["generasjoner"]
+                .first()["perioder"]
+                .first()["avslag"]
+                .first()
         assertNotNull(avslag)
         assertEquals(ApiAvslagstype.AVSLAG, enumValueOf<ApiAvslagstype>(avslag["type"].textValue()))
         assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].textValue())
@@ -453,7 +462,6 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(objectMapper.convertValue<Set<ObjectNode>>(forventedeHandlinger), periode["handlinger"].toSet())
     }
 
-
     @Test
     fun `andre fødsesnummer inkluderes i GraphQL-svaret`() {
         val annetFødselsnummer = lagFødselsnummer()
@@ -469,7 +477,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertContains(
             body["data"]["person"]["andreFodselsnummer"].map { it["fodselsnummer"].asText() },
-            annetFødselsnummer
+            annetFødselsnummer,
         )
     }
 
@@ -567,23 +575,31 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode = opprettBeregnetPeriode(fom, tom, id)
 
     private class Logglytter {
-        private val appender = ListAppender<ILoggingEvent>().apply {
-            (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
-            start()
+        private val appender =
+            ListAppender<ILoggingEvent>().apply {
+                (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
+                start()
+            }
+
+        fun assertBleLogget(
+            melding: String,
+            level: Level,
+        ) = assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
+            "Forventet ett innslag med $level og melding=$melding, dette ble logget: ${appender.list}"
         }
 
-        fun assertBleLogget(melding: String, level: Level) =
-            assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
-                "Forventet ett innslag med $level og melding=$melding, dette ble logget: ${appender.list}"
-            }
-
-        fun assertIngenLoggingFor(fødselsnummer: String, aktørid: String, personPseudoId: String) =
-            assertTrue(appender.list.none {
+        fun assertIngenLoggingFor(
+            fødselsnummer: String,
+            aktørid: String,
+            personPseudoId: String,
+        ) = assertTrue(
+            appender.list.none {
                 it.message.contains(fødselsnummer) ||
-                        it.message.contains(aktørid) ||
-                        it.message.contains(personPseudoId)
-            }) {
-                "Forventet at det ikke skulle være logget noe for $fødselsnummer/$aktørid/$personPseudoId, dette ble logget: ${appender.list}"
-            }
+                    it.message.contains(aktørid) ||
+                    it.message.contains(personPseudoId)
+            },
+        ) {
+            "Forventet at det ikke skulle være logget noe for $fødselsnummer/$aktørid/$personPseudoId, dette ble logget: ${appender.list}"
+        }
     }
 }

@@ -13,7 +13,7 @@ class Saksbehandler(
     id: SaksbehandlerOid,
     val navn: String,
     val epost: String,
-    val ident: String,
+    val ident: NAVIdent,
 ) : AggregateRoot<SaksbehandlerOid>(id) {
     override fun toString(): String = "epostadresse=$epost, oid=${id.value}"
 }

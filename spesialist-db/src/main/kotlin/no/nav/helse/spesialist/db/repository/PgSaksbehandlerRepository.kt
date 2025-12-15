@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDateTime
@@ -28,12 +29,12 @@ class PgSaksbehandlerRepository private constructor(
             "oid" to oid.value,
         ).singleOrNull { it.toSaksbehandler() }
 
-    override fun finn(ident: String): Saksbehandler? =
+    override fun finn(ident: NAVIdent): Saksbehandler? =
         asSQL(
             """ 
             SELECT * FROM saksbehandler WHERE ident = :ident
             """.trimIndent(),
-            "ident" to ident,
+            "ident" to ident.value,
         ).singleOrNull { it.toSaksbehandler() }
 
     override fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler> =
@@ -51,7 +52,7 @@ class PgSaksbehandlerRepository private constructor(
             id = SaksbehandlerOid(UUID.fromString(string("oid"))),
             navn = string("navn"),
             epost = string("epost"),
-            ident = string("ident"),
+            ident = NAVIdent(string("ident")),
         )
 
     override fun lagre(saksbehandler: Saksbehandler) {
@@ -67,7 +68,7 @@ class PgSaksbehandlerRepository private constructor(
             "oid" to saksbehandler.id.value,
             "navn" to saksbehandler.navn,
             "epost" to saksbehandler.epost,
-            "ident" to saksbehandler.ident,
+            "ident" to saksbehandler.ident.value,
             "siste_handling_utfort_tidspunkt" to LocalDateTime.now(),
         ).update()
     }

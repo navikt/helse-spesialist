@@ -11,6 +11,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.spesialist.application.modell.OppgaveInspector.Companion.oppgaveinspektør
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -18,28 +19,28 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class OppdaterOppgavestatusCommandTest {
-
     private val UTBETALING_ID = UUID.randomUUID()
     private val context = CommandContext(UUID.randomUUID())
     private lateinit var oppgave: Oppgave
 
     @BeforeEach
     fun beforeEach() {
-        oppgave = Oppgave.ny(
-            id = 1L,
-            førsteOpprettet = null,
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            utbetalingId = UTBETALING_ID,
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = setOf(SØKNAD),
-        )
+        oppgave =
+            Oppgave.ny(
+                id = 1L,
+                førsteOpprettet = null,
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = setOf(SØKNAD),
+            )
     }
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt utbetalt`() {
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         val status = UTBETALT
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
@@ -51,7 +52,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt godkjent uten utbetaling`() {
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         val status = GODKJENT_UTEN_UTBETALING
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
@@ -59,13 +60,12 @@ internal class OppdaterOppgavestatusCommandTest {
         oppgaveinspektør(oppgave) {
             assertEquals(Oppgave.Ferdigstilt, this.tilstand)
         }
-
     }
 
     @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt avslått`() {
         val status = IKKE_GODKJENT
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
         assertTrue(command.execute(context))
@@ -87,7 +87,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
     @Test
     fun `gjør ingenting om vi ikke forholder oss til utbetalingsstatusen`() {
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         val status = ANNULLERT
         val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgavehåndterer)
 
@@ -97,9 +97,13 @@ internal class OppdaterOppgavestatusCommandTest {
         }
     }
 
-    private val oppgavehåndterer get() = object : Oppgavefinner {
-        override fun oppgave(utbetalingId: UUID, oppgaveBlock: Oppgave.() -> Unit) {
-            oppgaveBlock(oppgave)
+    private val oppgavehåndterer get() =
+        object : Oppgavefinner {
+            override fun oppgave(
+                utbetalingId: UUID,
+                oppgaveBlock: Oppgave.() -> Unit,
+            ) {
+                oppgaveBlock(oppgave)
+            }
         }
-    }
 }

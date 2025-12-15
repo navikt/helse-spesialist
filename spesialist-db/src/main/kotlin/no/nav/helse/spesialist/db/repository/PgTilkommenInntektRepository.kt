@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
@@ -54,7 +55,7 @@ class PgTilkommenInntektRepository(
                 tilkommenInntektId = TilkommenInntektId(uuid("tilkommen_inntekt_id")),
                 sekvensnummer = int("sekvensnummer"),
                 tidspunkt = instant("tidspunkt"),
-                utførtAvSaksbehandlerIdent = string("utført_av_saksbehandler_ident"),
+                utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
                 notatTilBeslutter = string("notat_til_beslutter"),
                 totrinnsvurderingId = TotrinnsvurderingId(long("totrinnsvurdering_id")),
             )
@@ -175,7 +176,7 @@ class PgTilkommenInntektRepository(
                 "tilkommen_inntekt_id" to event.metadata.tilkommenInntektId.value,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,
-                "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent,
+                "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent.value,
                 "notat_til_beslutter" to event.metadata.notatTilBeslutter,
                 "totrinnsvurdering_id" to event.metadata.totrinnsvurderingId.value,
                 "type" to event.tilDBEventType().name,
@@ -207,16 +208,21 @@ class PgTilkommenInntektRepository(
                 )
             }
 
-            is TilkommenInntektEndretEvent ->
+            is TilkommenInntektEndretEvent -> {
                 DBEndretEventData(
                     endringer = endringer.tilDBEndringer(),
                 )
+            }
 
-            is TilkommenInntektFjernetEvent -> null
-            is TilkommenInntektGjenopprettetEvent ->
+            is TilkommenInntektFjernetEvent -> {
+                null
+            }
+
+            is TilkommenInntektGjenopprettetEvent -> {
                 DBGjenopprettetEventData(
                     endringer = endringer.tilDBEndringer(),
                 )
+            }
         }
 
     private fun TilkommenInntektEvent.Endringer.tilDBEndringer() =

@@ -59,7 +59,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
                     fødselsnummer = vedtaksperiode.fødselsnummer,
                     organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     saksbehandlerOid = saksbehandler.id.value,
-                    saksbehandlerIdent = saksbehandler.ident,
+                    saksbehandlerIdent = saksbehandler.ident.value,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,
                     begrunnelser = request.årsaker.map { arsak -> arsak.årsak },

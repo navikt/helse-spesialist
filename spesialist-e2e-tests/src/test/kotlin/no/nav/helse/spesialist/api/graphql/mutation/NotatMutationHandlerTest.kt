@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.KommentarId
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -34,20 +33,31 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
                     tekst = "Dette er et notat",
                     type = ApiNotatType.Generelt,
                     vedtaksperiodeId = PERIODE.id,
-                    saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid)
+                    saksbehandlerOid = SAKSBEHANDLER.id,
                 ),
             )
 
-        val notatId = body["data"]?.get("leggTilNotat")?.get("id")?.asInt()?.let(::NotatId)
+        val notatId =
+            body["data"]
+                ?.get("leggTilNotat")
+                ?.get("id")
+                ?.asInt()
+                ?.let(::NotatId)
         assertNotNull(notatId, "Fikk ikke noen ID på opprettet notat i svaret: $body")
 
-        val dialogRef = body["data"]?.get("leggTilNotat")?.get("dialogRef")?.asLong()?.let(::DialogId)
+        val dialogRef =
+            body["data"]
+                ?.get("leggTilNotat")
+                ?.get("dialogRef")
+                ?.asLong()
+                ?.let(::DialogId)
         assertNotNull(dialogRef, "Fikk ikke noen ID på opprettet dialog i svaret: $body")
 
         // Bekreft persistert resultat
-        val lagretNotat = sessionFactory.transactionalSessionScope {
-            it.notatRepository.finn(notatId)
-        }
+        val lagretNotat =
+            sessionFactory.transactionalSessionScope {
+                it.notatRepository.finn(notatId)
+            }
         assertNotNull(lagretNotat, "Lagret notat med ID $notatId ble ikke gjenfunnet i databasen")
 
         assertEquals(notatId, lagretNotat.id())
@@ -55,7 +65,7 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
         assertEquals("Dette er et notat", lagretNotat.tekst)
         assertEquals(dialogRef, lagretNotat.dialogRef)
         assertEquals(PERIODE.id, lagretNotat.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER.oid, lagretNotat.saksbehandlerOid.value)
+        assertEquals(SAKSBEHANDLER.id, lagretNotat.saksbehandlerOid)
         val opprettetTidspunkt = lagretNotat.opprettetTidspunkt
         with(opprettetTidspunkt) {
             val now = LocalDateTime.now()
@@ -67,28 +77,29 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         // Bekreft svaret
         assertJsonEquals(
-            expectedJson = """
-                            {
-                              "data" : {
-                                "leggTilNotat" : {
-                                  "id" : ${notatId.value},
-                                  "dialogRef" : ${dialogRef.value},
-                                  "tekst" : "Dette er et notat",
-                                  "opprettet" : "$opprettetTidspunkt",
-                                  "saksbehandlerOid" : "${SAKSBEHANDLER.oid}",
-                                  "saksbehandlerNavn" : "${SAKSBEHANDLER.navn}",
-                                  "saksbehandlerEpost" : "${SAKSBEHANDLER.epost}",
-                                  "saksbehandlerIdent" : "${SAKSBEHANDLER.ident}",
-                                  "vedtaksperiodeId" : "${PERIODE.id}",
-                                  "feilregistrert" : false,
-                                  "feilregistrert_tidspunkt" : null,
-                                  "type" : "Generelt",
-                                  "kommentarer" : [ ]
-                                }
-                              }
-                            }
-                        """.trimIndent(),
-            actualJsonNode = body
+            expectedJson =
+                """
+                {
+                  "data" : {
+                    "leggTilNotat" : {
+                      "id" : ${notatId.value},
+                      "dialogRef" : ${dialogRef.value},
+                      "tekst" : "Dette er et notat",
+                      "opprettet" : "$opprettetTidspunkt",
+                      "saksbehandlerOid" : "${SAKSBEHANDLER.id.value}",
+                      "saksbehandlerNavn" : "${SAKSBEHANDLER.navn}",
+                      "saksbehandlerEpost" : "${SAKSBEHANDLER.epost}",
+                      "saksbehandlerIdent" : "${SAKSBEHANDLER.ident.value}",
+                      "vedtaksperiodeId" : "${PERIODE.id}",
+                      "feilregistrert" : false,
+                      "feilregistrert_tidspunkt" : null,
+                      "type" : "Generelt",
+                      "kommentarer" : [ ]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            actualJsonNode = body,
         )
     }
 
@@ -101,13 +112,14 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         val body =
             runQuery(
-                feilregistrerNotatMutation(notatId)
+                feilregistrerNotatMutation(notatId),
             )
 
         // Bekreft persistert resultat
-        val lagretNotat = sessionFactory.transactionalSessionScope {
-            it.notatRepository.finn(notatId)
-        }
+        val lagretNotat =
+            sessionFactory.transactionalSessionScope {
+                it.notatRepository.finn(notatId)
+            }
         assertTrue(lagretNotat!!.feilregistrert)
 
         val feilregistrertTidspunkt = lagretNotat.feilregistrertTidspunkt
@@ -122,28 +134,29 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         // Bekreft svaret
         assertJsonEquals(
-            expectedJson = """
-                            {
-                              "data" : {
-                                "feilregistrerNotat" : {
-                                  "id" : ${notatId.value},
-                                  "dialogRef" : ${dialogRef.value},
-                                  "tekst" : "Et notat",
-                                  "opprettet" : "$opprettetTidspunkt",
-                                  "saksbehandlerOid" : "${SAKSBEHANDLER.oid}",
-                                  "saksbehandlerNavn" : "${SAKSBEHANDLER.navn}",
-                                  "saksbehandlerEpost" : "${SAKSBEHANDLER.epost}",
-                                  "saksbehandlerIdent" : "${SAKSBEHANDLER.ident}",
-                                  "vedtaksperiodeId" : "${PERIODE.id}",
-                                  "feilregistrert" : true,
-                                  "feilregistrert_tidspunkt" : "$feilregistrertTidspunkt",
-                                  "type" : "Generelt",
-                                  "kommentarer" : [ ]
-                                }
-                              }
-                            }
-                        """.trimIndent(),
-            actualJsonNode = body
+            expectedJson =
+                """
+                {
+                  "data" : {
+                    "feilregistrerNotat" : {
+                      "id" : ${notatId.value},
+                      "dialogRef" : ${dialogRef.value},
+                      "tekst" : "Et notat",
+                      "opprettet" : "$opprettetTidspunkt",
+                      "saksbehandlerOid" : "${SAKSBEHANDLER.id.value}",
+                      "saksbehandlerNavn" : "${SAKSBEHANDLER.navn}",
+                      "saksbehandlerEpost" : "${SAKSBEHANDLER.epost}",
+                      "saksbehandlerIdent" : "${SAKSBEHANDLER.ident.value}",
+                      "vedtaksperiodeId" : "${PERIODE.id}",
+                      "feilregistrert" : true,
+                      "feilregistrert_tidspunkt" : "$feilregistrertTidspunkt",
+                      "type" : "Generelt",
+                      "kommentarer" : [ ]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            actualJsonNode = body,
         )
     }
 
@@ -154,16 +167,22 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         val body =
             runQuery(
-                leggTilKommentarMutation(dialogRef, "En kommentar", SAKSBEHANDLER.ident)
+                leggTilKommentarMutation(dialogRef, "En kommentar", SAKSBEHANDLER.ident.value),
             )
 
-        val kommentarId = body["data"]?.get("leggTilKommentar")?.get("id")?.asInt()?.let(::KommentarId)
+        val kommentarId =
+            body["data"]
+                ?.get("leggTilKommentar")
+                ?.get("id")
+                ?.asInt()
+                ?.let(::KommentarId)
         assertNotNull(kommentarId, "Fikk ikke noen ID på opprettet kommentar i svaret: $body")
 
         // Bekreft persistert resultat
-        val lagretDialog = sessionFactory.transactionalSessionScope {
-            it.dialogRepository.finnForKommentar(kommentarId)
-        }
+        val lagretDialog =
+            sessionFactory.transactionalSessionScope {
+                it.dialogRepository.finnForKommentar(kommentarId)
+            }
         assertNotNull(lagretDialog, "Lagret dialog for kommentar med ID $kommentarId ble ikke gjenfunnet i databasen")
         val lagretKommentar = lagretDialog.finnKommentar(kommentarId)
         assertNotNull(lagretKommentar, "Lagret kommentar med ID $kommentarId ble ikke gjenfunnet i databasen")
@@ -181,20 +200,21 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         // Bekreft svaret
         assertJsonEquals(
-            expectedJson = """
-                            {
-                              "data" : {
-                                "leggTilKommentar" : {
-                                  "id" : ${kommentarId.value},
-                                  "tekst" : "En kommentar",
-                                  "opprettet" : "$opprettetTidspunkt",
-                                  "saksbehandlerident" : "${SAKSBEHANDLER.ident}",
-                                  "feilregistrert_tidspunkt" : null
-                                }
-                              }
-                            }
-                        """.trimIndent(),
-            actualJsonNode = body
+            expectedJson =
+                """
+                {
+                  "data" : {
+                    "leggTilKommentar" : {
+                      "id" : ${kommentarId.value},
+                      "tekst" : "En kommentar",
+                      "opprettet" : "$opprettetTidspunkt",
+                      "saksbehandlerident" : "${SAKSBEHANDLER.ident.value}",
+                      "feilregistrert_tidspunkt" : null
+                    }
+                  }
+                }
+                """.trimIndent(),
+            actualJsonNode = body,
         )
     }
 
@@ -216,9 +236,10 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
             )
 
         // Bekreft persistert resultat
-        val lagretDialog = sessionFactory.transactionalSessionScope {
-            it.dialogRepository.finn(dialogRef)
-        }
+        val lagretDialog =
+            sessionFactory.transactionalSessionScope {
+                it.dialogRepository.finn(dialogRef)
+            }
         assertNotNull(lagretDialog, "Lagret dialog med ID $dialogRef ble ikke gjenfunnet i databasen")
         val lagretKommentar = lagretDialog.finnKommentar(kommentarId)
         assertNotNull(lagretKommentar, "Lagret kommentar med ID $kommentarId ble ikke gjenfunnet i databasen")
@@ -235,20 +256,21 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         // Bekreft svaret
         assertJsonEquals(
-            expectedJson = """
-                            {
-                              "data" : {
-                                "feilregistrerKommentar" : {
-                                  "id" : ${kommentarId.value},
-                                  "tekst" : "En kommentar",
-                                  "opprettet" : "$opprettetTidspunkt",
-                                  "saksbehandlerident" : "${SAKSBEHANDLER.ident}",
-                                  "feilregistrert_tidspunkt" : "$feilregistrertTidspunkt"
-                                }
-                              }
-                            }
-                        """.trimIndent(),
-            actualJsonNode = body
+            expectedJson =
+                """
+                {
+                  "data" : {
+                    "feilregistrerKommentar" : {
+                      "id" : ${kommentarId.value},
+                      "tekst" : "En kommentar",
+                      "opprettet" : "$opprettetTidspunkt",
+                      "saksbehandlerident" : "${SAKSBEHANDLER.ident.value}",
+                      "feilregistrert_tidspunkt" : "$feilregistrertTidspunkt"
+                    }
+                  }
+                }
+                """.trimIndent(),
+            actualJsonNode = body,
         )
     }
 
@@ -262,11 +284,10 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
                     tekst = "Dette er et notat for en ikke-eksisterende vedtaksperiodeId",
                     type = ApiNotatType.Generelt,
                     vedtaksperiodeId = randomUUID(),
-                    saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid)
+                    saksbehandlerOid = SAKSBEHANDLER.id,
                 ),
             )
 
         assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
     }
 }
-

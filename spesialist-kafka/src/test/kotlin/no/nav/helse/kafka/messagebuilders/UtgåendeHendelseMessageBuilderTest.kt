@@ -283,7 +283,7 @@ class UtgåendeHendelseMessageBuilderTest {
                 godkjent = true,
                 automatiskBehandling = false,
                 godkjenttidspunkt = godkjenttidspunkt,
-                saksbehandlerIdent = saksbehandlerIdent,
+                saksbehandlerIdent = saksbehandlerIdent.value,
                 saksbehandlerEpost = saksbehandlerEpost,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
                 årsak = "En årsak",

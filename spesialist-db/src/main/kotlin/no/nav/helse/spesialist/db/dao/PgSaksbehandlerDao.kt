@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDateTime
@@ -32,7 +33,7 @@ class PgSaksbehandlerDao private constructor(
                 id = SaksbehandlerOid(it.uuid("oid")),
                 navn = it.string("navn"),
                 epost = it.string("epost"),
-                ident = it.string("ident"),
+                ident = NAVIdent(it.string("ident")),
             )
         }
 
@@ -49,7 +50,7 @@ class PgSaksbehandlerDao private constructor(
                 id = SaksbehandlerOid(it.uuid("oid")),
                 navn = it.string("navn"),
                 epost = it.string("epost"),
-                ident = it.string("ident"),
+                ident = NAVIdent(it.string("ident")),
             )
         }
 

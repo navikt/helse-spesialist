@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application.modell
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -13,11 +14,10 @@ import java.time.LocalDateTime
 
 internal class UtbetalingsgodkjenningMessageTest {
     private companion object {
-
-        private const val IDENT = "Z999999"
-        private const val EPOST = "test@nav.no"
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
+
+    private val saksbehandler = lagSaksbehandler()
 
     private lateinit var godkjenningsbehov: GodkjenningsbehovData
 
@@ -34,16 +34,16 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @Test
     fun `manuelt godkjent`() {
-        godkjenningsbehov.godkjennManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList())
-        assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
+        godkjenningsbehov.godkjennManuelt(saksbehandler.ident, saksbehandler.epost, GODKJENTTIDSPUNKT, emptyList())
+        assertGodkjent(false, saksbehandler.ident.value, saksbehandler.epost, GODKJENTTIDSPUNKT)
     }
 
     @Test
     fun `manuelt avvist`() {
-        godkjenningsbehov.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList())
+        godkjenningsbehov.avvisManuelt(saksbehandler.ident, saksbehandler.epost, GODKJENTTIDSPUNKT, null, null, null, emptyList())
         assertMessage { løsning ->
             assertFalse(løsning.godkjent)
-            assertLøsning(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
+            assertLøsning(false, saksbehandler.ident.value, saksbehandler.epost, GODKJENTTIDSPUNKT)
         }
     }
 
@@ -51,7 +51,7 @@ internal class UtbetalingsgodkjenningMessageTest {
         automatisk: Boolean,
         ident: String,
         epost: String,
-        godkjenttidspunkt: LocalDateTime? = null
+        godkjenttidspunkt: LocalDateTime? = null,
     ) {
         assertMessage { løsning ->
             assertTrue(løsning.godkjent)
@@ -63,7 +63,7 @@ internal class UtbetalingsgodkjenningMessageTest {
         automatisk: Boolean,
         ident: String,
         epost: String,
-        godkjenttidspunkt: LocalDateTime? = null
+        godkjenttidspunkt: LocalDateTime? = null,
     ) {
         assertMessage { løsning ->
             assertEquals(automatisk, løsning.automatiskBehandling)
@@ -79,7 +79,8 @@ internal class UtbetalingsgodkjenningMessageTest {
     }
 
     private fun assertMessage(block: (Godkjenningsbehovløsning) -> Unit) {
-        godkjenningsbehov.medLøsning()
+        godkjenningsbehov
+            .medLøsning()
             .apply(block)
     }
 }

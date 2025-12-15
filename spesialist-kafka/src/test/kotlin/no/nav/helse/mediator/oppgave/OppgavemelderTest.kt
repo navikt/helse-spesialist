@@ -16,7 +16,6 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 class OppgavemelderTest {
-
     private companion object {
         private val FNR = lagFødselsnummer()
         private val OPPGAVE_ID = nextLong()
@@ -34,7 +33,7 @@ class OppgavemelderTest {
     fun `bygg kafkamelding`() {
         val oppgave = nyOppgave()
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
         val melding = meldinger.single()
@@ -56,10 +55,10 @@ class OppgavemelderTest {
         val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandler,
-            saksbehandlerTilgangsgrupper = emptySet()
+            saksbehandlerTilgangsgrupper = emptySet(),
         )
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
-        oppgave.avventerSystem("IDENT", UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
         assertEquals(1, meldinger.size)
         val melding = meldinger.single()
@@ -75,14 +74,15 @@ class OppgavemelderTest {
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 
-    private fun nyOppgave() = Oppgave.ny(
-        id = OPPGAVE_ID,
-        førsteOpprettet = null,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        behandlingId = BEHANDLING_ID,
-        utbetalingId = UTBETALING_ID,
-        hendelseId = HENDELSE_ID,
-        kanAvvises = true,
-        egenskaper = setOf(SØKNAD),
-    )
+    private fun nyOppgave() =
+        Oppgave.ny(
+            id = OPPGAVE_ID,
+            førsteOpprettet = null,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            behandlingId = BEHANDLING_ID,
+            utbetalingId = UTBETALING_ID,
+            hendelseId = HENDELSE_ID,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD),
+        )
 }

@@ -33,7 +33,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -45,13 +45,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private val ENHET = Enhet(101, "Halden")
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
-    protected val SAKSBEHANDLER =
-        Saksbehandler(
-            oid = UUID.randomUUID(),
-            navn = "Jan Banan",
-            ident = lagSaksbehandlerident(),
-            epost = "jan.banan@nav.no",
-        )
+    protected val SAKSBEHANDLER = lagSaksbehandler()
 
     val FØDSELSNUMMER = lagFødselsnummer()
     val AKTØRID = lagAktørId()
@@ -326,8 +320,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             UPDATE oppgave SET ferdigstilt_av = :ident, ferdigstilt_av_oid = :oid, status = 'Ferdigstilt', oppdatert = now()
             WHERE oppgave.vedtak_ref = :vedtakRef
             """.trimIndent(),
-            "ident" to SAKSBEHANDLER.ident,
-            "oid" to SAKSBEHANDLER.oid,
+            "ident" to SAKSBEHANDLER.ident.value,
+            "oid" to SAKSBEHANDLER.id.value,
             "vedtakRef" to vedtakRef,
         )
 
@@ -341,7 +335,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettNotat(
         tekst: String = "Et notat",
-        saksbehandlerOid: SaksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid),
+        saksbehandlerOid: SaksbehandlerOid = SAKSBEHANDLER.id,
         vedtaksperiodeId: UUID = PERIODE.id,
         dialogRef: DialogId = opprettDialog(),
     ) = sessionFactory.transactionalSessionScope { session ->
@@ -484,10 +478,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettSaksbehandler(
-        oid: UUID = SAKSBEHANDLER.oid,
+        oid: UUID = SAKSBEHANDLER.id.value,
         navn: String = SAKSBEHANDLER.navn,
         epost: String = SAKSBEHANDLER.epost,
-        ident: String = SAKSBEHANDLER.ident,
+        ident: String = SAKSBEHANDLER.ident.value,
     ): UUID {
         dbQuery.update(
             "INSERT INTO saksbehandler (oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)",
@@ -589,11 +583,4 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             infix fun LocalDate.til(tom: LocalDate) = Periode(UUID.randomUUID(), this, tom)
         }
     }
-
-    protected data class Saksbehandler(
-        val oid: UUID,
-        val navn: String,
-        val ident: String,
-        val epost: String,
-    )
 }

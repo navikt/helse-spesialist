@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -112,7 +113,7 @@ class PgOppgaveRepository private constructor(
             "foerste_opprettet" to oppgave.førsteOpprettet,
             "oppdatert" to LocalDateTime.now(),
             "oppgavestatus" to status(oppgave.tilstand),
-            "ferdigstilt_av" to oppgave.ferdigstiltAvIdent,
+            "ferdigstilt_av" to oppgave.ferdigstiltAvIdent?.value,
             "ferdigstilt_av_oid" to oppgave.ferdigstiltAvOid,
             "vedtaksperiode_id" to oppgave.vedtaksperiodeId,
             "behandling_id" to oppgave.behandlingId,
@@ -408,7 +409,7 @@ class PgOppgaveRepository private constructor(
                 utbetalingId = row.uuid("utbetaling_id"),
                 godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
                 kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av")?.let { NAVIdent(it) },
                 ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
                 tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
             )
@@ -449,7 +450,7 @@ class PgOppgaveRepository private constructor(
                 utbetalingId = row.uuid("utbetaling_id"),
                 godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
                 kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av")?.let { NAVIdent(it) },
                 ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
                 tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
             )

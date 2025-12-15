@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.domain.tilgangskontroll
 
+import no.nav.helse.spesialist.domain.NAVIdent
+
 class SaksbehandlerIdentGruppe(
     vararg identer: String,
 ) {
     private val uppercaseIdenter = identer.map(String::uppercase).toSet()
 
-    fun inneholder(ident: String): Boolean = uppercaseIdenter.contains(ident.uppercase())
+    fun inneholder(ident: NAVIdent): Boolean = uppercaseIdenter.contains(ident.value.uppercase())
 }
 
 object SaksbehandlerIdentGrupper {

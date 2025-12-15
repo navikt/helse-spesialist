@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Kommentar
 import no.nav.helse.spesialist.domain.KommentarId
+import no.nav.helse.spesialist.domain.NAVIdent
 
 internal class PgDialogRepository(
     session: Session,
@@ -81,7 +82,7 @@ internal class PgDialogRepository(
         "tekst" to kommentar.tekst,
         "feilregistrert_tidspunkt" to kommentar.feilregistrertTidspunkt,
         "opprettet" to kommentar.opprettetTidspunkt,
-        "saksbehandlerident" to kommentar.saksbehandlerident,
+        "saksbehandlerident" to kommentar.saksbehandlerident.value,
         "dialog_ref" to dialogId.value,
     ).updateAndReturnGeneratedKey().toInt()
 
@@ -101,7 +102,7 @@ internal class PgDialogRepository(
             """.trimIndent(),
             "tekst" to kommentar.tekst,
             "feilregistrert_tidspunkt" to kommentar.feilregistrertTidspunkt,
-            "saksbehandlerident" to kommentar.saksbehandlerident,
+            "saksbehandlerident" to kommentar.saksbehandlerident.value,
             "dialog_ref" to dialogId.value,
             "id" to kommentar.id().value,
         ).update()
@@ -111,7 +112,7 @@ internal class PgDialogRepository(
         Kommentar.Factory.fraLagring(
             id = KommentarId(int("id")),
             tekst = string("tekst"),
-            saksbehandlerident = string("saksbehandlerident"),
+            saksbehandlerident = NAVIdent(string("saksbehandlerident")),
             opprettetTidspunkt = localDateTime("opprettet"),
             feilregistrertTidspunkt = localDateTimeOrNull("feilregistrert_tidspunkt"),
         )

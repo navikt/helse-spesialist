@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -238,13 +239,14 @@ abstract class AbstractDBIntegrationTest {
         etternavn: String = lagEtternavn(),
     ): Persondata {
         personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
-        val personinfoId = opprettPersoninfo(
-            fødselsnummer = fødselsnummer,
-            adressebeskyttelse = adressebeskyttelse,
-            fornavn = fornavn,
-            mellomnavn = mellomnavn,
-            etternavn = etternavn
-        )
+        val personinfoId =
+            opprettPersoninfo(
+                fødselsnummer = fødselsnummer,
+                adressebeskyttelse = adressebeskyttelse,
+                fornavn = fornavn,
+                mellomnavn = mellomnavn,
+                etternavn = etternavn,
+            )
         val infotrygdutbetalingerId =
             personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
@@ -268,7 +270,9 @@ abstract class AbstractDBIntegrationTest {
         @Suppress("SameParameterValue") erEgenAnsatt: Boolean,
     ) = egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, LocalDateTime.now())
 
-    protected fun oppdaterAdressebeskyttelse(@Suppress("SameParameterValue") adressebeskyttelse: Adressebeskyttelse) {
+    protected fun oppdaterAdressebeskyttelse(
+        @Suppress("SameParameterValue") adressebeskyttelse: Adressebeskyttelse,
+    ) {
         opprettPersoninfo(FNR, adressebeskyttelse = adressebeskyttelse)
     }
 
@@ -280,23 +284,24 @@ abstract class AbstractDBIntegrationTest {
         fødselsdato: LocalDate = LocalDate.of(1970, 1, 1),
         kjønn: Kjønn = Kjønn.Ukjent,
         adressebeskyttelse: Adressebeskyttelse,
-    ) = personDao.upsertPersoninfo(
-        fødselsnummer = fødselsnummer,
-        fornavn = fornavn,
-        mellomnavn = mellomnavn,
-        etternavn = etternavn,
-        fødselsdato = fødselsdato,
-        kjønn = kjønn,
-        adressebeskyttelse = adressebeskyttelse,
-    ).let { personDao.finnPersoninfoRef(fødselsnummer) }!!
+    ) = personDao
+        .upsertPersoninfo(
+            fødselsnummer = fødselsnummer,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn,
+            fødselsdato = fødselsdato,
+            kjønn = kjønn,
+            adressebeskyttelse = adressebeskyttelse,
+        ).let { personDao.finnPersoninfoRef(fødselsnummer) }!!
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
         navn: String = SAKSBEHANDLER.navn,
         epost: String = SAKSBEHANDLER.epost,
-        ident: String = SAKSBEHANDLER.ident,
+        ident: NAVIdent = SAKSBEHANDLER.ident,
     ): UUID {
-        saksbehandlerDao.opprettEllerOppdater(saksbehandlerOID, navn, epost, ident)
+        saksbehandlerDao.opprettEllerOppdater(saksbehandlerOID, navn, epost, ident.value)
         return saksbehandlerOID
     }
 
@@ -304,25 +309,27 @@ abstract class AbstractDBIntegrationTest {
         identifikator: String = ORGNUMMER,
         navn: String = ORGNAVN,
     ) {
-        Arbeidsgiver.Factory.ny(
-            id = ArbeidsgiverIdentifikator.fraString(identifikator),
-            navnString = navn
-        ).also(sessionContext.arbeidsgiverRepository::lagre)
+        Arbeidsgiver.Factory
+            .ny(
+                id = ArbeidsgiverIdentifikator.fraString(identifikator),
+                navnString = navn,
+            ).also(sessionContext.arbeidsgiverRepository::lagre)
     }
 
     protected fun opprettArbeidsforhold(
         fødselsnummer: String = FNR,
         orgnummer: String = ORGNUMMER,
     ) {
-        val arbeidsforholdDto = KomplettArbeidsforholdDto(
-            ARBEIDSFORHOLD.start,
-            ARBEIDSFORHOLD.slutt,
-            ARBEIDSFORHOLD.tittel,
-            ARBEIDSFORHOLD.prosent,
-            LocalDateTime.now(),
-            fødselsnummer,
-            orgnummer
-        )
+        val arbeidsforholdDto =
+            KomplettArbeidsforholdDto(
+                ARBEIDSFORHOLD.start,
+                ARBEIDSFORHOLD.slutt,
+                ARBEIDSFORHOLD.tittel,
+                ARBEIDSFORHOLD.prosent,
+                LocalDateTime.now(),
+                fødselsnummer,
+                orgnummer,
+            )
         arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer, orgnummer, listOf(arbeidsforholdDto))
     }
 
@@ -343,8 +350,8 @@ abstract class AbstractDBIntegrationTest {
                     spleisBehandlingId,
                     fom,
                     tom,
-                    Yrkesaktivitetstype.ARBEIDSTAKER
-                )
+                    Yrkesaktivitetstype.ARBEIDSTAKER,
+                ),
             )
             nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (tags != null) {
@@ -382,8 +389,8 @@ abstract class AbstractDBIntegrationTest {
                     spleisBehandlingId,
                     fom,
                     tom,
-                    yrkesaktivitetstype
-                )
+                    yrkesaktivitetstype,
+                ),
             )
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
@@ -396,16 +403,17 @@ abstract class AbstractDBIntegrationTest {
         tittel: String = "EN_TITTEL",
         kode: String = "EN_KODE",
         definisjonId: UUID = UUID.randomUUID(),
-    ) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        insert into api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
-        values (:definisjonId, :kode, :tittel, null, null, :opprettet)
-        """.trimIndent(),
-        "definisjonId" to definisjonId,
-        "kode" to kode,
-        "tittel" to tittel,
-        "opprettet" to LocalDateTime.now(),
-    ).let(::checkNotNull)
+    ) = dbQuery
+        .updateAndReturnGeneratedKey(
+            """
+            insert into api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
+            values (:definisjonId, :kode, :tittel, null, null, :opprettet)
+            """.trimIndent(),
+            "definisjonId" to definisjonId,
+            "kode" to kode,
+            "tittel" to tittel,
+            "opprettet" to LocalDateTime.now(),
+        ).let(::checkNotNull)
 
     fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
@@ -415,7 +423,7 @@ abstract class AbstractDBIntegrationTest {
         spleisBehandlingId: UUID = UUID.randomUUID(),
         definisjonRef: Long? = null,
         status: String = "AKTIV",
-        saksbehandlerSomEndretId: String? = null,
+        saksbehandlerSomEndretId: NAVIdent? = null,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ) = dbQuery.update(
         """
@@ -431,7 +439,7 @@ abstract class AbstractDBIntegrationTest {
         "definisjonRef" to definisjonRef,
         "opprettet" to opprettet,
         "status" to status,
-        "ident" to saksbehandlerSomEndretId,
+        "ident" to saksbehandlerSomEndretId?.value,
         "endretTidspunkt" to endretTidspunkt,
     )
 
@@ -447,16 +455,17 @@ abstract class AbstractDBIntegrationTest {
     ): Oppgave {
         val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
         opprettCommandContext(hendelse, contextId)
-        val oppgave = Oppgave.ny(
-            id = nextLong(),
-            førsteOpprettet = førsteOpprettet,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            hendelseId = godkjenningsbehovId,
-            kanAvvises = kanAvvises,
-            egenskaper = egenskaper
-        )
+        val oppgave =
+            Oppgave.ny(
+                id = nextLong(),
+                førsteOpprettet = førsteOpprettet,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = utbetalingId,
+                hendelseId = godkjenningsbehovId,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper,
+            )
         sessionContext.oppgaveRepository.lagre(oppgave)
         return oppgave
     }
@@ -568,7 +577,7 @@ abstract class AbstractDBIntegrationTest {
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = behandlingId,
             utbetalingId = utbetalingId,
-            yrkesaktivitetstype = yrkesaktivitetstype
+            yrkesaktivitetstype = yrkesaktivitetstype,
         )
         utbetalingsopplegg(
             fødselsnummer = fødselsnummer,
@@ -576,7 +585,7 @@ abstract class AbstractDBIntegrationTest {
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             beløpTilSykmeldt = 1000,
-            beløpTilArbeidsgiver = 1000
+            beløpTilArbeidsgiver = 1000,
         )
         return opprettOppgave(
             contextId = commandContextId,
@@ -596,7 +605,7 @@ abstract class AbstractDBIntegrationTest {
             saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id.value,
             navn = saksbehandlerWrapper.saksbehandler.navn,
             epost = saksbehandlerWrapper.saksbehandler.epost,
-            ident = saksbehandlerWrapper.saksbehandler.ident
+            ident = saksbehandlerWrapper.saksbehandler.ident,
         )
         this.forsøkTildeling(saksbehandlerWrapper, saksbehandlerTilgangsgrupper)
         sessionContext.oppgaveRepository.lagre(this)
@@ -613,16 +622,23 @@ abstract class AbstractDBIntegrationTest {
             saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id.value,
             navn = saksbehandlerWrapper.saksbehandler.navn,
             epost = saksbehandlerWrapper.saksbehandler.epost,
-            ident = saksbehandlerWrapper.saksbehandler.ident
+            ident = saksbehandlerWrapper.saksbehandler.ident,
         )
         this.leggPåVent(true, saksbehandlerWrapper)
-        val dialog = Dialog.Factory.ny().apply {
-            leggTilKommentar(tekst = "En kommentar", saksbehandlerident = SAKSBEHANDLER_IDENT)
-        }
+        val dialog =
+            Dialog.Factory.ny().apply {
+                leggTilKommentar(tekst = "En kommentar", saksbehandlerident = saksbehandlerWrapper.saksbehandler.ident)
+            }
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
-        påVentDao.lagrePåVent(this.id,
-            saksbehandlerWrapper.saksbehandler.id.value, frist, årsaker, tekst, dialog.id().value)
+        påVentDao.lagrePåVent(
+            this.id,
+            saksbehandlerWrapper.saksbehandler.id.value,
+            frist,
+            årsaker,
+            tekst,
+            dialog.id().value,
+        )
         return this
     }
 
@@ -656,7 +672,10 @@ abstract class AbstractDBIntegrationTest {
         return totrinnsvurdering.id()
     }
 
-    protected fun nyTotrinnsvurdering(fødselsnummer: String, oppgave: Oppgave): TotrinnsvurderingKontekst {
+    protected fun nyTotrinnsvurdering(
+        fødselsnummer: String,
+        oppgave: Oppgave,
+    ): TotrinnsvurderingKontekst {
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer)
         sessionContext.totrinnsvurderingRepository.lagre(
             totrinnsvurdering = totrinnsvurdering,
@@ -686,8 +705,10 @@ abstract class AbstractDBIntegrationTest {
     protected fun nyLegacySaksbehandler(): SaksbehandlerWrapper {
         val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
         opprettSaksbehandler(
-            saksbehandler.saksbehandler.id.value, saksbehandler.saksbehandler.navn,
-            saksbehandler.saksbehandler.epost, saksbehandler.saksbehandler.ident
+            saksbehandler.saksbehandler.id.value,
+            saksbehandler.saksbehandler.navn,
+            saksbehandler.saksbehandler.epost,
+            saksbehandler.saksbehandler.ident,
         )
         return saksbehandler
     }

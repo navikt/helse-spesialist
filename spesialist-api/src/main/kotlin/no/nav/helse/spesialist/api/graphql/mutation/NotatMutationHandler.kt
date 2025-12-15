@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Kommentar
 import no.nav.helse.spesialist.domain.KommentarId
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
@@ -84,7 +85,7 @@ class NotatMutationHandler(
             val kommentar =
                 dialog.leggTilKommentar(
                     tekst = tekst,
-                    saksbehandlerident = saksbehandlerident,
+                    saksbehandlerident = NAVIdent(saksbehandlerident),
                 )
 
             session.dialogRepository.lagre(dialog)
@@ -146,7 +147,7 @@ class NotatMutationHandler(
         saksbehandlerOid = saksbehandlerOid.value,
         saksbehandlerNavn = saksbehandler.navn,
         saksbehandlerEpost = saksbehandler.epost,
-        saksbehandlerIdent = saksbehandler.ident,
+        saksbehandlerIdent = saksbehandler.ident.value,
         vedtaksperiodeId = vedtaksperiodeId,
         feilregistrert = feilregistrert,
         feilregistrert_tidspunkt = feilregistrertTidspunkt?.roundToMicroseconds(),
@@ -177,7 +178,7 @@ class NotatMutationHandler(
             id = id().value,
             tekst = tekst,
             opprettet = opprettetTidspunkt.roundToMicroseconds(),
-            saksbehandlerident = saksbehandlerident,
+            saksbehandlerident = saksbehandlerident.value,
             feilregistrert_tidspunkt = feilregistrertTidspunkt?.roundToMicroseconds(),
         )
 

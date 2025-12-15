@@ -721,7 +721,7 @@ class PostVedtakIntegrationTest {
                 val hendelse = actualUtgåendeHendelse.hendelse
                 assertIs<Godkjenningsbehovløsning>(hendelse)
                 assertEquals(true, hendelse.godkjent)
-                assertEquals(saksbehandler.ident, hendelse.saksbehandlerIdent)
+                assertEquals(saksbehandler.ident.value, hendelse.saksbehandlerIdent)
                 assertEquals(saksbehandler.epost, hendelse.saksbehandlerEpost)
                 assertMindreEnnNSekunderSiden(30, hendelse.godkjenttidspunkt)
                 assertEquals(false, hendelse.automatiskBehandling)

@@ -5,6 +5,7 @@ import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.spesialist.domain.NAVIdent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -56,7 +57,7 @@ data class GodkjenningsbehovData(
             is Løsning.Manuelt -> {
                 Godkjenningsbehovløsning(
                     godkjent = løsning.godkjent,
-                    saksbehandlerIdent = løsning.saksbehandlerIdent,
+                    saksbehandlerIdent = løsning.saksbehandlerIdent.value,
                     saksbehandlerEpost = løsning.saksbehandlerEpost,
                     godkjenttidspunkt = løsning.godkjenttidspunkt,
                     automatiskBehandling = false,
@@ -92,7 +93,7 @@ data class GodkjenningsbehovData(
             godkjenttidspunkt: LocalDateTime,
             årsak: String?,
             begrunnelser: List<String>?,
-            val saksbehandlerIdent: String,
+            val saksbehandlerIdent: NAVIdent,
             val saksbehandlerEpost: String,
             val kommentar: String?,
             val saksbehandleroverstyringer: List<UUID>,
@@ -115,7 +116,7 @@ data class GodkjenningsbehovData(
     }
 
     fun godkjennManuelt(
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandleroverstyringer: List<UUID>,
@@ -133,7 +134,7 @@ data class GodkjenningsbehovData(
     }
 
     fun avvisManuelt(
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         saksbehandlerEpost: String,
         avvisttidspunkt: LocalDateTime,
         årsak: String?,
@@ -169,7 +170,7 @@ data class GodkjenningsbehovData(
 
     private fun løsManuelt(
         godkjent: Boolean,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,

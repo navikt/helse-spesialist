@@ -12,7 +12,7 @@ value class KommentarId(
 class Kommentar private constructor(
     id: KommentarId?,
     val tekst: String,
-    val saksbehandlerident: String,
+    val saksbehandlerident: NAVIdent,
     val opprettetTidspunkt: LocalDateTime,
     feilregistrertTidspunkt: LocalDateTime?,
 ) : LateIdEntity<KommentarId>(id) {
@@ -26,7 +26,7 @@ class Kommentar private constructor(
     object Factory {
         fun ny(
             tekst: String,
-            saksbehandlerident: String,
+            saksbehandlerident: NAVIdent,
         ) = Kommentar(
             id = null,
             tekst = tekst,
@@ -38,7 +38,7 @@ class Kommentar private constructor(
         fun fraLagring(
             id: KommentarId,
             tekst: String,
-            saksbehandlerident: String,
+            saksbehandlerident: NAVIdent,
             opprettetTidspunkt: LocalDateTime,
             feilregistrertTidspunkt: LocalDateTime?,
         ) = Kommentar(

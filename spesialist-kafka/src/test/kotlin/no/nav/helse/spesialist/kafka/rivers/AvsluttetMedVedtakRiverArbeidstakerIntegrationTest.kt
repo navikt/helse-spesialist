@@ -680,11 +680,11 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ],
               "saksbehandler" : {
-                "ident": "${saksbehandler.ident}",
+                "ident": "${saksbehandler.ident.value}",
                 "navn": "${saksbehandler.navn}"
               },
               "beslutter" : {
-                "ident": "${beslutter.ident}",
+                "ident": "${beslutter.ident.value}",
                 "navn": "${beslutter.navn}"
               },
               "automatiskFattet": false
@@ -760,7 +760,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ],
               "saksbehandler" : {
-                "ident": "${saksbehandler.ident}",
+                "ident": "${saksbehandler.ident.value}",
                 "navn": "${saksbehandler.navn}"
               },
               "automatiskFattet": false

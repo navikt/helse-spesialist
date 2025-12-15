@@ -14,6 +14,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -33,7 +34,7 @@ class Oppgave private constructor(
     val utbetalingId: UUID,
     val godkjenningsbehovId: UUID,
     val kanAvvises: Boolean,
-    ferdigstiltAvIdent: String?,
+    ferdigstiltAvIdent: NAVIdent?,
     ferdigstiltAvOid: UUID?,
     egenskaper: Set<Egenskap>,
     tildeltTil: SaksbehandlerOid?,
@@ -43,7 +44,7 @@ class Oppgave private constructor(
 
     var ferdigstiltAvOid = ferdigstiltAvOid
         private set
-    var ferdigstiltAvIdent = ferdigstiltAvIdent
+    var ferdigstiltAvIdent: NAVIdent? = ferdigstiltAvIdent
         private set
 
     var tilstand: Tilstand = tilstand
@@ -201,7 +202,7 @@ class Oppgave private constructor(
     }
 
     fun avventerSystem(
-        ident: String,
+        ident: NAVIdent,
         oid: UUID,
     ) {
         tilstand.avventerSystem(this, ident, oid)
@@ -266,7 +267,7 @@ class Oppgave private constructor(
 
         fun avventerSystem(
             oppgave: Oppgave,
-            ident: String,
+            ident: NAVIdent,
             oid: UUID,
         ) {
             logg.warn(
@@ -311,7 +312,7 @@ class Oppgave private constructor(
     data object AvventerSaksbehandler : Tilstand {
         override fun avventerSystem(
             oppgave: Oppgave,
-            ident: String,
+            ident: NAVIdent,
             oid: UUID,
         ) {
             oppgave.ferdigstiltAvIdent = ident
@@ -453,7 +454,7 @@ class Oppgave private constructor(
             godkjenningsbehovId: UUID,
             kanAvvises: Boolean,
             ferdigstiltAvOid: UUID?,
-            ferdigstiltAvIdent: String?,
+            ferdigstiltAvIdent: NAVIdent?,
             tildeltTil: SaksbehandlerOid?,
             egenskaper: Set<Egenskap>,
         ) = Oppgave(

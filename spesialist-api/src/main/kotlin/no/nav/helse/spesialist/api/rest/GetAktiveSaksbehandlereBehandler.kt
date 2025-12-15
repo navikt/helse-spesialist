@@ -17,7 +17,7 @@ class GetAktiveSaksbehandlereBehandler : GetBehandler<AktiveSaksbehandlere, List
         RestResponse.OK(
             transaksjon.saksbehandlerDao
                 .hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver()
-                .map { ApiAktivSaksbehandler(ident = it.ident, navn = it.navn, oid = it.id.value) },
+                .map { ApiAktivSaksbehandler(ident = it.ident.value, navn = it.navn, oid = it.id.value) },
         )
 
     override fun openApi(config: RouteConfig) {

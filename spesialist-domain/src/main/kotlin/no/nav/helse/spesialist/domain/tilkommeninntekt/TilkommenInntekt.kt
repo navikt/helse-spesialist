@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
@@ -58,7 +59,7 @@ class TilkommenInntekt private constructor(
         periode: Periode,
         periodebeløp: BigDecimal,
         ekskluderteUkedager: Set<LocalDate>,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
@@ -92,7 +93,7 @@ class TilkommenInntekt private constructor(
     }
 
     fun fjern(
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
@@ -115,7 +116,7 @@ class TilkommenInntekt private constructor(
         periode: Periode,
         periodebeløp: BigDecimal,
         ekskluderteUkedager: Set<LocalDate>,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
@@ -152,7 +153,9 @@ class TilkommenInntekt private constructor(
     private fun apply(event: TilkommenInntektEvent) {
         håndterEvent(event)
         when (event) {
-            is TilkommenInntektOpprettetEvent -> error("Kan ikke håndtere opphavsevent inni et eksisterende objekt")
+            is TilkommenInntektOpprettetEvent -> {
+                error("Kan ikke håndtere opphavsevent inni et eksisterende objekt")
+            }
 
             is TilkommenInntektEndretEvent -> {
                 håndterEndringer(event.endringer)
@@ -205,7 +208,7 @@ class TilkommenInntekt private constructor(
     companion object {
         fun ny(
             fødselsnummer: String,
-            saksbehandlerIdent: String,
+            saksbehandlerIdent: NAVIdent,
             notatTilBeslutter: String,
             totrinnsvurderingId: TotrinnsvurderingId,
             organisasjonsnummer: String,

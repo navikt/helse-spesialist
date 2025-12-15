@@ -13,15 +13,15 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
-
     @Test
     fun `reserverer person`() {
         opprettData()
-        val saksbehandler = sessionOf(dataSource).use {
-            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
-            reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
-                ?: fail("Forventet at det skulle finnes en reservasjon i basen")
-        }
+        val saksbehandler =
+            sessionOf(dataSource).use {
+                reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+                reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
+                    ?: fail("Forventet at det skulle finnes en reservasjon i basen")
+            }
         assertEquals(SAKSBEHANDLER_OID, saksbehandler.id.value)
         assertRiktigVarighet(finnGyldigTil())
     }
@@ -34,18 +34,19 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
             enAnnenSaksbehandler,
             "Siri Siksbehindler",
             "siri.siksbehindler@nav.no",
-            "S666666"
+            "S666666",
         )
 
-        val saksbehandler = sessionOf(dataSource).use {
-            reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
-            val gyldigTil1 = finnGyldigTil()
-            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
-            val gyldigTil2 = finnGyldigTil()
-            assertTrue(gyldigTil2.isEqual(gyldigTil1))
-            reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
-                ?: fail("Forventet at det skulle finnes en reservasjon i basen")
-        }
+        val saksbehandler =
+            sessionOf(dataSource).use {
+                reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
+                val gyldigTil1 = finnGyldigTil()
+                reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+                val gyldigTil2 = finnGyldigTil()
+                assertTrue(gyldigTil2.isEqual(gyldigTil1))
+                reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
+                    ?: fail("Forventet at det skulle finnes en reservasjon i basen")
+            }
         assertEquals(SAKSBEHANDLER_OID, saksbehandler.id.value)
         assertRiktigVarighet(finnGyldigTil())
     }
@@ -56,12 +57,12 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
             SAKSBEHANDLER_OID,
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT
+            SAKSBEHANDLER_IDENT.value,
         )
     }
 
     private fun assertRiktigVarighet(gyldigTil: LocalDateTime) {
-        assertEquals(LocalDate.now().atTime(23,59,59), gyldigTil)
+        assertEquals(LocalDate.now().atTime(23, 59, 59), gyldigTil)
     }
 
     private fun finnGyldigTil(): LocalDateTime {
@@ -75,9 +76,9 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(query, mapOf("fnr" to FNR))
-                    .map { it.localDateTime("gyldig_til") }.asSingle
+                    .map { it.localDateTime("gyldig_til") }
+                    .asSingle,
             )
         }!!
     }
-
 }

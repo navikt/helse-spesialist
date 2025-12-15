@@ -8,6 +8,7 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -19,15 +20,18 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class SaksbehandlerWrapperTest {
-
     @Test
     fun `håndtering av OverstyrtTidslinje medfører utgående event`() {
         var observert = false
-        val observer = object : SaksbehandlerObserver {
-            override fun tidslinjeOverstyrt(fødselsnummer: String, event: OverstyrtTidslinjeEvent) {
-                observert = true
+        val observer =
+            object : SaksbehandlerObserver {
+                override fun tidslinjeOverstyrt(
+                    fødselsnummer: String,
+                    event: OverstyrtTidslinjeEvent,
+                ) {
+                    observert = true
+                }
             }
-        }
 
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
@@ -40,7 +44,7 @@ internal class SaksbehandlerWrapperTest {
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
                 saksbehandlerOid = saksbehandler.saksbehandler.id,
-            )
+            ),
         )
         assertEquals(true, observert)
     }
@@ -48,26 +52,31 @@ internal class SaksbehandlerWrapperTest {
     @Test
     fun `lager subsumsjoner ved håndtering av OverstyrtTidslinje`() {
         val subsumsjoner = mutableListOf<SubsumsjonEvent>()
-        val observer = object : SaksbehandlerObserver {
-            override fun nySubsumsjon(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent) {
-                subsumsjoner.add(subsumsjonEvent)
+        val observer =
+            object : SaksbehandlerObserver {
+                override fun nySubsumsjon(
+                    fødselsnummer: String,
+                    subsumsjonEvent: SubsumsjonEvent,
+                ) {
+                    subsumsjoner.add(subsumsjonEvent)
+                }
             }
-        }
 
         val saksbehandler = saksbehandler()
         val vedtaksperiodeId = UUID.randomUUID()
         saksbehandler.register(observer)
-        val overstyring = OverstyrtTidslinje.ny(
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "123",
-            fødselsnummer = "1234",
-            organisasjonsnummer = "12345",
-            dager = overstyrteDager(),
-            begrunnelse = "begrunnelse",
-            saksbehandlerOid = saksbehandler.saksbehandler.id,
-        )
+        val overstyring =
+            OverstyrtTidslinje.ny(
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "123",
+                fødselsnummer = "1234",
+                organisasjonsnummer = "12345",
+                dager = overstyrteDager(),
+                begrunnelse = "begrunnelse",
+                saksbehandlerOid = saksbehandler.saksbehandler.id,
+            )
         saksbehandler.håndter(
-            overstyring
+            overstyring,
         )
 
         assertEquals(2, subsumsjoner.size)
@@ -81,35 +90,38 @@ internal class SaksbehandlerWrapperTest {
                 lovverk = "folketrygdloven",
                 lovverksversjon = "2019-06-21",
                 utfall = Subsumsjon.Utfall.VILKAR_BEREGNET.name,
-                output = mapOf(
-                    "dager" to listOf(
-                        mapOf(
-                            "dato" to (1 jan 2018),
-                            "type" to "Sykedag",
-                            "fraType" to "Sykedag",
-                            "grad" to 100,
-                            "fraGrad" to 100,
-                        ),
-                        mapOf(
-                            "dato" to (2 jan 2018),
-                            "type" to "Sykedag",
-                            "fraType" to "Sykedag",
-                            "grad" to 100,
-                            "fraGrad" to 100,
-                        ),
-                    )
-                ),
+                output =
+                    mapOf(
+                        "dager" to
+                            listOf(
+                                mapOf(
+                                    "dato" to (1 jan 2018),
+                                    "type" to "Sykedag",
+                                    "fraType" to "Sykedag",
+                                    "grad" to 100,
+                                    "fraGrad" to 100,
+                                ),
+                                mapOf(
+                                    "dato" to (2 jan 2018),
+                                    "type" to "Sykedag",
+                                    "fraType" to "Sykedag",
+                                    "grad" to 100,
+                                    "fraGrad" to 100,
+                                ),
+                            ),
+                    ),
                 input = mapOf("begrunnelseFraSaksbehandler" to "begrunnelse"),
-                sporing = mapOf(
-                    "organisasjonsnummer" to listOf("12345"),
-                    "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
-                    "saksbehandler" to listOf("epost@nav.no"),
-                    "overstyrtidslinje" to listOf(overstyring.eksternHendelseId.toString()),
-                ),
+                sporing =
+                    mapOf(
+                        "organisasjonsnummer" to listOf("12345"),
+                        "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
+                        "saksbehandler" to listOf("epost@nav.no"),
+                        "overstyrtidslinje" to listOf(overstyring.eksternHendelseId.toString()),
+                    ),
                 tidsstempel = subsumsjoner[0].tidsstempel,
                 kilde = "spesialist",
             ),
-            subsumsjoner[0]
+            subsumsjoner[0],
         )
         assertEquals(
             SubsumsjonEvent(
@@ -121,39 +133,46 @@ internal class SaksbehandlerWrapperTest {
                 lovverk = "ANNEN LOV",
                 lovverksversjon = "1970-01-01",
                 utfall = Subsumsjon.Utfall.VILKAR_BEREGNET.name,
-                output = mapOf(
-                    "dager" to listOf(
-                        mapOf(
-                            "dato" to (3 jan 2018),
-                            "type" to "Sykedag",
-                            "fraType" to "Sykedag",
-                            "grad" to 100,
-                            "fraGrad" to 100,
-                        ),
-                    )
-                ),
+                output =
+                    mapOf(
+                        "dager" to
+                            listOf(
+                                mapOf(
+                                    "dato" to (3 jan 2018),
+                                    "type" to "Sykedag",
+                                    "fraType" to "Sykedag",
+                                    "grad" to 100,
+                                    "fraGrad" to 100,
+                                ),
+                            ),
+                    ),
                 input = mapOf("begrunnelseFraSaksbehandler" to "begrunnelse"),
-                sporing = mapOf(
-                    "organisasjonsnummer" to listOf("12345"),
-                    "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
-                    "saksbehandler" to listOf("epost@nav.no"),
-                    "overstyrtidslinje" to listOf(overstyring.eksternHendelseId.toString()),
-                ),
+                sporing =
+                    mapOf(
+                        "organisasjonsnummer" to listOf("12345"),
+                        "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
+                        "saksbehandler" to listOf("epost@nav.no"),
+                        "overstyrtidslinje" to listOf(overstyring.eksternHendelseId.toString()),
+                    ),
                 tidsstempel = subsumsjoner[1].tidsstempel,
                 kilde = "spesialist",
             ),
-            subsumsjoner[1]
+            subsumsjoner[1],
         )
     }
 
     @Test
     fun `håndtering av OverstyrtInntektOgRefusjon medfører utgående event`() {
         var observert = false
-        val observer = object : SaksbehandlerObserver {
-            override fun inntektOgRefusjonOverstyrt(fødselsnummer: String, event: OverstyrtInntektOgRefusjonEvent) {
-                observert = true
+        val observer =
+            object : SaksbehandlerObserver {
+                override fun inntektOgRefusjonOverstyrt(
+                    fødselsnummer: String,
+                    event: OverstyrtInntektOgRefusjonEvent,
+                ) {
+                    observert = true
+                }
             }
-        }
 
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
@@ -165,7 +184,7 @@ internal class SaksbehandlerWrapperTest {
                 arbeidsgivere = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
                 saksbehandlerOid = saksbehandler.saksbehandler.id,
-            )
+            ),
         )
         assertEquals(true, observert)
     }
@@ -173,11 +192,15 @@ internal class SaksbehandlerWrapperTest {
     @Test
     fun `håndtering av OverstyrtArbeidsforhold medfører utgående event`() {
         var observert = false
-        val observer = object : SaksbehandlerObserver {
-            override fun arbeidsforholdOverstyrt(fødselsnummer: String, event: OverstyrtArbeidsforholdEvent) {
-                observert = true
+        val observer =
+            object : SaksbehandlerObserver {
+                override fun arbeidsforholdOverstyrt(
+                    fødselsnummer: String,
+                    event: OverstyrtArbeidsforholdEvent,
+                ) {
+                    observert = true
+                }
             }
-        }
 
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
@@ -189,7 +212,7 @@ internal class SaksbehandlerWrapperTest {
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
                 saksbehandlerOid = saksbehandler.saksbehandler.id,
-            )
+            ),
         )
         assertEquals(true, observert)
     }
@@ -197,11 +220,15 @@ internal class SaksbehandlerWrapperTest {
     @Test
     fun `håndtering av lagtPåVent medfører utgående event`() {
         var observert = false
-        val observer = object : SaksbehandlerObserver {
-            override fun lagtPåVent(fødselsnummer: String, event: LagtPåVentEvent) {
-                observert = true
+        val observer =
+            object : SaksbehandlerObserver {
+                override fun lagtPåVent(
+                    fødselsnummer: String,
+                    event: LagtPåVentEvent,
+                ) {
+                    observert = true
+                }
             }
-        }
 
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
@@ -213,8 +240,8 @@ internal class SaksbehandlerWrapperTest {
                 behandlingId = UUID.randomUUID(),
                 skalTildeles = true,
                 notatTekst = "en tekst",
-                årsaker = listOf(PåVentÅrsak("key", "arsak"))
-            )
+                årsaker = listOf(PåVentÅrsak("key", "arsak")),
+            ),
         )
         assertEquals(true, observert)
     }
@@ -270,56 +297,60 @@ internal class SaksbehandlerWrapperTest {
         assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
-    private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(
-        OverstyrtTidslinjedag(
-            dato = 1 jan 2018,
-            type = "Sykedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "22-13",
-                ledd = "7",
-                lovverk = "folketrygdloven",
-                lovverksversjon = "2019-06-21",
-            )
-        ),
-        OverstyrtTidslinjedag(
-            dato = 2 jan 2018,
-            type = "Sykedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "22-13",
-                ledd = "7",
-                lovverk = "folketrygdloven",
-                lovverksversjon = "2019-06-21",
-            )
-        ),
-        OverstyrtTidslinjedag(
-            dato = 3 jan 2018,
-            type = "Sykedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "ANNEN PARAGRAF",
-                ledd = "ANNET LEDD",
-                bokstav = "EN BOKSTAV",
-                lovverk = "ANNEN LOV",
-                lovverksversjon = "1970-01-01",
-            )
-        ),
-        OverstyrtTidslinjedag(
-            dato = 4 jan 2018,
-            type = "Feriedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = null,
+    private fun overstyrteDager(): List<OverstyrtTidslinjedag> =
+        listOf(
+            OverstyrtTidslinjedag(
+                dato = 1 jan 2018,
+                type = "Sykedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "22-13",
+                        ledd = "7",
+                        lovverk = "folketrygdloven",
+                        lovverksversjon = "2019-06-21",
+                    ),
+            ),
+            OverstyrtTidslinjedag(
+                dato = 2 jan 2018,
+                type = "Sykedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "22-13",
+                        ledd = "7",
+                        lovverk = "folketrygdloven",
+                        lovverksversjon = "2019-06-21",
+                    ),
+            ),
+            OverstyrtTidslinjedag(
+                dato = 3 jan 2018,
+                type = "Sykedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "ANNEN PARAGRAF",
+                        ledd = "ANNET LEDD",
+                        bokstav = "EN BOKSTAV",
+                        lovverk = "ANNEN LOV",
+                        lovverksversjon = "1970-01-01",
+                    ),
+            ),
+            OverstyrtTidslinjedag(
+                dato = 4 jan 2018,
+                type = "Feriedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel = null,
+            ),
         )
-    )
 
     private fun saksbehandler(
         epost: String = "epost@nav.no",
@@ -331,7 +362,7 @@ internal class SaksbehandlerWrapperTest {
             id = SaksbehandlerOid(oid),
             navn = navn,
             epost = epost,
-            ident = ident,
-        )
+            ident = NAVIdent(ident),
+        ),
     )
 }

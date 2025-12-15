@@ -35,9 +35,10 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
 
-        val person = lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
@@ -46,20 +47,22 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
-            body = """
-                {
-                    "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
-                    "personFagsystemId": "$personFagsystemId",
-                    "kommentar": "$kommentar",
-                    "årsaker": [
-                      ${årsaker.map { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }.joinToString()}
-                    ]
-                }
-            """.trimIndent(),
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.post(
+                url = "/api/vedtaksperioder/$vedtaksperiodeId/annuller",
+                body =
+                    """
+                    {
+                        "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                        "personFagsystemId": "$personFagsystemId",
+                        "kommentar": "$kommentar",
+                        "årsaker": [
+                          ${årsaker.map { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }.joinToString()}
+                        ]
+                    }
+                    """.trimIndent(),
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         // Sjekk svaret
@@ -87,19 +90,20 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
                 fødselsnummer = fødselsnummer,
-                hendelse = AnnullertUtbetalingEvent(
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = organisasjonsnummer,
-                    saksbehandlerOid = saksbehandler.id.value,
-                    saksbehandlerIdent = saksbehandler.ident,
-                    saksbehandlerEpost = saksbehandler.epost,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    begrunnelser = årsaker.values.toList(),
-                    arsaker = årsaker.map { AnnullertUtbetalingEvent.Årsak(key = it.key, arsak = it.value) },
-                    kommentar = kommentar
-                ),
-                årsak = "annullering av utbetaling"
-            )
+                hendelse =
+                    AnnullertUtbetalingEvent(
+                        fødselsnummer = fødselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
+                        saksbehandlerOid = saksbehandler.id.value,
+                        saksbehandlerIdent = saksbehandler.ident.value,
+                        saksbehandlerEpost = saksbehandler.epost,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        begrunnelser = årsaker.values.toList(),
+                        arsaker = årsaker.map { AnnullertUtbetalingEvent.Årsak(key = it.key, arsak = it.value) },
+                        kommentar = kommentar,
+                    ),
+                årsak = "annullering av utbetaling",
+            ),
         )
     }
 
@@ -116,9 +120,10 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = emptyList<ApiVedtaksperiodeAnnullerRequest.Årsak>()
 
-        val person = lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
@@ -127,20 +132,22 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
-            body = """
-                {
-                    "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
-                    "personFagsystemId": "$personFagsystemId",
-                    "kommentar": "$kommentar",
-                    "årsaker": [
-                      ${årsaker.joinToString { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }}
-                    ]
-                }
-            """.trimIndent(),
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.post(
+                url = "/api/vedtaksperioder/$vedtaksperiodeId/annuller",
+                body =
+                    """
+                    {
+                        "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                        "personFagsystemId": "$personFagsystemId",
+                        "kommentar": "$kommentar",
+                        "årsaker": [
+                          ${årsaker.joinToString { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }}
+                        ]
+                    }
+                    """.trimIndent(),
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         // Sjekk svaret
@@ -168,19 +175,20 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
                 fødselsnummer = fødselsnummer,
-                hendelse = AnnullertUtbetalingEvent(
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = organisasjonsnummer,
-                    saksbehandlerOid = saksbehandler.id.value,
-                    saksbehandlerIdent = saksbehandler.ident,
-                    saksbehandlerEpost = saksbehandler.epost,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    begrunnelser = emptyList(),
-                    arsaker = emptyList(),
-                    kommentar = kommentar
-                ),
-                årsak = "annullering av utbetaling"
-            )
+                hendelse =
+                    AnnullertUtbetalingEvent(
+                        fødselsnummer = fødselsnummer,
+                        organisasjonsnummer = organisasjonsnummer,
+                        saksbehandlerOid = saksbehandler.id.value,
+                        saksbehandlerIdent = saksbehandler.ident.value,
+                        saksbehandlerEpost = saksbehandler.epost,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        begrunnelser = emptyList(),
+                        arsaker = emptyList(),
+                        kommentar = kommentar,
+                    ),
+                årsak = "annullering av utbetaling",
+            ),
         )
     }
 
@@ -199,9 +207,10 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val tidligereÅrsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
         val årsaker = mapOf("årsak-3" to "Ny ferie", "årsak-4" to "Ny ferie")
 
-        val person = lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
@@ -211,31 +220,34 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
 
         annulleringRepository
             .lagreAnnullering(
-                annullering = Annullering.Factory.ny(
-                    arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                    personFagsystemId = personFagsystemId,
-                    saksbehandlerOid = tidligereSaksbehandler.id,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    årsaker = tidligereÅrsaker.map { it.value },
-                    kommentar = kommentar
-                )
+                annullering =
+                    Annullering.Factory.ny(
+                        arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                        personFagsystemId = personFagsystemId,
+                        saksbehandlerOid = tidligereSaksbehandler.id,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        årsaker = tidligereÅrsaker.map { it.value },
+                        kommentar = kommentar,
+                    ),
             )
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
-            body = """
-                {
-                    "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
-                    "personFagsystemId": "$personFagsystemId",
-                    "kommentar": "$kommentar",
-                    "årsaker": [
-                      ${årsaker.map { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }.joinToString()}
-                    ]
-                }
-            """.trimIndent(),
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.post(
+                url = "/api/vedtaksperioder/$vedtaksperiodeId/annuller",
+                body =
+                    """
+                    {
+                        "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                        "personFagsystemId": "$personFagsystemId",
+                        "kommentar": "$kommentar",
+                        "årsaker": [
+                          ${årsaker.map { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }.joinToString()}
+                        ]
+                    }
+                    """.trimIndent(),
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         // Sjekk svaret
@@ -249,7 +261,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
               "code": "ALLEREDE_ANNULLERT" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
 
         // Sjekk persistert data
@@ -272,5 +284,4 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         integrationTestFixture.assertPubliserteSubsumsjoner()
         integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
-
 }

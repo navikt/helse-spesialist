@@ -18,43 +18,51 @@ class ApiModuleIntegrationTestFixture(
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
 ) {
     val token: String =
-        mockOAuth2Server.issueToken(
-            issuerId = ISSUER_ID,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "preferred_username" to "saksbehandler@nav.no",
-                    "oid" to "${UUID.randomUUID()}",
-                    "name" to "En Saksbehandler",
-                    "NAVident" to "X123456",
-                ),
-        ).serialize().also {
-            println("OAuth2-token:")
-            println(it)
-        }
+        mockOAuth2Server
+            .issueToken(
+                issuerId = ISSUER_ID,
+                audience = CLIENT_ID,
+                claims =
+                    mapOf(
+                        "preferred_username" to "saksbehandler@nav.no",
+                        "oid" to "${UUID.randomUUID()}",
+                        "name" to "En Saksbehandler",
+                        "NAVident" to "X123456",
+                    ),
+            ).serialize()
+            .also {
+                println("OAuth2-token:")
+                println(it)
+            }
 
-    fun token(saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>): String =
-        mockOAuth2Server.issueToken(
-            issuerId = ISSUER_ID,
-            audience = CLIENT_ID,
-            subject = saksbehandler.id.value.toString(),
-            claims = mapOf(
-                "NAVident" to saksbehandler.ident,
-                "preferred_username" to saksbehandler.epost,
-                "oid" to saksbehandler.id.value.toString(),
-                "name" to saksbehandler.navn,
-                "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() }
-            )
-    ).serialize()
+    fun token(
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+    ): String =
+        mockOAuth2Server
+            .issueToken(
+                issuerId = ISSUER_ID,
+                audience = CLIENT_ID,
+                subject = saksbehandler.id.value.toString(),
+                claims =
+                    mapOf(
+                        "NAVident" to saksbehandler.ident.value,
+                        "preferred_username" to saksbehandler.epost,
+                        "oid" to saksbehandler.id.value.toString(),
+                        "name" to saksbehandler.navn,
+                        "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() },
+                    ),
+            ).serialize()
 
-    val apiModuleConfiguration = ApiModule.Configuration(
-        clientId = CLIENT_ID,
-        issuerUrl = mockOAuth2Server.issuerUrl(ISSUER_ID).toString(),
-        jwkProviderUri = mockOAuth2Server.jwksUrl(ISSUER_ID).toString(),
-        tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(ISSUER_ID).toString(),
-        eksponerOpenApi = true,
-        versjonAvKode = "0.0.0"
-    )
+    val apiModuleConfiguration =
+        ApiModule.Configuration(
+            clientId = CLIENT_ID,
+            issuerUrl = mockOAuth2Server.issuerUrl(ISSUER_ID).toString(),
+            jwkProviderUri = mockOAuth2Server.jwksUrl(ISSUER_ID).toString(),
+            tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(ISSUER_ID).toString(),
+            eksponerOpenApi = true,
+            versjonAvKode = "0.0.0",
+        )
 
     fun addAdditionalRoutings(application: Application) {
         with(application) {
@@ -69,12 +77,13 @@ class ApiModuleIntegrationTestFixture(
         }
     }
 
-    private fun buildPlaygroundHtml() = Application::class.java.classLoader
-        .getResource("graphql-playground.html")
-        ?.readText()
-        ?.replace("\${graphQLEndpoint}", "graphql")
-        ?.replace("\${subscriptionsEndpoint}", "subscriptions")
-        ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
+    private fun buildPlaygroundHtml() =
+        Application::class.java.classLoader
+            .getResource("graphql-playground.html")
+            ?.readText()
+            ?.replace("\${graphQLEndpoint}", "graphql")
+            ?.replace("\${subscriptionsEndpoint}", "subscriptions")
+            ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
 
     companion object {
         private const val CLIENT_ID = "en-client-id"

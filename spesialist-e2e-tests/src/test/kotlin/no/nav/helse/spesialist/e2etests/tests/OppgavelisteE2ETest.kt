@@ -32,18 +32,19 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
 
         @Language("JSON")
-        val expectedOppgaveJson = """
-                {
-                  "aktorId": "${testContext.person.aktørId}",
-                  "navn": {
-                    "fornavn": "${testContext.person.fornavn}",
-                    "etternavn": "${testContext.person.etternavn}",
-                    "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
-                  },
-                  "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
-                  "tildeling": null,
-                  "paVentInfo": null
-                }
+        val expectedOppgaveJson =
+            """
+            {
+              "aktorId": "${testContext.person.aktørId}",
+              "navn": {
+                "fornavn": "${testContext.person.fornavn}",
+                "etternavn": "${testContext.person.etternavn}",
+                "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
+              },
+              "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
+              "tildeling": null,
+              "paVentInfo": null
+            }
             """.trimIndent()
         assertJsonEquals(
             expectedOppgaveJson,
@@ -52,7 +53,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             "opprettetTidspunkt",
             "opprinneligSoeknadstidspunkt",
             "behandlingOpprettetTidspunkt",
-            "personPseudoId"
+            "personPseudoId",
         )
     }
 
@@ -74,39 +75,40 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
 
         // Sjekk mappede felter
         @Language("JSON")
-        val expectedOppgaveJson = """
-                {
-                  "aktorId": "${testContext.person.aktørId}",
-                  "navn": {
-                    "fornavn": "${testContext.person.fornavn}",
-                    "etternavn": "${testContext.person.etternavn}",
-                    "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
+        val expectedOppgaveJson =
+            """
+            {
+              "aktorId": "${testContext.person.aktørId}",
+              "navn": {
+                "fornavn": "${testContext.person.fornavn}",
+                "etternavn": "${testContext.person.etternavn}",
+                "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
+              },
+              "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "PA_VENT", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
+              "tildeling": {
+                "navn" : "${saksbehandler.navn}",
+                "epost" : "${saksbehandler.epost}",
+                "oid" : "${saksbehandler.id.value}"
+              },
+              "paVentInfo": {
+                "arsaker" : [ "Min første årsak", "Min andre årsak" ],
+                "tekst" : "Min notattekst",
+                "saksbehandler" : "${saksbehandler.ident.value}",
+                "tidsfrist" : "${LocalDate.now().plusDays(1337)}",
+                "kommentarer" : [
+                  {
+                    "tekst" : "Her er én kommentar",
+                    "saksbehandlerident" : "${saksbehandler.ident.value}",
+                    "feilregistrert_tidspunkt" : null
                   },
-                  "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "PA_VENT", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
-                  "tildeling": {
-                    "navn" : "${saksbehandler.navn}",
-                    "epost" : "${saksbehandler.epost}",
-                    "oid" : "${saksbehandler.id.value}"
-                  },
-                  "paVentInfo": {
-                    "arsaker" : [ "Min første årsak", "Min andre årsak" ],
-                    "tekst" : "Min notattekst",
-                    "saksbehandler" : "${saksbehandler.ident}",
-                    "tidsfrist" : "${LocalDate.now().plusDays(1337)}",
-                    "kommentarer" : [
-                      {
-                        "tekst" : "Her er én kommentar",
-                        "saksbehandlerident" : "${saksbehandler.ident}",
-                        "feilregistrert_tidspunkt" : null
-                      },
-                      {
-                        "tekst" : "Og her er en annen kommentar",
-                        "saksbehandlerident" : "${saksbehandler.ident}",
-                        "feilregistrert_tidspunkt" : null
-                      }
-                    ]
+                  {
+                    "tekst" : "Og her er en annen kommentar",
+                    "saksbehandlerident" : "${saksbehandler.ident.value}",
+                    "feilregistrert_tidspunkt" : null
                   }
-                }
+                ]
+              }
+            }
             """.trimIndent()
         assertJsonEquals(
             expectedOppgaveJson,
@@ -119,7 +121,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             "paVentInfo.opprettet",
             "paVentInfo.kommentarer.id",
             "paVentInfo.kommentarer.opprettet",
-            "personPseudoId"
+            "personPseudoId",
         )
     }
 
@@ -133,30 +135,40 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
     ): JsonNode? {
         val minstEnAvEgenskapene = egenskaper.groupBy { it.kategori }.map { it.value }
         // When:
-        val response = callHttpGet("api/oppgaver" + buildList {
-            minstEnAvEgenskapene.forEach { egenskaper ->
-                add("minstEnAvEgenskapene=${egenskaper.tilKommaseparert()}")
-            }
-            if (ingenAvEgenskapene.isNotEmpty()) {
-                add("ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
-            }
-            if (tildelt != null) {
-                add("erTildelt=${tildelt}")
-            }
-            if (fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT)) {
-                add("tildeltTilOid=${saksbehandler.id.value}")
-            }
-            when (fane) {
-                Fane.TIL_GODKJENNING -> {}
-                Fane.MINE_OPPGAVER -> add("erPaaVent=false")
-                Fane.PÅ_VENT -> add("erPaaVent=true")
-            }
-            add("sidetall=1")
-            add("sidestoerrelse=1000")
-            if (sorteringsfelt != null) {
-                add("sorteringsfelt=$sorteringsfelt")
-            }
-        }.joinToString(prefix = "?", separator = "&"))
+        val response =
+            callHttpGet(
+                "api/oppgaver" +
+                    buildList {
+                        minstEnAvEgenskapene.forEach { egenskaper ->
+                            add("minstEnAvEgenskapene=${egenskaper.tilKommaseparert()}")
+                        }
+                        if (ingenAvEgenskapene.isNotEmpty()) {
+                            add("ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
+                        }
+                        if (tildelt != null) {
+                            add("erTildelt=$tildelt")
+                        }
+                        if (fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT)) {
+                            add("tildeltTilOid=${saksbehandler.id.value}")
+                        }
+                        when (fane) {
+                            Fane.TIL_GODKJENNING -> {}
+
+                            Fane.MINE_OPPGAVER -> {
+                                add("erPaaVent=false")
+                            }
+
+                            Fane.PÅ_VENT -> {
+                                add("erPaaVent=true")
+                            }
+                        }
+                        add("sidetall=1")
+                        add("sidestoerrelse=1000")
+                        if (sorteringsfelt != null) {
+                            add("sorteringsfelt=$sorteringsfelt")
+                        }
+                    }.joinToString(prefix = "?", separator = "&"),
+            )
 
         // Then:
         if (forventetDukketOpp) {
@@ -169,8 +181,9 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
 
         val aktørId = testContext.person.aktørId
 
-        val oppgaverForPerson = response["elementer"]
-            .filter { it["aktorId"].asText() == aktørId }
+        val oppgaverForPerson =
+            response["elementer"]
+                .filter { it["aktorId"].asText() == aktørId }
         assertEquals(if (forventetDukketOpp) 1 else 0, oppgaverForPerson.size) {
             "Fikk uventet antall oppgaver for personen (aktørId: $aktørId)"
         }
@@ -178,8 +191,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         return if (forventetDukketOpp) oppgaverForPerson.single() else null
     }
 
-    private fun Collection<Egenskap>.tilKommaseparert(): String =
-        joinToString(separator = ",") { it.name.replace('Ø', 'O') }
+    private fun Collection<Egenskap>.tilKommaseparert(): String = joinToString(separator = ",") { it.name.replace('Ø', 'O') }
 
     enum class Fane { TIL_GODKJENNING, MINE_OPPGAVER, PÅ_VENT }
 
@@ -207,7 +219,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             saksbehandlerLeggerOppgavePåVent(
                 notatTekst = "Min notattekst",
                 frist = LocalDate.now().plusDays(1337),
-                arsaker = mapOf("arsak1" to "Min første årsak", "arsak2" to "Min andre årsak")
+                arsaker = mapOf("arsak1" to "Min første årsak", "arsak2" to "Min andre årsak"),
             )
             saksbehandlerKommentererLagtPåVent(tekst = "Her er én kommentar")
             // TODO: Feilregistrerer korrekt i testen, men query'en gir alltid null tilbake uansett (!)
@@ -308,69 +320,73 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         // Then:
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
-            forventetDukketOpp = true
+            forventetDukketOpp = true,
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = true,
-            egenskaper = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER)
+            egenskaper = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = true,
-            egenskaper = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER, Egenskap.UTBETALING_TIL_SYKMELDT)
+            egenskaper = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER, Egenskap.UTBETALING_TIL_SYKMELDT),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = false,
-            egenskaper = setOf(Egenskap.UTBETALING_TIL_SYKMELDT)
+            egenskaper = setOf(Egenskap.UTBETALING_TIL_SYKMELDT),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = false,
-            ingenAvEgenskapene = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER)
+            ingenAvEgenskapene = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = true,
-            egenskaper = setOf(Egenskap.SØKNAD, Egenskap.UTBETALING_TIL_ARBEIDSGIVER)
+            egenskaper = setOf(Egenskap.SØKNAD, Egenskap.UTBETALING_TIL_ARBEIDSGIVER),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = true,
-            egenskaper = setOf(
-                Egenskap.SØKNAD,
-                Egenskap.REVURDERING,
-                Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
-                Egenskap.UTBETALING_TIL_SYKMELDT
-            )
+            egenskaper =
+                setOf(
+                    Egenskap.SØKNAD,
+                    Egenskap.REVURDERING,
+                    Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+                    Egenskap.UTBETALING_TIL_SYKMELDT,
+                ),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = false,
-            egenskaper = setOf(
-                Egenskap.REVURDERING,
-                Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
-                Egenskap.UTBETALING_TIL_SYKMELDT
-            )
+            egenskaper =
+                setOf(
+                    Egenskap.REVURDERING,
+                    Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+                    Egenskap.UTBETALING_TIL_SYKMELDT,
+                ),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = false,
-            egenskaper = setOf(
-                Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
-                Egenskap.UTBETALING_TIL_SYKMELDT
-            ),
-            ingenAvEgenskapene = setOf(Egenskap.SØKNAD)
+            egenskaper =
+                setOf(
+                    Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+                    Egenskap.UTBETALING_TIL_SYKMELDT,
+                ),
+            ingenAvEgenskapene = setOf(Egenskap.SØKNAD),
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = true,
-            egenskaper = setOf(
-                Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
-                Egenskap.UTBETALING_TIL_SYKMELDT
-            ),
-            ingenAvEgenskapene = setOf(Egenskap.REVURDERING)
+            egenskaper =
+                setOf(
+                    Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+                    Egenskap.UTBETALING_TIL_SYKMELDT,
+                ),
+            ingenAvEgenskapene = setOf(Egenskap.REVURDERING),
         )
     }
 
@@ -385,7 +401,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = true,
-            sorteringsfelt = sorteringsfelt
+            sorteringsfelt = sorteringsfelt,
         )
     }
 }

@@ -25,8 +25,8 @@ internal class PubliserSykepengevedtakTest {
     private val testRapid = TestRapid()
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-    private val saksbehandlerIdentOgNavn = lagSaksbehandler().let { SaksbehandlerIdentOgNavn(it.ident, it.navn) }
-    private val beslutterIdentOgNavn = lagSaksbehandler().let { SaksbehandlerIdentOgNavn(it.ident, it.navn) }
+    private val saksbehandlerIdentOgNavn = lagSaksbehandler().let { SaksbehandlerIdentOgNavn(it.ident.value, it.navn) }
+    private val beslutterIdentOgNavn = lagSaksbehandler().let { SaksbehandlerIdentOgNavn(it.ident.value, it.navn) }
 
     private companion object {
         private const val FØDSELSNUMMER = "12345678910"

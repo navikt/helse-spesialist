@@ -1,6 +1,7 @@
 package no.nav.helse.modell.melding
 
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.domain.NAVIdent
 import java.util.UUID
 
 data class VedtaksperiodeAvvistAutomatisk(
@@ -19,7 +20,7 @@ data class VedtaksperiodeAvvistManuelt(
     val behandlingId: UUID,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
     val periodetype: String,
-    val saksbehandlerIdent: String,
+    val saksbehandlerIdent: NAVIdent,
     val saksbehandlerEpost: String,
     val årsak: String?,
     val begrunnelser: List<String>?,
@@ -40,8 +41,8 @@ data class VedtaksperiodeGodkjentManuelt(
     val behandlingId: UUID,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
     val periodetype: String,
-    val saksbehandlerIdent: String,
+    val saksbehandlerIdent: NAVIdent,
     val saksbehandlerEpost: String,
-    val beslutterIdent: String?,
+    val beslutterIdent: NAVIdent?,
     val beslutterEpost: String?,
 ) : UtgåendeHendelse

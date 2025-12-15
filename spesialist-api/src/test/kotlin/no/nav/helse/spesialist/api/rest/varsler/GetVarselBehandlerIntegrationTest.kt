@@ -33,25 +33,27 @@ class GetVarselBehandlerIntegrationTest {
 
     @Test
     fun `gir OK og tilbake et varsel i happy case`() {
-        //given
+        // given
         val saksbehandler = lagSaksbehandler()
         val vedtaksperiode = lagVedtaksperiode()
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varseldefinisjon = lagVarseldefinisjon(kode = "RV_IV_1")
         val opprettetTidspunkt = LocalDateTime.now()
         val vurdertTidspunkt = LocalDateTime.now()
-        val varsel = lagVarsel(
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandlerId = saksbehandler.id,
-                vurdertDefinisjonId = varseldefinisjon.id,
-                tidspunkt = vurdertTidspunkt,
-            ),
-            kode = "RV_IV_1",
-            opprettet = opprettetTidspunkt,
-        )
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandlerId = saksbehandler.id,
+                        vurdertDefinisjonId = varseldefinisjon.id,
+                        tidspunkt = vurdertTidspunkt,
+                    ),
+                kode = "RV_IV_1",
+                opprettet = opprettetTidspunkt,
+            )
         sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
@@ -60,10 +62,10 @@ class GetVarselBehandlerIntegrationTest {
         lagPerson(id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
 
-        //when
+        // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
-        //then
+        // then
         assertEquals(HttpStatusCode.OK.value, response.status)
         assertJsonEquals(
             """
@@ -75,17 +77,23 @@ class GetVarselBehandlerIntegrationTest {
               "handling": "${varseldefinisjon.handling}",
               "status": "VURDERT",
               "vurdering": {
-                "ident": "${saksbehandler.ident}"
+                "ident": "${saksbehandler.ident.value}"
               }
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
             "opprettet",
-            "vurdering.tidsstempel"
+            "vurdering.tidsstempel",
         )
 
         assertEquals(opprettetTidspunkt, response.bodyAsJsonNode.get("opprettet")?.asLocalDateTime())
-        assertEquals(vurdertTidspunkt, response.bodyAsJsonNode.get("vurdering")?.get("tidsstempel")?.asLocalDateTime())
+        assertEquals(
+            vurdertTidspunkt,
+            response.bodyAsJsonNode
+                .get("vurdering")
+                ?.get("tidsstempel")
+                ?.asLocalDateTime(),
+        )
     }
 
     @Test
@@ -102,18 +110,19 @@ class GetVarselBehandlerIntegrationTest {
               "code": "VARSEL_IKKE_FUNNET" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
     @Test
     fun `gir 500 dersom behandlingen for det aktuelle varselet ikke finnes`() {
         // given
-        val varsel = lagVarsel(
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            vurdering = null,
-        )
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                vurdering = null,
+            )
         sessionContext.varselRepository.lagre(varsel)
 
         // when
@@ -129,7 +138,7 @@ class GetVarselBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -138,11 +147,11 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val vedtaksperiode = lagVedtaksperiode(id = lagVedtaksperiodeId())
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            vurdering = null,
-
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                vurdering = null,
             )
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.behandlingRepository.lagre(behandling)
@@ -160,7 +169,7 @@ class GetVarselBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -169,16 +178,17 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val vedtaksperiode = lagVedtaksperiode(id = lagVedtaksperiodeId())
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val varsel = lagVarsel(
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id,
-        )
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+            )
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         lagPerson(
             id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-            adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig
+            adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig,
         ).also(sessionContext.personRepository::lagre)
 
         // when
@@ -195,7 +205,7 @@ class GetVarselBehandlerIntegrationTest {
               "code": "MANGLER_TILGANG_TIL_PERSON" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -204,10 +214,11 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val vedtaksperiode = lagVedtaksperiode(id = lagVedtaksperiodeId())
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val varsel = lagVarsel(
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id,
-        )
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+            )
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
@@ -227,7 +238,7 @@ class GetVarselBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -237,16 +248,18 @@ class GetVarselBehandlerIntegrationTest {
         val varseldefinisjon = lagVarseldefinisjon()
         val vedtaksperiode = lagVedtaksperiode()
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val varsel = lagVarsel(
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandlerId = SaksbehandlerOid(UUID.randomUUID()),
-                vurdertDefinisjonId = varseldefinisjon.id,
-                tidspunkt = LocalDateTime.now(),
-            ),
-        )
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandlerId = SaksbehandlerOid(UUID.randomUUID()),
+                        vurdertDefinisjonId = varseldefinisjon.id,
+                        tidspunkt = LocalDateTime.now(),
+                    ),
+            )
         sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -267,7 +280,7 @@ class GetVarselBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -277,16 +290,18 @@ class GetVarselBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(id = lagVedtaksperiodeId())
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
-        val varsel = lagVarsel(
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandlerId = saksbehandler.id,
-                vurdertDefinisjonId = VarseldefinisjonId(UUID.randomUUID()),
-                tidspunkt = LocalDateTime.now(),
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandlerId = saksbehandler.id,
+                        vurdertDefinisjonId = VarseldefinisjonId(UUID.randomUUID()),
+                        tidspunkt = LocalDateTime.now(),
+                    ),
             )
-        )
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
@@ -307,7 +322,7 @@ class GetVarselBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -318,11 +333,12 @@ class GetVarselBehandlerIntegrationTest {
         val varseldefinisjon = lagVarseldefinisjon()
         val vedtaksperiode = lagVedtaksperiode(id = lagVedtaksperiodeId())
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val varsel = lagVarsel(
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id,
-            status = status,
-        )
+        val varsel =
+            lagVarsel(
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+                status = status,
+            )
         sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -343,7 +359,7 @@ class GetVarselBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 }

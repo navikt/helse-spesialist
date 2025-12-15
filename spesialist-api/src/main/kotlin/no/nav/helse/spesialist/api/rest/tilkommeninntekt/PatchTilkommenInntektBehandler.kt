@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -114,7 +115,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
     private fun endre(
         tilkommenInntekt: TilkommenInntekt,
         endringer: ApiTilkommenInntektPatch.ApiTilkommenInntektEndringer,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
         transaksjon: SessionContext,
     ) {
@@ -139,7 +140,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
     private fun fjern(
         tilkommenInntekt: TilkommenInntekt,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
         transaksjon: SessionContext,
     ) {
@@ -157,7 +158,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
     private fun gjenopprett(
         tilkommenInntekt: TilkommenInntekt,
         endringer: ApiTilkommenInntektPatch.ApiTilkommenInntektEndringer,
-        saksbehandlerIdent: String,
+        saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
         transaksjon: SessionContext,
     ) {

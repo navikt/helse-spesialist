@@ -52,8 +52,11 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                                 -> SorteringsnøkkelForDatabase.OPPRETTET
 
                                 ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
+
                                 ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
+
                                 ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
+
                                 ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt -> SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
                             },
                         sorteringsrekkefølge =
@@ -219,7 +222,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             arsaker = årsaker,
             tekst = notattekst,
             dialogRef = dialogRef?.value ?: error("LagtPåVent ${id()} har ingen dialogRef"),
-            saksbehandler = saksbehandlere.getRequired(saksbehandlerOid).ident,
+            saksbehandler = saksbehandlere.getRequired(saksbehandlerOid).ident.value,
             opprettet =
                 opprettetTidspunkt
                     .atZone(ZoneId.of("Europe/Oslo"))
@@ -236,7 +239,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                                     id = kommentar.id().value,
                                     tekst = kommentar.tekst,
                                     opprettet = kommentar.opprettetTidspunkt,
-                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                    saksbehandlerident = kommentar.saksbehandlerident.value,
                                     feilregistrert_tidspunkt = null,
                                 )
                             }

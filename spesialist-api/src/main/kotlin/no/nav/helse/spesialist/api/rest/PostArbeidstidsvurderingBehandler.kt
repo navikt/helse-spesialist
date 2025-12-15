@@ -86,7 +86,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
                 oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
-                ident = saksbehandler.ident,
+                ident = saksbehandler.ident.value,
             )
 
         val subsumsjoner =

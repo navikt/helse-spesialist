@@ -72,74 +72,83 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val personinfoDao = daos.personinfoDao
     private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
 
-    private val apiTesting = ApiTesting(
-        jwtStub,
-        applicationBuilder = {
-            graphQL()
-        },
-        routeBuilder = {
-            route("graphql") {
-                queryHandler(application.plugin(GraphQL).server)
-            }
-        }
-    )
+    private val apiTesting =
+        ApiTesting(
+            jwtStub,
+            applicationBuilder = {
+                graphQL()
+            },
+            routeBuilder = {
+                route("graphql") {
+                    queryHandler(application.plugin(GraphQL).server)
+                }
+            },
+        )
 
     private fun ApplicationTestBuilder.graphQL() {
         val spesialistSchema =
             SpesialistSchema(
-                queryHandlers = SpesialistSchema.QueryHandlers(
-                    person = PersonQueryHandler(
-                        personoppslagService =
-                            PersonService(
-                                personApiDao = personApiDao,
-                                vergemålApiDao = vergemålApiDao,
-                                tildelingApiDao = tildelingApiDao,
-                                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                                overstyringApiDao = overstyringApiDao,
-                                risikovurderingApiDao = risikovurderingApiDao,
-                                varselRepository = apiVarselRepository,
-                                oppgaveApiDao = oppgaveApiDao,
-                                periodehistorikkApiDao = periodehistorikkApiDao,
-                                notatDao = notatDao,
-                                påVentApiDao = påVentApiDao,
+                queryHandlers =
+                    SpesialistSchema.QueryHandlers(
+                        person =
+                            PersonQueryHandler(
+                                personoppslagService =
+                                    PersonService(
+                                        personApiDao = personApiDao,
+                                        vergemålApiDao = vergemålApiDao,
+                                        tildelingApiDao = tildelingApiDao,
+                                        arbeidsgiverApiDao = arbeidsgiverApiDao,
+                                        overstyringApiDao = overstyringApiDao,
+                                        risikovurderingApiDao = risikovurderingApiDao,
+                                        varselRepository = apiVarselRepository,
+                                        oppgaveApiDao = oppgaveApiDao,
+                                        periodehistorikkApiDao = periodehistorikkApiDao,
+                                        notatDao = notatDao,
+                                        påVentApiDao = påVentApiDao,
+                                        apiOppgaveService = apiOppgaveService,
+                                        saksbehandlerMediator = saksbehandlerMediator,
+                                        stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                        personhåndterer = personhåndterer,
+                                        snapshotService = snapshotService,
+                                        reservasjonshenter = reservasjonshenter,
+                                        sessionFactory = sessionFactory,
+                                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                                        stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
+                                        annulleringRepository = daos.annulleringRepository,
+                                        saksbehandlerRepository = daos.saksbehandlerRepository,
+                                    ),
+                            ),
+                        oppgaver =
+                            OppgaverQueryHandler(
                                 apiOppgaveService = apiOppgaveService,
+                            ),
+                        behandlingsstatistikk =
+                            BehandlingsstatistikkQueryHandler(
+                                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+                            ),
+                        opptegnelse =
+                            OpptegnelseQueryHandler(
                                 saksbehandlerMediator = saksbehandlerMediator,
-                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                                personhåndterer = personhåndterer,
-                                snapshotService = snapshotService,
-                                reservasjonshenter = reservasjonshenter,
-                                sessionFactory = sessionFactory,
-                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
-                                annulleringRepository = daos.annulleringRepository,
-                                saksbehandlerRepository = daos.saksbehandlerRepository,
                             ),
                     ),
-                    oppgaver = OppgaverQueryHandler(
-                        apiOppgaveService = apiOppgaveService,
+                mutationHandlers =
+                    SpesialistSchema.MutationHandlers(
+                        notat = NotatMutationHandler(sessionFactory = sessionFactory),
+                        tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        overstyring =
+                            OverstyringMutationHandler(
+                                saksbehandlerMediator = saksbehandlerMediator,
+                            ),
+                        skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        totrinnsvurdering =
+                            TotrinnsvurderingMutationHandler(
+                                saksbehandlerMediator = saksbehandlerMediator,
+                            ),
+                        person = PersonMutationHandler(personhåndterer = personhåndterer),
+                        paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory),
                     ),
-                    behandlingsstatistikk = BehandlingsstatistikkQueryHandler(
-                        behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                    ),
-                    opptegnelse = OpptegnelseQueryHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                    ),
-                ),
-                mutationHandlers = SpesialistSchema.MutationHandlers(
-                    notat = NotatMutationHandler(sessionFactory = sessionFactory),
-                    tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    overstyring = OverstyringMutationHandler(
-                        saksbehandlerMediator = saksbehandlerMediator
-                    ),
-                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    totrinnsvurdering = TotrinnsvurderingMutationHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                    ),
-                    person = PersonMutationHandler(personhåndterer = personhåndterer),
-                    paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory)
-                ),
             )
 
         install(GraphQL) {
@@ -219,18 +228,20 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         @Language("GraphQL") query: String,
         tilgangsgruppe: Tilgangsgruppe? = null,
     ): JsonNode =
-        apiTesting.spesialistApi {
-            client.post("/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                authentication(
-                    navn = SAKSBEHANDLER.navn,
-                    epost = SAKSBEHANDLER.epost,
-                    ident = SAKSBEHANDLER.ident,
-                    oid = SAKSBEHANDLER.oid.toString(),
-                    group = tilgangsgruppe?.let(tilgangsgruppeUuider::uuidFor)?.toString(),
-                )
-                setBody(mapOf("query" to query))
-            }.body<String>()
-        }.let(objectMapper::readTree)
+        apiTesting
+            .spesialistApi {
+                client
+                    .post("/graphql") {
+                        contentType(ContentType.Application.Json)
+                        accept(ContentType.Application.Json)
+                        authentication(
+                            navn = SAKSBEHANDLER.navn,
+                            epost = SAKSBEHANDLER.epost,
+                            ident = SAKSBEHANDLER.ident.value,
+                            oid = SAKSBEHANDLER.id.value.toString(),
+                            group = tilgangsgruppe?.let(tilgangsgruppeUuider::uuidFor)?.toString(),
+                        )
+                        setBody(mapOf("query" to query))
+                    }.body<String>()
+            }.let(objectMapper::readTree)
 }

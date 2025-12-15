@@ -15,14 +15,14 @@ sealed class Vedtak private constructor(
     class ManueltUtenTotrinnskontroll(
         id: SpleisBehandlingId,
         tidspunkt: Instant,
-        val saksbehandlerIdent: String,
+        val saksbehandlerIdent: NAVIdent,
     ) : Vedtak(id, tidspunkt)
 
     class ManueltMedTotrinnskontroll(
         id: SpleisBehandlingId,
         tidspunkt: Instant,
-        val saksbehandlerIdent: String,
-        val beslutterIdent: String,
+        val saksbehandlerIdent: NAVIdent,
+        val beslutterIdent: NAVIdent,
     ) : Vedtak(id, tidspunkt)
 
     companion object {
@@ -34,7 +34,7 @@ sealed class Vedtak private constructor(
 
         fun manueltUtenTotrinnskontroll(
             id: SpleisBehandlingId,
-            saksbehandlerIdent: String,
+            saksbehandlerIdent: NAVIdent,
         ) = ManueltUtenTotrinnskontroll(
             id = id,
             saksbehandlerIdent = saksbehandlerIdent,
@@ -43,8 +43,8 @@ sealed class Vedtak private constructor(
 
         fun manueltMedTotrinnskontroll(
             id: SpleisBehandlingId,
-            saksbehandlerIdent: String,
-            beslutterIdent: String,
+            saksbehandlerIdent: NAVIdent,
+            beslutterIdent: NAVIdent,
         ) = ManueltMedTotrinnskontroll(
             id = id,
             saksbehandlerIdent = saksbehandlerIdent,
