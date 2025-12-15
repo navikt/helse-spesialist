@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import java.util.UUID
 import javax.sql.DataSource
 
 class PgReservasjonDao private constructor(
@@ -21,21 +20,21 @@ class PgReservasjonDao private constructor(
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun reserverPerson(
-        saksbehandlerOid: UUID,
+        saksbehandlersIdent: NAVIdent,
         fødselsnummer: String,
     ) {
         HelseDao
             .asSQL(
                 """
                 INSERT INTO reserver_person(saksbehandler_ref, person_ref)
-                SELECT :saksbehandler_ref, person.id
+                SELECT (SELECT oid FROM saksbehandler WHERE ident = :saksbehandlersIdent), person.id
                 FROM person
                 WHERE person.fødselsnummer = :foedselsnummer
                 ON CONFLICT (person_ref)
                     DO UPDATE SET gyldig_til = current_date + time '23:59:59',
-                                  saksbehandler_ref = :saksbehandler_ref;
+                                  saksbehandler_ref = excluded.saksbehandler_ref;
                 """.trimIndent(),
-                "saksbehandler_ref" to saksbehandlerOid,
+                "saksbehandlersIdent" to saksbehandlersIdent.value,
                 "foedselsnummer" to fødselsnummer,
             ).update()
     }

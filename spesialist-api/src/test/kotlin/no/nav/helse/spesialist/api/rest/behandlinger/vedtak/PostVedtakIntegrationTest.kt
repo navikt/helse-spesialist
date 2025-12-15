@@ -89,7 +89,7 @@ class PostVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.ident)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         sessionContext.oppgaveRepository.lagre(oppgave)
         sessionContext.meldingDao.lagre(godkjenningsbehov)
@@ -292,7 +292,7 @@ class PostVedtakIntegrationTest {
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.ident)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
@@ -336,7 +336,7 @@ class PostVedtakIntegrationTest {
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.ident)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:

@@ -49,6 +49,7 @@ import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -194,24 +195,24 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     }
 
     private fun opprettTotrinnsvurdering(
-        saksbehandlerOid: UUID? = null,
+        saksbehandlersIdent: NAVIdent? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
         fødselsnummer: String = FNR,
     ) {
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
-        saksbehandlerOid?.let {
+        saksbehandlersIdent?.let {
             totrinnsvurdering.sendTilBeslutter(
                 oppgaveId = oppgaveId,
-                behandlendeSaksbehandler = SaksbehandlerOid(saksbehandlerOid),
+                behandlendeSaksbehandler = it,
             )
         }
 
         if (erRetur) {
             totrinnsvurdering.sendIRetur(
                 oppgaveId = oppgaveId,
-                beslutter = SaksbehandlerOid(UUID.randomUUID()),
+                beslutter = lagSaksbehandler().ident,
             )
         }
 
@@ -446,16 +447,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     private val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     private val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    private val saksbehandler = saksbehandler()
-
-    private fun saksbehandler(oid: UUID = SAKSBEHANDLER_OID): Saksbehandler =
-        Saksbehandler(
-            id = SaksbehandlerOid(value = oid),
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLER_EPOST,
-            ident = SAKSBEHANDLER_IDENT,
-        )
-
     @BeforeEach
     fun beforeEach() {
         testRapid.reset()
@@ -478,14 +469,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             spleisBehandlingId = spleisBehandlingId,
         )
         opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
@@ -505,7 +489,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
             }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(saksbehandler.ident.value, totrinnsvurdering.saksbehandler?.value)
         assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
         assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "Begrunnelse")
     }
@@ -523,14 +507,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             spleisBehandlingId = spleisBehandlingId,
         )
         opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
@@ -557,7 +534,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
             }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(saksbehandler.ident.value, totrinnsvurdering.saksbehandler?.value)
         assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
     }
 
@@ -568,15 +545,9 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 arbeidsgivere = arbeidsgivere(2)
             }
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
-        opprettSaksbehandler()
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         opprettVedtaksperiode()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
+
         val overstyring =
             ApiTidslinjeOverstyring(
                 vedtaksperiodeId = VEDTAKSPERIODE,
@@ -619,21 +590,13 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 arbeidsgivere = arbeidsgivere(2)
             }
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
-        opprettSaksbehandler()
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         opprettVedtaksperiode()
-        val saksbehandler2Oid = UUID.randomUUID()
-        opprettSaksbehandler(saksbehandler2Oid)
+        val saksbehandler2 = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         opprettTotrinnsvurdering(
-            saksbehandlerOid = saksbehandler2Oid,
+            saksbehandlersIdent = saksbehandler2.ident,
             fødselsnummer = person.fødselsnummer,
         )
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
         val overstyring =
             ApiTidslinjeOverstyring(
                 vedtaksperiodeId = VEDTAKSPERIODE,
@@ -660,7 +623,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
             }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler2Oid, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(saksbehandler2.ident.value, totrinnsvurdering.saksbehandler?.value)
         assertTrue(
             totrinnsvurdering.overstyringer
                 .single()
@@ -683,14 +646,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             spleisBehandlingId = spleisBehandlingId,
         )
         opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
@@ -713,8 +669,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
 
-        val beslutter = lagSaksbehandler()
-        opprettSaksbehandler(beslutter.id.value, beslutter.navn, beslutter.epost, beslutter.ident.value)
+        val beslutter = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
 
         assertEquals(SendIReturResult.Ok, resultRetur)
@@ -724,8 +679,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
             }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
-        assertEquals(beslutter.id.value, totrinnsvurdering.beslutter?.value)
+        assertEquals(saksbehandler.ident.value, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(beslutter.ident.value, totrinnsvurdering.beslutter?.value)
         assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
     }
 
@@ -790,14 +745,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         )
 
         opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
@@ -817,6 +765,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `forsøk tildeling av oppgave`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson()
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
         val melding = testRapid.inspektør.hendelser().last()
@@ -826,6 +775,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `legg på vent forårsaker publisering av hendelse`() {
         val spleisBehandlingId = UUID.randomUUID()
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson(spleisBehandlingId = spleisBehandlingId)
         val frist = LocalDate.now()
         val skalTildeles = true
@@ -857,6 +807,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `endring av påVent forårsaker publisering av hendelse`() {
         val spleisBehandlingId = UUID.randomUUID()
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson(spleisBehandlingId = spleisBehandlingId)
         val frist = LocalDate.now()
         val skalTildeles = true
@@ -903,17 +854,19 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson()
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
         testRapid.reset()
         assertThrows<OppgaveTildeltNoenAndre> {
-            mediator.håndter(TildelOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
+            mediator.håndter(TildelOppgave(oppgaveId), lagSaksbehandler(), emptySet())
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
     }
 
     @Test
     fun `forsøk avmelding av oppgave`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson()
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
         testRapid.reset()
@@ -926,13 +879,14 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     fun `forsøk avmelding av oppgave når den ikke er tildelt`() {
         nyPerson()
         assertThrows<OppgaveIkkeTildelt> {
-            mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
+            mediator.håndter(AvmeldOppgave(oppgaveId), lagSaksbehandler(), emptySet())
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
     }
 
     @Test
     fun `legg på vent`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson()
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
@@ -956,6 +910,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `endre på vent`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson()
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
@@ -997,6 +952,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `fjern på vent`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson()
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
@@ -1082,6 +1038,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `håndterer overstyring av tidslinje`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         val person =
             person {
                 arbeidsgivere = arbeidsgivere(2)
@@ -1127,6 +1084,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `håndterer overstyring av arbeidsforhold`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
             ApiArbeidsforholdOverstyringHandling(
@@ -1152,10 +1110,10 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT.value, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(saksbehandler.id.value, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(saksbehandler.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(saksbehandler.ident.value, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(saksbehandler.epost, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
 
         val overstyrtArbeidsforhold = hendelse["overstyrteArbeidsforhold"].toList().single()
@@ -1167,6 +1125,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `håndterer overstyring av inntekt og refusjon`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
             ApiInntektOgRefusjonOverstyring(
@@ -1242,10 +1201,10 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT.value, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(saksbehandler.id.value, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(saksbehandler.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(saksbehandler.ident.value, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(saksbehandler.epost, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
@@ -1273,6 +1232,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val skjønnsfastsetting =
             ApiSkjonnsfastsettelse(
@@ -1316,10 +1276,10 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT.value, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(saksbehandler.id.value, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(saksbehandler.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(saksbehandler.ident.value, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(saksbehandler.epost, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())

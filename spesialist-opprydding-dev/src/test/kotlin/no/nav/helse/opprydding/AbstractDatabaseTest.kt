@@ -29,12 +29,13 @@ internal abstract class AbstractDatabaseTest {
         val utbetaling_id = UUID.randomUUID().toString()
         val avviksvurdering_unik_id = UUID.randomUUID().toString()
         val spleisBehandlingId = UUID.randomUUID().toString()
+        val saksbehandlersIdent = ('A'..'Z').random() + "${Random.nextInt(from = 200_000, until = 999_999)}"
 
         @Language("PostgreSQL")
         val sql =
             """
             INSERT INTO saksbehandler(oid, navn, epost, ident)
-            VALUES ('${saksbehandler_oid}', 'SAKSBEHANDLER SAKSBEHANDLERSEN', 'saksbehandler@nav.no', 'I123456');
+            VALUES ('${saksbehandler_oid}', 'SAKSBEHANDLER SAKSBEHANDLERSEN', 'saksbehandler@nav.no', '$saksbehandlersIdent');
             
             INSERT INTO hendelse(id, data, type)
             VALUES ('${hendelse_id}', '{"fødselsnummer": "$fødselsnummer"}'::json, 'TESTHENDELSE');

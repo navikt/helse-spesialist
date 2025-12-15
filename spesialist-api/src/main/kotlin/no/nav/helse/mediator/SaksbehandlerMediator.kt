@@ -406,7 +406,7 @@ class SaksbehandlerMediator(
                     }
 
                 apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
-                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.id.value))
+                totrinnsvurdering.sendIRetur(oppgavereferanse, besluttendeSaksbehandler.ident)
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
         } catch (modellfeil: Modellfeil) {
@@ -487,7 +487,7 @@ class SaksbehandlerMediator(
                             ?.let(session.saksbehandlerRepository::finn)
                             ?.let { SaksbehandlerWrapper(saksbehandler = it) }
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
-                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id)
+                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.ident)
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
                 }
             } catch (modellfeil: Modellfeil) {
@@ -785,7 +785,7 @@ private fun overstyringUnitOfWork(
             "Reserverer person til saksbehandler",
             "fødselsnummer: $fødselsnummer, saksbehandler: $saksbehandler",
         )
-        session.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
+        session.reservasjonDao.reserverPerson(saksbehandler.ident, fødselsnummer)
 
         val totrinnsvurdering =
             session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)

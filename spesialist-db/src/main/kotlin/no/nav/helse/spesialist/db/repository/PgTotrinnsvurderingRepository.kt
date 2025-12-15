@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.NAVIdent
 
 class PgTotrinnsvurderingRepository(
     session: Session,
@@ -21,8 +21,8 @@ class PgTotrinnsvurderingRepository(
             """
             SELECT tv.id,
                    p.fødselsnummer,
-                   tv.saksbehandler as saksbehandler_oid,
-                   tv.beslutter as beslutter_oid,
+                   (SELECT ident FROM saksbehandler WHERE oid = tv.saksbehandler) as saksbehandlers_ident,
+                   (SELECT ident FROM saksbehandler WHERE oid = tv.beslutter) as beslutters_ident,
                    tv.tilstand,
                    tv.vedtaksperiode_forkastet,
                    tv.opprettet,
@@ -39,8 +39,8 @@ class PgTotrinnsvurderingRepository(
             """
             SELECT tv.id,
                    p.fødselsnummer,
-                   tv.saksbehandler as saksbehandler_oid,
-                   tv.beslutter as beslutter_oid,
+                   (SELECT ident FROM saksbehandler WHERE oid = tv.saksbehandler) as saksbehandlers_ident,
+                   (SELECT ident FROM saksbehandler WHERE oid = tv.beslutter) as beslutters_ident,
                    tv.tilstand,
                    tv.vedtaksperiode_forkastet,
                    tv.opprettet,
@@ -69,7 +69,7 @@ class PgTotrinnsvurderingRepository(
         asSQL(
             """
             INSERT INTO totrinnsvurdering (vedtaksperiode_id, saksbehandler, beslutter, person_ref, tilstand, opprettet, oppdatert)
-            SELECT :vedtaksperiodeId, :saksbehandler, :beslutter, p.id, CAST(:tilstand AS totrinnsvurdering_tilstand), :opprettet, null
+            SELECT :vedtaksperiodeId, (SELECT oid FROM saksbehandler WHERE ident = :saksbehandler), (SELECT oid FROM saksbehandler WHERE ident = :beslutter), p.id, CAST(:tilstand AS totrinnsvurdering_tilstand), :opprettet, null
             FROM person p 
             WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
@@ -84,8 +84,8 @@ class PgTotrinnsvurderingRepository(
         asSQL(
             """
             UPDATE totrinnsvurdering 
-            SET saksbehandler       = :saksbehandler,
-                beslutter           = :beslutter,
+            SET saksbehandler       = (SELECT oid FROM saksbehandler WHERE ident = :saksbehandler),
+                beslutter           = (SELECT oid FROM saksbehandler WHERE ident = :beslutter),
                 tilstand            = CAST(:tilstand AS totrinnsvurdering_tilstand),
                 vedtaksperiode_forkastet = :vedtaksperiodeForkastet,
                 oppdatert           = :oppdatert
@@ -104,8 +104,8 @@ class PgTotrinnsvurderingRepository(
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(long("id")),
             fødselsnummer = string("fødselsnummer"),
-            saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
-            beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
+            saksbehandler = stringOrNull("saksbehandlers_ident")?.let(::NAVIdent),
+            beslutter = stringOrNull("beslutters_ident")?.let(::NAVIdent),
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
             tilstand = enumValueOf(string("tilstand")),

@@ -103,7 +103,7 @@ class PostVedtakBehandler(
                 vedtak = Vedtak.manueltUtenTotrinnskontroll(spleisBehandlingId, saksbehandlerSomFattetVedtaket.ident)
             }
             transaksjon.vedtakRepository.lagre(vedtak)
-            transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtaket.id.value, fødselsnummer)
+            transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtaket.ident, fødselsnummer)
             behandling.fattVedtak(
                 transaksjon = transaksjon,
                 fødselsnummer = fødselsnummer,
@@ -237,10 +237,10 @@ class PostVedtakBehandler(
         if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
             throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
         }
-        if (this.saksbehandler?.value == beslutter.id.value && !environmentToggles.kanBeslutteEgneSaker) {
+        if (this.saksbehandler?.value == beslutter.ident.value && !environmentToggles.kanBeslutteEgneSaker) {
             throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
         }
-        settBeslutter(beslutter.id)
+        settBeslutter(beslutter.ident)
         ferdigstill()
     }
 

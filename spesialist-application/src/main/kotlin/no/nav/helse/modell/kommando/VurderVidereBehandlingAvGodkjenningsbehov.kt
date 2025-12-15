@@ -73,7 +73,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         return if (harEndringerIGodkjenningsbehov) {
             val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer)
             if (tildeltSaksbehandler != null) {
-                reservasjonDao.reserverPerson(tildeltSaksbehandler.oid, fødselsnummer)
+                reservasjonDao.reserverPerson(tildeltSaksbehandler.ident, fødselsnummer)
                 loggInfo(
                     "Reserverer person til ${tildeltSaksbehandler.oid} pga eksisterende tildeling",
                     "fødselsnummer: $fødselsnummer",

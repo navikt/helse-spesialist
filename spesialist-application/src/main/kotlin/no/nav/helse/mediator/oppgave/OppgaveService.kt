@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter.Feil
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.sql.SQLException
@@ -194,11 +195,11 @@ class OppgaveService(
     }
 
     fun reserverOppgave(
-        saksbehandleroid: UUID,
+        saksbehandlersIdent: NAVIdent,
         fødselsnummer: String,
     ) {
         try {
-            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
+            reservasjonDao.reserverPerson(saksbehandlersIdent, fødselsnummer)
         } catch (e: SQLException) {
             logg.warn("Kunne ikke reservere person. Se sikker logg for mer informasjon")
             sikkerlogg.warn("Kunne ikke reservere person", e)
@@ -225,6 +226,7 @@ class OppgaveService(
                     }
                 }
             }
+
             is Either.Success<Set<Tilgangsgruppe>, Feil> -> {
                 try {
                     oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result)

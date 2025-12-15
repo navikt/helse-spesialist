@@ -7,7 +7,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
@@ -27,8 +27,8 @@ value class TotrinnsvurderingId(
 class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,
     val fødselsnummer: String,
-    saksbehandler: SaksbehandlerOid?,
-    beslutter: SaksbehandlerOid?,
+    saksbehandler: NAVIdent?,
+    beslutter: NAVIdent?,
     val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
@@ -39,10 +39,10 @@ class Totrinnsvurdering private constructor(
     val overstyringer: List<Overstyring>
         get() = _overstyringer
 
-    var saksbehandler: SaksbehandlerOid? = saksbehandler
+    var saksbehandler: NAVIdent? = saksbehandler
         private set
 
-    var beslutter: SaksbehandlerOid? = beslutter
+    var beslutter: NAVIdent? = beslutter
         private set
 
     var oppdatert: LocalDateTime? = oppdatert
@@ -59,7 +59,7 @@ class Totrinnsvurdering private constructor(
             tilstand = AVVENTER_SAKSBEHANDLER
         }
 
-    fun settBeslutter(beslutter: SaksbehandlerOid) =
+    fun settBeslutter(beslutter: NAVIdent) =
         oppdatering {
             this.beslutter = beslutter
         }
@@ -71,7 +71,7 @@ class Totrinnsvurdering private constructor(
 
     fun sendTilBeslutter(
         oppgaveId: Long,
-        behandlendeSaksbehandler: SaksbehandlerOid,
+        behandlendeSaksbehandler: NAVIdent,
     ) = oppdatering {
         if (tilstand == AVVENTER_BESLUTTER) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
@@ -82,7 +82,7 @@ class Totrinnsvurdering private constructor(
 
     fun sendIRetur(
         oppgaveId: Long,
-        beslutter: SaksbehandlerOid,
+        beslutter: NAVIdent,
     ) = oppdatering {
         if (tilstand != AVVENTER_BESLUTTER) throw OppgaveAlleredeSendtIRetur(oppgaveId)
         if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
@@ -150,8 +150,8 @@ class Totrinnsvurdering private constructor(
         fun fraLagring(
             id: TotrinnsvurderingId,
             fødselsnummer: String,
-            saksbehandler: SaksbehandlerOid?,
-            beslutter: SaksbehandlerOid?,
+            saksbehandler: NAVIdent?,
+            beslutter: NAVIdent?,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime?,
             overstyringer: List<Overstyring>,

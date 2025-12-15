@@ -37,7 +37,6 @@ import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -684,13 +683,13 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(saksbehandlerWrapper.saksbehandler.id.value))
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, NAVIdent(saksbehandlerWrapper.saksbehandler.ident.value))
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }
 
     protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
-        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.saksbehandler.id.value))
+        totrinnsvurdering.settBeslutter(NAVIdent(beslutter.saksbehandler.ident.value))
         totrinnsvurdering.ferdigstill()
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this

@@ -79,7 +79,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
 
-        transaksjon.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
+        transaksjon.reservasjonDao.reserverPerson(saksbehandler.ident, fødselsnummer)
 
         val varsler = transaksjon.varselRepository.finnVarslerFor(listOf(behandling.id))
         varsler

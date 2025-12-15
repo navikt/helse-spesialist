@@ -1,11 +1,11 @@
 package no.nav.helse.db
 
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
-import java.util.UUID
 
 interface ReservasjonDao {
     fun reserverPerson(
-        saksbehandlerOid: UUID,
+        saksbehandlersIdent: NAVIdent,
         fødselsnummer: String,
     )
 

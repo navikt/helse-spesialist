@@ -19,10 +19,11 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -38,35 +39,38 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE = LegacyVedtaksperiode.nyVedtaksperiode(
-            SpleisBehandling(
-                organisasjonsnummer = "987654321",
-                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                spleisBehandlingId = UUID.randomUUID(),
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        private val VEDTAKSPERIODE =
+            LegacyVedtaksperiode.nyVedtaksperiode(
+                SpleisBehandling(
+                    organisasjonsnummer = "987654321",
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                    spleisBehandlingId = UUID.randomUUID(),
+                    fom = LocalDate.now(),
+                    tom = LocalDate.now(),
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                ),
             )
-        )
         private val FØDSELSNUMMER = "fnr"
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val totrinnsvurderingRepository = object : TotrinnsvurderingRepository {
-        val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
-        var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
-        override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
-            if (!totrinnsvurdering.harFåttTildeltId()) {
-                totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+    private val totrinnsvurderingRepository =
+        object : TotrinnsvurderingRepository {
+            val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
+            var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
+
+            override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
+                if (!totrinnsvurdering.harFåttTildeltId()) {
+                    totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+                }
+                lagredeTotrinnsvurderinger.add(totrinnsvurdering)
             }
-            lagredeTotrinnsvurderinger.add(totrinnsvurdering)
+
+            override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
+
+            override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
         }
-
-        override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-
-        override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-    }
     private lateinit var context: CommandContext
 
     val sykefraværstilfelle =
@@ -80,7 +84,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                     fom = 1 jan 2018,
                     tom = 31 jan 2018,
                     skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
                 LegacyBehandling(
                     id = UUID.randomUUID(),
@@ -88,7 +92,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                     fom = 1 feb 2018,
                     tom = 28 feb 2018,
                     skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
             ),
         )
@@ -159,7 +163,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
-        val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
+        val saksbehandler = lagSaksbehandler()
 
         totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
             lagTotrinnsvurdering(saksbehandler = saksbehandler)
@@ -167,23 +171,24 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertTrue(command.execute(context))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.ident, FØDSELSNUMMER) }
     }
 
     @Test
     fun `Hvis totrinnsvurdering har beslutter skal tilstanden til totrinnsvurderingen settes tilbake til AVVENTER_SAKSBEHANDLER`() {
-        val saksbehandler = lagSaksbehandlerOid()
-        val beslutter = lagSaksbehandlerOid()
+        val saksbehandler = lagSaksbehandler()
+        val beslutter = lagSaksbehandler()
 
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(
-            saksbehandler = saksbehandler,
-            beslutter = beslutter
-        )
+        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
+            lagTotrinnsvurdering(
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+            )
 
         assertTrue(command.execute(context))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.ident, FØDSELSNUMMER) }
 
         assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().tilstand)
 
@@ -199,24 +204,19 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
-
-
-    private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
-
     private fun lagTotrinnsvurdering(
         tilstand: TotrinnsvurderingTilstand = AVVENTER_BESLUTTER,
-        saksbehandler: SaksbehandlerOid = lagSaksbehandlerOid(),
-        beslutter: SaksbehandlerOid = lagSaksbehandlerOid()
-    ) =
-        Totrinnsvurdering.fraLagring(
-            id = TotrinnsvurderingId(nextLong()),
-            fødselsnummer = FØDSELSNUMMER,
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now(),
-            overstyringer = emptyList(),
-            tilstand = tilstand,
-            vedtaksperiodeForkastet = false,
-        )
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
+        beslutter: Saksbehandler = lagSaksbehandler(),
+    ) = Totrinnsvurdering.fraLagring(
+        id = TotrinnsvurderingId(nextLong()),
+        fødselsnummer = FØDSELSNUMMER,
+        saksbehandler = saksbehandler.ident,
+        beslutter = beslutter.ident,
+        opprettet = LocalDateTime.now(),
+        oppdatert = LocalDateTime.now(),
+        overstyringer = emptyList(),
+        tilstand = tilstand,
+        vedtaksperiodeForkastet = false,
+    )
 }

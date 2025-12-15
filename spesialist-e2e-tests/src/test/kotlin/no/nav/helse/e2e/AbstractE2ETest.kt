@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsning
@@ -94,7 +95,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val testMediator = TestMediator(testRapid, dataSource)
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
-    protected val SAKSBEHANDLER_IDENT = "S199999"
+    protected val SAKSBEHANDLER_IDENT = lagSaksbehandler().ident.value
     protected val SAKSBEHANDLER_NAVN = "Augunn Saksbehandler"
     private val saksbehandler =
         Saksbehandler(

@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import javax.sql.DataSource
 
@@ -43,7 +44,7 @@ class PgTildelingDao internal constructor(
     override fun tildelingForPerson(fødselsnummer: String) =
         asSQL(
             """
-            SELECT s.epost, s.oid, s.navn FROM person p
+            SELECT s.epost, s.oid, s.navn, s.ident FROM person p
             JOIN vedtaksperiode v on p.id = v.person_ref
             JOIN oppgave o on v.id = o.vedtak_ref
             JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -57,13 +58,14 @@ class PgTildelingDao internal constructor(
                 navn = it.string("navn"),
                 epost = it.string("epost"),
                 oid = it.uuid("oid"),
+                ident = NAVIdent(it.string("ident")),
             )
         }
 
     override fun tildelingForOppgave(oppgaveId: Long) =
         asSQL(
             """
-            SELECT s.oid, s.epost, s.navn FROM tildeling t
+            SELECT s.oid, s.epost, s.navn, s.ident FROM tildeling t
             INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE t.oppgave_id_ref = :oppgaveId
             """.trimIndent(),
@@ -73,6 +75,7 @@ class PgTildelingDao internal constructor(
                 navn = it.string("navn"),
                 epost = it.string("epost"),
                 oid = it.uuid("oid"),
+                ident = NAVIdent(it.string("ident")),
             )
         }
 }

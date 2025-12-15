@@ -418,10 +418,12 @@ data class ApiBeregnetPeriodeResolver(
         if (oppgaveDto == null) return null
         return sessionFactory.transactionalSessionScope { sessionContext ->
             sessionContext.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let {
+                val saksbehandler = it.saksbehandler?.let(sessionContext.saksbehandlerRepository::finn)
+                val beslutter = it.beslutter?.let(sessionContext.saksbehandlerRepository::finn)
                 ApiTotrinnsvurdering(
                     erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                    saksbehandler = it.saksbehandler?.value,
-                    beslutter = it.beslutter?.value,
+                    saksbehandler = saksbehandler?.id?.value,
+                    beslutter = beslutter?.id?.value,
                     erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
                 )
             }

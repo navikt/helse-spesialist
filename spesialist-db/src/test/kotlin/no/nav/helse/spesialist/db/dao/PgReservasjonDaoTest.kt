@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 
 internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
     @Test
@@ -18,7 +18,7 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
         opprettData()
         val saksbehandler =
             sessionOf(dataSource).use {
-                reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+                reservasjonDao.reserverPerson(SAKSBEHANDLER_IDENT, FNR)
                 reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                     ?: fail("Forventet at det skulle finnes en reservasjon i basen")
             }
@@ -29,19 +29,19 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `ny reservasjon forlenger ikke fristen`() {
         opprettData()
-        val enAnnenSaksbehandler = UUID.randomUUID()
+        val enAnnenSaksbehandler = lagSaksbehandler()
         saksbehandlerDao.opprettEllerOppdater(
-            enAnnenSaksbehandler,
-            "Siri Siksbehindler",
-            "siri.siksbehindler@nav.no",
-            "S666666",
+            enAnnenSaksbehandler.id.value,
+            enAnnenSaksbehandler.navn,
+            enAnnenSaksbehandler.epost,
+            enAnnenSaksbehandler.ident.value,
         )
 
         val saksbehandler =
             sessionOf(dataSource).use {
-                reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
+                reservasjonDao.reserverPerson(enAnnenSaksbehandler.ident, FNR)
                 val gyldigTil1 = finnGyldigTil()
-                reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
+                reservasjonDao.reserverPerson(SAKSBEHANDLER_IDENT, FNR)
                 val gyldigTil2 = finnGyldigTil()
                 assertTrue(gyldigTil2.isEqual(gyldigTil1))
                 reservasjonDao.hentReservasjonFor(FNR)?.reservertTil

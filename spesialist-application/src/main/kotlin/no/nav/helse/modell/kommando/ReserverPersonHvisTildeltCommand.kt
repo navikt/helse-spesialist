@@ -5,7 +5,6 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import java.util.UUID
 
 internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
@@ -16,15 +15,15 @@ internal class ReserverPersonHvisTildeltCommand(
     override fun execute(context: CommandContext): Boolean {
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-        val saksbehandlerOid: UUID =
+        val saksbehandlersIdent =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                totrinnsvurdering.saksbehandler?.value ?: tildeltSaksbehandler.oid
+                totrinnsvurdering.saksbehandler ?: tildeltSaksbehandler.ident
             } else {
-                tildeltSaksbehandler.oid
+                tildeltSaksbehandler.ident
             }
 
-        sikkerlogg.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlerOid pga eksisterende tildeling")
-        reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer)
+        sikkerlogg.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlersIdent pga eksisterende tildeling")
+        reservasjonDao.reserverPerson(saksbehandlersIdent, fødselsnummer)
 
         return true
     }

@@ -73,7 +73,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
             )
 
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
-        transaksjon.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
+        transaksjon.reservasjonDao.reserverPerson(saksbehandler.ident, fødselsnummer)
 
         val totrinnsvurdering =
             transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)

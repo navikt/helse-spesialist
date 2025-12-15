@@ -296,7 +296,7 @@ class PostForkastingBehandlerIntegrationTest {
 
         oppgaveRepository.lagre(oppgave)
 
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.ident)
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:

@@ -13,9 +13,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-
 class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
-
     @BeforeEach
     fun setup() {
         opprettPerson()
@@ -49,7 +47,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.nyOverstyring(nyOverstyring())
-        hentetTotrinnsvurdering.settBeslutter(SaksbehandlerOid(SAKSBEHANDLER_OID))
+        hentetTotrinnsvurdering.settBeslutter(SAKSBEHANDLER_IDENT)
         hentetTotrinnsvurdering.settAvventerSaksbehandler()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
@@ -85,7 +83,6 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
             aktørId = AKTØR,
             organisasjonsnummer = ORGNUMMER,
             begrunnelse = "begrunnelse",
-            dager = listOf(nyOverstyrtTidslinjedag())
+            dager = listOf(nyOverstyrtTidslinjedag()),
         )
-
 }
