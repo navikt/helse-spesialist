@@ -8,7 +8,13 @@ import kotlin.random.Random
 
 fun lagSaksbehandler(
     id: SaksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
-    navn: String = listOfNotNull(lagFornavn(), lagMellomnavnOrNull(), lagEtternavn()).joinToString(separator = " "),
+    navn: String =
+        buildString {
+            append(lagEtternavn())
+            append(", ${lagFornavn()}")
+            val mellomnavn = lagMellomnavnOrNull()
+            if (mellomnavn != null) append(" $mellomnavn")
+        },
     epost: String = navn.split(" ").joinToString(".").lowercase() + "@nav.no",
     ident: String = navn.substringAfterLast(' ').first() + "${Random.nextInt(from = 200_000, until = 999_999)}",
 ): Saksbehandler =

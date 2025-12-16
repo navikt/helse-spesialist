@@ -112,9 +112,9 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
         assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEqualsNavn(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
         assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
-        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEqualsNavn(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
         assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
@@ -191,9 +191,9 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
         assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEqualsNavn(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
         assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
-        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEqualsNavn(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
         assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
@@ -283,9 +283,9 @@ internal class PubliserSykepengevedtakTest {
             objectMapper.convertValue<List<Map<String, LocalDate>>>(event["begrunnelser"][0]["perioder"]),
         )
         assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEqualsNavn(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
         assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
-        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEqualsNavn(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
         assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
@@ -405,9 +405,9 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
         assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEqualsNavn(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
         assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
-        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEqualsNavn(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
         assertEquals(false, event["automatiskFattet"].asBoolean())
     }
 
@@ -538,9 +538,26 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
         assertEquals(saksbehandlerIdentOgNavn.ident, event["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
+        assertEqualsNavn(saksbehandlerIdentOgNavn.navn, event["saksbehandler"]["navn"].asText())
         assertEquals(beslutterIdentOgNavn.ident, event["beslutter"]["ident"].asText())
-        assertEquals(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
+        assertEqualsNavn(beslutterIdentOgNavn.navn, event["beslutter"]["navn"].asText())
         assertEquals(false, event["automatiskFattet"].asBoolean())
+    }
+
+    private fun assertEqualsNavn(
+        expected: String,
+        actual: String,
+    ) {
+        assertEquals(normaliserNavn(expected), normaliserNavn(actual))
+    }
+
+    private fun normaliserNavn(navn: String): String {
+        val deler = navn.split(",", limit = 2)
+        if (deler.size != 2) return navn
+
+        val etternavn = deler[0].trim()
+        val fornavnOgMellomnavn = deler[1].trim()
+
+        return "$fornavnOgMellomnavn $etternavn"
     }
 }

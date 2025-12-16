@@ -681,11 +681,11 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               ],
               "saksbehandler" : {
                 "ident": "${saksbehandler.ident.value}",
-                "navn": "${saksbehandler.navn}"
+                "navn": "${normaliserNavn(saksbehandler.navn)}"
               },
               "beslutter" : {
                 "ident": "${beslutter.ident.value}",
-                "navn": "${beslutter.navn}"
+                "navn": "${normaliserNavn(beslutter.navn)}"
               },
               "automatiskFattet": false
             }
@@ -761,7 +761,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               ],
               "saksbehandler" : {
                 "ident": "${saksbehandler.ident.value}",
-                "navn": "${saksbehandler.navn}"
+                "navn": "${normaliserNavn(saksbehandler.navn)}"
               },
               "automatiskFattet": false
             }
@@ -1031,4 +1031,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           }
         }
         """.trimIndent()
+
+    private fun normaliserNavn(navn: String): String {
+        val deler = navn.split(",", limit = 2)
+        if (deler.size != 2) return navn
+
+        val etternavn = deler[0].trim()
+        val fornavnOgMellomnavn = deler[1].trim()
+
+        return "$fornavnOgMellomnavn $etternavn"
+    }
 }

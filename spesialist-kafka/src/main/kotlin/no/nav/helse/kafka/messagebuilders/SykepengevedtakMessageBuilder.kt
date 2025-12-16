@@ -3,6 +3,16 @@ package no.nav.helse.kafka.messagebuilders
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import java.time.LocalDate
 
+private fun normaliserNavn(navn: String): String {
+    val deler = navn.split(",", limit = 2)
+    if (deler.size != 2) return navn
+
+    val etternavn = deler[0].trim()
+    val fornavnOgMellomnavn = deler[1].trim()
+
+    return "$fornavnOgMellomnavn $etternavn"
+}
+
 internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
     buildMap {
         put("fødselsnummer", fødselsnummer)
@@ -21,8 +31,8 @@ internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
         put("tags", tags)
         put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta())
         put("begrunnelser", begrunnelser.map { it.tilBegrunnelse(fom = fom, tom = tom) })
-        saksbehandler?.let { put("saksbehandler", mapOf("ident" to it.ident, "navn" to it.navn)) }
-        beslutter?.let { put("beslutter", mapOf("ident" to it.ident, "navn" to it.navn)) }
+        saksbehandler?.let { put("saksbehandler", mapOf("ident" to it.ident, "navn" to normaliserNavn(it.navn))) }
+        beslutter?.let { put("beslutter", mapOf("ident" to it.ident, "navn" to normaliserNavn(it.navn))) }
         put("automatiskFattet", automatiskFattet)
     }
 
