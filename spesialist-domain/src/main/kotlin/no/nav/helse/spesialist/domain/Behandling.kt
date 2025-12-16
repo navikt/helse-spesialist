@@ -80,6 +80,14 @@ class Behandling private constructor(
 
     fun overlapperMedInfotrygd(): Boolean = tags.any { it == "OverlapperMedInfotrygd" }
 
+    fun avsluttetUtenVedtak() {
+        tilstand = Tilstand.AvsluttetUtenVedtak
+    }
+
+    fun avsluttetUtenVedtakMedVarsler() {
+        tilstand = Tilstand.AvsluttetUtenVedtakMedVarsler
+    }
+
     companion object {
         fun fraLagring(
             id: BehandlingUnikId,

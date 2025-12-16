@@ -179,10 +179,6 @@ class LegacyBehandling private constructor(
         tilstand.vedtakFattet(this)
     }
 
-    internal fun avsluttetUtenVedtak() {
-        tilstand.avsluttetUtenVedtak(this)
-    }
-
     fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
 
     fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
@@ -266,8 +262,6 @@ class LegacyBehandling private constructor(
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
 
-        fun avsluttetUtenVedtak(legacyBehandling: LegacyBehandling): Unit = throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
-
         fun vedtakFattet(legacyBehandling: LegacyBehandling) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
@@ -341,18 +335,6 @@ class LegacyBehandling private constructor(
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
             legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
-        }
-
-        override fun avsluttetUtenVedtak(legacyBehandling: LegacyBehandling) {
-            check(
-                legacyBehandling.utbetalingId == null,
-            ) { "Mottatt avsluttet_uten_vedtak på behandling som har utbetaling. Det gir ingen mening." }
-            val nesteTilstand =
-                when {
-                    legacyBehandling.varsler.isNotEmpty() -> AvsluttetUtenVedtakMedVarsler
-                    else -> AvsluttetUtenVedtak
-                }
-            legacyBehandling.nyTilstand(nesteTilstand)
         }
     }
 

@@ -5,7 +5,6 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.MeldingDao.Meldingtype
 import no.nav.helse.db.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.db.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.db.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
 import no.nav.helse.db.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENNING
@@ -22,7 +21,6 @@ import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
@@ -219,7 +217,6 @@ class PgMeldingDao private constructor(
             SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
             BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
-            AVSLUTTET_UTEN_VEDTAK -> AvsluttetUtenVedtakMessage(jsonNode)
             KLARGJØR_TILGANGSRELATERTE_DATA -> KlargjørTilgangsrelaterteData(jsonNode)
             else -> throw IllegalArgumentException("ukjent meldingtype: $meldingtype")
         }
@@ -240,7 +237,6 @@ class PgMeldingDao private constructor(
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
             is BehandlingOpprettet -> BEHANDLING_OPPRETTET
-            is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")

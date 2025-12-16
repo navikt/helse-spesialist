@@ -52,7 +52,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             status = "VURDERT",
             kode = "RV_IV_1",
             opprettet = LocalDateTime.now(),
-            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value),
         )
 
         // when
@@ -94,7 +94,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             status = status.name,
             kode = "RV_IV_1",
             opprettet = LocalDateTime.now(),
-            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value),
         )
 
         // when
@@ -138,7 +138,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             status = status.name,
             kode = "RV_IV_1",
             opprettet = LocalDateTime.now(),
-            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value),
         )
 
         // when
@@ -172,7 +172,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId.value,
             spleisBehandlingId = spleisBehandlingId.value,
             saksbehandlerSomEndretId = null,
-            endretTidspunkt = null
+            endretTidspunkt = null,
         )
 
         // when
@@ -210,7 +210,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             saksbehandlerSomEndretId = saksbehandlerIdent,
             endretTidspunkt = LocalDateTime.now(),
             status = "VURDERT",
-            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value),
         )
 
         // when
@@ -221,6 +221,99 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(varselId, funnet.first().id)
         assertEquals(Varsel.Status.VURDERT, funnet.first().status)
         assertEquals(saksbehandlerOid, funnet.first().vurdering?.saksbehandlerId)
+    }
+
+    @Test
+    fun `finn varsel med vurdering for gitt behandling vha behandlingUnikId`() {
+        // given
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+        val varselId = VarselId(UUID.randomUUID())
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        val saksbehandlerOid = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
+        val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+
+        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling")
+
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
+            endretTidspunkt = LocalDateTime.now(),
+            status = "VURDERT",
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value),
+        )
+
+        // when
+        val funnet = repository.finnVarslerFor(behandling.id)
+
+        // then
+        assertEquals(1, funnet.size)
+        assertEquals(varselId, funnet.first().id)
+        assertEquals(Varsel.Status.VURDERT, funnet.first().status)
+        assertEquals(saksbehandlerOid, funnet.first().vurdering?.saksbehandlerId)
+    }
+
+    @Test
+    fun `finn varsel med vurdering for flere behandlinger vha behandlingUnikId`() {
+        // given
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId1 = SpleisBehandlingId(UUID.randomUUID())
+        val spleisBehandlingId2 = SpleisBehandlingId(UUID.randomUUID())
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        opprettSaksbehandler(ident = saksbehandlerIdent)
+
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId1.value,
+            fødselsnummer = fødselsnummer,
+        )
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId2.value,
+            fødselsnummer = fødselsnummer,
+        )
+
+        val behandling1 = sessionContext.behandlingRepository.finn(spleisBehandlingId1) ?: error("Fant ikke behandling")
+        val behandling2 = sessionContext.behandlingRepository.finn(spleisBehandlingId2) ?: error("Fant ikke behandling")
+
+        nyttVarsel(
+            id = VarselId(UUID.randomUUID()).value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId1.value,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
+            endretTidspunkt = LocalDateTime.now(),
+            status = "VURDERT",
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = VarseldefinisjonId(UUID.randomUUID()).value),
+        )
+        nyttVarsel(
+            id = VarselId(UUID.randomUUID()).value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId2.value,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
+            endretTidspunkt = LocalDateTime.now(),
+            status = "VURDERT",
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_2", definisjonId = VarseldefinisjonId(UUID.randomUUID()).value),
+        )
+
+        // when
+        val funnet = repository.finnVarslerFor(listOf(behandling1.id, behandling2.id))
+
+        // then
+        assertEquals(2, funnet.size)
     }
 
     @Test
@@ -260,7 +353,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagre varsel med vurdering`(){
+    fun `lagre varsel med vurdering`() {
         // given
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
@@ -282,7 +375,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             spleisBehandlingId = spleisBehandlingId.value,
             saksbehandlerSomEndretId = saksbehandlerIdent,
             status = "AKTIV",
-            definisjonRef = null
+            definisjonRef = null,
         )
 
         opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = definisjonId.value)
@@ -299,7 +392,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagre varsel uten vurdering`(){
+    fun `lagre varsel uten vurdering`() {
         // given
         val vedtaksperiodeId = lagVedtaksperiodeId()
         val spleisBehandlingId = lagSpleisBehandlingId()
@@ -322,7 +415,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             saksbehandlerSomEndretId = saksbehandlerIdent,
             status = "AKTIV",
             definisjonRef = null,
-            kode = "RV_IV_1"
+            kode = "RV_IV_1",
         )
 
         opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = definisjonId.value)

@@ -2,12 +2,10 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
@@ -67,15 +65,6 @@ class LegacyPerson(
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
-    fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
-        val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetUtenVedtak.spleisBehandlingId)
-        if (vedtaksperiode.erForkastet()) return
-
-        vedtaksperiode
-            .finnBehandling(avsluttetUtenVedtak.spleisBehandlingId)
-            .avsluttetUtenVedtak()
-    }
-
     fun behandlinger() = vedtaksperioder.flatMap { it.behandlinger() }
 
     fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
@@ -100,10 +89,6 @@ class LegacyPerson(
         val vedtaksperiode = vedtaksperiodeOrNull(vedtaksperiodeId)
         return checkNotNull(vedtaksperiode)
     }
-
-    private fun vedtaksperiodeForBehandling(spleisBehandlingId: UUID): LegacyVedtaksperiode =
-        vedtaksperioder.finnBehandling(spleisBehandlingId)
-            ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
 
     fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
         val skjæringstidspunkt =

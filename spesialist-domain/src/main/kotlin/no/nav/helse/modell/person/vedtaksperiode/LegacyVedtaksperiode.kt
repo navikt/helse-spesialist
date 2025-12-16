@@ -30,8 +30,6 @@ class LegacyVedtaksperiode(
 
     fun behandlinger() = behandlinger.map { BehandlingData(it.vedtaksperiodeId(), it.spleisBehandlingId()) }
 
-    fun råBehandlinger(): List<LegacyBehandling> = behandlinger
-
     internal fun toDto(): VedtaksperiodeDto =
         VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,

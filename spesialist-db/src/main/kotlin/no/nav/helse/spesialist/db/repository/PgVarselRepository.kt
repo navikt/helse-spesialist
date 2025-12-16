@@ -46,6 +46,20 @@ class PgVarselRepository private constructor(
             row.mapTilVarsel()
         }
 
+    override fun finnVarslerFor(behandlingUnikId: BehandlingUnikId): List<Varsel> =
+        dbQuery.list(
+            """
+                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                JOIN behandling b ON sv.generasjon_ref = b.id
+                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
+                WHERE b.unik_id = :behandlingUnikId
+            """,
+            "behandlingUnikId" to behandlingUnikId.value,
+        ) { row ->
+            row.mapTilVarsel()
+        }
+
     override fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """

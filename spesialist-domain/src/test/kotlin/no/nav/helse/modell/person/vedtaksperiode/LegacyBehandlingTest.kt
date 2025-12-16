@@ -29,14 +29,15 @@ import java.util.UUID
 internal class LegacyBehandlingTest {
     @Test
     fun `behandling ligger før dato`() {
-        val legacyBehandling = LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-        )
+        val legacyBehandling =
+            LegacyBehandling(
+                id = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID(),
+                fom = 1 jan 2018,
+                tom = 31 jan 2018,
+                skjæringstidspunkt = 1 jan 2018,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            )
         assertTrue(legacyBehandling.tilhører(31 jan 2018))
         assertTrue(legacyBehandling.tilhører(1 feb 2018))
         assertFalse(legacyBehandling.tilhører(1 jan 2018))
@@ -360,8 +361,10 @@ internal class LegacyBehandlingTest {
     fun `oppdaterer fom, tom, skjæringstidspunkt, behandlingId`() {
         val behandlingId = UUID.randomUUID()
         val behandling = behandling(fom = 1 jan 2018, tom = 31 jan 2018, skjæringstidspunkt = 1 jan 2018)
-        behandling.håndter(mockk(relaxed = true),
-            SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2 jan 2018, 30 jan 2018, 2 jan 2018))
+        behandling.håndter(
+            mockk(relaxed = true),
+            SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2 jan 2018, 30 jan 2018, 2 jan 2018),
+        )
         val dto = behandling.toDto()
 
         assertEquals(2 jan 2018, dto.fom)
@@ -483,7 +486,7 @@ internal class LegacyBehandlingTest {
         val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling1 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1 jan 2018)
-        behandling1.avsluttetUtenVedtak()
+        behandling1.håndterNyUtbetaling(UUID.randomUUID())
         val behandling2 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1 jan 2018)
         assertNotEquals(behandling1, behandling2)
         assertNotEquals(behandling1.hashCode(), behandling2.hashCode())
@@ -498,14 +501,15 @@ internal class LegacyBehandlingTest {
         val skjæringstidspunkt = 1 jan 2018
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
-        val legacyBehandling = LegacyBehandling(
-            id = behandlingId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-        )
+        val legacyBehandling =
+            LegacyBehandling(
+                id = behandlingId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                skjæringstidspunkt = skjæringstidspunkt,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            )
         legacyBehandling.håndterNyUtbetaling(utbetalingId)
         val tags = listOf("tag 1")
         legacyBehandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
@@ -529,7 +533,7 @@ internal class LegacyBehandlingTest {
                 tags,
                 null,
                 listOf(varsel.toDto()),
-                Yrkesaktivitetstype.ARBEIDSTAKER
+                Yrkesaktivitetstype.ARBEIDSTAKER,
             ),
             dto,
         )
@@ -567,7 +571,7 @@ internal class LegacyBehandlingTest {
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,
-        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     )
 
     private fun LegacyBehandling.assertVarsler(

@@ -10,6 +10,8 @@ interface VarselRepository {
 
     fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel>
 
+    fun finnVarslerFor(behandlingUnikId: BehandlingUnikId): List<Varsel>
+
     fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel>
 
     fun lagre(varsel: Varsel)

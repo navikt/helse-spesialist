@@ -56,7 +56,7 @@ class RiverSetup(
             VedtaksperiodeNyUtbetalingRiver(mediator),
             BehovtidsbrukMetrikkRiver(),
             AvsluttetMedVedtakRiver(),
-            AvsluttetUtenVedtakRiver(mediator),
+            AvsluttetUtenVedtakRiver(),
             MidnattRiver(sessionFactory),
             BehandlingOpprettetRiver(mediator),
             KommandokjedePåminnelseRiver(mediator),
