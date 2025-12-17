@@ -2,17 +2,14 @@ package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.SessionContext
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
 
-class SøknadSendtRiver(
-    private val mediator: MeldingMediator,
-) : SpesialistRiver {
+class SøknadSendtRiver : TransaksjonellRiver() {
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireAny(
@@ -26,27 +23,29 @@ class SøknadSendtRiver(
             it.requireKey("@id", "fnr", "aktorId")
         }
 
-    override fun onPacket(
+    override fun transaksjonellOnPacket(
         packet: JsonMessage,
-        context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry,
+        outbox: Outbox,
+        transaksjon: SessionContext,
+        eventMetadata: EventMetadata,
     ) {
-        loggInfo(
-            "Mottok hendelse: ${packet["@event_name"].asText()} med hendelseId: ${packet["@id"].asUUID()}",
-            "hendelse: ${packet.toJson()}",
-        )
-        mediator.mottaSøknadSendt(
-            melding = søknadSendt(packet),
-            kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
-        )
-    }
-
-    private fun søknadSendt(packet: JsonMessage) =
-        SøknadSendt(
-            id = packet["@id"].asUUID(),
-            fødselsnummer = packet["fnr"].asText(),
-            aktørId = packet["aktorId"].asText(),
+        transaksjon.meldingDao.lagre(
+            id = eventMetadata.`@id`,
             json = packet.toJson(),
+            meldingtype = MeldingDao.Meldingtype.SØKNAD_SENDT,
         )
+        val identitetsnummer = Identitetsnummer.fraString(packet["fnr"].asText())
+        if (transaksjon.personRepository.finn(identitetsnummer) != null) {
+            loggInfo("Person finnes fra før", "identitetsnummer: ${identitetsnummer.value}")
+            return
+        }
+        val person =
+            Person.Factory.ny(
+                identitetsnummer,
+                packet["aktorId"].asText(),
+                null,
+                null,
+            )
+        transaksjon.personRepository.lagre(person)
+    }
 }

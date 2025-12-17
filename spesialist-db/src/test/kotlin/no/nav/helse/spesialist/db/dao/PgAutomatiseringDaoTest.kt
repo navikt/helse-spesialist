@@ -14,12 +14,13 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
+    val person = opprettPerson()
+
     @BeforeEach
     fun setup() {
-        testhendelse()
-        opprettPerson()
+        testhendelse(fødselsnummer = person.id.value)
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
     }
 
     @Test
@@ -67,7 +68,7 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagre to automatiseringer på samme vedtaksperiode`() {
         val hendelseId2 = UUID.randomUUID()
-        testhendelse(hendelseId = hendelseId2)
+        testhendelse(hendelseId = hendelseId2, fødselsnummer = person.id.value)
 
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         automatiseringDao.automatisert(VEDTAKSPERIODE, hendelseId2, UTBETALING_ID)

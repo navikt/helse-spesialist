@@ -6,24 +6,23 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 private class PgVergemålApiDaoTest : AbstractDBIntegrationTest() {
-
+    private val person = opprettPerson()
     private val vergemålApiDao = PgVergemålApiDao(dataSource)
 
     @Test
     fun `kan hente ut om person har vergemål`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettVergemål(FNR, harFullmakt = true)
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
+        opprettVergemål(person.id.value, harFullmakt = true)
 
-        assertEquals(true, vergemålApiDao.harFullmakt(FNR))
+        assertEquals(true, vergemålApiDao.harFullmakt(person.id.value))
     }
 
     private fun opprettVergemål(
         fødselsnummer: String,
         harVergemål: Boolean = false,
         harFullmakt: Boolean = false,
-        harFremtidsFullmakt: Boolean = false
+        harFremtidsFullmakt: Boolean = false,
     ) = dbQuery.update(
         """
         insert into vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert) 
@@ -35,8 +34,6 @@ private class PgVergemålApiDaoTest : AbstractDBIntegrationTest() {
         "harVergemal" to harVergemål,
         "harFremtidsFullmakt" to harFremtidsFullmakt,
         "harFullmakter" to harFullmakt,
-        "oppdatert" to LocalDateTime.now()
+        "oppdatert" to LocalDateTime.now(),
     )
-
-
 }

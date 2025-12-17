@@ -11,15 +11,14 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
-
+internal class PgBehandlingApiDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
     private val behandlingDao = PgBehandlingApiDao(dataSource)
 
     @Test
     fun `Finner periode med oppgave`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettOppgave()
         val vedtaksperiodeMedOppgave = behandlingDao.gjeldendeBehandlingFor(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
@@ -29,14 +28,13 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner periode med oppgave basert på siste behandling`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
 
         val nyFom = PERIODE.fom.plusDays(1)
         val nyTom = PERIODE.tom.plusDays(1)
         val spleisBehandlingId = UUID.randomUUID()
-        opprettBehandling(fom = nyFom, tom = nyTom, spleisBehandlingId = spleisBehandlingId)
+        opprettBehandling(fom = nyFom, tom = nyTom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
         oppdaterSkjæringstidspunkt(spleisBehandlingId, nyFom)
         opprettOppgave()
 
@@ -50,11 +48,10 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner alle gjeldende behandlinger for person gitt en oppgaveId`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom)
+        opprettVedtaksperiode(fødselsnummer = person.id.value, vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom)
         opprettOppgave()
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode1 = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
@@ -65,26 +62,25 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Henter alle behandlinger for person basert på siste behandling, gitt en oppgaveId`() {
-        opprettPerson()
         opprettArbeidsgiver()
 
         val v1 = UUID.randomUUID()
-        opprettVedtaksperiode(vedtaksperiodeId = v1)
-        opprettBehandling(v1, fom = 1 jan 2018, tom = 31 jan 2018)
+        opprettVedtaksperiode(fødselsnummer = person.id.value, vedtaksperiodeId = v1)
+        opprettBehandling(v1, fom = 1 jan 2018, tom = 31 jan 2018, fødselsnummer = person.id.value)
         val spleisBehandlingId1 = UUID.randomUUID()
-        opprettBehandling(v1, fom = 1 feb 2018, tom = 28 feb 2018, spleisBehandlingId = spleisBehandlingId1)
+        opprettBehandling(v1, fom = 1 feb 2018, tom = 28 feb 2018, spleisBehandlingId = spleisBehandlingId1, fødselsnummer = person.id.value)
         oppdaterSkjæringstidspunkt(spleisBehandlingId1, 1 feb 2018)
 
         val v2 = UUID.randomUUID()
         val periode2 = Periode(v2, LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(vedtaksperiodeId = periode2.id)
+        opprettVedtaksperiode(fødselsnummer = person.id.value, vedtaksperiodeId = periode2.id)
         val spleisBehandlingId2 = UUID.randomUUID()
-        opprettBehandling(v2, fom = 1 mar 2018, tom = 31 mar 2018, spleisBehandlingId = spleisBehandlingId2)
+        opprettBehandling(v2, fom = 1 mar 2018, tom = 31 mar 2018, spleisBehandlingId = spleisBehandlingId2, fødselsnummer = person.id.value)
         oppdaterSkjæringstidspunkt(spleisBehandlingId2, 1 mar 2018)
 
         val v3 = UUID.randomUUID()
         val periode3 = Periode(v3, LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(vedtaksperiodeId = periode3.id, fom = periode3.fom, tom =periode3.tom)
+        opprettVedtaksperiode(vedtaksperiodeId = periode3.id, fom = periode3.fom, tom = periode3.tom, fødselsnummer = person.id.value)
         opprettOppgave(vedtaksperiodeId = v3)
 
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(periode3.id))
@@ -99,12 +95,11 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner ikke behandlinger for forkastede perioder`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettOppgave()
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true)
+        opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true, fødselsnummer = person.id.value)
 
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
@@ -114,12 +109,11 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner ikke behandlinger for forkastede perioder - med varselSupplier`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettOppgave()
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
-        opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true)
+        opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true, fødselsnummer = person.id.value)
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id)) { emptySet() }
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
 
@@ -127,7 +121,10 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
     }
 
     // Burde bruke VedtaksperiodeDto og lagre via vedtakDao i stedet for manuell update
-    private fun oppdaterSkjæringstidspunkt(spleisBehandlingId: UUID, dato: LocalDate) {
+    private fun oppdaterSkjæringstidspunkt(
+        spleisBehandlingId: UUID,
+        dato: LocalDate,
+    ) {
         dbQuery.update(
             """
             update behandling
@@ -138,5 +135,4 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
             "spleisBehandlingId" to spleisBehandlingId,
         )
     }
-
 }

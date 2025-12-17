@@ -1,26 +1,18 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 
 internal class PgEgenAnsattDaoTest : AbstractDBIntegrationTest() {
-    @BeforeEach
-    fun setup() {
-        testhendelse()
-        opprettPerson()
-    }
-
     @Test
     fun `setter og henter egen ansatt`() {
-        egenAnsattDao.lagre(FNR, false, LocalDateTime.now())
-        val egenAnsattSvar = egenAnsattDao.erEgenAnsatt(FNR)
+        val person = opprettPerson()
+        egenAnsattDao.lagre(person.id.value, false, LocalDateTime.now())
+        val egenAnsattSvar = egenAnsattDao.erEgenAnsatt(person.id.value)
         assertNotNull(egenAnsattSvar)
-        if (egenAnsattSvar != null) {
-            assertFalse(egenAnsattSvar)
-        }
+        assertFalse(egenAnsattSvar)
     }
 }

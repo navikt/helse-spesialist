@@ -18,7 +18,6 @@ import java.time.LocalDate
 
 @Isolated
 internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
-
     private val NOW = LocalDate.now()
 
     @BeforeEach
@@ -88,8 +87,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Får antall fullførte beslutteroppgaver`() {
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer)
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandler = nyLegacySaksbehandler()
         val beslutter = nyLegacySaksbehandler()
         val oppgave = nyOppgaveForNyPerson()
@@ -106,13 +104,13 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun`Får antall automatiserte revurderinger`() {
+    fun `Får antall automatiserte revurderinger`() {
         nyPersonMedAutomatiskVedtak(utbetalingtype = Utbetalingtype.REVURDERING)
         assertEquals(1, behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(LocalDate.now()).perUtbetalingtype[BehandlingsstatistikkDao.StatistikkPerKombinasjon.Utbetalingtype.REVURDERING])
     }
 
     @Test
-    fun`Får antall tilgjengelige egen ansatt-oppgaver`() {
+    fun `Får antall tilgjengelige egen ansatt-oppgaver`() {
         val oppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.EGEN_ANSATT))
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
         oppgave
@@ -122,7 +120,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun`Får antall fullførte egen ansatt-oppgaver`() {
+    fun `Får antall fullførte egen ansatt-oppgaver`() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.EGEN_ANSATT))
             .avventSystemOgLagre(nyLegacySaksbehandler())
             .ferdigstillOgLagre()
@@ -143,23 +141,32 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         mottakertype: Mottakertype = Mottakertype.ARBEIDSGIVER,
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
     ) {
-        godkjenningsbehov()
-        opprettPerson()
+        val person = opprettPerson()
+        godkjenningsbehov(fødselsnummer = person.id.value)
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
+        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, fødselsnummer = person.id.value)
         nyttAutomatiseringsinnslag(true)
         when (mottakertype) {
-            Mottakertype.ARBEIDSGIVER -> utbetalingTilArbeidsgiver(utbetalingtype)
-            Mottakertype.SYKMELDT -> utbetalingTilPerson(utbetalingtype)
-            Mottakertype.BEGGE -> utbetalingTilBegge(utbetalingtype)
+            Mottakertype.ARBEIDSGIVER -> utbetalingTilArbeidsgiver(utbetalingtype, fødselsnummer = person.id.value)
+            Mottakertype.SYKMELDT -> utbetalingTilPerson(utbetalingtype, fødselsnummer = person.id.value)
+            Mottakertype.BEGGE -> utbetalingTilBegge(utbetalingtype, fødselsnummer = person.id.value)
         }
     }
 
-    private fun utbetalingTilArbeidsgiver(utbetalingtype: Utbetalingtype) = utbetalingsopplegg(beløpTilArbeidsgiver = 4000, beløpTilSykmeldt = 0, utbetalingtype = utbetalingtype)
+    private fun utbetalingTilArbeidsgiver(
+        utbetalingtype: Utbetalingtype,
+        fødselsnummer: String,
+    ) = utbetalingsopplegg(fødselsnummer = fødselsnummer, beløpTilArbeidsgiver = 4000, beløpTilSykmeldt = 0, utbetalingtype = utbetalingtype)
 
-    private fun utbetalingTilPerson(utbetalingtype: Utbetalingtype) = utbetalingsopplegg(beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000, utbetalingtype = utbetalingtype)
+    private fun utbetalingTilPerson(
+        utbetalingtype: Utbetalingtype,
+        fødselsnummer: String,
+    ) = utbetalingsopplegg(fødselsnummer = fødselsnummer, beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000, utbetalingtype = utbetalingtype)
 
-    private fun utbetalingTilBegge(utbetalingtype: Utbetalingtype) = utbetalingsopplegg(beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000, utbetalingtype = utbetalingtype)
+    private fun utbetalingTilBegge(
+        utbetalingtype: Utbetalingtype,
+        fødselsnummer: String,
+    ) = utbetalingsopplegg(fødselsnummer = fødselsnummer, beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000, utbetalingtype = utbetalingtype)
 }

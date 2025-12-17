@@ -14,7 +14,6 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
@@ -23,7 +22,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.OppdaterPersondataCommand
-import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
@@ -310,29 +308,6 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             vedtakRepository = sessionContext.vedtakRepository,
         )
-    }
-
-    // Kanskje prøve å få håndtering av søknad inn i samme flyt som andre kommandokjeder
-    fun iverksettSøknadSendt(
-        melding: SøknadSendt,
-        commandContextObservers: CommandContextObserver,
-        sessionContext: SessionContext,
-    ) {
-        iverksett(
-            command = OpprettMinimalPersonCommand(melding.fødselsnummer(), melding.aktørId, sessionContext.personDao),
-            meldingId = melding.id,
-            commandContext = nyContext(melding.id, sessionContext.commandContextDao),
-            commandContextObservers = setOf(commandContextObservers),
-            commandContextDao = sessionContext.commandContextDao,
-            metrikkDao = sessionContext.metrikkDao,
-        )
-    }
-
-    private fun nyContext(
-        meldingId: UUID,
-        transactionalCommandContextDao: CommandContextDao,
-    ) = CommandContext(UUID.randomUUID()).apply {
-        opprett(transactionalCommandContextDao, meldingId)
     }
 
     fun lagKommandostarter(

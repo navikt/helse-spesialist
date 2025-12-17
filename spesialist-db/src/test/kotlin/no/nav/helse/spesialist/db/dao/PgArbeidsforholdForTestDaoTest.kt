@@ -7,12 +7,17 @@ import no.nav.helse.spesialist.domain.testfixtures.apr
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
+
+    init {
+        opprettArbeidsgiver()
+    }
+
     private companion object {
         const val STILLINGSPROSENT = 100
         const val STILLINGSTITTEL = "Slabberasansvarlig"
@@ -20,16 +25,10 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
         val SLUTTDATO: LocalDate? = null
     }
 
-    @BeforeEach
-    fun setup() {
-        opprettPerson()
-        opprettArbeidsgiver()
-    }
-
     @Test
     fun `oppretter arbeidsforhold`() {
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
-        arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).first().also {
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
+        arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER).first().also {
             assertEquals(STILLINGSPROSENT, it.stillingsprosent)
             assertEquals(STILLINGSTITTEL, it.stillingstittel)
             assertEquals(STARTDATO, it.startdato)
@@ -43,21 +42,26 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
         val nySluttdato = LocalDate.now()
         val nyStillingstittel = "Sto i med kona til sjefen"
         val nyStillingsprosent = 0
-        val arbeidsforhold = listOf(
-            Arbeidsforholdløsning.Løsning(nyStartdato, nySluttdato, nyStillingstittel, nyStillingsprosent)
-        )
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, arbeidsforhold.map {
-            KomplettArbeidsforholdDto(
-                fødselsnummer = FNR,
-                organisasjonsnummer = ORGNUMMER,
-                startdato = it.startdato,
-                sluttdato = it.sluttdato,
-                stillingstittel = it.stillingstittel,
-                stillingsprosent = it.stillingsprosent
+        val arbeidsforhold =
+            listOf(
+                Arbeidsforholdløsning.Løsning(nyStartdato, nySluttdato, nyStillingstittel, nyStillingsprosent),
             )
-        })
-        arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).first().also {
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
+        arbeidsforholdDao.upsertArbeidsforhold(
+            person.id.value,
+            ORGNUMMER,
+            arbeidsforhold.map {
+                KomplettArbeidsforholdDto(
+                    fødselsnummer = person.id.value,
+                    organisasjonsnummer = ORGNUMMER,
+                    startdato = it.startdato,
+                    sluttdato = it.sluttdato,
+                    stillingstittel = it.stillingstittel,
+                    stillingsprosent = it.stillingsprosent,
+                )
+            },
+        )
+        arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER).first().also {
             assertEquals(nyStillingsprosent, it.stillingsprosent)
             assertEquals(nyStillingstittel, it.stillingstittel)
             assertEquals(nyStartdato, it.startdato)
@@ -67,26 +71,28 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `oppdaterer tomt arbeidsforhold`() {
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, emptyList())
-        assertTrue(arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).isEmpty())
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, emptyList())
+        assertTrue(arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER).isEmpty())
     }
 
     @Test
     fun `finner arbeidsforhold`() {
-        val fødselsnummer2 = "10273645893"
+        val fødselsnummer2 = opprettPerson().id.value
         val stillingstittel2 = "Slabberasmedarbeider"
-        val fødselsnummer3 = "10273645894"
+        val fødselsnummer3 = opprettPerson().id.value
         val stillingstittel3 = "Stillingstittel3"
-        opprettPerson(fødselsnummer2)
-        opprettPerson(fødselsnummer3)
 
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
-        arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer2, ORGNUMMER,
-            listOf(enKomplettArbeidsforholdDto(fødselsnummer = fødselsnummer2, stillingstittel = stillingstittel2))
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
+        arbeidsforholdDao.upsertArbeidsforhold(
+            fødselsnummer2,
+            ORGNUMMER,
+            listOf(enKomplettArbeidsforholdDto(fødselsnummer = fødselsnummer2, stillingstittel = stillingstittel2)),
         )
-        arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer3, ORGNUMMER,
-            listOf(enKomplettArbeidsforholdDto(fødselsnummer = fødselsnummer3, stillingstittel = stillingstittel3))
+        arbeidsforholdDao.upsertArbeidsforhold(
+            fødselsnummer3,
+            ORGNUMMER,
+            listOf(enKomplettArbeidsforholdDto(fødselsnummer = fødselsnummer3, stillingstittel = stillingstittel3)),
         )
 
         arbeidsforholdDao.findArbeidsforhold(fødselsnummer2, ORGNUMMER).first().also {
@@ -100,27 +106,28 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner sist oppdatert`() {
-        arbeidsforholdDao.upsertArbeidsforhold(FNR, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
-        arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).first().also {
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
+        arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER).first().also {
             assertTrue(it.oppdatert > LocalDateTime.now().minusDays(10))
         }
     }
 
     @Test
     fun `skriver ikke over alle arbeidsforhold med samme informasjon`() {
-        val løsninger = Arbeidsforholdløsning(
-            listOf(
-                Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50),
-                Arbeidsforholdløsning.Løsning(20 apr 2018, null, "Noe annet", 50)
+        val løsninger =
+            Arbeidsforholdløsning(
+                listOf(
+                    Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50),
+                    Arbeidsforholdløsning.Løsning(20 apr 2018, null, "Noe annet", 50),
+                ),
             )
-        )
 
         val now = LocalDateTime.now()
-        løsninger.upsert(arbeidsforholdDao, FNR, ORGNUMMER, now)
-        val arbeidsforhold = arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER)
+        løsninger.upsert(arbeidsforholdDao, person.id.value, ORGNUMMER, now)
+        val arbeidsforhold = arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER)
 
-        løsninger.upsert(arbeidsforholdDao, FNR, ORGNUMMER, now)
-        assertEquals(arbeidsforhold, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER))
+        løsninger.upsert(arbeidsforholdDao, person.id.value, ORGNUMMER, now)
+        assertEquals(arbeidsforhold, arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER))
     }
 
     @Test
@@ -128,27 +135,27 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
         Arbeidsforholdløsning(
             listOf(
                 Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50),
-                Arbeidsforholdløsning.Løsning(20 apr 2018, null, "Noe annet", 50)
-            )
-        ).upsert(arbeidsforholdDao, FNR, ORGNUMMER)
+                Arbeidsforholdløsning.Løsning(20 apr 2018, null, "Noe annet", 50),
+            ),
+        ).upsert(arbeidsforholdDao, person.id.value, ORGNUMMER)
 
         Arbeidsforholdløsning(
             listOf(
-                Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50)
-            )
-        ).upsert(arbeidsforholdDao, FNR, ORGNUMMER)
+                Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50),
+            ),
+        ).upsert(arbeidsforholdDao, person.id.value, ORGNUMMER)
 
-        assertEquals(1, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).size)
+        assertEquals(1, arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER).size)
     }
 
     private fun enKomplettArbeidsforholdDto(
-        fødselsnummer: String = FNR,
+        fødselsnummer: String = person.id.value,
         organisasjonsnummer: String = ORGNUMMER,
         startdato: LocalDate = STARTDATO,
         sluttdato: LocalDate? = SLUTTDATO,
         stillingstittel: String = STILLINGSTITTEL,
         stillingsprosent: Int = STILLINGSPROSENT,
-        oppdatert: LocalDateTime = LocalDateTime.now()
+        oppdatert: LocalDateTime = LocalDateTime.now(),
     ) = KomplettArbeidsforholdDto(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
@@ -156,6 +163,6 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
         sluttdato = sluttdato,
         stillingstittel = stillingstittel,
         stillingsprosent = stillingsprosent,
-        oppdatert = oppdatert
+        oppdatert = oppdatert,
     )
 }

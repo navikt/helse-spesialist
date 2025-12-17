@@ -11,20 +11,6 @@ class HentEnhetløsning(
         internal fun erEnhetUtland(enhet: String) = enhet in UTLANDSENHETER
     }
 
-    fun lagrePerson(
-        personDao: PersonDao,
-        fødselsnummer: String,
-        aktørId: String,
-        personinfoId: Long,
-        infotrygdutbetalingerId: Long,
-    ) = personDao.insertPerson(
-        fødselsnummer = fødselsnummer,
-        aktørId = aktørId,
-        personinfoId = personinfoId,
-        enhetId = enhetNr.toInt(),
-        infotrygdutbetalingerId = infotrygdutbetalingerId,
-    )
-
     fun oppdater(
         personDao: PersonDao,
         fødselsnummer: String,

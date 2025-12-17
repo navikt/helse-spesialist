@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
-import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class PgPersonDao internal constructor(
@@ -35,14 +34,6 @@ class PgPersonDao internal constructor(
             )
         }
 
-    override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-        asSQL(
-            """INSERT INTO person (fødselsnummer, aktør_id) VALUES (:foedselsnummer, :aktoerId)""",
-            "foedselsnummer" to minimalPerson.fødselsnummer,
-            "aktoerId" to minimalPerson.aktørId,
-        ).update()
-    }
-
     override fun personKlargjort(fødselsnummer: String) {
         asSQL("DELETE FROM person_klargjores WHERE fødselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer).update()
     }
@@ -52,12 +43,6 @@ class PgPersonDao internal constructor(
             "SELECT id FROM person WHERE fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.long("id") }
-
-    override fun finnAktørId(fødselsnummer: String): String? =
-        asSQL(
-            "SELECT aktør_id FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { it.string("aktør_id") }
 
     override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
         asSQL(
@@ -302,25 +287,6 @@ class PgPersonDao internal constructor(
             "SELECT infotrygdutbetalinger_ref FROM person WHERE fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { it.longOrNull("infotrygdutbetalinger_ref") }
-
-    override fun insertPerson(
-        fødselsnummer: String,
-        aktørId: String,
-        personinfoId: Long,
-        enhetId: Int,
-        infotrygdutbetalingerId: Long,
-    ) = asSQL(
-        """
-        INSERT INTO person(fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_oppdatert)
-        VALUES(:foedselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId, :timestamp, :timestamp, :timestamp);
-        """.trimIndent(),
-        "foedselsnummer" to fødselsnummer,
-        "aktorId" to aktørId,
-        "personinfoId" to personinfoId,
-        "enhetId" to enhetId,
-        "infotrygdutbetalingerId" to infotrygdutbetalingerId,
-        "timestamp" to LocalDateTime.now(),
-    ).updateAndReturnGeneratedKey()
 
     override fun finnEnhetId(fødselsnummer: String): String =
         asSQL(

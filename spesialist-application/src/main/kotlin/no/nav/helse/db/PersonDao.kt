@@ -12,8 +12,6 @@ interface PersonDao {
 
     fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
 
-    fun lagreMinimalPerson(minimalPerson: MinimalPersonDto)
-
     fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate?
 
     fun oppdaterEnhet(
@@ -58,14 +56,4 @@ interface PersonDao {
     fun finnEnhetId(fødselsnummer: String): String
 
     fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse?
-
-    fun finnAktørId(fødselsnummer: String): String?
-
-    fun insertPerson(
-        fødselsnummer: String,
-        aktørId: String,
-        personinfoId: Long,
-        enhetId: Int,
-        infotrygdutbetalingerId: Long,
-    ): Long
 }

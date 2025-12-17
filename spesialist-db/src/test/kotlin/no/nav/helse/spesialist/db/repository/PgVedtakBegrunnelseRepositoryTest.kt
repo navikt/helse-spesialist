@@ -5,7 +5,6 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,19 +18,18 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre og finn vedtaksbegrunnelse`() {
-        //given
+        // given
         val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            spleisBehandlingId = spleisBehandlingId.value
+            spleisBehandlingId = spleisBehandlingId.value,
         )
 
-        //when
+        // when
         val tekst = "Lorem ipsum dolor sit amet"
         val saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
         repository.lagre(
@@ -39,12 +37,12 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
                 spleisBehandlingId = spleisBehandlingId,
                 tekst = tekst,
                 utfall = Utfall.INNVILGELSE,
-                saksbehandlerOid = saksbehandlerOid
-            )
+                saksbehandlerOid = saksbehandlerOid,
+            ),
         )
         val vedtakBegrunnelse = repository.finn(spleisBehandlingId)
 
-        //then
+        // then
         assertNotNull(vedtakBegrunnelse)
         assertTrue(vedtakBegrunnelse.harFåttTildeltId())
         assertEquals(spleisBehandlingId, vedtakBegrunnelse.spleisBehandlingId)
@@ -56,26 +54,25 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `henter ikke vedtakbegrunnelse som er invalidert`() {
-        //given
+        // given
         val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            spleisBehandlingId = spleisBehandlingId.value
+            spleisBehandlingId = spleisBehandlingId.value,
         )
 
-        //when
+        // when
         repository.lagre(
             VedtakBegrunnelse.ny(
                 spleisBehandlingId = spleisBehandlingId,
                 tekst = "Lorem ipsum dolor sit amet",
                 utfall = Utfall.INNVILGELSE,
-                saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-            )
+                saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+            ),
         )
         val vedtakBegrunnelse = repository.finn(spleisBehandlingId)
         checkNotNull(vedtakBegrunnelse)
@@ -83,7 +80,7 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(vedtakBegrunnelse)
         val oppdatertVedtakBegrunnelse = repository.finn(spleisBehandlingId)
 
-        //then
+        // then
         assertNull(oppdatertVedtakBegrunnelse)
     }
 }

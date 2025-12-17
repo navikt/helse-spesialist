@@ -2,45 +2,40 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class PgVergemålDaoTest : AbstractDBIntegrationTest() {
-
-    @BeforeEach
-    fun setup() {
-        opprettPerson()
-    }
+    private val person = opprettPerson()
 
     @Test
     fun `lagre og les ut vergemål`() {
-        vergemålDao.lagre(FNR, VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = false), false)
-        assertEquals(true, vergemålDao.harVergemål(FNR))
-        vergemålDao.lagre(FNR, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false), false)
-        assertEquals(false, vergemålDao.harVergemål(FNR))
+        vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = false), false)
+        assertEquals(true, vergemålDao.harVergemål(person.id.value))
+        vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false), false)
+        assertEquals(false, vergemålDao.harVergemål(person.id.value))
     }
 
     @Test
     fun `lagre og les ut fullmakter`() {
-        vergemålDao.lagre(FNR, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false), false)
-        assertEquals(false, vergemålDao.harFullmakt(FNR))
-        vergemålDao.lagre(FNR, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false), true)
-        assertEquals(true, vergemålDao.harFullmakt(FNR))
-        vergemålDao.lagre(FNR, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = true), false)
-        assertEquals(true, vergemålDao.harFullmakt(FNR))
-        vergemålDao.lagre(FNR, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = true), true)
-        assertEquals(true, vergemålDao.harFullmakt(FNR))
+        vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false), false)
+        assertEquals(false, vergemålDao.harFullmakt(person.id.value))
+        vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false), true)
+        assertEquals(true, vergemålDao.harFullmakt(person.id.value))
+        vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = true), false)
+        assertEquals(true, vergemålDao.harFullmakt(person.id.value))
+        vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = true), true)
+        assertEquals(true, vergemålDao.harFullmakt(person.id.value))
     }
 
     @Test
     fun `ikke vergemål om vi ikke har gjort noe oppslag`() {
-        assertNull(vergemålDao.harVergemål(FNR))
+        assertNull(vergemålDao.harVergemål(person.id.value))
     }
 
     @Test
     fun `ikke fullmakt om vi ikke har gjort noe oppslag`() {
-        assertNull(vergemålDao.harFullmakt(FNR))
+        assertNull(vergemålDao.harFullmakt(person.id.value))
     }
 }

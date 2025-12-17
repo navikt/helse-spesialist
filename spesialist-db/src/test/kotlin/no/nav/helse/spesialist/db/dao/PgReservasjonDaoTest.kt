@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -52,7 +54,7 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
     }
 
     private fun opprettData(fødselsnummer: String = FNR) {
-        opprettPerson(fødselsnummer)
+        opprettPerson(person = lagPerson(id = Identitetsnummer.fraString(fødselsnummer)))
         saksbehandlerDao.opprettEllerOppdater(
             SAKSBEHANDLER_OID,
             SAKSBEHANDLER_NAVN,

@@ -39,7 +39,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.application.Either
@@ -49,6 +48,9 @@ import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -57,7 +59,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.test.TestPerson
-import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.AfterEach
@@ -101,7 +102,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     private val ETTERNAVN = testperson.etternavn
     private val FØDSELSDATO: LocalDate = LocalDate.EPOCH
     private val KJØNN = testperson.kjønn
-    private val ENHET = "0301"
 
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
 
@@ -121,7 +121,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 .registerModule(JavaTimeModule())
     }
 
-    private var personId: Long = -1
     private var vedtakId: Long = -1
     private var oppgaveId = nextLong().absoluteValue
 
@@ -173,7 +172,22 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 Egenskap.EN_ARBEIDSGIVER,
             ),
     ) {
-        opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
+        sessionContext.personRepository.lagre(
+            Person.Factory.ny(
+                Identitetsnummer.fraString(fødselsnummer),
+                aktørId,
+                Personinfo(
+                    FORNAVN,
+                    MELLOMNAVN,
+                    ETTERNAVN,
+                    FØDSELSDATO,
+                    KJØNN,
+                    Personinfo.Adressebeskyttelse.Ugradert,
+                ),
+                null,
+            ),
+        )
+        sessionContext.personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettVedtaksperiode(
             fødselsnummer = fødselsnummer,
@@ -234,54 +248,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     ) {
         daos.vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
-
-    private fun opprettPerson(
-        fødselsnummer: String = FNR,
-        aktørId: String = AKTØR,
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-    ): Persondata {
-        val personinfoId =
-            insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
-        val infotrygdutbetalingerId =
-            sessionContext.personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
-        val enhetId = ENHET.toInt()
-        personId =
-            sessionContext.personDao.insertPerson(
-                fødselsnummer,
-                aktørId,
-                personinfoId,
-                enhetId,
-                infotrygdutbetalingerId,
-            )
-        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        return Persondata(
-            personId = personId,
-            personinfoId = personinfoId,
-            enhetId = enhetId,
-            infotrygdutbetalingerId = infotrygdutbetalingerId,
-        )
-    }
-
-    private fun insertPersoninfo(
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
-        adressebeskyttelse: Adressebeskyttelse,
-    ) = dbQuery
-        .updateAndReturnGeneratedKey(
-            """
-            INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-            VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjoenn as person_kjonn), :adressebeskyttelse);
-            """.trimIndent(),
-            "fornavn" to fornavn,
-            "mellomnavn" to mellomnavn,
-            "etternavn" to etternavn,
-            "foedselsdato" to fødselsdato,
-            "kjoenn" to kjønn.name,
-            "adressebeskyttelse" to adressebeskyttelse.name,
-        ).let(::requireNotNull)
 
     private fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
@@ -361,13 +327,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             ),
         )
     }
-
-    private data class Persondata(
-        val personId: Long,
-        val personinfoId: Long,
-        val enhetId: Int,
-        val infotrygdutbetalingerId: Long,
-    )
 
     private fun nyttVarsel(
         id: UUID = UUID.randomUUID(),

@@ -16,7 +16,6 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -231,28 +230,6 @@ class MeldingMediator(
                 "json:\n$message",
                 err,
             )
-        }
-    }
-
-    fun mottaSøknadSendt(
-        melding: SøknadSendt,
-        kontekstbasertPubliserer: MeldingPubliserer,
-    ) {
-        val meldingnavn = requireNotNull(melding::class.simpleName)
-        withMDC(
-            mutableMapOf(
-                "meldingId" to melding.id.toString(),
-                "meldingnavn" to meldingnavn,
-            ),
-        ) {
-            loggInfo("Melding SøknadSendt mottatt", "json: \n${melding.toJson()}")
-            meldingDao.lagre(melding)
-            val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
-            sessionFactory.transactionalSessionScope { sessionContext ->
-                kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator, sessionContext)
-            }
-            utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
-            loggInfo("Melding SøknadSendt lest")
         }
     }
 

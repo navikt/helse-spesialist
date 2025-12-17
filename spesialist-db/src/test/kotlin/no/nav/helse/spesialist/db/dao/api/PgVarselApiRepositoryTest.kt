@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
+internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
 
     @Test
     fun `Finner varsler med vedtaksperiodeId og utbetalingId`() {
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettVarseldefinisjon(kode = "EN_KODE")
         opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
-        opprettBehandling(spleisBehandlingId = spleisBehandlingId, utbetalingId = utbetalingId)
+        opprettBehandling(spleisBehandlingId = spleisBehandlingId, utbetalingId = utbetalingId, fødselsnummer = person.id.value)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
         nyttVarsel(kode = "EN_ANNEN_KODE", status = "INAKTIV", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
 
@@ -33,15 +33,14 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner varsler for uberegnet periode`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettVarseldefinisjon(kode = "EN_KODE")
         opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
         opprettVarseldefinisjon(kode = "EN_TREDJE_KODE")
 
         val spleisBehandlingId2 = UUID.randomUUID()
-        opprettBehandling(spleisBehandlingId = spleisBehandlingId2)
+        opprettBehandling(spleisBehandlingId = spleisBehandlingId2, fødselsnummer = person.id.value)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2)
         nyttVarsel(kode = "EN_TREDJE_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2, status = "INAKTIV")
@@ -61,17 +60,17 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende perioden med oppgave`() {
         val uberegnetPeriode = periode(2 jan 2023, 3 jan 2023)
         val periodeMedOppgave = periode(4 jan 2023, 5 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
 
         with(periodeMedOppgave) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
+                fødselsnummer = person.id.value,
             )
             opprettOppgave(vedtaksperiodeId = id)
         }
@@ -86,14 +85,14 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
     fun `Uberegnet periode skal ikke vise varsler når den ikke er tilstøtende perioden med oppgave`() {
         val uberegnetPeriode = periode(2 jan 2023, 3 jan 2023)
         val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(fom = uberegnetPeriode.fom, tom = uberegnetPeriode.tom, utbetalingId = UUID.randomUUID())
+        opprettVedtaksperiode(fom = uberegnetPeriode.fom, tom = uberegnetPeriode.tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         opprettVedtaksperiode(
             vedtaksperiodeId = periodeMedOppgave.id,
             fom = periodeMedOppgave.fom,
             tom = periodeMedOppgave.tom,
-            spleisBehandlingId = UUID.randomUUID()
+            spleisBehandlingId = UUID.randomUUID(),
+            fødselsnummer = person.id.value,
         )
         opprettOppgave(vedtaksperiodeId = periodeMedOppgave.id)
         val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
@@ -106,16 +105,16 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende perioden med oppgave (over helg)`() {
         val uberegnetPeriode = periode(2 jan 2023, 6 jan 2023)
         val periodeMedOppgave = periode(9 jan 2023, 13 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(periodeMedOppgave) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
+                fødselsnummer = person.id.value,
             )
             opprettOppgave(vedtaksperiodeId = id)
         }
@@ -130,23 +129,24 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         val uberegnetPeriode = periode(1 jan 2023, 2 jan 2023)
         val beregnetPeriode = periode(3 jan 2023, 4 jan 2023)
         val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(beregnetPeriode) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
+                fødselsnummer = person.id.value,
             )
         }
         with(periodeMedOppgave) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
+                fødselsnummer = person.id.value,
             )
             opprettOppgave(vedtaksperiodeId = id)
         }
@@ -161,10 +161,9 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
         val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
         val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode1) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(uberegnetPeriode2) {
             val spleisBehandlingId = UUID.randomUUID()
@@ -173,17 +172,20 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
                 fom = fom,
                 tom = tom,
                 utbetalingId = UUID.randomUUID(),
-                spleisBehandlingId = spleisBehandlingId
+                spleisBehandlingId = spleisBehandlingId,
+                fødselsnummer = person.id.value,
             )
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode1.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode1.fom),
+                fødselsnummer = person.id.value,
             )
         }
         with(periodeMedOppgave) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode1.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode1.fom),
+                fødselsnummer = person.id.value,
             )
             opprettOppgave(vedtaksperiodeId = id)
         }
@@ -198,17 +200,16 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
         val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
         val periodeMedOppgave = periode(6 jan 2023, 7 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode1) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(uberegnetPeriode2) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(periodeMedOppgave) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             opprettOppgave(vedtaksperiodeId = id)
         }
 
@@ -222,19 +223,19 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
         val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
         val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode1) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(uberegnetPeriode2) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID())
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
         }
         with(periodeMedOppgave) {
             val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId)
+            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
             oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode2.fom)
+                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode2.fom),
+                fødselsnummer = person.id.value,
             )
             opprettOppgave(vedtaksperiodeId = id)
         }
@@ -245,11 +246,8 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         assertEquals(setOf(periodeMedOppgave.id, uberegnetPeriode2.id), perioderSomSkalViseVarsler)
     }
 
-    private fun finnGenerasjonId(spleisBehandlingId: UUID) = dbQuery.single(
-        "select unik_id from behandling where behandling.spleis_behandling_id = :spleisBehandlingId",
-        "spleisBehandlingId" to spleisBehandlingId
-    ) { it.uuid("unik_id") }
-
-    private fun periode(fom: LocalDate, tom: LocalDate) = Periode(UUID.randomUUID(), fom, tom)
-
+    private fun periode(
+        fom: LocalDate,
+        tom: LocalDate,
+    ) = Periode(UUID.randomUUID(), fom, tom)
 }

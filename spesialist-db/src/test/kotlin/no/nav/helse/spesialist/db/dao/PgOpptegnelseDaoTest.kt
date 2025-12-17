@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
     private val opptegnelseRepository = DBSessionContext(session).opptegnelseDao
 
     private companion object {
@@ -22,27 +22,26 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Kan opprette abonnement og få opptegnelser`() {
-        opprettPerson()
         opprettSaksbehandler()
-        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR)
+        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, person.aktørId)
         opptegnelseRepository.opprettOpptegnelse(
-            FNR,
+            person.id.value,
             UTBETALING_PAYLOAD,
-            UTBETALING_ANNULLERING_OK
+            UTBETALING_ANNULLERING_OK,
         )
 
-        opptegnelseRepository.opprettOpptegnelse(FNR, GODKJENNINGSBEHOV_PAYLOAD, NY_SAKSBEHANDLEROPPGAVE)
+        opptegnelseRepository.opprettOpptegnelse(person.id.value, GODKJENNINGSBEHOV_PAYLOAD, NY_SAKSBEHANDLEROPPGAVE)
 
         val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(2, alle.size)
 
-        alle.first { it.type == OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
-            assertEquals(AKTØR, opptegnelse.aktorId)
+        alle.first { it.type == UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
+            assertEquals(person.aktørId, opptegnelse.aktorId)
             assertJsonEquals(UTBETALING_PAYLOAD, opptegnelse.payload)
         }
 
-        alle.first { it.type == OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
-            assertEquals(AKTØR, opptegnelse.aktorId)
+        alle.first { it.type == NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
+            assertEquals(person.aktørId, opptegnelse.aktorId)
             assertJsonEquals(GODKJENNINGSBEHOV_PAYLOAD, opptegnelse.payload)
         }
     }
@@ -52,11 +51,11 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
         opprettPerson()
         opprettSaksbehandler()
         opptegnelseRepository.opprettOpptegnelse(
-            FNR,
+            person.id.value,
             UTBETALING_PAYLOAD,
-            UTBETALING_ANNULLERING_OK
+            UTBETALING_ANNULLERING_OK,
         )
-        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR)
+        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, person.aktørId)
 
         val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(0, alle.size)

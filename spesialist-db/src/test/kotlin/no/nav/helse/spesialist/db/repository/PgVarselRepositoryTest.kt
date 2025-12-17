@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVarselId
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjonId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -32,16 +31,15 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettSaksbehandler(saksbehandler.id.value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
-        opprettPerson(fødselsnummer = fødselsnummer)
+        val person = opprettPerson()
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
             spleisBehandlingId = spleisBehandlingId.value,
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.id.value,
         )
         nyttVarsel(
             id = varselId.value,
@@ -74,11 +72,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettSaksbehandler(saksbehandler.id.value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -118,11 +115,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettSaksbehandler(saksbehandler.id.value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -159,8 +155,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
+        val fødselsnummer = opprettPerson().id.value
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -190,12 +185,11 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandlerIdent = lagSaksbehandler().ident
         val saksbehandlerOid = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
 
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -229,12 +223,11 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandlerIdent = lagSaksbehandler().ident
         val saksbehandlerOid = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
 
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -270,11 +263,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId1 = SpleisBehandlingId(UUID.randomUUID())
         val spleisBehandlingId2 = SpleisBehandlingId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandlerIdent = lagSaksbehandler().ident
         opprettSaksbehandler(ident = saksbehandlerIdent)
 
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -325,8 +317,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId2 = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId2 = SpleisBehandlingId(UUID.randomUUID())
         val varselId2 = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
+        val fødselsnummer = opprettPerson().id.value
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId1.value,
@@ -358,11 +349,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandlerIdent = lagSaksbehandler().ident
         val saksbehandlerId = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         val definisjonId = VarseldefinisjonId(UUID.randomUUID())
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,
@@ -397,11 +387,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = lagVedtaksperiodeId()
         val spleisBehandlingId = lagSpleisBehandlingId()
         val varselId = lagVarselId()
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = opprettPerson().id.value
         val saksbehandlerIdent = lagSaksbehandler().ident
         val saksbehandlerId = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         val definisjonId = lagVarseldefinisjonId()
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId.value,

@@ -6,20 +6,19 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PgStansAutomatiskBehandlingSaksbehandlerDaoTest : AbstractDBIntegrationTest() {
-
     @Test
     fun `kan stanse automatisk behandling`() {
-        opprettPerson(FNR)
-        stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(FNR)
-        assertTrue(stansAutomatiskBehandlingSaksbehandlerDao.erStanset(FNR))
+        val fødselsnummer = opprettPerson().id.value
+        stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(fødselsnummer)
+        assertTrue(stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer))
     }
 
     @Test
     fun `kan oppheve stans av automatisk behandling`() {
-        opprettPerson(FNR)
-        stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(FNR)
-        assertTrue(stansAutomatiskBehandlingSaksbehandlerDao.erStanset(FNR))
-        stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(FNR)
-        assertFalse(stansAutomatiskBehandlingSaksbehandlerDao.erStanset(FNR))
+        val fødselsnummer = opprettPerson().id.value
+        stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(fødselsnummer)
+        assertTrue(stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer))
+        stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(fødselsnummer)
+        assertFalse(stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer))
     }
 }

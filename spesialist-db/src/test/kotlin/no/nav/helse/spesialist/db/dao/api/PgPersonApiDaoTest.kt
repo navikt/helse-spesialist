@@ -7,87 +7,92 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
 import no.nav.helse.modell.person.Adressebeskyttelse.Ugradert
 import no.nav.helse.modell.person.Adressebeskyttelse.Ukjent
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
-
     @Test
     fun `henter adressebeskyttelse Fortrolig`() {
-        opprettPerson(adressebeskyttelse = Fortrolig)
-        assertEquals(Fortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
+        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig)).id.value
+        assertEquals(Fortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
     }
 
     @Test
     fun `henter adressebeskyttelse Ugradert`() {
-        opprettPerson(adressebeskyttelse = Ugradert)
-        assertEquals(Ugradert.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
+        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert)).id.value
+        assertEquals(Ugradert.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
     }
 
     @Test
     fun `henter adressebeskyttelse Strengt Fortrolig`() {
-        opprettPerson(adressebeskyttelse = StrengtFortrolig)
-        assertEquals(StrengtFortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
+        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)).id.value
+        assertEquals(StrengtFortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
     }
 
     @Test
     fun `henter adressebeskyttelse Strengt Fortrolig Utland`() {
-        opprettPerson(adressebeskyttelse = StrengtFortroligUtland)
-        assertEquals(StrengtFortroligUtland.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
+        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortroligUtland)).id.value
+        assertEquals(StrengtFortroligUtland.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
     }
 
     @Test
     fun `henter adressebeskyttelse Ukjent`() {
-        opprettPerson(adressebeskyttelse = Ukjent)
-        assertEquals(Ukjent.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
+        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ukjent)).id.value
+        assertEquals(Ukjent.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
     }
 
     @Test
     fun `kan svare på om en person er klar for visning`() {
-        opprettMinimalPerson()
-        assertPersonenErIkkeKlar()
+        val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
+        assertPersonenErIkkeKlar(person.id)
 
-        oppdaterEnhet(enhetNr = 101)
-        assertPersonenErIkkeKlar()
+        oppdaterEnhet(fødselsnummer = person.id.value, enhetNr = 101)
+        assertPersonenErIkkeKlar(person.id)
 
-        opprettEgenAnsatt(FNR, false)
-        assertPersonenErIkkeKlar()
+        opprettEgenAnsatt(person.id.value, false)
+        assertPersonenErIkkeKlar(person.id)
 
-        oppdaterAdressebeskyttelse(Ugradert)
-        assertPersonenErKlar()
+        oppdaterAdressebeskyttelse(Ugradert, person.id.value)
+        assertPersonenErKlar(person.id)
     }
 
     // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
     @Test
     fun `kan svare på om en person er klar for visning, med dataene mottatt i ikke-realistisk rekkefølge`() {
-        opprettMinimalPerson()
-        assertPersonenErIkkeKlar()
+        val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
+        assertPersonenErIkkeKlar(person.id)
 
-        oppdaterAdressebeskyttelse(Ugradert)
-        assertPersonenErIkkeKlar()
+        oppdaterAdressebeskyttelse(Ugradert, person.id.value)
+        assertPersonenErIkkeKlar(person.id)
 
-        opprettEgenAnsatt(FNR, false)
-        assertPersonenErIkkeKlar()
+        opprettEgenAnsatt(person.id.value, false)
+        assertPersonenErIkkeKlar(person.id)
 
-        oppdaterEnhet(enhetNr = 101)
+        oppdaterEnhet(fødselsnummer = person.id.value, enhetNr = 101)
 
-        assertPersonenErKlar()
+        assertPersonenErKlar(person.id)
     }
 
     @Test
     fun `kan markere at en person er under klargjøring`() {
-        assertFalse(personApiDao.klargjøringPågår(FNR))
-        personApiDao.personKlargjøres(FNR)
-        assertTrue(personApiDao.klargjøringPågår(FNR))
+        val person = opprettPerson()
+        assertFalse(personApiDao.klargjøringPågår(person.id.value))
+        personApiDao.personKlargjøres(person.id.value)
+        assertTrue(personApiDao.klargjøringPågår(person.id.value))
     }
 
-    private fun harDataNødvendigForVisning() = personApiDao.harDataNødvendigForVisning(FNR)
-    private fun assertPersonenErIkkeKlar() = assertFalse(harDataNødvendigForVisning())
-    private fun assertPersonenErKlar() = assertTrue(harDataNødvendigForVisning())
+    private fun harDataNødvendigForVisning(identitetsnummer: Identitetsnummer) = personApiDao.harDataNødvendigForVisning(identitetsnummer.value)
+
+    private fun assertPersonenErIkkeKlar(identitetsnummer: Identitetsnummer) = assertFalse(harDataNødvendigForVisning(identitetsnummer))
+
+    private fun assertPersonenErKlar(identitetsnummer: Identitetsnummer) = assertTrue(harDataNødvendigForVisning(identitetsnummer))
 }
 
-private fun Adressebeskyttelse.somApiType(): no.nav.helse.spesialist.api.person.Adressebeskyttelse {
-    return no.nav.helse.spesialist.api.person.Adressebeskyttelse.valueOf(this.name)
-}
+private fun Adressebeskyttelse.somApiType(): no.nav.helse.spesialist.api.person.Adressebeskyttelse =
+    no.nav.helse.spesialist.api.person.Adressebeskyttelse
+        .valueOf(this.name)

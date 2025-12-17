@@ -9,17 +9,19 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
+
     @Test
     fun `finner arbeidsforhold`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettArbeidsforhold()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
+        opprettArbeidsforhold(fødselsnummer = person.id.value)
 
-        val arbeidsforhold = arbeidsgiverApiDao.finnArbeidsforhold(
-            fødselsnummer = FNR,
-            arbeidsgiverIdentifikator = ORGNUMMER
-        )
+        val arbeidsforhold =
+            arbeidsgiverApiDao.finnArbeidsforhold(
+                fødselsnummer = person.id.value,
+                arbeidsgiverIdentifikator = ORGNUMMER,
+            )
 
         assertEquals(1, arbeidsforhold.size)
         assertEquals(ARBEIDSFORHOLD.start, arbeidsforhold.first().startdato)
@@ -30,103 +32,140 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Finn inntekter fra aordningen for arbeidsgiveren i 3 foregående måneder for alle skjæringstidspunkt`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettInntekt(
             skjæringstidspunkt = LocalDate.parse("2020-01-01"),
-            inntekter = listOf(
-                Inntekter(
-                    årMåned = YearMonth.of(2019, 12),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 19000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
-                    )
+            inntekter =
+                listOf(
+                    Inntekter(
+                        årMåned = YearMonth.of(2019, 12),
+                        inntektsliste =
+                            listOf(
+                                Inntekter.Inntekt(beløp = 19000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
+                            ),
+                    ),
+                    Inntekter(
+                        årMåned = YearMonth.of(2019, 11),
+                        inntektsliste =
+                            listOf(
+                                Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
+                            ),
+                    ),
+                    Inntekter(
+                        årMåned = YearMonth.of(2019, 10),
+                        inntektsliste =
+                            listOf(
+                                Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
+                            ),
+                    ),
                 ),
-                Inntekter(
-                    årMåned = YearMonth.of(2019, 11),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
-                    )
-                ),
-                Inntekter(
-                    årMåned = YearMonth.of(2019, 10),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
-                    )
-                )
-            )
         )
         opprettInntekt(
             skjæringstidspunkt = LocalDate.parse("2022-11-11"),
-            inntekter = listOf(
-                Inntekter(
-                    årMåned = YearMonth.of(2022, 10),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 20000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
-                    )
+            inntekter =
+                listOf(
+                    Inntekter(
+                        årMåned = YearMonth.of(2022, 10),
+                        inntektsliste =
+                            listOf(
+                                Inntekter.Inntekt(beløp = 20000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
+                            ),
+                    ),
+                    Inntekter(
+                        årMåned = YearMonth.of(2022, 9),
+                        inntektsliste =
+                            listOf(
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
+                            ),
+                    ),
+                    Inntekter(
+                        årMåned = YearMonth.of(2022, 8),
+                        inntektsliste =
+                            listOf(
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
+                            ),
+                    ),
                 ),
-                Inntekter(
-                    årMåned = YearMonth.of(2022, 9),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
-                    )
-                ),
-                Inntekter(
-                    årMåned = YearMonth.of(2022, 8),
-                    inntektsliste = listOf(
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGNUMMER),
-                        Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
-                    )
-                )
-            )
         )
 
-        val arbeidsgiverInntekterFraAordningen = arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
-            fødselsnummer = FNR,
-            orgnummer = ORGNUMMER
-        )
+        val arbeidsgiverInntekterFraAordningen =
+            arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
+                fødselsnummer = person.id.value,
+                orgnummer = ORGNUMMER,
+            )
 
         assertEquals(2, arbeidsgiverInntekterFraAordningen.size)
         assertEquals(2, arbeidsgiverInntekterFraAordningen.size)
         assertEquals(3, arbeidsgiverInntekterFraAordningen.first().inntekter.size)
         assertEquals(3, arbeidsgiverInntekterFraAordningen.last().inntekter.size)
-        assertEquals(19000.0, arbeidsgiverInntekterFraAordningen.first().inntekter.first().sum)
-        assertEquals(23000.0, arbeidsgiverInntekterFraAordningen.first().inntekter.last().sum)
-        assertEquals(20000.0, arbeidsgiverInntekterFraAordningen.last().inntekter.first().sum)
-        assertEquals(24000.0, arbeidsgiverInntekterFraAordningen.last().inntekter.last().sum)
-
-        val inntektFraAordningenFeilOrgnummer = arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
-            fødselsnummer = FNR,
-            orgnummer = "123123123"
+        assertEquals(
+            19000.0,
+            arbeidsgiverInntekterFraAordningen
+                .first()
+                .inntekter
+                .first()
+                .sum,
         )
+        assertEquals(
+            23000.0,
+            arbeidsgiverInntekterFraAordningen
+                .first()
+                .inntekter
+                .last()
+                .sum,
+        )
+        assertEquals(
+            20000.0,
+            arbeidsgiverInntekterFraAordningen
+                .last()
+                .inntekter
+                .first()
+                .sum,
+        )
+        assertEquals(
+            24000.0,
+            arbeidsgiverInntekterFraAordningen
+                .last()
+                .inntekter
+                .last()
+                .sum,
+        )
+
+        val inntektFraAordningenFeilOrgnummer =
+            arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
+                fødselsnummer = person.id.value,
+                orgnummer = "123123123",
+            )
 
         assertEquals(0, inntektFraAordningenFeilOrgnummer.size)
     }
 
     @Test
     fun `Returnerer tomt array om arbeidsgiver ikke har noen inntekter lagret`() {
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
 
-        val inntektFraAordningen = arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
-            fødselsnummer = FNR,
-            orgnummer = ORGNUMMER
-        )
+        val inntektFraAordningen =
+            arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
+                fødselsnummer = person.id.value,
+                orgnummer = ORGNUMMER,
+            )
 
         assertEquals(0, inntektFraAordningen.size)
         assertTrue(inntektFraAordningen.isEmpty())
     }
 
     private fun opprettInntekt(
-        fødselsnummer: String = FNR,
+        fødselsnummer: String = person.id.value,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
     ) = dbQuery.update(
@@ -140,5 +179,4 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
         "skjaeringstidspunkt" to skjæringstidspunkt,
         "inntekter" to objectMapper.writeValueAsString(inntekter),
     )
-
 }

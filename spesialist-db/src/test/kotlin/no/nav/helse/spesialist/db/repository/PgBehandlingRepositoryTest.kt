@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
     private val repository = PgBehandlingRepository(session)
 
     @Test
@@ -25,16 +26,14 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
         val fom = 1.jan(2018)
         val tom = 31.jan(2018)
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             spleisBehandlingId = spleisBehandlingId,
             vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.id.value,
             fom = fom,
             tom = tom,
         )
@@ -49,7 +48,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(tags.toSet(), funnet.tags)
         assertEquals(fom, funnet.fom)
         assertEquals(tom, funnet.tom)
-        assertEquals(fom, funnet.skjæringstidspunkt) //ved ny behandling defaultes skjæringstidspunkt til fom
+        assertEquals(fom, funnet.skjæringstidspunkt) // ved ny behandling defaultes skjæringstidspunkt til fom
     }
 
     @Test
@@ -58,16 +57,14 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
         val fom = 1.jan(2018)
         val tom = 31.jan(2018)
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             spleisBehandlingId = spleisBehandlingId,
             vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.id.value,
             fom = fom,
             tom = tom,
         )
@@ -83,7 +80,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(tags.toSet(), funnetMedBehandlingUnikId.tags)
         assertEquals(fom, funnetMedBehandlingUnikId.fom)
         assertEquals(tom, funnetMedBehandlingUnikId.tom)
-        assertEquals(fom, funnetMedBehandlingUnikId.skjæringstidspunkt) //ved ny behandling defaultes skjæringstidspunkt til fom
+        assertEquals(fom, funnetMedBehandlingUnikId.skjæringstidspunkt) // ved ny behandling defaultes skjæringstidspunkt til fom
     }
 
     @Test
@@ -93,36 +90,36 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId2 = UUID.randomUUID()
         val spleisBehandlingId3 = UUID.randomUUID()
         val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             fom = 1.jan(2018),
             spleisBehandlingId = spleisBehandlingId1,
             vedtaksperiodeId = UUID.randomUUID(),
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = person.id.value,
         )
         opprettBehandling(
             fom = 1.jan(2018),
             spleisBehandlingId = spleisBehandlingId2,
             vedtaksperiodeId = UUID.randomUUID(),
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = person.id.value,
         )
         opprettBehandling(
             fom = 2.jan(2018),
             spleisBehandlingId = spleisBehandlingId3,
             vedtaksperiodeId = UUID.randomUUID(),
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = person.id.value,
         )
 
         // when
-        val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            lagBehandling(tags = emptySet(), fom = 1.jan(2018)),
-            fødselsnummer = fødselsnummer
-        ).map { it.spleisBehandlingId!!.value }
+        val funnet =
+            repository
+                .finnAndreBehandlingerISykefraværstilfelle(
+                    lagBehandling(tags = emptySet(), fom = 1.jan(2018)),
+                    fødselsnummer = person.id.value,
+                ).map { it.spleisBehandlingId!!.value }
 
         // then
         assertEquals(2, funnet.size)
@@ -136,8 +133,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId1 = UUID.randomUUID()
         val spleisBehandlingId2 = UUID.randomUUID()
         val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         val vedtaksperiodeId = UUID.randomUUID()
         opprettBehandling(
@@ -145,21 +140,22 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
             spleisBehandlingId = spleisBehandlingId1,
             vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = person.id.value,
         )
         opprettBehandling(
             fom = 2.jan(2018),
             spleisBehandlingId = spleisBehandlingId2,
             vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = person.id.value,
         )
 
         // when
-        val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            lagBehandling(tags = emptySet(), skjæringstidspunkt = 2 jan 2018),
-            fødselsnummer = fødselsnummer
-        )
+        val funnet =
+            repository.finnAndreBehandlingerISykefraværstilfelle(
+                lagBehandling(tags = emptySet(), skjæringstidspunkt = 2 jan 2018),
+                fødselsnummer = person.id.value,
+            )
 
         // then
         assertEquals(1, funnet.size)
@@ -171,21 +167,20 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         // given
         val spleisBehandlingId1 = UUID.randomUUID()
         val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             fom = 1.jan(2018),
             spleisBehandlingId = spleisBehandlingId1,
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = person.id.value,
         )
 
         // when
-        val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            lagBehandling(tags = emptySet()),
-            fødselsnummer = lagFødselsnummer()
-        )
+        val funnet =
+            repository.finnAndreBehandlingerISykefraværstilfelle(
+                lagBehandling(tags = emptySet()),
+                fødselsnummer = lagFødselsnummer(),
+            )
 
         // then
         assertEquals(0, funnet.size)
@@ -195,15 +190,14 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     fun `lagre behandling`() {
         // given
         val vedtaksperiode = lagVedtaksperiode()
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiode.id.value)
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiode.id.value, fødselsnummer = person.id.value)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
 
-        //when
+        // when
         repository.lagre(behandling)
 
-        //then
+        // then
         val funnet = repository.finn(behandling.id)
         assertNotNull(funnet)
         assertEquals(behandling.id, funnet.id)
@@ -222,37 +216,38 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     fun `oppdater behandling`() {
         // given
         val vedtaksperiode = lagVedtaksperiode()
-        opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiode.id.value)
-        val orginalBehandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id,
-            utbetalingId = UtbetalingId(UUID.randomUUID()),
-            fom = 1.feb(2018),
-            tom = 28.feb(2018),
-            skjæringstidspunkt = 1.feb(2018),
-            tilstand = Behandling.Tilstand.KlarTilBehandling,
-            tags = setOf("DelvisInnvilget"),
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        )
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiode.id.value, fødselsnummer = person.id.value)
+        val orginalBehandling =
+            lagBehandling(
+                vedtaksperiodeId = vedtaksperiode.id,
+                utbetalingId = UtbetalingId(UUID.randomUUID()),
+                fom = 1.feb(2018),
+                tom = 28.feb(2018),
+                skjæringstidspunkt = 1.feb(2018),
+                tilstand = Behandling.Tilstand.KlarTilBehandling,
+                tags = setOf("DelvisInnvilget"),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            )
         repository.lagre(orginalBehandling)
 
-        //when
-        val oppdatertBehandling = lagBehandling(
-            id = orginalBehandling.id,
-            spleisBehandlingId = orginalBehandling.spleisBehandlingId,
-            vedtaksperiodeId = orginalBehandling.vedtaksperiodeId,
-            utbetalingId = UtbetalingId(UUID.randomUUID()),
-            fom = 1.jan(2018),
-            tom = 31.jan(2018),
-            skjæringstidspunkt = 1.jan(2018),
-            tilstand = Behandling.Tilstand.VedtakFattet,
-            tags = setOf("Innvilget"),
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSLEDIG
-        )
+        // when
+        val oppdatertBehandling =
+            lagBehandling(
+                id = orginalBehandling.id,
+                spleisBehandlingId = orginalBehandling.spleisBehandlingId,
+                vedtaksperiodeId = orginalBehandling.vedtaksperiodeId,
+                utbetalingId = UtbetalingId(UUID.randomUUID()),
+                fom = 1.jan(2018),
+                tom = 31.jan(2018),
+                skjæringstidspunkt = 1.jan(2018),
+                tilstand = Behandling.Tilstand.VedtakFattet,
+                tags = setOf("Innvilget"),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSLEDIG,
+            )
         repository.lagre(oppdatertBehandling)
 
-        //then
+        // then
         val funnet = repository.finn(orginalBehandling.id)
         assertNotNull(funnet)
         assertEquals(orginalBehandling.id, funnet.id)

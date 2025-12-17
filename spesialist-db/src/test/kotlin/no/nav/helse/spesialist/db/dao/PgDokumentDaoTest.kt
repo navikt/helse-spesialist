@@ -5,26 +5,20 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-
 internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
-    @BeforeEach
-    fun setup() {
-        testhendelse()
-        opprettPerson()
-    }
+    private val person = opprettPerson()
 
     @Test
     fun `lagrer dokument`() {
         val dokumentId = UUID.randomUUID()
         val dokument = objectMapper.readTree("""{"testsøknad":"hei"}""")
-        dokumentDao.lagre(FNR, dokumentId, dokument)
+        dokumentDao.lagre(person.id.value, dokumentId, dokument)
 
-        val dokumentFraDB = dokumentDao.hent(FNR, dokumentId)
+        val dokumentFraDB = dokumentDao.hent(person.id.value, dokumentId)
 
         assertNotNull(dokumentFraDB)
 
@@ -38,10 +32,10 @@ internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
         val dokumentId = UUID.randomUUID()
         val dokument = objectMapper.readTree("""{"testsøknad":"hei"}""")
         val dokument2 = objectMapper.readTree("""{"testsøknad":"hade"}""")
-        dokumentDao.lagre(FNR, dokumentId, dokument)
-        dokumentDao.lagre(FNR, dokumentId, dokument2)
+        dokumentDao.lagre(person.id.value, dokumentId, dokument)
+        dokumentDao.lagre(person.id.value, dokumentId, dokument2)
 
-        val dokumentFraDB = dokumentDao.hent(FNR, dokumentId)
+        val dokumentFraDB = dokumentDao.hent(person.id.value, dokumentId)
 
         if (dokumentFraDB != null) {
             assertEquals("hade", dokumentFraDB["testsøknad"].asText())
@@ -54,18 +48,18 @@ internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
         val dokumentId2 = UUID.randomUUID()
         val dokument1 = objectMapper.readTree("""{"testsøknad":"gammel"}""")
         val dokument2 = objectMapper.readTree("""{"testsøknad":"ny"}""")
-        lagreDokumentMedOpprettet(LocalDateTime.now().minusMonths(4), FNR, dokumentId1, dokument1)
-        lagreDokumentMedOpprettet(LocalDateTime.now(), FNR, dokumentId2, dokument2)
+        lagreDokumentMedOpprettet(LocalDateTime.now().minusMonths(4), person.id.value, dokumentId1, dokument1)
+        lagreDokumentMedOpprettet(LocalDateTime.now(), person.id.value, dokumentId2, dokument2)
         val antallSlettet = dokumentDao.slettGamleDokumenter()
 
-        assertNull(dokumentDao.hent(FNR, dokumentId1))
-        assertNotNull(dokumentDao.hent(FNR, dokumentId2))
+        assertNull(dokumentDao.hent(person.id.value, dokumentId1))
+        assertNotNull(dokumentDao.hent(person.id.value, dokumentId2))
         assertEquals(1, antallSlettet)
     }
 
     @Test
     fun `returnerer null dersom dokument ikke er lagret i DB`() {
-        val dokumentFraDB = dokumentDao.hent(FNR, UUID.randomUUID())
+        val dokumentFraDB = dokumentDao.hent(person.id.value, UUID.randomUUID())
 
         assertNull(dokumentFraDB)
     }
@@ -75,25 +69,28 @@ internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
         fødselsnummer: String,
         dokumentId: UUID,
         dokument: JsonNode,
-    ) = dbQuery.singleOrNull(
-        """
-        SELECT id FROM person WHERE fødselsnummer = :fodselsnummer
-        """.trimIndent(), "fodselsnummer" to fødselsnummer
-    ) { it.int("id") }?.let { personId ->
-        dbQuery.update(
+    ) = dbQuery
+        .singleOrNull(
             """
-            INSERT INTO dokumenter (dokument_id, person_ref, dokument, opprettet)
-            VALUES (
-                :dokumentId,
-                :personId,
-                :dokument::json,
-                :opprettet
-            )
+            SELECT id FROM person WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "dokumentId" to dokumentId,
-            "personId" to personId,
-            "dokument" to objectMapper.writeValueAsString(dokument),
-            "opprettet" to opprettet
-        )
-    }
+            "fodselsnummer" to fødselsnummer,
+        ) { it.int("id") }
+        ?.let { personId ->
+            dbQuery.update(
+                """
+                INSERT INTO dokumenter (dokument_id, person_ref, dokument, opprettet)
+                VALUES (
+                    :dokumentId,
+                    :personId,
+                    :dokument::json,
+                    :opprettet
+                )
+                """.trimIndent(),
+                "dokumentId" to dokumentId,
+                "personId" to personId,
+                "dokument" to objectMapper.writeValueAsString(dokument),
+                "opprettet" to opprettet,
+            )
+        }
 }

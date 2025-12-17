@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -20,12 +21,12 @@ import java.util.UUID
 internal class VedtakDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagre og finn vedtaksperiode`() {
-        opprettPerson()
+        val person = opprettPerson()
         opprettArbeidsgiver()
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
-                    fødselsnummer = FNR,
+                    fødselsnummer = person.id.value,
                     vedtaksperiodeDto =
                         VedtaksperiodeDto(
                             organisasjonsnummer = ORGNUMMER,
@@ -66,12 +67,12 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finn forkastet vedtaksperiode`() {
-        opprettPerson()
+        val person = opprettPerson()
         opprettArbeidsgiver()
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
-                    fødselsnummer = FNR,
+                    fødselsnummer = person.id.value,
                     vedtaksperiodeDto =
                         VedtaksperiodeDto(
                             organisasjonsnummer = ORGNUMMER,
@@ -112,9 +113,9 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagrer og leser vedtaksperiodetype hvis den er satt`() {
-        opprettPerson()
+        val person = opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.id.value)
         val vedtaksperiodetype = Periodetype.FØRSTEGANGSBEHANDLING
         val inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
         vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype, inntektskilde)
@@ -124,30 +125,34 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `oppretter innslag i koblingstabellen`() {
-        godkjenningsbehov(HENDELSE_ID)
-        nyPerson()
+        val person = lagPerson()
+        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
+        godkjenningsbehov(HENDELSE_ID, fødselsnummer = person.id.value)
         vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
         assertEquals(VEDTAKSPERIODE, finnKobling(HENDELSE_ID))
     }
 
     @Test
     fun `ikke automatisk godkjent dersom det ikke finnes innslag i db`() {
-        nyPerson()
+        val person = lagPerson()
+        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
         assertFalse(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
     @Test
     fun `ikke automatisk godkjent dersom innslag i db sier false`() {
-        godkjenningsbehov(HENDELSE_ID)
-        nyPerson()
+        val person = lagPerson()
+        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
+        godkjenningsbehov(HENDELSE_ID, fødselsnummer = person.id.value)
         nyttAutomatiseringsinnslag(false)
         assertFalse(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
     @Test
     fun `automatisk godkjent dersom innslag i db sier true`() {
-        godkjenningsbehov(HENDELSE_ID)
-        nyPerson()
+        val person = lagPerson()
+        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
+        godkjenningsbehov(HENDELSE_ID, fødselsnummer = person.id.value)
         nyttAutomatiseringsinnslag(true)
         assertTrue(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }

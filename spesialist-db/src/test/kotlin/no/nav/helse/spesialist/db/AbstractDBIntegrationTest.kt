@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
-import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -36,7 +35,10 @@ import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
+import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -44,7 +46,9 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsdato
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.typer.Kjønn
@@ -185,12 +189,11 @@ abstract class AbstractDBIntegrationTest {
         organisasjonsnummer: String = ORGNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         utbetalingId: UUID = UTBETALING_ID,
-        contextId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         oppgaveEgenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ) {
-        opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
+        opprettPerson(person = lagPerson(id = Identitetsnummer.fraString(fødselsnummer), aktørId = aktørId))
         opprettArbeidsgiver(identifikator = organisasjonsnummer)
         opprettVedtaksperiode(
             fødselsnummer = fødselsnummer,
@@ -202,19 +205,11 @@ abstract class AbstractDBIntegrationTest {
             spleisBehandlingId = spleisBehandlingId,
         )
         opprettOppgave(
-            contextId = contextId,
             vedtaksperiodeId = vedtaksperiodeId,
             egenskaper = oppgaveEgenskaper,
             godkjenningsbehovId = godkjenningsbehovId,
             behandlingId = spleisBehandlingId,
         )
-    }
-
-    private fun opprettCommandContext(
-        hendelse: TestMelding,
-        contextId: UUID,
-    ) {
-        commandContextDao.opprett(hendelse.id, contextId)
     }
 
     private fun opprettVedtakstype(
@@ -225,39 +220,9 @@ abstract class AbstractDBIntegrationTest {
         vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
 
-    protected fun opprettMinimalPerson(
-        fødselsnummer: String = FNR,
-        aktørId: String = AKTØR,
-    ) = personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
-
-    protected fun opprettPerson(
-        fødselsnummer: String = FNR,
-        aktørId: String = AKTØR,
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-        fornavn: String = lagFornavn(),
-        mellomnavn: String? = null,
-        etternavn: String = lagEtternavn(),
-    ): Persondata {
-        personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
-        val personinfoId =
-            opprettPersoninfo(
-                fødselsnummer = fødselsnummer,
-                adressebeskyttelse = adressebeskyttelse,
-                fornavn = fornavn,
-                mellomnavn = mellomnavn,
-                etternavn = etternavn,
-            )
-        val infotrygdutbetalingerId =
-            personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
-        val enhetId = ENHET.toInt()
-        personDao.oppdaterEnhet(fødselsnummer, enhetId)
-        personDao.finnPersonMedFødselsnummer(fødselsnummer)!!
-        egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        return Persondata(
-            personinfoId = personinfoId,
-            enhetId = enhetId,
-            infotrygdutbetalingerId = infotrygdutbetalingerId,
-        )
+    protected fun opprettPerson(person: Person = lagPerson()): Person {
+        sessionContext.personRepository.lagre(person)
+        return person
     }
 
     protected fun oppdaterEnhet(
@@ -272,8 +237,9 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun oppdaterAdressebeskyttelse(
         @Suppress("SameParameterValue") adressebeskyttelse: Adressebeskyttelse,
+        fødselsnummer: String,
     ) {
-        opprettPersoninfo(FNR, adressebeskyttelse = adressebeskyttelse)
+        opprettPersoninfo(fødselsnummer, adressebeskyttelse = adressebeskyttelse)
     }
 
     protected fun opprettPersoninfo(
@@ -362,8 +328,11 @@ abstract class AbstractDBIntegrationTest {
 
     // For å få satt riktig skjæringstidspunkt på behandlinger
     // Burde kanskje erstattes med bruk av DAO-er
-    protected fun oppdaterBehandlingdata(vararg perioder: SpleisVedtaksperiode) {
-        pgLegacyPersonRepository.brukPersonHvisFinnes(FNR) {
+    protected fun oppdaterBehandlingdata(
+        vararg perioder: SpleisVedtaksperiode,
+        fødselsnummer: String = FNR,
+    ) {
+        pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             mottaSpleisVedtaksperioder(perioder.toList())
         }
     }
@@ -444,7 +413,6 @@ abstract class AbstractDBIntegrationTest {
     )
 
     protected fun opprettOppgave(
-        contextId: UUID = UUID.randomUUID(),
         førsteOpprettet: LocalDateTime? = null,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
@@ -453,8 +421,6 @@ abstract class AbstractDBIntegrationTest {
         behandlingId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
     ): Oppgave {
-        val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
-        opprettCommandContext(hendelse, contextId)
         val oppgave =
             Oppgave.ny(
                 id = nextLong(),
@@ -549,13 +515,12 @@ abstract class AbstractDBIntegrationTest {
     protected fun nyOppgaveForNyPerson(
         fødselsnummer: String = lagFødselsnummer(),
         aktørId: String = lagAktørId(),
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+        adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
-        commandContextId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
         fornavn: String = lagFornavn(),
         mellomnavn: String? = null,
@@ -563,12 +528,21 @@ abstract class AbstractDBIntegrationTest {
         oppgaveegenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ): Oppgave {
         opprettPerson(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            adressebeskyttelse = adressebeskyttelse,
-            fornavn = fornavn,
-            mellomnavn = mellomnavn,
-            etternavn = etternavn,
+            person =
+                lagPerson(
+                    id = Identitetsnummer.fraString(fødselsnummer),
+                    aktørId = aktørId,
+                    adressebeskyttelse = adressebeskyttelse,
+                    info =
+                        Personinfo(
+                            fornavn = fornavn,
+                            mellomnavn = mellomnavn,
+                            etternavn = etternavn,
+                            fødselsdato = lagFødselsdato(),
+                            kjønn = Personinfo.Kjønn.Ukjent,
+                            adressebeskyttelse = adressebeskyttelse,
+                        ),
+                ),
         )
         opprettArbeidsgiver(identifikator = organisasjonsnummer)
         opprettVedtaksperiode(
@@ -588,7 +562,6 @@ abstract class AbstractDBIntegrationTest {
             beløpTilArbeidsgiver = 1000,
         )
         return opprettOppgave(
-            contextId = commandContextId,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             behandlingId = behandlingId,
@@ -712,12 +685,6 @@ abstract class AbstractDBIntegrationTest {
         )
         return saksbehandler
     }
-
-    protected data class Persondata(
-        val personinfoId: Long,
-        val enhetId: Int,
-        val infotrygdutbetalingerId: Long,
-    )
 
     protected data class Periode(
         val id: UUID,

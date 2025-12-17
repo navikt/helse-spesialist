@@ -5,13 +5,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
-import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,6 +21,8 @@ import java.time.YearMonth
 
 @Isolated
 internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
+
     @BeforeEach
     fun tømTabeller() {
         sessionOf(dataSource).use {
@@ -30,55 +31,33 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `oppretter minimal person`() {
-        personDao.lagreMinimalPerson(MinimalPersonDto(FNR, AKTØR))
-        val minimalPerson = personDao.finnMinimalPerson(FNR)
-        assertNotNull(minimalPerson)
-        assertEquals(FNR, minimalPerson?.fødselsnummer)
-        assertEquals(AKTØR, minimalPerson?.aktørId)
-    }
-
-    @Test
     fun `kan fjerne en person fra klargjøringstabellen`() {
-        leggInnPersonIKlargjøringstabellen(FNR)
-        assertTrue(personFinnesIKlargjøringstabellen(FNR))
-        personDao.personKlargjort(FNR)
-        assertFalse(personFinnesIKlargjøringstabellen(FNR))
+        leggInnPersonIKlargjøringstabellen(person.id.value)
+        assertTrue(personFinnesIKlargjøringstabellen(person.id.value))
+        personDao.personKlargjort(person.id.value)
+        assertFalse(personFinnesIKlargjøringstabellen(person.id.value))
     }
 
     @Test
     fun `lagre personinfo`() {
-        personDao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+        personDao.upsertPersoninfo(person.id.value, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         assertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
     }
 
     @Test
     fun `ingen mellomnavn`() {
-        personDao.upsertPersoninfo(FNR, FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+        personDao.upsertPersoninfo(person.id.value, FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         assertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
     }
 
     @Test
     fun `lagre infotrygdutbetalinger`() {
-        personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
+        personDao.upsertInfotrygdutbetalinger(person.id.value, objectMapper.createObjectNode())
         assertEquals(1, infotrygdUtbetalinger().size)
-    }
-
-    @Test
-    fun `oppretter person`() {
-        val (personinfoId, enhetId, infotrygdutbetalingerId) = opprettPerson()
-        assertNotNull(personDao.finnPersonMedFødselsnummer(FNR))
-        assertEquals(1, infotrygdUtbetalinger().size)
-        assertEquals(LocalDate.now(), personDao.finnEnhetSistOppdatert(FNR))
-        assertEquals(LocalDate.now(), personDao.finnITUtbetalingsperioderSistOppdatert(FNR))
-        assertEquals(LocalDate.now(), personDao.finnPersoninfoSistOppdatert(FNR))
-        assertEquals(1, person().size)
-        person().first().assertEquals(FNR, AKTØR, personinfoId, enhetId, infotrygdutbetalingerId)
     }
 
     @Test
     fun `oppdaterer personinfo`() {
-        opprettPerson()
         val nyttFornavn = "OLE"
         val nyttMellomnavn = "PETTER"
         val nyttEtternavn = "SVENSKE"
@@ -86,7 +65,7 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
         val nyttKjønn = Kjønn.Mann
         val nyAdressebeskyttelse = Adressebeskyttelse.Fortrolig
         personDao.upsertPersoninfo(
-            FNR,
+            person.id.value,
             nyttFornavn,
             nyttMellomnavn,
             nyttEtternavn,
@@ -98,51 +77,41 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `finner aktørId`() {
-        opprettPerson()
-        assertEquals(AKTØR, personDao.finnAktørId(FNR))
-    }
-
-    @Test
-    fun `finner ikke aktørId om vi ikke har person`() {
-        assertEquals(null, personDao.finnAktørId(FNR))
-    }
-
-    @Test
     fun `finner enhet`() {
-        opprettPerson()
-        assertEquals(ENHET.toInt(), personDao.finnEnhetId(FNR).toInt())
+        val person = opprettPerson(person = lagPerson())
+        oppdaterEnhet(person.id.value, ENHET.toInt())
+        assertEquals(ENHET.toInt(), personDao.finnEnhetId(person.id.value).toInt())
     }
 
     @Test
     fun `oppdaterer enhet`() {
-        opprettPerson()
+        val person = opprettPerson()
         val nyEnhet = "2100".toInt()
-        personDao.oppdaterEnhet(FNR, nyEnhet)
+        personDao.oppdaterEnhet(person.id.value, nyEnhet)
         person().first().assertEnhet(nyEnhet)
     }
 
     @Test
     fun `oppdaterer infotrygdutbetalinger`() {
-        opprettPerson()
-        assertEquals("{}", infotrygdUtbetalinger().first())
+        val person = opprettPerson()
+        assertEquals(null, infotrygdUtbetalinger().firstOrNull())
         val utbetalinger = objectMapper.createObjectNode().set<JsonNode>("test", objectMapper.createArrayNode())
-        personDao.upsertInfotrygdutbetalinger(FNR, utbetalinger)
+        personDao.upsertInfotrygdutbetalinger(person.id.value, utbetalinger)
         assertEquals("{\"test\":[]}", infotrygdUtbetalinger().first())
     }
 
     @Test
     fun `finner adressebeskyttelse for person`() {
-        opprettPerson(fødselsnummer = FNR, adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-        assertEquals(Adressebeskyttelse.Fortrolig, personDao.finnAdressebeskyttelse(FNR))
+        val person = opprettPerson(person = lagPerson(adressebeskyttelse = no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Fortrolig))
+        assertEquals(Adressebeskyttelse.Fortrolig, personDao.finnAdressebeskyttelse(person.id.value))
     }
 
     @Test
     fun `Lagrer inntekt`() {
-        opprettPerson()
+        val person = opprettPerson()
         val sekvensnummer =
             personDao.lagreInntekter(
-                fødselsnummer = FNR,
+                fødselsnummer = person.id.value,
                 skjæringstidspunkt = LocalDate.parse("2022-11-11"),
                 inntekter =
                     listOf(
@@ -169,34 +138,34 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner riktig inntekt`() {
-        opprettPerson()
+        val person = opprettPerson()
         personDao.lagreInntekter(
-            fødselsnummer = FNR,
+            fødselsnummer = person.id.value,
             skjæringstidspunkt = LocalDate.parse("2022-11-11"),
             inntekter = listOf(Inntekter(YearMonth.parse("2022-11"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER)))),
         )
         personDao.lagreInntekter(
-            fødselsnummer = FNR,
+            fødselsnummer = person.id.value,
             skjæringstidspunkt = LocalDate.parse("2022-03-03"),
             inntekter = listOf(Inntekter(YearMonth.parse("2022-03"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER)))),
         )
         personDao.lagreInntekter(
-            fødselsnummer = FNR,
+            fødselsnummer = person.id.value,
             skjæringstidspunkt = LocalDate.parse("2020-01-01"),
             inntekter = listOf(Inntekter(YearMonth.parse("2021-01"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER)))),
         )
 
         assertEquals(
             YearMonth.parse("2022-11"),
-            personDao.finnInntekter(FNR, LocalDate.parse("2022-11-11"))!!.first().årMåned,
+            personDao.finnInntekter(person.id.value, LocalDate.parse("2022-11-11"))!!.first().årMåned,
         )
         assertEquals(
             YearMonth.parse("2022-03"),
-            personDao.finnInntekter(FNR, LocalDate.parse("2022-03-03"))!!.first().årMåned,
+            personDao.finnInntekter(person.id.value, LocalDate.parse("2022-03-03"))!!.first().årMåned,
         )
         assertEquals(
             YearMonth.parse("2021-01"),
-            personDao.finnInntekter(FNR, LocalDate.parse("2020-01-01"))!!.first().årMåned,
+            personDao.finnInntekter(person.id.value, LocalDate.parse("2020-01-01"))!!.first().årMåned,
         )
     }
 
@@ -237,11 +206,7 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
                 queryOf("SELECT fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person")
                     .map { row ->
                         Person(
-                            row.string("fødselsnummer"),
-                            row.string("aktør_id"),
-                            row.longOrNull("info_ref"),
                             row.intOrNull("enhet_ref"),
-                            row.longOrNull("infotrygdutbetalinger_ref"),
                         )
                     }.asList,
             )
@@ -278,36 +243,19 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
         dbQuery.update(
             "insert into person_klargjores (fødselsnummer, opprettet) values (:foedselsnummer, :opprettet)",
             "foedselsnummer" to fødselsnummer,
-            "opprettet" to now()
+            "opprettet" to now(),
         )
     }
 
-    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) = dbQuery.singleOrNull(
-        "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
-        "foedselsnummer" to fødselsnummer
-    ) { true } ?: false
+    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) =
+        dbQuery.singleOrNull(
+            "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
+        ) { true } ?: false
 
     private class Person(
-        private val fødselsnummer: String,
-        private val aktørId: String,
-        private val infoRef: Long?,
         private val enhetRef: Int?,
-        private val infotrygdutbetalingerRef: Long?,
     ) {
-        fun assertEquals(
-            forventetFødselsnummer: String,
-            forventetAktørId: String,
-            forventetInfoRef: Long?,
-            forventetEnhetRef: Int?,
-            forventetInfotrygdutbetalingerRef: Long?,
-        ) {
-            assertEquals(forventetFødselsnummer, fødselsnummer)
-            assertEquals(forventetAktørId, aktørId)
-            assertEquals(forventetInfoRef, infoRef)
-            assertEquals(forventetEnhetRef, enhetRef)
-            assertEquals(forventetInfotrygdutbetalingerRef, infotrygdutbetalingerRef)
-        }
-
         fun assertEnhet(forventetEnhet: Int) {
             assertEquals(forventetEnhet, enhetRef)
         }
