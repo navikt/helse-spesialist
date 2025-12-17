@@ -17,6 +17,136 @@ internal class PgPersonRepository(
     session: Session,
 ) : QueryRunner by MedSession(session),
     PersonRepository {
+    override fun lagre(person: Person) {
+        val personinfoRef =
+            personinfoId(person.id)?.also {
+                oppdaterPersoninfo(it, person.info)
+            } ?: lagrePersoninfo(person.id, person.info)
+        lagrePerson(person, personinfoRef)
+        lagreEgenAnsattStatus(person.id, person.egenAnsattStatus)
+    }
+
+    private fun lagrePerson(
+        person: Person,
+        personinfoRef: Long?,
+    ) {
+        asSQL(
+            """
+                INSERT INTO person(fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, personinfo_oppdatert, enhet_ref_oppdatert, infotrygdutbetalinger_oppdatert) 
+                VALUES(:fodselsnummer, :aktorId, :personinfoRef, :enhetRef, :infotrygdutbetalingerRef, :infoOppdatert, :enhetOppdatert, :infotrygdutbetalingerOppdatert)
+                ON CONFLICT(fødselsnummer) DO UPDATE SET 
+                info_ref = excluded.info_ref,
+                personinfo_oppdatert = excluded.personinfo_oppdatert, 
+                enhet_ref = excluded.enhet_ref,
+                enhet_ref_oppdatert = excluded.enhet_ref_oppdatert,
+                infotrygdutbetalinger_ref = excluded.infotrygdutbetalinger_ref,
+                infotrygdutbetalinger_oppdatert = excluded.infotrygdutbetalinger_oppdatert
+            """,
+            "fodselsnummer" to person.id.value,
+            "aktorId" to person.aktørId,
+            "personinfoRef" to personinfoRef,
+            "enhetRef" to person.enhetRef,
+            "infotrygdutbetalingerRef" to person.infotrygdutbetalingerRef,
+            "infoOppdatert" to person.infoOppdatert,
+            "enhetOppdatert" to person.enhetRefOppdatert,
+            "infotrygdutbetalingerOppdatert" to person.infotrygdutbetalingerOppdatert,
+        ).update()
+    }
+
+    private fun lagrePersoninfo(
+        identitetsnummer: Identitetsnummer,
+        personinfo: Personinfo?,
+    ): Long? {
+        if (personinfo == null) return null
+        return asSQL(
+            """
+                     INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) 
+                     VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, :kjonn::person_kjonn, :adressebeskyttelse)
+                """,
+            "fornavn" to personinfo.fornavn,
+            "mellomnavn" to personinfo.mellomnavn,
+            "etternavn" to personinfo.etternavn,
+            "fodselsdato" to personinfo.fødselsdato,
+            "kjonn" to
+                personinfo.kjønn?.let {
+                    when (it) {
+                        Kjønn.Kvinne -> "Kvinne"
+                        Kjønn.Mann -> "Mann"
+                        Kjønn.Ukjent -> "Ukjent"
+                    }
+                },
+            "adressebeskyttelse" to
+                when (personinfo.adressebeskyttelse) {
+                    Adressebeskyttelse.Ugradert -> "Ugradert"
+                    Adressebeskyttelse.Fortrolig -> "Fortrolig"
+                    Adressebeskyttelse.StrengtFortrolig -> "StrengtFortrolig"
+                    Adressebeskyttelse.StrengtFortroligUtland -> "StrengtFortroligUtland"
+                    Adressebeskyttelse.Ukjent -> "Ukjent"
+                },
+            "fodselsnummer" to identitetsnummer.value,
+        ).updateAndReturnGeneratedKey()
+    }
+
+    private fun oppdaterPersoninfo(
+        personinfoId: Long,
+        personinfo: Personinfo?,
+    ) {
+        if (personinfo == null) return
+        asSQL(
+            """
+                     UPDATE person_info SET fornavn = :fornavn, mellomnavn = :mellomnavn, etternavn = :etternavn,
+                     fodselsdato = :fodselsdato, kjonn = :kjonn::person_kjonn, adressebeskyttelse = :adressebeskyttelse
+                     WHERE id = :personinfoRef
+                """,
+            "fornavn" to personinfo.fornavn,
+            "mellomnavn" to personinfo.mellomnavn,
+            "etternavn" to personinfo.etternavn,
+            "fodselsdato" to personinfo.fødselsdato,
+            "kjonn" to
+                personinfo.kjønn?.let {
+                    when (it) {
+                        Kjønn.Kvinne -> "Kvinne"
+                        Kjønn.Mann -> "Mann"
+                        Kjønn.Ukjent -> "Ukjent"
+                    }
+                },
+            "adressebeskyttelse" to
+                when (personinfo.adressebeskyttelse) {
+                    Adressebeskyttelse.Ugradert -> "Ugradert"
+                    Adressebeskyttelse.Fortrolig -> "Fortrolig"
+                    Adressebeskyttelse.StrengtFortrolig -> "StrengtFortrolig"
+                    Adressebeskyttelse.StrengtFortroligUtland -> "StrengtFortroligUtland"
+                    Adressebeskyttelse.Ukjent -> "Ukjent"
+                },
+            "personinfoRef" to personinfoId,
+        ).update()
+    }
+
+    private fun personinfoId(identitetsnummer: Identitetsnummer): Long? =
+        asSQL(
+            """
+               SELECT info_ref FROM person WHERE fødselsnummer = :fodselsnummer 
+            """,
+            "fodselsnummer" to identitetsnummer.value,
+        ).singleOrNull { row -> row.longOrNull("info_ref") }
+
+    private fun lagreEgenAnsattStatus(
+        identitetsnummer: Identitetsnummer,
+        egenAnsattStatus: EgenAnsattStatus?,
+    ) {
+        if (egenAnsattStatus == null) return
+        asSQL(
+            """
+                 INSERT INTO egen_ansatt(person_ref, er_egen_ansatt, opprettet) 
+                  VALUES ((SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :egenAnsattStatus, :egenAnsattStatusOppdatert)
+                  ON CONFLICT(person_ref) DO UPDATE set er_egen_ansatt = excluded.er_egen_ansatt, opprettet = excluded.opprettet
+            """,
+            "egenAnsattStatus" to egenAnsattStatus.erEgenAnsatt,
+            "egenAnsattStatusOppdatert" to egenAnsattStatus.oppdatertTidspunkt,
+            "fodselsnummer" to identitetsnummer.value,
+        ).update()
+    }
+
     override fun finn(id: Identitetsnummer): Person? =
         asSQL(
             """

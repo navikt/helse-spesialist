@@ -52,6 +52,17 @@ class Person private constructor(
         this.infoOppdatert = LocalDate.now()
     }
 
+    fun oppdaterEgenAnsattStatus(
+        erEgenAnsatt: Boolean,
+        oppdatertTidspunkt: Instant,
+    ) {
+        this.egenAnsattStatus =
+            EgenAnsattStatus(
+                erEgenAnsatt = erEgenAnsatt,
+                oppdatertTidspunkt = oppdatertTidspunkt,
+            )
+    }
+
     fun kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
         girTilgangTilEgenAnsattStatus(tilgangsgrupper) &&
             girTilgangTilAdressebeskyttelse(tilgangsgrupper)
@@ -69,17 +80,6 @@ class Person private constructor(
             Personinfo.Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE_7 in tilgangsgrupper
             else -> false
         }
-
-    fun oppdaterEgenAnsattStatus(
-        erEgenAnsatt: Boolean,
-        oppdatertTidspunkt: Instant,
-    ) {
-        this.egenAnsattStatus =
-            EgenAnsattStatus(
-                erEgenAnsatt = erEgenAnsatt,
-                oppdatertTidspunkt = oppdatertTidspunkt,
-            )
-    }
 
     object Factory {
         fun ny(
