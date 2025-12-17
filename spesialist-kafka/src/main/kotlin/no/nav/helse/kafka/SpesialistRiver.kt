@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import java.util.UUID
 
 sealed interface SpesialistRiver : River.PacketListener {
     fun preconditions(): River.PacketValidation
@@ -26,12 +27,11 @@ sealed interface SpesialistRiver : River.PacketListener {
 }
 
 sealed class TransaksjonellRiver : SpesialistRiver {
-    abstract val eventName: String
-
     abstract fun transaksjonellOnPacket(
         packet: JsonMessage,
         outbox: Outbox,
         transaksjon: SessionContext,
+        eventMetadata: EventMetadata,
     )
 
     final override fun onPacket(
@@ -41,5 +41,24 @@ sealed class TransaksjonellRiver : SpesialistRiver {
         meterRegistry: MeterRegistry,
     ) {
         error("Ikke støttet ved bruk av transaksjonell river")
+    }
+}
+
+data class EventMetadata(
+    val name: EventName,
+    val `@id`: UUID,
+)
+
+sealed interface EventName {
+    class Behov(
+        val behovene: List<String>,
+    ) : EventName {
+        override fun toString(): String = "behov: " + behovene.joinToString(", ", prefix = "[", postfix = "]")
+    }
+
+    class Hendelse(
+        val navn: String,
+    ) : EventName {
+        override fun toString(): String = navn
     }
 }

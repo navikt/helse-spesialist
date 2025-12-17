@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.withMDC
 import no.nav.helse.modell.melding.SaksbehandlerIdentOgNavn
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
@@ -35,7 +34,7 @@ import java.math.BigDecimal
 import java.util.UUID
 
 class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
-    override val eventName = "avsluttet_med_vedtak"
+    private val eventName = "avsluttet_med_vedtak"
 
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
@@ -62,108 +61,98 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
         packet: JsonMessage,
         outbox: Outbox,
         transaksjon: SessionContext,
+        eventMetadata: EventMetadata,
     ) {
-        withMDC(
-            buildMap {
-                put("meldingId", packet["@id"].asText())
-                put("meldingnavn", eventName)
-                put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
-            },
-        ) {
-            val meldingJson = packet.toJson()
-            loggInfo("Melding $eventName mottatt", "json:\n$meldingJson")
+        val spleisBehandlingId = packet["behandlingId"].asUUID()
 
-            val spleisBehandlingId = packet["behandlingId"].asUUID()
+        val vedtak =
+            transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
+                ?: error("Finner ikke relevant informasjon knyttet til vedtaket")
 
-            val vedtak =
-                transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
-                    ?: error("Finner ikke relevant informasjon knyttet til vedtaket")
+        transaksjon.meldingDao.lagre(
+            id = packet["@id"].asUUID(),
+            json = packet.toJson(),
+            meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
+            vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+        )
+        transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
+            loggInfo("Personen finnes i databasen, behandler melding $eventName", "fødselsnummer: $fødselsnummer")
 
-            transaksjon.meldingDao.lagre(
-                id = packet["@id"].asUUID(),
-                json = meldingJson,
-                meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
-                vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-            )
-            transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
-                loggInfo("Personen finnes i databasen, behandler melding $eventName", "fødselsnummer: $fødselsnummer")
+            val vedtaksperiode =
+                vedtaksperioder().finnBehandling(spleisBehandlingId)
+                    ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+            val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
 
-                val vedtaksperiode =
-                    vedtaksperioder().finnBehandling(spleisBehandlingId)
-                        ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
-                val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
+            if (behandling.tags.isEmpty()) {
+                loggErrorWithNoThrowable(
+                    "Ingen tags funnet for behandling",
+                    "vedtaksperiodeId: ${behandling.vedtaksperiodeId}, spleisBehandlingId: ${behandling.spleisBehandlingId}",
+                )
+            }
 
-                if (behandling.tags.isEmpty()) {
-                    loggErrorWithNoThrowable(
-                        "Ingen tags funnet for behandling",
-                        "vedtaksperiodeId: ${behandling.vedtaksperiodeId}, spleisBehandlingId: ${behandling.spleisBehandlingId}",
-                    )
-                }
+            val sisteGodkjenningsbehov: Godkjenningsbehov? =
+                transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
+            if (sisteGodkjenningsbehov == null) {
+                loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
+            }
 
-                val sisteGodkjenningsbehov: Godkjenningsbehov? =
-                    transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
-                if (sisteGodkjenningsbehov == null) {
-                    loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
-                }
+            behandling.håndterVedtakFattet()
 
-                behandling.håndterVedtakFattet()
-
-                val meldingOmVedtak =
-                    when (vedtak) {
-                        is Vedtak.Automatisk -> {
-                            byggVedtaksmelding(
-                                packet = packet,
-                                behandling = behandling,
-                                vedtaksperiode = vedtaksperiode,
-                                godkjenningsbehov = sisteGodkjenningsbehov,
-                                saksbehandlerIdentOgNavn = null,
-                                beslutterIdentOgNavn = null,
-                                automatiskFattet = true,
-                            )
-                        }
-
-                        is Vedtak.ManueltMedTotrinnskontroll -> {
-                            val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
-                            val beslutter = transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent) ?: error("Finner ikke beslutter")
-                            byggVedtaksmelding(
-                                packet = packet,
-                                behandling = behandling,
-                                vedtaksperiode = vedtaksperiode,
-                                godkjenningsbehov = sisteGodkjenningsbehov,
-                                saksbehandlerIdentOgNavn =
-                                    SaksbehandlerIdentOgNavn(
-                                        saksbehandler.ident.value,
-                                        saksbehandler.navn,
-                                    ),
-                                beslutterIdentOgNavn =
-                                    SaksbehandlerIdentOgNavn(
-                                        beslutter.ident.value,
-                                        beslutter.navn,
-                                    ),
-                                automatiskFattet = false,
-                            )
-                        }
-
-                        is Vedtak.ManueltUtenTotrinnskontroll -> {
-                            val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
-                            byggVedtaksmelding(
-                                packet = packet,
-                                behandling = behandling,
-                                vedtaksperiode = vedtaksperiode,
-                                godkjenningsbehov = sisteGodkjenningsbehov,
-                                saksbehandlerIdentOgNavn =
-                                    SaksbehandlerIdentOgNavn(
-                                        saksbehandler.ident.value,
-                                        saksbehandler.navn,
-                                    ),
-                                beslutterIdentOgNavn = null,
-                                automatiskFattet = false,
-                            )
-                        }
+            val meldingOmVedtak =
+                when (vedtak) {
+                    is Vedtak.Automatisk -> {
+                        byggVedtaksmelding(
+                            packet = packet,
+                            behandling = behandling,
+                            vedtaksperiode = vedtaksperiode,
+                            godkjenningsbehov = sisteGodkjenningsbehov,
+                            saksbehandlerIdentOgNavn = null,
+                            beslutterIdentOgNavn = null,
+                            automatiskFattet = true,
+                        )
                     }
 
-                outbox.leggTil(fødselsnummer, meldingOmVedtak, eventName)
-            }
+                    is Vedtak.ManueltMedTotrinnskontroll -> {
+                        val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                        val beslutter = transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent) ?: error("Finner ikke beslutter")
+                        byggVedtaksmelding(
+                            packet = packet,
+                            behandling = behandling,
+                            vedtaksperiode = vedtaksperiode,
+                            godkjenningsbehov = sisteGodkjenningsbehov,
+                            saksbehandlerIdentOgNavn =
+                                SaksbehandlerIdentOgNavn(
+                                    saksbehandler.ident.value,
+                                    saksbehandler.navn,
+                                ),
+                            beslutterIdentOgNavn =
+                                SaksbehandlerIdentOgNavn(
+                                    beslutter.ident.value,
+                                    beslutter.navn,
+                                ),
+                            automatiskFattet = false,
+                        )
+                    }
+
+                    is Vedtak.ManueltUtenTotrinnskontroll -> {
+                        val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                        byggVedtaksmelding(
+                            packet = packet,
+                            behandling = behandling,
+                            vedtaksperiode = vedtaksperiode,
+                            godkjenningsbehov = sisteGodkjenningsbehov,
+                            saksbehandlerIdentOgNavn =
+                                SaksbehandlerIdentOgNavn(
+                                    saksbehandler.ident.value,
+                                    saksbehandler.navn,
+                                ),
+                            beslutterIdentOgNavn = null,
+                            automatiskFattet = false,
+                        )
+                    }
+                }
+
+            outbox.leggTil(fødselsnummer, meldingOmVedtak, eventName)
         }
     }
 

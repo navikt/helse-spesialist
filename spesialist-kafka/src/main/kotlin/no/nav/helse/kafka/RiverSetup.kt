@@ -10,6 +10,8 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.asUUID
+import no.nav.helse.mediator.withMDC
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
@@ -118,11 +120,34 @@ class DuplikatsjekkendeRiver(
         }
         if (river is TransaksjonellRiver) {
             val outbox = Outbox(versjonAvKode)
-            sessionFactory.transactionalSessionScope { transaksjon ->
-                river.transaksjonellOnPacket(packet, outbox, transaksjon)
+            packet.interestedIn("@event_name", "@id", "@behov", "vedtaksperiodeId")
+            val vedtaksperiodeId = packet["vedtaksperiodeId"].textValue()
+            val eventName =
+                when (val eventName = packet["@event_name"].asText()) {
+                    "behov" -> EventName.Behov(packet["@behov"].map { behov -> behov.asText() })
+                    else -> EventName.Hendelse(eventName)
+                }
+            val eventMetadata =
+                EventMetadata(
+                    name = eventName,
+                    `@id` = packet["@id"].asUUID(),
+                )
+            withMDC(
+                buildMap {
+                    put("meldingId", eventMetadata.`@id`.toString())
+                    put("meldingnavn", eventMetadata.name.toString())
+                    if (vedtaksperiodeId != null) {
+                        put("vedtaksperiodeId", vedtaksperiodeId)
+                    }
+                },
+            ) {
+                loggInfo("Melding ${eventMetadata.name} mottatt", "json:\n${packet.toJson()}")
+                sessionFactory.transactionalSessionScope { transaksjon ->
+                    river.transaksjonellOnPacket(packet, outbox, transaksjon, eventMetadata)
+                }
+                loggInfo("Melding ${eventMetadata.name} lest")
+                outbox.sendAlle(MessageContextMeldingPubliserer(context))
             }
-            loggInfo("Melding ${river.eventName} lest")
-            outbox.sendAlle(MessageContextMeldingPubliserer(context))
         } else {
             river.onPacket(packet, context, metadata, meterRegistry)
         }
