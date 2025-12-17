@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.domain.Periode
 
@@ -38,8 +37,18 @@ object TilkommenInntektPeriodeValidator {
         vedtaksperioder: List<VedtaksperiodeDto>,
     ) = periode erInnenforEnAv vedtaksperioder.tilSykefraværstillfellePerioder().filterNot { it.datoer().isEmpty() }
 
-    private fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Periode> =
+    fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Periode> =
         map { it.behandlinger.last() }
-            .groupBy(BehandlingDto::skjæringstidspunkt, BehandlingDto::tom)
-            .map { (skjæringstidspunkt, listeAvTom) -> Periode(fom = skjæringstidspunkt, tom = listeAvTom.max()) }
+            .map { Periode(it.fom, it.tom) }
+            .fold(listOf()) { sammenhengendePerioder, nestePeriode ->
+                val (overlappendePerioder, resten) =
+                    sammenhengendePerioder.partition {
+                        nestePeriode overlapper Periode(it.fom, it.tom.plusDays(1))
+                    }
+                if (overlappendePerioder.isEmpty()) {
+                    resten + nestePeriode
+                } else {
+                    resten + overlappendePerioder.first().let { it.copy(tom = maxOf(it.tom, nestePeriode.tom)) }
+                }
+            }
 }
