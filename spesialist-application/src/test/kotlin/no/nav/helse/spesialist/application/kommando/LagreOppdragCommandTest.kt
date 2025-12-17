@@ -17,34 +17,39 @@ import kotlin.random.Random.Default.nextLong
 import kotlin.test.Test
 
 class LagreOppdragCommandTest {
-
     @Test
-    fun `lagre arbeidsgiverbeløp og personbeløp`() {
-        // given
-        every { utbetalingDao.finnUtbetalingIdRef(any()) } returns null
-        every { utbetalingDao.nyttOppdrag(any(), any()) } returns nextLong()
-        val arbeidsgiverbeløp = 40000
-        val personbeløp = 30000
-        val command = command(arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
+    fun `lagre arbeidsgiverbeløp og personbeløp`() =
+        testMedSessionContext {
+            // given
+            every { utbetalingDao.finnUtbetalingIdRef(any()) } returns null
+            every { utbetalingDao.nyttOppdrag(any(), any()) } returns nextLong()
+            val arbeidsgiverbeløp = 40000
+            val personbeløp = 30000
+            val command = command(arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
 
-        // when
-        command.execute(CommandContext(UUID.randomUUID()))
+            // when
+            command.execute(CommandContext(UUID.randomUUID()), it)
 
-        // then
-        verify(exactly = 1) { utbetalingDao.opprettUtbetalingId(
-            utbetalingId = any(),
-            fødselsnummer = any(),
-            arbeidsgiverIdentifikator = any(),
-            type = any(),
-            opprettet = any(),
-            arbeidsgiverFagsystemIdRef = any(),
-            personFagsystemIdRef = any(),
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp
-        )  }
-    }
+            // then
+            verify(exactly = 1) {
+                utbetalingDao.opprettUtbetalingId(
+                    utbetalingId = any(),
+                    fødselsnummer = any(),
+                    arbeidsgiverIdentifikator = any(),
+                    type = any(),
+                    opprettet = any(),
+                    arbeidsgiverFagsystemIdRef = any(),
+                    personFagsystemIdRef = any(),
+                    arbeidsgiverbeløp = arbeidsgiverbeløp,
+                    personbeløp = personbeløp,
+                )
+            }
+        }
 
-    private fun command(arbeidsgiverbeløp: Int, personbeløp: Int): LagreOppdragCommand {
+    private fun command(
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int,
+    ): LagreOppdragCommand {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         return LagreOppdragCommand(

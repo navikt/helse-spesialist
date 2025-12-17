@@ -1,6 +1,7 @@
 package no.nav.helse.modell.egenansatt
 
 import no.nav.helse.db.EgenAnsattDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -11,9 +12,15 @@ internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
     private val egenAnsattDao: EgenAnsattDao,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context)
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = behandle(context)
 
-    override fun resume(context: CommandContext) = behandle(context)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
         if (viHarInformasjon()) return true

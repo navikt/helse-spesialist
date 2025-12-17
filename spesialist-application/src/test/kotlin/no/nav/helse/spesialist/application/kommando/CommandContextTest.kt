@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.kommando.Command
@@ -39,7 +40,10 @@ internal class CommandContextTest {
             val hendelser = mutableListOf<UtgåendeHendelse>()
             val utgåendeTilstandEndringer = mutableListOf<KommandokjedeEndretEvent>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
                 this.behov.add(behov)
             }
 
@@ -64,103 +68,112 @@ internal class CommandContextTest {
     }
 
     @Test
-    fun `executer kommando uten tilstand`() {
-        TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this.id, this))
-            assertTrue(executed)
-            assertFalse(resumed)
-            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
+    fun `executer kommando uten tilstand`() =
+        testMedSessionContext {
+            TestCommand().apply {
+                assertTrue(context.utfør(commandContextDao, this.id, this, it))
+                assertTrue(executed)
+                assertFalse(resumed)
+                verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
+                verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
+            }
         }
-    }
 
     @Test
-    fun `resumer kommando med tilstand`() {
-        context = CommandContext(CONTEXT, listOf(1))
-        TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this.id, this))
-            assertFalse(executed)
-            assertTrue(resumed)
-            verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
-            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
+    fun `resumer kommando med tilstand`() =
+        testMedSessionContext {
+            context = CommandContext(CONTEXT, listOf(1))
+            TestCommand().apply {
+                assertTrue(context.utfør(commandContextDao, this.id, this, it))
+                assertFalse(executed)
+                assertTrue(resumed)
+                verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
+                verify(exactly = 0) { commandContextDao.suspendert(any(), any(), hash().convertToUUID(), any()) }
+            }
         }
-    }
 
     @Test
-    fun `suspenderer ved execute`() {
-        TestCommand(executeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this.id, this))
-            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
+    fun `suspenderer ved execute`() =
+        testMedSessionContext {
+            TestCommand(executeAction = { false }).apply {
+                assertFalse(context.utfør(commandContextDao, this.id, this, it))
+                verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+                verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
+            }
         }
-    }
 
     @Test
-    fun `suspenderer ved resume`() {
-        val sti = listOf(1)
-        context = CommandContext(CONTEXT, sti)
-        TestCommand(resumeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this.id, this))
-            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
-            verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
+    fun `suspenderer ved resume`() =
+        testMedSessionContext {
+            val sti = listOf(1)
+            context = CommandContext(CONTEXT, sti)
+            TestCommand(resumeAction = { false }).apply {
+                assertFalse(context.utfør(commandContextDao, this.id, this, it))
+                verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+                verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
+            }
         }
-    }
 
     @Test
-    fun ferdigstiller() {
-        TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, this.id, this)
-            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
+    fun ferdigstiller() =
+        testMedSessionContext {
+            TestCommand(executeAction = { this.ferdigstill(context) }).apply {
+                context.utfør(commandContextDao, this.id, this, it)
+                verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
+            }
         }
-    }
 
     @Test
-    fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
-        TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, this.id, this)
+    fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() =
+        testMedSessionContext {
+            TestCommand(executeAction = { this.ferdigstill(context) }).apply {
+                context.utfør(commandContextDao, this.id, this, it)
+            }
+            val result = observer.utgåendeTilstandEndringer
+            assertTrue(result.isNotEmpty())
+            assertTrue(result.first() is KommandokjedeEndretEvent.Ferdig)
         }
-        val result = observer.utgåendeTilstandEndringer
-        assertTrue(result.isNotEmpty())
-        assertTrue(result.first() is KommandokjedeEndretEvent.Ferdig)
-    }
 
     @Test
-    fun `lager kommandokjede_suspendert hendelse når kommandokjeden suspenderes`() {
-        TestCommand(executeAction = {
-            false
-        }).apply {
-            context.utfør(commandContextDao, this.id, this)
+    fun `lager kommandokjede_suspendert hendelse når kommandokjeden suspenderes`() =
+        testMedSessionContext {
+            TestCommand(executeAction = {
+                false
+            }).apply {
+                context.utfør(commandContextDao, this.id, this, it)
+            }
+            val result = observer.utgåendeTilstandEndringer
+            assertTrue(result.isNotEmpty())
+            assertTrue(result.first() is KommandokjedeEndretEvent.Suspendert)
         }
-        val result = observer.utgåendeTilstandEndringer
-        assertTrue(result.isNotEmpty())
-        assertTrue(result.first() is KommandokjedeEndretEvent.Suspendert)
-    }
 
     @Test
-    fun `lager kommandokjede_avbrutt hendelse når kommandokjeden avbrytes`() {
-        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
-        TestCommand(executeAction = {
-            false
-        }).apply {
-            context.utfør(commandContextDao, this.id, this)
+    fun `lager kommandokjede_avbrutt hendelse når kommandokjeden avbrytes`() =
+        testMedSessionContext {
+            every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+            TestCommand(executeAction = {
+                false
+            }).apply {
+                context.utfør(commandContextDao, this.id, this, it)
+            }
+            context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
+            val result = observer.utgåendeTilstandEndringer
+            assertTrue(result.isNotEmpty())
+            assertTrue(result.last() is KommandokjedeEndretEvent.Avbrutt)
         }
-        context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
-        val result = observer.utgåendeTilstandEndringer
-        assertTrue(result.isNotEmpty())
-        assertTrue(result.last() is KommandokjedeEndretEvent.Avbrutt)
-    }
 
     @Test
-    fun `ferdigstiller selv ved suspendering`() {
-        context = CommandContext(CONTEXT)
-        TestCommand(executeAction = {
-            this.ferdigstill(context)
-            false
-        }).apply {
-            context.utfør(commandContextDao, this.id, this)
-            verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
+    fun `ferdigstiller selv ved suspendering`() =
+        testMedSessionContext {
+            context = CommandContext(CONTEXT)
+            TestCommand(executeAction = {
+                this.ferdigstill(context)
+                false
+            }).apply {
+                context.utfør(commandContextDao, this.id, this, it)
+                verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
+            }
         }
-    }
 
     @Test
     fun `Henter ut første av en gitt type`() {
@@ -199,13 +212,14 @@ internal class CommandContextTest {
 
     @Test
     fun `holder på meldinger`() {
-        val hendelse = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = lagFødselsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = "FØRSTEGANGSBEHANDLING"
-        )
+        val hendelse =
+            VedtaksperiodeGodkjentAutomatisk(
+                fødselsnummer = lagFødselsnummer(),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = "FØRSTEGANGSBEHANDLING",
+            )
         context.hendelse(hendelse)
         assertEquals(listOf(hendelse), observer.hendelser)
     }
@@ -223,15 +237,20 @@ internal class CommandContextTest {
 
         val id: UUID = HENDELSE
 
-        override fun execute(context: CommandContext): Boolean {
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean {
             executed = true
             return executeAction(this)
         }
 
-        override fun resume(context: CommandContext): Boolean {
+        override fun resume(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean {
             resumed = true
             return resumeAction(this)
         }
-
     }
 }

@@ -1,17 +1,16 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.kommando.CommandContext
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class SettTidligereAutomatiseringInaktivCommandTest {
-
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val hendelseId = UUID.randomUUID()
@@ -33,11 +32,12 @@ internal class SettTidligereAutomatiseringInaktivCommandTest {
     }
 
     @Test
-    fun `kaller utfør og returnerer true`() {
-        assertTrue(command.execute(context))
+    fun `kaller utfør og returnerer true`() =
+        testMedSessionContext {
+            Assertions.assertTrue(command.execute(context, it))
 
-        verify {
-            automatisering.settInaktiv(vedtaksperiodeId, hendelseId)
+            verify {
+                automatisering.settInaktiv(vedtaksperiodeId, hendelseId)
+            }
         }
-    }
 }

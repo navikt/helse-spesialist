@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -18,7 +19,10 @@ internal class VurderBehovForTotrinnskontroll(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId()
         val kreverTotrinnsvurdering =
             sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId) ||

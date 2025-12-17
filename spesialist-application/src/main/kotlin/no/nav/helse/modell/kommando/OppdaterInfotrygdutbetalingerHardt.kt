@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import org.slf4j.LoggerFactory
@@ -11,9 +12,15 @@ internal class OppdaterInfotrygdutbetalingerHardt(
     private val personDao: PersonDao,
     private val førsteKjenteDagFinner: () -> LocalDate?,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context, personDao, fødselsnummer)
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = behandle(context, personDao, fødselsnummer)
 
-    override fun resume(context: CommandContext) = behandle(context, personDao, fødselsnummer)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = behandle(context, personDao, fødselsnummer)
 
     private fun behandle(
         context: CommandContext,

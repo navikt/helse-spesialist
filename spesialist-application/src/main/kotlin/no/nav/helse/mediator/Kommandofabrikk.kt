@@ -316,16 +316,13 @@ class Kommandofabrikk(
         sessionContext: SessionContext,
     ): Kommandostarter =
         { kommandooppretter ->
-            val transactionalCommandContextDao = sessionContext.commandContextDao
-            val melding = this
             this@Kommandofabrikk.kommandooppretter()?.let { command ->
                 iverksett(
                     command = command,
-                    meldingId = melding.id,
+                    meldingId = this.id,
                     commandContext = commandContext,
                     commandContextObservers = commandContextObservers,
-                    commandContextDao = transactionalCommandContextDao,
-                    metrikkDao = sessionContext.metrikkDao,
+                    sessionContext = sessionContext,
                 )
             }
         }
@@ -344,8 +341,7 @@ class Kommandofabrikk(
         meldingId: UUID,
         commandContext: CommandContext,
         commandContextObservers: Collection<CommandContextObserver>,
-        commandContextDao: CommandContextDao,
-        metrikkDao: MetrikkDao,
+        sessionContext: SessionContext,
     ) {
         commandContextObservers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
@@ -353,9 +349,9 @@ class Kommandofabrikk(
             mapOf("contextId" to contextId.toString()),
         ) {
             try {
-                if (commandContext.utfør(commandContextDao, meldingId, command)) {
-                    val kjøretid = commandContextDao.tidsbrukForContext(contextId)
-                    metrikker(command.name, kjøretid, contextId, metrikkDao)
+                if (commandContext.utfør(sessionContext.commandContextDao, meldingId, command, sessionContext)) {
+                    val kjøretid = sessionContext.commandContextDao.tidsbrukForContext(contextId)
+                    metrikker(command.name, kjøretid, contextId, sessionContext.metrikkDao)
                     loggInfo("Kommando(er) for ${command.name} er utført ferdig")
                     loggDebug("Det tok ca ${kjøretid}ms å kjøre hele kommandokjeden")
                 } else {

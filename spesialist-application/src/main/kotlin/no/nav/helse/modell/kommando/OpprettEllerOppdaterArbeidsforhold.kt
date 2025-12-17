@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.ArbeidsforholdDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.melding.Behov
@@ -22,7 +23,10 @@ internal class OpprettEllerOppdaterArbeidsforhold(
                 listOf(ArbeidsforholdDto(fødselsnummer = fødselsnummer, organisasjonsnummer = organisasjonsnummer))
             }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         if (arbeidsforhold.any { it.måOppdateres() }) {
             return trengerMerInformasjon(context).also {
                 log.info("Trenger mer informasjon for å opprette eller oppdatere arbeidsforhold")
@@ -33,7 +37,10 @@ internal class OpprettEllerOppdaterArbeidsforhold(
         return true
     }
 
-    override fun resume(context: CommandContext): Boolean {
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val løsning = context.get<Arbeidsforholdløsning>() ?: return trengerMerInformasjon(context)
         return behandle(løsning)
     }

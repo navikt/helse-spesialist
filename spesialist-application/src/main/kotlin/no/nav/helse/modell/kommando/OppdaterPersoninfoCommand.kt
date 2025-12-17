@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.spesialist.application.logg.logg
@@ -15,12 +16,18 @@ internal class OppdaterPersoninfoCommand(
         private val BEHOV = Behov.Personinfo
     }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         if (erOppdatert(personDao, fødselsnummer) && !force) return ignorer()
         return behandle(context, personDao, fødselsnummer)
     }
 
-    override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean = behandle(context, personDao, fødselsnummer)
 
     private fun ignorer(): Boolean {
         logg.info("har ikke behov for ${BEHOV::class.simpleName}, informasjonen er ny nok")

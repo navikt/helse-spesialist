@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
@@ -90,6 +91,7 @@ class CommandContext(
         commandContextDao: CommandContextDao,
         hendelseId: UUID,
         command: Command,
+        sessionContext: SessionContext,
     ): Boolean {
         val newHash = command.hash().convertToUUID()
         if (hash != null && newHash != hash) {
@@ -98,7 +100,7 @@ class CommandContext(
             )
             sti.clear()
         }
-        return utfør(command).also { ferdig ->
+        return utfør(command, sessionContext).also { ferdig ->
             if (tidligFerdigstilt || ferdig) {
                 commandContextDao.ferdig(hendelseId, id).also {
                     kommandokjedetilstandEndret(KommandokjedeEndretEvent.Ferdig(command.name, id, hendelseId))
@@ -111,11 +113,13 @@ class CommandContext(
         }
     }
 
-    private fun utfør(command: Command) =
-        when {
-            sti.isEmpty() -> command.execute(this)
-            else -> command.resume(this)
-        }
+    private fun utfør(
+        command: Command,
+        sessionContext: SessionContext,
+    ) = when {
+        sti.isEmpty() -> command.execute(this, sessionContext)
+        else -> command.resume(this, sessionContext)
+    }
 
     internal companion object {
         internal fun Command.ferdigstill(context: CommandContext): Boolean {

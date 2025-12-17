@@ -1,6 +1,7 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -19,9 +20,15 @@ internal class VurderÅpenGosysoppgave(
     private val harTildeltOppgave: Boolean,
     private val oppgaveService: OppgaveService,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context)
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = behandle(context)
 
-    override fun resume(context: CommandContext) = behandle(context)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<ÅpneGosysOppgaverløsning>()

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.utbetaling
 
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -40,7 +41,10 @@ class LagreOppdragCommand(
         internal fun lagre(utbetalingDao: UtbetalingDao) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)
     }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         lagOpptegnelse()
         log.info("lagrer utbetaling $utbetalingId med status $status")
         lagre()
@@ -78,13 +82,18 @@ class LagreOppdragCommand(
                 type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
                     OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET
                 }
+
                 type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
                     OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
                 }
+
                 type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
                     OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET
                 }
-                else -> return
+
+                else -> {
+                    return
+                }
             }
 
         opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId).toJson(), opptegnelseType)

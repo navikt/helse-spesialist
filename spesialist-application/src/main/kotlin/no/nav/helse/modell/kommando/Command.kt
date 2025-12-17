@@ -1,9 +1,17 @@
 package no.nav.helse.modell.kommando
 
-interface Command {
-    fun execute(context: CommandContext): Boolean
+import no.nav.helse.db.SessionContext
 
-    fun resume(context: CommandContext) = true
+interface Command {
+    fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean
+
+    fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ) = true
 
     fun hash(): String = name
 
@@ -14,7 +22,10 @@ internal fun ikkesuspenderendeCommand(
     navnForLogging: String = "<navn ikke oppgitt>",
     block: () -> Unit,
 ) = object : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         block()
         return true
     }

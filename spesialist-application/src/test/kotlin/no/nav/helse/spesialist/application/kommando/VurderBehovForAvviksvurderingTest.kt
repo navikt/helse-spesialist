@@ -41,203 +41,228 @@ class VurderBehovForAvviksvurderingTest {
     private val harAkseptabeltAvvik = false
     private val beregningsgrunnlagTotalbeløp = 900000.0
     private val sammenligningsgrunnlagTotalbeløp = 600000.0
-    private val spleisSykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
-        seksG = 666666.00,
-        arbeidsgivere = listOf(
-            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                organisasjonsnummer = organisasjonsnummer,
-                omregnetÅrsinntekt = beregningsgrunnlagTotalbeløp,
-                inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
-            )
-        ),
-        sykepengegrunnlag = BigDecimal("666666.0")
-    )
+    private val spleisSykepengegrunnlagsfakta =
+        Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+            seksG = 666666.00,
+            arbeidsgivere =
+                listOf(
+                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                        organisasjonsnummer = organisasjonsnummer,
+                        omregnetÅrsinntekt = beregningsgrunnlagTotalbeløp,
+                        inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
+                    ),
+                ),
+            sykepengegrunnlag = BigDecimal("666666.0"),
+        )
     private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
-    private val beregningsgrunnlag = Beregningsgrunnlag(
-        totalbeløp = beregningsgrunnlagTotalbeløp,
-        omregnedeÅrsinntekter = expectedOmregnedeÅrsinntekter
-    )
-
-    private val sammenligningsgrunnlag = Sammenligningsgrunnlag(
-        totalbeløp = sammenligningsgrunnlagTotalbeløp,
-        innrapporterteInntekter = listOf(
-            InnrapportertInntekt(
-                arbeidsgiverreferanse = organisasjonsnummer,
-                inntekter = listOf(Inntekt(YearMonth.of(2018, 1), sammenligningsgrunnlagTotalbeløp))
-            )
+    private val beregningsgrunnlag =
+        Beregningsgrunnlag(
+            totalbeløp = beregningsgrunnlagTotalbeløp,
+            omregnedeÅrsinntekter = expectedOmregnedeÅrsinntekter,
         )
-    )
 
-    private val legacyBehandling = LegacyBehandling(
-        id = UUID.randomUUID(),
-        vedtaksperiodeId = UUID.randomUUID(),
-        fom = 1 jan 2018,
-        tom = 31 jan 2018,
-        skjæringstidspunkt = 1 jan 2018,
-        spleisBehandlingId = UUID.randomUUID(),
-        utbetalingId = null,
-        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-    )
+    private val sammenligningsgrunnlag =
+        Sammenligningsgrunnlag(
+            totalbeløp = sammenligningsgrunnlagTotalbeløp,
+            innrapporterteInntekter =
+                listOf(
+                    InnrapportertInntekt(
+                        arbeidsgiverreferanse = organisasjonsnummer,
+                        inntekter = listOf(Inntekt(YearMonth.of(2018, 1), sammenligningsgrunnlagTotalbeløp)),
+                    ),
+                ),
+        )
 
-    private val repository = object : AvviksvurderingRepository {
-        var avviksvurderingSomSkalReturneres: Avviksvurdering? = null
-        val avviksvurderinger = mutableListOf<Avviksvurdering>()
-        val koblinger = mutableListOf<Pair<UUID, UUID>>()
-        override fun lagre(avviksvurdering: Avviksvurdering) {
-            avviksvurderinger.add(avviksvurdering)
+    private val legacyBehandling =
+        LegacyBehandling(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
+            spleisBehandlingId = UUID.randomUUID(),
+            utbetalingId = null,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        )
+
+    private val repository =
+        object : AvviksvurderingRepository {
+            var avviksvurderingSomSkalReturneres: Avviksvurdering? = null
+            val avviksvurderinger = mutableListOf<Avviksvurdering>()
+            val koblinger = mutableListOf<Pair<UUID, UUID>>()
+
+            override fun lagre(avviksvurdering: Avviksvurdering) {
+                avviksvurderinger.add(avviksvurdering)
+            }
+
+            override fun opprettKobling(
+                avviksvurderingId: UUID,
+                vilkårsgrunnlagId: UUID,
+            ) {
+                koblinger.add(avviksvurderingId to vilkårsgrunnlagId)
+            }
+
+            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering = error("Ikke implementert i test")
+
+            override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? = avviksvurderingSomSkalReturneres
+
+            override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> = error("Ikke implementert i test")
         }
 
-        override fun opprettKobling(avviksvurderingId: UUID, vilkårsgrunnlagId: UUID) {
-            koblinger.add(avviksvurderingId to vilkårsgrunnlagId)
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableListOf<Behov>()
+
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
+                this.behov.add(behov)
+            }
         }
 
-        override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering = error("Ikke implementert i test")
-        override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? =
-            avviksvurderingSomSkalReturneres
-
-        override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
-            error("Ikke implementert i test")
-    }
-
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<Behov>()
-        override fun behov(behov: Behov, commandContextId: UUID) {
-            this.behov.add(behov)
+    @Test
+    fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() =
+        testMedSessionContext {
+            val command =
+                vurderBehovForAvviksvurderingCommand(
+                    sykepengegrunnlagsfakta =
+                        Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd(
+                            sykepengegrunnlag = BigDecimal("600000.0"),
+                        ),
+                )
+            val context = CommandContext(UUID.randomUUID())
+            context.nyObserver(observer)
+            assertTrue(command.execute(context, it))
+            assertEquals(0, observer.behov.size)
         }
-    }
 
     @Test
-    fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand(
-            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd(
-                sykepengegrunnlag = BigDecimal("600000.0")
+    fun `Ikke send ut behov dersom person er selvstendig næringsdrivende`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+            val context = CommandContext(UUID.randomUUID())
+            context.nyObserver(observer)
+            assertTrue(command.execute(context, it))
+            assertEquals(0, observer.behov.size)
+        }
+
+    @Test
+    fun `Send ut behov dersom inngangsvilkårene er vurdert i Spleis`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand()
+            val context = CommandContext(UUID.randomUUID())
+            context.nyObserver(observer)
+            assertFalse(command.execute(context, it))
+            assertEquals(1, observer.behov.size)
+            val behov = observer.behov.single()
+            assertInstanceOf<Behov.Avviksvurdering>(behov)
+            assertEquals(expectedOmregnedeÅrsinntekter, behov.omregnedeÅrsinntekter)
+            assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
+            assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
+            assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
+            assertEquals(legacyBehandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
+        }
+
+    @Test
+    fun `lagrer ned ny avviksvurdering ved løsning med ny vurdering`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand()
+            val context = CommandContext(UUID.randomUUID())
+            context.add(
+                AvviksvurderingBehovLøsning(
+                    avviksvurderingId = avviksvurderingId,
+                    maksimaltTillattAvvik = maksimaltTillattAvvik,
+                    avviksprosent = avviksprosent,
+                    harAkseptabeltAvvik = harAkseptabeltAvvik,
+                    opprettet = opprettet,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                ),
             )
-        )
-        val context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
-        assertTrue(command.execute(context))
-        assertEquals(0, observer.behov.size)
-    }
-
-    @Test
-    fun `Ikke send ut behov dersom person er selvstendig næringsdrivende`() {
-        val command = vurderBehovForAvviksvurderingCommand(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
-        val context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
-        assertTrue(command.execute(context))
-        assertEquals(0, observer.behov.size)
-    }
-
-    @Test
-    fun `Send ut behov dersom inngangsvilkårene er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand()
-        val context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
-        assertFalse(command.execute(context))
-        assertEquals(1, observer.behov.size)
-        val behov = observer.behov.single()
-        assertInstanceOf<Behov.Avviksvurdering>(behov)
-        assertEquals(expectedOmregnedeÅrsinntekter, behov.omregnedeÅrsinntekter)
-        assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
-        assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
-        assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
-        assertEquals(legacyBehandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
-    }
-
-    @Test
-    fun `lagrer ned ny avviksvurdering ved løsning med ny vurdering`() {
-        val command = vurderBehovForAvviksvurderingCommand()
-        val context = CommandContext(UUID.randomUUID())
-        context.add(
-            AvviksvurderingBehovLøsning(
-                avviksvurderingId = avviksvurderingId,
-                maksimaltTillattAvvik = maksimaltTillattAvvik,
-                avviksprosent = avviksprosent,
-                harAkseptabeltAvvik = harAkseptabeltAvvik,
-                opprettet = opprettet,
-                beregningsgrunnlag = beregningsgrunnlag,
-                sammenligningsgrunnlag = sammenligningsgrunnlag
+            command.resume(context, it)
+            assertEquals(1, repository.avviksvurderinger.size)
+            assertEquals(
+                Avviksvurdering(
+                    unikId = avviksvurderingId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    opprettet = opprettet,
+                    avviksprosent = avviksprosent,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                ),
+                repository.avviksvurderinger.single(),
             )
-        )
-        command.resume(context)
-        assertEquals(1, repository.avviksvurderinger.size)
-        assertEquals(
-            Avviksvurdering(
-                unikId = avviksvurderingId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
-                opprettet = opprettet,
-                avviksprosent = avviksprosent,
-                sammenligningsgrunnlag = sammenligningsgrunnlag,
-                beregningsgrunnlag = beregningsgrunnlag
-            ),
-            repository.avviksvurderinger.single()
-        )
-    }
+        }
 
     @Test
-    fun `legg til varsel RV_IV_2 dersom avviket er mer enn akseptabelt avvik`() {
-        val command = vurderBehovForAvviksvurderingCommand()
-        val context = CommandContext(UUID.randomUUID())
-        context.add(
-            AvviksvurderingBehovLøsning(
-                avviksvurderingId = avviksvurderingId,
-                maksimaltTillattAvvik = maksimaltTillattAvvik,
-                avviksprosent = avviksprosent,
-                harAkseptabeltAvvik = harAkseptabeltAvvik,
-                opprettet = opprettet,
-                beregningsgrunnlag = beregningsgrunnlag,
-                sammenligningsgrunnlag = sammenligningsgrunnlag
+    fun `legg til varsel RV_IV_2 dersom avviket er mer enn akseptabelt avvik`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand()
+            val context = CommandContext(UUID.randomUUID())
+            context.add(
+                AvviksvurderingBehovLøsning(
+                    avviksvurderingId = avviksvurderingId,
+                    maksimaltTillattAvvik = maksimaltTillattAvvik,
+                    avviksprosent = avviksprosent,
+                    harAkseptabeltAvvik = harAkseptabeltAvvik,
+                    opprettet = opprettet,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                ),
             )
-        )
-        command.resume(context)
-        assertTrue(legacyBehandling.varsler().inneholderVarselOmAvvik())
-    }
+            command.resume(context, it)
+            assertTrue(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        }
 
     @Test
-    fun `ikke legg til varsel RV_IV_2 dersom avviket er innenfor akseptabelt avvik`() {
-        val command = vurderBehovForAvviksvurderingCommand()
-        val context = CommandContext(UUID.randomUUID())
-        context.add(
-            AvviksvurderingBehovLøsning(
-                avviksvurderingId = avviksvurderingId,
-                maksimaltTillattAvvik = maksimaltTillattAvvik,
-                avviksprosent = 25.0,
-                harAkseptabeltAvvik = true,
-                opprettet = opprettet,
-                beregningsgrunnlag = beregningsgrunnlag,
-                sammenligningsgrunnlag = sammenligningsgrunnlag
+    fun `ikke legg til varsel RV_IV_2 dersom avviket er innenfor akseptabelt avvik`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand()
+            val context = CommandContext(UUID.randomUUID())
+            context.add(
+                AvviksvurderingBehovLøsning(
+                    avviksvurderingId = avviksvurderingId,
+                    maksimaltTillattAvvik = maksimaltTillattAvvik,
+                    avviksprosent = 25.0,
+                    harAkseptabeltAvvik = true,
+                    opprettet = opprettet,
+                    beregningsgrunnlag = beregningsgrunnlag,
+                    sammenligningsgrunnlag = sammenligningsgrunnlag,
+                ),
             )
-        )
-        command.resume(context)
-        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
-    }
+            command.resume(context, it)
+            assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        }
 
     @Test
-    fun `lagrer kun ned kobling ved løsning med avviksvurdering som finnes fra før av`() {
-        val command = vurderBehovForAvviksvurderingCommand()
-        repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
-        val context = CommandContext(UUID.randomUUID())
-        context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
-        command.resume(context)
-        assertEquals(0, repository.avviksvurderinger.size)
-        assertEquals(1, repository.koblinger.size)
-        assertEquals(avviksvurderingId to vilkårsgrunnlagId, repository.koblinger.single())
-    }
+    fun `lagrer kun ned kobling ved løsning med avviksvurdering som finnes fra før av`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand()
+            repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
+            val context = CommandContext(UUID.randomUUID())
+            context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
+            command.resume(context, it)
+            assertEquals(0, repository.avviksvurderinger.size)
+            assertEquals(1, repository.koblinger.size)
+            assertEquals(avviksvurderingId to vilkårsgrunnlagId, repository.koblinger.single())
+        }
 
     @Test
-    fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
-        val command = vurderBehovForAvviksvurderingCommand()
-        val context = CommandContext(UUID.randomUUID())
-        repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
-        context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
-        command.resume(context)
-        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
-    }
+    fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() =
+        testMedSessionContext {
+            val command = vurderBehovForAvviksvurderingCommand()
+            val context = CommandContext(UUID.randomUUID())
+            repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
+            context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
+            command.resume(context, it)
+            assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        }
 
-    private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering {
-        return Avviksvurdering(
+    private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering =
+        Avviksvurdering(
             unikId = avviksvurderingId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
@@ -245,35 +270,32 @@ class VurderBehovForAvviksvurderingTest {
             opprettet = opprettet,
             avviksprosent = avviksprosent,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
-            beregningsgrunnlag = beregningsgrunnlag
+            beregningsgrunnlag = beregningsgrunnlag,
         )
-    }
 
-    private fun enAvviksvurderingBehovløsning(avviksvurderingId: UUID = this.avviksvurderingId): AvviksvurderingBehovLøsning {
-        return AvviksvurderingBehovLøsning(
+    private fun enAvviksvurderingBehovløsning(avviksvurderingId: UUID = this.avviksvurderingId): AvviksvurderingBehovLøsning =
+        AvviksvurderingBehovLøsning(
             avviksvurderingId = avviksvurderingId,
             opprettet = opprettet,
             avviksprosent = avviksprosent,
             maksimaltTillattAvvik = maksimaltTillattAvvik,
             harAkseptabeltAvvik = harAkseptabeltAvvik,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
-            beregningsgrunnlag = beregningsgrunnlag
+            beregningsgrunnlag = beregningsgrunnlag,
         )
-    }
 
     private fun vurderBehovForAvviksvurderingCommand(
         sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        organisasjonsnummer: String = this.organisasjonsnummer
-    ) =
-        VurderBehovForAvviksvurdering(
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            avviksvurderingRepository = repository,
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            vilkårsgrunnlagId = vilkårsgrunnlagId,
-            legacyBehandling = legacyBehandling,
-            yrkesaktivitetstype = yrkesaktivitetstype,
-            organisasjonsnummer = organisasjonsnummer,
-        )
+        organisasjonsnummer: String = this.organisasjonsnummer,
+    ) = VurderBehovForAvviksvurdering(
+        fødselsnummer = fødselsnummer,
+        skjæringstidspunkt = skjæringstidspunkt,
+        avviksvurderingRepository = repository,
+        sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
+        legacyBehandling = legacyBehandling,
+        yrkesaktivitetstype = yrkesaktivitetstype,
+        organisasjonsnummer = organisasjonsnummer,
+    )
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -15,14 +16,19 @@ internal class OppdaterOppgavestatusCommand(
     private val status: Utbetalingsstatus,
     private val oppgavefinner: Oppgavefinner,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         oppgavefinner.oppgave(utbetalingId) {
             when (status) {
                 GODKJENT_UTEN_UTBETALING,
                 UTBETALT,
                 IKKE_GODKJENT,
                 -> ferdigstill()
+
                 FORKASTET -> avbryt()
+
                 else -> Unit
             }
         }

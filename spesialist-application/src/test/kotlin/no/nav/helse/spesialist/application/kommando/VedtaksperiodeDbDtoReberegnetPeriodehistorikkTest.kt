@@ -12,11 +12,12 @@ import java.util.UUID
 
 class VedtaksperiodeDbDtoReberegnetPeriodehistorikkTest {
     @Test
-    fun `Lagrer historikkinnslag når vedtaksperioden er reberegnet`() {
-        val context = CommandContext(UUID.randomUUID())
-        val repository = mockk<PeriodehistorikkDao>(relaxed = true)
-        val command = VedtaksperiodeReberegnetPeriodehistorikk(mockk(relaxed = true), repository)
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { repository.lagre(any<VedtaksperiodeReberegnet>(), any<UUID>()) }
-    }
+    fun `Lagrer historikkinnslag når vedtaksperioden er reberegnet`() =
+        testMedSessionContext {
+            val context = CommandContext(UUID.randomUUID())
+            val repository = mockk<PeriodehistorikkDao>(relaxed = true)
+            val command = VedtaksperiodeReberegnetPeriodehistorikk(mockk(relaxed = true), repository)
+            assertTrue(command.execute(context, it))
+            verify(exactly = 1) { repository.lagre(any<VedtaksperiodeReberegnet>(), any<UUID>()) }
+        }
 }

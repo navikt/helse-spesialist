@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.db.AutomatiseringDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
@@ -36,7 +37,10 @@ internal class VurderAutomatiskInnvilgelse(
         "vedtaksperiodeId: $vedtaksperiodeId, utbetalingId: $utbetalingId, problemer: ${problemer.joinToString()}",
     )
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val resultat =
             automatisering.utfør(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,

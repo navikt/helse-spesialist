@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -22,13 +23,19 @@ class VurderBehovForAvviksvurdering(
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val organisasjonsnummer: String,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
         return behov(context, sykepengegrunnlagsfakta)
     }
 
-    override fun resume(context: CommandContext): Boolean {
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context, sykepengegrunnlagsfakta)
         val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)

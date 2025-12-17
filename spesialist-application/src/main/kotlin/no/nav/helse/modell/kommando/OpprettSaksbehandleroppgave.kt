@@ -5,6 +5,7 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -67,7 +68,10 @@ internal class OpprettSaksbehandleroppgave(
     private val påVentDao: PåVentDao,
     private val opptegnelseDao: OpptegnelseDao,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val fødselsnummer = behovData.fødselsnummer
         val vedtaksperiodeId = behovData.vedtaksperiodeId
         val hendelseId = behovData.id
@@ -127,7 +131,9 @@ internal class OpprettSaksbehandleroppgave(
             StrengtFortrolig,
             StrengtFortroligUtland,
             -> add(STRENGT_FORTROLIG_ADRESSE)
+
             Fortrolig -> add(FORTROLIG_ADRESSE)
+
             else -> Unit
         }
     }
@@ -184,7 +190,9 @@ internal class OpprettSaksbehandleroppgave(
     private fun MutableSet<Egenskap>.inntektsforhold(yrkesaktivitetstype: Yrkesaktivitetstype) {
         when (yrkesaktivitetstype) {
             Yrkesaktivitetstype.SELVSTENDIG -> add(SELVSTENDIG_NÆRINGSDRIVENDE)
+
             Yrkesaktivitetstype.ARBEIDSTAKER -> add(ARBEIDSTAKER)
+
             Yrkesaktivitetstype.FRILANS,
             Yrkesaktivitetstype.ARBEIDSLEDIG,
             -> error("Støtter ikke yrkesaktivitetstype $yrkesaktivitetstype")

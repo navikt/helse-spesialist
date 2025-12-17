@@ -27,13 +27,17 @@ internal class PersisterInntektCommandTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private lateinit var context: CommandContext
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<Behov>()
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableListOf<Behov>()
 
-        override fun behov(behov: Behov, commandContextId: UUID) {
-            this.behov.add(behov)
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
+                this.behov.add(behov)
+            }
         }
-    }
 
     @BeforeEach
     fun setup() {
@@ -43,58 +47,63 @@ internal class PersisterInntektCommandTest {
     }
 
     @Test
-    fun `Sender behov om inntekt ikke er lagret fra før`() {
-        every { personDao.finnInntekter(any(), any()) } returns null
+    fun `Sender behov om inntekt ikke er lagret fra før`() =
+        testMedSessionContext {
+            every { personDao.finnInntekter(any(), any()) } returns null
 
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
+            val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
-        assertFalse(command.execute(context))
-        assertTrue(observer.behov.isNotEmpty())
-    }
-
-    @Test
-    fun `Fullfører dersom inntekt er lagret fra før`() {
-        every { personDao.finnInntekter(any(), any()) } returns inntekter()
-
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
-
-        assertTrue(command.execute(context))
-        assertTrue(observer.behov.isEmpty())
-    }
+            assertFalse(command.execute(context, it))
+            assertTrue(observer.behov.isNotEmpty())
+        }
 
     @Test
-    fun `Lagrer inntekter dersom det ikke finnes på skjæringstidspunkt for person`() {
-        val skjæringtidspunkt = LocalDate.now()
+    fun `Fullfører dersom inntekt er lagret fra før`() =
+        testMedSessionContext {
+            every { personDao.finnInntekter(any(), any()) } returns inntekter()
 
-        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns null
+            val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
-        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
-
-        assertFalse(command.execute(context))
-        assertTrue(observer.behov.isNotEmpty())
-
-        context.add(løsning())
-        assertTrue(command.resume(context))
-        verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
-    }
+            assertTrue(command.execute(context, it))
+            assertTrue(observer.behov.isEmpty())
+        }
 
     @Test
-    fun `Bryr oss ikke om løsning dersom vi har inntekter alt`() {
-        val skjæringtidspunkt = LocalDate.now()
-        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns inntekter()
+    fun `Lagrer inntekter dersom det ikke finnes på skjæringstidspunkt for person`() =
+        testMedSessionContext {
+            val skjæringtidspunkt = LocalDate.now()
 
-        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
+            every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns null
 
-        assertTrue(command.resume(context))
-        verify(exactly = 0) { personDao.lagreInntekter(any(), any(), any()) }
-    }
+            val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
+
+            assertFalse(command.execute(context, it))
+            assertTrue(observer.behov.isNotEmpty())
+
+            context.add(løsning())
+            assertTrue(command.resume(context, it))
+            verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
+        }
+
+    @Test
+    fun `Bryr oss ikke om løsning dersom vi har inntekter alt`() =
+        testMedSessionContext {
+            val skjæringtidspunkt = LocalDate.now()
+            every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns inntekter()
+
+            val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
+
+            assertTrue(command.resume(context, it))
+            verify(exactly = 0) { personDao.lagreInntekter(any(), any(), any()) }
+        }
 
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)
 
-    private fun inntekter() = listOf(
-        Inntekter(
-            årMåned = YearMonth.parse("2022-11"),
-            inntektsliste = listOf(Inntekter.Inntekt(beløp = 20000.0, orgnummer = "123456789"))
+    private fun inntekter() =
+        listOf(
+            Inntekter(
+                årMåned = YearMonth.parse("2022-11"),
+                inntektsliste = listOf(Inntekter.Inntekt(beløp = 20000.0, orgnummer = "123456789")),
+            ),
         )
-    )
 }

@@ -14,15 +14,17 @@ internal class AvbrytCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
-        private fun lagAvbrytCommand(commandContextDao: CommandContextDao) = AvbrytCommand(
-            fødselsnummer = "fnr",
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            commandContextDao = commandContextDao,
-            oppgaveService = mockk<OppgaveService>(relaxed = true),
-            reservasjonDao = mockk(relaxed = true),
-            tildelingDao = mockk(relaxed = true),
-            totrinnsvurderingRepository = mockk(relaxed = true),
-        )
+
+        private fun lagAvbrytCommand(commandContextDao: CommandContextDao) =
+            AvbrytCommand(
+                fødselsnummer = "fnr",
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                commandContextDao = commandContextDao,
+                oppgaveService = mockk<OppgaveService>(relaxed = true),
+                reservasjonDao = mockk(relaxed = true),
+                tildelingDao = mockk(relaxed = true),
+                totrinnsvurderingRepository = mockk(relaxed = true),
+            )
     }
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
@@ -31,8 +33,9 @@ internal class AvbrytCommandTest {
     private val command = lagAvbrytCommand(commandContextDao)
 
     @Test
-    fun `avbryter command context`() {
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
-    }
+    fun `avbryter command context`() =
+        testMedSessionContext {
+            assertTrue(command.execute(context, it))
+            verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
+        }
 }

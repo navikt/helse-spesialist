@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
@@ -27,7 +28,10 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val vedtakDao: VedtakDao,
     private val meldingDao: MeldingDao,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val utbetalingId = commandData.utbetalingId
         val meldingId = commandData.id
 

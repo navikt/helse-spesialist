@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.application.kommando
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.MacroCommand
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 class CommandHashTest {
-
     @Test
     fun `To kommandoer med samme navn har samme hash`() {
         val første = commandA()
@@ -41,60 +41,70 @@ class CommandHashTest {
 
     @Test
     fun `En makrokommando har samme hash hvis kjeden er lik`() {
-        val første = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandA(), commandB())
-        }
-        val andre = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandA(), commandB())
-        }
+        val første =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandA(), commandB())
+            }
+        val andre =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandA(), commandB())
+            }
 
         assertEquals(første.hash(), andre.hash())
     }
 
     @Test
     fun `En anonym makrokommando har lik hash som en annen anonym makro dersom kjeden ellers er lik`() {
-        val første = object: MacroCommand() {
-            override val commands: List<Command> = listOf()
-        }
-        val andre = object: MacroCommand() {
-            override val commands: List<Command> = listOf()
-        }
+        val første =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf()
+            }
+        val andre =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf()
+            }
 
         assertEquals(første.hash(), andre.hash())
     }
 
     @Test
     fun `En makrokommando har forskjellig hash hvis kommandoer har byttet rekkefølge`() {
-        val første = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandA(), commandB())
-        }
-        val andre = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandB(), commandA())
-        }
+        val første =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandA(), commandB())
+            }
+        val andre =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandB(), commandA())
+            }
 
         assertNotEquals(første.hash(), andre.hash())
     }
 
     @Test
     fun `En makrokommando har forskjellig hash hvis kommandoer har blitt fjernet`() {
-        val første = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandA(), commandB())
-        }
-        val andre = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandB())
-        }
+        val første =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandA(), commandB())
+            }
+        val andre =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandB())
+            }
 
         assertNotEquals(første.hash(), andre.hash())
     }
 
     @Test
     fun `En makrokommando har forskjellig hash hvis kommandoer har blitt lagt til`() {
-        val første = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandA(), commandB())
-        }
-        val andre = object: MacroCommand() {
-            override val commands: List<Command> = listOf(commandA(), commandB(), commandC())
-        }
+        val første =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandA(), commandB())
+            }
+        val andre =
+            object : MacroCommand() {
+                override val commands: List<Command> = listOf(commandA(), commandB(), commandC())
+            }
 
         assertNotEquals(første.hash(), andre.hash())
     }
@@ -108,14 +118,23 @@ class CommandHashTest {
     }
 
     private class commandA : Command {
-        override fun execute(context: CommandContext): Boolean = true
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean = true
     }
 
-    private class commandB: Command {
-        override fun execute(context: CommandContext): Boolean = true
+    private class commandB : Command {
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean = true
     }
 
-    private class commandC: Command {
-        override fun execute(context: CommandContext): Boolean = true
+    private class commandC : Command {
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean = true
     }
 }

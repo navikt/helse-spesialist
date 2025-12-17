@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
@@ -13,7 +14,10 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val adressebeskyttelse =
             checkNotNull(personDao.finnAdressebeskyttelse(godkjenningsbehov.fødselsnummer)) {
                 "Forventer at det fins adressebeskyttelse i databasen når denne kommandoen kjører"

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -10,9 +10,8 @@ import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -32,7 +31,10 @@ internal class KontrollerEgenAnsattstatusTest {
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
                 this.behov.add(behov)
             }
         }
@@ -47,33 +49,44 @@ internal class KontrollerEgenAnsattstatusTest {
     @Test
     fun `ber om informasjon om egen ansatt`() {
         every { dao.erEgenAnsatt(any()) } returns null
-        assertFalse(command.execute(context))
-        assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
+        InMemoryRepositoriesAndDaos().sessionFactory.transactionalSessionScope {
+            Assertions.assertFalse(command.execute(context, it))
+        }
+        Assertions.assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
     }
 
     @Test
     fun `mangler løsning ved resume`() {
         every { dao.erEgenAnsatt(any()) } returns null
-        assertFalse(command.resume(context))
+        InMemoryRepositoriesAndDaos().sessionFactory.transactionalSessionScope {
+            Assertions.assertFalse(command.resume(context, it))
+        }
+
         verify(exactly = 0) { dao.lagre(any(), any(), any()) }
     }
 
     @Test
     fun `lagrer løsning ved resume`() {
         every { dao.erEgenAnsatt(any()) } returns null
-        context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
-        assertTrue(command.resume(context))
+        context.add(`EgenAnsattløsning`(LocalDateTime.now(), FNR, false))
+        InMemoryRepositoriesAndDaos().sessionFactory.transactionalSessionScope {
+            Assertions.assertTrue(command.resume(context, it))
+        }
         verify(exactly = 1) { dao.lagre(FNR, false, any()) }
     }
 
     @Test
     fun `sender ikke behov om informasjonen finnes`() {
         every { dao.erEgenAnsatt(any()) } returns false
-        assertTrue(command.resume(context))
-        assertEquals(emptyList<Behov>(), observer.behov.toList())
+        InMemoryRepositoriesAndDaos().sessionFactory.transactionalSessionScope {
+            Assertions.assertTrue(command.resume(context, it))
+        }
+        Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
 
         every { dao.erEgenAnsatt(any()) } returns true
-        assertTrue(command.resume(context))
-        assertEquals(emptyList<Behov>(), observer.behov.toList())
+        InMemoryRepositoriesAndDaos().sessionFactory.transactionalSessionScope {
+            Assertions.assertTrue(command.resume(context, it))
+        }
+        Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
     }
 }

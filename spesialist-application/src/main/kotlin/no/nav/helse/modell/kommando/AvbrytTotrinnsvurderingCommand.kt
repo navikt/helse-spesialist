@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
@@ -9,7 +10,10 @@ internal class AvbrytTotrinnsvurderingCommand(
     private val alleForkastedeVedtaksperiodeIder: List<UUID>,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         loggInfo(
             "setter vedtaksperiode_forkastet i totrinnsvurdering for person",
             "fødselsnummer: $fødselsnummer",

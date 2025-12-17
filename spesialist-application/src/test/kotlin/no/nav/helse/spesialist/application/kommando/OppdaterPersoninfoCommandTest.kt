@@ -30,17 +30,22 @@ internal class OppdaterPersoninfoCommandTest {
         private val KJØNN = Kjønn.Ukjent
         private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
+
     private lateinit var context: CommandContext
 
     private val personDao = mockk<PersonDao>(relaxed = true)
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<Behov>()
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableListOf<Behov>()
 
-        override fun behov(behov: Behov, commandContextId: UUID) {
-            this.behov.add(behov)
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
+                this.behov.add(behov)
+            }
         }
-    }
 
     @BeforeEach
     fun beforeEach() {
@@ -49,48 +54,50 @@ internal class OppdaterPersoninfoCommandTest {
     }
 
     @Test
-    fun `trenger personinfo`() {
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        utdatertPersoninfo()
-        assertFalse(command.execute(context))
-        assertTrue(observer.behov.isNotEmpty())
-        assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
-    }
+    fun `trenger personinfo`() =
+        testMedSessionContext {
+            val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
+            utdatertPersoninfo()
+            assertFalse(command.execute(context, it))
+            assertTrue(observer.behov.isNotEmpty())
+            assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
+        }
 
     @Test
-    fun `oppdatere personinfo`() {
-        val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        utdatertPersoninfo()
-        val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
-        context.add(løsning)
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
-        verify(exactly = 1) { personDao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
-
-    }
-
-    @Test
-    fun `oppdaterer ingenting når informasjonen er ny nok`() {
-        val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        assertTrue(command.execute(context))
-        verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-    }
+    fun `oppdatere personinfo`() =
+        testMedSessionContext {
+            val context = CommandContext(UUID.randomUUID())
+            val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
+            utdatertPersoninfo()
+            val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+            context.add(løsning)
+            assertTrue(command.execute(context, it))
+            verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
+            verify(exactly = 1) { personDao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
+        }
 
     @Test
-    fun `oppdaterer personinfo dersom force er satt til true`() {
-        val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = true)
-        val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
-        context.add(løsning)
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
-        verify(exactly = 1) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-    }
+    fun `oppdaterer ingenting når informasjonen er ny nok`() =
+        testMedSessionContext {
+            val context = CommandContext(UUID.randomUUID())
+            val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
+            every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+            assertTrue(command.execute(context, it))
+            verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        }
 
+    @Test
+    fun `oppdaterer personinfo dersom force er satt til true`() =
+        testMedSessionContext {
+            val context = CommandContext(UUID.randomUUID())
+            val command = OppdaterPersoninfoCommand(FNR, personDao, force = true)
+            val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+            context.add(løsning)
+            every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+            assertTrue(command.execute(context, it))
+            verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
+            verify(exactly = 1) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        }
 
     private fun utdatertPersoninfo() {
         every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)

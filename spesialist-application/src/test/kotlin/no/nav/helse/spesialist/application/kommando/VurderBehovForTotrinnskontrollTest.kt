@@ -38,35 +38,38 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE = LegacyVedtaksperiode.nyVedtaksperiode(
-            SpleisBehandling(
-                organisasjonsnummer = "987654321",
-                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                spleisBehandlingId = UUID.randomUUID(),
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        private val VEDTAKSPERIODE =
+            LegacyVedtaksperiode.nyVedtaksperiode(
+                SpleisBehandling(
+                    organisasjonsnummer = "987654321",
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                    spleisBehandlingId = UUID.randomUUID(),
+                    fom = LocalDate.now(),
+                    tom = LocalDate.now(),
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                ),
             )
-        )
         private val FØDSELSNUMMER = "fnr"
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val totrinnsvurderingRepository = object : TotrinnsvurderingRepository {
-        val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
-        var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
-        override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
-            if (!totrinnsvurdering.harFåttTildeltId()) {
-                totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+    private val totrinnsvurderingRepository =
+        object : TotrinnsvurderingRepository {
+            val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
+            var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
+
+            override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
+                if (!totrinnsvurdering.harFåttTildeltId()) {
+                    totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+                }
+                lagredeTotrinnsvurderinger.add(totrinnsvurdering)
             }
-            lagredeTotrinnsvurderinger.add(totrinnsvurdering)
+
+            override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
+
+            override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
         }
-
-        override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-
-        override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-    }
     private lateinit var context: CommandContext
 
     val sykefraværstilfelle =
@@ -80,7 +83,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                     fom = 1 jan 2018,
                     tom = 31 jan 2018,
                     skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
                 LegacyBehandling(
                     id = UUID.randomUUID(),
@@ -88,7 +91,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                     fom = 1 feb 2018,
                     tom = 28 feb 2018,
                     skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
             ),
         )
@@ -108,38 +111,40 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     @Test
-    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        sykefraværstilfelle.håndter(
-            LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
-        )
-        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() =
+        testMedSessionContext {
+            sykefraværstilfelle.håndter(
+                LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
+            )
+            every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-    }
+            assertTrue(command.execute(context, it))
+            assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        }
 
     @Test
-    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for manglende inntektsmelding, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        sykefraværstilfelle.håndter(
-            LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
-        )
-        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for manglende inntektsmelding, og ikke har hatt oppgave som har vært ferdigstilt før`() =
+        testMedSessionContext {
+            sykefraværstilfelle.håndter(
+                LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
+            )
+            every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-    }
+            assertTrue(command.execute(context, it))
+            assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        }
 
     @ParameterizedTest
     @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(
         status: LegacyVarsel.Status,
-    ) {
+    ) = testMedSessionContext {
         sykefraværstilfelle.håndter(
             LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, it))
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -147,76 +152,77 @@ internal class VurderBehovForTotrinnskontrollTest {
     @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for manglende inntektsmelding og er utbetalt`(
         status: LegacyVarsel.Status,
-    ) {
+    ) = testMedSessionContext {
         sykefraværstilfelle.håndter(
             LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, it))
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
     @Test
-    fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
-        val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
+    fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() =
+        testMedSessionContext {
+            val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
 
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
-            lagTotrinnsvurdering(saksbehandler = saksbehandler)
+            totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
+                lagTotrinnsvurdering(saksbehandler = saksbehandler)
 
-        assertTrue(command.execute(context))
+            assertTrue(command.execute(context, it))
 
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
-    }
-
-    @Test
-    fun `Hvis totrinnsvurdering har beslutter skal tilstanden til totrinnsvurderingen settes tilbake til AVVENTER_SAKSBEHANDLER`() {
-        val saksbehandler = lagSaksbehandlerOid()
-        val beslutter = lagSaksbehandlerOid()
-
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(
-            saksbehandler = saksbehandler,
-            beslutter = beslutter
-        )
-
-        assertTrue(command.execute(context))
-
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
-
-        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().tilstand)
-
-        verify(exactly = 1) {
-            periodehistorikkDao.lagre(historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(), any())
+            assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+            verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
         }
-    }
 
     @Test
-    fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
-        assertTrue(command.execute(context))
+    fun `Hvis totrinnsvurdering har beslutter skal tilstanden til totrinnsvurderingen settes tilbake til AVVENTER_SAKSBEHANDLER`() =
+        testMedSessionContext {
+            val saksbehandler = lagSaksbehandlerOid()
+            val beslutter = lagSaksbehandlerOid()
 
-        assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-    }
+            totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
+                lagTotrinnsvurdering(
+                    saksbehandler = saksbehandler,
+                    beslutter = beslutter,
+                )
 
+            assertTrue(command.execute(context, it))
 
+            assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+            verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
+
+            assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().tilstand)
+
+            verify(exactly = 1) {
+                periodehistorikkDao.lagre(historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(), any())
+            }
+        }
+
+    @Test
+    fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() =
+        testMedSessionContext {
+            assertTrue(command.execute(context, it))
+
+            assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        }
 
     private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
 
     private fun lagTotrinnsvurdering(
         tilstand: TotrinnsvurderingTilstand = AVVENTER_BESLUTTER,
         saksbehandler: SaksbehandlerOid = lagSaksbehandlerOid(),
-        beslutter: SaksbehandlerOid = lagSaksbehandlerOid()
-    ) =
-        Totrinnsvurdering.fraLagring(
-            id = TotrinnsvurderingId(nextLong()),
-            fødselsnummer = FØDSELSNUMMER,
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now(),
-            overstyringer = emptyList(),
-            tilstand = tilstand,
-            vedtaksperiodeForkastet = false,
-        )
+        beslutter: SaksbehandlerOid = lagSaksbehandlerOid(),
+    ) = Totrinnsvurdering.fraLagring(
+        id = TotrinnsvurderingId(nextLong()),
+        fødselsnummer = FØDSELSNUMMER,
+        saksbehandler = saksbehandler,
+        beslutter = beslutter,
+        opprettet = LocalDateTime.now(),
+        oppdatert = LocalDateTime.now(),
+        overstyringer = emptyList(),
+        tilstand = tilstand,
+        vedtaksperiodeForkastet = false,
+    )
 }

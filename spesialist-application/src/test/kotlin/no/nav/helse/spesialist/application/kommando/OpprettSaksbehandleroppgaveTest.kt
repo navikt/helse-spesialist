@@ -86,178 +86,200 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     @Test
-    fun `oppretter oppgave`() {
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-        verify(exactly = 1) {
-            opptegnelseDao.opprettOpptegnelse(FNR, any(), OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE)
+    fun `oppretter oppgave`() =
+        testMedSessionContext {
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+            verify(exactly = 1) {
+                opptegnelseDao.opprettOpptegnelse(FNR, any(), OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE)
+            }
         }
-    }
 
     @Test
-    fun `oppretter stikkprøve`() {
-        every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, STIKKPRØVE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter stikkprøve`() =
+        testMedSessionContext {
+            every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, STIKKPRØVE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter risk QA`() {
-        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, RISK_QA, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter risk QA`() =
+        testMedSessionContext {
+            every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, RISK_QA, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter revurdering`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
-        assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter revurdering`() =
+        testMedSessionContext {
+            assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context, it))
+            assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egen oppgavetype for fortrolig adresse`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egen oppgavetype for fortrolig adresse`() =
+        testMedSessionContext {
+            every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(
-            SØKNAD,
-            STRENGT_FORTROLIG_ADRESSE,
-            INGEN_UTBETALING,
-            EN_ARBEIDSGIVER,
-            FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
-        )
-    }
+    fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() =
+        testMedSessionContext {
+            every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(
+                SØKNAD,
+                STRENGT_FORTROLIG_ADRESSE,
+                INGEN_UTBETALING,
+                EN_ARBEIDSGIVER,
+                FORSTEGANGSBEHANDLING,
+                ARBEIDSTAKER,
+            )
+        }
 
     @Test
-    fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(
-            SØKNAD,
-            STRENGT_FORTROLIG_ADRESSE,
-            INGEN_UTBETALING,
-            EN_ARBEIDSGIVER,
-            FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
-        )
-    }
+    fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() =
+        testMedSessionContext {
+            every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(
+                SØKNAD,
+                STRENGT_FORTROLIG_ADRESSE,
+                INGEN_UTBETALING,
+                EN_ARBEIDSGIVER,
+                FORSTEGANGSBEHANDLING,
+                ARBEIDSTAKER,
+            )
+        }
 
     @Test
-    fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
-        every { utbetaling.kunUtbetalingTilSykmeldt() } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() =
+        testMedSessionContext {
+            every { utbetaling.kunUtbetalingTilSykmeldt() } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() {
-        every { utbetaling.delvisRefusjon() } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, DELVIS_REFUSJON, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() =
+        testMedSessionContext {
+            every { utbetaling.delvisRefusjon() } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, DELVIS_REFUSJON, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap utbetaling til arbeidsgiver`() {
-        every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap utbetaling til arbeidsgiver`() =
+        testMedSessionContext {
+            every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap ingen utbetaling`() {
-        every { utbetaling.ingenUtbetaling() } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap ingen utbetaling`() =
+        testMedSessionContext {
+            every { utbetaling.ingenUtbetaling() } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
-        every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() =
+        testMedSessionContext {
+            every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
+            every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap haster dersom det er endring i utbetaling til sykmeldte`() {
-        every { utbetaling.harEndringIUtbetalingTilSykmeldt() } returns true
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap haster dersom det er endring i utbetaling til sykmeldte`() =
+        testMedSessionContext {
+            every { utbetaling.harEndringIUtbetalingTilSykmeldt() } returns true
+            every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(
-            SØKNAD,
-            INGEN_UTBETALING,
-            EN_ARBEIDSGIVER,
-            FORSTEGANGSBEHANDLING,
-            SKJØNNSFASTSETTELSE,
-            ARBEIDSTAKER
-        )
-    }
+    fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() =
+        testMedSessionContext {
+            every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(
+                SØKNAD,
+                INGEN_UTBETALING,
+                EN_ARBEIDSGIVER,
+                FORSTEGANGSBEHANDLING,
+                SKJØNNSFASTSETTELSE,
+                ARBEIDSTAKER,
+            )
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap tilbakedatert dersom det finnes varsel om tilbakedatering`() {
-        every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, TILBAKEDATERT, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap tilbakedatert dersom det finnes varsel om tilbakedatering`() =
+        testMedSessionContext {
+            every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, TILBAKEDATERT, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egen ansatt`() {
-        every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, EGEN_ANSATT, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egen ansatt`() =
+        testMedSessionContext {
+            every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, EGEN_ANSATT, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap UTLAND`() {
-        every { personDao.finnEnhetId(FNR) } returns "0393"
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, UTLAND, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap UTLAND`() =
+        testMedSessionContext {
+            every { personDao.finnEnhetId(FNR) } returns "0393"
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, UTLAND, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap FLERE_ARBEIDSGIVERE`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, FLERE_ARBEIDSGIVERE, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap FLERE_ARBEIDSGIVERE`() =
+        testMedSessionContext {
+            assertTrue(opprettSaksbehandlerOppgaveCommand(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, FLERE_ARBEIDSGIVERE, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap FORLENGELSE`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = FORLENGELSE).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.FORLENGELSE, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap FORLENGELSE`() =
+        testMedSessionContext {
+            assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = FORLENGELSE).execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.FORLENGELSE, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap INFOTRYGDFORLENGELSE`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = INFOTRYGDFORLENGELSE).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.INFOTRYGDFORLENGELSE, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap INFOTRYGDFORLENGELSE`() =
+        testMedSessionContext {
+            assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = INFOTRYGDFORLENGELSE).execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.INFOTRYGDFORLENGELSE, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap OVERGANG_FRA_IT`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.OVERGANG_FRA_IT, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap OVERGANG_FRA_IT`() =
+        testMedSessionContext {
+            assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.OVERGANG_FRA_IT, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskap PÅ_VENT`() {
-        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, PÅ_VENT, ARBEIDSTAKER)
-    }
+    fun `oppretter oppgave med egenskap PÅ_VENT`() =
+        testMedSessionContext {
+            every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(command.execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, PÅ_VENT, ARBEIDSTAKER)
+        }
 
     @Test
     fun `oppretter oppgave med egenskap JORDBRUKER_REINDRIFT`() {
@@ -267,56 +289,62 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     @Test
-    fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
-        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
+    fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() =
+        testMedSessionContext {
+            every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
+            assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context, it))
 
-        assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-    }
-
-    @Test
-    fun `legger til oppgave med kanAvvises lik false`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, kanAvvises = false,)
-    }
+            assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+        }
 
     @Test
-    fun `oppretter oppgave med egenskapen grunnbeløpsregulering`() {
-        assertTrue(
-            opprettSaksbehandlerOppgaveCommand(
-                utbetalingtype = Utbetalingtype.REVURDERING,
-                tags = listOf("Grunnbeløpsregulering")
-            ).execute(context)
-        )
-        assertForventedeEgenskaper(
-            REVURDERING,
-            INGEN_UTBETALING,
-            EN_ARBEIDSGIVER,
-            FORSTEGANGSBEHANDLING,
-            GRUNNBELØPSREGULERING,
-            ARBEIDSTAKER
-        )
-    }
+    fun `legger til oppgave med kanAvvises lik false`() =
+        testMedSessionContext {
+            assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context, it))
+            assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, kanAvvises = false)
+        }
 
     @Test
-    fun `legger ikke til egenskapen grunnbeløpsregulering ved oppgavetype søknad`() {
-        assertTrue(
-            opprettSaksbehandlerOppgaveCommand(
-                utbetalingtype = Utbetalingtype.UTBETALING,
-                tags = listOf("Grunnbeløpsregulering")
-            ).execute(context)
-        )
-        assertForventedeEgenskaper(
-            SØKNAD,
-            INGEN_UTBETALING,
-            EN_ARBEIDSGIVER,
-            FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
-        )
-    }
+    fun `oppretter oppgave med egenskapen grunnbeløpsregulering`() =
+        testMedSessionContext {
+            assertTrue(
+                opprettSaksbehandlerOppgaveCommand(
+                    utbetalingtype = Utbetalingtype.REVURDERING,
+                    tags = listOf("Grunnbeløpsregulering"),
+                ).execute(context, it),
+            )
+            assertForventedeEgenskaper(
+                REVURDERING,
+                INGEN_UTBETALING,
+                EN_ARBEIDSGIVER,
+                FORSTEGANGSBEHANDLING,
+                GRUNNBELØPSREGULERING,
+                ARBEIDSTAKER,
+            )
+        }
 
+    @Test
+    fun `legger ikke til egenskapen grunnbeløpsregulering ved oppgavetype søknad`() =
+        testMedSessionContext {
+            assertTrue(
+                opprettSaksbehandlerOppgaveCommand(
+                    utbetalingtype = Utbetalingtype.UTBETALING,
+                    tags = listOf("Grunnbeløpsregulering"),
+                ).execute(context, it),
+            )
+            assertForventedeEgenskaper(
+                SØKNAD,
+                INGEN_UTBETALING,
+                EN_ARBEIDSGIVER,
+                FORSTEGANGSBEHANDLING,
+                ARBEIDSTAKER,
+            )
+        }
 
-    private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
+    private fun assertForventedeEgenskaper(
+        vararg egenskaper: Egenskap,
+        kanAvvises: Boolean = true,
+    ) {
         verify(exactly = 1) {
             oppgaveService.nyOppgave(
                 FNR,
@@ -325,7 +353,7 @@ internal class OpprettSaksbehandleroppgaveTest {
                 UTBETALING_ID,
                 HENDELSE_ID,
                 kanAvvises,
-                egenskaper.toSet()
+                egenskaper.toSet(),
             )
         }
     }
@@ -339,17 +367,18 @@ internal class OpprettSaksbehandleroppgaveTest {
         arbeidssituasjon: Arbeidssituasjon? = null,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) = OpprettSaksbehandleroppgave(
-        behovData = godkjenningsbehovData(
-            id = HENDELSE_ID,
-            fødselsnummer = FNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            spleisBehandlingId = BEHANDLING_ID,
-            utbetalingId = UTBETALING_ID,
-            inntektskilde = inntektskilde,
-            periodetype = periodetype,
-            utbetalingtype = utbetalingtype,
-            kanAvvises = kanAvvises,
-            tags = tags,
+        behovData =
+            godkjenningsbehovData(
+                id = HENDELSE_ID,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                spleisBehandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                inntektskilde = inntektskilde,
+                periodetype = periodetype,
+                utbetalingtype = utbetalingtype,
+                kanAvvises = kanAvvises,
+                tags = tags,
             arbeidssituasjon = arbeidssituasjon,
             yrkesaktivitetstype = yrkesaktivitetstype,
         ),
@@ -363,6 +392,6 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetaling = utbetaling,
         vergemålDao = vergemålDao,
         påVentDao = påVentDao,
-        opptegnelseDao = opptegnelseDao
+        opptegnelseDao = opptegnelseDao,
     )
 }

@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.meldinger
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,7 +8,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -38,9 +38,10 @@ internal class VedtaksperiodeForkastetCommandTest {
         )
 
     @Test
-    fun `avbryter kommandoer og markerer vedtaksperiode som forkastet`() {
-        every { personDao.finnPersonMedFødselsnummer(FNR) } returns 1
-        assertTrue(vedtaksperiodeForkastetCommand.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
-    }
+    fun `avbryter kommandoer og markerer vedtaksperiode som forkastet`() =
+        testMedSessionContext {
+            every { personDao.finnPersonMedFødselsnummer(FNR) } returns 1
+            Assertions.assertTrue(vedtaksperiodeForkastetCommand.execute(context, it))
+            verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
+        }
 }

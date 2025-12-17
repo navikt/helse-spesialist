@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
@@ -27,12 +28,18 @@ internal class OppdaterPersonCommand(
         private val fødselsnummer: String,
         private val personDao: PersonDao,
     ) : Command {
-        override fun execute(context: CommandContext): Boolean {
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean {
             if (erOppdatert(personDao, fødselsnummer)) return ignorer()
             return behandle(context, personDao, fødselsnummer)
         }
 
-        override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
+        override fun resume(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean = behandle(context, personDao, fødselsnummer)
 
         private fun ignorer(): Boolean {
             log.info("har ikke behov for Enhet, informasjonen er ny nok")
@@ -71,12 +78,18 @@ internal class OppdaterPersonCommand(
         private val personDao: PersonDao,
         private val førsteKjenteDagFinner: () -> LocalDate?,
     ) : Command {
-        override fun execute(context: CommandContext): Boolean {
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean {
             if (erOppdatert(personDao, fødselsnummer)) return ignorer()
             return behandle(context, personDao, fødselsnummer)
         }
 
-        override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
+        override fun resume(
+            context: CommandContext,
+            sessionContext: SessionContext,
+        ): Boolean = behandle(context, personDao, fødselsnummer)
 
         private fun ignorer(): Boolean {
             log.info("har ikke behov for Infotrygdutbetalinger, informasjonen er ny nok")

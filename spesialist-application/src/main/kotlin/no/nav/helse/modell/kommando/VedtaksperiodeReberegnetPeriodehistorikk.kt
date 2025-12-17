@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 
@@ -8,7 +9,10 @@ internal class VedtaksperiodeReberegnetPeriodehistorikk(
     private val vedtaksperiode: LegacyVedtaksperiode,
     private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val innslag = Historikkinnslag.vedtaksperiodeReberegnet()
         periodehistorikkDao.lagre(historikkinnslag = innslag, generasjonId = vedtaksperiode.gjeldendeUnikId)
         return true

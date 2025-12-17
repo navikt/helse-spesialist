@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -12,7 +13,10 @@ internal class PersisterInntektCommand(
     private val skjæringstidspunkt: LocalDate,
     private val personDao: PersonDao,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
 
         loggInfo(
@@ -22,7 +26,10 @@ internal class PersisterInntektCommand(
         return trengerInntekt(context)
     }
 
-    override fun resume(context: CommandContext): Boolean {
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
         val løsning = context.get<Inntektløsning>() ?: return trengerInntekt(context)
 

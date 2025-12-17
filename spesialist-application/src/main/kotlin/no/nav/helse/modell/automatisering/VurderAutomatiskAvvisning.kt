@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.Command
@@ -17,7 +18,10 @@ internal class VurderAutomatiskAvvisning(
     private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
 

@@ -28,42 +28,49 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         val SLUTTDATO = null
     }
 
-    private val repository = object : ArbeidsforholdDao {
-        val arbeidsforholdSomHarBlittOppdatert = mutableListOf<KomplettArbeidsforholdDto>()
-        val eksisterendeArbeidsforhold = mutableListOf<KomplettArbeidsforholdDto>()
+    private val repository =
+        object : ArbeidsforholdDao {
+            val arbeidsforholdSomHarBlittOppdatert = mutableListOf<KomplettArbeidsforholdDto>()
+            val eksisterendeArbeidsforhold = mutableListOf<KomplettArbeidsforholdDto>()
 
-        override fun findArbeidsforhold(fødselsnummer: String, arbeidsgiverIdentifikator: String):
-                List<KomplettArbeidsforholdDto> {
-            return eksisterendeArbeidsforhold.filter {
-                it.fødselsnummer.equals(fødselsnummer) &&
+            override fun findArbeidsforhold(
+                fødselsnummer: String,
+                arbeidsgiverIdentifikator: String,
+            ): List<KomplettArbeidsforholdDto> =
+                eksisterendeArbeidsforhold.filter {
+                    it.fødselsnummer.equals(fødselsnummer) &&
                         it.organisasjonsnummer.equals(arbeidsgiverIdentifikator)
+                }
+
+            override fun upsertArbeidsforhold(
+                fødselsnummer: String,
+                organisasjonsnummer: String,
+                arbeidsforhold: List<KomplettArbeidsforholdDto>,
+            ) {
+                arbeidsforholdSomHarBlittOppdatert.addAll(arbeidsforhold)
             }
         }
 
-        override fun upsertArbeidsforhold(
-            fødselsnummer: String,
-            organisasjonsnummer: String,
-            arbeidsforhold: List<KomplettArbeidsforholdDto>
-        ) {
-            arbeidsforholdSomHarBlittOppdatert.addAll(arbeidsforhold)
-        }
-    }
-
     private lateinit var context: CommandContext
 
-    private fun enCommand() = OpprettEllerOppdaterArbeidsforhold(
-        fødselsnummer = FØDSELSNUMMER,
-        organisasjonsnummer = ORGANISASJONSNUMMER,
-        arbeidsforholdDao = repository
-    )
+    private fun enCommand() =
+        OpprettEllerOppdaterArbeidsforhold(
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            arbeidsforholdDao = repository,
+        )
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<Behov>()
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableListOf<Behov>()
 
-        override fun behov(behov: Behov, commandContextId: UUID) {
-            this.behov.add(behov)
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
+                this.behov.add(behov)
+            }
         }
-    }
 
     @BeforeEach
     fun setup() {
@@ -72,88 +79,93 @@ class OpprettEllerOppdaterArbeidsforholdTest {
     }
 
     @Test
-    fun `oppretter arbeidsforhold`() {
-        arbeidsforholdFinnesIkke()
-        val command = enCommand()
-        assertFalse(command.execute(context))
-        assertTrue(observer.behov.isNotEmpty())
-        context.add(
-            Arbeidsforholdløsning(
-                listOf(
-                    Arbeidsforholdløsning.Løsning(
-                        STARTDATO,
-                        SLUTTDATO,
-                        STILLINGSTITTEL,
-                        STILLINGSPROSENT
-                    )
-                )
+    fun `oppretter arbeidsforhold`() =
+        testMedSessionContext {
+            arbeidsforholdFinnesIkke()
+            val command = enCommand()
+            assertFalse(command.execute(context, it))
+            assertTrue(observer.behov.isNotEmpty())
+            context.add(
+                Arbeidsforholdløsning(
+                    listOf(
+                        Arbeidsforholdløsning.Løsning(
+                            STARTDATO,
+                            SLUTTDATO,
+                            STILLINGSTITTEL,
+                            STILLINGSPROSENT,
+                        ),
+                    ),
+                ),
             )
-        )
-        assertTrue(command.resume(context))
+            assertTrue(command.resume(context, it))
 
-        assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-        assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
-    }
+            assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
+            assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
+        }
 
     @Test
-    fun `oppdaterer arbeidsforhold`() {
-        arbeidsforholdFinnes(enKomplettArbeidsforholdDto(oppdatert = LocalDateTime.now().minusYears(1)))
-        val command = enCommand()
-        assertFalse(command.execute(context))
-        assertTrue(observer.behov.isNotEmpty())
-        context.add(
-            Arbeidsforholdløsning(
-                listOf(
-                    Arbeidsforholdløsning.Løsning(
-                        STARTDATO,
-                        SLUTTDATO,
-                        STILLINGSTITTEL,
-                        STILLINGSPROSENT
-                    )
-                )
+    fun `oppdaterer arbeidsforhold`() =
+        testMedSessionContext {
+            arbeidsforholdFinnes(enKomplettArbeidsforholdDto(oppdatert = LocalDateTime.now().minusYears(1)))
+            val command = enCommand()
+            assertFalse(command.execute(context, it))
+            assertTrue(observer.behov.isNotEmpty())
+            context.add(
+                Arbeidsforholdløsning(
+                    listOf(
+                        Arbeidsforholdløsning.Løsning(
+                            STARTDATO,
+                            SLUTTDATO,
+                            STILLINGSTITTEL,
+                            STILLINGSPROSENT,
+                        ),
+                    ),
+                ),
             )
-        )
-        assertTrue(command.resume(context))
+            assertTrue(command.resume(context, it))
 
-        assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-        assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
-    }
-
-    @Test
-    fun `oppretter ikke arbeidsforhold når den finnes`() {
-        arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
-        assertTrue(enCommand().execute(context))
-        assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
-    }
+            assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
+            assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
+        }
 
     @Test
-    fun `oppdaterer ikke arbeidsforhold når den er oppdatert`() {
-        arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
-        assertTrue(enCommand().execute(context))
-        assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
-    }
+    fun `oppretter ikke arbeidsforhold når den finnes`() =
+        testMedSessionContext {
+            arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
+            assertTrue(enCommand().execute(context, it))
+            assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
+        }
 
     @Test
-    fun `oppretter arbeidsforhold når det ikke finnes for orgnummeret`() {
-        arbeidsforholdFinnes(enKomplettArbeidsforholdDto(organisasjonsnummer = ORGANISASJONSNUMMER.reversed()))
-        val command = enCommand()
-        assertFalse(command.execute(context))
-        assertTrue(observer.behov.isNotEmpty())
-        context.add(
-            Arbeidsforholdløsning(
-                listOf(
-                    Arbeidsforholdløsning.Løsning(
-                        STARTDATO,
-                        SLUTTDATO,
-                        STILLINGSTITTEL,
-                        STILLINGSPROSENT
-                    )
-                )
+    fun `oppdaterer ikke arbeidsforhold når den er oppdatert`() =
+        testMedSessionContext {
+            arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
+            assertTrue(enCommand().execute(context, it))
+            assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
+        }
+
+    @Test
+    fun `oppretter arbeidsforhold når det ikke finnes for orgnummeret`() =
+        testMedSessionContext {
+            arbeidsforholdFinnes(enKomplettArbeidsforholdDto(organisasjonsnummer = ORGANISASJONSNUMMER.reversed()))
+            val command = enCommand()
+            assertFalse(command.execute(context, it))
+            assertTrue(observer.behov.isNotEmpty())
+            context.add(
+                Arbeidsforholdløsning(
+                    listOf(
+                        Arbeidsforholdløsning.Løsning(
+                            STARTDATO,
+                            SLUTTDATO,
+                            STILLINGSTITTEL,
+                            STILLINGSPROSENT,
+                        ),
+                    ),
+                ),
             )
-        )
-        assertTrue(command.resume(context))
-        assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-    }
+            assertTrue(command.resume(context, it))
+            assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
+        }
 
     private fun arbeidsforholdFinnes(komplettArbeidsforholdDto: KomplettArbeidsforholdDto) {
         repository.eksisterendeArbeidsforhold.add(komplettArbeidsforholdDto)
@@ -170,7 +182,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         sluttdato: LocalDate? = SLUTTDATO,
         stillingstittel: String = STILLINGSTITTEL,
         stillingsprosent: Int = STILLINGSPROSENT,
-        oppdatert: LocalDateTime = LocalDateTime.now()
+        oppdatert: LocalDateTime = LocalDateTime.now(),
     ) = KomplettArbeidsforholdDto(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
@@ -178,7 +190,7 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         sluttdato = sluttdato,
         stillingstittel = stillingstittel,
         stillingsprosent = stillingsprosent,
-        oppdatert = oppdatert
+        oppdatert = oppdatert,
     )
 
     private fun assertExpectedKomplettArbeidsforholdDto(actual: KomplettArbeidsforholdDto) {

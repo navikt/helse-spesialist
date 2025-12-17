@@ -1,6 +1,7 @@
 package no.nav.helse.modell.varsel
 
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.HentEnhetløsning
@@ -15,7 +16,10 @@ internal class VurderEnhetUtland(
     private val personDao: PersonDao,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         if (tilhørerEnhetUtland) {
             logg.info("Håndterer varsel om utland på vedtaksperiode $vedtaksperiodeId")
