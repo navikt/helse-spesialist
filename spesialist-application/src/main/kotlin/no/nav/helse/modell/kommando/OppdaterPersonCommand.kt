@@ -19,7 +19,7 @@ internal class OppdaterPersonCommand(
 
     override val commands: List<Command> =
         listOf(
-            OppdaterPersoninfoCommand(fødselsnummer, personDao, force = false),
+            OppdaterPersoninfoCommand(fødselsnummer, force = false),
             OppdaterEnhetCommand(fødselsnummer, personDao),
             OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao, førsteKjenteDagFinner),
         )

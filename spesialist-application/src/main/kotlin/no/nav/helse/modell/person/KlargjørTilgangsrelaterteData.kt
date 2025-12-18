@@ -50,7 +50,6 @@ internal class KlargjørTilgangsrelaterteDataCommand(
         listOf(
             OppdaterPersoninfoCommand(
                 fødselsnummer = fødselsnummer,
-                personDao = personDao,
                 force = false,
             ),
             OppdaterEnhetCommand(fødselsnummer, personDao),

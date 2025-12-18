@@ -1,55 +1,60 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
 import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
-    private val fødselsnummer: String,
-    private val personDao: PersonDao,
+    fødselsnummer: String,
     private val force: Boolean,
 ) : Command {
     private companion object {
         private val BEHOV = Behov.Personinfo
+        private val datoForUtdatert = LocalDate.now().minusDays(14)
     }
+
+    private val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
 
     override fun execute(
         context: CommandContext,
         sessionContext: SessionContext,
     ): Boolean {
-        if (erOppdatert(personDao, fødselsnummer) && !force) return ignorer()
-        return behandle(context, personDao, fødselsnummer)
+        val person =
+            sessionContext.personRepository.finn(identitetsnummer)
+                ?: error("Fant ikke person")
+        val sistOppdatert = person.infoOppdatert
+        if (sistOppdatert != null && sistOppdatert > datoForUtdatert && !force) return ignorer()
+        return behandle(context, sessionContext, person)
     }
 
     override fun resume(
         context: CommandContext,
         sessionContext: SessionContext,
-    ): Boolean = behandle(context, personDao, fødselsnummer)
+    ): Boolean {
+        val person =
+            sessionContext.personRepository.finn(identitetsnummer)
+                ?: error("Fant ikke person")
+        return behandle(context, sessionContext, person)
+    }
 
     private fun ignorer(): Boolean {
         logg.info("har ikke behov for ${BEHOV::class.simpleName}, informasjonen er ny nok")
         return true
     }
 
-    private fun erOppdatert(
-        personDao: PersonDao,
-        fødselsnummer: String,
-    ): Boolean {
-        val sistOppdatert = personDao.finnPersoninfoSistOppdatert(fødselsnummer)
-        return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(14)
-    }
-
     private fun behandle(
         context: CommandContext,
-        personDao: PersonDao,
-        fødselsnummer: String,
+        sessionContext: SessionContext,
+        person: Person,
     ): Boolean {
-        val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
+        val løsning = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
         logg.info("oppdaterer personinfo")
-        personinfo.oppdater(personDao, fødselsnummer)
+        person.oppdaterInfo(løsning.personinfo())
+        sessionContext.personRepository.lagre(person)
         return true
     }
 
