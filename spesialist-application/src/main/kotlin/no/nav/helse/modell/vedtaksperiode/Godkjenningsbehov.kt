@@ -112,6 +112,7 @@ class Godkjenningsbehov(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
+            arbeidssituasjon = arbeidssituasjon,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisVedtaksperioder = spleisVedtaksperioder,
             utbetalingId = utbetalingId,
@@ -170,7 +171,7 @@ class Godkjenningsbehov(
                 sykepengegrunnlagsfakta =
                     godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
                 foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
-                arbeidssituasjon = godkjenning["arbeidssituasjon"]?.asEnum<Arbeidssituasjon>(),
+                arbeidssituasjon = if (godkjenning["arbeidssituasjon"].asText() == "JORDBRUKER") godkjenning["arbeidssituasjon"].asEnum<Arbeidssituasjon>() else null,
                 relevanteSøknader = godkjenning["relevanteSøknader"].map { it.asUUID() },
                 json = json,
             )

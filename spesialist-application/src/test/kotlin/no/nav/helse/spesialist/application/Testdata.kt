@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
@@ -70,6 +71,7 @@ object Testdata {
         fødselsnummer: String = lagFødselsnummer(),
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        arbeidssituasjon: Arbeidssituasjon? = null,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
@@ -86,6 +88,7 @@ object Testdata {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
+            arbeidssituasjon = arbeidssituasjon,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisVedtaksperioder = emptyList(),
             utbetalingId = utbetalingId,

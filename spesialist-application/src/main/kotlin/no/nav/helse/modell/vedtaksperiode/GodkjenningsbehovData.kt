@@ -15,6 +15,7 @@ data class GodkjenningsbehovData(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
+    val arbeidssituasjon: Arbeidssituasjon?,
     val vedtaksperiodeId: UUID,
     val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     val utbetalingId: UUID,

@@ -33,6 +33,7 @@ enum class EgenskapDto {
     GRUNNBELØPSREGULERING,
     SELVSTENDIG_NÆRINGSDRIVENDE,
     ARBEIDSTAKER,
+    JORDBRUKER_REINDRIFT,
     ;
 
     internal companion object {
@@ -70,6 +71,7 @@ enum class EgenskapDto {
                 Egenskap.GRUNNBELØPSREGULERING -> GRUNNBELØPSREGULERING
                 Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> SELVSTENDIG_NÆRINGSDRIVENDE
                 Egenskap.ARBEIDSTAKER -> ARBEIDSTAKER
+                Egenskap.JORDBRUKER_REINDRIFT -> JORDBRUKER_REINDRIFT
             }
 
         fun EgenskapDto.gjenopprett() =
@@ -106,6 +108,7 @@ enum class EgenskapDto {
                 GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
                 SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
                 ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+                JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
             }
     }
 }

@@ -8,7 +8,6 @@ import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -808,7 +807,7 @@ class PostVedtakIntegrationTest {
                     sykepengegrunnlag = BigDecimal("700000.0"),
                 ),
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
-            arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+            arbeidssituasjon = null,
             relevanteSøknader = listOf(UUID.randomUUID()),
             json = "{}",
         )

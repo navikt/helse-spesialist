@@ -507,6 +507,7 @@ class PgOppgaveRepository private constructor(
             Egenskap.GRUNNBELØPSREGULERING -> "GRUNNBELØPSREGULERING"
             Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> "SELVSTENDIG_NÆRINGSDRIVENDE"
             Egenskap.ARBEIDSTAKER -> "ARBEIDSTAKER"
+            Egenskap.JORDBRUKER_REINDRIFT -> "JORDBRUKER_REINDRIFT"
         }
 
     private fun String.fromDb(): Egenskap? =

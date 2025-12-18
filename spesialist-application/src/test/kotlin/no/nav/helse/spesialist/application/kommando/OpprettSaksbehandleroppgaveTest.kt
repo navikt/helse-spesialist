@@ -25,9 +25,11 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.modell.oppgave.Egenskap.JORDBRUKER_REINDRIFT
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -40,12 +42,14 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -256,6 +260,13 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     @Test
+    fun `oppretter oppgave med egenskap JORDBRUKER_REINDRIFT`() {
+        assertTrue(opprettSaksbehandlerOppgaveCommand(arbeidssituasjon = Arbeidssituasjon.JORDBRUKER, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG).execute(context))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING,
+            JORDBRUKER_REINDRIFT, SELVSTENDIG_NÆRINGSDRIVENDE)
+    }
+
+    @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
         every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
         assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
@@ -324,7 +335,9 @@ internal class OpprettSaksbehandleroppgaveTest {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
-        tags: List<String> = emptyList()
+        tags: List<String> = emptyList(),
+        arbeidssituasjon: Arbeidssituasjon? = null,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) = OpprettSaksbehandleroppgave(
         behovData = godkjenningsbehovData(
             id = HENDELSE_ID,
@@ -336,7 +349,9 @@ internal class OpprettSaksbehandleroppgaveTest {
             periodetype = periodetype,
             utbetalingtype = utbetalingtype,
             kanAvvises = kanAvvises,
-            tags = tags
+            tags = tags,
+            arbeidssituasjon = arbeidssituasjon,
+            yrkesaktivitetstype = yrkesaktivitetstype,
         ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,

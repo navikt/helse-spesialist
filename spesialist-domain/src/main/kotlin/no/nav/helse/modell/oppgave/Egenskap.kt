@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.modell.oppgave.Egenskap.Kategori.Arbeidssituasjon
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Inntektsforhold
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Inntektskilde
 import no.nav.helse.modell.oppgave.Egenskap.Kategori.Mottaker
@@ -43,12 +44,14 @@ enum class Egenskap(
     GRUNNBELØPSREGULERING,
     SELVSTENDIG_NÆRINGSDRIVENDE(kategori = Inntektsforhold),
     ARBEIDSTAKER(kategori = Inntektsforhold),
+    JORDBRUKER_REINDRIFT(kategori = Arbeidssituasjon),
     ;
 
     enum class Kategori {
         Mottaker,
         Inntektskilde,
         Inntektsforhold,
+        Arbeidssituasjon,
         Oppgavetype,
         Ukategorisert,
         Periodetype,

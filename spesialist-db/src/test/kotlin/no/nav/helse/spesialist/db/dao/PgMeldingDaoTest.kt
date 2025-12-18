@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -215,7 +214,7 @@ class PgMeldingDaoTest {
                                 ),
                             "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1),
                             "relevanteSøknader" to listOf(UUID.randomUUID()),
-                            "arbeidssituasjon" to Arbeidssituasjon.ARBEIDSTAKER,
+                            "arbeidssituasjon" to null,
                         ),
                 ).toJson(),
         )

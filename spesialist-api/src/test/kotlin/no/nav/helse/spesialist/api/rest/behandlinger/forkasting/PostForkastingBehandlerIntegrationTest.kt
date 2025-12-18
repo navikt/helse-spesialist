@@ -6,7 +6,6 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -413,7 +412,7 @@ class PostForkastingBehandlerIntegrationTest {
                     sykepengegrunnlag = BigDecimal("700000.0"),
                 ),
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
-            arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+            arbeidssituasjon = null,
             relevanteSøknader = listOf(UUID.randomUUID()),
             json = "{}",
         )

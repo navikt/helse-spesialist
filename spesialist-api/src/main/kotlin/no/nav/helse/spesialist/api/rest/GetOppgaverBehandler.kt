@@ -120,6 +120,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             ApiEgenskap.GRUNNBELOPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
             ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
             ApiEgenskap.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+            ApiEgenskap.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
         }
 
     private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {

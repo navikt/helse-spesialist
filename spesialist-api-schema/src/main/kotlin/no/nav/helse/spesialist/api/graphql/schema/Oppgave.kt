@@ -70,6 +70,7 @@ enum class ApiEgenskap {
     GRUNNBELOPSREGULERING,
     SELVSTENDIG_NAERINGSDRIVENDE,
     ARBEIDSTAKER,
+    JORDBRUKER_REINDRIFT,
 }
 
 @GraphQLName("Kategori")
@@ -77,6 +78,7 @@ enum class ApiKategori {
     Mottaker,
     Inntektskilde,
     Inntektsforhold,
+    Arbeidssituasjon,
     Oppgavetype,
     Ukategorisert,
     Periodetype,

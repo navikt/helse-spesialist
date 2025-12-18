@@ -45,6 +45,7 @@ import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -87,6 +88,7 @@ internal class OpprettSaksbehandleroppgave(
                 mottaker()
                 inntektskilde(inntektskilde)
                 inntektsforhold(behovData.yrkesaktivitetstype)
+                arbeidssituasjon(behovData.arbeidssituasjon)
                 periodetype(periodetype)
                 påVent(vedtaksperiodeId)
                 skjønnsfastsettelse(vedtaksperiodeId)
@@ -156,6 +158,10 @@ internal class OpprettSaksbehandleroppgave(
 
     private fun MutableSet<Egenskap>.enhetUtland(fødselsnummer: String) {
         if (HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))) add(UTLAND)
+    }
+
+    private fun MutableSet<Egenskap>.arbeidssituasjon(arbeidssituasjon: Arbeidssituasjon?) {
+        if (arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) add(Egenskap.JORDBRUKER_REINDRIFT)
     }
 
     private fun MutableSet<Egenskap>.mottaker() {

@@ -303,7 +303,7 @@ object Testmeldingfabrikk {
                         ),
                     ),
             ),
-        arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+        arbeidssituasjon: Arbeidssituasjon? = null,
         relevanteSøknader: List<UUID> = listOf(UUID.randomUUID()),
     ) = nyHendelse(
         id,

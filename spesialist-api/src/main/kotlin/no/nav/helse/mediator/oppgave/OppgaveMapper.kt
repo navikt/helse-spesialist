@@ -114,6 +114,7 @@ internal object OppgaveMapper {
             Egenskap.GRUNNBELØPSREGULERING -> ApiEgenskap.GRUNNBELOPSREGULERING
             Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE
             Egenskap.ARBEIDSTAKER -> ApiEgenskap.ARBEIDSTAKER
+            Egenskap.JORDBRUKER_REINDRIFT -> ApiEgenskap.JORDBRUKER_REINDRIFT
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): ApiKategori =
@@ -125,6 +126,7 @@ internal object OppgaveMapper {
             Egenskap.Kategori.Ukategorisert -> ApiKategori.Ukategorisert
             Egenskap.Kategori.Periodetype -> ApiKategori.Periodetype
             Egenskap.Kategori.Status -> ApiKategori.Status
+            Egenskap.Kategori.Arbeidssituasjon -> ApiKategori.Arbeidssituasjon
         }
 
     private fun EgenskapForDatabase.tilModellversjon(): Egenskap? =
