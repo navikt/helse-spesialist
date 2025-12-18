@@ -163,6 +163,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
             EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
             EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+            EgenskapForDatabase.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             EgenskapForDatabase.TILKOMMEN -> null
         }

@@ -325,6 +325,8 @@ class PgOppgaveRepository private constructor(
 
             EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
 
+            EgenskapForDatabase.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
+
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             EgenskapForDatabase.TILKOMMEN -> null
         }
