@@ -141,7 +141,8 @@ class RestAdapter(
             if (statusCode in 400..<500) {
                 loggWarnThrowable(loggmelding, cause)
             } else {
-                loggThrowable(loggmelding, cause)
+                val secureLogDetails = "Request body: ${call.receive<String>()}"
+                loggThrowable(loggmelding, secureLogDetails, cause)
             }
             call.respondWithProblem(problemDetails)
         }.onSuccess { result ->
