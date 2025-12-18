@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
-import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import javax.sql.DataSource
 
@@ -27,7 +26,7 @@ class PgPersonDao internal constructor(
         asSQL(
             "SELECT aktør_id, fødselsnummer FROM person WHERE fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,
-        ).singleOrNull<MinimalPersonDto> { row ->
+        ).singleOrNull { row ->
             MinimalPersonDto(
                 aktørId = row.string("aktør_id"),
                 fødselsnummer = row.string("fødselsnummer"),
@@ -44,127 +43,6 @@ class PgPersonDao internal constructor(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.long("id") }
 
-    override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
-        asSQL(
-            "SELECT personinfo_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { row -> row.localDateOrNull("personinfo_oppdatert") }
-
-    override fun finnPersoninfoRef(fødselsnummer: String) =
-        asSQL(
-            "SELECT info_ref FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { row -> row.longOrNull("info_ref") }
-
-    private fun insertPersoninfo(
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
-        adressebeskyttelse: Adressebeskyttelse,
-        fødselsnummer: String,
-    ) {
-        val personinfoId =
-            asSQL(
-                """
-                INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-                VALUES(:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
-                """.trimIndent(),
-                "fornavn" to fornavn,
-                "mellomnavn" to mellomnavn,
-                "etternavn" to etternavn,
-                "foedselsdato" to fødselsdato,
-                "kjonn" to kjønn.name,
-                "adressebeskyttelse" to adressebeskyttelse.name,
-            ).updateAndReturnGeneratedKey()
-        updatePersoninfoRef(personinfoId, fødselsnummer)
-    }
-
-    private fun updatePersoninfoRef(
-        id: Long,
-        fødselsnummer: String,
-    ) {
-        asSQL(
-            "UPDATE person SET info_ref = :id, personinfo_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
-            "id" to id,
-            "foedselsnummer" to fødselsnummer,
-        ).update()
-    }
-
-    override fun upsertPersoninfo(
-        fødselsnummer: String,
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
-        adressebeskyttelse: Adressebeskyttelse,
-    ) {
-        finnPersoninfoRef(fødselsnummer)
-            ?.also {
-                updatePersonInfo(
-                    it,
-                    fornavn,
-                    mellomnavn,
-                    etternavn,
-                    fødselsdato,
-                    kjønn,
-                    adressebeskyttelse,
-                    fødselsnummer,
-                )
-            }
-            ?: insertPersoninfo(
-                fornavn,
-                mellomnavn,
-                etternavn,
-                fødselsdato,
-                kjønn,
-                adressebeskyttelse,
-                fødselsnummer,
-            )
-    }
-
-    private fun updatePersonInfo(
-        id: Long,
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
-        adressebeskyttelse: Adressebeskyttelse,
-        fødselsnummer: String,
-    ) {
-        asSQL(
-            """
-            UPDATE person_info 
-            SET fornavn = :fornavn, 
-                mellomnavn = :mellomnavn, 
-                etternavn = :etternavn, 
-                fodselsdato = :foedselsdato, 
-                kjonn = CAST(:kjonn as person_kjonn), 
-                adressebeskyttelse = :adressebeskyttelse 
-            WHERE id = :id
-            """.trimIndent(),
-            "fornavn" to fornavn,
-            "mellomnavn" to mellomnavn,
-            "etternavn" to etternavn,
-            "foedselsdato" to fødselsdato,
-            "kjonn" to kjønn.name,
-            "adressebeskyttelse" to adressebeskyttelse.name,
-            "id" to id,
-        ).update()
-
-        updatePersoninfoOppdatert(fødselsnummer)
-    }
-
-    private fun updatePersoninfoOppdatert(fødselsnummer: String) {
-        asSQL(
-            "UPDATE person SET personinfo_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).update()
-    }
-
     override fun finnAdressebeskyttelse(fødselsnummer: String) =
         asSQL(
             """
@@ -173,19 +51,6 @@ class PgPersonDao internal constructor(
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
-
-    override fun finnEnhetSistOppdatert(fødselsnummer: String) =
-        asSQL("SELECT enhet_ref_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer)
-            .singleOrNull { row -> row.localDateOrNull("enhet_ref_oppdatert") }
-
-    override fun oppdaterEnhet(
-        fødselsnummer: String,
-        enhetNr: Int,
-    ) = asSQL(
-        "UPDATE person SET enhet_ref = :enhetNr, enhet_ref_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
-        "enhetNr" to enhetNr,
-        "foedselsnummer" to fødselsnummer,
-    ).update()
 
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
         asSQL(

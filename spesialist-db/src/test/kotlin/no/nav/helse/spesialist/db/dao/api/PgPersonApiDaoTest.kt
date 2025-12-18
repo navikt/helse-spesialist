@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPersoninfo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,29 +52,33 @@ internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
         val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterEnhet(fødselsnummer = person.id.value, enhetNr = 101)
+        person.oppdaterEnhet(101)
+        sessionContext.personRepository.lagre(person)
         assertPersonenErIkkeKlar(person.id)
 
         opprettEgenAnsatt(person.id.value, false)
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterAdressebeskyttelse(Ugradert, person.id.value)
+        person.oppdaterInfo(lagPersoninfo(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert))
+        sessionContext.personRepository.lagre(person)
         assertPersonenErKlar(person.id)
     }
 
     // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
     @Test
     fun `kan svare på om en person er klar for visning, med dataene mottatt i ikke-realistisk rekkefølge`() {
-        val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
+        val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null, enhet = null))
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterAdressebeskyttelse(Ugradert, person.id.value)
+        person.oppdaterInfo(lagPersoninfo(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert))
+        sessionContext.personRepository.lagre(person)
         assertPersonenErIkkeKlar(person.id)
 
         opprettEgenAnsatt(person.id.value, false)
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterEnhet(fødselsnummer = person.id.value, enhetNr = 101)
+        person.oppdaterEnhet(101)
+        sessionContext.personRepository.lagre(person)
 
         assertPersonenErKlar(person.id)
     }

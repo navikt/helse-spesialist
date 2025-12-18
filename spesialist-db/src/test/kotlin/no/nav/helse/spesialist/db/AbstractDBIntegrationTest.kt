@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
@@ -51,7 +50,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.AfterEach
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -79,13 +77,6 @@ abstract class AbstractDBIntegrationTest {
 
     protected val FNR = testperson.fødselsnummer
     protected val AKTØR = testperson.aktørId
-    protected val FORNAVN = testperson.fornavn
-    protected val MELLOMNAVN = testperson.mellomnavn
-    protected val ETTERNAVN = testperson.etternavn
-    protected val FØDSELSDATO: LocalDate = LocalDate.EPOCH
-    protected val KJØNN = testperson.kjønn
-    protected val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
-    protected val ENHET = "0301"
 
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
     private val TOM: LocalDate = LocalDate.of(2018, 1, 31)
@@ -225,41 +216,10 @@ abstract class AbstractDBIntegrationTest {
         return person
     }
 
-    protected fun oppdaterEnhet(
-        fødselsnummer: String = FNR,
-        enhetNr: Int,
-    ) = personDao.oppdaterEnhet(fødselsnummer, enhetNr)
-
     protected fun opprettEgenAnsatt(
         fødselsnummer: String,
         @Suppress("SameParameterValue") erEgenAnsatt: Boolean,
     ) = egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, LocalDateTime.now())
-
-    protected fun oppdaterAdressebeskyttelse(
-        @Suppress("SameParameterValue") adressebeskyttelse: Adressebeskyttelse,
-        fødselsnummer: String,
-    ) {
-        opprettPersoninfo(fødselsnummer, adressebeskyttelse = adressebeskyttelse)
-    }
-
-    protected fun opprettPersoninfo(
-        fødselsnummer: String,
-        fornavn: String = FORNAVN,
-        mellomnavn: String? = MELLOMNAVN,
-        etternavn: String = ETTERNAVN,
-        fødselsdato: LocalDate = LocalDate.of(1970, 1, 1),
-        kjønn: Kjønn = Kjønn.Ukjent,
-        adressebeskyttelse: Adressebeskyttelse,
-    ) = personDao
-        .upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = fornavn,
-            mellomnavn = mellomnavn,
-            etternavn = etternavn,
-            fødselsdato = fødselsdato,
-            kjønn = kjønn,
-            adressebeskyttelse = adressebeskyttelse,
-        ).let { personDao.finnPersoninfoRef(fødselsnummer) }!!
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,

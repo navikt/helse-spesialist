@@ -9,7 +9,6 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -53,32 +52,9 @@ internal class OppdaterPersonCommandTest {
     fun `oppdaterer ingenting når informasjonen er ny nok`() =
         testMedSessionContext {
             val person = lagPerson().also(it.personRepository::lagre)
-            every { personDao.finnEnhetSistOppdatert(person.id.value) } returns LocalDate.now()
             every { personDao.finnITUtbetalingsperioderSistOppdatert(person.id.value) } returns LocalDate.now()
             assertTrue(command(person.id).execute(context, it))
-            verify(exactly = 0) { personDao.oppdaterEnhet(any(), any()) }
             verify(exactly = 0) { personDao.upsertInfotrygdutbetalinger(any(), any()) }
-        }
-
-    @Test
-    fun `trenger enhet`() =
-        testMedSessionContext {
-            val person = lagPerson().also(it.personRepository::lagre)
-            utdatertEnhet(person.id)
-            assertFalse(command(person.id).execute(context, it))
-            assertTrue(observer.behov.isNotEmpty())
-            assertEquals(listOf(Behov.Enhet), observer.behov.toList())
-        }
-
-    @Test
-    fun `oppdatere enhet`() =
-        testMedSessionContext {
-            val person = lagPerson().also(it.personRepository::lagre)
-            utdatertEnhet(person.id)
-            val løsning = mockk<HentEnhetløsning>(relaxed = true)
-            context.add(løsning)
-            assertTrue(command(person.id).execute(context, it))
-            verify(exactly = 1) { løsning.oppdater(personDao, person.id.value) }
         }
 
     @Test
@@ -110,32 +86,7 @@ internal class OppdaterPersonCommandTest {
             verify(exactly = 1) { løsning.oppdater(personDao, person.id.value) }
         }
 
-    @Test
-    fun `oppdatere alt`() =
-        testMedSessionContext {
-            val person = lagPerson().also(it.personRepository::lagre)
-            altUtdatert(person.id)
-            val enhet = mockk<HentEnhetløsning>(relaxed = true)
-            val utbetalinger = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
-            context.add(enhet)
-            context.add(utbetalinger)
-            assertTrue(command(person.id).execute(context, it))
-            verify(exactly = 1) { enhet.oppdater(personDao, person.id.value) }
-            verify(exactly = 1) { utbetalinger.oppdater(personDao, person.id.value) }
-        }
-
-    private fun utdatertEnhet(identitetsnummer: Identitetsnummer) {
-        every { personDao.finnEnhetSistOppdatert(identitetsnummer.value) } returns LocalDate.now().minusYears(1)
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(identitetsnummer.value) } returns LocalDate.now()
-    }
-
     private fun utdatertUtbetalinger(identitetsnummer: Identitetsnummer) {
-        every { personDao.finnEnhetSistOppdatert(identitetsnummer.value) } returns LocalDate.now()
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(identitetsnummer.value) } returns LocalDate.now().minusYears(1)
-    }
-
-    private fun altUtdatert(identitetsnummer: Identitetsnummer) {
-        every { personDao.finnEnhetSistOppdatert(identitetsnummer.value) } returns LocalDate.now().minusYears(1)
         every { personDao.finnITUtbetalingsperioderSistOppdatert(identitetsnummer.value) } returns LocalDate.now().minusYears(1)
     }
 }

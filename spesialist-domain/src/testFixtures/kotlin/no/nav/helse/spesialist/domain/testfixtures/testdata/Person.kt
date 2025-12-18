@@ -28,6 +28,8 @@ fun lagPerson(
         ),
     infoSistOppdatert: LocalDate? = info?.let { LocalDate.now() },
     erEgenAnsatt: Boolean? = false,
+    enhet: Int? = 1000,
+    enhetSistOppdatert: LocalDate? = enhet?.let { LocalDate.now() },
 ): Person =
     Person.Factory.fraLagring(
         id = id,
@@ -41,8 +43,8 @@ fun lagPerson(
             },
         info = info,
         infoOppdatert = infoSistOppdatert,
-        enhetRef = null,
-        enhetRefOppdatert = null,
+        enhetRef = enhet,
+        enhetRefOppdatert = enhetSistOppdatert,
         infotrygdutbetalingerRef = null,
         infotrygdutbetalingerOppdatert = null,
     )
