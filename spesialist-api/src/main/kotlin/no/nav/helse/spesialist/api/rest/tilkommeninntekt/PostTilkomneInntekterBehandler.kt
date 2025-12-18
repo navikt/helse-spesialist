@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -37,6 +38,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             return RestResponse.Error(ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
+        sikkerlogg.debug("Legge til tilkommen inntekt for ${request.fodselsnummer} med body: ${request.verdier}")
         val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
             periode = periode,
