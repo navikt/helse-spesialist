@@ -8,7 +8,6 @@ import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
-import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -42,21 +41,6 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     fun `lagre infotrygdutbetalinger`() {
         personDao.upsertInfotrygdutbetalinger(person.id.value, objectMapper.createObjectNode())
         assertEquals(1, infotrygdUtbetalinger().size)
-    }
-
-    @Test
-    fun `finner enhet`() {
-        val person = opprettPerson(person = lagPerson())
-        oppdaterEnhet(person.id.value, ENHET.toInt())
-        assertEquals(ENHET.toInt(), personDao.finnEnhetId(person.id.value).toInt())
-    }
-
-    @Test
-    fun `oppdaterer enhet`() {
-        val person = opprettPerson()
-        val nyEnhet = "2100".toInt()
-        personDao.oppdaterEnhet(person.id.value, nyEnhet)
-        person().first().assertEnhet(nyEnhet)
     }
 
     @Test
@@ -137,46 +121,12 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
         )
     }
 
-    private fun assertPersoninfo(
-        forventetNavn: String,
-        forventetMellomnavn: String?,
-        forventetEtternavn: String?,
-        forventetFødselsdato: LocalDate,
-        forventetKjønn: Kjønn,
-        forventetAdressebeskyttelse: Adressebeskyttelse,
-    ) {
-        val personinfo = personinfo()
-        assertEquals(1, personinfo.size)
-        personinfo
-            .first()
-            .assertEquals(
-                forventetNavn,
-                forventetMellomnavn,
-                forventetEtternavn,
-                forventetFødselsdato,
-                forventetKjønn,
-                forventetAdressebeskyttelse,
-            )
-    }
-
     private fun infotrygdUtbetalinger() =
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf("SELECT data FROM infotrygdutbetalinger")
                     .map { row -> row.string("data") }
                     .asList,
-            )
-        }
-
-    private fun person() =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf("SELECT fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person")
-                    .map { row ->
-                        Person(
-                            row.intOrNull("enhet_ref"),
-                        )
-                    }.asList,
             )
         }
 
@@ -188,23 +138,6 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
                         objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
                     }.asSingle,
             ) ?: emptyList()
-        }
-
-    private fun personinfo() =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf("SELECT fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse FROM person_info")
-                    .map { row ->
-                        Personinfo(
-                            row.string("fornavn"),
-                            row.stringOrNull("mellomnavn"),
-                            row.string("etternavn"),
-                            row.localDate("fodselsdato"),
-                            enumValueOf(row.string("kjonn")),
-                            enumValueOf(row.string("adressebeskyttelse")),
-                        )
-                    }.asList,
-            )
         }
 
     private fun leggInnPersonIKlargjøringstabellen(fødselsnummer: String) {
@@ -220,37 +153,4 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
             "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
             "foedselsnummer" to fødselsnummer,
         ) { true } ?: false
-
-    private class Person(
-        private val enhetRef: Int?,
-    ) {
-        fun assertEnhet(forventetEnhet: Int) {
-            assertEquals(forventetEnhet, enhetRef)
-        }
-    }
-
-    private class Personinfo(
-        private val fornavn: String,
-        private val mellomnavn: String?,
-        private val etternavn: String,
-        private val fødselsdato: LocalDate,
-        private val kjønn: Kjønn,
-        private val adressebeskyttelse: Adressebeskyttelse,
-    ) {
-        fun assertEquals(
-            forventetNavn: String,
-            forventetMellomnavn: String?,
-            forventetEtternavn: String?,
-            forventetFødselsdato: LocalDate,
-            forventetKjønn: Kjønn,
-            forventetAdressebeskyttelse: Adressebeskyttelse,
-        ) {
-            assertEquals(forventetNavn, fornavn)
-            assertEquals(forventetMellomnavn, mellomnavn)
-            assertEquals(forventetEtternavn, etternavn)
-            assertEquals(forventetFødselsdato, fødselsdato)
-            assertEquals(forventetKjønn, kjønn)
-            assertEquals(forventetAdressebeskyttelse, adressebeskyttelse)
-        }
-    }
 }

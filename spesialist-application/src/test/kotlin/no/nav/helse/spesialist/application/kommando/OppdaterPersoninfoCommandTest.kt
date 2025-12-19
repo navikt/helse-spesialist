@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.application.InMemoryPersonRepository
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.typer.Kjønn
-import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
@@ -27,7 +26,6 @@ internal class OppdaterPersoninfoCommandTest {
         private val FØDSELSDATO = LocalDate.EPOCH
     }
 
-    private lateinit var context: CommandContext
     private val personRepository = InMemoryPersonRepository()
 
     private val observer =
@@ -42,11 +40,10 @@ internal class OppdaterPersoninfoCommandTest {
             }
         }
 
-    @BeforeEach
-    fun beforeEach() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
-    }
+    private val context =
+        CommandContext(UUID.randomUUID()).also {
+            it.nyObserver(observer)
+        }
 
     @Test
     fun `mangler personinfo`() {

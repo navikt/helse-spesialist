@@ -10,7 +10,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterPersonCommand.OppdaterEnhetCommand
+import no.nav.helse.modell.kommando.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
@@ -55,7 +55,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 personRepository = personRepository,
                 force = false,
             ),
-            OppdaterEnhetCommand(fødselsnummer, personDao),
+            OppdaterEnhetCommand(fødselsnummer, personRepository),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = fødselsnummer,
                 egenAnsattDao = egenAnsattDao,

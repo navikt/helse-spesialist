@@ -77,7 +77,6 @@ abstract class AbstractDBIntegrationTest {
 
     protected val FNR = testperson.fødselsnummer
     protected val AKTØR = testperson.aktørId
-    protected val ENHET = "0301"
 
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
     private val TOM: LocalDate = LocalDate.of(2018, 1, 31)
@@ -216,16 +215,6 @@ abstract class AbstractDBIntegrationTest {
         sessionContext.personRepository.lagre(person)
         return person
     }
-
-    protected fun oppdaterEnhet(
-        fødselsnummer: String = FNR,
-        enhetNr: Int,
-    ) = personDao.oppdaterEnhet(fødselsnummer, enhetNr)
-
-    protected fun opprettEgenAnsatt(
-        fødselsnummer: String,
-        @Suppress("SameParameterValue") erEgenAnsatt: Boolean,
-    ) = egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, LocalDateTime.now())
 
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,

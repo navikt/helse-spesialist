@@ -2,7 +2,6 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.spesialist.application.PersonRepository
 import org.slf4j.LoggerFactory
@@ -21,52 +20,9 @@ internal class OppdaterPersonCommand(
     override val commands: List<Command> =
         listOf(
             OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = false),
-            OppdaterEnhetCommand(fødselsnummer, personDao),
+            OppdaterEnhetCommand(fødselsnummer, personRepository),
             OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao, førsteKjenteDagFinner),
         )
-
-    internal class OppdaterEnhetCommand(
-        private val fødselsnummer: String,
-        private val personDao: PersonDao,
-    ) : Command {
-        override fun execute(context: CommandContext): Boolean {
-            if (erOppdatert(personDao, fødselsnummer)) return ignorer()
-            return behandle(context, personDao, fødselsnummer)
-        }
-
-        override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
-
-        private fun ignorer(): Boolean {
-            log.info("har ikke behov for Enhet, informasjonen er ny nok")
-            return true
-        }
-
-        private fun trengerMerInformasjon(context: CommandContext): Boolean {
-            val behov = Behov.Enhet
-            log.info("trenger oppdatert $behov")
-            context.behov(behov)
-            return false
-        }
-
-        private fun erOppdatert(
-            personDao: PersonDao,
-            fødselsnummer: String,
-        ): Boolean {
-            val sistOppdatert = personDao.finnEnhetSistOppdatert(fødselsnummer)
-            return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(5)
-        }
-
-        private fun behandle(
-            context: CommandContext,
-            personDao: PersonDao,
-            fødselsnummer: String,
-        ): Boolean {
-            val enhet = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
-            log.info("oppdaterer enhetsnr")
-            enhet.oppdater(personDao, fødselsnummer)
-            return true
-        }
-    }
 
     private class OppdaterInfotrygdutbetalingerCommand(
         private val fødselsnummer: String,

@@ -18,17 +18,6 @@ class DelegatingPersonDao(
         TODO("Not yet implemented")
     }
 
-    override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate? {
-        TODO("Not yet implemented")
-    }
-
-    override fun oppdaterEnhet(
-        fødselsnummer: String,
-        enhetNr: Int,
-    ): Int {
-        TODO("Not yet implemented")
-    }
-
     override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate? {
         TODO("Not yet implemented")
     }

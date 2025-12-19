@@ -11,13 +11,6 @@ interface PersonDao {
 
     fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
 
-    fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate?
-
-    fun oppdaterEnhet(
-        fødselsnummer: String,
-        enhetNr: Int,
-    ): Int
-
     fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate?
 
     fun upsertInfotrygdutbetalinger(

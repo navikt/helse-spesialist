@@ -34,8 +34,8 @@ class Person private constructor(
     val aktørId: String,
     info: Personinfo?,
     infoOppdatert: LocalDate?,
-    val enhetRef: Int?,
-    val enhetRefOppdatert: LocalDate?,
+    enhetRef: Int?,
+    enhetRefOppdatert: LocalDate?,
     val infotrygdutbetalingerRef: Int?,
     val infotrygdutbetalingerOppdatert: LocalDate?,
     egenAnsattStatus: EgenAnsattStatus?,
@@ -47,9 +47,19 @@ class Person private constructor(
     var egenAnsattStatus: EgenAnsattStatus? = egenAnsattStatus
         private set
 
+    var enhetRef: Int? = enhetRef
+        private set
+    var enhetRefOppdatert: LocalDate? = enhetRefOppdatert
+        private set
+
     fun oppdaterInfo(personinfo: Personinfo) {
         this.info = personinfo
         this.infoOppdatert = LocalDate.now()
+    }
+
+    fun oppdaterEnhet(enhet: Int) {
+        this.enhetRef = enhet
+        this.enhetRefOppdatert = LocalDate.now()
     }
 
     fun oppdaterEgenAnsattStatus(

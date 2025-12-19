@@ -1,6 +1,5 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 
 interface PersonApiDao {
@@ -13,8 +12,6 @@ interface PersonApiDao {
     fun finnInfotrygdutbetalinger(fødselsnummer: String): String?
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean
-
-    fun hentAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse?
 
     fun finnAktørId(fødselsnummer: String): String
 

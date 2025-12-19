@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 
 class UnimplementedPersonApiDao : PersonApiDao {
@@ -22,10 +21,6 @@ class UnimplementedPersonApiDao : PersonApiDao {
     }
 
     override fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun hentAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? {
         TODO("Not yet implemented")
     }
 

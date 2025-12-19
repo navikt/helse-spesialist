@@ -1,85 +1,55 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig
-import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
-import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
-import no.nav.helse.modell.person.Adressebeskyttelse.Ugradert
-import no.nav.helse.modell.person.Adressebeskyttelse.Ukjent
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPersoninfo
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.Instant
 
 internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
-    @Test
-    fun `henter adressebeskyttelse Fortrolig`() {
-        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig)).id.value
-        assertEquals(Fortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
-    }
-
-    @Test
-    fun `henter adressebeskyttelse Ugradert`() {
-        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert)).id.value
-        assertEquals(Ugradert.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
-    }
-
-    @Test
-    fun `henter adressebeskyttelse Strengt Fortrolig`() {
-        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)).id.value
-        assertEquals(StrengtFortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
-    }
-
-    @Test
-    fun `henter adressebeskyttelse Strengt Fortrolig Utland`() {
-        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortroligUtland)).id.value
-        assertEquals(StrengtFortroligUtland.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
-    }
-
-    @Test
-    fun `henter adressebeskyttelse Ukjent`() {
-        val fødselsnummer = opprettPerson(person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ukjent)).id.value
-        assertEquals(Ukjent.somApiType(), personApiDao.hentAdressebeskyttelse(fødselsnummer))
-    }
-
     @Test
     fun `kan svare på om en person er klar for visning`() {
         val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterEnhet(fødselsnummer = person.id.value, enhetNr = 101)
+        person.oppdaterEnhet(101)
+        sessionContext.personRepository.lagre(person)
         assertPersonenErIkkeKlar(person.id)
 
-        opprettEgenAnsatt(person.id.value, false)
-        assertPersonenErIkkeKlar(person.id)
+        val oppdatertMedEnhet = sessionContext.personRepository.finn(person.id) ?: error("Fant ikke person")
+        oppdatertMedEnhet.oppdaterEgenAnsattStatus(false, Instant.now())
+        sessionContext.personRepository.lagre(oppdatertMedEnhet)
+        assertPersonenErIkkeKlar(oppdatertMedEnhet.id)
 
-        val oppdatertPerson = sessionContext.personRepository.finn(person.id) ?: error("Fant ikke person")
-        oppdatertPerson.oppdaterInfo(lagPersoninfo(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert))
-        sessionContext.personRepository.lagre(oppdatertPerson)
-        assertPersonenErKlar(oppdatertPerson.id)
+        val oppdatertMedEgenAnsattStatus = sessionContext.personRepository.finn(person.id) ?: error("Fant ikke person")
+        oppdatertMedEgenAnsattStatus.oppdaterInfo(lagPersoninfo())
+        sessionContext.personRepository.lagre(oppdatertMedEgenAnsattStatus)
+        assertPersonenErKlar(oppdatertMedEgenAnsattStatus.id)
     }
 
     // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
     @Test
     fun `kan svare på om en person er klar for visning, med dataene mottatt i ikke-realistisk rekkefølge`() {
-        val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
+        val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null, enhet = null))
         assertPersonenErIkkeKlar(person.id)
 
-        person.oppdaterInfo(lagPersoninfo(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert))
+        person.oppdaterInfo(lagPersoninfo())
         sessionContext.personRepository.lagre(person)
         assertPersonenErIkkeKlar(person.id)
 
-        opprettEgenAnsatt(person.id.value, false)
-        assertPersonenErIkkeKlar(person.id)
+        val oppdatertMedPersoninfo = sessionContext.personRepository.finn(person.id) ?: error("Fant ikke person")
+        oppdatertMedPersoninfo.oppdaterEgenAnsattStatus(false, Instant.now())
+        sessionContext.personRepository.lagre(oppdatertMedPersoninfo)
+        assertPersonenErIkkeKlar(oppdatertMedPersoninfo.id)
 
-        oppdaterEnhet(fødselsnummer = person.id.value, enhetNr = 101)
+        val oppdatertMedEgenAnsattStatus = sessionContext.personRepository.finn(person.id) ?: error("Fant ikke person")
+        oppdatertMedEgenAnsattStatus.oppdaterEnhet(101)
+        sessionContext.personRepository.lagre(oppdatertMedEgenAnsattStatus)
 
-        assertPersonenErKlar(person.id)
+        assertPersonenErKlar(oppdatertMedEgenAnsattStatus.id)
     }
 
     @Test
@@ -96,7 +66,3 @@ internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
 
     private fun assertPersonenErKlar(identitetsnummer: Identitetsnummer) = assertTrue(harDataNødvendigForVisning(identitetsnummer))
 }
-
-private fun Adressebeskyttelse.somApiType(): no.nav.helse.spesialist.api.person.Adressebeskyttelse =
-    no.nav.helse.spesialist.api.person.Adressebeskyttelse
-        .valueOf(this.name)

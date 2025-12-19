@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
@@ -47,17 +46,6 @@ class PgPersonApiDao internal constructor(
             " SELECT 1 FROM person WHERE fødselsnummer = :fodselsnummer; ",
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { true } ?: false
-
-    override fun hentAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? =
-        asSQL(
-            """
-            SELECT pi.adressebeskyttelse
-            FROM person p
-            JOIN person_info pi ON p.info_ref = pi.id
-            WHERE p.fødselsnummer = :fodselsnummer
-            """.trimIndent(),
-            "fodselsnummer" to fødselsnummer,
-        ).singleOrNull { Adressebeskyttelse.valueOf(it.string("adressebeskyttelse")) }
 
     override fun finnAktørId(fødselsnummer: String): String =
         asSQL(

@@ -1,7 +1,5 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.db.PersonDao
-
 class HentEnhetløsning(
     private val enhetNr: String,
 ) {
@@ -11,8 +9,5 @@ class HentEnhetløsning(
         internal fun erEnhetUtland(enhet: String) = enhet in UTLANDSENHETER
     }
 
-    fun oppdater(
-        personDao: PersonDao,
-        fødselsnummer: String,
-    ) = personDao.oppdaterEnhet(fødselsnummer, enhetNr.toInt())
+    fun enhet() = enhetNr.toInt()
 }
