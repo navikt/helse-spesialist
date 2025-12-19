@@ -10,12 +10,14 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.VedtakRepository
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
 import java.time.LocalDate
 import java.util.UUID
@@ -44,11 +46,16 @@ class TilbakedateringBehandlet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
+        val identitetsnummer = Identitetsnummer.fraString(person.fødselsnummer)
         person.behandleTilbakedateringBehandlet(perioder)
         kommandostarter {
-            val oppgaveDataForAutomatisering =
-                finnOppgavedata(fødselsnummer, sessionContext) ?: return@kommandostarter null
-            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgaveDataForAutomatisering, sessionContext)
+            val oppgave =
+                sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
+            if (oppgave == null) {
+                loggInfo("Ingen aktiv oppgave for personen, avslutter behandling av meldingen")
+                return@kommandostarter null
+            }
+            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgave, sessionContext)
         }
     }
 
@@ -61,19 +68,21 @@ internal class TilbakedateringGodkjentCommand(
     sykefraværstilfelle: Sykefraværstilfelle,
     utbetaling: Utbetaling,
     automatisering: Automatisering,
-    oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
+    oppgave: Oppgave,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     søknadsperioder: List<Periode>,
     godkjenningsbehov: GodkjenningsbehovData,
     automatiseringDao: AutomatiseringDao,
     vedtakRepository: VedtakRepository,
+    sessionContext: SessionContext,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            VurderOmSøknadsperiodenOverlapperMedOppgave(oppgaveDataForAutomatisering, søknadsperioder),
+            VurderOmSøknadsperiodenOverlapperMedOppgave(sessionContext, oppgave, søknadsperioder),
             ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
-                oppgaveService.fjernTilbakedatert(godkjenningsbehov.vedtaksperiodeId)
+                oppgave.fjernTilbakedatert()
+                sessionContext.oppgaveRepository.lagre(oppgave)
             },
             SettTidligereAutomatiseringInaktivCommand(
                 vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId,

@@ -6,12 +6,10 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonnavnFraDatabase
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -109,38 +107,6 @@ class PgOppgaveDao internal constructor(
             "oppgaveId" to oppgaveId,
         ).single {
             it.uuid("spleis_behandling_id")
-        }
-
-    override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? =
-        asSQL(
-            """
-            SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
-            FROM vedtaksperiode v
-            INNER JOIN oppgave o ON o.vedtak_ref = v.id
-            INNER JOIN hendelse h ON h.id = o.hendelse_id_godkjenningsbehov
-            INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
-            WHERE o.id = :oppgaveId
-            """,
-            "oppgaveId" to oppgaveId,
-        ).singleOrNull { row ->
-            val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
-            val skjæringstidspunkt =
-                json
-                    .path("Godkjenning")
-                    .path("skjæringstidspunkt")
-                    .asText()
-                    .let(LocalDate::parse)
-            OppgaveDataForAutomatisering(
-                oppgaveId = oppgaveId,
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                periodeFom = row.localDate("fom"),
-                periodeTom = row.localDate("tom"),
-                skjæringstidspunkt = skjæringstidspunkt,
-                utbetalingId = row.uuid("utbetaling_id"),
-                hendelseId = row.uuid("hendelseId"),
-                godkjenningsbehovJson = row.string("godkjenningbehovJson"),
-                periodetype = enumValueOf(row.string("periodetype")),
-            )
         }
 
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase =

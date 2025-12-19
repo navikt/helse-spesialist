@@ -172,15 +172,6 @@ class OppgaveService(
         }
     }
 
-    fun fjernTilbakedatert(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
-            oppgave(oppgaveId) {
-                logg.info("Fjerner egenskap TILBAKEDATERT på {}", kv("oppgaveId", oppgaveId))
-                fjernTilbakedatert()
-            }
-        }
-    }
-
     fun fjernGosysEgenskap(vedtaksperiodeId: UUID) {
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
             oppgave(oppgaveId) { fjernGosys() }
@@ -225,6 +216,7 @@ class OppgaveService(
                     }
                 }
             }
+
             is Either.Success<Set<Tilgangsgruppe>, Feil> -> {
                 try {
                     oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result)

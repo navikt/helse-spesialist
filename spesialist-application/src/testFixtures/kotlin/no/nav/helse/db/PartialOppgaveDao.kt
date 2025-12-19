@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import java.time.LocalDate
 import java.util.UUID
 
@@ -34,10 +33,6 @@ interface PartialOppgaveDao : OppgaveDao {
     }
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID {
-        error("Not implemented for this test")
-    }
-
-    override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
         error("Not implemented for this test")
     }
 

@@ -11,7 +11,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -96,11 +95,12 @@ class Kommandofabrikk(
     internal fun tilbakedateringGodkjent(
         melding: TilbakedateringBehandlet,
         person: LegacyPerson,
-        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
+        oppgave: Oppgave,
         sessionContext: SessionContext,
     ): TilbakedateringGodkjentCommand {
         val godkjenningsbehovData =
-            sessionContext.meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
+            sessionContext.meldingDao.finnSisteGodkjenningsbehov(oppgave.behandlingId)?.data()
+                ?: error("Fant ikke godkjenningsbehov")
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
@@ -108,39 +108,15 @@ class Kommandofabrikk(
             sykefraværstilfelle = sykefraværstilfelle,
             utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
-            oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
+            oppgave = oppgave,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
             vedtakRepository = sessionContext.vedtakRepository,
+            sessionContext = sessionContext,
         )
-    }
-
-    internal fun finnOppgavedata(
-        fødselsnummer: String,
-        sessionContext: SessionContext,
-    ): OppgaveDataForAutomatisering? {
-        val oppgaveDao = sessionContext.oppgaveDao
-        return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
-            loggInfo("Fant en oppgave med id: $oppgaveId", "fødselsnummer: $fødselsnummer")
-            val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
-
-            if (oppgaveDataForAutomatisering == null) {
-                loggInfo("Fant ikke oppgavedata med id: $oppgaveId", "fødselsnummer: $fødselsnummer")
-                null
-            } else {
-                loggInfo(
-                    melding = "Har aktiv saksbehandleroppgave med id: $oppgaveId, vedtaksperiodeId: ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
-                    sikkerloggDetaljer = "fødselsnummer: $fødselsnummer",
-                )
-                oppgaveDataForAutomatisering
-            }
-        } ?: kotlin.run {
-            loggInfo("Ingen aktive saksbehandleroppgaver funnet for personen", "fødselsnummer: $fødselsnummer")
-            null
-        }
     }
 
     internal fun vedtaksperiodeReberegnet(

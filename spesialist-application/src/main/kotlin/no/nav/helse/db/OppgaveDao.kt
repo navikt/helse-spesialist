@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import java.time.LocalDate
 import java.util.UUID
 
@@ -20,8 +19,6 @@ interface OppgaveDao {
     fun reserverNesteId(): Long
 
     fun finnSpleisBehandlingId(oppgaveId: Long): UUID
-
-    fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering?
 
     fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase
 
