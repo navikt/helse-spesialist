@@ -54,6 +54,26 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `lagre og finn aktiv oppgave for person`() {
+        val oppgave =
+            Oppgave.ny(
+                id = nextLong(),
+                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = utbetalingId,
+                hendelseId = godkjenningsbehovId,
+                kanAvvises = true,
+                egenskaper = setOf(SØKNAD),
+            )
+
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finnAktivForPerson(person.id)
+        assertNotNull(funnetOppgave)
+        assertEquals(oppgave, funnetOppgave)
+    }
+
+    @Test
     fun `lagre og finn oppgave for spleisBehandlingId`() {
         val oppgave =
             Oppgave.ny(

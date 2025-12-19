@@ -7,6 +7,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.time.LocalDateTime
@@ -15,20 +16,22 @@ import java.util.UUID
 class InMemoryOppgaveRepository : OppgaveRepository {
     private val oppgaver = mutableMapOf<Long, Oppgave>()
 
-    fun alle(): List<Oppgave> =
-        oppgaver.values.toList()
+    fun alle(): List<Oppgave> = oppgaver.values.toList()
 
     override fun lagre(oppgave: Oppgave) {
         oppgaver[oppgave.id] = oppgave
     }
 
-    override fun finn(id: Long): Oppgave? =
-        oppgaver[id]
+    override fun finn(id: Long): Oppgave? = oppgaver[id]
 
     override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id.value }
 
-    override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? {
-        return oppgaver.values.firstOrNull { it.utbetalingId == utbetalingId }?.let {
+    override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
+        error("Not implemented for this test")
+    }
+
+    override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
+        oppgaver.values.firstOrNull { it.utbetalingId == utbetalingId }?.let {
             OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov(
                 id = it.id,
                 tilstand = it.tilstand,
@@ -36,10 +39,8 @@ class InMemoryOppgaveRepository : OppgaveRepository {
                 utbetalingId = it.utbetalingId,
             )
         }
-    }
 
-    override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? =
-        oppgaver.values.filter { it.behandlingId == behandlingId }.minOfOrNull { it.opprettet }
+    override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId == behandlingId }.minOfOrNull { it.opprettet }
 
     override fun finnOppgaveProjeksjoner(
         minstEnAvEgenskapene: List<Set<Egenskap>>,
@@ -51,7 +52,7 @@ class InMemoryOppgaveRepository : OppgaveRepository {
         sorterPå: SorteringsnøkkelForDatabase,
         sorteringsrekkefølge: Sorteringsrekkefølge,
         sidetall: Int,
-        sidestørrelse: Int
+        sidestørrelse: Int,
     ): Side<OppgaveProjeksjon> {
         error("Not implemented for this test")
     }

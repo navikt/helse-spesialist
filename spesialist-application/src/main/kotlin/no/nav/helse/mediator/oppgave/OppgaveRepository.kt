@@ -19,6 +19,8 @@ interface OppgaveRepository {
 
     fun finn(id: SpleisBehandlingId): Oppgave?
 
+    fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave?
+
     // TODO: Helst bør vi bruke finn(), men Oppgave er ikke et aggregat ennå
     fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveTilstandStatusOgGodkjenningsbehov?
 
