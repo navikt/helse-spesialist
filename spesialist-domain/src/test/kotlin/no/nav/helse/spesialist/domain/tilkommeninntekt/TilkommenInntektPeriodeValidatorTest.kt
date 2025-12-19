@@ -10,7 +10,10 @@ import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.jul
+import no.nav.helse.spesialist.domain.testfixtures.jun
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.mai
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator.tilSykefraværstillfellePerioder
@@ -58,7 +61,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -77,7 +80,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -96,7 +99,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -115,7 +118,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -136,7 +139,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -152,7 +155,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -171,7 +174,7 @@ class TilkommenInntektPeriodeValidatorTest {
         // When:
         val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
             periode = periode,
-            vedtaksperioder = vedtaksperioder
+            vedtaksperioder = vedtaksperioder,
         )
 
         // Then:
@@ -184,7 +187,7 @@ class TilkommenInntektPeriodeValidatorTest {
         val periode1 = lagVedtaksperiode(fom = expected.fom, tom = 10 jan 2018)
         val periode2 = lagVedtaksperiode(fom = 11 jan 2018, tom = expected.tom)
 
-        val sammenslåttePerioder = listOf(periode1, periode2).tilSykefraværstillfellePerioder()
+        val sammenslåttePerioder = listOf(periode1, periode2).tilSykefraværstillfellePerioder().map { it.second }
         assertEquals(listOf(expected), sammenslåttePerioder)
     }
 
@@ -235,7 +238,7 @@ class TilkommenInntektPeriodeValidatorTest {
 
         assertEquals(
             listOf(sykefraværstilfelle1, sykefraværstilfelle2),
-            listOf(periode1, periode2, periode3, periode4).tilSykefraværstillfellePerioder()
+            listOf(periode1, periode2, periode3, periode4).tilSykefraværstillfellePerioder().map { it.second }
         )
     }
 
