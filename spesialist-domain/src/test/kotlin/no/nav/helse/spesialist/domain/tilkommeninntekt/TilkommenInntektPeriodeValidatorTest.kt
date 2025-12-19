@@ -207,7 +207,7 @@ class TilkommenInntektPeriodeValidatorTest {
         val periode1 = lagVedtaksperiode(fom = expected.fom, tom = 10 jan 2018)
         val periode2 = lagVedtaksperiode(fom = 11 jan 2018, tom = expected.tom)
 
-        val sammenslåttePerioder = listOf(periode1, periode2).tilSykefraværstillfellePerioder().map { it.second }
+        val sammenslåttePerioder = listOf(periode1, periode2).tilSykefraværstillfellePerioder()
         assertEquals(listOf(expected), sammenslåttePerioder)
     }
 
@@ -258,7 +258,7 @@ class TilkommenInntektPeriodeValidatorTest {
 
         assertEquals(
             listOf(sykefraværstilfelle1, sykefraværstilfelle2),
-            listOf(periode1, periode2, periode3, periode4).tilSykefraværstillfellePerioder().map { it.second }
+            listOf(periode1, periode2, periode3, periode4).tilSykefraværstillfellePerioder()
         )
     }
 

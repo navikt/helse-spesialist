@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.domain.tilkommeninntekt
 
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.domain.Periode
-import org.slf4j.Logger
-import java.util.UUID
 
 object TilkommenInntektPeriodeValidator {
     fun validerPeriode(
@@ -11,9 +9,8 @@ object TilkommenInntektPeriodeValidator {
         organisasjonsnummer: String,
         andreTilkomneInntekter: List<TilkommenInntekt>,
         vedtaksperioder: List<VedtaksperiodeDto>,
-        sikkerlogg: Logger,
     ) {
-        if (!erInnenforEtSykefraværstilfelle(periode = periode, vedtaksperioder = vedtaksperioder, sikkerlogg = sikkerlogg)) {
+        if (!erInnenforEtSykefraværstilfelle(periode = periode, vedtaksperioder = vedtaksperioder)) {
             error("Kan ikke legge til tilkommen inntekt som går utenfor et sykefraværstilfelle")
         }
         validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
@@ -38,35 +35,21 @@ object TilkommenInntektPeriodeValidator {
     fun erInnenforEtSykefraværstilfelle(
         periode: Periode,
         vedtaksperioder: List<VedtaksperiodeDto>,
-        sikkerlogg: Logger? = null,
-    ): Boolean {
-        val sykefraværstilfellePerioder = vedtaksperioder.tilSykefraværstillfellePerioder()
-        val erInnenforEnPeriode =
-            periode erInnenforEnAv (
-                sykefraværstilfellePerioder
-                    .map { it.second }
-                    .filterNot { it.datoer().isEmpty() }
-            )
-        return if (erInnenforEnPeriode) {
-            true
-        } else {
-            false.also { sikkerlogg?.info("Periode $periode overlapper ikke med noen sykefraværstilfelleperioder $sykefraværstilfellePerioder") }
-        }
-    }
+    ) = periode erInnenforEnAv vedtaksperioder.tilSykefraværstillfellePerioder().filterNot { it.datoer().isEmpty() }
 
-    fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Pair<UUID, Periode>> =
+    fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Periode> =
         map { it.behandlinger.last() }
-            .map { it.id to Periode(it.fom, it.tom) }
-            .sortedBy { it.second.fom }
-            .fold(listOf()) { sammenhengendePerioder, (id, nestePeriode) ->
+            .map { Periode(it.fom, it.tom) }
+            .sortedBy { it.fom }
+            .fold(listOf()) { sammenhengendePerioder, nestePeriode ->
                 val (overlappendePerioder, resten) =
                     sammenhengendePerioder.partition {
-                        nestePeriode overlapper Periode(it.second.fom, it.second.tom.plusDays(1))
+                        nestePeriode overlapper Periode(it.fom, it.tom.plusDays(1))
                     }
                 if (overlappendePerioder.isEmpty()) {
-                    resten + (id to nestePeriode)
+                    resten + nestePeriode
                 } else {
-                    resten + overlappendePerioder.first().let { it.first to it.second.copy(tom = maxOf(it.second.tom, nestePeriode.tom)) }
+                    resten + overlappendePerioder.first().let { it.copy(tom = maxOf(it.tom, nestePeriode.tom)) }
                 }
             }
 }
