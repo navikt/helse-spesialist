@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.math.BigDecimal
 import kotlin.random.Random
 import kotlin.test.Test
@@ -20,7 +20,7 @@ class TilkommenInntektTest {
         //given
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerIdent = lagSaksbehandler().ident
 
         //when
         val tilkommenInntekt = TilkommenInntekt.ny(
@@ -66,7 +66,7 @@ class TilkommenInntektTest {
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
-            saksbehandlerIdent = lagSaksbehandlerident(),
+            saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
             organisasjonsnummer = organisasjonsnummer
@@ -74,7 +74,7 @@ class TilkommenInntektTest {
 
         //when
         val endretOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerIdent = lagSaksbehandler().ident
         tilkommenInntekt.endreTil(
             organisasjonsnummer = endretOrganisasjonsnummer,
             periode = (3 jan 2018) tilOgMed (20 jan 2018),
@@ -121,17 +121,17 @@ class TilkommenInntektTest {
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
-            saksbehandlerIdent = lagSaksbehandlerident(),
+            saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
             organisasjonsnummer = organisasjonsnummer
         )
 
-        tilkommenInntekt.fjern(lagSaksbehandlerident(), "fjern", TotrinnsvurderingId(Random.nextLong()))
+        tilkommenInntekt.fjern(lagSaksbehandler().ident, "fjern", TotrinnsvurderingId(Random.nextLong()))
 
         //when
         val endretOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerIdent = lagSaksbehandler().ident
         tilkommenInntekt.gjenopprett(
             organisasjonsnummer = endretOrganisasjonsnummer,
             periode = (3 jan 2018) tilOgMed (20 jan 2018),
@@ -178,14 +178,14 @@ class TilkommenInntektTest {
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
-            saksbehandlerIdent = lagSaksbehandlerident(),
+            saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
             organisasjonsnummer = organisasjonsnummer
         )
 
         // when
-        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerIdent = lagSaksbehandler().ident
         tilkommenInntekt.fjern(saksbehandlerIdent, "remove", TotrinnsvurderingId(Random.nextLong()))
 
         // then

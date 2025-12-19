@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jun
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.mai
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator.tilSykefraværstillfellePerioder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -38,7 +38,7 @@ class TilkommenInntektPeriodeValidatorTest {
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000.0"),
             fødselsnummer = fødselsnummer,
-            saksbehandlerIdent = lagSaksbehandlerident(),
+            saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
             organisasjonsnummer = organisasjonsnummer

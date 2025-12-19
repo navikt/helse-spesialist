@@ -24,6 +24,3 @@ fun lagSaksbehandler(
         epost = epost,
         ident = NAVIdent(ident),
     )
-
-@Deprecated("Bruk lagSaksbehandler() og ta felter derfra")
-fun lagSaksbehandlerident() = lagSaksbehandler().ident
