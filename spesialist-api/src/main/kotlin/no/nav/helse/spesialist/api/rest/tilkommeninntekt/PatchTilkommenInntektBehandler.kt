@@ -85,6 +85,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                     .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                     .minus(tilkommenInntekt),
             vedtaksperioder = transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+            sikkerlogg = sikkerlogg,
         )
 
         if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {
