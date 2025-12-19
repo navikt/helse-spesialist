@@ -57,6 +57,7 @@ object TilkommenInntektPeriodeValidator {
     fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Pair<UUID, Periode>> =
         map { it.behandlinger.last() }
             .map { it.id to Periode(it.fom, it.tom) }
+            .sortedBy { it.second.fom }
             .fold(listOf()) { sammenhengendePerioder, (id, nestePeriode) ->
                 val (overlappendePerioder, resten) =
                     sammenhengendePerioder.partition {

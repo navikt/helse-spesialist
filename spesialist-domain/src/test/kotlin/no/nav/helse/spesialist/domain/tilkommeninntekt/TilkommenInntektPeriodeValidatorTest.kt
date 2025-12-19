@@ -7,6 +7,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.testfixtures.aug
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -133,7 +134,7 @@ class TilkommenInntektPeriodeValidatorTest {
         val ag2 = lagOrganisasjonsnummer()
         val vedtaksperioder = listOf(
             lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018, organisasjonsnummer = ag1),
-            lagVedtaksperiode(fom = 1 feb 2018,  28 feb 2018, organisasjonsnummer = ag2),
+            lagVedtaksperiode(fom = 1 feb 2018, 28 feb 2018, organisasjonsnummer = ag2),
         )
 
         // When:
@@ -160,6 +161,25 @@ class TilkommenInntektPeriodeValidatorTest {
 
         // Then:
         assertFalse(erInnenfor)
+    }
+
+    @Test
+    fun `usorterte perioder resulterer i en sammenhende periode`() {
+        // Given:
+        val periode = 12 jun 2025 tilOgMed (11 jul 2025)
+        val vedtaksperioder = listOf(
+            lagVedtaksperiode(fom = 13 jun 2025, tom = 24 aug 2025),
+            lagVedtaksperiode(fom = 25 mai 2025, tom = 12 jun 2025),
+        )
+
+        // When:
+        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+            periode = periode,
+            vedtaksperioder = vedtaksperioder,
+        )
+
+        // Then:
+        assertTrue(erInnenfor)
     }
 
     @Test
