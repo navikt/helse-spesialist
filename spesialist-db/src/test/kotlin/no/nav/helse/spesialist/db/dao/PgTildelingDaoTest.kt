@@ -5,10 +5,8 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import kotlin.test.assertNotNull
 
 internal class PgTildelingDaoTest : AbstractDBIntegrationTest() {
-
     @Test
     fun `henter saksbehandlerepost for tildeling med fødselsnummer`() {
         val saksbehandler = nyLegacySaksbehandler()
@@ -18,19 +16,6 @@ internal class PgTildelingDaoTest : AbstractDBIntegrationTest() {
 
         val tildeling = tildelingDao.tildelingForPerson(fødselsnummer)
         assertEquals(saksbehandler.saksbehandler.epost, tildeling?.epost)
-    }
-
-    @Test
-    fun `finn tildeling for oppgave`() {
-        val saksbehandler = nyLegacySaksbehandler()
-        val fødselsnummer = lagFødselsnummer()
-        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
-            .tildelOgLagre(saksbehandler)
-        val tildeling = tildelingDao.tildelingForOppgave(oppgave.id)
-        assertNotNull(tildeling)
-        assertEquals(saksbehandler.saksbehandler.id.value, tildeling.oid)
-        assertEquals(saksbehandler.saksbehandler.epost, tildeling.epost)
-        assertEquals(saksbehandler.saksbehandler.navn, tildeling.navn)
     }
 
     @Test

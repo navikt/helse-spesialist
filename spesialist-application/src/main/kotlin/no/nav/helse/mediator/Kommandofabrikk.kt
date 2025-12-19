@@ -17,6 +17,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
@@ -65,22 +66,22 @@ class Kommandofabrikk(
 
     internal fun gosysOppgaveEndret(
         person: LegacyPerson,
-        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
+        oppgave: Oppgave,
         sessionContext: SessionContext,
     ): GosysOppgaveEndretCommand {
-        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
-        val harTildeltOppgave =
-            sessionContext.tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
+        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(oppgave.utbetalingId)
+        val harTildeltOppgave = oppgave.tildeltTil != null
         val godkjenningsbehovData =
             sessionContext.meldingDao
-                .finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId)
-                .data()
+                .finnSisteGodkjenningsbehov(oppgave.behandlingId)
+                ?.data()
+                ?: error("Fant ikke godkjenningsbehov")
 
         return GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
-            sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId),
+            sykefraværstilfelle = person.sykefraværstilfelle(oppgave.vedtaksperiodeId),
             harTildeltOppgave = harTildeltOppgave,
-            oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
+            oppgave = oppgave,
             automatisering = transaksjonellAutomatisering(sessionContext),
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             oppgaveDao = sessionContext.oppgaveDao,

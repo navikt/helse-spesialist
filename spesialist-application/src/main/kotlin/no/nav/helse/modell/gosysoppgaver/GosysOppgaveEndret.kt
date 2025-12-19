@@ -14,12 +14,14 @@ import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivComm
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.VedtakRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.util.UUID
 
 class GosysOppgaveEndret(
@@ -38,10 +40,10 @@ class GosysOppgaveEndret(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
+        val identitetsnummer = Identitetsnummer.fraString(person.fødselsnummer)
         kommandostarter {
-            val oppgaveDataForAutomatisering =
-                finnOppgavedata(fødselsnummer, sessionContext) ?: return@kommandostarter null
-            gosysOppgaveEndret(person, oppgaveDataForAutomatisering, sessionContext)
+            val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer) ?: return@kommandostarter null
+            gosysOppgaveEndret(person, oppgave, sessionContext)
         }
     }
 
@@ -54,7 +56,7 @@ internal class GosysOppgaveEndretCommand(
     utbetaling: Utbetaling,
     sykefraværstilfelle: Sykefraværstilfelle,
     harTildeltOppgave: Boolean,
-    oppgavedataForAutomatisering: OppgaveDataForAutomatisering,
+    oppgave: Oppgave,
     automatisering: Automatisering,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     oppgaveDao: OppgaveDao,
@@ -68,7 +70,7 @@ internal class GosysOppgaveEndretCommand(
         listOf(
             VurderÅpenGosysoppgave(
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-                vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
+                vedtaksperiodeId = oppgave.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
@@ -78,8 +80,8 @@ internal class GosysOppgaveEndretCommand(
                 oppgaveDao = oppgaveDao,
             ),
             SettTidligereAutomatiseringInaktivCommand(
-                vedtaksperiodeId = oppgavedataForAutomatisering.vedtaksperiodeId,
-                hendelseId = oppgavedataForAutomatisering.hendelseId,
+                vedtaksperiodeId = oppgave.vedtaksperiodeId,
+                hendelseId = oppgave.godkjenningsbehovId,
                 automatisering = automatisering,
             ),
             VurderAutomatiskInnvilgelse(

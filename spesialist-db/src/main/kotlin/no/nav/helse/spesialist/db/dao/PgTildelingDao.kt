@@ -59,20 +59,4 @@ class PgTildelingDao internal constructor(
                 oid = it.uuid("oid"),
             )
         }
-
-    override fun tildelingForOppgave(oppgaveId: Long) =
-        asSQL(
-            """
-            SELECT s.oid, s.epost, s.navn FROM tildeling t
-            INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
-            WHERE t.oppgave_id_ref = :oppgaveId
-            """.trimIndent(),
-            "oppgaveId" to oppgaveId,
-        ).singleOrNull {
-            TildelingDto(
-                navn = it.string("navn"),
-                epost = it.string("epost"),
-                oid = it.uuid("oid"),
-            )
-        }
 }
