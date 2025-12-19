@@ -39,6 +39,7 @@ import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.util.UUID
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
@@ -169,23 +170,15 @@ class Kommandofabrikk(
 
     internal fun adressebeskyttelseEndret(
         melding: AdressebeskyttelseEndret,
-        oppgaveDataForAutomatisering: OppgaveDataForAutomatisering?,
         sessionContext: SessionContext,
     ): AdressebeskyttelseEndretCommand {
-        val godkjenningsbehovData =
-            oppgaveDataForAutomatisering
-                ?.let {
-                    sessionContext.meldingDao.finnGodkjenningsbehov(it.hendelseId)
-                }?.data()
-        val utbetaling = godkjenningsbehovData?.let { sessionContext.utbetalingDao.hentUtbetaling(it.utbetalingId) }
+        val identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer())
         return AdressebeskyttelseEndretCommand(
-            fødselsnummer = melding.fødselsnummer(),
-            personDao = sessionContext.personDao,
+            identitetsnummer = identitetsnummer,
+            meldingDao = sessionContext.meldingDao,
             personRepository = sessionContext.personRepository,
-            oppgaveDao = sessionContext.oppgaveDao,
+            oppgaveRepository = sessionContext.oppgaveRepository,
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
-            godkjenningsbehov = godkjenningsbehovData,
-            utbetaling = utbetaling,
         )
     }
 

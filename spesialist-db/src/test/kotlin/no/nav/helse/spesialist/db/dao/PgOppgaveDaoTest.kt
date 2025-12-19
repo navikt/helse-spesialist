@@ -228,18 +228,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `invaliderer oppgaver`() {
-        val fødselsnummer1 = lagFødselsnummer()
-        val oppgave1 = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer1)
-        val oppgave2 = nyOppgaveForNyPerson()
-
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = fødselsnummer1)
-
-        assertOppgaveStatus(oppgave1.id, Oppgave.Invalidert)
-        assertOppgaveStatus(oppgave2.id, Oppgave.AvventerSaksbehandler)
-    }
-
-    @Test
     fun `Finner egenskaper for gitt vedtaksperiode med gitt utbetalingId`() {
         val oppgave1 = nyOppgaveForNyPerson()
         val oppgave2 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT))
@@ -281,14 +269,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
         assertEquals(0, antallOppgaver.antallMineSaker)
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)
-    }
-
-    private fun assertOppgaveStatus(
-        oppgaveId: Long,
-        forventetStatus: Oppgave.Tilstand,
-    ) {
-        val status = dbQuery.single("SELECT * FROM oppgave where id = :id", "id" to oppgaveId) { it.string("status") }
-        assertEquals(forventetStatus.toString(), status)
     }
 
     private fun List<BehandletOppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {

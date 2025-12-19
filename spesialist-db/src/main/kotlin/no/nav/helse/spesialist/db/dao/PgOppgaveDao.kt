@@ -83,22 +83,6 @@ class PgOppgaveDao internal constructor(
             "oppgaveId" to oppgaveId,
         ).single { row -> row.uuid("vedtaksperiode_id") }
 
-    override fun invaliderOppgaveFor(fødselsnummer: String) {
-        asSQL(
-            """
-            UPDATE oppgave o
-            SET status = 'Invalidert'
-            FROM oppgave o2
-            JOIN vedtaksperiode v on v.id = o2.vedtak_ref
-            JOIN person p on v.person_ref = p.id
-            WHERE p.fødselsnummer = :fodselsnummer
-            and o.id = o2.id
-            AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
-            """,
-            "fodselsnummer" to fødselsnummer,
-        ).update()
-    }
-
     override fun invaliderOppgave(oppgaveId: Long) {
         asSQL(
             "UPDATE oppgave SET status = 'Invalidert' WHERE id = :id",

@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.domain.Person
 import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
-    fødselsnummer: String,
+    private val identitetsnummer: Identitetsnummer,
     private val personRepository: PersonRepository,
     private val force: Boolean,
 ) : Command {
@@ -18,11 +18,9 @@ internal class OppdaterPersoninfoCommand(
         private val datoForUtdatert = LocalDate.now().minusDays(14)
     }
 
-    private val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
-
     override fun execute(context: CommandContext): Boolean {
         val person =
-            personRepository.finn(identitetsnummer)
+            personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")
         val sistOppdatert = person.infoOppdatert
         if (sistOppdatert != null && sistOppdatert > datoForUtdatert && !force) return ignorer()
@@ -31,7 +29,7 @@ internal class OppdaterPersoninfoCommand(
 
     override fun resume(context: CommandContext): Boolean {
         val person =
-            personRepository.finn(identitetsnummer)
+            personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")
         return behandle(context, person)
     }

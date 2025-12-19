@@ -1,24 +1,39 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.PersonDao
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
-import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse
 
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
-    private val personDao: PersonDao,
-    private val oppgaveDao: OppgaveDao,
+    private val identitetsnummer: Identitetsnummer,
     private val godkjenningMediator: GodkjenningMediator,
-    private val godkjenningsbehov: GodkjenningsbehovData,
+    private val meldingDao: MeldingDao,
+    private val personRepository: PersonRepository,
+    private val oppgaveRepository: OppgaveRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
+        val oppgave = oppgaveRepository.finnAktivForPerson(identitetsnummer)
+        if (oppgave == null) {
+            loggInfo("Ingen aktiv oppgave for personen. Ingenting å avvise")
+            return true
+        }
+        val godkjenningsbehov =
+            meldingDao
+                .finnSisteGodkjenningsbehov(oppgave.behandlingId)
+                ?.data()
+                ?: error("Fant ikke godkjenningsbehov")
+
         val adressebeskyttelse =
-            checkNotNull(personDao.finnAdressebeskyttelse(godkjenningsbehov.fødselsnummer)) {
-                "Forventer at det fins adressebeskyttelse i databasen når denne kommandoen kjører"
-            }
-        if (adressebeskyttelse !in setOf(StrengtFortrolig, StrengtFortroligUtland)) {
+            personRepository
+                .finn(identitetsnummer)
+                ?.info
+                ?.adressebeskyttelse
+                ?: error("Fant ikke adressebeskyttelse for person")
+        if (adressebeskyttelse !in setOf(Adressebeskyttelse.StrengtFortrolig, Adressebeskyttelse.StrengtFortroligUtland)) {
             return true
         }
 
@@ -29,7 +44,8 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
             begrunnelser = årsaker,
             behov = godkjenningsbehov,
         )
-        oppgaveDao.invaliderOppgaveFor(godkjenningsbehov.fødselsnummer)
+        oppgave.avbryt()
+        oppgaveRepository.lagre(oppgave)
         return true
     }
 }

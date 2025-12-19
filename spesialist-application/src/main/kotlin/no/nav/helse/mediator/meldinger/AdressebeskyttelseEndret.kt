@@ -1,20 +1,19 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.PersonDao
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.util.UUID
 
 class AdressebeskyttelseEndret(
@@ -40,7 +39,6 @@ class AdressebeskyttelseEndret(
         kommandostarter {
             adressebeskyttelseEndret(
                 this@AdressebeskyttelseEndret,
-                finnOppgavedata(fødselsnummer, sessionContext),
                 sessionContext,
             )
         }
@@ -48,27 +46,21 @@ class AdressebeskyttelseEndret(
 }
 
 internal class AdressebeskyttelseEndretCommand(
-    fødselsnummer: String,
+    identitetsnummer: Identitetsnummer,
     personRepository: PersonRepository,
-    personDao: PersonDao,
-    oppgaveDao: OppgaveDao,
+    oppgaveRepository: OppgaveRepository,
+    meldingDao: MeldingDao,
     godkjenningMediator: GodkjenningMediator,
-    godkjenningsbehov: GodkjenningsbehovData?,
-    utbetaling: Utbetaling?,
 ) : MacroCommand() {
     override val commands: List<Command> =
-        buildList {
-            add(OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = true))
-            if (godkjenningsbehov != null) {
-                check(utbetaling != null) { "Forventer å finne utbetaling for godkjenningsbehov med id=${godkjenningsbehov.id}" }
-                add(
-                    AvvisVedStrengtFortroligAdressebeskyttelseCommand(
-                        personDao = personDao,
-                        oppgaveDao = oppgaveDao,
-                        godkjenningMediator = godkjenningMediator,
-                        godkjenningsbehov = godkjenningsbehov,
-                    ),
-                )
-            }
-        }
+        listOf(
+            OppdaterPersoninfoCommand(identitetsnummer, personRepository, force = true),
+            AvvisVedStrengtFortroligAdressebeskyttelseCommand(
+                identitetsnummer = identitetsnummer,
+                meldingDao = meldingDao,
+                personRepository = personRepository,
+                oppgaveRepository = oppgaveRepository,
+                godkjenningMediator = godkjenningMediator,
+            ),
+        )
 }

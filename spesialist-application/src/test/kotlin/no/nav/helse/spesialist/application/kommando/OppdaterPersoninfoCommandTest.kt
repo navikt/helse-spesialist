@@ -48,7 +48,7 @@ internal class OppdaterPersoninfoCommandTest {
     @Test
     fun `mangler personinfo`() {
         val person = lagPerson(info = null).also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = false)
+        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
@@ -58,7 +58,7 @@ internal class OppdaterPersoninfoCommandTest {
     fun `utdatert personinfo`() {
         // given
         val person = lagPerson(infoSistOppdatert = LocalDate.now().minusDays(15)).also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = false)
+        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
 
         // when
         val løsning = HentPersoninfoløsning(person.id.value, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Ukjent, Adressebeskyttelse.Fortrolig)
@@ -81,7 +81,7 @@ internal class OppdaterPersoninfoCommandTest {
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
         val person = lagPerson().also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = false)
+        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
 
         assertTrue(command.execute(context))
         assertTrue(observer.behov.isEmpty())
@@ -90,7 +90,7 @@ internal class OppdaterPersoninfoCommandTest {
     @Test
     fun `oppdaterer personinfo dersom force er satt til true`() {
         val person = lagPerson().also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = true)
+        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = true)
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
 

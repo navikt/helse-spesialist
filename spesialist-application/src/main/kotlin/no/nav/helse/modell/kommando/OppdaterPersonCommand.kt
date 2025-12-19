@@ -4,6 +4,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -19,7 +20,7 @@ internal class OppdaterPersonCommand(
 
     override val commands: List<Command> =
         listOf(
-            OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = false),
+            OppdaterPersoninfoCommand(Identitetsnummer.fraString(fødselsnummer), personRepository, force = false),
             OppdaterEnhetCommand(fødselsnummer, personRepository),
             OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao, førsteKjenteDagFinner),
         )

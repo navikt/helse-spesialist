@@ -15,6 +15,7 @@ import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
 import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.util.UUID
 
 class KlargjørTilgangsrelaterteData(
@@ -51,7 +52,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
     override val commands: List<Command> =
         listOf(
             OppdaterPersoninfoCommand(
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                 personRepository = personRepository,
                 force = false,
             ),

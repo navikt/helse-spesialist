@@ -25,10 +25,6 @@ interface PartialOppgaveDao : OppgaveDao {
         error("Not implemented for this test")
     }
 
-    override fun invaliderOppgaveFor(fødselsnummer: String) {
-        error("Not implemented for this test")
-    }
-
     override fun invaliderOppgave(oppgaveId: Long) {
         error("Not implemented for this test")
     }
@@ -54,14 +50,14 @@ interface PartialOppgaveDao : OppgaveDao {
         offset: Int,
         limit: Int,
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
     ): List<BehandletOppgaveFraDatabaseForVisning> {
         error("Not implemented for this test")
     }
 
     override fun finnEgenskaper(
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ): Set<EgenskapForDatabase>? {
         error("Not implemented for this test")
     }
@@ -78,7 +74,10 @@ interface PartialOppgaveDao : OppgaveDao {
         error("Not implemented for this test")
     }
 
-    override fun oppdaterPekerTilGodkjenningsbehov(godkjenningsbehovId: UUID, utbetalingId: UUID) {
+    override fun oppdaterPekerTilGodkjenningsbehov(
+        godkjenningsbehovId: UUID,
+        utbetalingId: UUID,
+    ) {
         error("Not implemented for this test")
     }
 }
