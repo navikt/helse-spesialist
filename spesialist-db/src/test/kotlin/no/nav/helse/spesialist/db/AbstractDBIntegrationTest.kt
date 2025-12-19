@@ -319,7 +319,6 @@ abstract class AbstractDBIntegrationTest {
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
-        vedtakDao.finnVedtakId(vedtaksperiodeId)
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
     }
 

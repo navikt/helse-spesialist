@@ -61,8 +61,8 @@ internal abstract class AbstractDatabaseTest {
             SET versjon = 1 WHERE versjon <> 1; -- WHERE for å slippe varsel om "update without 'where' updates all rows at once
             INSERT INTO snapshot(id, data, person_ref, versjon)
             VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
-            INSERT INTO vedtaksperiode(id, vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
-            VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), '$organisasjonsnummer', ${sequence_number}, false);
+            INSERT INTO vedtaksperiode(id, vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)
+            VALUES (${sequence_number}, '${vedtaksperiode_id}', '$organisasjonsnummer', ${sequence_number}, false);
             INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, spleis_behandling_id)
             VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares', '$spleisBehandlingId');
             INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)

@@ -45,15 +45,13 @@ class PgVedtakDao private constructor(
     ) {
         asSQL(
             """
-            INSERT INTO vedtaksperiode(vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :fom, :tom, :arbeidsgiver_identifikator, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
+            INSERT INTO vedtaksperiode(vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)
+            VALUES (:vedtaksperiode_id, :arbeidsgiver_identifikator, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
             ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
             """,
             "fodselsnummer" to fødselsnummer,
             "arbeidsgiver_identifikator" to vedtaksperiodeDto.organisasjonsnummer,
             "vedtaksperiode_id" to vedtaksperiodeDto.vedtaksperiodeId,
-            "fom" to vedtaksperiodeDto.behandlinger.last().fom,
-            "tom" to vedtaksperiodeDto.behandlinger.last().tom,
             "forkastet" to vedtaksperiodeDto.forkastet,
         ).update()
     }

@@ -532,12 +532,10 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         insertOpprinneligSoknadsdato(vedtaksperiodeId = vedtaksperiodeId)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-                INSERT INTO vedtaksperiode (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
-                VALUES (:id, :fom, :tom, :arbeidsgiver_identifikator, :personId, :forkastet)
+                INSERT INTO vedtaksperiode (vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)
+                VALUES (:id, :arbeidsgiver_identifikator, :personId, :forkastet)
             """.trimMargin(),
             "id" to vedtaksperiodeId,
-            "fom" to fom,
-            "tom" to tom,
             "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
             "personId" to personId,
             "forkastet" to forkastet,
