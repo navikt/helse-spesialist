@@ -44,18 +44,6 @@ class PgPersonDao internal constructor(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.long("id") }
 
-    override fun finnPersoninfoSistOppdatert(fødselsnummer: String) =
-        asSQL(
-            "SELECT personinfo_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { row -> row.localDateOrNull("personinfo_oppdatert") }
-
-    override fun finnPersoninfoRef(fødselsnummer: String) =
-        asSQL(
-            "SELECT info_ref FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { row -> row.longOrNull("info_ref") }
-
     private fun insertPersoninfo(
         fornavn: String,
         mellomnavn: String?,
@@ -90,39 +78,6 @@ class PgPersonDao internal constructor(
             "id" to id,
             "foedselsnummer" to fødselsnummer,
         ).update()
-    }
-
-    override fun upsertPersoninfo(
-        fødselsnummer: String,
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
-        adressebeskyttelse: Adressebeskyttelse,
-    ) {
-        finnPersoninfoRef(fødselsnummer)
-            ?.also {
-                updatePersonInfo(
-                    it,
-                    fornavn,
-                    mellomnavn,
-                    etternavn,
-                    fødselsdato,
-                    kjønn,
-                    adressebeskyttelse,
-                    fødselsnummer,
-                )
-            }
-            ?: insertPersoninfo(
-                fornavn,
-                mellomnavn,
-                etternavn,
-                fødselsdato,
-                kjønn,
-                adressebeskyttelse,
-                fødselsnummer,
-            )
     }
 
     private fun updatePersonInfo(

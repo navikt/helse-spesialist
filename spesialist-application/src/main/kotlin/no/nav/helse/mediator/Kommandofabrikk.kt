@@ -181,6 +181,7 @@ class Kommandofabrikk(
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
             personDao = sessionContext.personDao,
+            personRepository = sessionContext.personRepository,
             oppgaveDao = sessionContext.oppgaveDao,
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             godkjenningsbehov = godkjenningsbehovData,
@@ -212,6 +213,7 @@ class Kommandofabrikk(
             personDao = sessionContext.personDao,
             egenAnsattDao = sessionContext.egenAnsattDao,
             opptegnelseDao = sessionContext.opptegnelseDao,
+            personRepository = sessionContext.personRepository,
         )
 
     internal fun utbetalingEndret(
@@ -307,6 +309,7 @@ class Kommandofabrikk(
             tildelingDao = sessionContext.tildelingDao,
             reservasjonDao = sessionContext.reservasjonDao,
             vedtakRepository = sessionContext.vedtakRepository,
+            personRepository = sessionContext.personRepository,
         )
     }
 

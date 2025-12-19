@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.db.PersonDao
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
@@ -21,16 +21,25 @@ class HentPersoninfoløsning(
 ) {
     internal fun navn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
-    fun oppdater(
-        personDao: PersonDao,
-        fødselsnummer: String,
-    ) = personDao.upsertPersoninfo(
-        fødselsnummer = fødselsnummer,
-        fornavn = fornavn,
-        mellomnavn = mellomnavn,
-        etternavn = etternavn,
-        fødselsdato = fødselsdato,
-        kjønn = kjønn,
-        adressebeskyttelse = adressebeskyttelse,
-    )
+    fun personinfo() =
+        Personinfo(
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn,
+            fødselsdato = fødselsdato,
+            kjønn =
+                when (kjønn) {
+                    Kjønn.Mann -> Personinfo.Kjønn.Mann
+                    Kjønn.Kvinne -> Personinfo.Kjønn.Kvinne
+                    Kjønn.Ukjent -> Personinfo.Kjønn.Ukjent
+                },
+            adressebeskyttelse =
+                when (adressebeskyttelse) {
+                    Adressebeskyttelse.Ugradert -> Personinfo.Adressebeskyttelse.Ugradert
+                    Adressebeskyttelse.Fortrolig -> Personinfo.Adressebeskyttelse.Fortrolig
+                    Adressebeskyttelse.StrengtFortrolig -> Personinfo.Adressebeskyttelse.StrengtFortrolig
+                    Adressebeskyttelse.StrengtFortroligUtland -> Personinfo.Adressebeskyttelse.StrengtFortroligUtland
+                    Adressebeskyttelse.Ukjent -> Personinfo.Adressebeskyttelse.Ukjent
+                },
+        )
 }

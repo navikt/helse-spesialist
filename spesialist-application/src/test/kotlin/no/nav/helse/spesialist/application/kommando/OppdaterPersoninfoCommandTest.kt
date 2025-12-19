@@ -1,46 +1,46 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
-import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentPersoninfoløsning
+import no.nav.helse.spesialist.application.InMemoryPersonRepository
+import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.typer.Kjønn
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class OppdaterPersoninfoCommandTest {
     private companion object {
-        private const val FNR = "12345678911"
         private const val FORNAVN = "LITEN"
         private const val MELLOMNAVN = "STOR"
         private const val ETTERNAVN = "TRANFLASKE"
         private val FØDSELSDATO = LocalDate.EPOCH
-        private val KJØNN = Kjønn.Ukjent
-        private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
+
     private lateinit var context: CommandContext
+    private val personRepository = InMemoryPersonRepository()
 
-    private val personDao = mockk<PersonDao>(relaxed = true)
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableListOf<Behov>()
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<Behov>()
-
-        override fun behov(behov: Behov, commandContextId: UUID) {
-            this.behov.add(behov)
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
+                this.behov.add(behov)
+            }
         }
-    }
 
     @BeforeEach
     fun beforeEach() {
@@ -49,52 +49,54 @@ internal class OppdaterPersoninfoCommandTest {
     }
 
     @Test
-    fun `trenger personinfo`() {
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        utdatertPersoninfo()
+    fun `mangler personinfo`() {
+        val person = lagPerson(info = null).also(personRepository::lagre)
+        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = false)
         assertFalse(command.execute(context))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
     }
 
     @Test
-    fun `oppdatere personinfo`() {
-        val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        utdatertPersoninfo()
-        val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+    fun `utdatert personinfo`() {
+        // given
+        val person = lagPerson(infoSistOppdatert = LocalDate.now().minusDays(15)).also(personRepository::lagre)
+        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = false)
+
+        // when
+        val løsning = HentPersoninfoløsning(person.id.value, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Ukjent, Adressebeskyttelse.Fortrolig)
         context.add(løsning)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
-        verify(exactly = 1) { personDao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
 
+        // then
+        val funnet = personRepository.finn(person.id)
+        assertNotNull(funnet)
+        val personinfo = funnet.info
+        assertNotNull(personinfo)
+        assertEquals(FORNAVN, personinfo.fornavn)
+        assertEquals(MELLOMNAVN, personinfo.mellomnavn)
+        assertEquals(ETTERNAVN, personinfo.etternavn)
+        assertEquals(FØDSELSDATO, personinfo.fødselsdato)
+        assertEquals(Personinfo.Kjønn.Ukjent, personinfo.kjønn)
+        assertEquals(Personinfo.Adressebeskyttelse.Fortrolig, personinfo.adressebeskyttelse)
     }
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
-        val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = false)
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
+        val person = lagPerson().also(personRepository::lagre)
+        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = false)
+
         assertTrue(command.execute(context))
-        verify(exactly = 0) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        assertTrue(observer.behov.isEmpty())
     }
 
     @Test
     fun `oppdaterer personinfo dersom force er satt til true`() {
-        val context = CommandContext(UUID.randomUUID())
-        val command = OppdaterPersoninfoCommand(FNR, personDao, force = true)
-        val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
-        context.add(løsning)
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, FNR) }
-        verify(exactly = 1) { personDao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-    }
+        val person = lagPerson().also(personRepository::lagre)
+        val command = OppdaterPersoninfoCommand(person.id.value, personRepository, force = true)
+        assertFalse(command.execute(context))
+        assertTrue(observer.behov.isNotEmpty())
 
-
-    private fun utdatertPersoninfo() {
-        every { personDao.finnPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { personDao.finnEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
+        assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
     }
 }

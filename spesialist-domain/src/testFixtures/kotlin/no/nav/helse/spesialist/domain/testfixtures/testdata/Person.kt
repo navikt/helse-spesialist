@@ -13,29 +13,39 @@ import kotlin.random.Random
 fun lagPerson(
     fødselsdato: LocalDate? = lagFødselsdato(),
     kjønn: Kjønn? = Kjønn.entries.random(),
-    id: Identitetsnummer = lagIdentitetsnummer(
-        fødselsdato = fødselsdato ?: lagFødselsdato(),
-        mann = kjønn == Kjønn.Mann
-    ),
+    id: Identitetsnummer =
+        lagIdentitetsnummer(
+            fødselsdato = fødselsdato ?: lagFødselsdato(),
+            mann = kjønn == Kjønn.Mann,
+        ),
     aktørId: String = lagAktørId(),
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-    info: Personinfo? = lagPersoninfo(
-        fødselsdato = fødselsdato,
-        kjønn = kjønn,
-        adressebeskyttelse = adressebeskyttelse
-    ),
+    info: Personinfo? =
+        lagPersoninfo(
+            fødselsdato = fødselsdato,
+            kjønn = kjønn,
+            adressebeskyttelse = adressebeskyttelse,
+        ),
+    infoSistOppdatert: LocalDate? = info?.let { LocalDate.now() },
     erEgenAnsatt: Boolean? = false,
-): Person = Person.Factory.ny(
-    id = id,
-    aktørId = aktørId,
-    info = info,
-    egenAnsattStatus = erEgenAnsatt?.let {
-        EgenAnsattStatus(
-            erEgenAnsatt = it,
-            oppdatertTidspunkt = Instant.now(),
-        )
-    }
-)
+): Person =
+    Person.Factory.fraLagring(
+        id = id,
+        aktørId = aktørId,
+        egenAnsattStatus =
+            erEgenAnsatt?.let {
+                EgenAnsattStatus(
+                    erEgenAnsatt = it,
+                    oppdatertTidspunkt = Instant.now(),
+                )
+            },
+        info = info,
+        infoOppdatert = infoSistOppdatert,
+        enhetRef = null,
+        enhetRefOppdatert = null,
+        infotrygdutbetalingerRef = null,
+        infotrygdutbetalingerOppdatert = null,
+    )
 
 fun lagPersoninfo(
     fornavn: String = lagFornavn(),
@@ -44,72 +54,82 @@ fun lagPersoninfo(
     fødselsdato: LocalDate? = lagFødselsdato(),
     kjønn: Kjønn? = Kjønn.entries.random(),
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-): Personinfo = Personinfo(
-    fornavn = fornavn,
-    mellomnavn = mellomnavn,
-    etternavn = etternavn,
-    fødselsdato = fødselsdato,
-    kjønn = kjønn,
-    adressebeskyttelse = adressebeskyttelse,
-)
+): Personinfo =
+    Personinfo(
+        fornavn = fornavn,
+        mellomnavn = mellomnavn,
+        etternavn = etternavn,
+        fødselsdato = fødselsdato,
+        kjønn = kjønn,
+        adressebeskyttelse = adressebeskyttelse,
+    )
 
-private val fornavnListe = listOf(
-    "Måteholden",
-    "Dypsindig",
-    "Ultrafiolett",
-    "Urettferdig",
-    "Berikende",
-    "Upresis",
-    "Stridlynt",
-    "Rund",
-    "Internasjonal"
-)
+private val fornavnListe =
+    listOf(
+        "Måteholden",
+        "Dypsindig",
+        "Ultrafiolett",
+        "Urettferdig",
+        "Berikende",
+        "Upresis",
+        "Stridlynt",
+        "Rund",
+        "Internasjonal",
+    )
 
 fun lagFornavn() = fornavnListe.random()
 
-private val mellomnavnListe = listOf(
-    "Lysende",
-    "Spennende",
-    "Tidløs",
-    "Hjertelig",
-    "Storslått",
-    "Sjarmerende",
-    "Uforutsigbar",
-    "Behagelig",
-    "Robust",
-    "Sofistikert",
-)
+private val mellomnavnListe =
+    listOf(
+        "Lysende",
+        "Spennende",
+        "Tidløs",
+        "Hjertelig",
+        "Storslått",
+        "Sjarmerende",
+        "Uforutsigbar",
+        "Behagelig",
+        "Robust",
+        "Sofistikert",
+    )
 
 fun lagMellomnavn() = mellomnavnListe.random()
+
 fun lagMellomnavnOrNull() = if (Math.random() < 0.5) lagMellomnavn() else null
 
-private val etternavnListe = listOf(
-    "Diode",
-    "Flom",
-    "Damesykkel",
-    "Undulat",
-    "Bakgrunn",
-    "Genser",
-    "Fornøyelse",
-    "Campingvogn",
-    "Bakkeklaring"
-)
+private val etternavnListe =
+    listOf(
+        "Diode",
+        "Flom",
+        "Damesykkel",
+        "Undulat",
+        "Bakgrunn",
+        "Genser",
+        "Fornøyelse",
+        "Campingvogn",
+        "Bakkeklaring",
+    )
 
 fun lagEtternavn() = etternavnListe.random()
 
 fun lagAktørId() = Random.nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
 
 fun lagIdentitetsnummer() = lagIdentitetsnummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
+
 fun lagFødselsnummer() = lagFødselsnummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
+
 fun lagDNummer() = lagDNummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
 
-fun lagIdentitetsnummer(fødselsdato: LocalDate, mann: Boolean): Identitetsnummer =
+fun lagIdentitetsnummer(
+    fødselsdato: LocalDate,
+    mann: Boolean,
+): Identitetsnummer =
     Identitetsnummer.fraString(
         if (Math.random() < 0.9) {
             lagFødselsnummer(fødselsdato, mann)
         } else {
             lagDNummer(fødselsdato, mann)
-        }
+        },
     )
 
 fun lagFødselsdato(): LocalDate {
@@ -121,36 +141,50 @@ fun lagFødselsdato(): LocalDate {
 
 // Generer syntetisk fødselsnummer slik som Skattetaten også gjør - med 8 plusset på måneden i fødselsdatoen
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/
-fun lagFødselsnummer(fødselsdato: LocalDate, mann: Boolean): String {
-    val fødselsnummerFødselsdato = buildString {
-        append(fødselsdato.dayOfMonth.toString().padStart(2, '0'))
-        append(fødselsdato.month.value + 80)
-        append((fødselsdato.year % 100).toString().padStart(2, '0'))
-    }
-    val personnummer = lagPersonnummerForFødselsnummer(
-        fødselsnummerFødselsdato = fødselsnummerFødselsdato,
-        fødselsår = fødselsdato.year,
-        mann = mann
-    )
+fun lagFødselsnummer(
+    fødselsdato: LocalDate,
+    mann: Boolean,
+): String {
+    val fødselsnummerFødselsdato =
+        buildString {
+            append(fødselsdato.dayOfMonth.toString().padStart(2, '0'))
+            append(fødselsdato.month.value + 80)
+            append((fødselsdato.year % 100).toString().padStart(2, '0'))
+        }
+    val personnummer =
+        lagPersonnummerForFødselsnummer(
+            fødselsnummerFødselsdato = fødselsnummerFødselsdato,
+            fødselsår = fødselsdato.year,
+            mann = mann,
+        )
     return fødselsnummerFødselsdato + personnummer
 }
 
 // Generer syntetisk D-nummer slik som Skattetaten også gjør - med 8 plusset på måneden i fødselsdatoen
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/
-fun lagDNummer(fødselsdato: LocalDate, mann: Boolean): String {
-    val dNummerFødselsdato = buildString {
-        append(fødselsdato.dayOfMonth + 40)
-        append(fødselsdato.month.value + 80)
-        append((fødselsdato.year % 100).toString().padStart(2, '0'))
-    }
-    val personnummer = lagPersonnummerForDNummer(
-        dNummerFødselsdato = dNummerFødselsdato,
-        mann = mann
-    )
+fun lagDNummer(
+    fødselsdato: LocalDate,
+    mann: Boolean,
+): String {
+    val dNummerFødselsdato =
+        buildString {
+            append(fødselsdato.dayOfMonth + 40)
+            append(fødselsdato.month.value + 80)
+            append((fødselsdato.year % 100).toString().padStart(2, '0'))
+        }
+    val personnummer =
+        lagPersonnummerForDNummer(
+            dNummerFødselsdato = dNummerFødselsdato,
+            mann = mann,
+        )
     return dNummerFødselsdato + personnummer
 }
 
-private fun lagPersonnummerForFødselsnummer(fødselsnummerFødselsdato: String, fødselsår: Int, mann: Boolean): String {
+private fun lagPersonnummerForFødselsnummer(
+    fødselsnummerFødselsdato: String,
+    fødselsår: Int,
+    mann: Boolean,
+): String {
     var individnummer: String
     var kontrollsiffer1: Int
     var kontrollsiffer2: Int
@@ -172,7 +206,10 @@ private fun lagPersonnummerForFødselsnummer(fødselsnummerFødselsdato: String,
     return individnummer + kontrollsiffer1 + kontrollsiffer2
 }
 
-private fun lagPersonnummerForDNummer(dNummerFødselsdato: String, mann: Boolean): String {
+private fun lagPersonnummerForDNummer(
+    dNummerFødselsdato: String,
+    mann: Boolean,
+): String {
     var individnummer: String
     var kontrollsiffer1: Int
     var kontrollsiffer2: Int
@@ -180,7 +217,7 @@ private fun lagPersonnummerForDNummer(dNummerFødselsdato: String, mann: Boolean
         do {
             // Individnummer i D-nummer tildeles fortløpende, ikke i serier
             individnummer = Random.nextInt(from = 0, until = 10).toString().padStart(2, '0') +
-                    ((Random.nextInt(until = 5) * 2) + (if (mann) 1 else 0)).toString()
+                ((Random.nextInt(until = 5) * 2) + (if (mann) 1 else 0)).toString()
             kontrollsiffer1 = beregnKontrollsiffer1(dNummerFødselsdato + individnummer)
         } while (kontrollsiffer1 > 9)
         kontrollsiffer2 = beregnKontrollsiffer2(dNummerFødselsdato + individnummer + kontrollsiffer1)
@@ -189,11 +226,11 @@ private fun lagPersonnummerForDNummer(dNummerFødselsdato: String, mann: Boolean
     return individnummer + kontrollsiffer1 + kontrollsiffer2
 }
 
-internal fun beregnKontrollsiffer1(sifre: String): Int =
-    beregnKontrollsiffer(sifre, listOf(3, 7, 6, 1, 8, 9, 4, 5, 2))
+internal fun beregnKontrollsiffer1(sifre: String): Int = beregnKontrollsiffer(sifre, listOf(3, 7, 6, 1, 8, 9, 4, 5, 2))
 
-internal fun beregnKontrollsiffer2(sifre: String): Int =
-    beregnKontrollsiffer(sifre, listOf(5, 4, 3, 2, 7, 6, 5, 4, 3, 2))
+internal fun beregnKontrollsiffer2(sifre: String): Int = beregnKontrollsiffer(sifre, listOf(5, 4, 3, 2, 7, 6, 5, 4, 3, 2))
 
-private fun beregnKontrollsiffer(sifre: String, vekting: List<Int>): Int =
-    11 - ((sifre).foldIndexed(0) { index, acc, char -> acc + vekting[index] * char.digitToInt() } % 11)
+private fun beregnKontrollsiffer(
+    sifre: String,
+    vekting: List<Int>,
+): Int = 11 - ((sifre).foldIndexed(0) { index, acc, char -> acc + vekting[index] * char.digitToInt() } % 11)

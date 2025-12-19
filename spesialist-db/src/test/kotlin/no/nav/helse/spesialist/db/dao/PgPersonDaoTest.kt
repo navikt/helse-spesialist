@@ -39,41 +39,9 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagre personinfo`() {
-        personDao.upsertPersoninfo(person.id.value, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
-        assertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
-    }
-
-    @Test
-    fun `ingen mellomnavn`() {
-        personDao.upsertPersoninfo(person.id.value, FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
-        assertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
-    }
-
-    @Test
     fun `lagre infotrygdutbetalinger`() {
         personDao.upsertInfotrygdutbetalinger(person.id.value, objectMapper.createObjectNode())
         assertEquals(1, infotrygdUtbetalinger().size)
-    }
-
-    @Test
-    fun `oppdaterer personinfo`() {
-        val nyttFornavn = "OLE"
-        val nyttMellomnavn = "PETTER"
-        val nyttEtternavn = "SVENSKE"
-        val nyFødselsdato = LocalDate.of(1990, 12, 31)
-        val nyttKjønn = Kjønn.Mann
-        val nyAdressebeskyttelse = Adressebeskyttelse.Fortrolig
-        personDao.upsertPersoninfo(
-            person.id.value,
-            nyttFornavn,
-            nyttMellomnavn,
-            nyttEtternavn,
-            nyFødselsdato,
-            nyttKjønn,
-            nyAdressebeskyttelse,
-        )
-        assertPersoninfo(nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
     }
 
     @Test

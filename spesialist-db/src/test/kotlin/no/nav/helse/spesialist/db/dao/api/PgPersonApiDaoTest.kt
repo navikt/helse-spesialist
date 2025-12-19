@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPersoninfo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -57,8 +58,10 @@ internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
         opprettEgenAnsatt(person.id.value, false)
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterAdressebeskyttelse(Ugradert, person.id.value)
-        assertPersonenErKlar(person.id)
+        val oppdatertPerson = sessionContext.personRepository.finn(person.id) ?: error("Fant ikke person")
+        oppdatertPerson.oppdaterInfo(lagPersoninfo(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert))
+        sessionContext.personRepository.lagre(oppdatertPerson)
+        assertPersonenErKlar(oppdatertPerson.id)
     }
 
     // Denne testen komplementerer den ovenstående, for å vise at både personinfo og info om egen ansatt må finnes
@@ -67,7 +70,8 @@ internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
         val person = opprettPerson(person = lagPerson(fødselsdato = null, kjønn = null, info = null, erEgenAnsatt = null))
         assertPersonenErIkkeKlar(person.id)
 
-        oppdaterAdressebeskyttelse(Ugradert, person.id.value)
+        person.oppdaterInfo(lagPersoninfo(adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert))
+        sessionContext.personRepository.lagre(person)
         assertPersonenErIkkeKlar(person.id)
 
         opprettEgenAnsatt(person.id.value, false)

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
 interface PersonDao {
@@ -26,18 +25,6 @@ interface PersonDao {
         utbetalinger: JsonNode,
     ): Long
 
-    fun upsertPersoninfo(
-        fødselsnummer: String,
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn,
-        adressebeskyttelse: Adressebeskyttelse,
-    )
-
-    fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate?
-
     fun finnInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
@@ -50,8 +37,6 @@ interface PersonDao {
     ): Long?
 
     fun finnPersonMedFødselsnummer(fødselsnummer: String): Long?
-
-    fun finnPersoninfoRef(fødselsnummer: String): Long?
 
     fun finnEnhetId(fødselsnummer: String): String
 

@@ -14,6 +14,7 @@ import no.nav.helse.modell.kommando.OppdaterPersonCommand.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
+import no.nav.helse.spesialist.application.PersonRepository
 import java.util.UUID
 
 class KlargjørTilgangsrelaterteData(
@@ -43,6 +44,7 @@ class KlargjørTilgangsrelaterteData(
 internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
     personDao: PersonDao,
+    personRepository: PersonRepository,
     egenAnsattDao: EgenAnsattDao,
     opptegnelseDao: OpptegnelseDao,
 ) : MacroCommand() {
@@ -50,7 +52,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
         listOf(
             OppdaterPersoninfoCommand(
                 fødselsnummer = fødselsnummer,
-                personDao = personDao,
+                personRepository = personRepository,
                 force = false,
             ),
             OppdaterEnhetCommand(fødselsnummer, personDao),

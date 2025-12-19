@@ -58,6 +58,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
+import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VedtakRepository
 import java.math.BigDecimal
@@ -372,6 +373,7 @@ internal class GodkjenningsbehovCommand(
     vedtakRepository: VedtakRepository,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
+    personRepository: PersonRepository,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
     override val commands: List<Command> =
@@ -432,6 +434,7 @@ internal class GodkjenningsbehovCommand(
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
                 arbeidsforholdDao = arbeidsforholdDao,
+                personRepository = personRepository,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
@@ -521,6 +524,7 @@ private class ForberedVisningCommand(
     arbeidsgiverRepository: ArbeidsgiverRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
+    personRepository: PersonRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -528,6 +532,7 @@ private class ForberedVisningCommand(
                 fødselsnummer = fødselsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 personDao = personDao,
+                personRepository = personRepository,
             ),
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = fødselsnummer,

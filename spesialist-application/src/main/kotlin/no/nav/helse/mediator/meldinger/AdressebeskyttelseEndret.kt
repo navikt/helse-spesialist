@@ -14,6 +14,7 @@ import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.PersonRepository
 import java.util.UUID
 
 class AdressebeskyttelseEndret(
@@ -48,6 +49,7 @@ class AdressebeskyttelseEndret(
 
 internal class AdressebeskyttelseEndretCommand(
     fødselsnummer: String,
+    personRepository: PersonRepository,
     personDao: PersonDao,
     oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator,
@@ -56,7 +58,7 @@ internal class AdressebeskyttelseEndretCommand(
 ) : MacroCommand() {
     override val commands: List<Command> =
         buildList {
-            add(OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true))
+            add(OppdaterPersoninfoCommand(fødselsnummer, personRepository, force = true))
             if (godkjenningsbehov != null) {
                 check(utbetaling != null) { "Forventer å finne utbetaling for godkjenningsbehov med id=${godkjenningsbehov.id}" }
                 add(
