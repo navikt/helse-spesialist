@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.db.dao
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -47,8 +47,18 @@ class PgMeldingDaoTest {
             )
 
         // When:
-        meldingDao.lagre(behandlingOpprettetRevurdering)
-        meldingDao.lagre(behandlingOpprettetSøknad)
+        meldingDao.lagre(
+            UUID.randomUUID(),
+            behandlingOpprettetRevurdering,
+            MeldingDao.Meldingtype.BEHANDLING_OPPRETTET,
+            vedtaksperiodeId1,
+        )
+        meldingDao.lagre(
+            UUID.randomUUID(),
+            behandlingOpprettetSøknad,
+            MeldingDao.Meldingtype.BEHANDLING_OPPRETTET,
+            vedtaksperiodeId1,
+        )
 
         // Then:
         assertNull(meldingDao.sisteBehandlingOpprettetOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId2))
@@ -129,30 +139,27 @@ class PgMeldingDaoTest {
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
         type: String,
-    ) = BehandlingOpprettet(
-        jsonNode =
+    ) = mapOf(
+        "@event_name" to "behandling_opprettet",
+        "@id" to UUID.randomUUID(),
+        "@opprettet" to LocalDateTime.now(),
+        "organisasjonsnummer" to lagOrganisasjonsnummer(),
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "behandlingId" to UUID.randomUUID(),
+        "fødselsnummer" to fødselsnummer,
+        "fom" to LocalDate.now().minusDays(20),
+        "tom" to LocalDate.now(),
+        "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
+        "type" to type,
+        "kilde" to
             mapOf(
-                "@event_name" to "behandling_opprettet",
-                "@id" to UUID.randomUUID(),
-                "@opprettet" to LocalDateTime.now(),
-                "organisasjonsnummer" to lagOrganisasjonsnummer(),
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "behandlingId" to UUID.randomUUID(),
-                "fødselsnummer" to fødselsnummer,
-                "fom" to LocalDate.now().minusDays(20),
-                "tom" to LocalDate.now(),
-                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
-                "type" to type,
-                "kilde" to
-                    mapOf(
-                        "avsender" to "SYKMELDT",
-                    ),
-                "@forårsaket_av" to
-                    mapOf(
-                        "event_name" to "sendt_søknad_nav",
-                    ),
-            ).toJsonNode(),
-    )
+                "avsender" to "SYKMELDT",
+            ),
+        "@forårsaket_av" to
+            mapOf(
+                "event_name" to "sendt_søknad_nav",
+            ),
+    ).toJsonNode().toPrettyString()
 
     private fun lagGodkjenningsbehov(
         hendelseId: UUID,

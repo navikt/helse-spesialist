@@ -18,9 +18,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class VarselTest {
-
     @ParameterizedTest
     @EnumSource(Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `varsel kan ikke vurderes hvis det ikke er aktivt`(status: Status) {
@@ -67,15 +67,16 @@ class VarselTest {
     @Test
     fun `varsel kan godkjennes hvis det er vurdert`() {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = Status.VURDERT,
-            vurdering = null,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = Status.VURDERT,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // then
         assertTrue(varsel.kanGodkjennes())
@@ -85,15 +86,16 @@ class VarselTest {
     @EnumSource(Status::class, names = ["AKTIV", "GODKJENT", "VURDERT"])
     fun `varsel trenger vurdering dersom vurdering ikke eksisterer og varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            vurdering = null,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // then
         assertTrue(varsel.trengerVurdering())
@@ -103,15 +105,16 @@ class VarselTest {
     @EnumSource(Status::class, names = ["INAKTIV", "AVVIST", "AVVIKLET"])
     fun `varsel trenger ikke vurdering dersom vurdering ikke eksisterer og varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            vurdering = null,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // then
         assertFalse(varsel.trengerVurdering())
@@ -121,19 +124,21 @@ class VarselTest {
     @EnumSource(Status::class)
     fun `varsel trenger ikke vurdering dersom vurdering eksisterer og varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            vurdering = Varselvurdering(
-                lagSaksbehandler().id,
-                LocalDateTime.now(),
-                lagVarseldefinisjonId()
-            ),
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering =
+                    Varselvurdering(
+                        lagSaksbehandler().id,
+                        LocalDateTime.now(),
+                        lagVarseldefinisjonId(),
+                    ),
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // then
         assertFalse(varsel.trengerVurdering())
@@ -143,15 +148,16 @@ class VarselTest {
     @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `varsel kan ikke avvises dersom varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-            vurdering = null,
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = null,
+            )
 
         // then
         assertFalse(varsel.kanAvvises())
@@ -161,15 +167,16 @@ class VarselTest {
     @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.INCLUDE)
     fun `varsel kan avvises dersom varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-            vurdering = null,
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = null,
+            )
 
         // then
         assertTrue(varsel.kanAvvises())
@@ -179,15 +186,16 @@ class VarselTest {
     @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `error ved forsøk på å avvise når varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-            vurdering = null,
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = null,
+            )
 
         // then
         assertThrows<IllegalStateException> {
@@ -199,15 +207,16 @@ class VarselTest {
     @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.INCLUDE)
     fun `ikke error ved forsøk på å avvise når varselet har tilstand`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-            vurdering = null,
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = null,
+            )
 
         // then
         assertDoesNotThrow {
@@ -219,37 +228,88 @@ class VarselTest {
     @EnumSource(Status::class, names = ["VURDERT"], mode = EnumSource.Mode.EXCLUDE)
     fun `varsel kan ikke godkjennes hvis det har feil status`(status: Status) {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            vurdering = null,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // then
         assertFalse(varsel.kanGodkjennes())
     }
 
     @Test
+    fun `flytt aktivt varsel til ny behandling`() {
+        // given
+        val nyBehandlingUnikId = lagBehandlingUnikId()
+        val nySpleisBehandlingId = lagSpleisBehandlingId()
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = Status.AKTIV,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+
+        // when
+        varsel.flyttTil(nyBehandlingUnikId, nySpleisBehandlingId)
+
+        // then
+        assertEquals(nyBehandlingUnikId, varsel.behandlingUnikId)
+        assertEquals(nySpleisBehandlingId, varsel.spleisBehandlingId)
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke flytte varsel til ny behandling som har status`(status: Status) {
+        // given
+        val nyBehandlingUnikId = lagBehandlingUnikId()
+        val nySpleisBehandlingId = lagSpleisBehandlingId()
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+
+        // then
+        assertFailsWith<IllegalStateException> {
+            // when
+            varsel.flyttTil(nyBehandlingUnikId, nySpleisBehandlingId)
+        }
+    }
+
+    @Test
     fun `godkjenn varsel`() {
         // given
         val saksbehandlerSomVurderteVarselet = SaksbehandlerOid(UUID.randomUUID())
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandlerId = saksbehandlerSomVurderteVarselet,
-                tidspunkt = LocalDateTime.now(),
-                vurdertDefinisjonId = VarseldefinisjonId(UUID.randomUUID()),
-            ),
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandlerId = saksbehandlerSomVurderteVarselet,
+                        tidspunkt = LocalDateTime.now(),
+                        vurdertDefinisjonId = VarseldefinisjonId(UUID.randomUUID()),
+                    ),
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // given
         varsel.godkjenn()
@@ -262,15 +322,16 @@ class VarselTest {
     @Test
     fun `kan ikke godkjenne varsel som ikke er vurdert`() {
         // given
-        val varsel = Varsel.fraLagring(
-            id = VarselId(value = UUID.randomUUID()),
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = Status.AKTIV,
-            vurdering = null,
-            kode = "RV_IV_2",
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = Status.AKTIV,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
 
         // then
         assertThrows<IllegalStateException> {

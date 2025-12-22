@@ -12,6 +12,20 @@ class PgVedtaksperiodeRepository private constructor(
 ) : VedtaksperiodeRepository {
     internal constructor(session: Session) : this(SessionDbQuery(session))
 
+    override fun lagre(vedtaksperiode: Vedtaksperiode) {
+        dbQuery.update(
+            """
+                 INSERT INTO vedtaksperiode(vedtaksperiode_id, person_ref, forkastet, arbeidsgiver_identifikator)
+                 VALUES (:vedtaksperiodeId, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), false, :organisasjonsnummer)
+                 ON CONFLICT(vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
+            """,
+            "vedtaksperiodeId" to vedtaksperiode.id.value,
+            "fodselsnummer" to vedtaksperiode.fødselsnummer,
+            "forkastet" to vedtaksperiode.forkastet,
+            "organisasjonsnummer" to vedtaksperiode.organisasjonsnummer,
+        )
+    }
+
     override fun finn(vedtaksperiodeId: VedtaksperiodeId): Vedtaksperiode? =
         dbQuery.singleOrNull(
             """

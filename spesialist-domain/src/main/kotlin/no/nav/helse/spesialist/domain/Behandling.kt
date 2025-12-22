@@ -112,5 +112,55 @@ class Behandling private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
+
+        private fun ny(
+            spleisBehandlingId: SpleisBehandlingId,
+            vedtaksperiodeId: VedtaksperiodeId,
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            yrkesaktivitetstype: Yrkesaktivitetstype,
+        ) = Behandling(
+            id = BehandlingUnikId(UUID.randomUUID()),
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            utbetalingId = null,
+            tags = emptySet(),
+            tilstand = Tilstand.VidereBehandlingAvklares,
+        )
+
+        fun ny(
+            spleisBehandlingId: SpleisBehandlingId,
+            vedtaksperiodeId: VedtaksperiodeId,
+            fom: LocalDate,
+            tom: LocalDate,
+            yrkesaktivitetstype: Yrkesaktivitetstype,
+        ) = ny(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = fom,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+        )
+
+        fun nyBasertPåTidligereBehandling(
+            spleisBehandlingId: SpleisBehandlingId,
+            fom: LocalDate,
+            tom: LocalDate,
+            yrkesaktivitetstype: Yrkesaktivitetstype,
+            tidligereBehandling: Behandling,
+        ) = ny(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = tidligereBehandling.vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = tidligereBehandling.skjæringstidspunkt,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+        )
     }
 }

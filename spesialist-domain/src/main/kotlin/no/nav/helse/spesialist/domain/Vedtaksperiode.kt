@@ -14,4 +14,17 @@ class Vedtaksperiode(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val forkastet: Boolean,
-) : AggregateRoot<VedtaksperiodeId>(id)
+) : AggregateRoot<VedtaksperiodeId>(id) {
+    companion object {
+        fun ny(
+            id: VedtaksperiodeId,
+            identitetsnummer: Identitetsnummer,
+            organisasjonsnummer: String,
+        ) = Vedtaksperiode(
+            id = id,
+            fødselsnummer = identitetsnummer.value,
+            organisasjonsnummer = organisasjonsnummer,
+            forkastet = false,
+        )
+    }
+}

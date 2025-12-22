@@ -5,7 +5,6 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.MeldingDao.Meldingtype
 import no.nav.helse.db.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.db.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
 import no.nav.helse.db.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENNING
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
@@ -29,7 +28,6 @@ import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
-import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
@@ -216,7 +214,6 @@ class PgMeldingDao private constructor(
             NYE_VARSLER -> NyeVarsler(jsonNode)
             SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
-            BEHANDLING_OPPRETTET -> BehandlingOpprettet(jsonNode)
             KLARGJØR_TILGANGSRELATERTE_DATA -> KlargjørTilgangsrelaterteData(jsonNode)
             else -> throw IllegalArgumentException("ukjent meldingtype: $meldingtype")
         }
@@ -236,7 +233,6 @@ class PgMeldingDao private constructor(
             is SøknadSendt -> SØKNAD_SENDT
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
-            is BehandlingOpprettet -> BEHANDLING_OPPRETTET
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")

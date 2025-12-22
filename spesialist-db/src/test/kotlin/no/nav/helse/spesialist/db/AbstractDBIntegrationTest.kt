@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
@@ -33,12 +32,16 @@ import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -263,20 +266,23 @@ abstract class AbstractDBIntegrationTest {
         tags: List<String>? = emptyList(),
         fødselsnummer: String = FNR,
     ) {
+        val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
+        sessionContext.vedtaksperiodeRepository.lagre(
+            Vedtaksperiode.ny(vedtaksperiodeId, Identitetsnummer.fraString(fødselsnummer), ORGNUMMER),
+        )
+        sessionContext.behandlingRepository.lagre(
+            Behandling.ny(
+                SpleisBehandlingId(spleisBehandlingId),
+                vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            ),
+        )
         pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            this.nySpleisBehandling(
-                SpleisBehandling(
-                    ORGNUMMER,
-                    vedtaksperiodeId,
-                    spleisBehandlingId,
-                    fom,
-                    tom,
-                    Yrkesaktivitetstype.ARBEIDSTAKER,
-                ),
-            )
-            nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
+            nyUtbetalingForVedtaksperiode(vedtaksperiodeId.value, utbetalingId)
             if (tags != null) {
-                this.oppdaterPeriodeTilGodkjenning(vedtaksperiodeId, tags, spleisBehandlingId, utbetalingId)
+                this.oppdaterPeriodeTilGodkjenning(vedtaksperiodeId.value, tags, spleisBehandlingId, utbetalingId)
             }
         }
     }
@@ -305,21 +311,24 @@ abstract class AbstractDBIntegrationTest {
         spleisBehandlingId: UUID = UUID.randomUUID(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) {
+        val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
+        sessionContext.vedtaksperiodeRepository.lagre(
+            Vedtaksperiode.ny(vedtaksperiodeId, Identitetsnummer.fraString(fødselsnummer), organisasjonsnummer),
+        )
+        sessionContext.behandlingRepository.lagre(
+            Behandling.ny(
+                SpleisBehandlingId(spleisBehandlingId),
+                vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                yrkesaktivitetstype = yrkesaktivitetstype,
+            ),
+        )
         pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            this.nySpleisBehandling(
-                SpleisBehandling(
-                    organisasjonsnummer,
-                    vedtaksperiodeId,
-                    spleisBehandlingId,
-                    fom,
-                    tom,
-                    yrkesaktivitetstype,
-                ),
-            )
-            if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
-            if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
+            if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId.value, utbetalingId)
+            if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId.value)
         }
-        opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
+        opprettVedtakstype(vedtaksperiodeId.value, periodetype, inntektskilde)
     }
 
     protected fun opprettVarseldefinisjon(

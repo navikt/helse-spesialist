@@ -13,30 +13,6 @@ import java.util.UUID
 
 class LegacyVedtaksperiodeTest {
     @Test
-    fun `ignorerer behandling som ikke er relevant for vedtaksperioden`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val annenVedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-
-        vedtaksperiode.nySpleisBehandling(nySpleisBehandling(annenVedtaksperiodeId))
-
-        val antallbehandlinger = vedtaksperiode.toDto().behandlinger.size
-        assertEquals(1, antallbehandlinger) // Det har ikke blitt opprettet noen ny behandling for denne vedtaksperioden
-    }
-
-    @Test
-    fun `oppretter behandling når Spleis forteller om ny behandling uavhengig av tilstand på tidligere behandling - Spleis er master for behandlinger`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-
-        vedtaksperiode.nySpleisBehandling(nySpleisBehandling(vedtaksperiodeId))
-
-        val behandlinger = vedtaksperiode.toDto().behandlinger
-        assertEquals(TilstandDto.VidereBehandlingAvklares, behandlinger.first().tilstand) // tilstand på tidligere behandling er ikke avgjørende for om vi oppretter behandling
-        assertEquals(2, behandlinger.size) // Det har ikke blitt opprettet noen ny behandling for denne vedtaksperioden
-    }
-
-    @Test
     fun `vedtaksperioden mottar nye varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
@@ -215,11 +191,6 @@ class LegacyVedtaksperiodeTest {
         }
     }
 
-    private fun nySpleisBehandling(
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) = SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018, Yrkesaktivitetstype.ARBEIDSTAKER)
-
     private fun nyttVarsel(
         vedtaksperiodeId: UUID,
         varselkode: String = "SB_EX_1",
@@ -228,5 +199,25 @@ class LegacyVedtaksperiodeTest {
     private fun nyVedtaksperiode(
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) = LegacyVedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId, spleisBehandlingId))
+    ) = LegacyVedtaksperiode.gjenopprett(
+        "987654321",
+        vedtaksperiodeId,
+        false,
+        listOf(
+            BehandlingDto(
+                UUID.randomUUID(),
+                vedtaksperiodeId,
+                null,
+                spleisBehandlingId,
+                1 jan 2018,
+                1 jan 2018,
+                31 jan 2018,
+                TilstandDto.VidereBehandlingAvklares,
+                emptyList(),
+                null,
+                emptyList(),
+                Yrkesaktivitetstype.ARBEIDSTAKER,
+            ),
+        ),
+    )
 }

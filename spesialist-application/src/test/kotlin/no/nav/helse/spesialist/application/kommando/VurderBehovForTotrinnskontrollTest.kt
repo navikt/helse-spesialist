@@ -9,9 +9,10 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
+import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
@@ -38,35 +39,50 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE = LegacyVedtaksperiode.nyVedtaksperiode(
-            SpleisBehandling(
+        private val VEDTAKSPERIODE =
+            LegacyVedtaksperiode.gjenopprett(
                 organisasjonsnummer = "987654321",
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                spleisBehandlingId = UUID.randomUUID(),
-                fom = LocalDate.now(),
-                tom = LocalDate.now(),
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                behandlinger =
+                    listOf(
+                        BehandlingDto(
+                            spleisBehandlingId = UUID.randomUUID(),
+                            fom = LocalDate.now(),
+                            tom = LocalDate.now(),
+                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                            vedtaksperiodeId = VEDTAKSPERIODE_ID_1,
+                            utbetalingId = UUID.randomUUID(),
+                            skjæringstidspunkt = LocalDate.now(),
+                            tilstand = TilstandDto.KlarTilBehandling,
+                            id = UUID.randomUUID(),
+                            tags = emptyList(),
+                            vedtakBegrunnelse = null,
+                            varsler = emptyList(),
+                        ),
+                    ),
+                forkastet = false,
             )
-        )
         private val FØDSELSNUMMER = "fnr"
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val totrinnsvurderingRepository = object : TotrinnsvurderingRepository {
-        val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
-        var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
-        override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
-            if (!totrinnsvurdering.harFåttTildeltId()) {
-                totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+    private val totrinnsvurderingRepository =
+        object : TotrinnsvurderingRepository {
+            val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
+            var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
+
+            override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
+                if (!totrinnsvurdering.harFåttTildeltId()) {
+                    totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+                }
+                lagredeTotrinnsvurderinger.add(totrinnsvurdering)
             }
-            lagredeTotrinnsvurderinger.add(totrinnsvurdering)
+
+            override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
+
+            override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
         }
-
-        override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-
-        override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-    }
     private lateinit var context: CommandContext
 
     val sykefraværstilfelle =
@@ -80,7 +96,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                     fom = 1 jan 2018,
                     tom = 31 jan 2018,
                     skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
                 LegacyBehandling(
                     id = UUID.randomUUID(),
@@ -88,7 +104,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                     fom = 1 feb 2018,
                     tom = 28 feb 2018,
                     skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 ),
             ),
         )
@@ -175,10 +191,11 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehandler = lagSaksbehandlerOid()
         val beslutter = lagSaksbehandlerOid()
 
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(
-            saksbehandler = saksbehandler,
-            beslutter = beslutter
-        )
+        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
+            lagTotrinnsvurdering(
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+            )
 
         assertTrue(command.execute(context))
 
@@ -199,24 +216,21 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
-
-
     private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
 
     private fun lagTotrinnsvurdering(
         tilstand: TotrinnsvurderingTilstand = AVVENTER_BESLUTTER,
         saksbehandler: SaksbehandlerOid = lagSaksbehandlerOid(),
-        beslutter: SaksbehandlerOid = lagSaksbehandlerOid()
-    ) =
-        Totrinnsvurdering.fraLagring(
-            id = TotrinnsvurderingId(nextLong()),
-            fødselsnummer = FØDSELSNUMMER,
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now(),
-            overstyringer = emptyList(),
-            tilstand = tilstand,
-            vedtaksperiodeForkastet = false,
-        )
+        beslutter: SaksbehandlerOid = lagSaksbehandlerOid(),
+    ) = Totrinnsvurdering.fraLagring(
+        id = TotrinnsvurderingId(nextLong()),
+        fødselsnummer = FØDSELSNUMMER,
+        saksbehandler = saksbehandler,
+        beslutter = beslutter,
+        opprettet = LocalDateTime.now(),
+        oppdatert = LocalDateTime.now(),
+        overstyringer = emptyList(),
+        tilstand = tilstand,
+        vedtaksperiodeForkastet = false,
+    )
 }

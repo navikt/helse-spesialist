@@ -5,4 +5,6 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 interface VedtaksperiodeRepository {
     fun finn(vedtaksperiodeId: VedtaksperiodeId): Vedtaksperiode?
+
+    fun lagre(vedtaksperiode: Vedtaksperiode)
 }

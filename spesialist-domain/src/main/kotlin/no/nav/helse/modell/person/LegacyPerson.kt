@@ -3,7 +3,6 @@ package no.nav.helse.modell.person
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.relevanteFor
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
@@ -71,13 +70,6 @@ class LegacyPerson(
         vedtaksperioder
             .find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?.vedtaksperiodeForkastet()
-    }
-
-    fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
-        vedtaksperioder
-            .find { spleisBehandling.erRelevantFor(it.vedtaksperiodeId()) }
-            ?.nySpleisBehandling(spleisBehandling)
-            ?: vedtaksperioder.add(LegacyVedtaksperiode.nyVedtaksperiode(spleisBehandling))
     }
 
     fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): LegacyVedtaksperiode? {

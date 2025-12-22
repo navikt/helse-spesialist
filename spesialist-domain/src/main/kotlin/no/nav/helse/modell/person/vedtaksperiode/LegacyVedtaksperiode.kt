@@ -3,7 +3,6 @@ package no.nav.helse.modell.person.vedtaksperiode
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg
 import java.time.LocalDate
 import java.util.UUID
@@ -69,20 +68,11 @@ class LegacyVedtaksperiode(
         aktuellBehandling.håndter(this, spleisVedtaksperiode)
     }
 
-    internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
-        if (forkastet || !spleisBehandling.erRelevantFor(vedtaksperiodeId) || finnes(spleisBehandling)) return
-        nyBehandling(gjeldendeBehandling.nySpleisBehandling(spleisBehandling))
-    }
-
     internal fun utbetalingForkastet(forkastetUtbetalingId: UUID) {
         if (forkastet) return
         val utbetalingId = gjeldendeUtbetalingId
         if (utbetalingId == null || gjeldendeUtbetalingId != forkastetUtbetalingId) return
         gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
-    }
-
-    private fun nyBehandling(legacyBehandling: LegacyBehandling) {
-        behandlinger.addLast(legacyBehandling)
     }
 
     internal fun vedtaksperiodeForkastet() {
@@ -113,29 +103,7 @@ class LegacyVedtaksperiode(
         behandlinger.find { it.spleisBehandlingId() == spleisBehandlingId }
             ?: throw IllegalArgumentException("Forventer at behandling med spleisBehandlingId=$spleisBehandlingId finnes")
 
-    private fun finnes(spleisBehandling: SpleisBehandling): Boolean = behandlinger.finnBehandlingForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
-
     companion object {
-        fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): LegacyVedtaksperiode =
-            LegacyVedtaksperiode(
-                vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
-                organisasjonsnummer = spleisBehandling.organisasjonsnummer,
-                behandlinger =
-                    listOf(
-                        LegacyBehandling(
-                            id = UUID.randomUUID(),
-                            vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
-                            spleisBehandlingId = spleisBehandling.spleisBehandlingId,
-                            fom = spleisBehandling.fom,
-                            tom = spleisBehandling.tom,
-                            yrkesaktivitetstype = spleisBehandling.yrkesaktivitetstype,
-                            // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
-                            skjæringstidspunkt = spleisBehandling.fom,
-                        ),
-                    ),
-                forkastet = false,
-            )
-
         fun gjenopprett(
             organisasjonsnummer: String,
             vedtaksperiodeId: UUID,

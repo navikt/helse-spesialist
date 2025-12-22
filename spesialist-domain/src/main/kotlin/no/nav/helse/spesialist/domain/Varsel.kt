@@ -19,13 +19,17 @@ sealed interface ResultatAvSletting {
 
 class Varsel private constructor(
     id: VarselId,
-    val spleisBehandlingId: SpleisBehandlingId?,
-    val behandlingUnikId: BehandlingUnikId,
+    spleisBehandlingId: SpleisBehandlingId?,
+    behandlingUnikId: BehandlingUnikId,
     val kode: String,
     status: Status,
     val opprettetTidspunkt: LocalDateTime,
     vurdering: Varselvurdering?,
 ) : AggregateRoot<VarselId>(id) {
+    var spleisBehandlingId: SpleisBehandlingId? = spleisBehandlingId
+        private set
+    var behandlingUnikId: BehandlingUnikId = behandlingUnikId
+        private set
     var status: Status = status
         private set
     var vurdering: Varselvurdering? = vurdering
@@ -51,6 +55,15 @@ class Varsel private constructor(
             Status.AKTIV, Status.GODKJENT, Status.VURDERT -> vurdering == null
             Status.INAKTIV, Status.AVVIST, Status.AVVIKLET -> false
         }
+
+    fun flyttTil(
+        behandlingUnikId: BehandlingUnikId,
+        spleisBehandlingId: SpleisBehandlingId?,
+    ) {
+        check(status == Status.AKTIV) { "Kan kun flytte varsler som er aktive" }
+        this.behandlingUnikId = behandlingUnikId
+        this.spleisBehandlingId = spleisBehandlingId
+    }
 
     fun vurder(
         saksbehandlerOid: SaksbehandlerOid,

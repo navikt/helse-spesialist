@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
-
     private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
     private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
     private lateinit var HENDELSE1: TestMelding
@@ -84,59 +83,72 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
         assertContextRad(false, contextId)
     }
 
-    private fun ny(melding: Melding = HENDELSE1) = UUID.randomUUID().also { uuid ->
-        CommandContext(uuid).opprett(commandContextDao, melding.id)
-    }
-
-    private fun ferdig(melding: Melding = HENDELSE1) = ny(melding).also { uuid ->
-        commandContextDao.ferdig(melding.id, uuid)
-    }
-
-    private fun suspendert(melding: Melding = HENDELSE1) = ny(melding).also { uuid ->
-        commandContextDao.suspendert(melding.id, uuid, UUID.randomUUID(), listOf())
-    }
-
-    private fun feil(melding: Melding = HENDELSE1) = ny(melding).also { uuid ->
-        commandContextDao.feil(melding.id, uuid)
-    }
-
-    private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1): List<Pair<UUID, UUID>> {
-        return commandContextDao.avbryt(vedtaksperiodeId, contextId)
-    }
-
-    private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {
-        sessionOf(dataSource).use  { session ->
-            session.run(
-                queryOf(
-                    "SELECT tilstand FROM command_context WHERE context_id = ? ORDER BY id ASC",
-                    contextId
-                ).map { it.string("tilstand") }.asList
-            )
-        }.also {
-            assertEquals(expectedTilstand.toList(), it)
+    private fun ny(melding: Melding = HENDELSE1) =
+        UUID.randomUUID().also { uuid ->
+            CommandContext(uuid).opprett(commandContextDao, melding.id)
         }
+
+    private fun ferdig(melding: Melding = HENDELSE1) =
+        ny(melding).also { uuid ->
+            commandContextDao.ferdig(melding.id, uuid)
+        }
+
+    private fun suspendert(melding: Melding = HENDELSE1) =
+        ny(melding).also { uuid ->
+            commandContextDao.suspendert(melding.id, uuid, UUID.randomUUID(), listOf())
+        }
+
+    private fun feil(melding: Melding = HENDELSE1) =
+        ny(melding).also { uuid ->
+            commandContextDao.feil(melding.id, uuid)
+        }
+
+    private fun avbryt(
+        contextId: UUID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1,
+    ): List<Pair<UUID, UUID>> = commandContextDao.avbryt(vedtaksperiodeId, contextId)
+
+    private fun assertTilstand(
+        contextId: UUID,
+        vararg expectedTilstand: String,
+    ) {
+        sessionOf(dataSource)
+            .use { session ->
+                session.run(
+                    queryOf(
+                        "SELECT tilstand FROM command_context WHERE context_id = ? ORDER BY id ASC",
+                        contextId,
+                    ).map { it.string("tilstand") }.asList,
+                )
+            }.also {
+                assertEquals(expectedTilstand.toList(), it)
+            }
     }
 
-    private fun assertContextRad(@Suppress("SameParameterValue") finnes: Boolean, contextId: UUID) {
-        val count = sessionOf(dataSource).use  {
-            it.run(
-                queryOf("SELECT COUNT(1) FROM command_context WHERE context_id = ?",
-                contextId
-                ).map { it.int(1) }.asSingle
-            )!!
-        }
+    private fun assertContextRad(
+        @Suppress("SameParameterValue") finnes: Boolean,
+        contextId: UUID,
+    ) {
+        val count =
+            sessionOf(dataSource).use {
+                it.run(
+                    queryOf(
+                        "SELECT COUNT(1) FROM command_context WHERE context_id = ?",
+                        contextId,
+                    ).map { it.int(1) }.asSingle,
+                )!!
+            }
         assertEquals(finnes, count > 0)
     }
 
-
     @BeforeEach
     internal fun setup() {
-        HENDELSE1 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID1)
-        HENDELSE2 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID2)
-        opprettPerson()
+        val person = opprettPerson()
+        HENDELSE1 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID1, fødselsnummer = person.id.value)
+        HENDELSE2 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID2, fødselsnummer = person.id.value)
         opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID1)
-        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID2)
+        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID1, fødselsnummer = person.id.value)
+        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID2, fødselsnummer = person.id.value)
         vedtakDao.opprettKobling(VEDTAKSPERIODE_ID1, HENDELSE1.id)
         vedtakDao.opprettKobling(VEDTAKSPERIODE_ID2, HENDELSE2.id)
     }

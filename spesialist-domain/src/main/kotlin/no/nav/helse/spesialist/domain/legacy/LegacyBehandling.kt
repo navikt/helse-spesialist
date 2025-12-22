@@ -13,7 +13,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.innehold
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
@@ -114,8 +113,6 @@ class LegacyBehandling private constructor(
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom <= dato
 
-    internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) = nyBehandling(spleisBehandling)
-
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
     internal fun harKunGosysvarsel() = varsler.size == 1 && varsler.single().erGosysvarsel()
@@ -189,35 +186,6 @@ class LegacyBehandling private constructor(
 
     private fun nyUtbetaling(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
-    }
-
-    private fun nyBehandling(spleisBehandling: SpleisBehandling): LegacyBehandling {
-        val nyLegacyBehandling =
-            LegacyBehandling(
-                id = UUID.randomUUID(),
-                vedtaksperiodeId = vedtaksperiodeId,
-                fom = spleisBehandling.fom,
-                tom = spleisBehandling.tom,
-                skjæringstidspunkt = skjæringstidspunkt,
-                spleisBehandlingId = spleisBehandling.spleisBehandlingId,
-                yrkesaktivitetstype = spleisBehandling.yrkesaktivitetstype,
-            )
-        flyttAktiveVarslerTil(nyLegacyBehandling)
-        return nyLegacyBehandling
-    }
-
-    private fun flyttAktiveVarslerTil(legacyBehandling: LegacyBehandling) {
-        val aktiveVarsler = varsler.filter(LegacyVarsel::erAktiv)
-        this.varsler.removeAll(aktiveVarsler)
-        legacyBehandling.varsler.addAll(aktiveVarsler)
-        if (aktiveVarsler.isNotEmpty()) {
-            sikkerlogg.info(
-                "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel behandling har {}",
-                kv("gammel_behandling", this.id),
-                kv("ny_behandling", legacyBehandling.id),
-                kv("utbetalingId", this.utbetalingId),
-            )
-        }
     }
 
     private fun nyttVarsel(varsel: LegacyVarsel) {

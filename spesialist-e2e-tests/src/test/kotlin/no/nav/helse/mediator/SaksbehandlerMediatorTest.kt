@@ -16,7 +16,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
@@ -48,11 +47,15 @@ import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -283,24 +286,27 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
+        val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
+        sessionContext.vedtaksperiodeRepository.lagre(
+            Vedtaksperiode.ny(vedtaksperiodeId, Identitetsnummer.fraString(fødselsnummer), organisasjonsnummer),
+        )
+        sessionContext.behandlingRepository.lagre(
+            Behandling.ny(
+                SpleisBehandlingId(spleisBehandlingId),
+                vedtaksperiodeId,
+                fom = fom,
+                tom = tom,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            ),
+        )
         sessionContext.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            this.nySpleisBehandling(
-                SpleisBehandling(
-                    organisasjonsnummer,
-                    vedtaksperiodeId,
-                    spleisBehandlingId,
-                    fom,
-                    tom,
-                    Yrkesaktivitetstype.ARBEIDSTAKER,
-                ),
-            )
-            if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
-            if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
+            if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId.value, utbetalingId)
+            if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId.value)
         }
-        daos.vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
+        daos.vedtakDao.finnVedtakId(vedtaksperiodeId.value)?.also {
             vedtakId = it
         }
-        opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
+        opprettVedtakstype(vedtaksperiodeId.value, periodetype, inntektskilde)
     }
 
     private fun opprettOppgave(
@@ -528,7 +534,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             }
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.fødselsnummer, vedtaksperiodeId = UUID.randomUUID(), utbetalingId = UUID.randomUUID())
         val saksbehandler =
             Saksbehandler(
                 id = SaksbehandlerOid(SAKSBEHANDLER_OID),
@@ -579,7 +585,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             }
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(fødselsnummer = person.fødselsnummer, vedtaksperiodeId = UUID.randomUUID(), utbetalingId = UUID.randomUUID())
         val saksbehandler2Oid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandler2Oid)
         opprettTotrinnsvurdering(
