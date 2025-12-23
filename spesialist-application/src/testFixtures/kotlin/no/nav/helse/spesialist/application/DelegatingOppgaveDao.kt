@@ -8,12 +8,13 @@ import java.util.UUID
 class DelegatingOppgaveDao(
     private val oppgaveRepository: InMemoryOppgaveRepository,
     private val behandlingRepository: InMemoryBehandlingRepository,
-    private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository
+    private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
 ) : PartialOppgaveDao {
     override fun finnOppgaveId(fødselsnummer: String): Long? {
         val vedtaksperiodeIder =
             vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.map { it.id.value }
-        return oppgaveRepository.alle()
+        return oppgaveRepository
+            .alle()
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
             .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
             ?.id
@@ -25,10 +26,11 @@ class DelegatingOppgaveDao(
             .spleisBehandlingId!!
             .value
 
-    override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
+    override fun finnOppgaveIdUansettStatus(`fødselsnummer`: String): Long? {
         val vedtaksperiodeIder =
             vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.map { it.id.value }
-        return oppgaveRepository.alle()
+        return oppgaveRepository
+            .alle()
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
             .maxOf { it.id }
     }

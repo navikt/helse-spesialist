@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 interface PartialOppgaveDao : OppgaveDao {
-    override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
+    override fun finnOppgaveIdUansettStatus(`fødselsnummer`: String): Long? {
         error("Not implemented for this test")
     }
 
