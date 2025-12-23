@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.Risikofunn.Companion.tilJson
@@ -959,47 +960,49 @@ object Testmeldingfabrikk {
 
     fun lagAktivitetsloggNyAktivitet(
         fødselsnummer: String,
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        orgnummer: String,
-        aktiviteter: List<Map<String, Any>> =
-            listOf(
-                lagVarsel(
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    orgnummer = orgnummer,
-                ),
-            ),
+        id: UUID = UUID.randomUUID(),
+        varselkoder: Map<Vedtaksperiode, List<String>>,
     ): String =
         nyHendelse(
             id,
             "aktivitetslogg_ny_aktivitet",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "aktiviteter" to aktiviteter,
+                "aktiviteter" to
+                    varselkoder.flatMap { (vedtaksperiode, koder) ->
+                        koder.map {
+                            lagVarsel(
+                                fødselsnummer = fødselsnummer,
+                                kode = it,
+                                vedtaksperiodeId = vedtaksperiode.id.value,
+                                orgnummer = vedtaksperiode.organisasjonsnummer,
+                            )
+                        }
+                    },
             ),
         )
 
     fun lagNyeVarsler(
         fødselsnummer: String,
-        id: UUID,
-        vedtaksperiodeId: UUID,
-        orgnummer: String,
-        aktiviteter: List<Map<String, Any>> =
-            listOf(
-                lagVarsel(
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    orgnummer = orgnummer,
-                ),
-            ),
+        id: UUID = UUID.randomUUID(),
+        varselkoder: Map<Vedtaksperiode, List<String>>,
     ): String =
         nyHendelse(
             id,
             "nye_varsler",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "aktiviteter" to aktiviteter,
+                "aktiviteter" to
+                    varselkoder.flatMap { (vedtaksperiode, koder) ->
+                        koder.map {
+                            lagVarsel(
+                                fødselsnummer = fødselsnummer,
+                                kode = it,
+                                vedtaksperiodeId = vedtaksperiode.id.value,
+                                orgnummer = vedtaksperiode.organisasjonsnummer,
+                            )
+                        }
+                    },
             ),
         )
 

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -92,10 +91,6 @@ class LegacyPerson(
             skjæringstidspunkt = skjæringstidspunkt,
             gjeldendeBehandlinger = gjeldendeBehandlinger,
         )
-    }
-
-    fun nyeVarsler(varsler: List<LegacyVarsel>) {
-        vedtaksperioder.forEach { it.nyeVarsler(varsler) }
     }
 
     fun utbetalingForkastet(utbetalingId: UUID) {

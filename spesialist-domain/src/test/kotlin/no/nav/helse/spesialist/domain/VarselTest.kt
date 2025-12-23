@@ -244,6 +244,98 @@ class VarselTest {
     }
 
     @Test
+    fun `deaktiver aktivt varsel`() {
+        // given
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = Status.AKTIV,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+
+        // when
+        varsel.deaktiver()
+
+        // then
+        assertEquals(Status.INAKTIV, varsel.status)
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke deaktivere varsel som har status`(status: Status) {
+        // given
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+
+        // then
+        assertFailsWith<IllegalStateException> {
+            // when
+            varsel.deaktiver()
+        }
+    }
+
+    @Test
+    fun `reaktiver inaktivt varsel`() {
+        // given
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = Status.INAKTIV,
+                vurdering =
+                    Varselvurdering(
+                        lagSaksbehandler().id,
+                        LocalDateTime.now(),
+                        lagVarseldefinisjon(kode = "RV_IV_2").id,
+                    ),
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+
+        // when
+        varsel.reaktiver()
+
+        // then
+        assertEquals(Status.AKTIV, varsel.status)
+        assertEquals(null, varsel.vurdering)
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["INAKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `kan ikke reaktivere varsel som har status`(status: Status) {
+        // given
+        val varsel =
+            Varsel.fraLagring(
+                id = VarselId(value = UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+                status = status,
+                vurdering = null,
+                kode = "RV_IV_2",
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+
+        // then
+        assertFailsWith<IllegalStateException> {
+            // when
+            varsel.reaktiver()
+        }
+    }
+
+    @Test
     fun `flytt aktivt varsel til ny behandling`() {
         // given
         val nyBehandlingUnikId = lagBehandlingUnikId()

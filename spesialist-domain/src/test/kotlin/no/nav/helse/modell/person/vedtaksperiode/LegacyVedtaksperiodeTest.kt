@@ -13,24 +13,6 @@ import java.util.UUID
 
 class LegacyVedtaksperiodeTest {
     @Test
-    fun `vedtaksperioden mottar nye varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.nyeVarsler(listOf(nyttVarsel(vedtaksperiodeId)))
-        val gjeldendebehandling = vedtaksperiode.toDto().behandlinger.single()
-        assertEquals(1, gjeldendebehandling.varsler.size)
-    }
-
-    @Test
-    fun `vedtaksperioden ignorerer varsler som ikke er relevante for den`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
-        vedtaksperiode.nyeVarsler(listOf(nyttVarsel(UUID.randomUUID())))
-        val gjeldendebehandling = vedtaksperiode.toDto().behandlinger.single()
-        assertEquals(0, gjeldendebehandling.varsler.size)
-    }
-
-    @Test
     fun `ny vedtaksperiode opprettes med spleisBehandlingId`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId)
@@ -190,11 +172,6 @@ class LegacyVedtaksperiodeTest {
             LegacyVedtaksperiode.gjenopprett("987654321", UUID.randomUUID(), false, emptyList())
         }
     }
-
-    private fun nyttVarsel(
-        vedtaksperiodeId: UUID,
-        varselkode: String = "SB_EX_1",
-    ) = LegacyVarsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun nyVedtaksperiode(
         vedtaksperiodeId: UUID,

@@ -97,33 +97,55 @@ class PgVarselRepository private constructor(
     }
 
     override fun lagre(varsel: Varsel) {
-        val vurdering = varsel.vurdering
-        if (vurdering != null) {
-            dbQuery.update(
-                """
-                    UPDATE selve_varsel SET status = :status, status_endret_ident = sb.ident, status_endret_tidspunkt = :tidspunkt, definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjon_id LIMIT 1)
-                    FROM saksbehandler sb WHERE sb.oid = :saksbehandler
-                    AND unik_id = :unik_id
+        dbQuery.update(
+            """
+                    INSERT INTO selve_varsel (unik_id, kode, status, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
+                    VALUES (
+                        :unikId, 
+                        :kode, 
+                        :status,
+                        (SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId), 
+                        (SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId), 
+                        (SELECT id FROM api_varseldefinisjon av WHERE av.unik_id = :definisjonId),
+                        :opprettet, 
+                        (SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
+                        :statusEndretTidspunkt
+                    )
+                    ON CONFLICT (generasjon_ref, kode) DO UPDATE SET 
+                        status = excluded.status,
+                        status_endret_ident = excluded.status_endret_ident, 
+                        status_endret_tidspunkt = excluded.status_endret_tidspunkt, 
+                        definisjon_ref = excluded.definisjon_ref
                 """,
-                "status" to varsel.status.name,
-                "saksbehandler" to vurdering.saksbehandlerId.value,
-                "tidspunkt" to vurdering.tidspunkt,
-                "definisjon_id" to vurdering.vurdertDefinisjonId.value,
-                "unik_id" to varsel.id.value,
-            )
-        } else {
-            dbQuery.update(
-                """
-                    UPDATE selve_varsel SET status = :status, status_endret_ident = null, status_endret_tidspunkt = null, definisjon_ref = null
-                    WHERE unik_id = :unik_id
-                """,
-                "status" to varsel.status.name,
-                "unik_id" to varsel.id.value,
-            )
-        }
+            "unikId" to varsel.id.value,
+            "kode" to varsel.kode,
+            "status" to
+                when (varsel.status) {
+                    Varsel.Status.AKTIV -> "AKTIV"
+                    Varsel.Status.INAKTIV -> "INAKTIV"
+                    Varsel.Status.GODKJENT -> "GODKJENT"
+                    Varsel.Status.VURDERT -> "VURDERT"
+                    Varsel.Status.AVVIST -> "AVVIST"
+                    Varsel.Status.AVVIKLET -> "AVVIKLET"
+                },
+            "behandlingUnikId" to varsel.behandlingUnikId.value,
+            "definisjonId" to varsel.vurdering?.vurdertDefinisjonId?.value,
+            "opprettet" to varsel.opprettetTidspunkt,
+            "statusEndretOid" to varsel.vurdering?.saksbehandlerId?.value,
+            "statusEndretTidspunkt" to varsel.vurdering?.tidspunkt,
+        )
     }
 
     override fun lagre(varsler: List<Varsel>) {
         varsler.forEach { lagre(it) }
+    }
+
+    override fun slett(varselId: VarselId) {
+        dbQuery.update(
+            """
+                 DELETE FROM selve_varsel WHERE unik_id = :id
+            """,
+            "id" to varselId.value,
+        )
     }
 }

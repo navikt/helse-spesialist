@@ -79,12 +79,6 @@ class LegacyVedtaksperiode(
         forkastet = true
     }
 
-    internal fun nyeVarsler(nyeVarsler: List<LegacyVarsel>) {
-        val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }
-        if (forkastet || varsler.isEmpty()) return
-        varsler.forEach { gjeldendeBehandling.håndterNyttVarsel(it) }
-    }
-
     internal fun mottaBehandlingsinformasjon(
         tags: List<String>,
         spleisBehandlingId: UUID,

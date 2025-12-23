@@ -17,4 +17,6 @@ interface VarselRepository {
     fun lagre(varsel: Varsel)
 
     fun lagre(varsler: List<Varsel>)
+
+    fun slett(varselId: VarselId)
 }

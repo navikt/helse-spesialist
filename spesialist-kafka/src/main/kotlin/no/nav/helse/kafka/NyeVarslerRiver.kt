@@ -5,17 +5,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
-import no.nav.helse.modell.vedtaksperiode.NyeVarsler
+import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import java.time.LocalDateTime
+import java.util.UUID
 
-class NyeVarslerRiver(
-    private val mediator: MeldingMediator,
-) : SpesialistRiver {
+class NyeVarslerRiver : TransaksjonellRiver() {
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
@@ -39,25 +39,65 @@ class NyeVarslerRiver(
         check((node as ArrayNode).any { element -> element.path("varselkode").isTextual }) { "Ingen av elementene har varselkode." }
     }
 
-    override fun onPacket(
+    override fun transaksjonellOnPacket(
         packet: JsonMessage,
-        context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry,
+        outbox: Outbox,
+        transaksjon: SessionContext,
+        eventMetadata: EventMetadata,
     ) {
-        mediator.mottaMelding(
-            NyeVarsler(
-                id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
-                varsler = packet["aktiviteter"].varsler(),
-                json = packet.toJson(),
-            ),
-            MessageContextMeldingPubliserer(context),
+        transaksjon.meldingDao.lagre(
+            id = eventMetadata.`@id`,
+            meldingtype = MeldingDao.Meldingtype.NYE_VARSLER,
+            json = packet.toJson(),
+            vedtaksperiodeId = null,
         )
+        val nyeVarsler = packet["aktiviteter"].nyeVarsler()
+        nyeVarsler
+            .groupBy { it.vedtaksperiodeId }
+            .mapKeys { transaksjon.vedtaksperiodeRepository.finn(it.key) ?: error("Fant ikke vedtaksperiode") }
+            .filterNot { (vedtaksperiode) -> vedtaksperiode.forkastet }
+            .forEach { (vedtaksperiode, nyeVarsler) ->
+                val nyesteBehandling = transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) ?: error("Fant ikke behandling")
+                val eksisterendeVarsler = transaksjon.varselRepository.finnVarslerFor(nyesteBehandling.id).associateBy { it.kode }
+
+                val varsler =
+                    nyeVarsler
+                        .map {
+                            Varsel.nytt(
+                                id = VarselId(it.id),
+                                behandlingUnikId = nyesteBehandling.id,
+                                spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                                kode = it.kode,
+                                opprettetTidspunkt = it.opprettet,
+                            )
+                        }
+
+                val (finnesFraFør, finnesIkkeFraFør) = varsler.partition { it.kode in eksisterendeVarsler.keys }
+                transaksjon.varselRepository.lagre(finnesIkkeFraFør)
+                finnesFraFør
+                    .forEach {
+                        val eksisterendeVarsel = eksisterendeVarsler.getValue(it.kode)
+                        if (it.erVarselOmAvvik()) {
+                            transaksjon.varselRepository.slett(eksisterendeVarsel.id)
+                            transaksjon.varselRepository.lagre(it)
+                        }
+                        if (eksisterendeVarsel.erInaktivt()) {
+                            eksisterendeVarsel.reaktiver()
+                            transaksjon.varselRepository.lagre(eksisterendeVarsel)
+                        }
+                    }
+            }
     }
 
+    private data class NyttVarsel(
+        val id: UUID,
+        val kode: String,
+        val opprettet: LocalDateTime,
+        val vedtaksperiodeId: VedtaksperiodeId,
+    )
+
     private companion object {
-        private fun JsonNode.varsler(): List<LegacyVarsel> =
+        private fun JsonNode.nyeVarsler(): List<NyttVarsel> =
             filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
                 .map { jsonNode ->
@@ -65,11 +105,11 @@ class NyeVarslerRiver(
                         jsonNode["kontekster"]
                             .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
                             .asUUID()
-                    LegacyVarsel(
-                        jsonNode["id"].asUUID(),
-                        jsonNode["varselkode"].asText(),
-                        jsonNode["tidsstempel"].asLocalDateTime(),
-                        vedtaksperiodeId,
+                    NyttVarsel(
+                        id = jsonNode["id"].asUUID(),
+                        kode = jsonNode["varselkode"].asText(),
+                        opprettet = jsonNode["tidsstempel"].asLocalDateTime(),
+                        vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
                     )
                 }
     }

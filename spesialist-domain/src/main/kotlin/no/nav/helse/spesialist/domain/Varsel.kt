@@ -44,6 +44,10 @@ class Varsel private constructor(
         AVVIKLET,
     }
 
+    fun erVarselOmAvvik(): Boolean = this.kode == "RV_IV_2"
+
+    fun erInaktivt(): Boolean = this.status == Status.INAKTIV
+
     fun kanAvvises() = status in listOf(Status.AKTIV, Status.VURDERT)
 
     fun kanGodkjennes() = status == Status.VURDERT
@@ -55,6 +59,17 @@ class Varsel private constructor(
             Status.AKTIV, Status.GODKJENT, Status.VURDERT -> vurdering == null
             Status.INAKTIV, Status.AVVIST, Status.AVVIKLET -> false
         }
+
+    fun deaktiver() {
+        check(status == Status.AKTIV) { "Kan kun deaktivere varsler som er aktive" }
+        status = Status.INAKTIV
+    }
+
+    fun reaktiver() {
+        check(status == Status.INAKTIV) { "Kan kun reaktivere varsler som er inaktive" }
+        vurdering = null
+        status = Status.AKTIV
+    }
 
     fun flyttTil(
         behandlingUnikId: BehandlingUnikId,
@@ -101,6 +116,23 @@ class Varsel private constructor(
     }
 
     companion object {
+        fun nytt(
+            id: VarselId,
+            behandlingUnikId: BehandlingUnikId,
+            spleisBehandlingId: SpleisBehandlingId?,
+            kode: String,
+            opprettetTidspunkt: LocalDateTime,
+        ): Varsel =
+            Varsel(
+                id = id,
+                spleisBehandlingId = spleisBehandlingId,
+                behandlingUnikId = behandlingUnikId,
+                kode = kode,
+                opprettetTidspunkt = opprettetTidspunkt,
+                vurdering = null,
+                status = Status.AKTIV,
+            )
+
         fun fraLagring(
             id: VarselId,
             spleisBehandlingId: SpleisBehandlingId?,

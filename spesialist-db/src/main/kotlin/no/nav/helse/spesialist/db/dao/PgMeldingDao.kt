@@ -10,7 +10,6 @@ import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENNING
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.db.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
 import no.nav.helse.db.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
-import no.nav.helse.db.MeldingDao.Meldingtype.NYE_VARSLER
 import no.nav.helse.db.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
 import no.nav.helse.db.MeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.db.MeldingDao.Meldingtype.UTBETALING_ENDRET
@@ -29,7 +28,6 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
@@ -211,7 +209,6 @@ class PgMeldingDao private constructor(
             UTBETALING_ENDRET -> UtbetalingEndret(jsonNode)
             VEDTAKSPERIODE_REBEREGNET -> VedtaksperiodeReberegnet(jsonNode)
             ENDRET_EGEN_ANSATT_STATUS -> EndretEgenAnsattStatus(jsonNode)
-            NYE_VARSLER -> NyeVarsler(jsonNode)
             SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
             KLARGJØR_TILGANGSRELATERTE_DATA -> KlargjørTilgangsrelaterteData(jsonNode)
@@ -229,7 +226,6 @@ class PgMeldingDao private constructor(
             is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
             is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
             is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
-            is NyeVarsler -> NYE_VARSLER
             is SøknadSendt -> SØKNAD_SENDT
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING

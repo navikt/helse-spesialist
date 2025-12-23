@@ -420,4 +420,38 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(Varsel.Status.AKTIV, funnet.status)
         assertEquals(null, oppdatert.vurdering)
     }
+
+    @Test
+    fun `slett varsel`() {
+        // given
+        val vedtaksperiodeId = lagVedtaksperiodeId()
+        val spleisBehandlingId = lagSpleisBehandlingId()
+        val varselId = lagVarselId()
+        val fødselsnummer = opprettPerson().id.value
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        val definisjonId = lagVarseldefinisjonId()
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
+            status = "AKTIV",
+            definisjonRef = null,
+            kode = "RV_IV_1",
+        )
+
+        opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = definisjonId.value)
+        // when
+        repository.slett(varselId)
+
+        // then
+        val funnet = repository.finn(varselId)
+        assertNull(funnet)
+    }
 }
