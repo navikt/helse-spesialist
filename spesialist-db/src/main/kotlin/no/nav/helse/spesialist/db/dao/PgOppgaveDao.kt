@@ -25,7 +25,7 @@ class PgOppgaveDao internal constructor(
         asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
             .single { it.uuid("generasjon_ref") }
 
-    override fun finnOppgaveIdUansettStatus(`fødselsnummer`: String): Long? =
+    override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =
         asSQL(
             """
             SELECT o.id as oppgaveId
@@ -37,7 +37,7 @@ class PgOppgaveDao internal constructor(
             LIMIT 1
             """,
             "fodselsnummer" to fødselsnummer,
-        ).singleOrNull {
+        ).single {
             it.long("oppgaveId")
         }
 

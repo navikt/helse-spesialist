@@ -30,12 +30,10 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
         }
 
         transaksjon.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fødselsnummer)
-        val oppgaveId =
-            transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = fødselsnummer)
-                ?: transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = fødselsnummer)
-                ?: return RestResponse.NoContent()
         transaksjon.notatDao.lagreForOppgaveId(
-            oppgaveId = oppgaveId,
+            oppgaveId =
+                transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = fødselsnummer)
+                    ?: transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = fødselsnummer),
             tekst = request.begrunnelse,
             saksbehandlerOid = saksbehandler.id.value,
             notatType = NotatType.OpphevStans,

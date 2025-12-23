@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 interface OppgaveDao {
-    fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long?
+    fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long
 
     fun finnGenerasjonId(oppgaveId: Long): UUID
 

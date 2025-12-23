@@ -45,7 +45,7 @@ class StansAutomatiskBehandlingMutationHandler(
         saksbehandler: Saksbehandler,
         begrunnelse: String,
     ) {
-        val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer) ?: return
+        val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer)
         val dialog = Dialog.Factory.ny()
         this.dialogRepository.lagre(dialog)
 
@@ -63,7 +63,7 @@ class StansAutomatiskBehandlingMutationHandler(
         saksbehandler: Saksbehandler,
         begrunnelse: String,
     ) {
-        val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer) ?: return
+        val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer)
         val dialog = Dialog.Factory.ny()
         this.dialogRepository.lagre(dialog)
 
