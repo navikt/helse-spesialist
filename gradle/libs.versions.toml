@@ -4,7 +4,7 @@ graphqlKotlin = "8.4.0"
 jackson = "2.20.1"
 ktor = "3.3.3"
 tbdLibs = "2025.11.04-10.54-c831038e"
-testcontainers = "1.21.3"
+testcontainers = "1.21.4"
 smiley4KtorOpenapiTools = "5.4.0"
 smiley4SchemaKenerator = "2.5.0"
 
