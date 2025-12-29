@@ -86,6 +86,7 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
                     tom = packet["tom"].asLocalDate(),
                     yrkesaktivitetstype = packet["yrkesaktivitetstype"].asEnum<Yrkesaktivitetstype>(),
                 )
+            transaksjon.behandlingRepository.lagre(behandling)
         } else {
             if (eksisterendeVedtaksperiode.forkastet) return
             val tidligereBehandling =
@@ -100,6 +101,8 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
                     yrkesaktivitetstype = packet["yrkesaktivitetstype"].asEnum<Yrkesaktivitetstype>(),
                     tidligereBehandling = tidligereBehandling,
                 )
+            transaksjon.behandlingRepository.lagre(behandling)
+
             val aktiveVarslerForTidligereBehandling =
                 transaksjon
                     .varselRepository
@@ -115,6 +118,5 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
                     }
             }
         }
-        transaksjon.behandlingRepository.lagre(behandling)
     }
 }
