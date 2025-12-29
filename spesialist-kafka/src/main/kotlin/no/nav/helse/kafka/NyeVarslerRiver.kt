@@ -54,8 +54,9 @@ class NyeVarslerRiver : TransaksjonellRiver() {
         val nyeVarsler = packet["aktiviteter"].nyeVarsler()
         nyeVarsler
             .groupBy { it.vedtaksperiodeId }
-            .mapKeys { transaksjon.vedtaksperiodeRepository.finn(it.key) ?: error("Fant ikke vedtaksperiode") }
-            .filterNot { (vedtaksperiode) -> vedtaksperiode.forkastet }
+            .mapNotNull { (vedtaksperiodeId, varsler) ->
+                transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)?.let { vedtaksperiode -> vedtaksperiode to varsler }
+            }.filterNot { (vedtaksperiode) -> vedtaksperiode.forkastet }
             .forEach { (vedtaksperiode, nyeVarsler) ->
                 val nyesteBehandling = transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) ?: error("Fant ikke behandling")
                 val eksisterendeVarsler = transaksjon.varselRepository.finnVarslerFor(nyesteBehandling.id).associateBy { it.kode }
