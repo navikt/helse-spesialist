@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
@@ -71,6 +72,21 @@ internal class NyeVarslerRiverIntegrationTest {
         assertEquals(1, varsler.size)
 
         assertEquals("RV_IV_1", varsler.single().kode)
+    }
+
+    @Test
+    fun `ignorerer varsler for vedtaksperioder vi ikke kjenner til`() {
+        val person =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
+        // given
+        val ikkePersistertVedtaksperiode = lagVedtaksperiode()
+
+        // then
+        assertDoesNotThrow {
+            // when
+            testRapid.sendTestMessage(lagAktivitetsloggNyAktivitetMelding(person, ikkePersistertVedtaksperiode to "RV_IV_1"))
+        }
     }
 
     @Test
