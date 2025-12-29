@@ -9,8 +9,9 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -19,24 +20,31 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VedtakDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
+    private val organisasjonsnummer =
+        when (val id = arbeidsgiver.id) {
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> id.fødselsnummer
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> id.organisasjonsnummer
+        }
+    private val vedtaksperiodeId = UUID.randomUUID()
+
     @Test
     fun `lagre og finn vedtaksperiode`() {
-        val person = opprettPerson()
-        opprettArbeidsgiver()
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
                     fødselsnummer = person.id.value,
                     vedtaksperiodeDto =
                         VedtaksperiodeDto(
-                            organisasjonsnummer = ORGNUMMER,
-                            vedtaksperiodeId = VEDTAKSPERIODE,
+                            organisasjonsnummer = organisasjonsnummer,
+                            vedtaksperiodeId = vedtaksperiodeId,
                             forkastet = false,
                             behandlinger =
                                 listOf(
                                     BehandlingDto(
                                         id = UUID.randomUUID(),
-                                        vedtaksperiodeId = VEDTAKSPERIODE,
+                                        vedtaksperiodeId = vedtaksperiodeId,
                                         utbetalingId = null,
                                         spleisBehandlingId = UUID.randomUUID(),
                                         skjæringstidspunkt = 1 jan 2018,
@@ -56,33 +64,31 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
         val vedtaksperiode =
             sessionOf(dataSource).use {
                 it.transaction {
-                    PgVedtakDao(it).finnVedtaksperiode(VEDTAKSPERIODE)
+                    PgVedtakDao(it).finnVedtaksperiode(vedtaksperiodeId)
                 }
             }
         assertNotNull(vedtaksperiode)
-        assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
-        assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
+        assertEquals(vedtaksperiodeId, vedtaksperiode?.vedtaksperiodeId)
+        assertEquals(organisasjonsnummer, vedtaksperiode?.organisasjonsnummer)
         assertEquals(false, vedtaksperiode?.forkastet)
     }
 
     @Test
     fun `finn forkastet vedtaksperiode`() {
-        val person = opprettPerson()
-        opprettArbeidsgiver()
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
                     fødselsnummer = person.id.value,
                     vedtaksperiodeDto =
                         VedtaksperiodeDto(
-                            organisasjonsnummer = ORGNUMMER,
-                            vedtaksperiodeId = VEDTAKSPERIODE,
+                            organisasjonsnummer = organisasjonsnummer,
+                            vedtaksperiodeId = vedtaksperiodeId,
                             forkastet = true,
                             behandlinger =
                                 listOf(
                                     BehandlingDto(
                                         id = UUID.randomUUID(),
-                                        vedtaksperiodeId = VEDTAKSPERIODE,
+                                        vedtaksperiodeId = vedtaksperiodeId,
                                         utbetalingId = null,
                                         spleisBehandlingId = UUID.randomUUID(),
                                         skjæringstidspunkt = 1 jan 2018,
@@ -102,65 +108,65 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
         val vedtaksperiode =
             sessionOf(dataSource).use {
                 it.transaction {
-                    PgVedtakDao(it).finnVedtaksperiode(VEDTAKSPERIODE)
+                    PgVedtakDao(it).finnVedtaksperiode(vedtaksperiodeId)
                 }
             }
         assertNotNull(vedtaksperiode)
-        assertEquals(VEDTAKSPERIODE, vedtaksperiode?.vedtaksperiodeId)
-        assertEquals(ORGNUMMER, vedtaksperiode?.organisasjonsnummer)
+        assertEquals(vedtaksperiodeId, vedtaksperiode?.vedtaksperiodeId)
+        assertEquals(organisasjonsnummer, vedtaksperiode?.organisasjonsnummer)
         assertEquals(true, vedtaksperiode?.forkastet)
     }
 
     @Test
     fun `lagrer og leser vedtaksperiodetype hvis den er satt`() {
         val person = opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
-        val vedtaksperiodetype = Periodetype.FØRSTEGANGSBEHANDLING
-        val inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
-        vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype, inntektskilde)
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, finnVedtaksperiodetype(VEDTAKSPERIODE))
-        assertEquals(inntektskilde, vedtakDao.finnInntektskilde(VEDTAKSPERIODE))
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver, periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        opprettBehandling(vedtaksperiode)
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, finnVedtaksperiodetype(vedtaksperiode.id.value))
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, vedtakDao.finnInntektskilde(vedtaksperiode.id.value))
     }
 
     @Test
     fun `oppretter innslag i koblingstabellen`() {
-        val person = lagPerson()
-        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
-        godkjenningsbehov(HENDELSE_ID, fødselsnummer = person.id.value)
-        vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
-        assertEquals(VEDTAKSPERIODE, finnKobling(HENDELSE_ID))
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val utbetalingId = UUID.randomUUID()
+        val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+        godkjenningsbehov(oppgave.godkjenningsbehovId, fødselsnummer = person.id.value)
+        vedtakDao.opprettKobling(vedtaksperiodeId, oppgave.godkjenningsbehovId)
+        assertEquals(vedtaksperiodeId, finnKobling(oppgave.godkjenningsbehovId))
     }
 
     @Test
     fun `ikke automatisk godkjent dersom det ikke finnes innslag i db`() {
-        val person = lagPerson()
-        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
-        assertFalse(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val utbetalingId = UUID.randomUUID()
+        val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+        assertFalse(vedtakDao.erAutomatiskGodkjent(oppgave.utbetalingId))
     }
 
     @Test
     fun `ikke automatisk godkjent dersom innslag i db sier false`() {
-        val person = lagPerson()
-        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
-        godkjenningsbehov(HENDELSE_ID, fødselsnummer = person.id.value)
-        nyttAutomatiseringsinnslag(false)
-        assertFalse(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val utbetalingId = UUID.randomUUID()
+        val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+        godkjenningsbehov(oppgave.godkjenningsbehovId, fødselsnummer = person.id.value)
+        nyttAutomatiseringsinnslag(false, vedtaksperiode.id.value, utbetalingId, hendelseId = oppgave.godkjenningsbehovId)
+        assertFalse(vedtakDao.erAutomatiskGodkjent(oppgave.utbetalingId))
     }
 
     @Test
     fun `automatisk godkjent dersom innslag i db sier true`() {
-        val person = lagPerson()
-        nyPerson(fødselsnummer = person.id.value, aktørId = person.aktørId)
-        godkjenningsbehov(HENDELSE_ID, fødselsnummer = person.id.value)
-        nyttAutomatiseringsinnslag(true)
-        assertTrue(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
-    }
-
-    @Test
-    fun `Finner orgnummer med vedtaksperiodeId`() {
-        nyPerson()
-        assertEquals(ORGNUMMER, vedtakDao.finnOrganisasjonsnummer(VEDTAKSPERIODE))
+        val utbetalingId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
+        godkjenningsbehov(hendelseId, fødselsnummer = person.id.value)
+        nyttAutomatiseringsinnslag(true, vedtaksperiode.id.value, utbetalingId, hendelseId)
+        assertTrue(vedtakDao.erAutomatiskGodkjent(utbetalingId))
     }
 
     private fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype =

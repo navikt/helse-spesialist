@@ -6,13 +6,17 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 private class PgVergemålApiDaoTest : AbstractDBIntegrationTest() {
-    private val person = opprettPerson()
+    private val person =
+        opprettPerson().also {
+            val arbeidsgiver = opprettArbeidsgiver()
+            val vedtaksperiode = opprettVedtaksperiode(it, arbeidsgiver)
+            opprettBehandling(vedtaksperiode)
+        }
+
     private val vergemålApiDao = PgVergemålApiDao(dataSource)
 
     @Test
     fun `kan hente ut om person har vergemål`() {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettVergemål(person.id.value, harFullmakt = true)
 
         assertEquals(true, vergemålApiDao.harFullmakt(person.id.value))

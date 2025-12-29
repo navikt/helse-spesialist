@@ -1,31 +1,34 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.UUID
 
 internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
 
     @Test
     fun `Finner varsler med vedtaksperiodeId og utbetalingId`() {
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
+        val utbetalingId = UtbetalingId(UUID.randomUUID())
+
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode, utbetalingId = utbetalingId)
+
         opprettVarseldefinisjon(kode = "EN_KODE")
         opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
-        opprettBehandling(spleisBehandlingId = spleisBehandlingId, utbetalingId = utbetalingId, fødselsnummer = person.id.value)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-        nyttVarsel(kode = "EN_ANNEN_KODE", status = "INAKTIV", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
 
-        val varsler = apiVarselRepository.finnVarslerSomIkkeErInaktiveFor(PERIODE.id, utbetalingId)
+        opprettVarsel(behandling = behandling, "EN_KODE")
+        val varsel2 = opprettVarsel(behandling = behandling, "EN_ANNEN_KODE")
+        varsel2.deaktiver()
+        sessionContext.varselRepository.lagre(varsel2)
+
+        val varsler = apiVarselRepository.finnVarslerSomIkkeErInaktiveFor(vedtaksperiode.id.value, utbetalingId.value)
 
         assertTrue(varsler.isNotEmpty())
         assertEquals(1, varsler.size)
@@ -33,18 +36,20 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner varsler for uberegnet periode`() {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode, utbetalingId = null)
+        val behandling2 = opprettBehandling(vedtaksperiode)
         opprettVarseldefinisjon(kode = "EN_KODE")
         opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
         opprettVarseldefinisjon(kode = "EN_TREDJE_KODE")
 
-        val spleisBehandlingId2 = UUID.randomUUID()
-        opprettBehandling(spleisBehandlingId = spleisBehandlingId2, fødselsnummer = person.id.value)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2)
-        nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2)
-        nyttVarsel(kode = "EN_TREDJE_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2, status = "INAKTIV")
-        val varsler = apiVarselRepository.finnVarslerForUberegnetPeriode(PERIODE.id)
+        opprettVarsel(behandling = behandling2, "EN_KODE")
+        opprettVarsel(behandling = behandling2, "EN_ANNEN_KODE")
+        val varsel3 = opprettVarsel(behandling = behandling2, "EN_TREDJE_KODE")
+        varsel3.deaktiver()
+        sessionContext.varselRepository.lagre(varsel3)
+
+        val varsler = apiVarselRepository.finnVarslerForUberegnetPeriode(vedtaksperiode.id.value)
 
         assertTrue(varsler.isNotEmpty())
         assertEquals(2, varsler.size)
@@ -58,196 +63,96 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende perioden med oppgave`() {
-        val uberegnetPeriode = periode(2 jan 2023, 3 jan 2023)
-        val periodeMedOppgave = periode(4 jan 2023, 5 jan 2023)
-        opprettArbeidsgiver()
-        with(uberegnetPeriode) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
+        val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode1, fom = 2 jan 2023, tom = 3 jan 2023, utbetalingId = null)
+        val behandling = opprettBehandling(vedtaksperiode2, fom = 4 jan 2023, tom = 5 jan 2023, skjæringstidspunkt = 2 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
+        val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
-        with(periodeMedOppgave) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
-                fødselsnummer = person.id.value,
-            )
-            opprettOppgave(vedtaksperiodeId = id)
-        }
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
 
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
-
-        assertEquals(setOf(periodeMedOppgave.id, uberegnetPeriode.id), perioderSomSkalViseVarsler)
+        assertEquals(setOf(vedtaksperiode2.id.value, vedtaksperiode1.id.value), perioderSomSkalViseVarsler)
     }
 
     @Test
     fun `Uberegnet periode skal ikke vise varsler når den ikke er tilstøtende perioden med oppgave`() {
-        val uberegnetPeriode = periode(2 jan 2023, 3 jan 2023)
-        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fom = uberegnetPeriode.fom, tom = uberegnetPeriode.tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        opprettVedtaksperiode(
-            vedtaksperiodeId = periodeMedOppgave.id,
-            fom = periodeMedOppgave.fom,
-            tom = periodeMedOppgave.tom,
-            spleisBehandlingId = UUID.randomUUID(),
-            fødselsnummer = person.id.value,
-        )
-        opprettOppgave(vedtaksperiodeId = periodeMedOppgave.id)
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
+        val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode1, fom = 2 jan 2023, tom = 3 jan 2023, utbetalingId = null)
+        val behandling = opprettBehandling(vedtaksperiode2, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = 5 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
+        val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
-        assertFalse(perioderSomSkalViseVarsler.contains(uberegnetPeriode.id))
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+
+        assertFalse(perioderSomSkalViseVarsler.contains(vedtaksperiode1.id.value))
     }
 
     @Test
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende perioden med oppgave (over helg)`() {
-        val uberegnetPeriode = periode(2 jan 2023, 6 jan 2023)
-        val periodeMedOppgave = periode(9 jan 2023, 13 jan 2023)
-        opprettArbeidsgiver()
-        with(uberegnetPeriode) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(periodeMedOppgave) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
-                fødselsnummer = person.id.value,
-            )
-            opprettOppgave(vedtaksperiodeId = id)
-        }
+        val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode1, fom = 2 jan 2023, tom = 6 jan 2023, utbetalingId = null)
+        val behandling = opprettBehandling(vedtaksperiode2, fom = 9 jan 2023, tom = 13 jan 2023, skjæringstidspunkt = 2 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
+        val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
-        assertEquals(setOf(periodeMedOppgave.id, uberegnetPeriode.id), perioderSomSkalViseVarsler)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        assertEquals(setOf(vedtaksperiode2.id.value, vedtaksperiode1.id.value), perioderSomSkalViseVarsler)
     }
 
     @Test
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende de to andre periodene`() {
-        val uberegnetPeriode = periode(1 jan 2023, 2 jan 2023)
-        val beregnetPeriode = periode(3 jan 2023, 4 jan 2023)
-        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettArbeidsgiver()
-        with(uberegnetPeriode) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(beregnetPeriode) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
-                fødselsnummer = person.id.value,
-            )
-        }
-        with(periodeMedOppgave) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode.fom),
-                fødselsnummer = person.id.value,
-            )
-            opprettOppgave(vedtaksperiodeId = id)
-        }
+        val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        val vedtaksperiode3 = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling1 = opprettBehandling(vedtaksperiode1, fom = 1 jan 2023, tom = 2 jan 2023, utbetalingId = null)
+        opprettBehandling(vedtaksperiode2, fom = 3 jan 2023, tom = 4 jan 2023, skjæringstidspunkt = behandling1.skjæringstidspunkt, utbetalingId = UtbetalingId(UUID.randomUUID()))
+        val behandling3 = opprettBehandling(vedtaksperiode3, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling1.skjæringstidspunkt, utbetalingId = UtbetalingId(UUID.randomUUID()))
+        val oppgave = opprettOppgave(vedtaksperiode3, behandling3)
 
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
-        assertEquals(setOf(periodeMedOppgave.id, beregnetPeriode.id, uberegnetPeriode.id), perioderSomSkalViseVarsler)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        assertEquals(setOf(vedtaksperiode3.id.value, vedtaksperiode2.id.value, vedtaksperiode1.id.value), perioderSomSkalViseVarsler)
     }
 
     @Test
     fun `Begge uberegnede perioder skal vise varsler fordi de henger sammen med perioden med oppgave`() {
-        val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
-        val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
-        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettArbeidsgiver()
-        with(uberegnetPeriode1) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(uberegnetPeriode2) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(
-                vedtaksperiodeId = id,
-                fom = fom,
-                tom = tom,
-                utbetalingId = UUID.randomUUID(),
-                spleisBehandlingId = spleisBehandlingId,
-                fødselsnummer = person.id.value,
-            )
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode1.fom),
-                fødselsnummer = person.id.value,
-            )
-        }
-        with(periodeMedOppgave) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode1.fom),
-                fødselsnummer = person.id.value,
-            )
-            opprettOppgave(vedtaksperiodeId = id)
-        }
+        val uberegnetPeriode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val uberegnetPeriode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        val periodeMedOppgave = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling1 = opprettBehandling(uberegnetPeriode1, fom = 1 jan 2023, tom = 2 jan 2023)
+        opprettBehandling(uberegnetPeriode2, fom = 3 jan 2023, tom = 4 jan 2023, skjæringstidspunkt = behandling1.skjæringstidspunkt)
+        val behandling3 = opprettBehandling(periodeMedOppgave, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling1.skjæringstidspunkt)
+        val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
-        assertEquals(setOf(periodeMedOppgave.id, uberegnetPeriode1.id, uberegnetPeriode2.id), perioderSomSkalViseVarsler)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        assertEquals(setOf(periodeMedOppgave.id.value, uberegnetPeriode1.id.value, uberegnetPeriode2.id.value), perioderSomSkalViseVarsler)
     }
 
     @Test
     fun `Ingen uberegnede perioder skal vise varsler fordi de ikke henger sammen med perioden med oppgave`() {
-        val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
-        val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
-        val periodeMedOppgave = periode(6 jan 2023, 7 jan 2023)
-        opprettArbeidsgiver()
-        with(uberegnetPeriode1) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(uberegnetPeriode2) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(periodeMedOppgave) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            opprettOppgave(vedtaksperiodeId = id)
-        }
+        val uberegnetPeriode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val uberegnetPeriode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        val periodeMedOppgave = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(uberegnetPeriode1, fom = 1 jan 2023, tom = 2 jan 2023)
+        opprettBehandling(uberegnetPeriode2, fom = 3 jan 2023, tom = 4 jan 2023)
+        val behandling3 = opprettBehandling(periodeMedOppgave, fom = 6 jan 2023, tom = 7 jan 2023)
+        val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
-        assertFalse(perioderSomSkalViseVarsler.any(setOf(uberegnetPeriode1.id, uberegnetPeriode2.id)::contains))
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        assertFalse(perioderSomSkalViseVarsler.any(setOf(uberegnetPeriode1.id.value, uberegnetPeriode2.id.value)::contains))
     }
 
     @Test
     fun `Bare den tilstøtende uberegnede perioden skal vise varsler`() {
-        val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
-        val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
-        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
-        opprettArbeidsgiver()
-        with(uberegnetPeriode1) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(uberegnetPeriode2) {
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, utbetalingId = UUID.randomUUID(), fødselsnummer = person.id.value)
-        }
-        with(periodeMedOppgave) {
-            val spleisBehandlingId = UUID.randomUUID()
-            opprettVedtaksperiode(vedtaksperiodeId = id, fom = fom, tom = tom, spleisBehandlingId = spleisBehandlingId, fødselsnummer = person.id.value)
-            oppdaterBehandlingdata(
-                SpleisVedtaksperiode(vedtaksperiodeId = id, spleisBehandlingId, fom, tom, uberegnetPeriode2.fom),
-                fødselsnummer = person.id.value,
-            )
-            opprettOppgave(vedtaksperiodeId = id)
-        }
+        val uberegnetPeriode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val uberegnetPeriode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        val periodeMedOppgave = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(uberegnetPeriode1, fom = 1 jan 2023, tom = 2 jan 2023)
+        val behandling2 = opprettBehandling(uberegnetPeriode2, fom = 3 jan 2023, tom = 4 jan 2023)
+        val behandling3 = opprettBehandling(periodeMedOppgave, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling2.skjæringstidspunkt)
+        val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
-        val oppgaveId = finnOppgaveIdFor(periodeMedOppgave.id)
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgaveId)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
 
-        assertEquals(setOf(periodeMedOppgave.id, uberegnetPeriode2.id), perioderSomSkalViseVarsler)
+        assertEquals(setOf(periodeMedOppgave.id.value, uberegnetPeriode2.id.value), perioderSomSkalViseVarsler)
     }
-
-    private fun periode(
-        fom: LocalDate,
-        tom: LocalDate,
-    ) = Periode(UUID.randomUUID(), fom, tom)
 }

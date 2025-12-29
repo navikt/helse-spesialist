@@ -13,6 +13,7 @@ import java.util.UUID
 
 internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
+    private val saksbehandler = opprettSaksbehandler()
     private val opptegnelseRepository = DBSessionContext(session).opptegnelseDao
 
     private companion object {
@@ -22,8 +23,7 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Kan opprette abonnement og få opptegnelser`() {
-        opprettSaksbehandler()
-        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, person.aktørId)
+        abonnementDao.opprettAbonnement(saksbehandler.id.value, person.aktørId)
         opptegnelseRepository.opprettOpptegnelse(
             person.id.value,
             UTBETALING_PAYLOAD,
@@ -32,7 +32,7 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
 
         opptegnelseRepository.opprettOpptegnelse(person.id.value, GODKJENNINGSBEHOV_PAYLOAD, NY_SAKSBEHANDLEROPPGAVE)
 
-        val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
+        val alle = opptegnelseRepository.finnOpptegnelser(saksbehandler.id.value)
         assertEquals(2, alle.size)
 
         alle.first { it.type == UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
@@ -55,9 +55,9 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
             UTBETALING_PAYLOAD,
             UTBETALING_ANNULLERING_OK,
         )
-        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, person.aktørId)
+        abonnementDao.opprettAbonnement(saksbehandler.id.value, person.aktørId)
 
-        val alle = opptegnelseRepository.finnOpptegnelser(SAKSBEHANDLER_OID)
+        val alle = opptegnelseRepository.finnOpptegnelser(saksbehandler.id.value)
         assertEquals(0, alle.size)
     }
 }

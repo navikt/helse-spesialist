@@ -9,7 +9,6 @@ import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -18,65 +17,47 @@ import java.util.UUID
 
 internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
     private val generasjonDao = daos.legacyBehandlingDao
 
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val generasjonId1 = UUID.randomUUID()
-        val generasjonId2 = UUID.randomUUID()
-        val generasjonId3 = UUID.randomUUID()
-
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId1, fødselsnummer = person.id.value)
-        opprettBehandling(vedtaksperiodeId1, generasjonId1, fødselsnummer = person.id.value)
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2, fødselsnummer = person.id.value)
-        opprettBehandling(vedtaksperiodeId2, generasjonId2, fødselsnummer = person.id.value)
-        opprettBehandling(vedtaksperiodeId2, generasjonId3, fødselsnummer = person.id.value)
+        val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode1)
+        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(vedtaksperiode2)
 
         val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(person.id.value)
         assertEquals(2, vedtaksperiodeIder.size)
-        assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiodeId1, vedtaksperiodeId2)))
+        assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiode1.id.value, vedtaksperiode2.id.value)))
     }
 
     @Test
     fun `finner vedtaksperiodeider kun for aktuell person`() {
-        val person1 = opprettPerson().id.value
-        val organisasjonsnummer1 = lagOrganisasjonsnummer()
-        val vedtaksperiodeId1 = UUID.randomUUID()
+        val person1 = person
+        val arbeidsgiver1 = arbeidsgiver
 
-        val person2 = opprettPerson().id.value
-        val organisasjonsnummer2 = lagOrganisasjonsnummer()
-        val vedtaksperiodeId2 = UUID.randomUUID()
+        val person2 = opprettPerson()
+        val arbeidsgiver2 = opprettArbeidsgiver()
 
-        opprettArbeidsgiver(identifikator = organisasjonsnummer1)
-        opprettVedtaksperiode(
-            fødselsnummer = person1,
-            organisasjonsnummer = organisasjonsnummer1,
-            vedtaksperiodeId = vedtaksperiodeId1,
-        )
+        val vedtaksperiode1 = opprettVedtaksperiode(person1, arbeidsgiver1)
+        opprettBehandling(vedtaksperiode1)
+        val vedtaksperiode2 = opprettVedtaksperiode(person2, arbeidsgiver2)
+        opprettBehandling(vedtaksperiode2)
 
-        opprettArbeidsgiver(identifikator = organisasjonsnummer2)
-        opprettVedtaksperiode(
-            fødselsnummer = person2,
-            organisasjonsnummer = organisasjonsnummer2,
-            vedtaksperiodeId = vedtaksperiodeId2,
-        )
+        val vedtaksperiodeIderPerson1 = generasjonDao.finnVedtaksperiodeIderFor(person1.id.value)
 
-        val vedtaksperiodeIderPerson1 = generasjonDao.finnVedtaksperiodeIderFor(person1)
-
-        val vedtaksperiodeIderPerson2 = generasjonDao.finnVedtaksperiodeIderFor(person2)
+        val vedtaksperiodeIderPerson2 = generasjonDao.finnVedtaksperiodeIderFor(person2.id.value)
         assertEquals(1, vedtaksperiodeIderPerson1.size)
         assertEquals(1, vedtaksperiodeIderPerson2.size)
-        assertTrue(vedtaksperiodeIderPerson1.containsAll(setOf(vedtaksperiodeId1)))
-        assertTrue(vedtaksperiodeIderPerson2.containsAll(setOf(vedtaksperiodeId2)))
+        assertTrue(vedtaksperiodeIderPerson1.containsAll(setOf(vedtaksperiode1.id.value)))
+        assertTrue(vedtaksperiodeIderPerson2.containsAll(setOf(vedtaksperiode2.id.value)))
     }
 
     @Test
     fun `lagre og finne generasjon`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val varsel =
@@ -89,7 +70,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
             )
         generasjonDao.finnLegacyBehandling(
             BehandlingDto(
-                id = generasjonId,
+                id = behandlingId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
                 spleisBehandlingId = spleisBehandlingId,
@@ -107,7 +88,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
         assertEquals(1, funnet.size)
         assertEquals(
             BehandlingDto(
-                id = generasjonId,
+                id = behandlingId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
                 spleisBehandlingId = spleisBehandlingId,

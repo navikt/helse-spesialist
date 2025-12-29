@@ -5,23 +5,27 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
-
-    @BeforeEach
-    fun setup() {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
-        opprettSaksbehandler()
-    }
+    private val arbeidsgiver = opprettArbeidsgiver()
+    private val organisasjonsnummer =
+        when (val id = arbeidsgiver.id) {
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> id.fødselsnummer
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> id.organisasjonsnummer
+        }
+    private val vedtaksperiode =
+        opprettVedtaksperiode(person, arbeidsgiver).also {
+            opprettBehandling(it)
+        }
+    private val saksbehandler = opprettSaksbehandler()
+    private val beslutter = opprettSaksbehandler()
 
     @Test
     fun `hvis det ikke finnes totrinnsvurdering, returnerer null`() {
@@ -48,7 +52,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.nyOverstyring(nyOverstyring())
-        hentetTotrinnsvurdering.settBeslutter(SaksbehandlerOid(SAKSBEHANDLER_OID))
+        hentetTotrinnsvurdering.settBeslutter(beslutter.id)
         hentetTotrinnsvurdering.settAvventerSaksbehandler()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
@@ -67,7 +71,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
         checkNotNull(hentetTotrinnsvurdering)
-        hentetTotrinnsvurdering.vedtaksperiodeForkastet(listOf(VEDTAKSPERIODE))
+        hentetTotrinnsvurdering.vedtaksperiodeForkastet(listOf(vedtaksperiode.id.value))
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
 
@@ -78,11 +82,11 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
     private fun nyOverstyring(): Overstyring =
         OverstyrtTidslinje.ny(
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
+            vedtaksperiodeId = vedtaksperiode.id.value,
+            saksbehandlerOid = saksbehandler.id,
             fødselsnummer = person.id.value,
-            aktørId = AKTØR,
-            organisasjonsnummer = ORGNUMMER,
+            aktørId = person.aktørId,
+            organisasjonsnummer = organisasjonsnummer,
             begrunnelse = "begrunnelse",
             dager = listOf(nyOverstyrtTidslinjedag()),
         )

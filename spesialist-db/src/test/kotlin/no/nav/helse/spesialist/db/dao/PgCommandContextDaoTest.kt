@@ -5,18 +5,27 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Melding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.TestMelding
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
-    private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
-    private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
-    private lateinit var HENDELSE1: TestMelding
-    private lateinit var HENDELSE2: TestMelding
+    private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
+    private val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+    private val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+
+    private val testhendelse1 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = vedtaksperiode1.id.value, fødselsnummer = person.id.value)
+    private val testhendelse2 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = vedtaksperiode2.id.value, fødselsnummer = person.id.value)
+
+    init {
+        opprettBehandling(vedtaksperiode1)
+        opprettBehandling(vedtaksperiode2)
+        vedtakDao.opprettKobling(vedtaksperiode1.id.value, testhendelse1.id)
+        vedtakDao.opprettKobling(vedtaksperiode2.id.value, testhendelse2.id)
+    }
 
     @Test
     fun `lagrer context i db`() {
@@ -41,7 +50,7 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `avbryter ikke seg selv`() {
         val contextId = ny()
-        avbryt(contextId)
+        avbryt(contextId, vedtaksperiode1)
         assertTilstand(contextId, "NY")
     }
 
@@ -51,7 +60,7 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
         val contextId2 = ferdig()
         val contextId3 = feil()
         val contextId4 = ny()
-        avbryt(contextId1)
+        avbryt(contextId1, vedtaksperiode1)
         assertTilstand(contextId2, "NY", "FERDIG")
         assertTilstand(contextId3, "NY", "FEIL")
         assertTilstand(contextId4, "NY", "AVBRUTT")
@@ -59,20 +68,20 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `avbryter bare for riktig vedtaksperiode`() {
-        val contextId1 = ny(HENDELSE1)
-        val contextId2 = ny(HENDELSE2)
-        avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId())
+        val contextId1 = ny(testhendelse1)
+        val contextId2 = ny(testhendelse2)
+        avbryt(UUID.randomUUID(), vedtaksperiode1)
         assertTilstand(contextId1, "NY", "AVBRUTT")
         assertTilstand(contextId2, "NY")
     }
 
     @Test
     fun `returnerer commandContextId og meldingId`() {
-        val contextId1 = ny(HENDELSE1)
-        val contextId2 = ny(HENDELSE2)
-        val avbruttKommandokjede = avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId())
+        val contextId1 = ny(testhendelse1)
+        val contextId2 = ny(testhendelse2)
+        val avbruttKommandokjede = avbryt(UUID.randomUUID(), vedtaksperiode1)
         assertEquals(contextId1, avbruttKommandokjede.first().first)
-        assertEquals(HENDELSE1.id, avbruttKommandokjede.first().second)
+        assertEquals(testhendelse1.id, avbruttKommandokjede.first().second)
         assertTilstand(contextId2, "NY")
     }
 
@@ -83,30 +92,30 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
         assertContextRad(false, contextId)
     }
 
-    private fun ny(melding: Melding = HENDELSE1) =
+    private fun ny(melding: Melding = testhendelse1) =
         UUID.randomUUID().also { uuid ->
             CommandContext(uuid).opprett(commandContextDao, melding.id)
         }
 
-    private fun ferdig(melding: Melding = HENDELSE1) =
+    private fun ferdig(melding: Melding = testhendelse1) =
         ny(melding).also { uuid ->
             commandContextDao.ferdig(melding.id, uuid)
         }
 
-    private fun suspendert(melding: Melding = HENDELSE1) =
+    private fun suspendert(melding: Melding = testhendelse1) =
         ny(melding).also { uuid ->
             commandContextDao.suspendert(melding.id, uuid, UUID.randomUUID(), listOf())
         }
 
-    private fun feil(melding: Melding = HENDELSE1) =
+    private fun feil(melding: Melding = testhendelse1) =
         ny(melding).also { uuid ->
             commandContextDao.feil(melding.id, uuid)
         }
 
     private fun avbryt(
         contextId: UUID,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1,
-    ): List<Pair<UUID, UUID>> = commandContextDao.avbryt(vedtaksperiodeId, contextId)
+        vedtaksperiode: Vedtaksperiode,
+    ): List<Pair<UUID, UUID>> = commandContextDao.avbryt(vedtaksperiode.id.value, contextId)
 
     private fun assertTilstand(
         contextId: UUID,
@@ -139,17 +148,5 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
                 )!!
             }
         assertEquals(finnes, count > 0)
-    }
-
-    @BeforeEach
-    internal fun setup() {
-        val person = opprettPerson()
-        HENDELSE1 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID1, fødselsnummer = person.id.value)
-        HENDELSE2 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID2, fødselsnummer = person.id.value)
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID1, fødselsnummer = person.id.value)
-        opprettVedtaksperiode(vedtaksperiodeId = VEDTAKSPERIODE_ID2, fødselsnummer = person.id.value)
-        vedtakDao.opprettKobling(VEDTAKSPERIODE_ID1, HENDELSE1.id)
-        vedtakDao.opprettKobling(VEDTAKSPERIODE_ID2, HENDELSE2.id)
     }
 }

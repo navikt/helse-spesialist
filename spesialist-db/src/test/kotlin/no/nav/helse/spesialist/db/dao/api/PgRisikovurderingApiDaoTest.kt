@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -12,11 +11,13 @@ import java.util.UUID
 
 internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
+    private val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver).also { opprettBehandling(it) }
 
     @Test
     fun `finner risikovurdering`() {
-        risikovurdering(riskrespons, person.id)
-        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[PERIODE.id])
+        risikovurdering(riskrespons)
+        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[vedtaksperiode.id.value])
         assertEquals(1, risikovurdering.funn.size)
         assertEquals(1, risikovurdering.kontrollertOk.size)
         assertEquals("En beskrivelse", risikovurdering.funn.first()["beskrivelse"].asText())
@@ -39,8 +40,8 @@ internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
                 }]
             }
         """
-        risikovurdering(data, person.id)
-        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[PERIODE.id])
+        risikovurdering(data)
+        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[vedtaksperiode.id.value])
         risikovurdering.also { dto ->
             assertEquals(
                 listOf("Eierandel i selskap (0 prosent)"),
@@ -55,22 +56,16 @@ internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `leser manglende risikovurdering`() {
-        assertNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[PERIODE.id])
+        assertNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[vedtaksperiode.id.value])
     }
 
-    private fun risikovurdering(
-        data: String,
-        identitetsnummer: Identitetsnummer,
-    ) {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = identitetsnummer.value)
-
+    private fun risikovurdering(data: String) {
         dbQuery.update(
             """
             INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, data)
             VALUES (:vedtaksperiodeId, true, :data::json)
             """.trimIndent(),
-            "vedtaksperiodeId" to PERIODE.id,
+            "vedtaksperiodeId" to vedtaksperiode.id.value,
             "data" to data,
         )
     }

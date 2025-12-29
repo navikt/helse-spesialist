@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import java.util.UUID
 import kotlin.test.Test
@@ -14,21 +13,15 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
+    private val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+    private val behandling = opprettBehandling(vedtaksperiode)
+    private val spleisBehandlingId = behandling.spleisBehandlingId!!
     private val repository = sessionContext.vedtakBegrunnelseRepository
 
     @Test
     fun `lagre og finn vedtaksbegrunnelse`() {
-        // given
-        val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = opprettPerson().id.value
-        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
-        opprettArbeidsgiver()
-        opprettBehandling(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            spleisBehandlingId = spleisBehandlingId.value,
-        )
-
         // when
         val tekst = "Lorem ipsum dolor sit amet"
         val saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
@@ -54,17 +47,6 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `henter ikke vedtakbegrunnelse som er invalidert`() {
-        // given
-        val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = opprettPerson().id.value
-        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
-        opprettArbeidsgiver()
-        opprettBehandling(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            spleisBehandlingId = spleisBehandlingId.value,
-        )
-
         // when
         repository.lagre(
             VedtakBegrunnelse.ny(

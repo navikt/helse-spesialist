@@ -1,11 +1,10 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import org.junit.jupiter.api.Test
-import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class PgVedtaksperiodeRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.vedtaksperiodeRepository
@@ -13,20 +12,39 @@ class PgVedtaksperiodeRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `finn vedtaksperiode`() {
         // given
-        val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = opprettPerson().id.value
-        opprettArbeidsgiver()
-        opprettBehandling(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-        )
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode =
+            opprettVedtaksperiode(person, arbeidsgiver).also {
+                opprettBehandling(it)
+            }
 
         // when
-        val funnet = repository.finn(VedtaksperiodeId(vedtaksperiodeId))
+        val funnet = repository.finn(vedtaksperiode.id)
 
         // then
         assertNotNull(funnet)
-        assertEquals(vedtaksperiodeId, funnet.id.value)
-        assertEquals(fødselsnummer, funnet.fødselsnummer)
+        assertEquals(vedtaksperiode.id, funnet.id)
+        assertEquals(person.id.value, funnet.fødselsnummer)
+    }
+
+    @Test
+    fun `lagre forkastet vedtaksperiode`() {
+        // given
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode =
+            opprettVedtaksperiode(person, arbeidsgiver, forkastet = true).also {
+                opprettBehandling(it)
+            }
+
+        // when
+        val funnet = repository.finn(vedtaksperiode.id)
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(vedtaksperiode.id, funnet.id)
+        assertEquals(person.id.value, funnet.fødselsnummer)
+        assertTrue(funnet.forkastet)
     }
 }

@@ -3,8 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.Person
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,22 +14,23 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
+    private val person = opprettPerson()
+    private val saksbehandler = opprettSaksbehandler()
+
     @Test
     fun `reserverer person`() {
-        opprettData()
         val saksbehandler =
             sessionOf(dataSource).use {
-                reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
-                reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
+                reservasjonDao.reserverPerson(saksbehandler.id.value, person.id.value)
+                reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil
                     ?: fail("Forventet at det skulle finnes en reservasjon i basen")
             }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandler.id.value)
-        assertRiktigVarighet(finnGyldigTil())
+        assertEquals(saksbehandler.id.value, saksbehandler.id.value)
+        assertRiktigVarighet(finnGyldigTil(person))
     }
 
     @Test
     fun `ny reservasjon forlenger ikke fristen`() {
-        opprettData()
         val enAnnenSaksbehandler = UUID.randomUUID()
         saksbehandlerDao.opprettEllerOppdater(
             enAnnenSaksbehandler,
@@ -41,33 +41,23 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
 
         val saksbehandler =
             sessionOf(dataSource).use {
-                reservasjonDao.reserverPerson(enAnnenSaksbehandler, FNR)
-                val gyldigTil1 = finnGyldigTil()
-                reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
-                val gyldigTil2 = finnGyldigTil()
+                reservasjonDao.reserverPerson(enAnnenSaksbehandler, person.id.value)
+                val gyldigTil1 = finnGyldigTil(person)
+                reservasjonDao.reserverPerson(saksbehandler.id.value, person.id.value)
+                val gyldigTil2 = finnGyldigTil(person)
                 assertTrue(gyldigTil2.isEqual(gyldigTil1))
-                reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
+                reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil
                     ?: fail("Forventet at det skulle finnes en reservasjon i basen")
             }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandler.id.value)
-        assertRiktigVarighet(finnGyldigTil())
-    }
-
-    private fun opprettData(fødselsnummer: String = FNR) {
-        opprettPerson(person = lagPerson(id = Identitetsnummer.fraString(fødselsnummer)))
-        saksbehandlerDao.opprettEllerOppdater(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT.value,
-        )
+        assertEquals(saksbehandler.id.value, saksbehandler.id.value)
+        assertRiktigVarighet(finnGyldigTil(person))
     }
 
     private fun assertRiktigVarighet(gyldigTil: LocalDateTime) {
         assertEquals(LocalDate.now().atTime(23, 59, 59), gyldigTil)
     }
 
-    private fun finnGyldigTil(): LocalDateTime {
+    private fun finnGyldigTil(person: Person): LocalDateTime {
         @Language("PostgreSQL")
         val query = """
             SELECT r.gyldig_til
@@ -77,7 +67,7 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
             """
         return sessionOf(dataSource).use { session ->
             session.run(
-                queryOf(query, mapOf("fnr" to FNR))
+                queryOf(query, mapOf("fnr" to person.id.value))
                     .map { it.localDateTime("gyldig_til") }
                     .asSingle,
             )

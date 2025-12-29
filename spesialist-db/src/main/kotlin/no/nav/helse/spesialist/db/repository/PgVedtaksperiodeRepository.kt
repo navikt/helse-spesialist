@@ -16,7 +16,7 @@ class PgVedtaksperiodeRepository private constructor(
         dbQuery.update(
             """
                  INSERT INTO vedtaksperiode(vedtaksperiode_id, person_ref, forkastet, arbeidsgiver_identifikator)
-                 VALUES (:vedtaksperiodeId, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), false, :organisasjonsnummer)
+                 VALUES (:vedtaksperiodeId, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet, :organisasjonsnummer)
                  ON CONFLICT(vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
             """,
             "vedtaksperiodeId" to vedtaksperiode.id.value,

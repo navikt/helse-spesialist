@@ -11,6 +11,7 @@ import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -21,6 +22,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
+    private val fødselsnummer = lagFødselsnummer()
     private val avviksvurderingRepository = DBSessionContext(session).avviksvurderingRepository
 
     @Test
@@ -30,7 +32,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 unikId = avviksvurderingId,
             ),
         )
@@ -46,7 +48,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val opprettet = LocalDateTime.now().withNano(0)
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
                 opprettet = opprettet,
@@ -54,11 +56,11 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         )
         avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId)
 
-        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(FNR)
+        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer)
         val forventetAvviksvurdering =
             forventetAvviksvurdering(
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
                 opprettet = opprettet,
@@ -75,7 +77,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val opprettet = LocalDateTime.now()
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
                 opprettet = opprettet,
@@ -85,7 +87,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
                 opprettet = opprettet,
@@ -93,7 +95,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         )
         avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId2)
 
-        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(FNR)
+        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer)
 
         assertEquals(2, avviksvurderinger.size)
         assertAntallKoblinger(unikId, 2)
@@ -108,7 +110,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val opprettet = LocalDateTime.now()
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
                 opprettet = opprettet,
@@ -118,7 +120,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
                 opprettet = opprettet,
@@ -126,7 +128,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         )
         avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId)
 
-        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(FNR)
+        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer)
 
         assertEquals(1, avviksvurderinger.size)
         assertAntallKoblinger(unikId, 1)
@@ -143,7 +145,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val opprettet = LocalDateTime.now()
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId1,
                 opprettet = opprettet,
@@ -153,7 +155,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId2,
                 opprettet = opprettet,
@@ -161,7 +163,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         )
         avviksvurderingRepository.opprettKobling(unikId2, vilkårsgrunnlagId2)
 
-        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(FNR)
+        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer)
 
         assertEquals(2, avviksvurderinger.size)
         assertAntallKoblinger(unikId1, 1)
@@ -178,7 +180,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val opprettet = LocalDateTime.now()
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
@@ -186,7 +188,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
             ),
         )
 
-        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(FNR)
+        val avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer)
 
         assertEquals(1, avviksvurderinger.size)
         assertAntallKoblinger(unikId, 1)
@@ -200,7 +202,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val opprettet = LocalDateTime.now()
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 vilkårsgrunnlagId = null,
                 skjæringstidspunkt = skjæringstidspunkt,
                 unikId = unikId,
@@ -216,7 +218,7 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val unikId = UUID.randomUUID()
         avviksvurderingRepository.lagre(
             avviksvurdering(
-                fødselsnummer = FNR,
+                fødselsnummer = fødselsnummer,
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 skjæringstidspunkt = 1 jan 2018,
                 unikId = unikId,
@@ -224,10 +226,10 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
             ),
         )
 
-        val antallAvviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(FNR).size
+        val antallAvviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer).size
         assertEquals(1, antallAvviksvurderinger)
         slettAvviksvurdering(unikId)
-        val antallAvviksvurderingerEtterSletting = avviksvurderingRepository.finnAvviksvurderinger(FNR).size
+        val antallAvviksvurderingerEtterSletting = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer).size
         assertEquals(0, antallAvviksvurderingerEtterSletting)
     }
 
@@ -273,8 +275,8 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         unikId: UUID,
         vilkårsgrunnlagId: UUID,
         opprettet: LocalDateTime,
-    ): Avviksvurdering {
-        return Avviksvurdering(
+    ): Avviksvurdering =
+        Avviksvurdering(
             unikId = unikId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
@@ -284,7 +286,6 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
             sammenligningsgrunnlag = sammenligningsgrunnlag(),
             beregningsgrunnlag = beregningsggrunnlag(),
         )
-    }
 
     private fun avviksvurdering(
         fødselsnummer: String = "12345678910",

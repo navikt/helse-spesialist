@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -33,17 +32,23 @@ import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.UtbetalingId
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
@@ -62,28 +67,14 @@ import kotlin.random.Random.Default.nextLong
 
 abstract class AbstractDBIntegrationTest {
     private val testperson = TestPerson()
-    protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
-    protected val VEDTAKSPERIODE: UUID = testperson.vedtaksperiodeId1
     protected val ARBEIDSFORHOLD =
         ArbeidsforholdForTest(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
-    protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected val ORGNUMMER =
         with(testperson) {
             1.arbeidsgiver.organisasjonsnummer
         }
-    protected val ORGNAVN =
-        with(testperson) {
-            1.arbeidsgiver.organisasjonsnavn
-        }
-
-    protected val FNR = testperson.fødselsnummer
-    protected val AKTØR = testperson.aktørId
-
-    private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
-    private val TOM: LocalDate = LocalDate.of(2018, 1, 31)
-    protected val PERIODE = Periode(VEDTAKSPERIODE, FOM, TOM)
 
     protected val SAKSBEHANDLER = lagSaksbehandler()
     protected val SAKSBEHANDLER_OID: UUID = SAKSBEHANDLER.id.value
@@ -130,15 +121,14 @@ abstract class AbstractDBIntegrationTest {
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val dialogDao = daos.dialogDao
     internal val annulleringRepository = daos.annulleringRepository
-    private val pgLegacyPersonRepository = sessionContext.legacyPersonRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
     internal val stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao
 
     internal fun testhendelse(
-        hendelseId: UUID = HENDELSE_ID,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        fødselsnummer: String = FNR,
+        hendelseId: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
         type: String = "GODKJENNING",
         json: String = "{}",
     ) = TestMelding(hendelseId, vedtaksperiodeId, fødselsnummer).also {
@@ -146,8 +136,8 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun godkjenningsbehov(
-        hendelseId: UUID = HENDELSE_ID,
-        fødselsnummer: String = FNR,
+        hendelseId: UUID,
+        fødselsnummer: String,
         json: String = "{}",
     ) {
         lagreHendelse(hendelseId, fødselsnummer, "GODKJENNING", json)
@@ -155,7 +145,7 @@ abstract class AbstractDBIntegrationTest {
 
     private fun lagreHendelse(
         hendelseId: UUID,
-        fødselsnummer: String = FNR,
+        fødselsnummer: String,
         type: String,
         json: String = """{"fødselsnummer": "$fødselsnummer"}""",
     ) {
@@ -167,47 +157,21 @@ abstract class AbstractDBIntegrationTest {
         )
     }
 
-    protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
+    protected fun nyttAutomatiseringsinnslag(
+        automatisert: Boolean,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        hendelseId: UUID,
+    ) {
         if (automatisert) {
-            automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+            automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
         } else {
-            automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+            automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), vedtaksperiodeId, hendelseId, utbetalingId)
         }
     }
 
-    protected fun nyPerson(
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
-        fødselsnummer: String = FNR,
-        aktørId: String = AKTØR,
-        organisasjonsnummer: String = ORGNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        utbetalingId: UUID = UTBETALING_ID,
-        godkjenningsbehovId: UUID = UUID.randomUUID(),
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        oppgaveEgenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
-    ) {
-        opprettPerson(person = lagPerson(id = Identitetsnummer.fraString(fødselsnummer), aktørId = aktørId))
-        opprettArbeidsgiver(identifikator = organisasjonsnummer)
-        opprettVedtaksperiode(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = periodetype,
-            inntektskilde = inntektskilde,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-        )
-        opprettOppgave(
-            vedtaksperiodeId = vedtaksperiodeId,
-            egenskaper = oppgaveEgenskaper,
-            godkjenningsbehovId = godkjenningsbehovId,
-            behandlingId = spleisBehandlingId,
-        )
-    }
-
     private fun opprettVedtakstype(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        vedtaksperiodeId: UUID,
         type: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
     ) {
@@ -231,18 +195,17 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun opprettArbeidsgiver(
         identifikator: String = ORGNUMMER,
-        navn: String = ORGNAVN,
-    ) {
+        navn: String = lagOrganisasjonsnavn(),
+    ): Arbeidsgiver =
         Arbeidsgiver.Factory
             .ny(
                 id = ArbeidsgiverIdentifikator.fraString(identifikator),
                 navnString = navn,
             ).also(sessionContext.arbeidsgiverRepository::lagre)
-    }
 
     protected fun opprettArbeidsforhold(
-        fødselsnummer: String = FNR,
-        orgnummer: String = ORGNUMMER,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
     ) {
         val arbeidsforholdDto =
             KomplettArbeidsforholdDto(
@@ -252,83 +215,78 @@ abstract class AbstractDBIntegrationTest {
                 ARBEIDSFORHOLD.prosent,
                 LocalDateTime.now(),
                 fødselsnummer,
-                orgnummer,
+                organisasjonsnummer,
             )
-        arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer, orgnummer, listOf(arbeidsforholdDto))
-    }
-
-    protected fun opprettBehandling(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1 jan 2018,
-        tom: LocalDate = 31 jan 2018,
-        tags: List<String>? = emptyList(),
-        fødselsnummer: String = FNR,
-    ) {
-        val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
-        sessionContext.vedtaksperiodeRepository.lagre(
-            Vedtaksperiode.ny(vedtaksperiodeId, Identitetsnummer.fraString(fødselsnummer), ORGNUMMER),
-        )
-        sessionContext.behandlingRepository.lagre(
-            Behandling.ny(
-                SpleisBehandlingId(spleisBehandlingId),
-                vedtaksperiodeId,
-                fom = fom,
-                tom = tom,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            ),
-        )
-        pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            nyUtbetalingForVedtaksperiode(vedtaksperiodeId.value, utbetalingId)
-            if (tags != null) {
-                this.oppdaterPeriodeTilGodkjenning(vedtaksperiodeId.value, tags, spleisBehandlingId, utbetalingId)
-            }
-        }
-    }
-
-    // For å få satt riktig skjæringstidspunkt på behandlinger
-    // Burde kanskje erstattes med bruk av DAO-er
-    protected fun oppdaterBehandlingdata(
-        vararg perioder: SpleisVedtaksperiode,
-        fødselsnummer: String = FNR,
-    ) {
-        pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            mottaSpleisVedtaksperioder(perioder.toList())
-        }
+        arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer, organisasjonsnummer, listOf(arbeidsforholdDto))
     }
 
     protected fun opprettVedtaksperiode(
-        fødselsnummer: String = FNR,
-        organisasjonsnummer: String = ORGNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        fom: LocalDate = FOM,
-        tom: LocalDate = TOM,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
-        utbetalingId: UUID? = UTBETALING_ID,
         forkastet: Boolean = false,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
+    ): Vedtaksperiode {
+        val organisasjonsnummer =
+            when (val id = arbeidsgiver.id) {
+                is ArbeidsgiverIdentifikator.Fødselsnummer -> id.fødselsnummer
+                is ArbeidsgiverIdentifikator.Organisasjonsnummer -> id.organisasjonsnummer
+            }
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val vedtaksperiode =
+            Vedtaksperiode(vedtaksperiodeId, person.id.value, organisasjonsnummer, forkastet)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        opprettVedtakstype(vedtaksperiodeId.value, periodetype, inntektskilde)
+        return vedtaksperiode
+    }
+
+    protected fun opprettSaksbehandler(): Saksbehandler {
+        val saksbehandler = lagSaksbehandler()
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        return saksbehandler
+    }
+
+    protected fun opprettBehandling(
+        vedtaksperiode: Vedtaksperiode,
+        tags: List<String> = emptyList(),
+        fom: LocalDate = LocalDate.now().minusDays(30),
+        tom: LocalDate = LocalDate.now(),
+        skjæringstidspunkt: LocalDate = fom,
+        utbetalingId: UtbetalingId? = UtbetalingId(UUID.randomUUID()),
+        spleisBehandlingId: SpleisBehandlingId? = SpleisBehandlingId(UUID.randomUUID()),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-    ) {
-        val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
-        sessionContext.vedtaksperiodeRepository.lagre(
-            Vedtaksperiode.ny(vedtaksperiodeId, Identitetsnummer.fraString(fødselsnummer), organisasjonsnummer),
-        )
-        sessionContext.behandlingRepository.lagre(
-            Behandling.ny(
-                SpleisBehandlingId(spleisBehandlingId),
-                vedtaksperiodeId,
+    ): Behandling {
+        val behandling =
+            Behandling.fraLagring(
+                id = BehandlingUnikId(UUID.randomUUID()),
+                spleisBehandlingId = spleisBehandlingId,
+                vedtaksperiodeId = vedtaksperiode.id,
                 fom = fom,
                 tom = tom,
                 yrkesaktivitetstype = yrkesaktivitetstype,
-            ),
-        )
-        pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId.value, utbetalingId)
-            if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId.value)
-        }
-        opprettVedtakstype(vedtaksperiodeId.value, periodetype, inntektskilde)
+                utbetalingId = utbetalingId,
+                tags = tags.toSet(),
+                tilstand = Behandling.Tilstand.VidereBehandlingAvklares,
+                skjæringstidspunkt = skjæringstidspunkt,
+            )
+        sessionContext.behandlingRepository.lagre(behandling)
+        return behandling
+    }
+
+    protected fun opprettVarsel(
+        behandling: Behandling,
+        kode: String,
+    ): Varsel {
+        val varsel =
+            Varsel.nytt(
+                id = VarselId(UUID.randomUUID()),
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                kode = kode,
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+        sessionContext.varselRepository.lagre(varsel)
+        return varsel
     }
 
     protected fun opprettVarseldefinisjon(
@@ -347,40 +305,12 @@ abstract class AbstractDBIntegrationTest {
             "opprettet" to LocalDateTime.now(),
         ).let(::checkNotNull)
 
-    fun nyttVarsel(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        opprettet: LocalDateTime? = LocalDateTime.now(),
-        kode: String = "EN_KODE",
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        definisjonRef: Long? = null,
-        status: String = "AKTIV",
-        saksbehandlerSomEndretId: NAVIdent? = null,
-        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
-    ) = dbQuery.update(
-        """
-        insert into selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-        select :id, :kode, :vedtaksperiodeId, id, :definisjonRef, :opprettet, :status, :ident, :endretTidspunkt
-        from behandling
-        where spleis_behandling_id = :spleisBehandlingId
-        """.trimIndent(),
-        "id" to id,
-        "kode" to kode,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "spleisBehandlingId" to spleisBehandlingId,
-        "definisjonRef" to definisjonRef,
-        "opprettet" to opprettet,
-        "status" to status,
-        "ident" to saksbehandlerSomEndretId?.value,
-        "endretTidspunkt" to endretTidspunkt,
-    )
-
     protected fun opprettOppgave(
         førsteOpprettet: LocalDateTime? = null,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        vedtaksperiodeId: UUID,
         egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
-        utbetalingId: UUID = UTBETALING_ID,
+        utbetalingId: UUID,
         behandlingId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
     ): Oppgave {
@@ -399,7 +329,28 @@ abstract class AbstractDBIntegrationTest {
         return oppgave
     }
 
-    fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
+    protected fun opprettOppgave(
+        vedtaksperiode: Vedtaksperiode,
+        behandling: Behandling,
+        førsteOpprettet: LocalDateTime? = null,
+        egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
+        kanAvvises: Boolean = true,
+        godkjenningsbehovId: UUID = UUID.randomUUID(),
+    ): Oppgave {
+        val oppgave =
+            Oppgave.ny(
+                id = nextLong(),
+                førsteOpprettet = førsteOpprettet,
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                behandlingId = behandling.spleisBehandlingId!!.value,
+                utbetalingId = behandling.utbetalingId!!.value,
+                hendelseId = godkjenningsbehovId,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper,
+            )
+        sessionContext.oppgaveRepository.lagre(oppgave)
+        return oppgave
+    }
 
     private fun opprettUtbetalingKobling(
         vedtaksperiodeId: UUID,
@@ -412,13 +363,13 @@ abstract class AbstractDBIntegrationTest {
         beløpTilArbeidsgiver: Int,
         beløpTilSykmeldt: Int,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        utbetalingId: UUID = UTBETALING_ID,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        fødselsnummer: String = FNR,
-        organisasjonsnummer: String = ORGNUMMER,
+        utbetalingId: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
     ) {
         val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
-        val personOppdragId = lagPersonoppdrag(fagsystemId())
+        val personOppdragId = lagPersonoppdrag(fagsystemId(), fødselsnummer)
         val utbetaling_idId =
             lagUtbetalingId(
                 fødselsnummer = fødselsnummer,
@@ -439,7 +390,10 @@ abstract class AbstractDBIntegrationTest {
         mottaker: String = ORGNUMMER,
     ) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
 
-    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) = utbetalingDao.nyttOppdrag(fagsystemId, FNR)!!
+    protected fun lagPersonoppdrag(
+        fagsystemId: String = fagsystemId(),
+        fødselsnummer: String,
+    ) = utbetalingDao.nyttOppdrag(fagsystemId, fødselsnummer)!!
 
     protected fun lagUtbetalingId(
         arbeidsgiverOppdragId: Long,
@@ -448,7 +402,7 @@ abstract class AbstractDBIntegrationTest {
         arbeidsgiverbeløp: Int = 2000,
         personbeløp: Int = 2000,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        fødselsnummer: String = FNR,
+        fødselsnummer: String,
         organisasjonsnummer: String = ORGNUMMER,
     ): Long =
         utbetalingDao.opprettUtbetalingId(
@@ -481,8 +435,6 @@ abstract class AbstractDBIntegrationTest {
         adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        behandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
         fornavn: String = lagFornavn(),
@@ -490,44 +442,39 @@ abstract class AbstractDBIntegrationTest {
         etternavn: String = lagEtternavn(),
         oppgaveegenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ): Oppgave {
-        opprettPerson(
-            person =
-                lagPerson(
-                    id = Identitetsnummer.fraString(fødselsnummer),
-                    aktørId = aktørId,
-                    adressebeskyttelse = adressebeskyttelse,
-                    info =
-                        Personinfo(
-                            fornavn = fornavn,
-                            mellomnavn = mellomnavn,
-                            etternavn = etternavn,
-                            fødselsdato = lagFødselsdato(),
-                            kjønn = Personinfo.Kjønn.Ukjent,
-                            adressebeskyttelse = adressebeskyttelse,
-                        ),
-                ),
-        )
-        opprettArbeidsgiver(identifikator = organisasjonsnummer)
-        opprettVedtaksperiode(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            yrkesaktivitetstype = yrkesaktivitetstype,
-        )
+        val person =
+            opprettPerson(
+                person =
+                    lagPerson(
+                        id = Identitetsnummer.fraString(fødselsnummer),
+                        aktørId = aktørId,
+                        adressebeskyttelse = adressebeskyttelse,
+                        info =
+                            Personinfo(
+                                fornavn = fornavn,
+                                mellomnavn = mellomnavn,
+                                etternavn = etternavn,
+                                fødselsdato = lagFødselsdato(),
+                                kjønn = Personinfo.Kjønn.Ukjent,
+                                adressebeskyttelse = adressebeskyttelse,
+                            ),
+                    ),
+            )
+        val arbeidsgiver = opprettArbeidsgiver(identifikator = organisasjonsnummer)
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode, yrkesaktivitetstype = yrkesaktivitetstype, utbetalingId = UtbetalingId(utbetalingId))
         utbetalingsopplegg(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiode.id.value,
             utbetalingId = utbetalingId,
             beløpTilSykmeldt = 1000,
             beløpTilArbeidsgiver = 1000,
         )
         return opprettOppgave(
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiode.id.value,
             utbetalingId = utbetalingId,
-            behandlingId = behandlingId,
+            behandlingId = behandling.spleisBehandlingId!!.value,
             godkjenningsbehovId = godkjenningsbehovId,
             egenskaper = oppgaveegenskaper,
         )
@@ -602,8 +549,8 @@ abstract class AbstractDBIntegrationTest {
         return this
     }
 
-    protected fun opprettTotrinnsvurdering(fødselsnummer: String = FNR): TotrinnsvurderingId {
-        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+    protected fun opprettTotrinnsvurdering(person: Person): TotrinnsvurderingId {
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return totrinnsvurdering.id()
     }
@@ -648,12 +595,6 @@ abstract class AbstractDBIntegrationTest {
         )
         return saksbehandler
     }
-
-    protected data class Periode(
-        val id: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
 
     protected data class ArbeidsforholdForTest(
         val start: LocalDate,

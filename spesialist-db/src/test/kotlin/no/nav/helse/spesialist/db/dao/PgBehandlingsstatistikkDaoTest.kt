@@ -8,6 +8,11 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
+import java.util.UUID
 
 @Isolated
 internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
@@ -144,29 +150,70 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
     ) {
         val person = opprettPerson()
-        godkjenningsbehov(fødselsnummer = person.id.value)
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde, fødselsnummer = person.id.value)
-        nyttAutomatiseringsinnslag(true)
+        val hendelseId = UUID.randomUUID()
+        godkjenningsbehov(fødselsnummer = person.id.value, hendelseId = hendelseId)
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver, periodetype = periodetype, inntektskilde = inntektskilde)
+        val behandling = opprettBehandling(vedtaksperiode)
+        nyttAutomatiseringsinnslag(true, vedtaksperiodeId = vedtaksperiode.id.value, utbetalingId = behandling.utbetalingId!!.value, hendelseId = hendelseId)
         when (mottakertype) {
-            Mottakertype.ARBEIDSGIVER -> utbetalingTilArbeidsgiver(utbetalingtype, fødselsnummer = person.id.value)
-            Mottakertype.SYKMELDT -> utbetalingTilPerson(utbetalingtype, fødselsnummer = person.id.value)
-            Mottakertype.BEGGE -> utbetalingTilBegge(utbetalingtype, fødselsnummer = person.id.value)
+            Mottakertype.ARBEIDSGIVER -> utbetalingTilArbeidsgiver(utbetalingtype, person, arbeidsgiver, vedtaksperiode, behandling)
+            Mottakertype.SYKMELDT -> utbetalingTilPerson(utbetalingtype, person, arbeidsgiver, vedtaksperiode, behandling)
+            Mottakertype.BEGGE -> utbetalingTilBegge(utbetalingtype, person, arbeidsgiver, vedtaksperiode, behandling)
         }
     }
 
     private fun utbetalingTilArbeidsgiver(
         utbetalingtype: Utbetalingtype,
-        fødselsnummer: String,
-    ) = utbetalingsopplegg(fødselsnummer = fødselsnummer, beløpTilArbeidsgiver = 4000, beløpTilSykmeldt = 0, utbetalingtype = utbetalingtype)
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode,
+        behandling: Behandling,
+    ) = utbetalingsopplegg(
+        fødselsnummer = person.id.value,
+        beløpTilArbeidsgiver = 4000,
+        beløpTilSykmeldt = 0,
+        utbetalingtype = utbetalingtype,
+        utbetalingId = behandling.utbetalingId!!.value,
+        vedtaksperiodeId = vedtaksperiode.id.value,
+        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+    )
 
     private fun utbetalingTilPerson(
         utbetalingtype: Utbetalingtype,
-        fødselsnummer: String,
-    ) = utbetalingsopplegg(fødselsnummer = fødselsnummer, beløpTilArbeidsgiver = 0, beløpTilSykmeldt = 4000, utbetalingtype = utbetalingtype)
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode,
+        behandling: Behandling,
+    ) = utbetalingsopplegg(
+        fødselsnummer = person.id.value,
+        beløpTilArbeidsgiver = 0,
+        beløpTilSykmeldt = 4000,
+        utbetalingtype = utbetalingtype,
+        utbetalingId = behandling.utbetalingId!!.value,
+        vedtaksperiodeId = vedtaksperiode.id.value,
+        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+    )
 
     private fun utbetalingTilBegge(
         utbetalingtype: Utbetalingtype,
-        fødselsnummer: String,
-    ) = utbetalingsopplegg(fødselsnummer = fødselsnummer, beløpTilArbeidsgiver = 2000, beløpTilSykmeldt = 2000, utbetalingtype = utbetalingtype)
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode,
+        behandling: Behandling,
+    ) = utbetalingsopplegg(
+        fødselsnummer = person.id.value,
+        beløpTilArbeidsgiver = 2000,
+        beløpTilSykmeldt = 2000,
+        utbetalingtype = utbetalingtype,
+        utbetalingId = behandling.utbetalingId!!.value,
+        vedtaksperiodeId = vedtaksperiode.id.value,
+        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+    )
+
+    private val Arbeidsgiver.organisasjonsnummer get() =
+        when (val id = this.id) {
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> id.fødselsnummer
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> id.organisasjonsnummer
+        }
 }

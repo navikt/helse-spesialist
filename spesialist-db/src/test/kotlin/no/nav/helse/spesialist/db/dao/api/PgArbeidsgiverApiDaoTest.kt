@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -9,18 +10,28 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
-    private val person = opprettPerson()
+    private val arbeidsgiver = opprettArbeidsgiver()
+    private val person =
+        opprettPerson().also { person ->
+            opprettVedtaksperiode(person, arbeidsgiver).also { vedtaksperiode ->
+                opprettBehandling(vedtaksperiode)
+            }
+        }
+
+    private val organisasjonsnummer =
+        when (val id = arbeidsgiver.id) {
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> id.fødselsnummer
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> id.organisasjonsnummer
+        }
 
     @Test
     fun `finner arbeidsforhold`() {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
-        opprettArbeidsforhold(fødselsnummer = person.id.value)
+        opprettArbeidsforhold(fødselsnummer = person.id.value, organisasjonsnummer)
 
         val arbeidsforhold =
             arbeidsgiverApiDao.finnArbeidsforhold(
                 fødselsnummer = person.id.value,
-                arbeidsgiverIdentifikator = ORGNUMMER,
+                arbeidsgiverIdentifikator = organisasjonsnummer,
             )
 
         assertEquals(1, arbeidsforhold.size)
@@ -32,8 +43,6 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Finn inntekter fra aordningen for arbeidsgiveren i 3 foregående måneder for alle skjæringstidspunkt`() {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
         opprettInntekt(
             skjæringstidspunkt = LocalDate.parse("2020-01-01"),
             inntekter =
@@ -42,7 +51,7 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
                         årMåned = YearMonth.of(2019, 12),
                         inntektsliste =
                             listOf(
-                                Inntekter.Inntekt(beløp = 19000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 19000.0, orgnummer = organisasjonsnummer),
                                 Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                             ),
                     ),
@@ -50,7 +59,7 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
                         årMåned = YearMonth.of(2019, 11),
                         inntektsliste =
                             listOf(
-                                Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 21000.0, orgnummer = organisasjonsnummer),
                                 Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                             ),
                     ),
@@ -58,8 +67,8 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
                         årMåned = YearMonth.of(2019, 10),
                         inntektsliste =
                             listOf(
-                                Inntekter.Inntekt(beløp = 21000.0, orgnummer = ORGNUMMER),
-                                Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 21000.0, orgnummer = organisasjonsnummer),
+                                Inntekter.Inntekt(beløp = 2000.0, orgnummer = organisasjonsnummer),
                                 Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                             ),
                     ),
@@ -73,7 +82,7 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
                         årMåned = YearMonth.of(2022, 10),
                         inntektsliste =
                             listOf(
-                                Inntekter.Inntekt(beløp = 20000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 20000.0, orgnummer = organisasjonsnummer),
                                 Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                             ),
                     ),
@@ -81,7 +90,7 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
                         årMåned = YearMonth.of(2022, 9),
                         inntektsliste =
                             listOf(
-                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = organisasjonsnummer),
                                 Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                             ),
                     ),
@@ -89,8 +98,8 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
                         årMåned = YearMonth.of(2022, 8),
                         inntektsliste =
                             listOf(
-                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = ORGNUMMER),
-                                Inntekter.Inntekt(beløp = 2000.0, orgnummer = ORGNUMMER),
+                                Inntekter.Inntekt(beløp = 22000.0, orgnummer = organisasjonsnummer),
+                                Inntekter.Inntekt(beløp = 2000.0, orgnummer = organisasjonsnummer),
                                 Inntekter.Inntekt(beløp = 22000.0, orgnummer = "123456789"),
                             ),
                     ),
@@ -100,7 +109,7 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
         val arbeidsgiverInntekterFraAordningen =
             arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
                 fødselsnummer = person.id.value,
-                orgnummer = ORGNUMMER,
+                orgnummer = organisasjonsnummer,
             )
 
         assertEquals(2, arbeidsgiverInntekterFraAordningen.size)
@@ -151,13 +160,10 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Returnerer tomt array om arbeidsgiver ikke har noen inntekter lagret`() {
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(fødselsnummer = person.id.value)
-
         val inntektFraAordningen =
             arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
                 fødselsnummer = person.id.value,
-                orgnummer = ORGNUMMER,
+                orgnummer = organisasjonsnummer,
             )
 
         assertEquals(0, inntektFraAordningen.size)

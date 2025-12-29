@@ -3,40 +3,22 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
-import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.TestMelding
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.parallel.Execution
-import org.junit.jupiter.api.parallel.ExecutionMode
-import org.junit.jupiter.api.parallel.Isolated
-import java.util.UUID
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@Isolated
-@Execution(ExecutionMode.SAME_THREAD)
 class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
-    private val CONTEXT_ID = UUID.randomUUID()
-    private val TESTHENDELSE = TestMelding(HENDELSE_ID, UUID.randomUUID(), FNR)
     private val legacySaksbehandler = nyLegacySaksbehandler()
-
-    @BeforeTest
-    fun setupDaoTest() {
-        godkjenningsbehov(TESTHENDELSE.id)
-        CommandContext(CONTEXT_ID).opprett(commandContextDao, TESTHENDELSE.id)
-        dbQuery.execute("truncate oppgave restart identity cascade")
-    }
 
     @Test
     fun `Finn neste ledige id`() {
@@ -206,8 +188,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             nyOppgaveForNyPerson()
                 .avventSystemOgLagre(legacySaksbehandler)
                 .ferdigstillOgLagre()
-
-        opprettOppgave(vedtaksperiodeId = oppgave.vedtaksperiodeId)
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId))
     }
