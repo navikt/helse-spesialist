@@ -24,6 +24,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Bygg koden
-        run: ./gradlew build
+        run: ./gradlew build -debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
