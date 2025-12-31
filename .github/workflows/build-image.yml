@@ -31,6 +31,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: read
     name: Build image
     runs-on: ubuntu-latest-16-cores
     outputs:
@@ -52,8 +53,7 @@ jobs:
       - name: Gradle build
         run: ./gradlew ${{ inputs.gradle_command }}
         env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: nais/docker-build-push@v0
         id: docker-build-push
