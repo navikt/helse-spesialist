@@ -36,7 +36,7 @@ jobs:
     build:
         uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
         with:
-            gradle_command: build
+            gradle_command: build -debug
             dockerfile: Dockerfile
             image_suffix: ''
         secrets: inherit
