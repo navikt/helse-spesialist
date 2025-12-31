@@ -41,7 +41,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Gradle build
-        run: ./gradlew :spesialist-bootstrap:build --no-build-cache # alle modulene bygges fordi bootstrap avhenger av dem
+        run: ./gradlew build --no-build-cache
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
