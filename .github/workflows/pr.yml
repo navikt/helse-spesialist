@@ -10,6 +10,8 @@ jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest-16-cores
+    permissions:
+      packages: read
 
     steps:
       - uses: actions/checkout@v6
@@ -24,5 +26,4 @@ jobs:
       - name: Bygg koden
         run: ./gradlew build
         env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

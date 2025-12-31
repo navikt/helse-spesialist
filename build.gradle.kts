@@ -6,14 +6,6 @@ plugins {
 allprojects {
     group = "no.nav.helse"
 
-    repositories {
-        mavenCentral()
-        maven {
-            url = uri("https://maven.pkg.github.com/navikt/*")
-        }
-        maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
-
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
