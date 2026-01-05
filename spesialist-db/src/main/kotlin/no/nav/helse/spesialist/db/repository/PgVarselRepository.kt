@@ -18,6 +18,12 @@ class PgVarselRepository private constructor(
 ) : VarselRepository {
     internal constructor(session: Session) : this(SessionDbQuery(session))
 
+    override fun eksisterer(varselId: VarselId): Boolean =
+        dbQuery.singleOrNull(
+            "SELECT 1 FROM selve_varsel WHERE unik_id = :unik_id LIMIT 1",
+            "unik_id" to varselId.value,
+        ) { true } ?: false
+
     override fun finn(varselId: VarselId): Varsel? =
         dbQuery.singleOrNull(
             """
@@ -97,8 +103,39 @@ class PgVarselRepository private constructor(
     }
 
     override fun lagre(varsel: Varsel) {
-        dbQuery.update(
-            """
+        if (eksisterer(varsel.id)) {
+            dbQuery.update(
+                """
+                UPDATE selve_varsel
+                SET
+                  kode=:kode,
+                  vedtaksperiode_id=(SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
+                  generasjon_ref=(SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
+                  definisjon_ref=(SELECT id FROM api_varseldefinisjon av WHERE av.unik_id = :definisjonId),
+                  status=:status,
+                  status_endret_ident=(SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
+                  status_endret_tidspunkt=:statusEndretTidspunkt
+                WHERE unik_id = :unikId
+                """.trimIndent(),
+                "kode" to varsel.kode,
+                "behandlingUnikId" to varsel.behandlingUnikId.value,
+                "definisjonId" to varsel.vurdering?.vurdertDefinisjonId?.value,
+                "status" to
+                    when (varsel.status) {
+                        Varsel.Status.AKTIV -> "AKTIV"
+                        Varsel.Status.INAKTIV -> "INAKTIV"
+                        Varsel.Status.GODKJENT -> "GODKJENT"
+                        Varsel.Status.VURDERT -> "VURDERT"
+                        Varsel.Status.AVVIST -> "AVVIST"
+                        Varsel.Status.AVVIKLET -> "AVVIKLET"
+                    },
+                "statusEndretOid" to varsel.vurdering?.saksbehandlerId?.value,
+                "statusEndretTidspunkt" to varsel.vurdering?.tidspunkt,
+                "unikId" to varsel.id.value,
+            )
+        } else {
+            dbQuery.update(
+                """
                     INSERT INTO selve_varsel (unik_id, kode, status, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
                     VALUES (
                         :unikId, 
@@ -111,29 +148,25 @@ class PgVarselRepository private constructor(
                         (SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
                         :statusEndretTidspunkt
                     )
-                    ON CONFLICT (generasjon_ref, kode) DO UPDATE SET 
-                        status = excluded.status,
-                        status_endret_ident = excluded.status_endret_ident, 
-                        status_endret_tidspunkt = excluded.status_endret_tidspunkt, 
-                        definisjon_ref = excluded.definisjon_ref
                 """,
-            "unikId" to varsel.id.value,
-            "kode" to varsel.kode,
-            "status" to
-                when (varsel.status) {
-                    Varsel.Status.AKTIV -> "AKTIV"
-                    Varsel.Status.INAKTIV -> "INAKTIV"
-                    Varsel.Status.GODKJENT -> "GODKJENT"
-                    Varsel.Status.VURDERT -> "VURDERT"
-                    Varsel.Status.AVVIST -> "AVVIST"
-                    Varsel.Status.AVVIKLET -> "AVVIKLET"
-                },
-            "behandlingUnikId" to varsel.behandlingUnikId.value,
-            "definisjonId" to varsel.vurdering?.vurdertDefinisjonId?.value,
-            "opprettet" to varsel.opprettetTidspunkt,
-            "statusEndretOid" to varsel.vurdering?.saksbehandlerId?.value,
-            "statusEndretTidspunkt" to varsel.vurdering?.tidspunkt,
-        )
+                "unikId" to varsel.id.value,
+                "kode" to varsel.kode,
+                "status" to
+                    when (varsel.status) {
+                        Varsel.Status.AKTIV -> "AKTIV"
+                        Varsel.Status.INAKTIV -> "INAKTIV"
+                        Varsel.Status.GODKJENT -> "GODKJENT"
+                        Varsel.Status.VURDERT -> "VURDERT"
+                        Varsel.Status.AVVIST -> "AVVIST"
+                        Varsel.Status.AVVIKLET -> "AVVIKLET"
+                    },
+                "behandlingUnikId" to varsel.behandlingUnikId.value,
+                "definisjonId" to varsel.vurdering?.vurdertDefinisjonId?.value,
+                "opprettet" to varsel.opprettetTidspunkt,
+                "statusEndretOid" to varsel.vurdering?.saksbehandlerId?.value,
+                "statusEndretTidspunkt" to varsel.vurdering?.tidspunkt,
+            )
+        }
     }
 
     override fun lagre(varsler: List<Varsel>) {

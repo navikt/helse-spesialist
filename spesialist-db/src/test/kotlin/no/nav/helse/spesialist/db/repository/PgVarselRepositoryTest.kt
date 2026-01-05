@@ -225,4 +225,22 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val funnet = repository.finn(varsel.id)
         assertNull(funnet)
     }
+
+    @Test
+    fun `oppdaterer varsel i stedet for å duplisere`() {
+        // given
+        val gammelBehandling = behandling
+        val varsel = opprettVarsel(gammelBehandling, kode = "RV_IV_1")
+        val nyBehandling = opprettBehandling(vedtaksperiode)
+        varsel.flyttTil(nyBehandling.id, nyBehandling.spleisBehandlingId)
+
+        // when
+        sessionContext.varselRepository.lagre(varsel)
+
+        // then
+        val varslerPåGammelBehandling = repository.finnVarslerFor(gammelBehandling.id)
+        assertEquals(emptyList(), varslerPåGammelBehandling)
+        val varslerPåNyBehandling = repository.finnVarslerFor(nyBehandling.id)
+        assertEquals(1, varslerPåNyBehandling.size)
+    }
 }

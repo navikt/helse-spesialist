@@ -8,6 +8,8 @@ abstract class AbstractInMemoryRepository<IDTYPE : ValueObject, T : AggregateRoo
 
     protected abstract fun deepCopy(original: T): T
 
+    fun eksisterer(id: IDTYPE): Boolean = data.any { it.id == id }
+
     fun finn(id: IDTYPE): T? = data.find { it.id == id }?.let(::deepCopy)
 
     fun finnAlle(ider: Set<IDTYPE>): List<T> = data.filter { it.id in ider }.map(::deepCopy)
