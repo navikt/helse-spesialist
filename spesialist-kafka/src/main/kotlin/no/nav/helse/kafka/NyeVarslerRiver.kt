@@ -71,7 +71,7 @@ class NyeVarslerRiver : TransaksjonellRiver() {
                                 kode = it.kode,
                                 opprettetTidspunkt = it.opprettet,
                             )
-                        }
+                        }.distinctBy { it.kode }
 
                 val (finnesFraFør, finnesIkkeFraFør) = varsler.partition { it.kode in eksisterendeVarsler.keys }
                 transaksjon.varselRepository.lagre(finnesIkkeFraFør)
