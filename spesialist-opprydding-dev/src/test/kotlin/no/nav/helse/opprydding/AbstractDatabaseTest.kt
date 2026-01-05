@@ -229,6 +229,7 @@ internal abstract class AbstractDatabaseTest {
                 "tilkommen_inntekt_events",
                 "ukoblede_annulleringer",
                 "midlertidig_behandling_vedtak_fattet",
+                "tmp_slettede_varsler"
             ),
         )
         tabeller.forEach { tabellnavn ->
