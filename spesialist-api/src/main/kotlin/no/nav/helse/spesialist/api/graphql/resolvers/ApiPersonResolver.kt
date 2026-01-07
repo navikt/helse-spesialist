@@ -123,43 +123,45 @@ data class ApiPersonResolver(
     override fun arbeidsgivere(): List<ApiArbeidsgiver> {
         val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
 
-        return snapshot.arbeidsgivere.map { arbeidsgiver ->
-            ApiArbeidsgiver(
-                resolver =
-                    ApiArbeidsgiverResolver(
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        navn = finnNavnForOrganisasjonsnummer(arbeidsgiver.organisasjonsnummer),
-                        ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
-                        fødselsnummer = snapshot.fodselsnummer,
-                        generasjoner = arbeidsgiver.generasjoner,
-                        apiOppgaveService = apiOppgaveService,
-                        saksbehandlerMediator = saksbehandlerMediator,
-                        arbeidsgiverApiDao = arbeidsgiverApiDao,
-                        risikovurderinger = risikovurderinger,
-                        varselRepository = varselRepository,
-                        oppgaveApiDao = oppgaveApiDao,
-                        periodehistorikkApiDao = periodehistorikkApiDao,
-                        notatDao = notatDao,
-                        påVentApiDao = påVentApiDao,
-                        overstyringer =
-                            overstyringer
-                                .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
-                                .map { overstyring ->
-                                    when (overstyring) {
-                                        is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
-                                        is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
-                                        is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
-                                        is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
-                                        is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
-                                    }
-                                },
-                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                        sessionFactory = sessionFactory,
-                        annulleringRepository = annulleringRepository,
-                        saksbehandlerRepository = saksbehandlerRepository,
-                    ),
-            )
-        }
+        return snapshot.arbeidsgivere
+            .filterNot { it.organisasjonsnummer == "SELVSTENDIG" }
+            .map { arbeidsgiver ->
+                ApiArbeidsgiver(
+                    resolver =
+                        ApiArbeidsgiverResolver(
+                            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                            navn = finnNavnForOrganisasjonsnummer(arbeidsgiver.organisasjonsnummer),
+                            ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
+                            fødselsnummer = snapshot.fodselsnummer,
+                            generasjoner = arbeidsgiver.generasjoner,
+                            apiOppgaveService = apiOppgaveService,
+                            saksbehandlerMediator = saksbehandlerMediator,
+                            arbeidsgiverApiDao = arbeidsgiverApiDao,
+                            risikovurderinger = risikovurderinger,
+                            varselRepository = varselRepository,
+                            oppgaveApiDao = oppgaveApiDao,
+                            periodehistorikkApiDao = periodehistorikkApiDao,
+                            notatDao = notatDao,
+                            påVentApiDao = påVentApiDao,
+                            overstyringer =
+                                overstyringer
+                                    .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
+                                    .map { overstyring ->
+                                        when (overstyring) {
+                                            is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
+                                            is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
+                                            is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
+                                            is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
+                                            is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
+                                        }
+                                    },
+                            vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                            sessionFactory = sessionFactory,
+                            annulleringRepository = annulleringRepository,
+                            saksbehandlerRepository = saksbehandlerRepository,
+                        ),
+                )
+            }
     }
 
     override fun selvstendigNaering(): ApiSelvstendigNaering? {
