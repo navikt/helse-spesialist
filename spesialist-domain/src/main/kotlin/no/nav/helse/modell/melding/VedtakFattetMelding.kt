@@ -30,6 +30,7 @@ data class VedtakFattetMelding(
     val saksbehandler: SaksbehandlerIdentOgNavn?,
     val beslutter: SaksbehandlerIdentOgNavn?,
     val automatiskFattet: Boolean,
+    val dekning: Dekning?,
 ) : UtgåendeHendelse {
     sealed interface Sykepengegrunnlagsfakta
 
@@ -86,6 +87,11 @@ data class VedtakFattetMelding(
     data class Begrunnelse(
         val type: BegrunnelseType,
         val begrunnelse: String,
+    )
+
+    data class Dekning(
+        val dekningsgrad: Int,
+        val gjelderFraDag: Int,
     )
 
     enum class BegrunnelseType {

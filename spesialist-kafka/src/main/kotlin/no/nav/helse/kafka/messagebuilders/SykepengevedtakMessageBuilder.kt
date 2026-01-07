@@ -34,6 +34,12 @@ internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
         saksbehandler?.let { put("saksbehandler", mapOf("ident" to it.ident, "navn" to normaliserNavn(it.navn))) }
         beslutter?.let { put("beslutter", mapOf("ident" to it.ident, "navn" to normaliserNavn(it.navn))) }
         put("automatiskFattet", automatiskFattet)
+        dekning?.let {
+            put(
+                "dekning",
+                mapOf("dekningsgrad" to it.dekningsgrad, "gjelderFraDag" to it.gjelderFraDag),
+            )
+        }
     }
 
 private fun VedtakFattetMelding.Sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =

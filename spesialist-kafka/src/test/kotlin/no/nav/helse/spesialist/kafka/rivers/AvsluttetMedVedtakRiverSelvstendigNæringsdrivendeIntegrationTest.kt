@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.kafka.rivers
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -110,7 +111,92 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "dekning" : {
+                "dekningsgrad" : 80,
+                "gjelderFraDag" : 17
+              }
+            }
+            """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
+    fun `fastsatt etter hovedregel jordbruker`() {
+        // Given:
+        this.beregningsgrunnlag = BigDecimal("600000.00")
+        this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+
+        setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
+
+        initGodkjenningsbehov(erJordbruker = true)
+
+        // When:
+        testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = beregningsgrunnlag))
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(person.id.value, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson =
+            """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "${person.id.value}",
+              "aktørId": "${person.aktørId}",
+              "yrkesaktivitetstype": "SELVSTENDIG",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
+              "behandlingId": "${behandling.spleisBehandlingId?.value}",
+              "organisasjonsnummer" : "SELVSTENDIG",
+              "fom": "${behandling.fom}",
+              "tom": "${behandling.tom}",
+              "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
+              "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlag": $beregningsgrunnlag,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+              "utbetalingId": "${behandling.utbetalingId?.value}",
+              "tags": [ ${behandling.tags.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlagsfakta": {
+                "fastsatt": "EtterHovedregel",
+                "6G": $seksG,
+                "tags" : [ ],
+                "selvstendig": {
+                  "beregningsgrunnlag": $beregningsgrunnlag,
+                  "pensjonsgivendeInntekter" : [ 
+                      {
+                        "årstall" : 2022,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2023,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2024,
+                        "beløp" : 200000
+                      } 
+                  ]
+                }
+              },
+              "begrunnelser": [
+                {
+                  "type" : "Innvilgelse",
+                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "perioder" : [
+                    {
+                      "fom" : "${behandling.fom}",
+                      "tom" : "${behandling.tom}"
+                    }
+                  ]
+                }
+              ],
+              "automatiskFattet": true,
+              "dekning" : {
+                "dekningsgrad" : 100,
+                "gjelderFraDag" : 17
+              }
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -187,7 +273,11 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "dekning" : {
+                "dekningsgrad" : 80,
+                "gjelderFraDag" : 17
+              }
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -229,7 +319,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
             ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
     }
 
-    private fun initGodkjenningsbehov() {
+    private fun initGodkjenningsbehov(erJordbruker: Boolean = false) {
         val godkjenningsbehovId = UUID.randomUUID()
         val godkjenningsbehovJson =
             lagGodkjenningsbehov(
@@ -238,6 +328,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 fødselsnummer = person.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!.value,
                 yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+                arbeidssituasjon = if (erJordbruker) Arbeidssituasjon.JORDBRUKER else null,
                 sykepengegrunnlagsfakta =
                     godkjenningsbehovSelvstendigNæringsdrivende(
                         sykepengegrunnlag = BigDecimal(600000),

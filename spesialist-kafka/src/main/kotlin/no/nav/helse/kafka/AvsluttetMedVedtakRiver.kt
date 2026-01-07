@@ -19,6 +19,7 @@ import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -93,7 +94,10 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
             val sisteGodkjenningsbehov: Godkjenningsbehov? =
                 transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
             if (sisteGodkjenningsbehov == null) {
-                loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
+                loggWarn(
+                    "Finner ikke godkjenningsbehov tilhørende behandling",
+                    "spleisBehandlingId: $spleisBehandlingId",
+                )
             }
 
             behandling.håndterVedtakFattet()
@@ -113,8 +117,12 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                     }
 
                     is Vedtak.ManueltMedTotrinnskontroll -> {
-                        val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
-                        val beslutter = transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent) ?: error("Finner ikke beslutter")
+                        val saksbehandler =
+                            transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent)
+                                ?: error("Finner ikke saksbehandler")
+                        val beslutter =
+                            transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent)
+                                ?: error("Finner ikke beslutter")
                         byggVedtaksmelding(
                             packet = packet,
                             behandling = behandling,
@@ -135,7 +143,9 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                     }
 
                     is Vedtak.ManueltUtenTotrinnskontroll -> {
-                        val saksbehandler = transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent) ?: error("Finner ikke saksbehandler")
+                        val saksbehandler =
+                            transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent)
+                                ?: error("Finner ikke saksbehandler")
                         byggVedtaksmelding(
                             packet = packet,
                             behandling = behandling,
@@ -167,6 +177,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
     ): UtgåendeHendelse {
         val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
 
+        val erSelvstendig = packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
         return VedtakFattetMelding(
             fødselsnummer = packet["fødselsnummer"].asText(),
             aktørId = aktørId,
@@ -215,7 +226,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
             beslutter = beslutterIdentOgNavn,
             automatiskFattet = automatiskFattet,
             sykepengegrunnlagsfakta =
-                if (packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE) {
+                if (erSelvstendig) {
                     if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {
                         error(
                             "Ustøttet verdi sykepengegrunnlagsfakta.fastsatt for selvstendig næringsdrivende: \"$fastsatt\"." +
@@ -257,6 +268,15 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                             error("Ukjent verdi for sykepengegrunnlagsfakta.fastsatt: \"$fastsatt\"")
                         }
                     }
+                },
+            dekning =
+                if (erSelvstendig) {
+                    VedtakFattetMelding.Dekning(
+                        dekningsgrad = if (godkjenningsbehov?.arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) 100 else 80,
+                        gjelderFraDag = 17,
+                    )
+                } else {
+                    null
                 },
         )
     }

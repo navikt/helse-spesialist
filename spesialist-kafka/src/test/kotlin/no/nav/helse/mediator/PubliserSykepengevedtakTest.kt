@@ -85,6 +85,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
+                dekning = null
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -156,6 +157,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
+                dekning = null
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -241,6 +243,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
+                dekning = null
             )
         utgåendeMeldingerMediator.hendelse(spleis)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -345,6 +348,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
+                dekning = null
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -471,6 +475,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
+                dekning = null
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
