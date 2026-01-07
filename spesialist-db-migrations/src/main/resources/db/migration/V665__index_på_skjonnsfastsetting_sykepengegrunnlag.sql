@@ -1,0 +1,1 @@
+create index overstyring_ref_idx on skjonnsfastsetting_sykepengegrunnlag (overstyring_ref)
