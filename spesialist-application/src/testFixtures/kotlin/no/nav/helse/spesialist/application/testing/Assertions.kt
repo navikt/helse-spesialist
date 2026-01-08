@@ -34,7 +34,7 @@ fun assertJsonEquals(
     vararg ignorerStier: String,
 ) {
     val actualAsObjectNode =
-        (actualJsonNode.deepCopy<JsonNode>() as ObjectNode).apply {
+        actualJsonNode.deepCopy<JsonNode>().apply {
             ignorerStier.forEach { sti ->
                 val gjeldende: JsonNode = this
                 val segmenter = sti.split(".")
