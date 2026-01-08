@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
+import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersonRepository
@@ -68,4 +69,5 @@ interface SessionContext {
     val personPseudoIdDao: PersonPseudoIdDao
     val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao
     val vedtakRepository: VedtakRepository
+    val opptegnelseRepository: OpptegnelseRepository
 }

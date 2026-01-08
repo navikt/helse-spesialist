@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
+import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersonRepository
@@ -58,6 +59,7 @@ import no.nav.helse.spesialist.db.repository.PgBehandlingRepository
 import no.nav.helse.spesialist.db.repository.PgDialogRepository
 import no.nav.helse.spesialist.db.repository.PgNotatRepository
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
+import no.nav.helse.spesialist.db.repository.PgOpptegnelseRepository
 import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
 import no.nav.helse.spesialist.db.repository.PgPersonRepository
 import no.nav.helse.spesialist.db.repository.PgPåVentRepository
@@ -123,4 +125,5 @@ class DBSessionContext(
     override val personPseudoIdDao: PersonPseudoIdDao = PgPersonPseudoIdDao(session)
     override val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao = PgMidlertidigBehandlingVedtakFattetDao(session)
     override val vedtakRepository: VedtakRepository = PgVedtakRepository(session)
+    override val opptegnelseRepository: OpptegnelseRepository = PgOpptegnelseRepository(session)
 }

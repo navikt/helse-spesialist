@@ -67,6 +67,9 @@ fun Routing.restRoutes(
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
             post(PostBehandlingNotaterBehandler(), restAdapter)
+
+            get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)
+            get(GetOpptegnelserForPersonBehandler(), restAdapter)
         }
     }
 }

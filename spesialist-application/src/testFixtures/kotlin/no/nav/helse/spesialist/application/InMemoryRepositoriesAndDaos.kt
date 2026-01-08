@@ -91,6 +91,7 @@ class InMemoryRepositoriesAndDaos {
     private val åpneGosysOppgaverDao = UnimplementedÅpneGosysOppgaverDao()
     private val midlertidigBehandlingVedtakFattetDao = InMemoryMidlertidigBehandlingVedtakFattetDao()
     private val vedtakRepository = InMemoryVedtakRepository()
+    private val opptegnelseRepository = InMemoryOpptegnelseRepository()
 
     val daos =
         InMemoryDaos(
@@ -190,6 +191,7 @@ class InMemoryRepositoriesAndDaos {
                     åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                     midlertidigBehandlingVedtakFattetDao = midlertidigBehandlingVedtakFattetDao,
                     vedtakRepository = vedtakRepository,
+                    opptegnelseRepository = opptegnelseRepository
                 ),
         )
 }

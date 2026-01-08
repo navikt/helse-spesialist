@@ -23,6 +23,12 @@ class Personer {
         val parent: Personer = Personer(),
         val pseudoId: String,
     ) {
+        @Resource("opptegnelser")
+        class Opptegnelser(
+            val parent: PersonPseudoId,
+            val etterSekvensnummer: Int,
+        )
+
         @Resource("tilkomne-inntektskilder")
         class TilkomneInntektskilder(
             val parent: PersonPseudoId,
