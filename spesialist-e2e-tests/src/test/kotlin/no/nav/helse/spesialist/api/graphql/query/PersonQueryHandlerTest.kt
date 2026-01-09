@@ -47,13 +47,36 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     @ResourceLock("auditlogg-lytter")
-    fun `henter person`() {
+    fun `henter person med fødselsnummer som parameter`() {
         mockSnapshot()
         val logglytter = Logglytter()
         opprettVedtaksperiode(opprettPerson())
 
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
+        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
+    fun `henter person med personPseudoId som parameter`() {
+        // Given
+        mockSnapshot()
+        opprettVedtaksperiode(opprettPerson())
+
+        // Gjør et kall for å få opprettet en personPseudoId som vi kan spørre på
+        val pseudoId = runQuery("""{ person(aktorId: "$AKTØRID" ) { personPseudoId } }""").let {
+            it["data"]["person"]["personPseudoId"].asText()
+        }
+
+        // Sett opp logglytter her, for å slippe at logginnslaget fra forrige kall er med når det skal assertes
+        val logglytter = Logglytter()
+
+        // When
+        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
+
+        // Then
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
     }
