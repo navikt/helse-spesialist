@@ -585,7 +585,12 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
             melding: String,
             level: Level,
         ) = assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
-            "Forventet ett innslag med $level og melding=$melding, dette ble logget: ${appender.list}"
+            """
+                Forventet at loggen skulle inneholde ett $level-innslag som inneholder teksten:
+                    $melding
+                Dette ble logget:
+                    ${appender.list}}
+            """.trimIndent()
         }
 
         fun assertIngenLoggingFor(
