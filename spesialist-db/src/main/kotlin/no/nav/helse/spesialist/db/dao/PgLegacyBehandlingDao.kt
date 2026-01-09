@@ -40,7 +40,6 @@ class PgLegacyBehandlingDao private constructor(
                 LEFT JOIN selve_varsel sv ON b.id = sv.generasjon_ref
                 WHERE b.vedtaksperiode_id = :vedtaksperiode_id
                 GROUP BY b.id
-                ORDER BY b.id
             ), begrunnelser AS (
                 SELECT b.type, b.tekst, vb.generasjon_ref FROM vedtak_begrunnelse vb
                 LEFT JOIN begrunnelse b ON b.id = vb.begrunnelse_ref
@@ -50,6 +49,7 @@ class PgLegacyBehandlingDao private constructor(
             SELECT bh.*, beg.*
             FROM behandlinger AS bh
             LEFT JOIN begrunnelser beg ON beg.generasjon_ref = bh.id
+            ORDER BY bh.id
             """,
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { row ->

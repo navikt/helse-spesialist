@@ -3,9 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import kotlin.test.Ignore
 
-@Ignore("Feiler med jevne mellomrom pga. timing på melding i fatting av vedtak (ingen outbox)") // TODO
 class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering av periode med negativt beløp medfører oppgave`() {

@@ -6,9 +6,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import kotlin.test.Ignore
 
-@Ignore("Feiler med jevne mellomrom pga. timing på melding i fatting av vedtak (ingen outbox)") // TODO
 class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.test.Ignore
 
 class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
@@ -253,7 +252,6 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")
     }
 
-    @Ignore("Feiler med jevne mellomrom pga. timing på melding i fatting av vedtak (ingen outbox)") // TODO
     @Test
     fun `avviser ikke godkjenningsbehov når kanAvvises-flagget er false`() {
         vedtaksløsningenMottarNySøknad()
