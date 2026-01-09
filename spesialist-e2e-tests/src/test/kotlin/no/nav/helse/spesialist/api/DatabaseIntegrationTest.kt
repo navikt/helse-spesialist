@@ -14,7 +14,6 @@ import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
@@ -49,7 +48,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     val FØDSELSNUMMER = lagFødselsnummer()
     val AKTØRID = lagAktørId()
-    val PERSONPSEUDOID = UUID.randomUUID()
     val ARBEIDSGIVER_NAVN = lagOrganisasjonsnavn()
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
 
@@ -358,23 +356,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val personId = opprettMinimalPerson(fødselsnummer, aktørId)
         val personinfoid = opprettPersoninfo(adressebeskyttelse)
         val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
-        opprettPersonPseudoId(fødselsnummer)
         oppdaterPersonpekere(fødselsnummer, personinfoid, infotrygdutbetalingerid)
         opprettEgenAnsatt(personId, erEgenAnsatt)
         oppdaterEnhet(personId, bostedId)
         return personId
-    }
-
-    protected fun opprettPersonPseudoId(fødselsnummer: String) {
-        val pseudoId = PersonPseudoId.ny().value
-        dbQuery.update(
-            """
-            INSERT INTO personpseudoid (pseudoid, identitetsnummer) 
-            VALUES  (:pseudoId, :fodselsnummer)
-            """.trimIndent(),
-            "pseudoId" to pseudoId,
-            "fodselsnummer" to fødselsnummer,
-        )
     }
 
     protected fun opprettMinimalPerson(

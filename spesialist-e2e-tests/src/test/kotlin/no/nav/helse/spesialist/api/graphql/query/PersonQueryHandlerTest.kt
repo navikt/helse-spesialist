@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -42,6 +43,8 @@ import java.util.UUID
 import kotlin.test.assertContains
 
 class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
+    val PERSON_PSEUDO_ID = PersonPseudoId.ny().value
+
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `henter person`() {
@@ -101,11 +104,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @ResourceLock("auditlogg-lytter")
     fun `får 404-feil når personen man søker etter på personPseudoId ikke finnes`() {
         val logglytter = Logglytter()
-        val body = runQuery("""{ person(personPseudoId: "$PERSONPSEUDOID") { aktorId } }""")
+        val body = runQuery("""{ person(personPseudoId: "$PERSON_PSEUDO_ID") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$PERSONPSEUDOID operation=PersonQuery msg=Finner ikke data for person med identifikator $PERSONPSEUDOID",
+            "suid=${SAKSBEHANDLER.ident.value} duid=$PERSON_PSEUDO_ID operation=PersonQuery msg=Finner ikke data for person med identifikator $PERSON_PSEUDO_ID",
             Level.WARN,
         )
     }
@@ -135,7 +138,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         logglytter.assertIngenLoggingFor(
             fødselsnummer = FØDSELSNUMMER,
             aktørid = AKTØRID,
-            personPseudoId = PERSONPSEUDOID.toString(),
+            personPseudoId = PERSON_PSEUDO_ID.toString(),
         )
     }
 
