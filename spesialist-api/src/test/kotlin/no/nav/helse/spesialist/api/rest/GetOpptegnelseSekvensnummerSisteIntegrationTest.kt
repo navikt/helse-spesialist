@@ -17,12 +17,10 @@ class GetOpptegnelseSekvensnummerSisteIntegrationTest {
         val opptegnelse1 = Opptegnelse.ny(
             identitetsnummer = lagIdentitetsnummer(),
             type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
-            payload = "{json}",
         )
         val opptegnelse2 = Opptegnelse.ny(
             identitetsnummer = lagIdentitetsnummer(),
             type = Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
-            payload = "{json}",
         )
         opptegnelseRepository.lagre(opptegnelse1)
         opptegnelseRepository.lagre(opptegnelse2)

@@ -15,7 +15,6 @@ class InMemoryOpptegnelseRepository : OpptegnelseRepository,
         id = original.id(),
         identitetsnummer = original.identitetsnummer,
         type = original.type,
-        payload = original.payload,
     )
 
     override fun finnAlleForPersonEtter(

@@ -12,7 +12,6 @@ class Opptegnelse private constructor(
     id: Sekvensnummer?,
     val identitetsnummer: Identitetsnummer,
     val type: Type,
-    val payload: String,
 ) : LateIdAggregateRoot<Sekvensnummer>(id) {
     enum class Type {
         UTBETALING_ANNULLERING_FEILET,
@@ -29,14 +28,12 @@ class Opptegnelse private constructor(
         fun ny(
             identitetsnummer: Identitetsnummer,
             type: Type,
-            payload: String,
-        ) = Opptegnelse(id = null, identitetsnummer = identitetsnummer, type = type, payload = payload)
+        ) = Opptegnelse(id = null, identitetsnummer = identitetsnummer, type = type)
 
         fun fraLagring(
             id: Sekvensnummer,
             identitetsnummer: Identitetsnummer,
             type: Type,
-            payload: String,
-        ) = Opptegnelse(id = id, identitetsnummer = identitetsnummer, type = type, payload = payload)
+        ) = Opptegnelse(id = id, identitetsnummer = identitetsnummer, type = type)
     }
 }

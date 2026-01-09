@@ -53,7 +53,6 @@ class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.O
                                     Opptegnelse.Type.PERSONDATA_OPPDATERT -> ApiOpptegnelse.Type.PERSONDATA_OPPDATERT
                                 }
                             },
-                        payload = opptegnelse.payload,
                     )
                 }.sortedByDescending { it.sekvensnummer },
         )

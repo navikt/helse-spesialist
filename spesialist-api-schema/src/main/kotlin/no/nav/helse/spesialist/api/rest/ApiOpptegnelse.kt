@@ -20,7 +20,6 @@ import java.util.UUID
 data class ApiOpptegnelse(
     val sekvensnummer: Int,
     val type: Type,
-    val payload: String,
 ) {
     @Serializable
     enum class Type {

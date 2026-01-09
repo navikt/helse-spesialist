@@ -22,7 +22,6 @@ class GetOpptegnelserForPersonIntegrationTest {
             Opptegnelse.ny(
                 identitetsnummer = lagIdentitetsnummer(),
                 type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
-                payload = "Denne skal ikke dukke opp",
             )
         )
 
@@ -33,14 +32,12 @@ class GetOpptegnelserForPersonIntegrationTest {
             Opptegnelse.ny(
                 identitetsnummer = person.id,
                 type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
-                payload = "Tester en payload for klar til behandling",
             )
         )
         opptegnelseRepository.lagre(
             Opptegnelse.ny(
                 identitetsnummer = person.id,
-                type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
-                payload = "Tester en annen payload for utbetalingsannullering OK",
+                type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK
             )
         )
 
@@ -59,13 +56,11 @@ class GetOpptegnelserForPersonIntegrationTest {
             [
               {
                 "sekvensnummer": 3,
-                "type": "UTBETALING_ANNULLERING_OK",
-                "payload": "Tester en annen payload for utbetalingsannullering OK"
+                "type": "UTBETALING_ANNULLERING_OK"
               },
               {
                 "sekvensnummer": 2,
-                "type": "PERSON_KLAR_TIL_BEHANDLING",
-                "payload": "Tester en payload for klar til behandling"
+                "type": "PERSON_KLAR_TIL_BEHANDLING"
               }
             ]
         """.trimIndent(), body)

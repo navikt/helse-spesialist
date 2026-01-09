@@ -55,7 +55,6 @@ internal class PgOpptegnelseRepository(
             VALUES ((SELECT id FROM person WHERE fødselsnummer = :identitetsnummer), :payload, :type)
             """.trimIndent(),
             "identitetsnummer" to opptegnelse.identitetsnummer.value,
-            "payload" to opptegnelse.payload,
             "type" to opptegnelse.type,
         ).update()
 
@@ -64,6 +63,5 @@ internal class PgOpptegnelseRepository(
             id = Sekvensnummer(int("sekvensnummer")),
             identitetsnummer = Identitetsnummer.fraString(string("fødselsnummer")),
             type = Opptegnelse.Type.valueOf(string("type")),
-            payload = string("payload"),
         )
 }
