@@ -4,7 +4,7 @@ graphqlKotlin = "8.4.0"
 jackson = "2.20.1"
 ktor = "3.3.3"
 tbdLibs = "2025.11.04-10.54-c831038e"
-testcontainers = "1.21.4"
+testcontainers = "2.0.3"
 smiley4KtorOpenapiTools = "5.4.0"
 smiley4SchemaKenerator = "2.5.0"
 
@@ -67,8 +67,8 @@ smiley4-schema-kenerator-swagger = { module = "io.github.smiley4:schema-kenerato
 tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
 tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdLibs" }
 
-testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
-testcontainers-postgres = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
+testcontainers-postgres = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 
 wiremock = "org.wiremock:wiremock-jetty12:3.13.2"
 

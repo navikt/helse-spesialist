@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.testfixtures
 
 import no.nav.helse.spesialist.db.DBModule
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 
 class TestcontainersDatabase(moduleLabel: String) {
     private val postgres =
