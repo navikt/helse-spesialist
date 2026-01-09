@@ -55,7 +55,7 @@ class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.O
                             },
                         payload = opptegnelse.payload,
                     )
-                },
+                }.sortedByDescending { it.sekvensnummer },
         )
     }
 

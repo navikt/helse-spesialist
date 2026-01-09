@@ -58,14 +58,14 @@ class GetOpptegnelserForPersonIntegrationTest {
         assertJsonEquals("""
             [
               {
-                "sekvensnummer": 2,
-                "type": "PERSON_KLAR_TIL_BEHANDLING",
-                "payload": "Tester en payload for klar til behandling"
-              },
-              {
                 "sekvensnummer": 3,
                 "type": "UTBETALING_ANNULLERING_OK",
                 "payload": "Tester en annen payload for utbetalingsannullering OK"
+              },
+              {
+                "sekvensnummer": 2,
+                "type": "PERSON_KLAR_TIL_BEHANDLING",
+                "payload": "Tester en payload for klar til behandling"
               }
             ]
         """.trimIndent(), body)
