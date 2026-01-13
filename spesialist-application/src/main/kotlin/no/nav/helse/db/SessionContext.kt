@@ -30,7 +30,6 @@ interface SessionContext {
     val metrikkDao: MetrikkDao
     val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
-    val opptegnelseDao: OpptegnelseDao
     val periodehistorikkDao: PeriodehistorikkDao
     val personDao: PersonDao
     val påVentDao: PåVentDao

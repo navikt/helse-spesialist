@@ -38,7 +38,6 @@ import no.nav.helse.spesialist.db.dao.PgMetrikkDao
 import no.nav.helse.spesialist.db.dao.PgMidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
 import no.nav.helse.spesialist.db.dao.PgOppgaveDao
-import no.nav.helse.spesialist.db.dao.PgOpptegnelseDao
 import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.PgPersonPseudoIdDao
@@ -85,7 +84,6 @@ class DBSessionContext(
     override val metrikkDao = PgMetrikkDao(session)
     override val notatDao = PgNotatDao(session)
     override val oppgaveDao = PgOppgaveDao(session)
-    override val opptegnelseDao = PgOpptegnelseDao(session)
     override val periodehistorikkDao = PgPeriodehistorikkDao(session)
     override val personDao = PgPersonDao(session)
     override val påVentDao = PgPåVentDao(session)
@@ -123,7 +121,8 @@ class DBSessionContext(
     override val varseldefinisjonRepository: VarseldefinisjonRepository = PgVarseldefinisjonRepository(session)
     override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository = PgVedtakBegrunnelseRepository(session)
     override val personPseudoIdDao: PersonPseudoIdDao = PgPersonPseudoIdDao(session)
-    override val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao = PgMidlertidigBehandlingVedtakFattetDao(session)
+    override val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao =
+        PgMidlertidigBehandlingVedtakFattetDao(session)
     override val vedtakRepository: VedtakRepository = PgVedtakRepository(session)
     override val opptegnelseRepository: OpptegnelseRepository = PgOpptegnelseRepository(session)
 }

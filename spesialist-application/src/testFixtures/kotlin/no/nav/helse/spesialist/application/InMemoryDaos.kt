@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.db.Daos
 
 class InMemoryDaos(
-    override val abonnementApiDao: InMemoryAbonnementApiDao,
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val arbeidsgiverApiDao: UnimplementedArbeidsgiverApiDao,
     override val behandlingApiRepository: UnimplementedBehandlingApiRepository,
@@ -23,7 +22,6 @@ class InMemoryDaos(
     override val oppgaveDao: DelegatingOppgaveDao,
     override val oppgaveApiDao: DelegatingOppgaveApiDao,
     override val oppgaveRepository: InMemoryOppgaveRepository,
-    override val opptegnelseDao: InMemoryOpptegnelseDao,
     override val overstyringApiDao: UnimplementedOverstyringApiDao,
     override val periodehistorikkDao: InMemoryDoNothingPeriodehistorikkDao,
     override val periodehistorikkApiDao: UnimplementedPeriodehistorikkApiDao,

@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
@@ -50,8 +49,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
-import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.ANNET
@@ -82,8 +79,6 @@ class SaksbehandlerMediator(
     private val sessionFactory: SessionFactory,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
-    private val opptegnelseRepository = daos.opptegnelseDao
-    private val abonnementDao = daos.abonnementApiDao
     private val påVentDao = daos.påVentDao
     private val periodehistorikkDao = daos.periodehistorikkDao
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
@@ -306,52 +301,6 @@ class SaksbehandlerMediator(
             throw e.tilApiversjon()
         }
     }
-
-    fun opprettAbonnement(
-        saksbehandler: Saksbehandler,
-        personidentifikator: String,
-    ) {
-        sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
-        abonnementDao.opprettAbonnement(saksbehandler.id.value, personidentifikator)
-    }
-
-    fun hentAbonnerteOpptegnelser(
-        saksbehandler: Saksbehandler,
-        sisteSekvensId: Int,
-    ): List<ApiOpptegnelse> {
-        sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
-        abonnementDao.registrerSistekvensnummer(saksbehandler.id.value, sisteSekvensId)
-        return opptegnelseRepository.finnOpptegnelser(saksbehandler.id.value).toApiOpptegnelser()
-    }
-
-    fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<ApiOpptegnelse> =
-        sessionFactory
-            .transactionalSessionScope { session ->
-                session.saksbehandlerRepository.lagre(saksbehandler)
-                session.opptegnelseDao.finnOpptegnelser(saksbehandler.id.value)
-            }.toApiOpptegnelser()
-
-    private fun List<OpptegnelseDao.Opptegnelse>.toApiOpptegnelser() =
-        map { opptegnelse ->
-            ApiOpptegnelse(
-                aktorId = opptegnelse.aktorId,
-                sekvensnummer = opptegnelse.sekvensnummer,
-                type =
-                    opptegnelse.type.let { type ->
-                        when (type) {
-                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET -> ApiOpptegnelsetype.UTBETALING_ANNULLERING_FEILET
-                            OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK -> ApiOpptegnelsetype.UTBETALING_ANNULLERING_OK
-                            OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> ApiOpptegnelsetype.FERDIGBEHANDLET_GODKJENNINGSBEHOV
-                            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE -> ApiOpptegnelsetype.NY_SAKSBEHANDLEROPPGAVE
-                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_AVVIST -> ApiOpptegnelsetype.REVURDERING_AVVIST
-                            OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET -> ApiOpptegnelsetype.REVURDERING_FERDIGBEHANDLET
-                            OpptegnelseDao.Opptegnelse.Type.PERSONDATA_OPPDATERT -> ApiOpptegnelsetype.PERSONDATA_OPPDATERT
-                            OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> ApiOpptegnelsetype.PERSON_KLAR_TIL_BEHANDLING
-                        }
-                    },
-                payload = opptegnelse.payload,
-            )
-        }
 
     private fun håndterVedtakBegrunnelse(
         utfall: Utfall,

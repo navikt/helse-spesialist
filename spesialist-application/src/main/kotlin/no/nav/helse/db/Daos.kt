@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import no.nav.helse.db.api.AbonnementApiDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.BehandlingApiRepository
 import no.nav.helse.db.api.EgenAnsattApiDao
@@ -31,7 +30,6 @@ interface Daos {
     val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
     val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
-    val opptegnelseDao: OpptegnelseDao
     val periodehistorikkDao: PeriodehistorikkDao
     val personDao: PersonDao
     val poisonPillDao: PoisonPillDao
@@ -45,7 +43,6 @@ interface Daos {
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
     val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
 
-    val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
     val egenAnsattApiDao: EgenAnsattApiDao
     val behandlingApiRepository: BehandlingApiRepository

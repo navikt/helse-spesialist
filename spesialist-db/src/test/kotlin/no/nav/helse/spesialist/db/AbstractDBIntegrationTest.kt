@@ -21,7 +21,6 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.api.PgAbonnementApiDao
 import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
 import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
@@ -112,7 +111,6 @@ abstract class AbstractDBIntegrationTest {
     internal val automatiseringDao = sessionContext.automatiseringDao
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
     internal val egenAnsattDao = sessionContext.egenAnsattDao
-    internal val abonnementDao = PgAbonnementApiDao(dataSource)
     internal val utbetalingDao = sessionContext.utbetalingDao
     internal val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
@@ -462,7 +460,11 @@ abstract class AbstractDBIntegrationTest {
             )
         val arbeidsgiver = opprettArbeidsgiver(identifikator = organisasjonsnummer)
         val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
-        val behandling = opprettBehandling(vedtaksperiode, yrkesaktivitetstype = yrkesaktivitetstype, utbetalingId = UtbetalingId(utbetalingId))
+        val behandling = opprettBehandling(
+            vedtaksperiode,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            utbetalingId = UtbetalingId(utbetalingId)
+        )
         utbetalingsopplegg(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

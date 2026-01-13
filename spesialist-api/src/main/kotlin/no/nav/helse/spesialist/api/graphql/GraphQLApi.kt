@@ -32,7 +32,6 @@ import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.feilhåndtering.SpesialistDataFetcherExceptionHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
@@ -42,7 +41,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
@@ -150,16 +148,11 @@ fun lagSchemaMedResolversOgHandlers(
                     BehandlingsstatistikkQueryHandler(
                         behandlingsstatistikkMediator = behandlingstatistikk,
                     ),
-                opptegnelse =
-                    OpptegnelseQueryHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                    ),
             ),
         mutationHandlers =
             SpesialistSchema.MutationHandlers(
                 notat = NotatMutationHandler(sessionFactory = sessionFactory),
                 tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 overstyring =
                     OverstyringMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,

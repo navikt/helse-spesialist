@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.application
 
 class InMemoryRepositoriesAndDaos {
-    private val abonnementApiDao = InMemoryAbonnementApiDao()
     private val annulleringRepository = InMemoryAnnulleringRepository()
     private val arbeidsgiverRepository = InMemoryArbeidsgiverRepository()
     private val avviksvurderingRepository = InMemoryAvviksvurderingRepository()
@@ -28,7 +27,6 @@ class InMemoryRepositoriesAndDaos {
     private val meldingDuplikatkontrollDao = NoopMeldingDuplikatkontrollDao()
     private val poisonPillDao = NoopPoisonPillDao()
 
-    private val opptegnelseDao = InMemoryOpptegnelseDao(personRepository, abonnementApiDao)
     private val reservasjonDao = InMemoryReservasjonDao(saksbehandlerRepository)
 
     private val dialogDao = DelegatingDialogDao(dialogRepository)
@@ -95,7 +93,6 @@ class InMemoryRepositoriesAndDaos {
 
     val daos =
         InMemoryDaos(
-            abonnementApiDao = abonnementApiDao,
             annulleringRepository = annulleringRepository,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             behandlingApiRepository = behandlingApiRepository,
@@ -115,7 +112,6 @@ class InMemoryRepositoriesAndDaos {
             oppgaveDao = oppgaveDao,
             oppgaveApiDao = oppgaveApiDao,
             oppgaveRepository = oppgaveRepository,
-            opptegnelseDao = opptegnelseDao,
             overstyringApiDao = overstyringApiDao,
             periodehistorikkDao = periodehistorikkDao,
             periodehistorikkApiDao = periodehistorikkApiDao,
@@ -163,7 +159,6 @@ class InMemoryRepositoriesAndDaos {
                     notatRepository = notatRepository,
                     oppgaveDao = oppgaveDao,
                     oppgaveRepository = oppgaveRepository,
-                    opptegnelseDao = opptegnelseDao,
                     overstyringRepository = overstyringRepository,
                     periodehistorikkDao = periodehistorikkDao,
                     personDao = personDao,

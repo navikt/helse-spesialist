@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.db.dao.PgMeldingDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
 import no.nav.helse.spesialist.db.dao.PgOppgaveDao
-import no.nav.helse.spesialist.db.dao.PgOpptegnelseDao
 import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.PgPoisonPillDao
@@ -26,7 +25,6 @@ import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDa
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
 import no.nav.helse.spesialist.db.dao.PgVedtakDao
-import no.nav.helse.spesialist.db.dao.api.PgAbonnementApiDao
 import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
 import no.nav.helse.spesialist.db.dao.api.PgBehandlingApiRepository
 import no.nav.helse.spesialist.db.dao.api.PgEgenAnsattApiDao
@@ -60,7 +58,6 @@ class DBDaos(
     override val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     override val notatDao = PgNotatDao(dataSource)
     override val oppgaveDao = PgOppgaveDao(dataSource)
-    override val opptegnelseDao = PgOpptegnelseDao(dataSource)
     override val periodehistorikkDao = PgPeriodehistorikkDao(dataSource)
     override val personDao = PgPersonDao(dataSource)
     override val poisonPillDao = PgPoisonPillDao(dataSource)
@@ -74,7 +71,6 @@ class DBDaos(
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
     override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(dataSource)
 
-    override val abonnementApiDao = PgAbonnementApiDao(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     override val egenAnsattApiDao = PgEgenAnsattApiDao(dataSource)
     override val behandlingApiRepository = PgBehandlingApiRepository(dataSource)

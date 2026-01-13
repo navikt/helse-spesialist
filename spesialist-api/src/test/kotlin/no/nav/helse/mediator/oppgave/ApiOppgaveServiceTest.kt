@@ -8,7 +8,6 @@ import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
@@ -52,7 +51,6 @@ internal class ApiOppgaveServiceTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
 
     private val integrationTestFixture = IntegrationTestFixture()
@@ -103,7 +101,7 @@ internal class ApiOppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, tildelingDao, opptegnelseDao)
+        clearMocks(oppgaveDao, tildelingDao)
     }
 
     @Test
@@ -168,8 +166,8 @@ internal class ApiOppgaveServiceTest {
     }
 
     private fun behandletOppgaveFraDatabaseForVisning(
-        oppgaveId: Long = Random.Default.nextLong(),
-        aktørId: String = Random.Default.nextLong(1000000000000, 2000000000000).toString(),
+        oppgaveId: Long = Random.nextLong(),
+        aktørId: String = Random.nextLong(1000000000000, 2000000000000).toString(),
         fødselsnummer: String = lagFødselsnummer(),
         egenskaper: Set<EgenskapForDatabase> = EGENSKAPER,
         ferdigstiltAv: String? = "EN-SAKSBEHANDLER-IDENT",

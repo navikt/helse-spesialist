@@ -3,8 +3,6 @@ package no.nav.helse.spesialist.api.graphql
 import com.expediagroup.graphql.server.ktor.GraphQLConfiguration
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
-import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
@@ -23,8 +21,6 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuerySchema
-import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
-import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuerySchema
 
@@ -36,13 +32,11 @@ class SpesialistSchema(
         val person: PersonQuerySchema,
         val oppgaver: OppgaverQuerySchema,
         val behandlingsstatistikk: BehandlingsstatistikkQuerySchema,
-        val opptegnelse: OpptegnelseQuerySchema,
     )
 
     class MutationHandlers(
         val notat: NotatMutationSchema,
         val tildeling: TildelingMutationSchema,
-        val opptegnelse: OpptegnelseMutationSchema,
         val overstyring: OverstyringMutationSchema,
         val skjonnsfastsettelse: SkjonnsfastsettelseMutationSchema,
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
@@ -59,14 +53,12 @@ class SpesialistSchema(
                 PersonQuery(handler = queryHandlers.person),
                 OppgaverQuery(handler = queryHandlers.oppgaver),
                 BehandlingsstatistikkQuery(handler = queryHandlers.behandlingsstatistikk),
-                OpptegnelseQuery(handler = queryHandlers.opptegnelse),
             )
 
         schemaConfiguration.mutations =
             listOf(
                 NotatMutation(handler = mutationHandlers.notat),
                 TildelingMutation(handler = mutationHandlers.tildeling),
-                OpptegnelseMutation(handler = mutationHandlers.opptegnelse),
                 OverstyringMutation(handler = mutationHandlers.overstyring),
                 SkjonnsfastsettelseMutation(handler = mutationHandlers.skjonnsfastsettelse),
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),
