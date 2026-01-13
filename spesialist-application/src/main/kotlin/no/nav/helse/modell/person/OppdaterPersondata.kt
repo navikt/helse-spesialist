@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
@@ -9,9 +10,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.spesialist.application.OpptegnelseRepository
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Opptegnelse
+import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 import java.time.LocalDate
 import java.util.UUID
 
@@ -43,18 +42,17 @@ internal class OppdaterPersondataCommand(
     fødselsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate?,
     personDao: PersonDao,
-    opptegnelseRepository: OpptegnelseRepository,
+    opptegnelseDao: OpptegnelseDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao, førsteKjenteDagFinner),
             ikkesuspenderendeCommand("opprettOpptegnelse") {
-                val opptegnelse =
-                    Opptegnelse.ny(
-                        identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-                        type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
-                    )
-                opptegnelseRepository.lagre(opptegnelse)
+                opptegnelseDao.opprettOpptegnelse(
+                    fødselsnummer,
+                    PersonOppdatertPayload.toJson(),
+                    OpptegnelseDao.Opptegnelse.Type.PERSONDATA_OPPDATERT,
+                )
             },
         )
 }

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.OppgaveRepository
@@ -42,6 +43,7 @@ internal class OppgaveServiceTest {
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
 
     private val meldingPubliserer = object : MeldingPubliserer {
@@ -62,8 +64,7 @@ internal class OppgaveServiceTest {
             behov: List<Behov>
         ) = error("Not implemented for test")
 
-        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) =
-            error("Not implemented for test")
+        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented for test")
     }
 
     private val oppgaveService =
@@ -105,7 +106,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao)
+        clearMocks(oppgaveDao, opptegnelseDao)
     }
 
     @Test

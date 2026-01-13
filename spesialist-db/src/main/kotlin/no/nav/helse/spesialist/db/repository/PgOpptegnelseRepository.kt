@@ -45,17 +45,17 @@ internal class PgOpptegnelseRepository(
                 SELECT MAX(sekvensnummer)
                 FROM opptegnelse
                 """.trimIndent(),
-            ).singleOrNull { it.intOrNull(1) } ?: 0,
+            ).single { it.intOrNull(1) } ?: -1,
         )
 
     private fun insertOpptegnelse(opptegnelse: Opptegnelse) =
         asSQL(
             """
-            INSERT INTO opptegnelse (person_id, type, payload) 
-            VALUES ((SELECT id FROM person WHERE fødselsnummer = :identitetsnummer), :type, '{}')
+            INSERT INTO opptegnelse (person_id, payload, type) 
+            VALUES ((SELECT id FROM person WHERE fødselsnummer = :identitetsnummer), :payload, :type)
             """.trimIndent(),
             "identitetsnummer" to opptegnelse.identitetsnummer.value,
-            "type" to opptegnelse.type.toString(),
+            "type" to opptegnelse.type,
         ).update()
 
     private fun Row.tilOpptegnelse(): Opptegnelse =
