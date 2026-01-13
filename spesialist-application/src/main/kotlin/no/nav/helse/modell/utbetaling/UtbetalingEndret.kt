@@ -1,7 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
@@ -14,6 +13,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.person.LegacyPerson
+import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDateTime
 import java.util.UUID
@@ -83,11 +83,11 @@ internal class UtbetalingEndretCommand(
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
     utbetalingDao: UtbetalingDao,
-    opptegnelseDao: OpptegnelseDao,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveService: OppgaveService,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    opptegnelseRepository: OpptegnelseRepository,
     json: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -105,7 +105,7 @@ internal class UtbetalingEndretCommand(
                 personbeløp = personbeløp,
                 json = json,
                 utbetalingDao = utbetalingDao,
-                opptegnelseDao = opptegnelseDao,
+                opptegnelseRepository = opptegnelseRepository,
             ),
             ReserverPersonHvisTildeltCommand(
                 fødselsnummer = fødselsnummer,

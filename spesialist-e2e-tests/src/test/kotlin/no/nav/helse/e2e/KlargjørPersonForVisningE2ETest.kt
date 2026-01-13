@@ -1,10 +1,9 @@
 package no.nav.helse.e2e
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Opptegnelse
+import no.nav.helse.spesialist.domain.Sekvensnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -52,18 +51,19 @@ class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         håndterEgenansattløsning(fødselsnummer = fødselsnummer)
 
         assertHarTilgangsdata(fødselsnummer)
-        assertOpptegnelse(fødselsnummer, OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING)
+        assertOpptegnelse(fødselsnummer, Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING)
     }
 
-    private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseDao.Opptegnelse.Type) {
-        val opptegnelser = sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val query = """SELECT type FROM opptegnelse WHERE person_id = (SELECT id FROM person WHERE fødselsnummer = ?)"""
-            it.run(queryOf(query, fødselsnummer).map { row -> enumValueOf<OpptegnelseDao.Opptegnelse.Type>(row.string("type")) }.asList)
+    private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: Opptegnelse.Type) {
+        val opptegnelser = sessionFactory.transactionalSessionScope { session ->
+            session.opptegnelseRepository.finnAlleForPersonEtter(
+                Sekvensnummer(0),
+                Identitetsnummer.fraString(fødselsnummer)
+            )
         }
 
         assertEquals(1, opptegnelser.size)
-        assertEquals(opptegnelseType, opptegnelser.single())
+        assertEquals(opptegnelseType, opptegnelser.single().type)
     }
 
     private fun assertHarTilgangsdata(fødselsnummer: String) {

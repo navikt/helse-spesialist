@@ -9,7 +9,6 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
@@ -58,6 +57,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
+import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VedtakRepository
@@ -366,7 +366,6 @@ internal class GodkjenningsbehovCommand(
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
-    opptegnelseDao: OpptegnelseDao,
     tildelingDao: TildelingDao,
     reservasjonDao: ReservasjonDao,
     oppgaveService: OppgaveService,
@@ -374,6 +373,7 @@ internal class GodkjenningsbehovCommand(
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
     personRepository: PersonRepository,
+    opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
     override val commands: List<Command> =
@@ -505,7 +505,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
                 påVentDao = påVentDao,
-                opptegnelseDao = opptegnelseDao,
+                opptegnelseRepository = opptegnelseRepository,
             ),
             PersisterInntektCommand(
                 fødselsnummer = behovData.fødselsnummer,

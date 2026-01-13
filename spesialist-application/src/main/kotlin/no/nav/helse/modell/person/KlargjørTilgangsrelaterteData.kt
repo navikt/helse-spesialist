@@ -2,7 +2,6 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
@@ -13,9 +12,10 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.spesialist.api.abonnement.PersonKlarTilVisning
+import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Opptegnelse
 import java.util.UUID
 
 class KlargjørTilgangsrelaterteData(
@@ -47,7 +47,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
     personDao: PersonDao,
     personRepository: PersonRepository,
     egenAnsattDao: EgenAnsattDao,
-    opptegnelseDao: OpptegnelseDao,
+    opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -62,11 +62,12 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 egenAnsattDao = egenAnsattDao,
             ),
             ikkesuspenderendeCommand("opprettOptegnelse") {
-                opptegnelseDao.opprettOpptegnelse(
-                    fødselsnummer = fødselsnummer,
-                    payload = PersonKlarTilVisning.toJson(),
-                    type = OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
-                )
+                val opptegnelse =
+                    Opptegnelse.ny(
+                        identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                        type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
+                    )
+                opptegnelseRepository.lagre(opptegnelse)
             },
             ikkesuspenderendeCommand("ferdigstillKlargjøring") {
                 personDao.personKlargjort(fødselsnummer)

@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
@@ -18,7 +16,7 @@ import java.util.UUID
 
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
-    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val hendelserInspektør =
         object : CommandContextObserver {
             private val hendelser = mutableListOf<UtgåendeHendelse>()
@@ -29,13 +27,12 @@ internal class GodkjenningMediatorTest {
                 hendelser.add(hendelse)
             }
         }
-    private val mediator = GodkjenningMediator(opptegnelseDao)
+    private val mediator = GodkjenningMediator(opptegnelseRepository)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(hendelserInspektør)
-        clearMocks(opptegnelseDao)
     }
 
     @Test
@@ -78,7 +75,9 @@ internal class GodkjenningMediatorTest {
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
         verify(exactly = 1) {
-            opptegnelseDao.opprettOpptegnelse(eq(fnr), any(), eq(OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV))
+            opptegnelseRepository.lagre(
+                any()
+            )
         }
 
     private companion object {
