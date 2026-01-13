@@ -1,7 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
@@ -50,7 +49,9 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Opptegnelse
 import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
@@ -65,7 +66,7 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
     private val påVentDao: PåVentDao,
-    private val opptegnelseDao: OpptegnelseDao,
+    private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = behovData.fødselsnummer
@@ -110,11 +111,12 @@ internal class OpprettSaksbehandleroppgave(
             kanAvvises = kanAvvises,
             egenskaper = egenskaper,
         )
-        opptegnelseDao.opprettOpptegnelse(
-            fødselsnummer,
-            GodkjenningsbehovPayload(behovData.id).toJson(),
-            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
-        )
+        val opptegnelse =
+            Opptegnelse.ny(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
+            )
+        opptegnelseRepository.lagre(opptegnelse)
         return true
     }
 
@@ -127,6 +129,7 @@ internal class OpprettSaksbehandleroppgave(
             StrengtFortrolig,
             StrengtFortroligUtland,
             -> add(STRENGT_FORTROLIG_ADRESSE)
+
             Fortrolig -> add(FORTROLIG_ADRESSE)
             else -> Unit
         }
@@ -228,7 +231,11 @@ internal class OpprettSaksbehandleroppgave(
         tags: List<String>,
         utbetalingtype: Utbetalingtype,
     ) {
-        if (tags.contains("Grunnbeløpsregulering") and (utbetalingtype == Utbetalingtype.REVURDERING)) add(GRUNNBELØPSREGULERING)
+        if (tags.contains("Grunnbeløpsregulering") and (utbetalingtype == Utbetalingtype.REVURDERING)) {
+            add(
+                GRUNNBELØPSREGULERING,
+            )
+        }
     }
 
     private fun MutableSet<Egenskap>.haster(vedtaksperiodeId: UUID) {

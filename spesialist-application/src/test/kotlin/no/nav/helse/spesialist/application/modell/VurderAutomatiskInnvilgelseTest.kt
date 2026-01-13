@@ -63,7 +63,7 @@ internal class VurderAutomatiskInnvilgelseTest {
         VurderAutomatiskInnvilgelse(
             automatisering,
             GodkjenningMediator(
-                opptegnelseDao = mockk(relaxed = true),
+                opptegnelseRepository = mockk(relaxed = true),
             ),
             utbetaling = Utbetaling(utbetalingId, 0, 0, Utbetalingtype.UTBETALING),
             sykefraværstilfelle =

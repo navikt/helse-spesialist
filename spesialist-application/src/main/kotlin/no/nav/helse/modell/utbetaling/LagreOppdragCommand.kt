@@ -1,6 +1,5 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -9,7 +8,9 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
+import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Opptegnelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,7 +28,7 @@ class LagreOppdragCommand(
     private val personbeløp: Int,
     private val json: String,
     private val utbetalingDao: UtbetalingDao,
-    private val opptegnelseDao: OpptegnelseDao,
+    private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
@@ -73,20 +74,31 @@ class LagreOppdragCommand(
     }
 
     private fun lagOpptegnelse() {
-        val opptegnelseType: OpptegnelseDao.Opptegnelse.Type =
-            when {
-                type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
-                    OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET
+        val opptegnelseType: Opptegnelse.Type =
+            when (type) {
+                Utbetalingtype.ANNULLERING if status == UTBETALING_FEILET -> {
+                    Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET
                 }
-                type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
-                    OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
+                Utbetalingtype.ANNULLERING if status == ANNULLERT -> {
+                    Opptegnelse.Type.UTBETALING_ANNULLERING_OK
                 }
-                type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
-                    OpptegnelseDao.Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET
+                Utbetalingtype.REVURDERING if status in
+                    listOf(
+                        UTBETALT,
+                        GODKJENT_UTEN_UTBETALING,
+                        OVERFØRT,
+                    )
+                -> {
+                    Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET
                 }
                 else -> return
             }
 
-        opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId).toJson(), opptegnelseType)
+        val opptegnelse =
+            Opptegnelse.ny(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                type = opptegnelseType,
+            )
+        opptegnelseRepository.lagre(opptegnelse)
     }
 }
