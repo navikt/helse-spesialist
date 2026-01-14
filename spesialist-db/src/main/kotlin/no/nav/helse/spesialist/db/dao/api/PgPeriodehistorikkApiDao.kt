@@ -27,10 +27,10 @@ class PgPeriodehistorikkApiDao internal constructor(
             (
                 SELECT ph.id
                 FROM periodehistorikk ph
-                JOIN behandling b ON generasjon_id = unik_id
+                JOIN behandling b ON behandling_id = unik_id
                 WHERE b.utbetaling_id = :utbetaling_id
             )
-            SELECT id, type, timestamp, json, ident, dialog_ref, utbetaling_id, generasjon_id
+            SELECT id, type, timestamp, json, ident, dialog_ref, utbetaling_id, behandling_id
             FROM periodehistorikk
             LEFT JOIN saksbehandler s ON saksbehandler_oid = s.oid
             WHERE id IN

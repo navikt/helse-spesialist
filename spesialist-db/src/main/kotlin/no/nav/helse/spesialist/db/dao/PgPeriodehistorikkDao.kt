@@ -43,12 +43,12 @@ class PgPeriodehistorikkDao private constructor(
     ) {
         asSQL(
             """
-                INSERT INTO periodehistorikk (type, saksbehandler_oid, generasjon_id, utbetaling_id, dialog_ref, json)
-                VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :dialog_ref, :json::json)
+                INSERT INTO periodehistorikk (type, saksbehandler_oid, behandling_id, utbetaling_id, dialog_ref, json)
+                VALUES (:type, :saksbehandler_oid, :behandling_id, null, :dialog_ref, :json::json)
         """,
             "type" to historikkinnslag.type(),
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.id?.value,
-            "generasjon_id" to generasjonId,
+            "behandling_id" to generasjonId,
             "dialog_ref" to historikkinnslag.dialogRef,
             "json" to historikkinnslag.detaljer().let { objectMapper.writeValueAsString(it) },
         ).update()

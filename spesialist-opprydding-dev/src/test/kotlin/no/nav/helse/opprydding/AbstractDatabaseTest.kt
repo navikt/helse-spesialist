@@ -173,7 +173,7 @@ internal abstract class AbstractDatabaseTest {
             VALUES (${periodehistorikk_dialog_id}, now());
             INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, opprettet, dialog_ref)
             VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), now(), ${periodehistorikk_dialog_id});
-            INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, dialog_ref)
+            INSERT INTO periodehistorikk(id, type, timestamp, behandling_id, saksbehandler_oid, dialog_ref)
             VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
                     ${periodehistorikk_dialog_id});
             

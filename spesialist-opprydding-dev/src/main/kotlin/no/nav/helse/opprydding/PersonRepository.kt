@@ -303,7 +303,7 @@ internal class PersonRepository(
                 DELETE FROM periodehistorikk ph
                 USING behandling b
                 JOIN vedtaksperiode v ON v.vedtaksperiode_id = b.vedtaksperiode_id
-                WHERE ph.generasjon_id = b.unik_id
+                WHERE ph.behandling_id = b.unik_id
                 AND v.person_ref = :personRef returning dialog_ref
             )
             DELETE FROM dialog USING slettet_rad sr WHERE id = sr.dialog_ref
