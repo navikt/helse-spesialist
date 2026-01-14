@@ -7,8 +7,6 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import java.time.LocalDate
 
 interface PersonDao {
-    fun personKlargjort(fødselsnummer: String)
-
     fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
 
     fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate?

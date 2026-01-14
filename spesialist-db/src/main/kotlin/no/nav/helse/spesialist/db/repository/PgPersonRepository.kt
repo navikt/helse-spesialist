@@ -159,6 +159,19 @@ internal class PgPersonRepository(
             "fodselsnummer" to id.value,
         ).singleOrNull { it.toPerson() }
 
+    override fun finnAlleMedAktørId(aktørId: String): List<Person> =
+        asSQL(
+            """
+            SELECT p.*, pi.id as person_info_id, pi.*, ea.person_ref as egen_ansatt_person_ref, ea.er_egen_ansatt, ea.opprettet as egen_ansatt_opprettet
+            FROM person p
+            LEFT JOIN person_info pi ON p.info_ref = pi.id
+            LEFT JOIN egen_ansatt ea ON p.id = ea.person_ref
+            WHERE p.aktør_id = :aktorId
+            ORDER BY p.fødselsnummer
+            """.trimIndent(),
+            "aktorId" to aktørId,
+        ).list { it.toPerson() }
+
     override fun finnAlle(ider: Set<Identitetsnummer>): List<Person> =
         asSQL(
             """

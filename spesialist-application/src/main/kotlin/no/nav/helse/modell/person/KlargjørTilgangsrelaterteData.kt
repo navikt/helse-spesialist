@@ -2,7 +2,6 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -13,6 +12,7 @@ import no.nav.helse.modell.kommando.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.application.PersonKlargjoresDao
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
@@ -44,7 +44,7 @@ class KlargjørTilgangsrelaterteData(
 
 internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
-    personDao: PersonDao,
+    personKlargjoresDao: PersonKlargjoresDao,
     personRepository: PersonRepository,
     egenAnsattDao: EgenAnsattDao,
     opptegnelseRepository: OpptegnelseRepository,
@@ -70,7 +70,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 opptegnelseRepository.lagre(opptegnelse)
             },
             ikkesuspenderendeCommand("ferdigstillKlargjøring") {
-                personDao.personKlargjort(fødselsnummer)
+                personKlargjoresDao.personKlargjort(fødselsnummer)
             },
         )
 }

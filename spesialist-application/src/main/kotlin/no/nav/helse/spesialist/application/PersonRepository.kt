@@ -8,5 +8,7 @@ interface PersonRepository {
 
     fun finn(id: Identitetsnummer): Person?
 
+    fun finnAlleMedAktørId(aktørId: String): List<Person>
+
     fun finnAlle(ider: Set<Identitetsnummer>): List<Person>
 }

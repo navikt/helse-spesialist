@@ -9,9 +9,12 @@ class InMemoryRepositoriesAndDaos {
     private val dialogRepository = InMemoryDialogRepository()
     private val dokumentDao = InMemoryDokumentDao()
     private val meldingDao = InMemoryMeldingDao()
+    private val midlertidigBehandlingVedtakFattetDao = InMemoryMidlertidigBehandlingVedtakFattetDao()
     private val notatRepository = InMemoryNotatRepository()
     private val oppgaveRepository = InMemoryOppgaveRepository()
+    private val opptegnelseRepository = InMemoryOpptegnelseRepository()
     private val overstyringRepository = InMemoryOverstyringRepository()
+    private val personKlargjoresDao = InMemoryPersonKlargjoresDao()
     private val personRepository = InMemoryPersonRepository()
     private val personPseudoIdDao = InMemoryPersonPseudoIdDao()
     private val påVentRepository = InMemoryPåVentRepository()
@@ -23,6 +26,7 @@ class InMemoryRepositoriesAndDaos {
     private val varseldefinisjonRepository = InMemoryVarseldefinisjonRepository()
     private val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
     private val vedtakBegrunnelseRepository = InMemoryVedtakBegrunnelseRepository()
+    private val vedtakRepository = InMemoryVedtakRepository()
 
     private val meldingDuplikatkontrollDao = NoopMeldingDuplikatkontrollDao()
     private val poisonPillDao = NoopPoisonPillDao()
@@ -87,9 +91,6 @@ class InMemoryRepositoriesAndDaos {
     private val vergemålDao = UnimplementedVergemålDao()
     private val vergemålApiDao = UnimplementedVergemålApiDao()
     private val åpneGosysOppgaverDao = UnimplementedÅpneGosysOppgaverDao()
-    private val midlertidigBehandlingVedtakFattetDao = InMemoryMidlertidigBehandlingVedtakFattetDao()
-    private val vedtakRepository = InMemoryVedtakRepository()
-    private val opptegnelseRepository = InMemoryOpptegnelseRepository()
 
     val daos =
         InMemoryDaos(
@@ -186,7 +187,8 @@ class InMemoryRepositoriesAndDaos {
                     åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                     midlertidigBehandlingVedtakFattetDao = midlertidigBehandlingVedtakFattetDao,
                     vedtakRepository = vedtakRepository,
-                    opptegnelseRepository = opptegnelseRepository
+                    opptegnelseRepository = opptegnelseRepository,
+                    personKlargjoresDao = personKlargjoresDao
                 ),
         )
 }

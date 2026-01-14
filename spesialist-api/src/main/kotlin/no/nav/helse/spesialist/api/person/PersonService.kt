@@ -92,21 +92,22 @@ class PersonService(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): FetchPersonResult {
-        val aktørId = personApiDao.finnAktørId(fødselsnummer)
-        if (!personApiDao.harDataNødvendigForVisning(fødselsnummer)) {
-            if (!personApiDao.klargjøringPågår(fødselsnummer)) {
-                personhåndterer.klargjørPersonForVisning(fødselsnummer)
-                personApiDao.personKlargjøres(fødselsnummer)
-            }
-
-            return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
-        }
         val personEntity =
             sessionFactory.transactionalSessionScope {
                 it.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))
             }
         if (personEntity == null) {
             return FetchPersonResult.Feil.IkkeFunnet
+        }
+        if (!personEntity.harDataNødvendigForVisning()) {
+            sessionFactory.transactionalSessionScope { session ->
+                if (!session.personKlargjoresDao.klargjøringPågår(fødselsnummer)) {
+                    personhåndterer.klargjørPersonForVisning(fødselsnummer)
+                    session.personKlargjoresDao.personKlargjøres(fødselsnummer)
+                }
+            }
+
+            return FetchPersonResult.Feil.IkkeKlarTilVisning(personEntity.aktørId)
         }
         if (!personEntity.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
             return FetchPersonResult.Feil.ManglerTilgang
@@ -138,7 +139,7 @@ class PersonService(
 
         val fødselsnumrePseudoIdMap =
             sessionFactory.transactionalSessionScope { session ->
-                fødselsnumreKnyttetTil(aktørId).associateWith { fnr ->
+                fødselsnumreKnyttetTil(personEntity.aktørId).associateWith { fnr ->
                     session.personPseudoIdDao.nyPersonPseudoId(
                         identitetsnummer = Identitetsnummer.fraString(fnr),
                     )

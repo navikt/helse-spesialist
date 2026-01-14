@@ -49,6 +49,7 @@ class InMemorySessionContext(
     override val vergemålDao: UnimplementedVergemålDao,
     override val åpneGosysOppgaverDao: UnimplementedÅpneGosysOppgaverDao,
     override val midlertidigBehandlingVedtakFattetDao: InMemoryMidlertidigBehandlingVedtakFattetDao,
-    override val vedtakRepository: VedtakRepository,
-    override val opptegnelseRepository: OpptegnelseRepository
+    override val vedtakRepository: InMemoryVedtakRepository,
+    override val opptegnelseRepository: InMemoryOpptegnelseRepository,
+    override val personKlargjoresDao: InMemoryPersonKlargjoresDao
 ) : SessionContext

@@ -10,10 +10,6 @@ import java.time.LocalDate
 class DelegatingPersonDao(
     private val personRepository: InMemoryPersonRepository,
 ) : PersonDao {
-    override fun personKlargjort(fødselsnummer: String) {
-        TODO("Not yet implemented")
-    }
-
     override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
         TODO("Not yet implemented")
     }

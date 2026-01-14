@@ -180,7 +180,7 @@ class Kommandofabrikk(
     ): KlargjørTilgangsrelaterteDataCommand =
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            personDao = sessionContext.personDao,
+            personKlargjoresDao = sessionContext.personKlargjoresDao,
             egenAnsattDao = sessionContext.egenAnsattDao,
             personRepository = sessionContext.personRepository,
             opptegnelseRepository = sessionContext.opptegnelseRepository,

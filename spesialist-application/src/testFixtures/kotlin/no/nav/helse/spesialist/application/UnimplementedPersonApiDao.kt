@@ -4,14 +4,6 @@ import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 
 class UnimplementedPersonApiDao : PersonApiDao {
-    override fun personKlargjøres(fødselsnummer: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun klargjøringPågår(fødselsnummer: String): Boolean {
-        TODO("Not yet implemented")
-    }
-
     override fun finnEnhet(fødselsnummer: String): EnhetDto {
         TODO("Not yet implemented")
     }

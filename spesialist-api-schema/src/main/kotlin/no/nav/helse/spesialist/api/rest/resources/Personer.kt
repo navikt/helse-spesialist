@@ -18,6 +18,11 @@ import java.util.UUID
 
 @Resource("personer")
 class Personer {
+    @Resource("sok")
+    class Sok(
+        val parent: Personer = Personer(),
+    )
+
     @Resource("{pseudoId}")
     class PersonPseudoId(
         val parent: Personer = Personer(),

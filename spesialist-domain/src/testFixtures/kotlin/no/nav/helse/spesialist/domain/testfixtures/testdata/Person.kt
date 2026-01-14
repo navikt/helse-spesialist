@@ -118,8 +118,6 @@ fun lagAktørId() = Random.nextLong(from = 1_000_000_000_000, until = 1_000_099_
 
 fun lagIdentitetsnummer() = lagIdentitetsnummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
 
-fun lagFødselsnummer() = lagFødselsnummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
-
 fun lagDNummer() = lagDNummer(fødselsdato = lagFødselsdato(), mann = Math.random() <= 0.5)
 
 fun lagIdentitetsnummer(
@@ -144,8 +142,8 @@ fun lagFødselsdato(): LocalDate {
 // Generer syntetisk fødselsnummer slik som Skattetaten også gjør - med 8 plusset på måneden i fødselsdatoen
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/
 fun lagFødselsnummer(
-    fødselsdato: LocalDate,
-    mann: Boolean,
+    fødselsdato: LocalDate = lagFødselsdato(),
+    mann: Boolean = Math.random() <= 0.5,
 ): String {
     val fødselsnummerFødselsdato =
         buildString {

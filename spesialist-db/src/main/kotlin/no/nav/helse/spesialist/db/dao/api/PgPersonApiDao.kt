@@ -5,28 +5,12 @@ import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
-import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class PgPersonApiDao internal constructor(
     dataSource: DataSource,
 ) : QueryRunner by MedDataSource(dataSource),
     PersonApiDao {
-    override fun personKlargjøres(fødselsnummer: String) {
-        asSQL(
-            "INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES(:fodselsnummer, :opprettet) ON CONFLICT DO NOTHING",
-            "fodselsnummer" to fødselsnummer,
-            "opprettet" to LocalDateTime.now(),
-        ).update()
-    }
-
-    override fun klargjøringPågår(fødselsnummer: String): Boolean =
-        asSQL(
-            "SELECT true FROM person_klargjores WHERE fødselsnummer = :fodselsnummer",
-            "fodselsnummer" to fødselsnummer,
-            "opprettet" to LocalDateTime.now(),
-        ).singleOrNull { it.boolean(1) } ?: false
-
     override fun finnEnhet(fødselsnummer: String) =
         asSQL(
             " SELECT id, navn from enhet WHERE id = (SELECT enhet_ref FROM person where fødselsnummer = :fodselsnummer); ",

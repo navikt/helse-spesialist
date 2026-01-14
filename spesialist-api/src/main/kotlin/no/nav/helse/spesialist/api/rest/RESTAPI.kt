@@ -70,6 +70,8 @@ fun Routing.restRoutes(
 
             get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)
             get(GetOpptegnelserForPersonBehandler(), restAdapter)
+
+            post(PostPersonSokBehandler(), restAdapter)
         }
     }
 }

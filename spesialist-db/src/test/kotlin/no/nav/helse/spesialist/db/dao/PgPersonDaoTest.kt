@@ -9,13 +9,10 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
-import java.time.LocalDateTime.now
 import java.time.YearMonth
 
 @Isolated
@@ -27,14 +24,6 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
         sessionOf(dataSource).use {
             it.run(queryOf("truncate person_info, inntekt, infotrygdutbetalinger restart identity cascade").asExecute)
         }
-    }
-
-    @Test
-    fun `kan fjerne en person fra klargjøringstabellen`() {
-        leggInnPersonIKlargjøringstabellen(person.id.value)
-        assertTrue(personFinnesIKlargjøringstabellen(person.id.value))
-        personDao.personKlargjort(person.id.value)
-        assertFalse(personFinnesIKlargjøringstabellen(person.id.value))
     }
 
     @Test
@@ -139,18 +128,4 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
                     }.asSingle,
             ) ?: emptyList()
         }
-
-    private fun leggInnPersonIKlargjøringstabellen(fødselsnummer: String) {
-        dbQuery.update(
-            "insert into person_klargjores (fødselsnummer, opprettet) values (:foedselsnummer, :opprettet)",
-            "foedselsnummer" to fødselsnummer,
-            "opprettet" to now(),
-        )
-    }
-
-    private fun personFinnesIKlargjøringstabellen(fødselsnummer: String) =
-        dbQuery.singleOrNull(
-            "select 1 from person_klargjores where fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ) { true } ?: false
 }

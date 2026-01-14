@@ -33,10 +33,6 @@ class PgPersonDao internal constructor(
             )
         }
 
-    override fun personKlargjort(fødselsnummer: String) {
-        asSQL("DELETE FROM person_klargjores WHERE fødselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer).update()
-    }
-
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
         asSQL(
             "SELECT id FROM person WHERE fødselsnummer = :foedselsnummer",

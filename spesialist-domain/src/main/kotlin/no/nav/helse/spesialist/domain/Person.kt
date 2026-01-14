@@ -91,6 +91,8 @@ class Person private constructor(
             else -> false
         }
 
+    fun harDataNødvendigForVisning() = info != null && egenAnsattStatus != null && enhetRef != null
+
     object Factory {
         fun ny(
             id: Identitetsnummer,

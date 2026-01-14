@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
+import no.nav.helse.spesialist.application.PersonKlargjoresDao
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.PåVentRepository
@@ -69,4 +70,5 @@ interface SessionContext {
     val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao
     val vedtakRepository: VedtakRepository
     val opptegnelseRepository: OpptegnelseRepository
+    val personKlargjoresDao: PersonKlargjoresDao
 }
