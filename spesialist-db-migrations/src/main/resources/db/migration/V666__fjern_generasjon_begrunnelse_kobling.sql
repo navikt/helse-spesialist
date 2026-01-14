@@ -1,0 +1,1 @@
+drop table generasjon_begrunnelse_kobling;

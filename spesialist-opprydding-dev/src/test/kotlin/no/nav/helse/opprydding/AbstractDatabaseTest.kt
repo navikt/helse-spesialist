@@ -141,7 +141,6 @@ internal abstract class AbstractDatabaseTest {
             INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number}, 'Begrunnelsefritekst', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST', '${saksbehandler_oid}');
             INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 1000, 'En begrunnelsemal', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL', '${saksbehandler_oid}');
             INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 2000, 'En begrunnelsekonklusjon', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON', '${saksbehandler_oid}');
-            INSERT INTO generasjon_begrunnelse_kobling(generasjon_id, begrunnelse_id) VALUES ('${generasjon_id}', ${sequence_number});
             INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, skjaeringstidspunkt, arsak, overstyring_ref, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref)
             VALUES (${sequence_number}, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000, ${sequence_number} + 2000);
             INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_identifikator, skjonnsfastsetting_sykepengegrunnlag_ref)

@@ -318,7 +318,6 @@ internal class PersonRepository(
     }
 
     private fun TransactionalSession.slettVedtaksperiodegenerasjoner(personRef: Int) {
-        slettGenerasjonBegrunnelseKoblinger(personRef)
         @Language("PostgreSQL")
         val query = """
              DELETE FROM behandling b USING vedtaksperiode v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
@@ -338,14 +337,6 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = """
              DELETE FROM behandling_v2 b USING vedtaksperiode v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
-        """
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettGenerasjonBegrunnelseKoblinger(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = """
-             DELETE FROM generasjon_begrunnelse_kobling gbk USING vedtaksperiode v INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id WHERE gbk.generasjon_id = b.unik_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
