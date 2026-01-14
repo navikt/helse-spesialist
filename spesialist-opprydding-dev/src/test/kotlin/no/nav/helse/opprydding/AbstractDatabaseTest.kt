@@ -21,7 +21,7 @@ internal abstract class AbstractDatabaseTest {
         val periodehistorikk_dialog_id = Random.nextInt(1000, 99999).toString()
         val saksbehandler_oid = UUID.randomUUID().toString()
         val hendelse_id = UUID.randomUUID().toString()
-        val generasjon_id = UUID.randomUUID().toString()
+        val behandling_id = UUID.randomUUID().toString()
         val vedtaksperiode_id = UUID.randomUUID().toString()
         val command_context_id = UUID.randomUUID().toString()
         val aktør_id = fødselsnummer.reversed()
@@ -64,7 +64,7 @@ internal abstract class AbstractDatabaseTest {
             INSERT INTO vedtaksperiode(id, vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)
             VALUES (${sequence_number}, '${vedtaksperiode_id}', '$organisasjonsnummer', ${sequence_number}, false);
             INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, spleis_behandling_id)
-            VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares', '$spleisBehandlingId');
+            VALUES (${sequence_number}, '${behandling_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares', '$spleisBehandlingId');
             INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
             VALUES ('$spleisBehandlingId', true, null, null, now());
             INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
@@ -174,7 +174,7 @@ internal abstract class AbstractDatabaseTest {
             INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, opprettet, dialog_ref)
             VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), now(), ${periodehistorikk_dialog_id});
             INSERT INTO periodehistorikk(id, type, timestamp, behandling_id, saksbehandler_oid, dialog_ref)
-            VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
+            VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${behandling_id}', '${saksbehandler_oid}',
                     ${periodehistorikk_dialog_id});
             
             INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id)

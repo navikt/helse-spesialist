@@ -71,7 +71,7 @@ class PgVedtakBegrunnelseDao internal constructor(
 
     override fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
-        generasjonId: Long,
+        behandlingId: Long,
     ): VedtakBegrunnelse? =
         asSQL(
             """
@@ -83,7 +83,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             ORDER BY vb.opprettet DESC LIMIT 1
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-            "behandlingId" to generasjonId,
+            "behandlingId" to behandlingId,
         ).singleOrNull { vedtakBegrunnelse ->
             val begrunnelse = vedtakBegrunnelse.string("tekst")
             val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))

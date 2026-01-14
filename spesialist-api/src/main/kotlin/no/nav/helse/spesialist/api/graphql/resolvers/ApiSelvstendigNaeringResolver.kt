@@ -79,7 +79,7 @@ class ApiSelvstendigNaeringResolver(
                                             periodehistorikkApiDao = periodehistorikkApiDao,
                                             notatDao = notatDao,
                                             påVentApiDao = påVentApiDao,
-                                            erSisteGenerasjon = index == 0,
+                                            erSisteBehandling = index == 0,
                                             index = index,
                                             vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                             sessionFactory = sessionFactory,

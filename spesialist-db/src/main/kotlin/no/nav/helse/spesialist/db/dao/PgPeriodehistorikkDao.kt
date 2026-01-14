@@ -33,13 +33,13 @@ class PgPeriodehistorikkDao private constructor(
         historikkinnslag: Historikkinnslag,
         oppgaveId: Long,
     ) {
-        val generasjonId = PgOppgaveDao(queryRunner).finnGenerasjonId(oppgaveId)
-        lagre(historikkinnslag, generasjonId)
+        val behandlingId = PgOppgaveDao(queryRunner).finnBehandlingId(oppgaveId)
+        lagre(historikkinnslag, behandlingId)
     }
 
     override fun lagre(
         historikkinnslag: Historikkinnslag,
-        generasjonId: UUID,
+        behandlingId: UUID,
     ) {
         asSQL(
             """
@@ -48,7 +48,7 @@ class PgPeriodehistorikkDao private constructor(
         """,
             "type" to historikkinnslag.type(),
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.id?.value,
-            "behandling_id" to generasjonId,
+            "behandling_id" to behandlingId,
             "dialog_ref" to historikkinnslag.dialogRef,
             "json" to historikkinnslag.detaljer().let { objectMapper.writeValueAsString(it) },
         ).update()

@@ -229,9 +229,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             ),
         )
 
-    protected fun nyGenerasjon(
+    protected fun nyBehandling(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        generasjonId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode = PERIODE,
         tilstandEndretTidspunkt: LocalDateTime? = null,
@@ -241,10 +241,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             dbQuery.updateAndReturnGeneratedKey(
                 """
                 INSERT INTO behandling (vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
-                VALUES (:vedtaksperiodeId, :generasjonId, :utbetalingId, :opprettetAvHendelse, :tilstandEndretTidspunkt, :tilstandEndretAvHendelse, 'VidereBehandlingAvklares', :fom, :tom, :skjaeringstidspunkt)
+                VALUES (:vedtaksperiodeId, :behandlingId, :utbetalingId, :opprettetAvHendelse, :tilstandEndretTidspunkt, :tilstandEndretAvHendelse, 'VidereBehandlingAvklares', :fom, :tom, :skjaeringstidspunkt)
                 """.trimIndent(),
                 "vedtaksperiodeId" to vedtaksperiodeId,
-                "generasjonId" to generasjonId,
+                "behandlingId" to behandlingId,
                 "utbetalingId" to utbetalingId,
                 "opprettetAvHendelse" to UUID.randomUUID(),
                 "tilstandEndretTidspunkt" to tilstandEndretTidspunkt,
@@ -260,7 +260,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         opprettet: LocalDateTime? = LocalDateTime.now(),
         kode: String = "EN_KODE",
-        generasjonRef: Long,
+        behandlingRef: Long,
         definisjonRef: Long? = null,
         status: String,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
@@ -272,7 +272,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "id" to id,
         "kode" to kode,
         "vedtaksperiodeId" to vedtaksperiodeId,
-        "behandlingRef" to generasjonRef,
+        "behandlingRef" to behandlingRef,
         "definisjonRef" to definisjonRef,
         "opprettet" to opprettet,
         "status" to status,

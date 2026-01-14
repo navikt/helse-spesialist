@@ -18,7 +18,7 @@ import java.util.UUID
 internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
     private val arbeidsgiver = opprettArbeidsgiver()
-    private val generasjonDao = daos.legacyBehandlingDao
+    private val behandlingDao = daos.legacyBehandlingDao
 
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {
@@ -27,7 +27,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
         val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
         opprettBehandling(vedtaksperiode2)
 
-        val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(person.id.value)
+        val vedtaksperiodeIder = behandlingDao.finnVedtaksperiodeIderFor(person.id.value)
         assertEquals(2, vedtaksperiodeIder.size)
         assertTrue(vedtaksperiodeIder.containsAll(setOf(vedtaksperiode1.id.value, vedtaksperiode2.id.value)))
     }
@@ -45,9 +45,9 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
         val vedtaksperiode2 = opprettVedtaksperiode(person2, arbeidsgiver2)
         opprettBehandling(vedtaksperiode2)
 
-        val vedtaksperiodeIderPerson1 = generasjonDao.finnVedtaksperiodeIderFor(person1.id.value)
+        val vedtaksperiodeIderPerson1 = behandlingDao.finnVedtaksperiodeIderFor(person1.id.value)
 
-        val vedtaksperiodeIderPerson2 = generasjonDao.finnVedtaksperiodeIderFor(person2.id.value)
+        val vedtaksperiodeIderPerson2 = behandlingDao.finnVedtaksperiodeIderFor(person2.id.value)
         assertEquals(1, vedtaksperiodeIderPerson1.size)
         assertEquals(1, vedtaksperiodeIderPerson2.size)
         assertTrue(vedtaksperiodeIderPerson1.containsAll(setOf(vedtaksperiode1.id.value)))
@@ -55,7 +55,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagre og finne generasjon`() {
+    fun `lagre og finne behandling`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
@@ -68,7 +68,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 status = VarselStatusDto.AKTIV,
             )
-        generasjonDao.finnLegacyBehandling(
+        behandlingDao.finnLegacyBehandling(
             BehandlingDto(
                 id = behandlingId,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -84,7 +84,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             ),
         )
-        val funnet = generasjonDao.finnLegacyBehandlinger(vedtaksperiodeId)
+        val funnet = behandlingDao.finnLegacyBehandlinger(vedtaksperiodeId)
         assertEquals(1, funnet.size)
         assertEquals(
             BehandlingDto(

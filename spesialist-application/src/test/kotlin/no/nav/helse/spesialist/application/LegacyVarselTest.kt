@@ -89,7 +89,7 @@ internal class LegacyVarselTest {
 
     private fun opprettVarsel(status: VarselDbDto.Varselstatus) = VarselDbDto(
         varselId = UUID.randomUUID(),
-        generasjonId = UUID.randomUUID(),
+        behandlingId = UUID.randomUUID(),
         opprettet = LocalDateTime.now(),
         kode = "SB_EX_1",
         status = status,

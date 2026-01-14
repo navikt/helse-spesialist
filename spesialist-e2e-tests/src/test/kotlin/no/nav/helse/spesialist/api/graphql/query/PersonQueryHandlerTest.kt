@@ -271,11 +271,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
         opprettVedtaksperiode(personRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
         opprettVedtak(personId = personRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
-        val generasjonId = UUID.randomUUID()
-        val generasjonRef =
-            nyGenerasjon(
+        val behandlingId= UUID.randomUUID()
+        val behandlingRef =
+            nyBehandling(
                 vedtaksperiodeId = uberegnetPeriode.id,
-                generasjonId = generasjonId,
+                behandlingId = behandlingId,
                 periode = uberegnetPeriode,
                 skjæringstidspunkt = 2 jan 2018,
             )
@@ -285,9 +285,9 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef, status = "AKTIV")
+        nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef, status = "AKTIV")
         val periode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id)
-        val forventetVarsel = setOf(PersonQueryTestVarsel(generasjonId, "EN_KODE"))
+        val forventetVarsel = setOf(PersonQueryTestVarsel(behandlingId, "EN_KODE"))
 
         assertEquals(forventetVarsel, periode.varsler)
     }
@@ -295,7 +295,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `Uberegnet periode som ikke er tilstøtende en periode med oppgave tar ikke med seg varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        val behandlingRef = nyBehandling(vedtaksperiodeId = vedtaksperiodeId)
         val uberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, vedtaksperiodeId)
         val beregnetPeriode = opprettBeregnetPeriode(5 jan 2023, 6 jan 2023, PERIODE.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(beregnetPeriode, uberegnetPeriode))
@@ -303,7 +303,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVedtaksperiode(opprettPerson())
         opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "AKTIV")
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, behandlingRef = behandlingRef, status = "AKTIV")
 
         val periode = runPersonQuery().plukkUtPeriodeMed(vedtaksperiodeId)
 
@@ -311,7 +311,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `Bare siste generasjon av en uberegnet periode skal ta med seg aktive varsler`() {
+    fun `Bare siste behandling for en uberegnet periode skal ta med seg aktive varsler`() {
         val snapshotGenerasjonId1 = UUID.randomUUID()
         val snapshotGenerasjonId2 = UUID.randomUUID()
         val personRef = opprettPerson()
@@ -320,19 +320,19 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
         opprettVedtaksperiode(personRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
         opprettVedtak(personId = personRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
-        val generasjonId1 = UUID.randomUUID()
-        val generasjonId2 = UUID.randomUUID()
-        val generasjonRef1 =
-            nyGenerasjon(
+        val behandlingId1 = UUID.randomUUID()
+        val behandlingId2 = UUID.randomUUID()
+        val behandlingRef1 =
+            nyBehandling(
                 vedtaksperiodeId = uberegnetPeriode.id,
-                generasjonId = generasjonId1,
+                behandlingId = behandlingId1,
                 periode = uberegnetPeriode,
                 skjæringstidspunkt = 2 jan 2018,
             )
-        val generasjonRef2 =
-            nyGenerasjon(
+        val behandlingRef2 =
+            nyBehandling(
                 vedtaksperiodeId = uberegnetPeriode.id,
-                generasjonId = generasjonId2,
+                behandlingId = behandlingId2,
                 periode = uberegnetPeriode,
                 skjæringstidspunkt = 2 jan 2018,
             )
@@ -346,15 +346,15 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
             opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon1, snapshotGenerasjon2))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
-        nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef1, status = "AKTIV")
-        nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef2, status = "AKTIV")
-        val førsteGenerasjonAvPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId2)
-        val sisteGenerasjonAvPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId1)
+        nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef1, status = "AKTIV")
+        nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef2, status = "AKTIV")
+        val førsteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId2)
+        val sisteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId1)
         val forventedeVarsler =
-            setOf(PersonQueryTestVarsel(generasjonId1, "EN_KODE"), PersonQueryTestVarsel(generasjonId2, "EN_KODE"))
+            setOf(PersonQueryTestVarsel(behandlingId1, "EN_KODE"), PersonQueryTestVarsel(behandlingId2, "EN_KODE"))
 
-        assertTrue(førsteGenerasjonAvPeriode.varsler.isEmpty())
-        assertEquals(forventedeVarsler, sisteGenerasjonAvPeriode.varsler)
+        assertTrue(førsteBehandlingForPeriode.varsler.isEmpty())
+        assertEquals(forventedeVarsler, sisteBehandlingForPeriode.varsler)
     }
 
     @Test

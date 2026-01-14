@@ -12,7 +12,7 @@ class UnimplementedVarselApiRepository : VarselApiRepository {
         TODO("Not yet implemented")
     }
 
-    override fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+    override fun finnVarslerSomIkkeErInaktiveForSisteBehandling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID
     ): Set<VarselDbDto> {

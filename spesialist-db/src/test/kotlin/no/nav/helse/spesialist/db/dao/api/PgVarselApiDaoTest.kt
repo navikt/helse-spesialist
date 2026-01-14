@@ -63,15 +63,15 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         // Given:
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val generasjonId = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId,
+            behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[1],
-            generasjonId = generasjonId,
+            behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
@@ -91,15 +91,15 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         // Given:
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val generasjonId = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId,
+            behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarselUtenDefinisjon(
             varseldefinisjonKode = "EN_KODE_UTEN_DEFINISJON",
-            generasjonId = generasjonId,
+            behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
@@ -121,40 +121,40 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
 
-        val generasjonId1 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
-        val generasjonId2 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[1],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
-        val generasjonId3 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId3 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId3,
+            behandlingId = behandlingId3,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarselUtenDefinisjon(
             varseldefinisjonKode = "EN_KODE_UTEN_DEFINISJON",
-            generasjonId = generasjonId3,
+            behandlingId = behandlingId3,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
         // When:
         val varsler =
-            apiVarselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+            apiVarselDao.finnVarslerSomIkkeErInaktiveForSisteBehandling(
                 vedtaksperiodeId = vedtaksperiode.id,
                 utbetalingId = utbetalingId,
             )
@@ -169,32 +169,32 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
 
-        val generasjonId1 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[1],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
-        val generasjonId2 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[1],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarselUtenDefinisjon(
             varseldefinisjonKode = "EN_KODE_UTEN_DEFINISJON",
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
@@ -211,34 +211,34 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
 
-        val generasjonId1 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             status = Varselstatus.GODKJENT,
             endret = true,
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[1],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
-        val generasjonId2 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[1],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarselUtenDefinisjon(
             varseldefinisjonKode = "EN_KODE_UTEN_DEFINISJON",
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
@@ -250,27 +250,27 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Finner varsler for en gitt generasjon`() {
+    fun `Finner varsler for en gitt behandling`() {
         // Given:
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
 
-        val generasjonId = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
         val varsel1 =
             opprettVarsel(
                 varseldefinisjon = varseldefinisjoner[0],
-                generasjonId = generasjonId,
+                behandlingId = behandlingId,
                 vedtaksperiodeId = vedtaksperiode.id,
             )
         val varsel2 =
             opprettVarsel(
                 varseldefinisjon = varseldefinisjoner[1],
-                generasjonId = generasjonId,
+                behandlingId = behandlingId,
                 vedtaksperiodeId = vedtaksperiode.id,
             )
 
         // When:
-        val varsler = apiVarselDao.finnVarslerFor(generasjonId = generasjonId.unikId)
+        val varsler = apiVarselDao.finnVarslerFor(behandlingId = behandlingId.unikId)
 
         // Then:
         assertEquals(setOf(varsel1, varsel2), varsler)
@@ -282,20 +282,20 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
 
         val vedtaksperiode1 = opprettVedtaksperiode(skjæringstidspunkt = 1 jan 2021, utbetalingId = utbetalingId)
-        val generasjonId1 = opprettGenerasjon(vedtaksperiode = vedtaksperiode1, utbetalingId = utbetalingId)
+        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode1, utbetalingId = utbetalingId)
         opprettVarsel(
             status = Varselstatus.VURDERT,
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode1.id,
         )
 
         val vedtaksperiode2 = opprettVedtaksperiode(skjæringstidspunkt = 1 feb 2022, utbetalingId = utbetalingId)
-        val generasjonId2 = opprettGenerasjon(vedtaksperiode = vedtaksperiode2, utbetalingId = utbetalingId)
+        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode2, utbetalingId = utbetalingId)
         opprettVarsel(
             status = Varselstatus.VURDERT,
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode2.id,
         )
 
@@ -303,8 +303,8 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         apiVarselDao.godkjennVarslerFor(listOf(vedtaksperiode1, vedtaksperiode2).map(TestVedtaksperiodeDto::id))
 
         // Then:
-        assertEquals(1, tellGodkjenteVarsel(generasjonId1))
-        assertEquals(1, tellGodkjenteVarsel(generasjonId2))
+        assertEquals(1, tellGodkjenteVarsel(behandlingId1))
+        assertEquals(1, tellGodkjenteVarsel(behandlingId2))
     }
 
     @Test
@@ -313,18 +313,18 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
 
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val generasjonId1 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
-        val generasjonId2 = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
+        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
         opprettVarsel(
             status = Varselstatus.VURDERT,
             endret = true,
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId1,
+            behandlingId = behandlingId1,
             vedtaksperiodeId = vedtaksperiode.id,
         )
         opprettVarsel(
             varseldefinisjon = varseldefinisjoner[0],
-            generasjonId = generasjonId2,
+            behandlingId = behandlingId2,
             vedtaksperiodeId = vedtaksperiode.id,
         )
 
@@ -342,12 +342,12 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     fun `vurder varsel`() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val generasjonId = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
         val varselId =
             opprettVarsel(
                 status = Varselstatus.AKTIV,
                 varseldefinisjon = varseldefinisjoner[0],
-                generasjonId = generasjonId,
+                behandlingId = behandlingId,
                 vedtaksperiodeId = vedtaksperiode.id,
             ).varselId
         val vurdering1 = finnVurderingFor(varselId)
@@ -369,11 +369,11 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     fun `godkjenning av varsel setter ikke ident eller endret_tidspunkt`() {
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val generasjonId = opprettGenerasjon(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
+        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
         val varselId =
             opprettVarsel(
                 varseldefinisjon = varseldefinisjoner[0],
-                generasjonId = generasjonId,
+                behandlingId = behandlingId,
                 vedtaksperiodeId = vedtaksperiode.id,
             ).varselId
         apiVarselDao.vurderVarselFor(varselId, Varselstatus.VURDERT, "ident")
@@ -481,7 +481,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             )
         }
 
-    private fun opprettGenerasjon(
+    private fun opprettBehandling(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
@@ -523,7 +523,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         skjæringstidspunkt: LocalDate,
         forkastet: Boolean,
     ): Long {
-        opprettGenerasjon(
+        opprettBehandling(
             vedtaksperiodeId = vedtaksperiodeId,
             fom = fom,
             tom = tom,
@@ -542,7 +542,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         )!!
     }
 
-    private fun nyGenerasjon(
+    private fun nyBehandling(
         vedtaksperiodeId: UUID,
         unikId: UUID,
         utbetalingId: UUID,
@@ -768,7 +768,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         status: Varselstatus = Varselstatus.AKTIV,
         endret: Boolean = false,
         varseldefinisjon: TestVarseldefinisjon,
-        generasjonId: TestGenerasjonId,
+        behandlingId: TestBehandlingId,
         vedtaksperiodeId: UUID,
     ): VarselDbDto =
         opprettVarsel(
@@ -776,7 +776,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             endret = endret,
             varseldefinisjonKode = varseldefinisjon.kode,
             varseldefinisjon = varseldefinisjon.dto,
-            generasjonId = generasjonId,
+            behandlingId= behandlingId,
             vedtaksperiodeId = vedtaksperiodeId,
         )
 
@@ -784,7 +784,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         status: Varselstatus = Varselstatus.AKTIV,
         endret: Boolean = false,
         varseldefinisjonKode: String,
-        generasjonId: TestGenerasjonId,
+        behandlingId: TestBehandlingId,
         vedtaksperiodeId: UUID,
     ) {
         opprettVarsel(
@@ -792,7 +792,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             endret = endret,
             varseldefinisjonKode = varseldefinisjonKode,
             varseldefinisjon = null,
-            generasjonId = generasjonId,
+            behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiodeId,
         )
     }
@@ -802,12 +802,12 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         endret: Boolean,
         varseldefinisjonKode: String,
         varseldefinisjon: VarseldefinisjonDbDto?,
-        generasjonId: TestGenerasjonId,
+        behandlingId: TestBehandlingId,
         vedtaksperiodeId: UUID,
     ): VarselDbDto =
         VarselDbDto(
             varselId = UUID.randomUUID(),
-            generasjonId = generasjonId.unikId,
+            behandlingId = behandlingId.unikId,
             opprettet = (1 jan 2020).atTime(12, 0, 0),
             kode = varseldefinisjonKode,
             status = status,
@@ -816,7 +816,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         ).also {
             insertSelveVarsel(
                 dto = it,
-                generasjonId = generasjonId.id,
+                behandlingId = behandlingId.id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 endret = endret,
             )
@@ -827,34 +827,34 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         val dto: VarseldefinisjonDbDto,
     )
 
-    private class TestGenerasjonId(
+    private class TestBehandlingId(
         val id: Long,
         val unikId: UUID,
     )
 
-    private fun opprettGenerasjon(
+    private fun opprettBehandling(
         vedtaksperiode: TestVedtaksperiodeDto,
         utbetalingId: UUID,
-    ): TestGenerasjonId =
-        UUID.randomUUID().let { generasjonUnikId ->
-            TestGenerasjonId(
+    ): TestBehandlingId =
+        UUID.randomUUID().let { behandlingUnikId ->
+            TestBehandlingId(
                 id =
-                    nyGenerasjon(
+                    nyBehandling(
                         vedtaksperiodeId = vedtaksperiode.id,
-                        unikId = generasjonUnikId,
+                        unikId = behandlingUnikId,
                         utbetalingId = utbetalingId,
                         fom = vedtaksperiode.fom,
                         tom = vedtaksperiode.fom,
                         tilstandEndretTidspunkt = null,
                         skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
                     ),
-                unikId = generasjonUnikId,
+                unikId = behandlingUnikId,
             )
         }
 
     private fun insertSelveVarsel(
         dto: VarselDbDto,
-        generasjonId: Long,
+        behandlingId: Long,
         vedtaksperiodeId: UUID,
         endret: Boolean,
     ) {
@@ -866,7 +866,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             "unik_id" to dto.varselId,
             "kode" to dto.kode,
             "vedtaksperiode_id" to vedtaksperiodeId,
-            "behandling_ref" to generasjonId,
+            "behandling_ref" to behandlingId,
             "opprettet" to dto.opprettet,
             "status" to dto.status.name,
             "status_endret_ident" to "EN_IDENT".takeIf { endret },
@@ -902,10 +902,10 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         )
     }
 
-    private fun tellGodkjenteVarsel(generasjonId: TestGenerasjonId): Int =
+    private fun tellGodkjenteVarsel(behandlingId: TestBehandlingId): Int =
         dbQuery.single(
-            "SELECT COUNT(*) FROM selve_varsel sv WHERE sv.behandling_ref = :generasjonRef AND status = 'GODKJENT'",
-            "generasjonRef" to generasjonId.id,
+            "SELECT COUNT(*) FROM selve_varsel sv WHERE sv.behandling_ref = :behandling_ref AND status = 'GODKJENT'",
+            "behandling_ref" to behandlingId.id,
         ) { it.int(1) }
 
     class TestVedtaksperiodeDto(

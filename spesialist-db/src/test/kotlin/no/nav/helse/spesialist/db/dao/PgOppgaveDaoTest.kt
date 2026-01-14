@@ -35,10 +35,10 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `finn generasjonId`() {
+    fun `finn behandlingId`() {
         val oppgave = nyOppgaveForNyPerson()
         assertDoesNotThrow {
-            oppgaveDao.finnGenerasjonId(oppgave.id)
+            oppgaveDao.finnBehandlingId(oppgave.id)
         }
     }
 

@@ -8,7 +8,7 @@ interface PartialOppgaveDao : OppgaveDao {
         error("Not implemented for this test")
     }
 
-    override fun finnGenerasjonId(oppgaveId: Long): UUID {
+    override fun finnBehandlingId(oppgaveId: Long): UUID {
         error("Not implemented for this test")
     }
 

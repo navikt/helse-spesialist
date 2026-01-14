@@ -42,7 +42,7 @@ class PgBehandlingApiDao internal constructor(
 
     fun gjeldendeBehandlingFor(
         oppgaveId: Long,
-        varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>,
+        varselSupplier: (behandlingId: UUID) -> Set<VarselDbDto>,
     ): VedtaksperiodeDbDto =
         asSQL(
             """
@@ -58,7 +58,7 @@ class PgBehandlingApiDao internal constructor(
 
     fun gjeldendeBehandlingerForPerson(
         oppgaveId: Long,
-        varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>,
+        varselSupplier: (behandlingId: UUID) -> Set<VarselDbDto>,
     ): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
@@ -74,7 +74,7 @@ class PgBehandlingApiDao internal constructor(
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode(varselSupplier) }.toSet()
 
-    private fun Row.tilVedtaksperiode(varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>) = tilVedtaksperiode(varselSupplier(uuid("unik_id")))
+    private fun Row.tilVedtaksperiode(varselSupplier: (behandlingUnikId: UUID) -> Set<VarselDbDto>) = tilVedtaksperiode(varselSupplier(uuid("unik_id")))
 
     private fun Row.tilVedtaksperiode(varsler: Set<VarselDbDto> = emptySet()) =
         VedtaksperiodeDbDto(

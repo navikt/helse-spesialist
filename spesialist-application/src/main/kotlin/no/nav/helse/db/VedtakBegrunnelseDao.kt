@@ -8,7 +8,7 @@ interface VedtakBegrunnelseDao {
 
     fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
-        generasjonId: Long,
+        behandlingId: Long,
     ): VedtakBegrunnelse?
 
     fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase?

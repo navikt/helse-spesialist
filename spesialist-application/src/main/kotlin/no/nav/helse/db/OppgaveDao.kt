@@ -6,7 +6,7 @@ import java.util.UUID
 interface OppgaveDao {
     fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long
 
-    fun finnGenerasjonId(oppgaveId: Long): UUID
+    fun finnBehandlingId(oppgaveId: Long): UUID
 
     fun finnOppgaveId(fødselsnummer: String): Long?
 

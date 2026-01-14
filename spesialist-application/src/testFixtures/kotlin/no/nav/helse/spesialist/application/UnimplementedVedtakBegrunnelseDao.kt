@@ -13,7 +13,7 @@ class UnimplementedVedtakBegrunnelseDao : VedtakBegrunnelseDao {
 
     override fun finnVedtakBegrunnelse(
         vedtaksperiodeId: UUID,
-        generasjonId: Long
+        behandlingId: Long
     ): VedtakBegrunnelse? {
         TODO("Not yet implemented")
     }

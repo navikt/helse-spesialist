@@ -21,7 +21,7 @@ class PgOppgaveDao internal constructor(
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
 
-    override fun finnGenerasjonId(oppgaveId: Long): UUID =
+    override fun finnBehandlingId(oppgaveId: Long): UUID =
         asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
             .single { it.uuid("generasjon_ref") }
 

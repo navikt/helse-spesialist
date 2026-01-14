@@ -17,10 +17,10 @@ class PgVarselApiRepository internal constructor(
         utbetalingId: UUID,
     ): Set<VarselDbDto> = varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId)
 
-    override fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+    override fun finnVarslerSomIkkeErInaktiveForSisteBehandling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<VarselDbDto> = varselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId)
+    ): Set<VarselDbDto> = varselDao.finnVarslerSomIkkeErInaktiveForSisteBehandling(vedtaksperiodeId, utbetalingId)
 
     override fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> = varselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId)
 

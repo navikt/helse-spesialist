@@ -8,7 +8,7 @@ interface VarselApiRepository {
         utbetalingId: UUID,
     ): Set<VarselDbDto>
 
-    fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+    fun finnVarslerSomIkkeErInaktiveForSisteBehandling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<VarselDbDto>

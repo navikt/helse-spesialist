@@ -32,8 +32,8 @@ internal class VurderÅpenGosysoppgaveTest {
         private val VEDTAKPERIODE_ID_AG_2 = UUID.randomUUID()
     }
 
-    private val behandlingAg1 = generasjon(VEDTAKPERIODE_ID_AG_1)
-    private val behandlingAg2 = generasjon(VEDTAKPERIODE_ID_AG_2)
+    private val behandlingAg1 = behandling(VEDTAKPERIODE_ID_AG_1)
+    private val behandlingAg2 = behandling(VEDTAKPERIODE_ID_AG_2)
     private val skjæringstidspunkt = LocalDate.now().minusDays(17)
     private val sykefraværstilfelle = Sykefraværstilfelle(
         FNR,
@@ -170,7 +170,7 @@ internal class VurderÅpenGosysoppgaveTest {
         }
     }
 
-    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
+    private fun behandling(vedtaksperiodeId: UUID = UUID.randomUUID()) =
         LegacyBehandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,

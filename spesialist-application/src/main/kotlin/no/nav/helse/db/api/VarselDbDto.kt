@@ -5,7 +5,7 @@ import java.util.UUID
 
 data class VarselDbDto(
     val varselId: UUID,
-    val generasjonId: UUID,
+    val behandlingId: UUID,
     val opprettet: LocalDateTime,
     val kode: String,
     var status: Varselstatus,

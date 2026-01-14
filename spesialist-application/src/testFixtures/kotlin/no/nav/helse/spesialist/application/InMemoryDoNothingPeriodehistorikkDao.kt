@@ -13,7 +13,7 @@ class InMemoryDoNothingPeriodehistorikkDao : PeriodehistorikkDao {
 
     override fun lagre(
         historikkinnslag: Historikkinnslag,
-        generasjonId: UUID,
+        behandlingId: UUID,
     ) {
     }
 }

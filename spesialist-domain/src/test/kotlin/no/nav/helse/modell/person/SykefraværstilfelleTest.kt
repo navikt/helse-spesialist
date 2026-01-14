@@ -16,42 +16,42 @@ import java.util.UUID
 
 internal class SykefraværstilfelleTest {
     @Test
-    fun `Kan ikke opprette et sykefraværstilfelle uten å ha en generasjon`() {
+    fun `Kan ikke opprette et sykefraværstilfelle uten å ha en behandling`() {
         assertThrows<IllegalStateException> {
-            sykefraværstilfelle(gjeldendeGenerasjoner = emptyList())
+            sykefraværstilfelle(gjeldendeBehandlinger = emptyList())
         }
     }
 
     @Test
     fun `har ikke aktive varsler`() {
-        val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
-        val gjeldendeGenerasjon2 = legacyBehandling(UUID.randomUUID())
-        assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
+        val gjeldendeBehandling1 = legacyBehandling(UUID.randomUUID())
+        val gjeldendeBehandling2 = legacyBehandling(UUID.randomUUID())
+        assertFalse(listOf(gjeldendeBehandling1, gjeldendeBehandling2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
-    fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
-        val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
-        val gjeldendeGenerasjon2 = legacyBehandling(UUID.randomUUID())
+    fun `har ikke aktive varsler når behandlingene har utbetalingId men ikke fom`() {
+        val gjeldendeBehandling1 = legacyBehandling(UUID.randomUUID())
+        val gjeldendeBehandling2 = legacyBehandling(UUID.randomUUID())
         val utbetalingId = UUID.randomUUID()
-        gjeldendeGenerasjon1.håndterNyUtbetaling(utbetalingId)
-        gjeldendeGenerasjon2.håndterNyUtbetaling(utbetalingId)
-        assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
+        gjeldendeBehandling1.håndterNyUtbetaling(utbetalingId)
+        gjeldendeBehandling2.håndterNyUtbetaling(utbetalingId)
+        assertFalse(listOf(gjeldendeBehandling1, gjeldendeBehandling2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
     fun `har aktive varsler`() {
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
-        val gjeldendeGenerasjon2 = legacyBehandling(vedtaksperiodeId2)
-        gjeldendeGenerasjon2.håndterNyttVarsel(
+        val gjeldendeBehandling1 = legacyBehandling(UUID.randomUUID())
+        val gjeldendeBehandling2 = legacyBehandling(vedtaksperiodeId2)
+        gjeldendeBehandling2.håndterNyttVarsel(
             LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
         )
-        assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
+        assertTrue(listOf(gjeldendeBehandling1, gjeldendeBehandling2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
-    fun `thrower hvis generasjon ikke finnes`() {
+    fun `thrower hvis behandling ikke finnes`() {
         assertThrows<IllegalArgumentException> { sykefraværstilfelle().haster(UUID.randomUUID()) }
     }
 
@@ -68,10 +68,10 @@ internal class SykefraværstilfelleTest {
     private fun sykefraværstilfelle(
         fødselsnummer: String = "12345678910",
         skjæringstidspunkt: LocalDate = 1 jan 2018,
-        gjeldendeGenerasjoner: List<LegacyBehandling> = listOf(legacyBehandling()),
+        gjeldendeBehandlinger: List<LegacyBehandling> = listOf(legacyBehandling()),
     ) = Sykefraværstilfelle(
         fødselsnummer,
         skjæringstidspunkt,
-        gjeldendeGenerasjoner,
+        gjeldendeBehandlinger,
     )
 }

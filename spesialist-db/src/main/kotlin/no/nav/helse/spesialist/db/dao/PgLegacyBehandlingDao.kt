@@ -113,7 +113,7 @@ class PgLegacyBehandlingDao private constructor(
     private fun lagre(
         varselDto: VarselDto,
         vedtaksperiodeId: UUID,
-        generasjonId: UUID,
+        behandlingId: UUID,
     ) {
         asSQL(
             """
@@ -124,14 +124,14 @@ class PgLegacyBehandlingDao private constructor(
             "unik_id" to varselDto.id,
             "kode" to varselDto.varselkode,
             "vedtaksperiode_id" to vedtaksperiodeId,
-            "behandling_id" to generasjonId,
+            "behandling_id" to behandlingId,
             "opprettet" to varselDto.opprettet,
             "status" to varselDto.status.name,
         ).update()
     }
 
     private fun slettVarsler(
-        generasjonId: UUID,
+        behandlingId: UUID,
         varselIder: List<UUID>,
     ) {
         asSQLWithQuestionMarks(
@@ -146,7 +146,7 @@ class PgLegacyBehandlingDao private constructor(
                 AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
                 """.trimIndent()
             },
-            generasjonId,
+            behandlingId,
             *varselIder.toTypedArray(),
         ).update()
     }

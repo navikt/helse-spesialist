@@ -11,6 +11,6 @@ interface PeriodehistorikkDao {
 
     fun lagre(
         historikkinnslag: Historikkinnslag,
-        generasjonId: UUID,
+        behandlingId: UUID,
     )
 }

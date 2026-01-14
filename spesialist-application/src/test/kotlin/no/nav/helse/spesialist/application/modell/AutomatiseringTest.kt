@@ -151,17 +151,17 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
-        val gjeldendeGenerasjon = enGenerasjon()
-        gjeldendeGenerasjon.håndterNyttVarsel(etVarsel())
-        blirManuellOppgave(legacyBehandling = gjeldendeGenerasjon)
+        val gjeldendeBehandling = enBehandling()
+        gjeldendeBehandling.håndterNyttVarsel(etVarsel())
+        blirManuellOppgave(legacyBehandling = gjeldendeBehandling)
     }
 
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 3
-        val gjeldendeGenerasjon = enGenerasjon()
+        val gjeldendeBehandling = enBehandling()
         blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = gjeldendeGenerasjon,
+            legacyBehandling = gjeldendeBehandling,
             problems = listOf("Antall automatisk godkjente korrigerte søknader er større eller lik 2"),
             varselkode = Varselkode.SB_SØ_1,
         )
@@ -197,7 +197,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med nådd maksdato og refusjon fra AG er ikke automatiserbar`() {
         blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = enGenerasjon(skjæringstidspunkt = 1 jan 2018),
+            legacyBehandling = enBehandling(skjæringstidspunkt = 1 jan 2018),
             tags = listOf("ArbeidsgiverØnskerRefusjon"),
             maksdato = 1 des 2017,
             varselkode = Varselkode.RV_OV_5,
@@ -373,7 +373,7 @@ internal class AutomatiseringTest {
     private fun forsøkAutomatisering(
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         periodetype: Periodetype = FORLENGELSE,
-        generasjoners: List<LegacyBehandling> =
+        behandlinger: List<LegacyBehandling> =
             listOf(
                 LegacyBehandling(
                     id = UUID.randomUUID(),
@@ -392,7 +392,7 @@ internal class AutomatiseringTest {
         vedtaksperiodeId = vedtaksperiodeId,
         utbetaling = utbetaling,
         periodetype = periodetype,
-        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, generasjoners),
+        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, behandlinger),
         organisasjonsnummer = orgnummer,
         yrkesaktivitetstype = yrkesaktivitetstype,
         maksdato = maksdato,
@@ -405,14 +405,14 @@ internal class AutomatiseringTest {
         type: Utbetalingtype = Utbetalingtype.UTBETALING,
     ) = Utbetaling(utbetalingId, arbeidsgiverbeløp, personbeløp, type)
 
-    private fun enGenerasjon(
+    private fun enBehandling(
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = this.vedtaksperiodeId,
-        generasjonId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = UUID.randomUUID(),
     ) = LegacyBehandling(
-        id = generasjonId,
+        id = behandlingId,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = fom,
         tom = tom,
@@ -428,7 +428,7 @@ internal class AutomatiseringTest {
 
     private fun blirManuellOppgave(
         utbetaling: Utbetaling = enUtbetaling(),
-        legacyBehandling: LegacyBehandling = enGenerasjon(),
+        legacyBehandling: LegacyBehandling = enBehandling(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
@@ -437,7 +437,7 @@ internal class AutomatiseringTest {
         forsøkAutomatisering(
             yrkesaktivitetstype = yrkesaktivitetstype,
             utbetaling = utbetaling,
-            generasjoners = listOf(legacyBehandling),
+            behandlinger = listOf(legacyBehandling),
             maksdato = maksdato,
             tags = tags,
             periodetype = periodetype,
@@ -468,7 +468,7 @@ internal class AutomatiseringTest {
     private fun blirManuellOppgaveMedFeilOgVarsel(
         utbetaling: Utbetaling = enUtbetaling(),
         problems: List<String>,
-        legacyBehandling: LegacyBehandling = enGenerasjon(),
+        legacyBehandling: LegacyBehandling = enBehandling(),
         varselkode: Varselkode,
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
@@ -476,7 +476,7 @@ internal class AutomatiseringTest {
         val resultat =
             forsøkAutomatisering(
                 utbetaling = utbetaling,
-                generasjoners = listOf(legacyBehandling),
+                behandlinger = listOf(legacyBehandling),
                 maksdato = maksdato,
                 tags = tags,
             )

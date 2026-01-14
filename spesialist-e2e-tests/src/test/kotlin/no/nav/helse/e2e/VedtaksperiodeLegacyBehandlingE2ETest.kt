@@ -9,18 +9,18 @@ import java.util.UUID
 
 class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
     @Test
-    fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {
+    fun `Oppretter første behandling når vedtaksperioden blir opprettet`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
-        assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
+        assertBehandlinger(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
-    fun `Oppretter ikke ny generasjon ved vedtaksperiode_endret dersom det finnes en ubehandlet generasjon fra før av`() {
+    fun `Oppretter ikke ny behandling ved vedtaksperiode_endret dersom det finnes en ubehandlet behandling fra før av`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeEndret()
-        assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
+        assertBehandlinger(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
@@ -28,7 +28,7 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = UTBETALING_ID)
-        assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
+        assertBehandlingerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
     }
 
     @Test
@@ -40,8 +40,8 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = gammel)
         håndterUtbetalingForkastet()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = ny)
-        assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, gammel, 0)
-        assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, ny, 1)
+        assertBehandlingerMedUtbetaling(VEDTAKSPERIODE_ID, gammel, 0)
+        assertBehandlingerMedUtbetaling(VEDTAKSPERIODE_ID, ny, 1)
     }
 
     @Test
@@ -49,9 +49,9 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
+        assertBehandlingerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 1)
         håndterUtbetalingForkastet()
-        assertGenerasjonerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 0)
+        assertBehandlingerMedUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID, 0)
     }
 
     @Test
@@ -65,11 +65,11 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         val utbetalingId = UUID.randomUUID()
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = utbetalingId)
-        assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
-        assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
+        assertBehandlinger(VEDTAKSPERIODE_ID, 2)
+        assertBehandlingHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
     }
 
-    private fun assertGenerasjonHarVarsler(
+    private fun assertBehandlingHarVarsler(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         forventetAntall: Int,
@@ -88,7 +88,7 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         assertEquals(forventetAntall, antall) { "Forventet $forventetAntall varsler for $vedtaksperiodeId, $utbetalingId, fant $antall" }
     }
 
-    private fun assertGenerasjoner(
+    private fun assertBehandlinger(
         vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
@@ -98,10 +98,10 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
                 val query = "SELECT COUNT(1) FROM behandling WHERE vedtaksperiode_id = ?"
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
-        assertEquals(forventetAntall, antall) { "Forventet $forventetAntall generasjoner for $vedtaksperiodeId, fant $antall" }
+        assertEquals(forventetAntall, antall) { "Forventet $forventetAntall behandlinger for $vedtaksperiodeId, fant $antall" }
     }
 
-    private fun assertGenerasjonerMedUtbetaling(
+    private fun assertBehandlingerMedUtbetaling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         forventetAntall: Int,
@@ -113,7 +113,7 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
                 session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
             }
         assertEquals(forventetAntall, antall) {
-            "Forventet $forventetAntall generasjoner med utbetalingId=$utbetalingId for $vedtaksperiodeId, fant $antall"
+            "Forventet $forventetAntall behandlinger med utbetalingId=$utbetalingId for $vedtaksperiodeId, fant $antall"
         }
     }
 }

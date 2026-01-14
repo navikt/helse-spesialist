@@ -27,10 +27,10 @@ class PgLegacyVedtaksperiodeRepository(
     private fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto =
         vedtakDao
             .finnVedtaksperiode(vedtaksperiodeId)
-            ?.copy(behandlinger = finnGenerasjoner(vedtaksperiodeId))
+            ?.copy(behandlinger = finnBehandlinger(vedtaksperiodeId))
             ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
 
-    private fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
+    private fun finnBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto> =
         legacyBehandlingDao.finnLegacyBehandlinger(vedtaksperiodeId).also {
             hentedeBehandlinger[vedtaksperiodeId] = it
         }
@@ -42,51 +42,51 @@ class PgLegacyVedtaksperiodeRepository(
         vedtakDao.lagreVedtaksperiode(fødselsnummer, vedtaksperiode)
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeBehandlinger.remove(vedtaksperiode.vedtaksperiodeId)
-        vedtaksperiode.behandlinger.forEach { generasjonDto ->
-            legacyBehandlingDao.finnLegacyBehandling(generasjonDto)
+        vedtaksperiode.behandlinger.forEach { behandlingDto ->
+            legacyBehandlingDao.finnLegacyBehandling(behandlingDto)
         }
         vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {
-        val hentedeGenerasjonerForPeriode = hentedeBehandlinger[vedtaksperiode.vedtaksperiodeId] ?: return
-        val antallHentet = hentedeGenerasjonerForPeriode.size
+        val hentedeBehandlingerForPeriode = hentedeBehandlinger[vedtaksperiode.vedtaksperiodeId] ?: return
+        val antallHentet = hentedeBehandlingerForPeriode.size
         if (antallHentet == 0) return
-        val generasjonerForLagring = vedtaksperiode.behandlinger
-        val antallNå = generasjonerForLagring.size
+        val behandlingerForLagring = vedtaksperiode.behandlinger
+        val antallNå = behandlingerForLagring.size
         val builder =
             StringBuilder().appendLine(
-                "Hentet $antallHentet generasjon(er) for ${vedtaksperiode.vedtaksperiodeId}, skal lagre $antallNå.",
+                "Hentet $antallHentet behandling(er) for ${vedtaksperiode.vedtaksperiodeId}, skal lagre $antallNå.",
             )
 
         if (antallHentet == antallNå) {
-            val nyesteHentet = hentedeGenerasjonerForPeriode.last()
-            val nyesteSkalLagres = generasjonerForLagring.last()
+            val nyesteHentet = hentedeBehandlingerForPeriode.last()
+            val nyesteSkalLagres = behandlingerForLagring.last()
             val nyesteErEendret = nyesteHentet != nyesteSkalLagres
-            builder.appendLine("Ingen generasjoner ble lagt til. Nyeste versjon ble endret: $nyesteErEendret")
+            builder.appendLine("Ingen behandlinger ble lagt til. Nyeste versjon ble endret: $nyesteErEendret")
             if (nyesteErEendret) {
                 builder.appendLine()
             }
-            builder.diffMellomToGenerasjoner(nyesteHentet, nyesteSkalLagres)
+            builder.diffMellomToBehandlinger(nyesteHentet, nyesteSkalLagres)
         }
-        val hentedeBortsettFraSiste = hentedeGenerasjonerForPeriode.dropLast(1)
+        val hentedeBortsettFraSiste = hentedeBehandlingerForPeriode.dropLast(1)
         if (hentedeBortsettFraSiste.isNotEmpty()) {
-            val historiskeForLagring = generasjonerForLagring.take(hentedeBortsettFraSiste.size)
+            val historiskeForLagring = behandlingerForLagring.take(hentedeBortsettFraSiste.size)
             val historiskeErUlike = hentedeBortsettFraSiste != historiskeForLagring
             if (historiskeErUlike) {
-                builder.appendLine("Historiske generasjoner ble endret")
+                builder.appendLine("Historiske behandlinger ble endret")
                 builder.appendLine("         før - etter:")
-                hentedeGenerasjonerForPeriode.zip(historiskeForLagring).forEach { (hentet, skalLagres) ->
-                    builder.diffMellomToGenerasjoner(hentet, skalLagres)
+                hentedeBehandlingerForPeriode.zip(historiskeForLagring).forEach { (hentet, skalLagres) ->
+                    builder.diffMellomToBehandlinger(hentet, skalLagres)
                 }
             } else {
-                builder.appendLine("Historiske generasjoner ble ikke endret")
+                builder.appendLine("Historiske behandlinger ble ikke endret")
             }
         }
         sikkerlogg.info(builder.toString())
     }
 
-    private fun StringBuilder.diffMellomToGenerasjoner(
+    private fun StringBuilder.diffMellomToBehandlinger(
         hentet: BehandlingDto,
         skalLagres: BehandlingDto,
     ) {

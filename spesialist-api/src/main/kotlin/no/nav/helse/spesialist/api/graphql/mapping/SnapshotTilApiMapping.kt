@@ -299,7 +299,7 @@ private fun SnapshotRefusjonselement.tilApiRefusjonselement() =
         meldingsreferanseId = meldingsreferanseId,
     )
 
-fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
+fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteBehandling: Boolean) =
     when (this) {
         SnapshotPeriodetilstand.ANNULLERINGFEILET -> ApiPeriodetilstand.AnnulleringFeilet
         SnapshotPeriodetilstand.ANNULLERT -> ApiPeriodetilstand.Annullert
@@ -315,7 +315,7 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
         SnapshotPeriodetilstand.UTBETALINGFEILET -> ApiPeriodetilstand.UtbetalingFeilet
         SnapshotPeriodetilstand.VENTERPAANNENPERIODE -> ApiPeriodetilstand.VenterPaEnAnnenPeriode
         SnapshotPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
-            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) {
+            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteBehandling) {
                 ApiPeriodetilstand.VenterPaEnAnnenPeriode
             } else {
                 ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode

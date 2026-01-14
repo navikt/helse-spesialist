@@ -97,14 +97,14 @@ data class ApiBeregnetPeriodeResolver(
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val erSisteGenerasjon: Boolean,
+    private val erSisteBehandling: Boolean,
     private val index: Int,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val sessionFactory: SessionFactory,
     private val annulleringRepository: AnnulleringRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : BeregnetPeriodeSchema {
-    private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteGenerasjon)
+    private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteBehandling)
 
     override fun behandlingId(): UUID = periode.behandlingId
 
@@ -394,9 +394,9 @@ data class ApiBeregnetPeriodeResolver(
         }
 
     override fun varsler(): List<ApiVarselDTO> =
-        if (erSisteGenerasjon) {
+        if (erSisteBehandling) {
             varselRepository
-                .finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
+                .finnVarslerSomIkkeErInaktiveForSisteBehandling(
                     vedtaksperiodeId(),
                     periode.utbetaling.id,
                 ).map { it.toVarselDto() }
@@ -409,7 +409,7 @@ data class ApiBeregnetPeriodeResolver(
         }
 
     private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-        if (erSisteGenerasjon) oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId) else null
+        if (erSisteBehandling) oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId) else null
     }
 
     override fun oppgave() = oppgaveDto?.let { oppgaveDto -> ApiOppgaveForPeriodevisning(id = oppgaveDto.id) }
@@ -482,7 +482,7 @@ data class ApiBeregnetPeriodeResolver(
             }
 
     override fun annullering(): ApiAnnullering? =
-        if (erSisteGenerasjon) {
+        if (erSisteBehandling) {
             annulleringRepository
                 .finnAnnullering(vedtaksperiodeId())
                 ?.let {
