@@ -37,18 +37,18 @@ class PgLegacyBehandlingDao private constructor(
             WITH behandlinger AS (
                 SELECT b.id, b.unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags, yrkesaktivitetstype, json_agg(DISTINCT to_jsonb(sv.*)) FILTER (WHERE sv.id IS NOT NULL) AS varsler
                 FROM behandling b
-                LEFT JOIN selve_varsel sv ON b.id = sv.generasjon_ref
+                LEFT JOIN selve_varsel sv ON b.id = sv.behandling_ref
                 WHERE b.vedtaksperiode_id = :vedtaksperiode_id
                 GROUP BY b.id
             ), begrunnelser AS (
-                SELECT b.type, b.tekst, vb.generasjon_ref FROM vedtak_begrunnelse vb
+                SELECT b.type, b.tekst, vb.behandling_ref FROM vedtak_begrunnelse vb
                 LEFT JOIN begrunnelse b ON b.id = vb.begrunnelse_ref
                 WHERE vb.vedtaksperiode_id = :vedtaksperiode_id AND vb.invalidert = false
                 ORDER BY vb.opprettet DESC LIMIT 1
             )
             SELECT bh.*, beg.*
             FROM behandlinger AS bh
-            LEFT JOIN begrunnelser beg ON beg.generasjon_ref = bh.id
+            LEFT JOIN begrunnelser beg ON beg.behandling_ref = bh.id
             ORDER BY bh.id
             """,
             "vedtaksperiode_id" to vedtaksperiodeId,
@@ -117,14 +117,14 @@ class PgLegacyBehandlingDao private constructor(
     ) {
         asSQL(
             """
-            INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt, status) 
-            VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM behandling WHERE unik_id = :generasjon_id), null, :opprettet, null, null, :status)
-            ON CONFLICT (generasjon_ref, kode) DO UPDATE SET status = excluded.status, generasjon_ref = excluded.generasjon_ref
+            INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt, status) 
+            VALUES (:unik_id, :kode, :vedtaksperiode_id, (SELECT id FROM behandling WHERE unik_id = :behandling_id), null, :opprettet, null, null, :status)
+            ON CONFLICT (behandling_ref, kode) DO UPDATE SET status = excluded.status, behandling_ref = excluded.behandling_ref
             """,
             "unik_id" to varselDto.id,
             "kode" to varselDto.varselkode,
             "vedtaksperiode_id" to vedtaksperiodeId,
-            "generasjon_id" to generasjonId,
+            "behandling_id" to generasjonId,
             "opprettet" to varselDto.opprettet,
             "status" to varselDto.status.name,
         ).update()
@@ -137,12 +137,12 @@ class PgLegacyBehandlingDao private constructor(
         asSQLWithQuestionMarks(
             if (varselIder.isEmpty()) {
                 """
-                DELETE FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1)
+                DELETE FROM selve_varsel WHERE behandling_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1)
                 """.trimIndent()
             } else {
                 """
                 DELETE FROM selve_varsel 
-                WHERE generasjon_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1) 
+                WHERE behandling_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1) 
                 AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
                 """.trimIndent()
             },

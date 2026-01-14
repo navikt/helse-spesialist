@@ -37,7 +37,7 @@ class PgVedtakBegrunnelseDao internal constructor(
     ) = lagreBegrunnelse(vedtakBegrunnelse, saksbehandlerOid).let { begrunnelseId ->
         asSQL(
             """
-            INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
+            INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, behandling_ref)
             SELECT v.vedtaksperiode_id, :begrunnelseId, b.id
             FROM vedtaksperiode v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
@@ -64,7 +64,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             UPDATE vedtak_begrunnelse vb
             SET invalidert = true
             FROM t
-            WHERE vb.vedtaksperiode_id = t.vedtaksperiode_id AND vb.generasjon_ref = t.id
+            WHERE vb.vedtaksperiode_id = t.vedtaksperiode_id AND vb.behandling_ref = t.id
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
         ).update()
@@ -77,13 +77,13 @@ class PgVedtakBegrunnelseDao internal constructor(
             """
             SELECT b.type, b.tekst FROM vedtak_begrunnelse AS vb, begrunnelse AS b
             WHERE vb.vedtaksperiode_id = :vedtaksperiodeId 
-            AND vb.generasjon_ref = :generasjonId 
+            AND vb.behandling_ref = :behandlingId 
             AND vb.invalidert = false 
             AND b.id = vb.begrunnelse_ref
             ORDER BY vb.opprettet DESC LIMIT 1
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-            "generasjonId" to generasjonId,
+            "behandlingId" to generasjonId,
         ).singleOrNull { vedtakBegrunnelse ->
             val begrunnelse = vedtakBegrunnelse.string("tekst")
             val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))
@@ -98,7 +98,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             AND vb.invalidert = false 
             AND vb.vedtaksperiode_id = v.vedtaksperiode_id
             AND v.id = o.vedtak_ref
-            AND vb.generasjon_ref = bh.id 
+            AND vb.behandling_ref = bh.id 
             AND bh.unik_id = o.generasjon_ref
             AND o.id = :oppgaveId
             ORDER BY vb.opprettet DESC LIMIT 1
@@ -123,7 +123,7 @@ class PgVedtakBegrunnelseDao internal constructor(
     ) = asSQL(
         """
         SELECT b.type, b.tekst, vb.opprettet, s.ident, vb.invalidert FROM vedtak_begrunnelse vb
-        INNER JOIN behandling beh ON vb.generasjon_ref = beh.id 
+        INNER JOIN behandling beh ON vb.behandling_ref = beh.id 
         INNER JOIN begrunnelse b ON b.id = vb.begrunnelse_ref
         INNER JOIN saksbehandler s ON s.oid = b.saksbehandler_ref
         WHERE vb.vedtaksperiode_id = :vedtaksperiodeId AND beh.utbetaling_id = :utbetalingId 

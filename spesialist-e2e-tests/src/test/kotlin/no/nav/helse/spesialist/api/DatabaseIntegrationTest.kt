@@ -266,13 +266,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ) = dbQuery.update(
         """
-        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-        VALUES (:id, :kode, :vedtaksperiodeId, :generasjonRef, :definisjonRef, :opprettet, :status, :ident, :endretTidspunkt)
+        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+        VALUES (:id, :kode, :vedtaksperiodeId, :behandlingRef, :definisjonRef, :opprettet, :status, :ident, :endretTidspunkt)
         """.trimIndent(),
         "id" to id,
         "kode" to kode,
         "vedtaksperiodeId" to vedtaksperiodeId,
-        "generasjonRef" to generasjonRef,
+        "behandlingRef" to generasjonRef,
         "definisjonRef" to definisjonRef,
         "opprettet" to opprettet,
         "status" to status,

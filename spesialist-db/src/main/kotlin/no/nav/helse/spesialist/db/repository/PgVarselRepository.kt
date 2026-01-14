@@ -28,7 +28,7 @@ class PgVarselRepository private constructor(
         dbQuery.singleOrNull(
             """
                 SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
-                JOIN behandling b ON sv.generasjon_ref = b.id
+                JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE sv.unik_id = :unikId
@@ -42,7 +42,7 @@ class PgVarselRepository private constructor(
         dbQuery.listWithListParameter(
             """
                 SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
-                JOIN behandling b ON sv.generasjon_ref = b.id
+                JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.spleis_behandling_id IN (${behandlingIder.joinToString { "?" }})
@@ -56,7 +56,7 @@ class PgVarselRepository private constructor(
         dbQuery.list(
             """
                 SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
-                JOIN behandling b ON sv.generasjon_ref = b.id
+                JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.unik_id = :behandlingUnikId
@@ -70,7 +70,7 @@ class PgVarselRepository private constructor(
         dbQuery.listWithListParameter(
             """
                 SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
-                JOIN behandling b ON sv.generasjon_ref = b.id
+                JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.unik_id IN (${behandlingUnikIder.joinToString { "?" }})
@@ -110,7 +110,7 @@ class PgVarselRepository private constructor(
                 SET
                   kode=:kode,
                   vedtaksperiode_id=(SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
-                  generasjon_ref=(SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
+                  behandling_ref=(SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
                   definisjon_ref=(SELECT id FROM api_varseldefinisjon av WHERE av.unik_id = :definisjonId),
                   status=:status,
                   status_endret_ident=(SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
@@ -136,7 +136,7 @@ class PgVarselRepository private constructor(
         } else {
             dbQuery.update(
                 """
-                    INSERT INTO selve_varsel (unik_id, kode, status, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
+                    INSERT INTO selve_varsel (unik_id, kode, status, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
                     VALUES (
                         :unikId, 
                         :kode, 

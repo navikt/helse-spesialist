@@ -21,7 +21,7 @@ class PgVedtakBegrunnelseRepository private constructor(
             """
             SELECT b.id, b.type, b.tekst, b.saksbehandler_ref, vb.invalidert FROM begrunnelse b 
             JOIN vedtak_begrunnelse vb ON b.id = vb.begrunnelse_ref 
-            JOIN behandling beh ON beh.id = vb.generasjon_ref
+            JOIN behandling beh ON beh.id = vb.behandling_ref
             WHERE beh.spleis_behandling_id = :spleisBehandlingId
                 AND vb.invalidert = false
             ORDER BY vb.opprettet DESC LIMIT 1
@@ -58,7 +58,7 @@ class PgVedtakBegrunnelseRepository private constructor(
             ) ?: error("Kunne ikke lagre begrunnelse")
         dbQuery.update(
             """
-            INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, generasjon_ref, opprettet, invalidert) 
+            INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, behandling_ref, opprettet, invalidert) 
             SELECT beh.vedtaksperiode_id, :begrunnelseId, beh.id, :opprettet, false
             FROM behandling beh
             WHERE beh.spleis_behandling_id = :spleisBehandlingId

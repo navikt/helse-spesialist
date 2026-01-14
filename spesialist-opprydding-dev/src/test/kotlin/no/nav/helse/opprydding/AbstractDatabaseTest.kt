@@ -71,7 +71,7 @@ internal abstract class AbstractDatabaseTest {
             VALUES ('${vedtaksperiode_id}', gen_random_uuid(), now(), now(), now(), now());
             INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
             VALUES ('${vedtaksperiode_id}', now());
-            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
+            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, behandling_ref)
             VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now(), ${sequence_number});
             INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde)
             VALUES (${sequence_number}, 'SØKNAD', ${sequence_number}, 'EN_ARBEIDSGIVER');
@@ -190,7 +190,7 @@ internal abstract class AbstractDatabaseTest {
             VALUES ('${avviksvurdering_unik_id}', gen_random_uuid());
             
             INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 420, 'avslagtekst', 'AVSLAG', '${saksbehandler_oid}');
-            INSERT INTO vedtak_begrunnelse(vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number} + 420, ${sequence_number})
+            INSERT INTO vedtak_begrunnelse(vedtaksperiode_id, begrunnelse_ref, behandling_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number} + 420, ${sequence_number})
             """.trimIndent()
         sessionOf(dataSource).use { session ->
             session.update(queryOf(sql))

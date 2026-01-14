@@ -343,7 +343,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ) = dbQuery.update(
         """
-        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
         VALUES (:id, :kode, :vedtaksperiodeId, (SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId LIMIT 1), :definisjonRef, :opprettet, :status, :ident, :tidspunkt)
         """.trimIndent(),
         "id" to id,

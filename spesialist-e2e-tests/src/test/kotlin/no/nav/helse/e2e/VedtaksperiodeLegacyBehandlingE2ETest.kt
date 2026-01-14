@@ -80,7 +80,7 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
                 val query =
                     """
                     SELECT COUNT(1) FROM behandling b 
-                    INNER JOIN selve_varsel sv on b.id = sv.generasjon_ref 
+                    INNER JOIN selve_varsel sv on b.id = sv.behandling_ref 
                     WHERE b.vedtaksperiode_id = ? AND utbetaling_id = ? AND sv.status = 'AKTIV'
                     """
                 session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)

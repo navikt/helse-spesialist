@@ -860,13 +860,13 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     ) {
         dbQuery.update(
             """
-            INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (:unik_id, :kode, :vedtaksperiode_id, :generasjon_ref, :opprettet, :status, :status_endret_ident, :status_endret_tidspunkt)
+            INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+            VALUES (:unik_id, :kode, :vedtaksperiode_id, :behandling_ref, :opprettet, :status, :status_endret_ident, :status_endret_tidspunkt)
             """.trimIndent(),
             "unik_id" to dto.varselId,
             "kode" to dto.kode,
             "vedtaksperiode_id" to vedtaksperiodeId,
-            "generasjon_ref" to generasjonId,
+            "behandling_ref" to generasjonId,
             "opprettet" to dto.opprettet,
             "status" to dto.status.name,
             "status_endret_ident" to "EN_IDENT".takeIf { endret },
@@ -904,7 +904,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
 
     private fun tellGodkjenteVarsel(generasjonId: TestGenerasjonId): Int =
         dbQuery.single(
-            "SELECT COUNT(*) FROM selve_varsel sv WHERE sv.generasjon_ref = :generasjonRef AND status = 'GODKJENT'",
+            "SELECT COUNT(*) FROM selve_varsel sv WHERE sv.behandling_ref = :generasjonRef AND status = 'GODKJENT'",
             "generasjonRef" to generasjonId.id,
         ) { it.int(1) }
 
