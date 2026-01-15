@@ -39,7 +39,6 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
             return RestResponse.Error(ApiPostPersonSokErrorCode.PERSON_IKKE_FUNNET)
         }
 
-        // Gi PseudoId
         val personPseudoId = transaksjon.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = person.id)
 
         val klarForVisning = person.harDataNødvendigForVisning()
@@ -61,7 +60,7 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
 
     override fun openApi(config: RouteConfig) {
         with(config) {
-            tags = setOf("Stans av automatisering")
+            tags = setOf("Personsøk")
         }
     }
 }
