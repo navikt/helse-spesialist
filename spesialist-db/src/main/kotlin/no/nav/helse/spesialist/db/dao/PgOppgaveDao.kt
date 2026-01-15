@@ -22,8 +22,8 @@ class PgOppgaveDao internal constructor(
     internal constructor(session: Session) : this(MedSession(session))
 
     override fun finnBehandlingId(oppgaveId: Long): UUID =
-        asSQL("SELECT generasjon_ref FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
-            .single { it.uuid("generasjon_ref") }
+        asSQL("SELECT spesialist_behandling_id FROM oppgave WHERE id = :oppgaveId", "oppgaveId" to oppgaveId)
+            .single { it.uuid("spesialist_behandling_id") }
 
     override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long =
         asSQL(
@@ -101,7 +101,7 @@ class PgOppgaveDao internal constructor(
         asSQL(
             """
             SELECT spleis_behandling_id FROM oppgave o
-            INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
+            INNER JOIN behandling b ON b.unik_id = o.spesialist_behandling_id
             WHERE o.id = :oppgaveId; 
             """,
             "oppgaveId" to oppgaveId,

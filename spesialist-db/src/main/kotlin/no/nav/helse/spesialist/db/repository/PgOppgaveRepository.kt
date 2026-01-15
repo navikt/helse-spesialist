@@ -119,7 +119,7 @@ class PgOppgaveRepository private constructor(
                 ferdigstilt_av, 
                 ferdigstilt_av_oid, 
                 vedtak_ref, 
-                generasjon_ref, 
+                spesialist_behandling_id, 
                 behandling_id, 
                 hendelse_id_godkjenningsbehov, 
                 utbetaling_id, 

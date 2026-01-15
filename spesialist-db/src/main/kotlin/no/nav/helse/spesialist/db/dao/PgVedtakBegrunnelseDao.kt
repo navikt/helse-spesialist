@@ -41,7 +41,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             SELECT v.vedtaksperiode_id, :begrunnelseId, b.id
             FROM vedtaksperiode v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
-            INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
+            INNER JOIN behandling b ON b.unik_id = o.spesialist_behandling_id
             WHERE o.id = :oppgaveId
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
@@ -58,7 +58,7 @@ class PgVedtakBegrunnelseDao internal constructor(
                 SELECT v.vedtaksperiode_id, b.id 
                 FROM vedtaksperiode v
                 INNER JOIN oppgave o ON v.id = o.vedtak_ref
-                INNER JOIN behandling b ON o.generasjon_ref = b.unik_id
+                INNER JOIN behandling b ON o.spesialist_behandling_id = b.unik_id
                 WHERE o.id = :oppgaveId
             )
             UPDATE vedtak_begrunnelse vb
@@ -99,7 +99,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             AND vb.vedtaksperiode_id = v.vedtaksperiode_id
             AND v.id = o.vedtak_ref
             AND vb.behandling_ref = bh.id 
-            AND bh.unik_id = o.generasjon_ref
+            AND bh.unik_id = o.spesialist_behandling_id
             AND o.id = :oppgaveId
             ORDER BY vb.opprettet DESC LIMIT 1
             """.trimIndent(),
