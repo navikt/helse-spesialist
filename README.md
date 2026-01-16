@@ -99,9 +99,7 @@ bedre liv. Da gjør du følgende:
 ## Oppgradering av gradle wrapper
 
 - Finn nyeste versjon av gradle her: https://gradle.org/releases/
-- Oppdater versjonsnummeret i wrapper-tasken i build.gradle.kts
-- Kjør `./gradlew wrapper` to ganger, ref. [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper).
-  - For eksempel kan du jo kjøre `./gradlew wrapper && ./gradlew wrapper`?
+- Kjør `./gradlew wrapper --gradle-version <versjon> && ./gradlew wrapper` - ja, den skal kjøres to ganger, ref. [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper).
 
 ## Spesialist-opprydding-dev
 

@@ -57,9 +57,6 @@ subprojects {
 }
 
 tasks {
-    wrapper {
-        gradleVersion = "8.14.3"
-    }
     jar {
         enabled = false
     }
