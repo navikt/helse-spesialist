@@ -182,7 +182,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                                     override fun klargjørPersonForVisning(fødselsnummer: String) {}
                                 },
                             snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
-                            krrRegistrertStatusHenter = mockk(relaxed = true),
                             sessionFactory = sessionFactory,
                             vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                             stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,

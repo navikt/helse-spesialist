@@ -63,11 +63,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
         "fodselsdato" : "${testContext.person.fødselsdato}",
         "kjonn" : "${testContext.person.kjønn}",
         "fullmakt" : false,
-        "reservasjon" : {
-          "kanVarsles" : true,
-          "reservert" : false,
-          "__typename" : "Reservasjon"
-        },
         "unntattFraAutomatisering" : {
           "erUnntatt" : false,
           "arsaker" : [ ],

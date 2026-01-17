@@ -81,7 +81,6 @@ class ApiModule(
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
             snapshothenter = snapshothenter,
-            krrRegistrertStatusHenter = krrRegistrertStatusHenter,
             sessionFactory = sessionFactory,
             behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
         )

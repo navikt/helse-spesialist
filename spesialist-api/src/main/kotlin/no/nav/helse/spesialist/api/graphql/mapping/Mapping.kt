@@ -4,13 +4,11 @@ import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehistorikkType
-import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO.ApiVarselvurderingDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselstatus
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.varsel.Varselstatus
-import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun VarselDbDto.toVarselDto(): ApiVarselDTO {
     val varseldefinisjon = this.varseldefinisjon
@@ -68,16 +66,4 @@ fun PeriodehistorikkType.tilApiPeriodehistorikkType() =
         PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING -> ApiPeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
         PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> ApiPeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER
         PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> ApiPeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER
-    }
-
-fun KrrRegistrertStatusHenter.KrrRegistrertStatus.toApiReservasjon(): ApiReservasjon? =
-    when (this) {
-        KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING ->
-            ApiReservasjon(kanVarsles = false, reservert = true)
-
-        KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING ->
-            ApiReservasjon(kanVarsles = true, reservert = false)
-
-        KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR ->
-            null
     }

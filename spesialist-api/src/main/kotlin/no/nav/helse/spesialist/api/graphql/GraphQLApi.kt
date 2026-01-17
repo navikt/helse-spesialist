@@ -106,7 +106,6 @@ fun lagSchemaMedResolversOgHandlers(
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     personhåndterer: Personhåndterer,
     snapshothenter: Snapshothenter,
-    krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     sessionFactory: SessionFactory,
     behandlingstatistikk: IBehandlingsstatistikkService,
 ): SpesialistSchema =
@@ -133,7 +132,6 @@ fun lagSchemaMedResolversOgHandlers(
                                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
                                 snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
-                                krrRegistrertStatusHenter = krrRegistrertStatusHenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                                 stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,

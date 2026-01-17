@@ -1,9 +1,5 @@
 package no.nav.helse.spesialist.api.person
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionFactory
@@ -24,14 +20,12 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.graphql.mapping.toApiReservasjon
 import no.nav.helse.spesialist.api.graphql.query.FetchPersonResult
 import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.logg.logg
@@ -70,7 +64,6 @@ class PersonService(
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
-    private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     private val sessionFactory: SessionFactory,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
@@ -112,7 +105,6 @@ class PersonService(
             return FetchPersonResult.Feil.ManglerTilgang
         }
 
-        val reservasjon = finnReservasjonsstatus(fødselsnummer)
         val snapshot =
             when (val snapshotResult = hentSnapshot(fødselsnummer)) {
                 HentSnapshotResult.Feil.IkkeFunnet -> return FetchPersonResult.Feil.IkkeFunnet
@@ -144,14 +136,13 @@ class PersonService(
                     )
                 }
             }
-        return person(fødselsnummer, fødselsnumrePseudoIdMap, snapshot, reservasjon)
+        return person(fødselsnummer, fødselsnumrePseudoIdMap, snapshot)
     }
 
-    private suspend fun person(
-        fødselsnummer: String,
-        fødselsnumrePseudoIdMap: Map<String, PersonPseudoId>,
+    private fun person(
+        `fødselsnummer`: String,
+        `fødselsnumrePseudoIdMap`: Map<String, PersonPseudoId>,
         snapshot: Pair<ApiPersoninfo, SnapshotPerson>,
-        reservasjon: Deferred<KrrRegistrertStatusHenter.KrrRegistrertStatus>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
@@ -167,7 +158,6 @@ class PersonService(
                         snapshot = personSnapshot,
                         personinfo =
                             personinfo.copy(
-                                reservasjon = reservasjon.await().toApiReservasjon(),
                                 unntattFraAutomatisering =
                                     stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
                                 fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
@@ -194,11 +184,6 @@ class PersonService(
             ),
         )
     }
-
-    private fun finnReservasjonsstatus(fødselsnummer: String) =
-        CoroutineScope(Dispatchers.IO).async {
-            krrRegistrertStatusHenter.hentForPerson(fødselsnummer)
-        }
 
     private fun hentSnapshot(fødselsnummer: String): HentSnapshotResult {
         val snapshot =

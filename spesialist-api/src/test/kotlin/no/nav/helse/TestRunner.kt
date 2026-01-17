@@ -112,7 +112,6 @@ object TestRunner {
                         stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
                         personhåndterer = avhengigheter.personhåndterer,
                         snapshothenter = avhengigheter.snapshothenter,
-                        krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                         sessionFactory = avhengigheter.sessionFactory,
                         behandlingstatistikk = avhengigheter.behandlingstatistikk,
                     )

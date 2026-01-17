@@ -11,7 +11,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.time.Instant
@@ -41,13 +40,6 @@ data class ApiAktivSaksbehandler(
     val navn: String,
     val ident: String,
     val oid: UUID,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@GraphQLName("Reservasjon")
-data class ApiReservasjon(
-    val kanVarsles: Boolean,
-    val reservert: Boolean,
 )
 
 @GraphQLName("UnntattFraAutomatiskGodkjenning")
