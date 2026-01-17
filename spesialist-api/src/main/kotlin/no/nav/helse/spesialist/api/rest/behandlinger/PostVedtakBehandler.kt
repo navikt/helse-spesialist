@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.behandlinger.vedtak
+package no.nav.helse.spesialist.api.rest.behandlinger
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode

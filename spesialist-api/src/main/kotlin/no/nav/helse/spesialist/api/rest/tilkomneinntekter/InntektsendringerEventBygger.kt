@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.tilkommeninntekt
+package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
 import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder

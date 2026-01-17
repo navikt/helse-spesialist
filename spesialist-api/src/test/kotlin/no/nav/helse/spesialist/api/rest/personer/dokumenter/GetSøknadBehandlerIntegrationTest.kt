@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.dokument
+package no.nav.helse.spesialist.api.rest.personer.dokumenter
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture

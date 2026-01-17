@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.behandlinger.forkasting
+package no.nav.helse.spesialist.api.rest.behandlinger
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
@@ -13,12 +13,12 @@ import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.ApiPostForkastingErrorCode.BEHANDLING_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.ApiPostForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON
-import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.ApiPostForkastingErrorCode.OPPGAVE_FEIL_TILSTAND
-import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.ApiPostForkastingErrorCode.OPPGAVE_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.ApiPostForkastingErrorCode.TOTRINNSVURDERING_SENDT_TIL_BESLUTTER
-import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.ApiPostForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.BEHANDLING_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_FEIL_TILSTAND
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.TOTRINNSVURDERING_SENDT_TIL_BESLUTTER
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox

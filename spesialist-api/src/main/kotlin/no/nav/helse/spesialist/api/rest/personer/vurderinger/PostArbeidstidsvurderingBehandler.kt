@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.personer.vurderinger
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
@@ -9,6 +9,11 @@ import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiv
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykdomsgrad
+import no.nav.helse.spesialist.api.rest.ApiArbeidstidsvurderingRequest
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.PostBehandler
+import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.sikkerlogg

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.dokument
+package no.nav.helse.spesialist.api.rest.personer.dokumenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate

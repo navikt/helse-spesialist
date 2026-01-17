@@ -1,9 +1,14 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.personer
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiPersonSokRequest
+import no.nav.helse.spesialist.api.rest.ApiPersonSokResponse
+import no.nav.helse.spesialist.api.rest.PostBehandler
+import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer

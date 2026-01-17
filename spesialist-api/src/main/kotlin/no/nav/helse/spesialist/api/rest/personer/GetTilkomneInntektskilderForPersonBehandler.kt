@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.tilkommeninntekt
+package no.nav.helse.spesialist.api.rest.personer
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
