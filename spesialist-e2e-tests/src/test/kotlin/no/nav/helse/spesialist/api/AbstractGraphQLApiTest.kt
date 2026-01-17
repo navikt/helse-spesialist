@@ -40,7 +40,6 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
-import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.client.spleis.SpleisClient
@@ -88,30 +87,27 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     SpesialistSchema.QueryHandlers(
                         person =
                             PersonQueryHandler(
-                                personoppslagService =
-                                    PersonService(
-                                        personApiDao = personApiDao,
-                                        vergemålApiDao = vergemålApiDao,
-                                        tildelingApiDao = tildelingApiDao,
-                                        arbeidsgiverApiDao = arbeidsgiverApiDao,
-                                        overstyringApiDao = overstyringApiDao,
-                                        risikovurderingApiDao = risikovurderingApiDao,
-                                        varselRepository = apiVarselRepository,
-                                        oppgaveApiDao = oppgaveApiDao,
-                                        periodehistorikkApiDao = periodehistorikkApiDao,
-                                        notatDao = notatDao,
-                                        påVentApiDao = påVentApiDao,
-                                        apiOppgaveService = apiOppgaveService,
-                                        saksbehandlerMediator = saksbehandlerMediator,
-                                        stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                                        personhåndterer = personhåndterer,
-                                        snapshotService = snapshotService,
-                                        sessionFactory = sessionFactory,
-                                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                        stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
-                                        annulleringRepository = daos.annulleringRepository,
-                                        saksbehandlerRepository = daos.saksbehandlerRepository,
-                                    ),
+                                personApiDao = personApiDao,
+                                vergemålApiDao = vergemålApiDao,
+                                tildelingApiDao = tildelingApiDao,
+                                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                                overstyringApiDao = overstyringApiDao,
+                                risikovurderingApiDao = risikovurderingApiDao,
+                                varselRepository = apiVarselRepository,
+                                oppgaveApiDao = oppgaveApiDao,
+                                periodehistorikkApiDao = periodehistorikkApiDao,
+                                notatDao = notatDao,
+                                påVentApiDao = påVentApiDao,
+                                apiOppgaveService = apiOppgaveService,
+                                saksbehandlerMediator = saksbehandlerMediator,
+                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                personhåndterer = personhåndterer,
+                                snapshotService = snapshotService,
+                                sessionFactory = sessionFactory,
+                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                                stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
+                                annulleringRepository = daos.annulleringRepository,
+                                saksbehandlerRepository = daos.saksbehandlerRepository,
                             ),
                         oppgaver =
                             OppgaverQueryHandler(

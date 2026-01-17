@@ -43,7 +43,6 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -114,30 +113,27 @@ fun lagSchemaMedResolversOgHandlers(
             SpesialistSchema.QueryHandlers(
                 person =
                     PersonQueryHandler(
-                        personoppslagService =
-                            PersonService(
-                                personApiDao = daos.personApiDao,
-                                vergemålApiDao = daos.vergemålApiDao,
-                                tildelingApiDao = daos.tildelingApiDao,
-                                arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
-                                overstyringApiDao = daos.overstyringApiDao,
-                                risikovurderingApiDao = daos.risikovurderingApiDao,
-                                varselRepository = daos.varselApiRepository,
-                                oppgaveApiDao = daos.oppgaveApiDao,
-                                periodehistorikkApiDao = daos.periodehistorikkApiDao,
-                                notatDao = daos.notatApiDao,
-                                påVentApiDao = daos.påVentApiDao,
-                                apiOppgaveService = apiOppgaveService,
-                                saksbehandlerMediator = saksbehandlerMediator,
-                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                                personhåndterer = personhåndterer,
-                                snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
-                                sessionFactory = sessionFactory,
-                                vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
-                                stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                                annulleringRepository = daos.annulleringRepository,
-                                saksbehandlerRepository = daos.saksbehandlerRepository,
-                            ),
+                        personApiDao = daos.personApiDao,
+                        vergemålApiDao = daos.vergemålApiDao,
+                        tildelingApiDao = daos.tildelingApiDao,
+                        arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
+                        overstyringApiDao = daos.overstyringApiDao,
+                        risikovurderingApiDao = daos.risikovurderingApiDao,
+                        varselRepository = daos.varselApiRepository,
+                        oppgaveApiDao = daos.oppgaveApiDao,
+                        periodehistorikkApiDao = daos.periodehistorikkApiDao,
+                        notatDao = daos.notatApiDao,
+                        påVentApiDao = daos.påVentApiDao,
+                        apiOppgaveService = apiOppgaveService,
+                        saksbehandlerMediator = saksbehandlerMediator,
+                        stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                        personhåndterer = personhåndterer,
+                        snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
+                        sessionFactory = sessionFactory,
+                        vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                        stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
+                        annulleringRepository = daos.annulleringRepository,
+                        saksbehandlerRepository = daos.saksbehandlerRepository,
                     ),
                 oppgaver =
                     OppgaverQueryHandler(
