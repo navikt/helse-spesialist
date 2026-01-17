@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import graphql.GraphQLContext
 import graphql.GraphQLError
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
@@ -12,7 +11,6 @@ import no.nav.helse.spesialist.api.graphql.forbiddenError
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.notFoundError
 import no.nav.helse.spesialist.api.graphql.personNotReadyError
-import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -22,50 +20,8 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 
-private sealed interface Inputvalidering {
-    class Ok(
-        val fødselsnummer: String,
-    ) : Inputvalidering
-
-    sealed class UgyldigInput(
-        val graphqlError: GraphQLError,
-    ) : Inputvalidering {
-        class UkjentFødselsnummer(
-            val fødselsnummer: String,
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-
-        class UkjentAktørId(
-            val aktørId: String,
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-
-        class UkjentPersonPseudoId(
-            val personPseudoId: String,
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-
-        class UgyldigPersonPseudoId(
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-
-        class ParametreMangler(
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-
-        class UgyldigAktørId(
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-
-        class HarFlereFødselsnumre(
-            val aktørId: String,
-            graphqlError: GraphQLError,
-        ) : UgyldigInput(graphqlError)
-    }
-}
-
 interface PersonoppslagService {
-    suspend fun hentPerson(
+    fun hentPerson(
         fødselsnummer: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
@@ -104,68 +60,66 @@ class PersonQueryHandler(
     override suspend fun person(
         personPseudoId: String,
         env: DataFetchingEnvironment,
+    ): DataFetcherResult<ApiPerson?> =
+        håndterRequest(
+            personPseudoId =
+                runCatching { PersonPseudoId.fraString(personPseudoId) }
+                    .getOrElse { return byggFeilrespons(notFoundError(personPseudoId)) },
+            saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER),
+            tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER),
+        )
+
+    private fun håndterRequest(
+        personPseudoId: PersonPseudoId,
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): DataFetcherResult<ApiPerson?> {
         val fødselsnummer =
-            when (val validering = validerInput(personPseudoId)) {
-                is Inputvalidering.Ok -> {
-                    validering.fødselsnummer
-                }
+            (
+                personoppslagService.fødselsnummerKnyttetTil(personPseudoId)
+                    ?: run {
+                        loggNotFoundForPersonPseudoId(personPseudoId.value.toString(), saksbehandler)
+                        return byggFeilrespons(notFoundError(personPseudoId.value.toString()))
+                    }
+            ).value
 
-                is UgyldigInput -> {
-                    validering.auditlogg(env)
-                    return byggFeilrespons(validering.graphqlError)
-                }
-            }
         loggInfo(
             "Personoppslag på person",
             "fødselsnummer: $fødselsnummer",
         )
 
-        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
-        val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
-
         return when (val result = personoppslagService.hentPerson(fødselsnummer, saksbehandler, tilgangsgrupper)) {
             is FetchPersonResult.Feil -> {
-                result.auditlogg(env, fødselsnummer)
+                result.auditlogg(saksbehandler, fødselsnummer)
                 result.tilGraphqlError(fødselsnummer)
             }
 
             is FetchPersonResult.Ok -> {
-                auditLog(env.graphQlContext, fødselsnummer, true, null)
+                auditLog(saksbehandler, fødselsnummer, true, null)
                 byggRespons(result.person)
             }
         }
     }
 
     private fun FetchPersonResult.Feil.auditlogg(
-        env: DataFetchingEnvironment,
+        saksbehandler: Saksbehandler,
         fødselsnummer: String,
     ) {
         when (this) {
             is FetchPersonResult.Feil.IkkeFunnet -> {
-                auditLog(
-                    env.graphQlContext,
-                    fødselsnummer,
-                    true,
-                    notFoundError(fødselsnummer).message,
-                )
+                auditLog(saksbehandler, `fødselsnummer`, true, notFoundError(`fødselsnummer`).message)
             }
 
             is FetchPersonResult.Feil.IkkeKlarTilVisning -> {
-                auditLog(env.graphQlContext, fødselsnummer, false, null)
+                auditLog(saksbehandler, `fødselsnummer`, false, null)
             }
 
             is FetchPersonResult.Feil.ManglerTilgang -> {
-                auditLog(env.graphQlContext, fødselsnummer, false, null)
+                auditLog(saksbehandler, `fødselsnummer`, false, null)
             }
 
             is FetchPersonResult.Feil.KlarteIkkeHente -> {
-                auditLog(
-                    env.graphQlContext,
-                    fødselsnummer,
-                    null,
-                    getSnapshotFetchError().message,
-                )
+                auditLog(saksbehandler, `fødselsnummer`, null, getSnapshotFetchError().message)
             }
         }
     }
@@ -182,53 +136,24 @@ class PersonQueryHandler(
         return byggFeilrespons(graphqlError)
     }
 
-    private fun validerInput(personPseudoId: String): Inputvalidering {
-        val gyldigPersonPseudoId =
-            runCatching { PersonPseudoId.fraString(personPseudoId) }
-                .getOrElse { return UgyldigInput.UgyldigPersonPseudoId(notFoundError(personPseudoId)) }
-
-        val identitetsnummer =
-            personoppslagService.fødselsnummerKnyttetTil(gyldigPersonPseudoId)
-                ?: return UgyldigInput.UkjentPersonPseudoId(personPseudoId, notFoundError(personPseudoId))
-
-        return Inputvalidering.Ok(identitetsnummer.value)
-    }
-
-    private fun loggNotFoundForAktørId(
-        aktorId: String,
-        env: DataFetchingEnvironment,
-    ) {
-        loggInfo("Fant ikke person basert på aktørId", "aktørId: $aktorId")
-        auditLog(env.graphQlContext, aktorId, null, notFoundError(aktorId).message)
-    }
-
     private fun loggNotFoundForPersonPseudoId(
         personPseudoId: String,
-        env: DataFetchingEnvironment,
+        saksbehandler: Saksbehandler,
     ) {
         loggInfo("Fant ikke person basert på personPseudoId: $personPseudoId")
-        auditLog(env.graphQlContext, personPseudoId, null, notFoundError(personPseudoId).message)
-    }
-
-    private fun loggNotFoundForFødselsnummer(
-        fnr: String,
-        env: DataFetchingEnvironment,
-    ) {
-        loggInfo("Fant ikke person basert på fødselsnummer", "fødselsnummer: $fnr")
-        auditLog(env.graphQlContext, fnr, null, notFoundError(fnr).message)
+        auditLog(saksbehandler, personPseudoId, null, notFoundError(personPseudoId).message)
     }
 
     private fun getSnapshotFetchError(): GraphQLError = graphqlErrorException(501, "Feil ved henting av snapshot for person", "field" to "person")
 
     private fun auditLog(
-        graphQLContext: GraphQLContext,
+        saksbehandler: Saksbehandler,
         personId: String,
         harTilgang: Boolean?,
         fantIkkePersonErrorMsg: String?,
     ) {
-        val saksbehandlerIdent = graphQLContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER).ident.value
+        val saksbehandlerIdent = saksbehandler.ident.value
         auditLogTeller.increment()
-
         if (harTilgang == false) {
             auditLog.warn(
                 "end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery flexString1=Deny",
@@ -243,31 +168,5 @@ class PersonQueryHandler(
         sikkerlogg.debug(
             "audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg",
         )
-    }
-
-    private fun UgyldigInput.auditlogg(env: DataFetchingEnvironment) {
-        when (this) {
-            is UgyldigInput.UkjentFødselsnummer -> {
-                loggNotFoundForFødselsnummer(this.fødselsnummer, env)
-            }
-
-            is UgyldigInput.UkjentAktørId -> {
-                loggNotFoundForAktørId(aktørId, env)
-            }
-
-            is UgyldigInput.UkjentPersonPseudoId -> {
-                loggNotFoundForPersonPseudoId(personPseudoId, env)
-            }
-
-            is UgyldigInput.HarFlereFødselsnumre -> {
-                auditLog(env.graphQlContext, aktørId, null, graphqlError.message)
-            }
-
-            is UgyldigInput.ParametreMangler -> {}
-
-            is UgyldigInput.UgyldigAktørId -> {}
-
-            is UgyldigInput.UgyldigPersonPseudoId -> {}
-        }
     }
 }

@@ -79,7 +79,7 @@ class PersonService(
             session.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
         }
 
-    override suspend fun hentPerson(
+    override fun hentPerson(
         fødselsnummer: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
