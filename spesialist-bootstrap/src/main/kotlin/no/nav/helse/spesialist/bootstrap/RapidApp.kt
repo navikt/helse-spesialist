@@ -43,8 +43,14 @@ fun main() {
                     ),
                 clientKrr =
                     ClientKrrModule.Configuration(
-                        apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-                        scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                        if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET")) {
+                            null
+                        } else {
+                            ClientKrrModule.Configuration.Client(
+                                apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+                                scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                            )
+                        },
                     ),
                 clientSpleis =
                     ClientSpleisModule.Configuration(

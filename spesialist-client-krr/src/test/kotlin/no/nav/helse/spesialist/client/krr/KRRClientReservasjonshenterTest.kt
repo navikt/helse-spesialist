@@ -61,7 +61,7 @@ class KRRClientReservasjonshenterTest {
         // Given:
         wireMock.stubFor(post("/rest/v1/personer").willReturn(okResponse(personident, responseContent)))
         val client = KRRClientReservasjonshenter(
-            ClientKrrModule.Configuration(apiUrl = wireMock.runtimeInfo.httpBaseUrl, scope = "scoap"),
+            ClientKrrModule.Configuration.Client(apiUrl = wireMock.runtimeInfo.httpBaseUrl, scope = "scoap"),
             accessTokenGenerator = object : AccessTokenGenerator {
                 override suspend fun hentAccessToken(scope: String) = "gief axess plz"
             }

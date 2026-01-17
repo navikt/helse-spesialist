@@ -123,16 +123,14 @@ spec:
       value: "http://spleis-api"
     - name: SPLEIS_CLIENT_LOGG_RESPONS
       value: "true"
+    - name: BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET
+      value: "true"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK
       value: "true"
     - name: IGNORER_MELDINGER_FOR_UKJENTE_PERSONER
       value: "true"
-    - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
-      value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
-    - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
-      value: "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-dev-7ff9
     - name: EKSPONER_OPENAPI
