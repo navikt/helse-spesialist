@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import graphql.GraphQLError
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
@@ -26,12 +24,8 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
-import no.nav.helse.spesialist.api.graphql.forbiddenError
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
-import no.nav.helse.spesialist.api.graphql.notFoundError
-import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -39,29 +33,13 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
-
-sealed interface FetchPersonResult {
-    class Ok(
-        val person: ApiPerson,
-    ) : FetchPersonResult
-
-    sealed interface Feil : FetchPersonResult {
-        class IkkeKlarTilVisning(
-            val aktørId: String,
-        ) : Feil
-
-        data object ManglerTilgang : Feil
-
-        data object IkkeFunnet : Feil
-
-        data object KlarteIkkeHente : Feil
-    }
-}
+import org.slf4j.event.Level
 
 class PersonQueryHandler(
     private val personApiDao: PersonApiDao,
@@ -96,10 +74,8 @@ class PersonQueryHandler(
             hentPerson(
                 personPseudoId =
                     runCatching {
-                        PersonPseudoId.fraString(
-                            personPseudoId,
-                        )
-                    }.getOrElse { return@transactionalSessionScope byggFeilrespons(notFoundError(personPseudoId)) },
+                        PersonPseudoId.fraString(personPseudoId)
+                    }.getOrElse { badRequest("Ugyldig format på personPseudoId") },
                 transaction = transaction,
                 saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER),
@@ -112,135 +88,42 @@ class PersonQueryHandler(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): DataFetcherResult<ApiPerson?> {
-        val fødselsnummer =
-            (
-                transaction.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                    ?: run {
-                        loggNotFoundForPersonPseudoId(personPseudoId.value.toString(), saksbehandler)
-                        return byggFeilrespons(notFoundError(personPseudoId.value.toString()))
-                    }
-            ).value
-
-        loggInfo(
-            "Personoppslag på person",
-            "fødselsnummer: $fødselsnummer",
+        val identitetsnummer = (
+            transaction.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+                ?: run {
+                    loggInfo("Fant ikke person basert på personPseudoId: ${personPseudoId.value}")
+                    auditLoggPersonIkkeFunnet(
+                        saksbehandler = saksbehandler,
+                        duid = personPseudoId.value.toString(),
+                        msg = "Finner ikke data for person med identifikator ${personPseudoId.value}",
+                    )
+                    notFound("PseudoId er ugyldig eller utgått")
+                }
         )
 
-        val result =
-            utfoerHenting(
-                transaction,
-                fødselsnummer,
-                tilgangsgrupper,
-                saksbehandler,
-            )
+        loggInfo("Personoppslag på person", "identitetsnummer: $identitetsnummer")
 
-        return when (result) {
-            is FetchPersonResult.Feil -> {
-                result.auditlogg(saksbehandler, fødselsnummer)
-                result.tilGraphqlError(fødselsnummer)
-            }
-
-            is FetchPersonResult.Ok -> {
-                auditLog(saksbehandler, fødselsnummer, true, null)
-                byggRespons(result.person)
-            }
-        }
-    }
-
-    private fun FetchPersonResult.Feil.auditlogg(
-        saksbehandler: Saksbehandler,
-        fødselsnummer: String,
-    ) {
-        when (this) {
-            is FetchPersonResult.Feil.IkkeFunnet -> {
-                auditLog(saksbehandler, `fødselsnummer`, true, notFoundError(`fødselsnummer`).message)
-            }
-
-            is FetchPersonResult.Feil.IkkeKlarTilVisning -> {
-                auditLog(saksbehandler, `fødselsnummer`, false, null)
-            }
-
-            is FetchPersonResult.Feil.ManglerTilgang -> {
-                auditLog(saksbehandler, `fødselsnummer`, false, null)
-            }
-
-            is FetchPersonResult.Feil.KlarteIkkeHente -> {
-                auditLog(saksbehandler, `fødselsnummer`, null, getSnapshotFetchError().message)
-            }
-        }
-    }
-
-    private fun FetchPersonResult.Feil.tilGraphqlError(fødselsnummer: String): DataFetcherResult<ApiPerson?> {
-        val graphqlError =
-            when (this) {
-                is FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
-                is FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer, aktørId)
-                is FetchPersonResult.Feil.ManglerTilgang -> forbiddenError(fødselsnummer)
-                is FetchPersonResult.Feil.KlarteIkkeHente -> getSnapshotFetchError()
-            }
-
-        return byggFeilrespons(graphqlError)
-    }
-
-    private fun loggNotFoundForPersonPseudoId(
-        personPseudoId: String,
-        saksbehandler: Saksbehandler,
-    ) {
-        loggInfo("Fant ikke person basert på personPseudoId: $personPseudoId")
-        auditLog(saksbehandler, personPseudoId, null, notFoundError(personPseudoId).message)
-    }
-
-    private fun getSnapshotFetchError(): GraphQLError = graphqlErrorException(501, "Feil ved henting av snapshot for person", "field" to "person")
-
-    private fun auditLog(
-        saksbehandler: Saksbehandler,
-        personId: String,
-        harTilgang: Boolean?,
-        fantIkkePersonErrorMsg: String?,
-    ) {
-        val saksbehandlerIdent = saksbehandler.ident.value
-        auditLogTeller.increment()
-        if (harTilgang == false) {
-            auditLog.warn(
-                "end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery flexString1=Deny",
-            )
-        } else if (fantIkkePersonErrorMsg != null) {
-            auditLog.warn(
-                "end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery msg=$fantIkkePersonErrorMsg",
-            )
-        } else {
-            auditLog.info("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery")
-        }
-        sikkerlogg.debug(
-            "audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg",
-        )
-    }
-
-    private fun utfoerHenting(
-        transaction: SessionContext,
-        fødselsnummer: String,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        saksbehandler: Saksbehandler,
-    ): FetchPersonResult {
         val personEntity =
-            transaction.personRepository.finn(Identitetsnummer.fraString(`fødselsnummer`))
-                ?: return FetchPersonResult.Feil.IkkeFunnet
+            transaction.personRepository.finn(identitetsnummer)
+                ?: personIkkeFunnet(saksbehandler, identitetsnummer)
+
         if (!personEntity.harDataNødvendigForVisning()) {
-            if (!transaction.personKlargjoresDao.klargjøringPågår(`fødselsnummer`)) {
-                personhåndterer.klargjørPersonForVisning(`fødselsnummer`)
-                transaction.personKlargjoresDao.personKlargjøres(`fødselsnummer`)
+            if (!transaction.personKlargjoresDao.klargjøringPågår(identitetsnummer.value)) {
+                personhåndterer.klargjørPersonForVisning(identitetsnummer.value)
+                transaction.personKlargjoresDao.personKlargjøres(identitetsnummer.value)
             }
 
-            return FetchPersonResult.Feil.IkkeKlarTilVisning(personEntity.aktørId)
+            personIkkeKlarTilVisning(saksbehandler, identitetsnummer)
         }
+
         if (!personEntity.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
-            return FetchPersonResult.Feil.ManglerTilgang
+            manglerTilgangTilPerson(saksbehandler, identitetsnummer)
         }
 
         // Best effort for å finne ut om saksbehandler har tilgang til oppgaven som gjelder
         // Litt vanskelig å få pent så lenge vi har dynamisk resolving av resten, og tilsynelatende "mange" oppgaver
         val harTilgangTilOppgave =
-            oppgaveApiDao.finnOppgaveId(`fødselsnummer`)?.let { oppgaveId ->
+            oppgaveApiDao.finnOppgaveId(identitetsnummer.value)?.let { oppgaveId ->
                 transaction.oppgaveRepository
                     .finn(oppgaveId)
                     ?.kanSeesAv(saksbehandler, tilgangsgrupper)
@@ -248,62 +131,177 @@ class PersonQueryHandler(
 
         if (!harTilgangTilOppgave) {
             logg.warn("Saksbehandler mangler tilgang til aktiv oppgave på denne personen")
-            return FetchPersonResult.Feil.ManglerTilgang
+            manglerTilgangTilPerson(saksbehandler, identitetsnummer)
         }
 
         val snapshot =
-            runCatching { snapshotService.hentSnapshot(`fødselsnummer`) }
+            runCatching { snapshotService.hentSnapshot(identitetsnummer.value) }
                 .getOrElse { e ->
-                    sikkerlogg.error("feilet under henting av snapshot for {}", keyValue("fnr", `fødselsnummer`), e)
-                    return FetchPersonResult.Feil.KlarteIkkeHente
+                    loggThrowable(
+                        message = "Klarte ikke hente snapshot fra Spleis",
+                        securelogDetails = "identitetsnummer=${identitetsnummer.value}",
+                        throwable = e,
+                    )
+                    klarteIkkeHentePerson(saksbehandler, identitetsnummer)
                 }?.takeUnless { it.second.arbeidsgivere.isEmpty() }
-                ?: return FetchPersonResult.Feil.IkkeFunnet
+
+        if (snapshot == null) {
+            personIkkeFunnet(saksbehandler, identitetsnummer)
+        }
 
         val (personinfo, personSnapshot) = snapshot
 
-        return FetchPersonResult.Ok(
-            ApiPerson(
-                resolver =
-                    ApiPersonResolver(
-                        andreFødselsnummer =
-                            personApiDao
-                                .finnFødselsnumre(personEntity.aktørId)
-                                .toSet()
-                                .filterNot { fnr -> fnr == `fødselsnummer` }
-                                .associateWith { fnr ->
-                                    transaction.personPseudoIdDao.nyPersonPseudoId(
-                                        identitetsnummer = Identitetsnummer.fraString(fnr),
-                                    )
-                                }.entries
-                                .map { (fødselsnummer, pseudoId) -> Identitetsnummer.fraString(fødselsnummer) to pseudoId }
-                                .toSet(),
-                        snapshot = personSnapshot,
-                        personinfo =
-                            personinfo.copy(
-                                unntattFraAutomatisering =
-                                    stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(`fødselsnummer`),
-                                fullmakt = vergemålApiDao.harFullmakt(`fødselsnummer`),
-                                automatiskBehandlingStansetAvSaksbehandler =
-                                    stansAutomatiskBehandlingSaksbehandlerDao.erStanset(`fødselsnummer`),
-                            ),
-                        personApiDao = personApiDao,
-                        tildelingApiDao = tildelingApiDao,
-                        arbeidsgiverApiDao = arbeidsgiverApiDao,
-                        overstyringApiDao = overstyringApiDao,
-                        risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(`fødselsnummer`),
-                        varselRepository = varselRepository,
-                        oppgaveApiDao = oppgaveApiDao,
-                        periodehistorikkApiDao = periodehistorikkApiDao,
-                        notatDao = notatDao,
-                        påVentApiDao = påVentApiDao,
-                        apiOppgaveService = apiOppgaveService,
-                        saksbehandlerMediator = saksbehandlerMediator,
-                        sessionFactory = sessionFactory,
-                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                        annulleringRepository = annulleringRepository,
-                        saksbehandlerRepository = saksbehandlerRepository,
-                    ),
-            ),
+        return ApiPerson(
+            resolver =
+                ApiPersonResolver(
+                    andreFødselsnummer =
+                        personApiDao
+                            .finnFødselsnumre(personEntity.aktørId)
+                            .toSet()
+                            .filterNot { fnr -> fnr == identitetsnummer.value }
+                            .associateWith { fnr ->
+                                transaction.personPseudoIdDao.nyPersonPseudoId(
+                                    identitetsnummer = Identitetsnummer.fraString(fnr),
+                                )
+                            }.entries
+                            .map { (fødselsnummer, pseudoId) ->
+                                Identitetsnummer.fraString(
+                                    fødselsnummer,
+                                ) to pseudoId
+                            }.toSet(),
+                    snapshot = personSnapshot,
+                    personinfo =
+                        personinfo.copy(
+                            unntattFraAutomatisering =
+                                stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(
+                                    identitetsnummer.value,
+                                ),
+                            fullmakt = vergemålApiDao.harFullmakt(identitetsnummer.value),
+                            automatiskBehandlingStansetAvSaksbehandler =
+                                stansAutomatiskBehandlingSaksbehandlerDao.erStanset(
+                                    identitetsnummer.value,
+                                ),
+                        ),
+                    personApiDao = personApiDao,
+                    tildelingApiDao = tildelingApiDao,
+                    arbeidsgiverApiDao = arbeidsgiverApiDao,
+                    overstyringApiDao = overstyringApiDao,
+                    risikovurderinger =
+                        risikovurderingApiDao.finnRisikovurderinger(
+                            identitetsnummer.value,
+                        ),
+                    varselRepository = varselRepository,
+                    oppgaveApiDao = oppgaveApiDao,
+                    periodehistorikkApiDao = periodehistorikkApiDao,
+                    notatDao = notatDao,
+                    påVentApiDao = påVentApiDao,
+                    apiOppgaveService = apiOppgaveService,
+                    saksbehandlerMediator = saksbehandlerMediator,
+                    sessionFactory = sessionFactory,
+                    vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                    annulleringRepository = annulleringRepository,
+                    saksbehandlerRepository = saksbehandlerRepository,
+                ),
+        ).let {
+            auditLoggOk(saksbehandler, identitetsnummer)
+            byggRespons(it)
+        }
+    }
+
+    private fun klarteIkkeHentePerson(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+    ): Nothing {
+        auditLoggPersonIkkeFunnet(
+            saksbehandler = saksbehandler,
+            identitetsnummer = identitetsnummer,
+            msg = "Feil ved henting av snapshot for person",
         )
+        internalServerError("Feil ved henting av snapshot for person")
+    }
+
+    private fun manglerTilgangTilPerson(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+    ): Nothing {
+        auditLoggManglendeTilgang(saksbehandler, identitetsnummer)
+        forbidden("Har ikke tilgang til person")
+    }
+
+    private fun personIkkeKlarTilVisning(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+    ): Nothing {
+        auditLoggManglendeTilgang(saksbehandler, identitetsnummer)
+        conflict("Personen er ikke klar for visning ennå")
+    }
+
+    private fun personIkkeFunnet(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+    ): Nothing {
+        auditLoggPersonIkkeFunnet(
+            saksbehandler = saksbehandler,
+            identitetsnummer = identitetsnummer,
+            msg = "Finner ikke data for person med identifikator ${identitetsnummer.value}",
+        )
+        notFound("Fant ikke data for person")
+    }
+
+    private fun auditLoggOk(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+    ) {
+        auditLogg(saksbehandler, identitetsnummer.value, "", Level.INFO)
+    }
+
+    private fun auditLoggPersonIkkeFunnet(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+        msg: String,
+    ) {
+        auditLoggPersonIkkeFunnet(saksbehandler, identitetsnummer.value, msg)
+    }
+
+    private fun auditLoggPersonIkkeFunnet(
+        saksbehandler: Saksbehandler,
+        duid: String,
+        msg: String,
+    ) {
+        auditLogg(saksbehandler, duid, " msg=$msg", Level.WARN)
+    }
+
+    private fun auditLoggManglendeTilgang(
+        saksbehandler: Saksbehandler,
+        identitetsnummer: Identitetsnummer,
+    ) {
+        auditLogg(saksbehandler, identitetsnummer.value, " flexString1=Deny", Level.WARN)
+    }
+
+    private fun auditLogg(
+        saksbehandler: Saksbehandler,
+        duid: String,
+        suffix: String,
+        level: Level,
+    ) {
+        auditLogTeller.increment()
+        val message =
+            "end=${System.currentTimeMillis()}" +
+                " suid=${saksbehandler.ident.value}" +
+                " duid=$duid" +
+                " operation=PersonQuery" +
+                suffix
+        auditLog.atLevel(level).log(message)
+        sikkerlogg.debug("audit-logget: $level - $message")
     }
 }
+
+private fun badRequest(message: String): Nothing = throw graphqlErrorException(400, message)
+
+private fun forbidden(message: String): Nothing = throw graphqlErrorException(403, message)
+
+private fun notFound(message: String): Nothing = throw graphqlErrorException(404, message)
+
+private fun conflict(message: String): Nothing = throw graphqlErrorException(409, message)
+
+private fun internalServerError(message: String): Nothing = throw graphqlErrorException(500, message)

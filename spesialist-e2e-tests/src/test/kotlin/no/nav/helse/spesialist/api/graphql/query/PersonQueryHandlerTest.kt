@@ -72,10 +72,20 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(personPseudoId: "$personPseudoId") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals("Exception while fetching data (/person) : PseudoId er ugyldig eller utgått", body["errors"].first()["message"].asText())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$personPseudoId operation=PersonQuery msg=Finner ikke data for person med identifikator $personPseudoId",
             Level.WARN,
         )
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
+    fun `får 400-feil når personen man sender inn en personPseudoId på feil format`() {
+        val body = runQuery("""{ person(personPseudoId: "abc123") { aktorId } }""")
+
+        assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals("Exception while fetching data (/person) : Ugyldig format på personPseudoId", body["errors"].first()["message"].asText())
     }
 
     @Test
@@ -199,7 +209,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
 
-        assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(500, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery msg=Feil ved henting av snapshot for person",
             Level.WARN,

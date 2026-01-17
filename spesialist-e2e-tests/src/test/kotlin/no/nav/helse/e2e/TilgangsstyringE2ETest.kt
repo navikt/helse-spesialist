@@ -18,24 +18,23 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
+import kotlin.test.assertNotNull
 
 class TilgangsstyringE2ETest : AbstractE2ETest() {
     @Test
     fun `Gir 409 når bare søknad er mottatt`() {
         settOppDefaultDataOgTilganger()
 
-        assertKanIkkeHentePerson("Finner ikke data for person med identifikator ")
+        assertKanIkkeHentePerson("Fant ikke data for person")
 
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
 
-        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
     }
 
     @Test
@@ -44,7 +43,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendMeldingerOppTilEgenAnsatt()
         mockSnapshot()
 
-        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
 
         håndterEgenansattløsning(erEgenAnsatt = false)
         assertKanHentePerson()
@@ -56,10 +55,10 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendMeldingerOppTilEgenAnsatt()
         mockSnapshot()
 
-        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
 
         håndterEgenansattløsning(erEgenAnsatt = true)
-        assertKanIkkeHentePerson("Har ikke tilgang til person med fødselsnummer ")
+        assertKanIkkeHentePerson("Har ikke tilgang til person")
     }
 
     @Test
@@ -68,10 +67,10 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         mockSnapshot()
 
-        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
 
         håndterEgenansattløsning()
-        assertKanIkkeHentePerson("Har ikke tilgang til person med fødselsnummer ")
+        assertKanIkkeHentePerson("Har ikke tilgang til person")
     }
 
     @Test
@@ -80,7 +79,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         mockSnapshot()
 
-        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
         håndterEgenansattløsning()
         saksbehandlertilgangTilKode7(true)
         assertKanHentePerson()
@@ -93,11 +92,11 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = adressebeskyttelse)
         mockSnapshot()
 
-        assertKanIkkeHentePerson("Person med fødselsnummer $FØDSELSNUMMER er ikke klar for visning ennå")
+        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
         håndterEgenansattløsning()
         saksbehandlertilgangTilKode7(true)
         saksbehandlertilgangTilSkjermede(true)
-        assertKanIkkeHentePerson("Har ikke tilgang til person med fødselsnummer ")
+        assertKanIkkeHentePerson("Har ikke tilgang til person")
     }
 
     private fun sendMeldingerOppTilEgenAnsatt(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) {
@@ -124,9 +123,10 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun assertKanIkkeHentePerson(feilmelding: String) {
-        fetchPerson().let { response ->
-            assertFeilmelding(feilmelding, response.errors)
-            assertNull(response.data)
+        runCatching { fetchPerson() }.let { result ->
+            val exceptionOrNull = result.exceptionOrNull()
+            assertNotNull(exceptionOrNull)
+            assertEquals(feilmelding, exceptionOrNull.message)
         }
     }
 
