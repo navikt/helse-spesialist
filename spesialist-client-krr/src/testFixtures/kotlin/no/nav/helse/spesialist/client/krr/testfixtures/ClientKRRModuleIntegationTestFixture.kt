@@ -30,9 +30,7 @@ object ClientKRRModuleIntegationTestFixture {
     }
 
     val moduleConfiguration = ClientKrrModule.Configuration(
-        ClientKrrModule.Configuration.Client(
-            apiUrl = wireMockServer.baseUrl(),
-            scope = "local-app",
-        )
+        apiUrl = wireMockServer.baseUrl(),
+        scope = "local-app",
     )
 }

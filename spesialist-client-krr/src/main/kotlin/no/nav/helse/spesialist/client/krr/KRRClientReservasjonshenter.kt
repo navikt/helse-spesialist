@@ -40,7 +40,7 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
 class KRRClientReservasjonshenter(
-    private val configuration: ClientKrrModule.Configuration.Client,
+    private val configuration: ClientKrrModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : Reservasjonshenter {
     private val httpClient: HttpClient =
