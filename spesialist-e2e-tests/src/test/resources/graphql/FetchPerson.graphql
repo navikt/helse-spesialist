@@ -1,5 +1,5 @@
-query FetchPerson($fnr: String, $aktorId: String) {
-    person(fnr: $fnr, aktorId: $aktorId) {
+query FetchPerson($personPseudoId: String) {
+    person(personPseudoId: $personPseudoId) {
         ...person
         __typename
     }
@@ -588,7 +588,6 @@ fragment tilleggsinfoForInntektskilde on TilleggsinfoForInntektskilde {
 
 fragment person on Person {
     fodselsnummer
-    personPseudoId
     dodsdato
     enhet {
         id

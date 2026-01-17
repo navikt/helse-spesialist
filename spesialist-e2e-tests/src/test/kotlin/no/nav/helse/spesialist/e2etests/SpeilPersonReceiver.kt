@@ -22,12 +22,13 @@ class SpeilPersonReceiver(
     private val saksbehandler: Saksbehandler,
     private val tilgangsgrupper: Set<Tilgangsgruppe>,
 ) {
-    var person: JsonNode = fetchPerson(testContext.person.aktørId)
+    val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asText()
+    var person: JsonNode = fetchPerson(personPseudoId)
     var tilkomneInntektskilder: JsonNode = callGetTilkomneInntektskilder()
 
     fun hentOppdatertPerson() {
         logg.info("Henter oppdatert person...")
-        person = fetchPerson(testContext.person.aktørId)
+        person = fetchPerson(personPseudoId)
     }
 
     fun hentOppdaterteTilkomneInntektskilder() {
@@ -439,20 +440,25 @@ class SpeilPersonReceiver(
         assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asText())
     }
 
-    private fun fetchPerson(aktørId: String): JsonNode {
+    private fun fetchPerson(personPseudoId: String): JsonNode {
         val fetchPersonResponse =
             callGraphQL(
                 operationName = "FetchPerson",
                 variables =
                     mapOf(
-                        "aktorId" to aktørId,
+                        "personPseudoId" to personPseudoId,
                     ),
             )
         return fetchPersonResponse["data"]["person"].takeUnless { it.isNull }
             ?: error("Fikk ikke data.person i respons fra FetchPerson. Responsen var: ${fetchPersonResponse.toPrettyString()}")
     }
 
-    fun callGetTilkomneInntektskilder(): JsonNode = callHttpGet("api/personer/${person["personPseudoId"].asText()}/tilkomne-inntektskilder")
+    fun callGetTilkomneInntektskilder(): JsonNode = callHttpGet("api/personer/$personPseudoId/tilkomne-inntektskilder")
+
+    fun callPostPersonerSok(fødselsnummer: String): JsonNode = callHttpPost(
+        relativeUrl = "api/personer/sok",
+        request = mapOf("identitetsnummer" to fødselsnummer)
+    )
 
     private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asText()
 

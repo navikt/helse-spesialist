@@ -149,7 +149,6 @@ class PersonService(
             ApiPerson(
                 resolver =
                     ApiPersonResolver(
-                        personPseudoId = fødselsnumrePseudoIdMap.getValue(fødselsnummer),
                         andreFødselsnummer =
                             fødselsnumrePseudoIdMap.entries
                                 .filterNot { (fnr, _) -> fnr == fødselsnummer }

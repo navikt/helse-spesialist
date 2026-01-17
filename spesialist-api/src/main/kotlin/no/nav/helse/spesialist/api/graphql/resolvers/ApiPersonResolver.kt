@@ -53,7 +53,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class ApiPersonResolver(
-    private val personPseudoId: PersonPseudoId,
     private val andreFødselsnummer: Set<Pair<Identitetsnummer, PersonPseudoId>>,
     private val sessionFactory: SessionFactory,
     private val snapshot: SnapshotPerson,
@@ -75,8 +74,6 @@ data class ApiPersonResolver(
     private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : PersonSchema {
     override fun versjon(): Int = snapshot.versjon
-
-    override fun personPseudoId(): UUID = personPseudoId.value
 
     override fun aktorId(): String = snapshot.aktorId
 

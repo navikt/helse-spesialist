@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -63,15 +64,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     fun `henter person med personPseudoId som parameter`() {
         // Given
         mockSnapshot()
-        opprettVedtaksperiode(opprettPerson())
-
-        // Gjør et kall for å få opprettet en personPseudoId som vi kan spørre på
-        val pseudoId = runQuery("""{ person(aktorId: "$AKTØRID" ) { personPseudoId } }""").let {
-            it["data"]["person"]["personPseudoId"].asText()
-        }
-
-        // Sett opp logglytter her, for å slippe at logginnslaget fra forrige kall er med når det skal assertes
         val logglytter = Logglytter()
+        opprettVedtaksperiode(opprettPerson())
+        val pseudoId = sessionFactory.transactionalSessionScope {
+            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+        }.value
 
         // When
         val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")

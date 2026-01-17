@@ -107,8 +107,6 @@ data class ApiAnnetFodselsnummer(
 interface PersonSchema {
     fun versjon(): Int
 
-    fun personPseudoId(): UUID
-
     fun aktorId(): String
 
     fun fodselsnummer(): String
