@@ -28,7 +28,7 @@ class ApiModule(
     private val sessionFactory: SessionFactory,
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
-    reservasjonshenter: Reservasjonshenter,
+    private val reservasjonshenter: Reservasjonshenter,
 ) {
     data class Configuration(
         val clientId: String,
@@ -96,6 +96,7 @@ class ApiModule(
             environmentToggles = environmentToggles,
             sessionFactory = sessionFactory,
             meldingPubliserer = meldingPubliserer,
+            reservasjonshenter = reservasjonshenter,
         )
     }
 }

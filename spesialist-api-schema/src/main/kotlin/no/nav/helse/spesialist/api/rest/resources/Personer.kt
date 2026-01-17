@@ -69,5 +69,10 @@ class Personer {
                 )
             }
         }
+
+        @Resource("krr-status")
+        class KrrStatus(
+            val parent: PersonPseudoId,
+        )
     }
 }

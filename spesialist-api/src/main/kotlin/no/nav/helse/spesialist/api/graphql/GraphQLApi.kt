@@ -63,6 +63,7 @@ fun kobleOppApi(
     meldingPubliserer: MeldingPubliserer,
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
+    reservasjonshenter: Reservasjonshenter,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -94,7 +95,7 @@ fun kobleOppApi(
                 meldingPubliserer = meldingPubliserer,
                 versjonAvKode = apiModuleConfiguration.versjonAvKode,
             )
-        restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles)
+        restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles, reservasjonshenter)
     }
 }
 

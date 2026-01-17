@@ -129,6 +129,7 @@ object TestRunner {
                             override val kanBeslutteEgneSaker: Boolean = false
                             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
                         },
+                    reservasjonshenter = avhengigheter.reservasjonshenter,
                 )
             }
 

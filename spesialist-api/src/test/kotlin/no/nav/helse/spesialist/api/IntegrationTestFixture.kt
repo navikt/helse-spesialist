@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
+import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -53,6 +54,8 @@ class IntegrationTestFixture() {
         }
     }
 
+    val reservasjonshenterMock: Reservasjonshenter = mockk(relaxed = true)
+
     private val apiModule = ApiModule(
         configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
         tilgangsgruppeUuider = tilgangsgruppeUuider,
@@ -62,7 +65,7 @@ class IntegrationTestFixture() {
         sessionFactory = sessionFactory,
         environmentToggles = mockk(relaxed = true),
         snapshothenter = mockk(relaxed = true),
-        reservasjonshenter = mockk(relaxed = true),
+        reservasjonshenter = reservasjonshenterMock,
     )
 
     class Response(

@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.rest.behandlinger.PostBehandlingNotaterBehand
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer.GetOpptegnelseSekvensnummerSisteBehandler
+import no.nav.helse.spesialist.api.rest.personer.GetKrrStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetOpptegnelserForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
@@ -30,12 +31,14 @@ import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
+import no.nav.helse.spesialist.application.Reservasjonshenter
 
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
     configuration: ApiModule.Configuration,
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
+    reservasjonshenter: Reservasjonshenter,
 ) {
     route("/api") {
         if (configuration.eksponerOpenApi) {
@@ -77,6 +80,8 @@ fun Routing.restRoutes(
             get(GetOpptegnelserForPersonBehandler(), restAdapter)
 
             post(PostPersonSokBehandler(), restAdapter)
+
+            get(GetKrrStatusForPersonBehandler(reservasjonshenter), restAdapter)
         }
     }
 }
