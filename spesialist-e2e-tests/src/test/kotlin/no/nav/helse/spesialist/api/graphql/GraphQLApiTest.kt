@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql
 
 import com.github.navikt.tbd_libs.jackson.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.apr
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -19,12 +20,15 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson())
+        val pseudoId = sessionFactory.transactionalSessionScope {
+            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+        }.value
         opprettAvviksvurdering(vilkårsgrunnlagId = vilkårsgrunnlagId)
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(personPseudoId:"$pseudoId") {
                     vilkarsgrunnlagV2 {
                         ... on VilkarsgrunnlagSpleisV2 {
                           arbeidsgiverrefusjoner {
@@ -57,11 +61,14 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 26.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson())
+        val pseudoId = sessionFactory.transactionalSessionScope {
+            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+        }.value
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(personPseudoId:"$pseudoId") {
                     vilkarsgrunnlagV2 {
                         ... on VilkarsgrunnlagSpleisV2 {
                           inntekter {
@@ -127,11 +134,14 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 0.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson())
+        val pseudoId = sessionFactory.transactionalSessionScope {
+            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+        }.value
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(personPseudoId:"$pseudoId") {
                     vilkarsgrunnlagV2 {
                         skjaeringstidspunkt
                          ... on VilkarsgrunnlagSpleisV2 {

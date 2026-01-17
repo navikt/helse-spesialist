@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -192,8 +193,11 @@ class OverstyringE2ETest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
 
         mockSnapshot()
+        val personPseudoId = sessionFactory.transactionalSessionScope {
+            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+        }.value.toString()
 
-        val snapshot: ApiPerson = runBlocking { personQuery.person(FØDSELSNUMMER, env = dataFetchingEnvironment).data!! }
+        val snapshot: ApiPerson = runBlocking { personQuery.person(personPseudoId, env = dataFetchingEnvironment).data!! }
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()

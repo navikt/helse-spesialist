@@ -7,9 +7,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 
 interface PersonQuerySchema : Query {
     suspend fun person(
-        fnr: String? = null,
-        aktorId: String? = null,
-        personPseudoId: String? = null,
+        personPseudoId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?>
 }

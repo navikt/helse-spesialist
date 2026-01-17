@@ -1,4 +1,4 @@
-query FetchPerson($personPseudoId: String) {
+query FetchPerson($personPseudoId: String!) {
     person(personPseudoId: $personPseudoId) {
         ...person
         __typename

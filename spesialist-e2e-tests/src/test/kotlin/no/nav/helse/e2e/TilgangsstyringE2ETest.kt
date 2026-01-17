@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -114,7 +115,14 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterArbeidsforholdløsning()
     }
 
-    private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, env = dataFetchingEnvironment) }
+    private fun fetchPerson() = runBlocking {
+        personQuery.person(
+            personPseudoId = sessionFactory.transactionalSessionScope {
+                it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+            }.value.toString(),
+            env = dataFetchingEnvironment
+        )
+    }
 
     private fun assertKanIkkeHentePerson(feilmelding: String) {
         fetchPerson().let { response ->

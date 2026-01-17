@@ -101,18 +101,12 @@ class PersonQueryHandler(
 ) : PersonQuerySchema {
     private val auditLog = LoggerFactory.getLogger("auditLogger")
 
-    private companion object {
-        private const val GYLDIG_AKTØRID_LENDGE = 13
-    }
-
     override suspend fun person(
-        fnr: String?,
-        aktorId: String?,
-        personPseudoId: String?,
+        personPseudoId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?> {
         val fødselsnummer =
-            when (val validering = validerInput(fnr, aktorId, personPseudoId)) {
+            when (val validering = validerInput(personPseudoId)) {
                 is Inputvalidering.Ok -> {
                     validering.fødselsnummer
                 }
@@ -188,52 +182,16 @@ class PersonQueryHandler(
         return byggFeilrespons(graphqlError)
     }
 
-    private fun Set<String>.harFlereFødselsnumre() = this.size > 1
+    private fun validerInput(personPseudoId: String): Inputvalidering {
+        val gyldigPersonPseudoId =
+            runCatching { PersonPseudoId.fraString(personPseudoId) }
+                .getOrElse { return UgyldigInput.UgyldigPersonPseudoId(notFoundError(personPseudoId)) }
 
-    private fun Set<String>.harIngenFødselsnumre() = this.isEmpty()
+        val identitetsnummer =
+            personoppslagService.fødselsnummerKnyttetTil(gyldigPersonPseudoId)
+                ?: return UgyldigInput.UkjentPersonPseudoId(personPseudoId, notFoundError(personPseudoId))
 
-    private fun ugyldigAktørId(aktørId: String) = aktørId.length != GYLDIG_AKTØRID_LENDGE
-
-    private fun validerInput(
-        fødselsnummer: String?,
-        aktørId: String?,
-        personPseudoId: String?,
-    ): Inputvalidering {
-        if (personPseudoId != null) {
-            val gyldigPersonPseudoId =
-                runCatching { PersonPseudoId.fraString(personPseudoId) }
-                    .getOrElse { return UgyldigInput.UgyldigPersonPseudoId(notFoundError(personPseudoId)) }
-
-            val identitetsnummer =
-                personoppslagService.fødselsnummerKnyttetTil(gyldigPersonPseudoId)
-                    ?: return UgyldigInput.UkjentPersonPseudoId(personPseudoId, notFoundError(personPseudoId))
-
-            return Inputvalidering.Ok(identitetsnummer.value)
-        }
-        if (fødselsnummer != null) {
-            if (personoppslagService.finnesPersonMedFødselsnummer(fødselsnummer)) {
-                return Inputvalidering.Ok(fødselsnummer)
-            }
-            return UgyldigInput.UkjentFødselsnummer(fødselsnummer, notFoundError(fødselsnummer))
-        }
-        if (aktørId == null) return UgyldigInput.ParametreMangler(getBadRequestError("Requesten mangler både fødselsnummer og aktorId"))
-        if (ugyldigAktørId(aktørId)) {
-            return UgyldigInput.UgyldigAktørId(
-                getBadRequestError("Feil lengde på parameter aktorId: ${aktørId.length}"),
-            )
-        }
-
-        val fødselsnumre = personoppslagService.fødselsnumreKnyttetTil(aktørId)
-
-        if (fødselsnumre.harIngenFødselsnumre()) return UgyldigInput.UkjentAktørId(aktørId, notFoundError(aktørId))
-        if (fødselsnumre.harFlereFødselsnumre()) {
-            return UgyldigInput.HarFlereFødselsnumre(
-                aktørId,
-                getFlereFødselsnumreError(fødselsnumre),
-            )
-        }
-
-        return Inputvalidering.Ok(fødselsnumre.single())
+        return Inputvalidering.Ok(identitetsnummer.value)
     }
 
     private fun loggNotFoundForAktørId(
@@ -260,17 +218,7 @@ class PersonQueryHandler(
         auditLog(env.graphQlContext, fnr, null, notFoundError(fnr).message)
     }
 
-    private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
-        graphqlErrorException(
-            500,
-            "Mer enn ett fødselsnummer for personen",
-            "feilkode" to "HarFlereFodselsnumre",
-            "fodselsnumre" to fødselsnumre,
-        )
-
     private fun getSnapshotFetchError(): GraphQLError = graphqlErrorException(501, "Feil ved henting av snapshot for person", "field" to "person")
-
-    private fun getBadRequestError(melding: String): GraphQLError = graphqlErrorException(400, melding)
 
     private fun auditLog(
         graphQLContext: GraphQLContext,
