@@ -182,8 +182,8 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private fun defaultArbeidsgivere(): GraphQLArbeidsgiver {
         val periodeMedOppgave = Periode(UUID.randomUUID(), 1 jan 2018, 25 jan 2018)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         return arbeidsgiver
     }
 

@@ -2,10 +2,11 @@ package no.nav.helse.spesialist.api.testfixtures.mutation
 
 import java.util.UUID
 
-fun settVarselstatusMutation(generasjonId: UUID?, definisjonId: UUID? = null, saksbehandlerOid: UUID, varselkode: String) = asGQL("""
+fun settVarselstatusMutation(behandlingId: UUID?, definisjonId: UUID? = null, saksbehandlerOid: UUID, varselkode: String) = asGQL(
+    """
     mutation SettVarselstatus {
         settVarselstatus(
-            generasjonIdString: "$generasjonId", 
+            behandlingIdString: "$behandlingId", 
             definisjonIdString: ${definisjonId?.let { """"$it"""" }},
             varselkode: "$varselkode", 
             ident: "$saksbehandlerOid" 
@@ -16,4 +17,5 @@ fun settVarselstatusMutation(generasjonId: UUID?, definisjonId: UUID? = null, sa
             }
         }
     }
-""")
+"""
+)

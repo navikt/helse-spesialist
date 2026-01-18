@@ -116,7 +116,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Finner varsler som skal med for siste snapshotgenerasjon`() {
+    fun `Finner varsler som skal med for siste snapshotbehandling`() {
         // Given:
         val utbetalingId = UUID.randomUUID()
         val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)

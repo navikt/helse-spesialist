@@ -30,10 +30,6 @@ class ApiModuleIntegrationTestFixture(
                         "NAVident" to "X123456",
                     ),
             ).serialize()
-            .also {
-                println("OAuth2-token:")
-                println(it)
-            }
 
     fun token(
         saksbehandler: Saksbehandler,

@@ -15,8 +15,8 @@ data class ApiArbeidsforhold(
     val sluttdato: LocalDate?,
 )
 
-@GraphQLName("Generasjon")
-data class ApiGenerasjon(
+@GraphQLName("Behandling")
+data class ApiBehandling(
     val id: UUID,
     val perioder: List<ApiPeriode>,
 )
@@ -165,7 +165,7 @@ interface ArbeidsgiverSchema {
 
     fun ghostPerioder(): List<ApiGhostPeriode>
 
-    fun generasjoner(): List<ApiGenerasjon>
+    fun behandlinger(): List<ApiBehandling>
 
     fun overstyringer(): List<ApiOverstyring>
 

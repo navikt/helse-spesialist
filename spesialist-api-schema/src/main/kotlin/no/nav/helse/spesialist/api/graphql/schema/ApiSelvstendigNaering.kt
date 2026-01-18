@@ -5,7 +5,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLName
 
 @GraphQLIgnore
 interface SelvstendigNaeringSchema {
-    fun generasjoner(): List<ApiGenerasjon>
+    fun behandlinger(): List<ApiBehandling>
 
     fun overstyringer(): List<ApiOverstyring>
 }

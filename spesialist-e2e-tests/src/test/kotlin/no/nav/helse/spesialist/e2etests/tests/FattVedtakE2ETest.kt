@@ -181,8 +181,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             val vedtakBegrunnelse =
                 person["arbeidsgivere"]
                     .flatMap { arbeidsgiver ->
-                        arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                            generasjon["perioder"].flatMap { periode ->
+                        arbeidsgiver["behandlinger"].flatMap { behandling ->
+                            behandling["perioder"].flatMap { periode ->
                                 periode["vedtakBegrunnelser"]?.toList().orEmpty()
                             }
                         }
@@ -229,8 +229,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             val vedtakBegrunnelse =
                 person["arbeidsgivere"]
                     .flatMap { arbeidsgiver ->
-                        arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                            generasjon["perioder"].flatMap { periode ->
+                        arbeidsgiver["behandlinger"].flatMap { behandling ->
+                            behandling["perioder"].flatMap { periode ->
                                 periode["vedtakBegrunnelser"]?.toList().orEmpty()
                             }
                         }
@@ -242,8 +242,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
             val historikkinnslag =
                 person["arbeidsgivere"].flatMap { arbeidsgiver ->
-                    arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                        generasjon["perioder"].flatMap { periode ->
+                    arbeidsgiver["behandlinger"].flatMap { behandling ->
+                        behandling["perioder"].flatMap { periode ->
                             periode["historikkinnslag"]?.toList().orEmpty()
                         }
                     }
@@ -333,8 +333,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             // Sjekk at varsler er godkjent
             person["arbeidsgivere"]
                 .flatMap { arbeidsgiver ->
-                    arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                        generasjon["perioder"].flatMap { periode ->
+                    arbeidsgiver["behandlinger"].flatMap { behandling ->
+                        behandling["perioder"].flatMap { periode ->
                             periode["varsler"].map {
                                 it["vurdering"]?.get("status")?.asText()
                             }
@@ -348,8 +348,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             val vedtakBegrunnelse =
                 person["arbeidsgivere"]
                     .flatMap { arbeidsgiver ->
-                        arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                            generasjon["perioder"].flatMap { periode ->
+                        arbeidsgiver["behandlinger"].flatMap { behandling ->
+                            behandling["perioder"].flatMap { periode ->
                                 periode["vedtakBegrunnelser"]?.toList().orEmpty()
                             }
                         }

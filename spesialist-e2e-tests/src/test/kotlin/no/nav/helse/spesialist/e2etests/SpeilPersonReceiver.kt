@@ -38,8 +38,8 @@ class SpeilPersonReceiver(
     fun saksbehandlerGodkjennerAlleVarsler() {
         person["arbeidsgivere"]
             .flatMap { arbeidsgiver ->
-                arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                    generasjon["perioder"].flatMap { periode ->
+                arbeidsgiver["behandlinger"].flatMap { behandling ->
+                    behandling["perioder"].flatMap { periode ->
                         periode["varsler"]
                     }
                 }
@@ -118,7 +118,7 @@ class SpeilPersonReceiver(
                     "tekst" to tekst,
                     "dialogRef" to (
                         person["arbeidsgivere"]
-                            .flatMap { it["generasjoner"] }
+                            .flatMap { it["behandlinger"] }
                             .flatMap { it["perioder"] }
                             .flatMap { it["historikkinnslag"] }
                             .find { it["__typename"].asText() == "LagtPaVent" }
@@ -139,7 +139,7 @@ class SpeilPersonReceiver(
                 mapOf(
                     "id" to (
                         person["arbeidsgivere"]
-                            .flatMap { it["generasjoner"] }
+                            .flatMap { it["behandlinger"] }
                             .flatMap { it["perioder"] }
                             .flatMap { it["historikkinnslag"] }
                             .flatMap { it["kommentarer"] }
@@ -386,20 +386,20 @@ class SpeilPersonReceiver(
 
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {
         val egenskaper =
-            person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toSet())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
     fun assertHarIkkeOppgaveegenskap(vararg egenskaperSomSkalMangle: String) {
         val egenskaper =
-            person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
         assertTrue(egenskaper.none { it in egenskaperSomSkalMangle.toSet() }) { "Forventet å ikke finne ${egenskaperSomSkalMangle.toSet()} i $egenskaper" }
     }
 
     fun assertPeriodeHarIkkeOppgave() {
-        assertTrue(person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"].isNull) {
+        assertTrue(person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].isNull) {
             "Forventet at oppgave var null for perioden, men den var: " +
-                person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"].toPrettyString()
+                person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].toPrettyString()
         }
     }
 
@@ -410,8 +410,8 @@ class SpeilPersonReceiver(
         val vedtaksperiodeFraFetchPerson =
             person["arbeidsgivere"]
                 .flatMap { arbeidsgiver ->
-                    arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                        generasjon["perioder"]
+                    arbeidsgiver["behandlinger"].flatMap { behandling ->
+                        behandling["perioder"]
                     }
                 }.find { it["behandlingId"].asText() == behandlingId.toString() }
                 ?: error("Fant ikke periode med behandlingId $behandlingId i FetchPerson-svaret")
@@ -426,8 +426,8 @@ class SpeilPersonReceiver(
         val vedtaksperiodeFraFetchPerson =
             person["arbeidsgivere"]
                 .flatMap { arbeidsgiver ->
-                    arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                        generasjon["perioder"]
+                    arbeidsgiver["behandlinger"].flatMap { behandling ->
+                        behandling["perioder"]
                     }
                 }.find { it["vedtaksperiodeId"].asText() == vedtaksperiode.vedtaksperiodeId.toString() }
                 ?: error("Fant ikke periode med vedtaksperiodeId ${vedtaksperiode.vedtaksperiodeId} i FetchPerson-svaret")
@@ -454,7 +454,7 @@ class SpeilPersonReceiver(
 
     fun callGetTilkomneInntektskilder(): JsonNode = callHttpGet("api/personer/${person["personPseudoId"].asText()}/tilkomne-inntektskilder")
 
-    private fun getOppgaveId(): String = person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"]["id"].asText()
+    private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asText()
 
     private fun callGraphQL(
         operationName: String,

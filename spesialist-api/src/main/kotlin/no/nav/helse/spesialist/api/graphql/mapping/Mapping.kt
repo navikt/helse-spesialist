@@ -17,7 +17,7 @@ fun VarselDbDto.toVarselDto(): ApiVarselDTO {
     checkNotNull(varseldefinisjon)
     return ApiVarselDTO(
         id = varselId,
-        generasjonId = behandlingId,
+        behandlingId = behandlingId,
         definisjonId = varseldefinisjon.definisjonId,
         opprettet = opprettet,
         kode = kode,

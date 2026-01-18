@@ -286,7 +286,7 @@ data class ApiRisikovurdering(
 @GraphQLName("VarselDTO")
 data class ApiVarselDTO(
     val id: UUID,
-    val generasjonId: UUID,
+    val behandlingId: UUID,
     val definisjonId: UUID,
     val opprettet: LocalDateTime,
     val kode: String,

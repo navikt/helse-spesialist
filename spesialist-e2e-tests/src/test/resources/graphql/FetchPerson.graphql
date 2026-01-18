@@ -157,7 +157,7 @@ fragment periode on Periode {
     skjaeringstidspunkt
     varsler {
         id
-        generasjonId
+        behandlingId
         definisjonId
         opprettet
         kode
@@ -549,7 +549,7 @@ fragment arbeidsgiver on Arbeidsgiver {
         ...ghostPeriode
         __typename
     }
-    generasjoner {
+    behandlinger {
         id
         perioder {
             ... on UberegnetPeriode {

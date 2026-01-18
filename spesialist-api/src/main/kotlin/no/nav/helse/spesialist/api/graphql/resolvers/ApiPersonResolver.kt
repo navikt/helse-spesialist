@@ -133,7 +133,7 @@ data class ApiPersonResolver(
                             navn = finnNavnForOrganisasjonsnummer(arbeidsgiver.organisasjonsnummer),
                             ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
                             fødselsnummer = snapshot.fodselsnummer,
-                            generasjoner = arbeidsgiver.generasjoner,
+                            behandlinger = arbeidsgiver.behandlinger,
                             apiOppgaveService = apiOppgaveService,
                             saksbehandlerMediator = saksbehandlerMediator,
                             arbeidsgiverApiDao = arbeidsgiverApiDao,
@@ -174,7 +174,7 @@ data class ApiPersonResolver(
         return ApiSelvstendigNaering(
             resolver =
                 ApiSelvstendigNaeringResolver(
-                    generasjoner = selvstendig.generasjoner,
+                    behandlinger = selvstendig.behandlinger,
                     fødselsnummer = snapshot.fodselsnummer,
                     apiOppgaveService = apiOppgaveService,
                     saksbehandlerMediator = saksbehandlerMediator,

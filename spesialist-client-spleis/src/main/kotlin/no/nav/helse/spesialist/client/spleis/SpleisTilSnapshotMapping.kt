@@ -6,9 +6,9 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotBegrunnelse
+import no.nav.helse.spesialist.application.snapshot.SnapshotBehandling
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotDag
-import no.nav.helse.spesialist.application.snapshot.SnapshotGenerasjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotHendelsetype
 import no.nav.helse.spesialist.application.snapshot.SnapshotInfotrygdVilkarsgrunnlag
@@ -121,7 +121,7 @@ fun GraphQLArbeidsgiver.tilSnapshotArbeidsgiver() =
     SnapshotArbeidsgiver(
         organisasjonsnummer = organisasjonsnummer,
         ghostPerioder = ghostPerioder.map { it.tilSnapshotGhostPeriode() },
-        generasjoner = generasjoner.map { it.tilSnapshotGenerasjon() },
+        behandlinger = generasjoner.map { it.tilSnapshotBehandling() },
     )
 
 fun GraphQLArbeidsgiverinntekt.tilSnapshotArbeidsgiverinntekt() =
@@ -151,8 +151,8 @@ fun GraphQLDag.tilSnapshotDag() =
         utbetalingsinfo = utbetalingsinfo?.tilSnapshotUtbetalingsinfo(),
     )
 
-fun GraphQLGenerasjon.tilSnapshotGenerasjon() =
-    SnapshotGenerasjon(
+fun GraphQLGenerasjon.tilSnapshotBehandling() =
+    SnapshotBehandling(
         id = id,
         perioder = perioder.map { it.tilSnapshotTidslinjeperiode() },
     )
@@ -246,8 +246,6 @@ fun GraphQLInntektFraAOrdningen.tilSnapshotInntektFraAOrdningen() =
         type = type.tilSnapshotHendelsetype(),
         eksternDokumentId = eksternDokumentId,
     )
-
-fun DefaultGraphQLHendelseImplementation.tilSnapshotUkjentHendelse() = SnapshotUkjentHendelse
 
 fun GraphQLInntekterFraAOrdningen.tilSnapshotInntekterFraAOrdningen() =
     SnapshotInntekterFraAOrdningen(
@@ -437,7 +435,7 @@ fun GraphQLHendelse.tilSnapshotHendelse() =
         is GraphQLSoknadSelvstendig -> tilSnapshotSoknadSelvstendig()
         is GraphQLSykmelding -> tilSnapshotSykmelding()
         is GraphQLInntektFraAOrdningen -> tilSnapshotInntektFraAOrdningen()
-        is DefaultGraphQLHendelseImplementation -> tilSnapshotUkjentHendelse()
+        is DefaultGraphQLHendelseImplementation -> SnapshotUkjentHendelse
         else -> error("Uhåndtert hendelsetype: ${this.javaClass.simpleName}")
     }
 

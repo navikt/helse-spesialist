@@ -7,7 +7,7 @@ mutation SettVarselStatus($generasjonIdString: String!, $ident: String!, $varsel
     ) {
         forklaring
         definisjonId
-        generasjonId
+        behandlingId
         handling
         kode
         tittel

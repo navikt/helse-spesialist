@@ -281,8 +281,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
             )
         val graphQLUberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef, status = "AKTIV")
@@ -298,8 +298,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val behandlingRef = nyBehandling(vedtaksperiodeId = vedtaksperiodeId)
         val uberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, vedtaksperiodeId)
         val beregnetPeriode = opprettBeregnetPeriode(5 jan 2023, 6 jan 2023, PERIODE.id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(beregnetPeriode, uberegnetPeriode))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(beregnetPeriode, uberegnetPeriode))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVedtaksperiode(opprettPerson())
         opprettVarseldefinisjon()
@@ -312,8 +312,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `Bare siste behandling for en uberegnet periode skal ta med seg aktive varsler`() {
-        val snapshotGenerasjonId1 = UUID.randomUUID()
-        val snapshotGenerasjonId2 = UUID.randomUUID()
+        val snapshotBehandlingId1 = UUID.randomUUID()
+        val snapshotBehandlingId2 = UUID.randomUUID()
         val personRef = opprettPerson()
         opprettArbeidsgiver()
         val uberegnetPeriode = 2 jan 2023 til (3 jan 2023)
@@ -338,18 +338,18 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
             )
         val graphQLUberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
-        val snapshotGenerasjon1 =
-            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId1)
-        val snapshotGenerasjon2 =
-            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId2)
+        val snapshotBehandling1 =
+            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotBehandlingId1)
+        val snapshotBehandling2 =
+            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotBehandlingId2)
         val arbeidsgiver =
-            opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon1, snapshotGenerasjon2))
+            opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling1, snapshotBehandling2))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef1, status = "AKTIV")
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef2, status = "AKTIV")
-        val førsteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId2)
-        val sisteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId1)
+        val førsteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotBehandlingId2)
+        val sisteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotBehandlingId1)
         val forventedeVarsler =
             setOf(PersonQueryTestVarsel(behandlingId1, "EN_KODE"), PersonQueryTestVarsel(behandlingId2, "EN_KODE"))
 
@@ -368,13 +368,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(personRef, periode = periode2)
         val førstePeriode = periode1.tilBeregnetPeriode().copy(periodetilstand = GraphQLPeriodetilstand.UTBETALT)
         val andrePeriode = periode2.tilBeregnetPeriode()
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(førstePeriode, andrePeriode))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(førstePeriode, andrePeriode))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
 
-        val perioder = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"]
+        val perioder = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
         assertEquals(2, perioder.size())
         val responseperiode1 = perioder.first { it["vedtaksperiodeId"].textValue() == periode1.id.toString() }
         val responseperiode2 = perioder.first { it["vedtaksperiodeId"].textValue() == periode2.id.toString() }
@@ -393,13 +393,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(personRef)
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
 
-        val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
+        val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
         assertFalse(periode["handlinger"].isEmpty)
         assertTrue(periode["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
@@ -413,15 +413,15 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val eksternDokumentId = UUID.randomUUID()
         val graphQLHendelse = opprettSnapshotHendelse(eksternDokumentId)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id, hendelser = listOf(graphQLHendelse))
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
 
         val hendelse =
             body["data"]["person"]["arbeidsgivere"]
-                .first()["generasjoner"]
+                .first()["behandlinger"]
                 .first()["perioder"]
                 .first()["hendelser"]
                 .first()
@@ -445,18 +445,18 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         val personRef = opprettPerson()
         opprettArbeidsgiver()
-        val snapshotGenerasjonId1 = UUID.randomUUID()
+        val snapshotBehandlingId1 = UUID.randomUUID()
         opprettVedtaksperiode(personRef)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, PERIODE.id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave), snapshotGenerasjonId1)
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave), snapshotBehandlingId1)
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
 
         val avslag =
             body["data"]["person"]["arbeidsgivere"]
-                .first()["generasjoner"]
+                .first()["behandlinger"]
                 .first()["perioder"]
                 .first()["avslag"]
                 .first()
@@ -472,13 +472,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(), kanAvvises = false)
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
 
-        val periode = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()
+        val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
         val forventedeHandlinger =
             setOf(
                 ApiHandling(ApiPeriodehandling.UTBETALE, true, null),
@@ -495,8 +495,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(aktørId = AKTØRID))
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
         val body = runPersonQuery()
@@ -518,13 +518,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                         personPseudoId
                     }
                     arbeidsgivere {
-                        generasjoner {
+                        behandlinger {
                             id
                             perioder {
                                 ... on UberegnetPeriode {
                                     vedtaksperiodeId
                                     varsler {
-                                        generasjonId
+                                        behandlingId
                                         kode
                                     }                      
                                 }
@@ -532,7 +532,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                                     vedtaksperiodeId
                                     handlinger { type, tillatt, begrunnelse }
                                     varsler {
-                                        generasjonId
+                                        behandlingId
                                         kode
                                     }         
                                     avslag {
@@ -568,22 +568,22 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         )
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {
-        val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"]
+        val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
         val perioder = objectMapper.treeToValue<List<PersonQueryTestPeriode>>(jsonNode)
         return perioder.first { periode -> vedtaksperiodeId == periode.vedtaksperiodeId }
     }
 
     private fun JsonNode.plukkUtPeriodeMed(
         vedtaksperiodeId: UUID,
-        generasjonId: UUID,
+        behandlingId: UUID,
     ): PersonQueryTestPeriode {
-        val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["generasjoner"]
-        val generasjoner = objectMapper.treeToValue<List<PersonQueryTestGenerasjon>>(jsonNode)
-        val generasjon = generasjoner.first { generasjon -> generasjonId == generasjon.id }
-        return generasjon.perioder.first { periode -> vedtaksperiodeId == periode.vedtaksperiodeId }
+        val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"]
+        val behandlinger = objectMapper.treeToValue<List<PersonQueryTestBehandling>>(jsonNode)
+        val behandling = behandlinger.first { behandling -> behandlingId == behandling.id }
+        return behandling.perioder.first { periode -> vedtaksperiodeId == periode.vedtaksperiodeId }
     }
 
-    private data class PersonQueryTestGenerasjon(
+    private data class PersonQueryTestBehandling(
         val id: UUID,
         val perioder: List<PersonQueryTestPeriode>,
     )
@@ -594,7 +594,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     )
 
     private data class PersonQueryTestVarsel(
-        val generasjonId: UUID,
+        val behandlingId: UUID,
         val kode: String,
     )
 

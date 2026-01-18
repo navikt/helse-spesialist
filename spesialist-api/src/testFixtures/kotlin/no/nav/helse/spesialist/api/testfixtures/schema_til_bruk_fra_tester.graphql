@@ -113,7 +113,7 @@ type Arbeidsforholdoverstyring implements Overstyring {
 
 type Arbeidsgiver {
     arbeidsforhold: [Arbeidsforhold!]!
-    generasjoner: [Generasjon!]!
+    behandlinger: [Behandling!]!
     ghostPerioder: [GhostPeriode!]!
     inntekterFraAordningen: [ArbeidsgiverInntekterFraAOrdningen!]!
     navn: String!
@@ -166,6 +166,11 @@ type BehandletOppgave {
     personPseudoId: UUID!
     personnavn: Personnavn!
     saksbehandler: String
+}
+
+type Behandling {
+    id: UUID!
+    perioder: [Periode!]!
 }
 
 type Behandlingsstatistikk {
@@ -274,11 +279,6 @@ type FjernetFraPaVent implements Historikkinnslag {
     type: PeriodehistorikkType!
 }
 
-type Generasjon {
-    id: UUID!
-    perioder: [Periode!]!
-}
-
 type GhostPeriode {
     deaktivert: Boolean!
     fom: LocalDate!
@@ -378,7 +378,6 @@ type Mutation {
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
-    opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean
@@ -429,13 +428,6 @@ type OpphevStansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
-}
-
-type Opptegnelse {
-    aktorId: String!
-    payload: String!
-    sekvensnummer: Int!
-    type: Opptegnelsetype!
 }
 
 type OverstyrtDag {
@@ -531,7 +523,6 @@ type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(fom: LocalDate!, limit: Int!, offset: Int!, tom: LocalDate!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
-    opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String, personPseudoId: String): Person
 }
 
@@ -569,7 +560,7 @@ type Sammenligningsgrunnlag {
 }
 
 type SelvstendigNaering {
-    generasjoner: [Generasjon!]!
+    behandlinger: [Behandling!]!
     overstyringer: [Overstyring!]!
 }
 
@@ -796,9 +787,9 @@ type Utbetalingsinfo {
 }
 
 type VarselDTO {
+    behandlingId: UUID!
     definisjonId: UUID!
     forklaring: String
-    generasjonId: UUID!
     handling: String
     id: UUID!
     kode: String!
@@ -928,6 +919,7 @@ enum Egenskap {
     HASTER
     INFOTRYGDFORLENGELSE
     INGEN_UTBETALING
+    JORDBRUKER_REINDRIFT
     MANGLER_IM
     MEDLEMSKAP
     OVERGANG_FRA_IT
@@ -975,6 +967,7 @@ enum Inntektstype {
 }
 
 enum Kategori {
+    Arbeidssituasjon
     Inntektsforhold
     Inntektskilde
     Mottaker
@@ -1015,17 +1008,6 @@ enum Oppgavetype {
     STIKKPROVE
     UTBETALING_TIL_ARBEIDSGIVER
     UTBETALING_TIL_SYKMELDT
-}
-
-enum Opptegnelsetype {
-    FERDIGBEHANDLET_GODKJENNINGSBEHOV
-    NY_SAKSBEHANDLEROPPGAVE
-    PERSONDATA_OPPDATERT
-    PERSON_KLAR_TIL_BEHANDLING
-    REVURDERING_AVVIST
-    REVURDERING_FERDIGBEHANDLET
-    UTBETALING_ANNULLERING_FEILET
-    UTBETALING_ANNULLERING_OK
 }
 
 enum Periodehandling {

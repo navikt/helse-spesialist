@@ -43,6 +43,14 @@ fun main() {
         rapidsConnection = KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
             rapidApp.ktorSetupCallback(ktorApplication)
             apiModuleIntegrationTestFixture.addAdditionalRoutings(ktorApplication)
+            println(
+                """
+            
+                OAuth2-token:
+                ${apiModuleIntegrationTestFixture.token}
+            
+                """.trimIndent()
+            )
         },
     )
 }

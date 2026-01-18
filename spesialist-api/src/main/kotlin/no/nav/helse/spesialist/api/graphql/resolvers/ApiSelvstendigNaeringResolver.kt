@@ -10,21 +10,21 @@ import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.schema.ApiBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.schema.ApiGenerasjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.SelvstendigNaeringSchema
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.snapshot.SnapshotBehandling
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotGenerasjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
 import java.util.UUID
 
 class ApiSelvstendigNaeringResolver(
     private val fødselsnummer: String,
-    private val generasjoner: List<SnapshotGenerasjon>,
+    private val behandlinger: List<SnapshotBehandling>,
     private val overstyringer: List<ApiOverstyring>,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerMediator: SaksbehandlerMediator,
@@ -39,14 +39,14 @@ class ApiSelvstendigNaeringResolver(
     private val annulleringRepository: AnnulleringRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : SelvstendigNaeringSchema {
-    override fun generasjoner(): List<ApiGenerasjon> =
-        generasjoner.mapIndexed { index, generasjon ->
+    override fun behandlinger(): List<ApiBehandling> =
+        behandlinger.mapIndexed { index, behandling ->
             val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
             val perioderSomSkalViseAktiveVarsler = varselRepository.perioderSomSkalViseVarsler(oppgaveId)
-            ApiGenerasjon(
-                id = generasjon.id,
+            ApiBehandling(
+                id = behandling.id,
                 perioder =
-                    generasjon.perioder.map {
+                    behandling.perioder.map {
                         when (it) {
                             is SnapshotUberegnetPeriode ->
                                 ApiUberegnetPeriode(
