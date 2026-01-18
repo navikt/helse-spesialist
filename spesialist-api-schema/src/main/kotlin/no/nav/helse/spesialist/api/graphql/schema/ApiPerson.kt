@@ -9,7 +9,6 @@
 
 package no.nav.helse.spesialist.api.graphql.schema
 
-import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
@@ -103,36 +102,19 @@ data class ApiAnnetFodselsnummer(
     val personPseudoId: UUID,
 )
 
-@GraphQLIgnore
-interface PersonSchema {
-    fun versjon(): Int
-
-    fun aktorId(): String
-
-    fun fodselsnummer(): String
-
-    fun andreFodselsnummer(): List<ApiAnnetFodselsnummer>
-
-    fun dodsdato(): LocalDate?
-
-    fun personinfo(): ApiPersoninfo
-
-    fun enhet(): ApiEnhet
-
-    fun tildeling(): ApiTildeling?
-
-    fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde>
-
-    fun arbeidsgivere(): List<ApiArbeidsgiver>
-
-    fun selvstendigNaering(): ApiSelvstendigNaering?
-
-    fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>?
-
-    fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2>
-}
-
 @GraphQLName("Person")
-class ApiPerson(
-    private val resolver: PersonSchema,
-) : PersonSchema by resolver
+data class ApiPerson(
+    val versjon: Int,
+    val aktorId: String,
+    val fodselsnummer: String,
+    val andreFodselsnummer: List<ApiAnnetFodselsnummer>,
+    val dodsdato: LocalDate?,
+    val personinfo: ApiPersoninfo,
+    val enhet: ApiEnhet,
+    val tildeling: ApiTildeling?,
+    val tilleggsinfoForInntektskilder: List<ApiTilleggsinfoForInntektskilde>,
+    val arbeidsgivere: List<ApiArbeidsgiver>,
+    val selvstendigNaering: ApiSelvstendigNaering?,
+    val infotrygdutbetalinger: List<ApiInfotrygdutbetaling>?,
+    val vilkarsgrunnlagV2: List<ApiVilkårsgrunnlagV2>,
+)
