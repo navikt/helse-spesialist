@@ -24,9 +24,14 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                 "arbeidsgivere.behandlinger.perioder.utbetaling.id",
                 "arbeidsgivere.behandlinger.perioder.vilkarsgrunnlagId",
                 "arbeidsgivere.behandlinger.perioder.behandlingId",
+                "arbeidsgivere.behandlinger.perioder.oppgave.id",
                 "arbeidsgivere.behandlinger.perioder.varsler.id",
                 "arbeidsgivere.behandlinger.perioder.varsler.behandlingId",
                 "arbeidsgivere.behandlinger.perioder.varsler.opprettet",
+                "arbeidsgivere.behandlinger.perioder.varsler.definisjonId",
+                "arbeidsgivere.behandlinger.perioder.varsler.tittel",
+                "arbeidsgivere.behandlinger.perioder.varsler.forklaring",
+                "arbeidsgivere.behandlinger.perioder.varsler.handling",
             )
         }
     }
@@ -238,7 +243,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
               "__typename" : "Utbetaling"
             },
             "oppgave" : {
-              "id" : "1",
               "__typename" : "OppgaveForPeriodevisning"
             },
             "paVent" : null,
@@ -783,11 +787,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
             "periodetilstand" : "TilGodkjenning",
             "skjaeringstidspunkt" : "2024-12-01",
             "varsler" : [ {
-              "definisjonId" : "77970f04-c4c5-4b9f-8795-bb5e4749344c",
               "kode" : "SB_RV_1",
-              "tittel" : "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger",
-              "forklaring" : null,
-              "handling" : null,
               "vurdering" : null,
               "__typename" : "VarselDTO"
             } ],
