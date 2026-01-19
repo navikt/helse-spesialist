@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostNotatBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PutFeilregistrerNotatBehandler
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun Routing.restRoutes(
@@ -76,6 +77,7 @@ fun Routing.restRoutes(
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
             post(PostNotatBehandler(), restAdapter)
+            put(PutFeilregistrerNotatBehandler(), restAdapter)
 
             get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)
             get(GetOpptegnelserForPersonBehandler(), restAdapter)
@@ -119,7 +121,6 @@ private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPO
     post<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
 }
 
-@Suppress("unused")
 private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.put(
     behandler: PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
     adapter: RestAdapter,

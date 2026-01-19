@@ -4,34 +4,31 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiNotatRequest
-import no.nav.helse.spesialist.api.rest.ApiNotatResponse
-import no.nav.helse.spesialist.api.rest.PostBehandler
+import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Notat
-import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostNotatBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Notater, ApiNotatRequest, ApiNotatResponse, ApiPostNotatErrorCode> {
+class PutFeilregistrerNotatBehandler : PutBehandler<Vedtaksperioder.VedtaksperiodeId.Notater.NotatId.Feilregistrer, Unit, Unit, ApiPostFeilregistrerNotatErrorCode> {
     override fun behandle(
-        resource: Vedtaksperioder.VedtaksperiodeId.Notater,
-        request: ApiNotatRequest,
+        resource: Vedtaksperioder.VedtaksperiodeId.Notater.NotatId.Feilregistrer,
+        request: Unit,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<ApiNotatResponse, ApiPostNotatErrorCode> {
-        val vedtaksperiodeId = resource.parent.vedtaksperiodeId
+    ): RestResponse<Unit, ApiPostFeilregistrerNotatErrorCode> {
+        val notatId = resource.parent.notatId
+        val vedtaksperiodeId = resource.parent.parent.parent.vedtaksperiodeId
         val vedtaksperiode =
             transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(vedtaksperiodeId))
-                ?: return RestResponse.Error(ApiPostNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
+                ?: return RestResponse.Error(ApiPostFeilregistrerNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
 
         if (!saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = vedtaksperiode.fødselsnummer),
@@ -39,23 +36,19 @@ class PostNotatBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Notate
                 transaksjon = transaksjon,
             )
         ) {
-            return RestResponse.Error(ApiPostNotatErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            return RestResponse.Error(ApiPostFeilregistrerNotatErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
-        val dialog = Dialog.Factory.ny()
-        transaksjon.dialogRepository.lagre(dialog)
-
         val notat =
-            Notat.Factory.ny(
-                type = NotatType.Generelt,
-                tekst = request.tekst,
-                dialogRef = dialog.id(),
-                vedtaksperiodeId = vedtaksperiodeId,
-                saksbehandlerOid = saksbehandler.id,
+            transaksjon.notatRepository.finn(NotatId(notatId)) ?: return RestResponse.Error(
+                ApiPostFeilregistrerNotatErrorCode.NOTAT_IKKE_FUNNET,
             )
+
+        notat.feilregistrer()
+
         transaksjon.notatRepository.lagre(notat)
 
-        return RestResponse.Created(ApiNotatResponse(id = notat.id().value))
+        return RestResponse.OK(Unit)
     }
 
     override fun openApi(config: RouteConfig) {
@@ -65,10 +58,11 @@ class PostNotatBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Notate
     }
 }
 
-enum class ApiPostNotatErrorCode(
+enum class ApiPostFeilregistrerNotatErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
+    NOTAT_IKKE_FUNNET("Fant ikke notat", HttpStatusCode.NotFound),
 }

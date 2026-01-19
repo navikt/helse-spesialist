@@ -10,18 +10,29 @@ import java.util.UUID
 @Resource("vedtaksperioder")
 class Vedtaksperioder {
     @Resource("{vedtaksperiodeId}")
-    class Id(
+    class VedtaksperiodeId(
         val parent: Vedtaksperioder = Vedtaksperioder(),
         val vedtaksperiodeId: UUID,
     ) {
         @Resource("notater")
         class Notater(
-            val parent: Id,
-        )
+            val parent: VedtaksperiodeId,
+        ) {
+            @Resource("{notatId}")
+            class NotatId(
+                val parent: Notater,
+                val notatId: Int,
+            ) {
+                @Resource("feilregistrer")
+                class Feilregistrer(
+                    val parent: NotatId,
+                )
+            }
+        }
 
         @Resource("annuller")
         class Annuller(
-            val parent: Id,
+            val parent: VedtaksperiodeId,
         )
     }
 }

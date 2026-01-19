@@ -27,6 +27,7 @@ class Notat private constructor(
         private set
 
     fun feilregistrer() {
+        if (feilregistrert) return
         feilregistrert = true
         feilregistrertTidspunkt = LocalDateTime.now()
     }

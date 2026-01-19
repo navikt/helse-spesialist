@@ -17,9 +17,9 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Annuller, ApiVedtaksperiodeAnnullerRequest, Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
+class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Annuller, ApiVedtaksperiodeAnnullerRequest, Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
     override fun behandle(
-        resource: Vedtaksperioder.Id.Annuller,
+        resource: Vedtaksperioder.VedtaksperiodeId.Annuller,
         request: ApiVedtaksperiodeAnnullerRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,

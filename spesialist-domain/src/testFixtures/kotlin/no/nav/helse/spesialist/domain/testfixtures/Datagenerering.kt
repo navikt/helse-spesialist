@@ -15,7 +15,10 @@ import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Notat
+import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
@@ -182,6 +185,20 @@ fun lagVedtaksperiode(
     fødselsnummer = identitetsnummer.value,
     organisasjonsnummer = organisasjonsnummer,
     forkastet = forkastet
+)
+
+fun lagNotat(
+    tekst: String = "Dette er et notat",
+    type: NotatType = NotatType.Generelt,
+    dialogRef: DialogId = DialogId(nextLong()),
+    vedtaksperiodeId: UUID = lagVedtaksperiodeId().value,
+    saksbehandlerOid: SaksbehandlerOid = lagSaksbehandler().id,
+): Notat = Notat.Factory.ny(
+    tekst = tekst,
+    type = type,
+    dialogRef = dialogRef,
+    vedtaksperiodeId = vedtaksperiodeId,
+    saksbehandlerOid = saksbehandlerOid,
 )
 
 fun lagVarselId() = VarselId(UUID.randomUUID())
