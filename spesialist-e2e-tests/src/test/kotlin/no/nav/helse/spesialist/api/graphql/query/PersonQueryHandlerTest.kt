@@ -10,8 +10,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import graphql.GraphQLException
 import io.mockk.every
-import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
-import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
@@ -25,10 +24,20 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
@@ -39,7 +48,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertContains
 
@@ -72,7 +80,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(personPseudoId: "$personPseudoId") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals("Exception while fetching data (/person) : PseudoId er ugyldig eller utgått", body["errors"].first()["message"].asText())
+        assertEquals(
+            "Exception while fetching data (/person) : PseudoId er ugyldig eller utgått",
+            body["errors"].first()["message"].asText()
+        )
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$personPseudoId operation=PersonQuery msg=Finner ikke data for person med identifikator $personPseudoId",
             Level.WARN,
@@ -85,7 +96,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(personPseudoId: "abc123") { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals("Exception while fetching data (/person) : Ugyldig format på personPseudoId", body["errors"].first()["message"].asText())
+        assertEquals(
+            "Exception while fetching data (/person) : Ugyldig format på personPseudoId",
+            body["errors"].first()["message"].asText()
+        )
     }
 
     @Test
@@ -385,27 +399,70 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
-        every { vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(any(), any()) } returns
-                listOf(
-                    VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase(
-                        type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-                        begrunnelse = avslagsbegrunnelse,
-                        opprettet = LocalDateTime.now(),
-                        saksbehandlerIdent = "AIDENT",
-                        invalidert = false,
-                    ),
+        val person = lagPerson()
+            .also { sessionFactory.transactionalSessionScope { transaction -> transaction.personRepository.lagre(it) } }
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val arbeidsgiver1 = Arbeidsgiver.Factory.ny(
+            id = ArbeidsgiverIdentifikator.Organisasjonsnummer(organisasjonsnummer),
+            navnString = lagOrganisasjonsnavn()
+        ).also {
+            sessionFactory.transactionalSessionScope { transaction ->
+                transaction.arbeidsgiverRepository.lagre(
+                    it
                 )
+            }
+        }
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id, organisasjonsnummer = organisasjonsnummer)
+                .also {
+                    sessionFactory.transactionalSessionScope { transaction ->
+                        transaction.vedtaksperiodeRepository.lagre(
+                            it
+                        )
+                    }
+                }
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+            .also { sessionFactory.transactionalSessionScope { transaction -> transaction.behandlingRepository.lagre(it) } }
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, UUID.randomUUID())
+        val saksbehandler = lagSaksbehandler().also {
+            sessionFactory.transactionalSessionScope { transaction ->
+                transaction.saksbehandlerRepository.lagre(it)
+            }
+        }
+        val vedtakBegrunnelse = VedtakBegrunnelse.ny(
+            spleisBehandlingId = behandling.spleisBehandlingId!!,
+            tekst = avslagsbegrunnelse,
+            utfall = Utfall.AVSLAG,
+            saksbehandlerOid = saksbehandler.id
+        ).also {
+            sessionFactory.transactionalSessionScope { transaction ->
+                transaction.vedtakBegrunnelseRepository.lagre(it)
+            }
+        }
 
-        val personRef = opprettPerson()
-        opprettArbeidsgiver()
-        val snapshotBehandlingId1 = UUID.randomUUID()
-        opprettVedtaksperiode(personRef)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, PERIODE.id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave), snapshotBehandlingId1)
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
-        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+        mockSnapshot(
+            fødselsnummer = person.id.value,
+            arbeidsgivere = listOf(
+                opprettSnapshotArbeidsgiver(
+                    organisasjonsnummer = organisasjonsnummer,
+                    generasjoner = listOf(
+                        opprettSnapshotGenerasjon(
+                            perioder = listOf(
+                                opprettBeregnetPeriode(
+                                    fom = behandling.fom,
+                                    tom = behandling.tom,
+                                    vedtaksperiodeId = vedtaksperiode.id.value,
+                                    utbetalingId = behandling.utbetalingId!!.value
+                                )
+                            ),
+                            id = behandling.spleisBehandlingId!!.value
+                        )
+                    )
+                )
+            )
+        )
 
-        val body = runPersonQuery()
+        val body = runPersonQuery(person.id)
 
         val avslag =
             body["data"]["person"]["arbeidsgivere"]
@@ -416,7 +473,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertNotNull(avslag)
         assertEquals(ApiAvslagstype.AVSLAG, enumValueOf<ApiAvslagstype>(avslag["type"].textValue()))
         assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].textValue())
-        assertEquals("AIDENT", avslag["saksbehandlerIdent"].textValue())
+        assertEquals(saksbehandler.ident.value, avslag["saksbehandlerIdent"].textValue())
         assertFalse(avslag["invalidert"].booleanValue())
     }
 
@@ -460,11 +517,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         )
     }
 
-    private fun runPersonQuery() =
+    private fun runPersonQuery(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)) =
         runQuery(
             """
             { 
-                person(personPseudoId: "${opprettPersonPseudoId()}") { 
+                person(personPseudoId: "${opprettPersonPseudoId(identitetsnummer)}") { 
                     aktorId
                     andreFodselsnummer {
                         fodselsnummer
@@ -520,9 +577,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         """,
         )
 
-    private fun opprettPersonPseudoId(): UUID = sessionFactory.transactionalSessionScope {
-        it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-    }.value
+    private fun opprettPersonPseudoId(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)): UUID =
+        sessionFactory.transactionalSessionScope {
+            it.personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
+        }.value
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {
         val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]

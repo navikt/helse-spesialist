@@ -17,8 +17,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
-import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
@@ -40,7 +38,7 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
-import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -56,16 +54,11 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
-    protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
-    protected val stansAutomatiskBehandlingSaksbehandlerDao =
-        mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
-    private val personinfoDao = daos.personinfoDao
-    private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
 
     private val apiTesting =
         ApiTesting(
@@ -87,27 +80,12 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     SpesialistSchema.QueryHandlers(
                         person =
                             PersonQueryHandler(
-                                personApiDao = personApiDao,
-                                vergemålApiDao = vergemålApiDao,
-                                tildelingApiDao = tildelingApiDao,
-                                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                                overstyringApiDao = overstyringApiDao,
-                                risikovurderingApiDao = risikovurderingApiDao,
-                                varselRepository = apiVarselRepository,
-                                oppgaveApiDao = oppgaveApiDao,
-                                periodehistorikkApiDao = periodehistorikkApiDao,
-                                notatDao = notatDao,
-                                påVentApiDao = påVentApiDao,
+                                daos = daos,
                                 apiOppgaveService = apiOppgaveService,
-                                saksbehandlerMediator = saksbehandlerMediator,
                                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
-                                snapshotService = snapshotService,
+                                snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
-                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
-                                annulleringRepository = daos.annulleringRepository,
-                                saksbehandlerRepository = daos.saksbehandlerRepository,
                             ),
                         oppgaver =
                             OppgaverQueryHandler(
@@ -152,7 +130,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
         val respons = snapshot(fødselsnummer, arbeidsgivere, vilkårsgrunnlagId)
-        every { spleisClient.hentPerson(FØDSELSNUMMER) } returns respons
+        every { spleisClient.hentPerson(fødselsnummer) } returns respons
     }
 
     private fun snapshot(
@@ -230,4 +208,5 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         setBody(mapOf("query" to query))
                     }.body<String>()
             }.let(objectMapper::readTree)
+            .also { logg.info("Response fra GraphQL: $it") }
 }

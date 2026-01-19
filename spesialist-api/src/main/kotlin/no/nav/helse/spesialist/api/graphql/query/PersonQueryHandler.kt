@@ -7,24 +7,10 @@ import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.db.AnnulleringRepository
+import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
-import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.db.api.ArbeidsgiverApiDao
-import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.db.api.OverstyringApiDao
-import no.nav.helse.db.api.PeriodehistorikkApiDao
-import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.RisikovurderingApiDao
-import no.nav.helse.db.api.TildelingApiDao
-import no.nav.helse.db.api.VarselApiRepository
-import no.nav.helse.db.api.VergemålApiDao
-import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
@@ -114,7 +100,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
@@ -135,29 +121,15 @@ import java.time.LocalDate
 import java.util.UUID
 
 class PersonQueryHandler(
-    private val personApiDao: PersonApiDao,
-    private val vergemålApiDao: VergemålApiDao,
-    private val tildelingApiDao: TildelingApiDao,
-    private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    private val overstyringApiDao: OverstyringApiDao,
-    private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselRepository: VarselApiRepository,
-    private val oppgaveApiDao: OppgaveApiDao,
-    private val periodehistorikkApiDao: PeriodehistorikkApiDao,
-    private val notatDao: NotatApiDao,
-    private val påVentApiDao: PåVentApiDao,
+    private val daos: Daos,
     private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerMediator: SaksbehandlerMediator,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
-    private val snapshotService: SnapshotService,
+    snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
-    private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
-    private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
-    private val annulleringRepository: AnnulleringRepository,
-    private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : PersonQuerySchema {
     private val auditLog = LoggerFactory.getLogger("auditLogger")
+    private val snapshotService = SnapshotService(daos.personinfoDao, snapshothenter)
 
     override suspend fun person(
         personPseudoId: String,
@@ -216,7 +188,7 @@ class PersonQueryHandler(
         // Best effort for å finne ut om saksbehandler har tilgang til oppgaven som gjelder
         // Litt vanskelig å få pent så lenge vi har dynamisk resolving av resten, og tilsynelatende "mange" oppgaver
         val harTilgangTilOppgave =
-            oppgaveApiDao.finnOppgaveId(identitetsnummer.value)?.let { oppgaveId ->
+            daos.oppgaveApiDao.finnOppgaveId(identitetsnummer.value)?.let { oppgaveId ->
                 transaction.oppgaveRepository
                     .finn(oppgaveId)
                     ?.kanSeesAv(saksbehandler, tilgangsgrupper)
@@ -256,7 +228,7 @@ class PersonQueryHandler(
             aktorId = snapshot.aktorId,
             fodselsnummer = snapshot.fodselsnummer,
             andreFodselsnummer =
-                personApiDao
+                daos.personApiDao
                     .finnFødselsnumre(personEntity.aktørId)
                     .toSet()
                     .filterNot { fnr -> fnr == identitetsnummer.value }
@@ -276,14 +248,14 @@ class PersonQueryHandler(
                         stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(
                             identitetsnummer.value,
                         ),
-                    fullmakt = vergemålApiDao.harFullmakt(identitetsnummer.value),
+                    fullmakt = daos.vergemålApiDao.harFullmakt(identitetsnummer.value),
                     automatiskBehandlingStansetAvSaksbehandler =
-                        stansAutomatiskBehandlingSaksbehandlerDao.erStanset(
+                        daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(
                             identitetsnummer.value,
                         ),
                 ),
-            enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { ApiEnhet(it.id, it.navn) },
-            tildeling = tildelingApiDao.tildelingForPerson(snapshot.fodselsnummer)?.tilTildeling(),
+            enhet = daos.personApiDao.finnEnhet(snapshot.fodselsnummer).let { ApiEnhet(it.id, it.navn) },
+            tildeling = daos.tildelingApiDao.tildelingForPerson(snapshot.fodselsnummer)?.tilTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag
                     .flatMap { vilkårsgrunnlag ->
@@ -303,7 +275,7 @@ class PersonQueryHandler(
                     },
             arbeidsgivere =
                 run {
-                    val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
+                    val overstyringer = daos.overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
 
                     snapshot.arbeidsgivere
                         .filterNot { it.organisasjonsnummer == "SELVSTENDIG" }
@@ -316,16 +288,17 @@ class PersonQueryHandler(
                                 }
                             val fødselsnummer = snapshot.fodselsnummer
                             val behandlinger = arbeidsgiver.behandlinger
-                            val risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
+                            val risikovurderinger =
+                                daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
                             ApiArbeidsgiver(
                                 organisasjonsnummer = orgnummer,
                                 navn = navn,
                                 ghostPerioder = ghostPerioder,
                                 behandlinger =
                                     behandlinger.mapIndexed { index, behandling ->
-                                        val oppgaveId = oppgaveApiDao.finnOppgaveId(fødselsnummer)
+                                        val oppgaveId = daos.oppgaveApiDao.finnOppgaveId(fødselsnummer)
                                         val perioderSomSkalViseAktiveVarsler =
-                                            varselRepository.perioderSomSkalViseVarsler(oppgaveId)
+                                            daos.varselApiRepository.perioderSomSkalViseVarsler(oppgaveId)
                                         ApiBehandling(
                                             id = behandling.id,
                                             perioder =
@@ -363,18 +336,18 @@ class PersonQueryHandler(
                                                                 hendelser = periode.hendelser.map { it.tilApiHendelse() },
                                                                 varsler =
                                                                     if (skalViseAktiveVarsler) {
-                                                                        varselRepository
+                                                                        daos.varselApiRepository
                                                                             .finnVarslerForUberegnetPeriode(
                                                                                 vedtaksperiodeId,
                                                                             ).map { it.toVarselDto() }
                                                                     } else {
-                                                                        varselRepository
+                                                                        daos.varselApiRepository
                                                                             .finnGodkjenteVarslerForUberegnetPeriode(
                                                                                 vedtaksperiodeId,
                                                                             ).map { it.toVarselDto() }
                                                                     },
                                                                 notater =
-                                                                    notatDao
+                                                                    daos.notatApiDao
                                                                         .finnNotater(vedtaksperiodeId)
                                                                         .map { it.tilApiNotat() },
                                                             )
@@ -388,7 +361,7 @@ class PersonQueryHandler(
                                                             val vedtaksperiodeId = periode.vedtaksperiodeId
                                                             val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
                                                                 if (erSisteBehandling) {
-                                                                    oppgaveApiDao.finnPeriodeoppgave(
+                                                                    daos.oppgaveApiDao.finnPeriodeoppgave(
                                                                         periode.vedtaksperiodeId,
                                                                     )
                                                                 } else {
@@ -478,11 +451,11 @@ class PersonQueryHandler(
                                                                     ),
                                                                 hendelser = periode.hendelser.map { it.tilApiHendelse() },
                                                                 notater =
-                                                                    notatDao
+                                                                    daos.notatApiDao
                                                                         .finnNotater(vedtaksperiodeId)
                                                                         .map { it.tilApiNotat() },
                                                                 historikkinnslag =
-                                                                    periodehistorikkApiDao
+                                                                    daos.periodehistorikkApiDao
                                                                         .finn(periode.utbetaling.id)
                                                                         .map {
                                                                             when (it.type) {
@@ -501,7 +474,7 @@ class PersonQueryHandler(
                                                                                         frist = frist,
                                                                                         notattekst = notattekst,
                                                                                         kommentarer =
-                                                                                            notatDao
+                                                                                            daos.notatApiDao
                                                                                                 .finnKommentarer(it.dialogRef!!.toLong())
                                                                                                 .map { kommentar ->
                                                                                                     ApiKommentar(
@@ -530,7 +503,7 @@ class PersonQueryHandler(
                                                                                         frist = frist,
                                                                                         notattekst = notattekst,
                                                                                         kommentarer =
-                                                                                            notatDao
+                                                                                            daos.notatApiDao
                                                                                                 .finnKommentarer(it.dialogRef!!.toLong())
                                                                                                 .map { kommentar ->
                                                                                                     ApiKommentar(
@@ -566,7 +539,7 @@ class PersonQueryHandler(
                                                                                         notattekst = notattekst,
                                                                                         kommentarer =
                                                                                             it.dialogRef?.let { dialogRef ->
-                                                                                                notatDao
+                                                                                                daos.notatApiDao
                                                                                                     .finnKommentarer(
                                                                                                         dialogRef.toLong(),
                                                                                                     ).map { kommentar ->
@@ -593,7 +566,7 @@ class PersonQueryHandler(
                                                                                         dialogRef = it.dialogRef,
                                                                                         notattekst = notattekst,
                                                                                         kommentarer =
-                                                                                            notatDao
+                                                                                            daos.notatApiDao
                                                                                                 .finnKommentarer(it.dialogRef!!.toLong())
                                                                                                 .map { kommentar ->
                                                                                                     ApiKommentar(
@@ -618,7 +591,7 @@ class PersonQueryHandler(
                                                                                         dialogRef = it.dialogRef,
                                                                                         notattekst = notattekst,
                                                                                         kommentarer =
-                                                                                            notatDao
+                                                                                            daos.notatApiDao
                                                                                                 .finnKommentarer(it.dialogRef!!.toLong())
                                                                                                 .map { kommentar ->
                                                                                                     ApiKommentar(
@@ -722,13 +695,13 @@ class PersonQueryHandler(
                                                                     },
                                                                 varsler =
                                                                     if (erSisteBehandling) {
-                                                                        varselRepository
+                                                                        daos.varselApiRepository
                                                                             .finnVarslerSomIkkeErInaktiveForSisteBehandling(
                                                                                 vedtaksperiodeId,
                                                                                 periode.utbetaling.id,
                                                                             ).map { it.toVarselDto() }
                                                                     } else {
-                                                                        varselRepository
+                                                                        daos.varselApiRepository
                                                                             .finnVarslerSomIkkeErInaktiveFor(
                                                                                 vedtaksperiodeId,
                                                                                 periode.utbetaling.id,
@@ -761,7 +734,7 @@ class PersonQueryHandler(
                                                                         }
                                                                     },
                                                                 paVent =
-                                                                    påVentApiDao
+                                                                    daos.påVentApiDao
                                                                         .hentAktivPåVent(vedtaksperiodeId)
                                                                         ?.let {
                                                                             ApiPaVent(
@@ -770,7 +743,7 @@ class PersonQueryHandler(
                                                                             )
                                                                         },
                                                                 avslag =
-                                                                    vedtakBegrunnelseDao
+                                                                    daos.vedtakBegrunnelseDao
                                                                         .finnAlleVedtakBegrunnelser(
                                                                             vedtaksperiodeId = periode.vedtaksperiodeId,
                                                                             utbetalingId = periode.utbetaling.id,
@@ -795,7 +768,7 @@ class PersonQueryHandler(
                                                                             )
                                                                         },
                                                                 vedtakBegrunnelser =
-                                                                    vedtakBegrunnelseDao
+                                                                    daos.vedtakBegrunnelseDao
                                                                         .finnAlleVedtakBegrunnelser(
                                                                             vedtaksperiodeId = periode.vedtaksperiodeId,
                                                                             utbetalingId = periode.utbetaling.id,
@@ -814,11 +787,11 @@ class PersonQueryHandler(
                                                                         },
                                                                 annullering =
                                                                     if (erSisteBehandling) {
-                                                                        annulleringRepository
+                                                                        daos.annulleringRepository
                                                                             .finnAnnullering(vedtaksperiodeId)
                                                                             ?.let {
                                                                                 val saksbehandler =
-                                                                                    saksbehandlerRepository.finn(it.saksbehandlerOid)
+                                                                                    daos.saksbehandlerRepository.finn(it.saksbehandlerOid)
                                                                                         ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                                                                                 ApiAnnullering(
                                                                                     saksbehandlerIdent = saksbehandler.ident.value,
@@ -870,7 +843,7 @@ class PersonQueryHandler(
                                             }
                                         },
                                 arbeidsforhold =
-                                    arbeidsgiverApiDao
+                                    daos.arbeidsgiverApiDao
                                         .finnArbeidsforhold(
                                             fødselsnummer,
                                             orgnummer,
@@ -883,7 +856,7 @@ class PersonQueryHandler(
                                             )
                                         },
                                 inntekterFraAordningen =
-                                    arbeidsgiverApiDao
+                                    daos.arbeidsgiverApiDao
                                         .finnArbeidsgiverInntekterFraAordningen(
                                             fødselsnummer,
                                             orgnummer,
@@ -912,9 +885,9 @@ class PersonQueryHandler(
                     ApiSelvstendigNaering(
                         behandlinger =
                             selvstendig.behandlinger.mapIndexed { index, behandling ->
-                                val oppgaveId = oppgaveApiDao.finnOppgaveId(snapshot.fodselsnummer)
+                                val oppgaveId = daos.oppgaveApiDao.finnOppgaveId(snapshot.fodselsnummer)
                                 val perioderSomSkalViseAktiveVarsler =
-                                    varselRepository.perioderSomSkalViseVarsler(oppgaveId)
+                                    daos.varselApiRepository.perioderSomSkalViseVarsler(oppgaveId)
                                 ApiBehandling(
                                     id = behandling.id,
                                     perioder =
@@ -947,18 +920,18 @@ class PersonQueryHandler(
                                                         hendelser = periode.hendelser.map { it.tilApiHendelse() },
                                                         varsler =
                                                             if (skalViseAktiveVarsler) {
-                                                                varselRepository
+                                                                daos.varselApiRepository
                                                                     .finnVarslerForUberegnetPeriode(
                                                                         vedtaksperiodeId,
                                                                     ).map { it.toVarselDto() }
                                                             } else {
-                                                                varselRepository
+                                                                daos.varselApiRepository
                                                                     .finnGodkjenteVarslerForUberegnetPeriode(
                                                                         vedtaksperiodeId,
                                                                     ).map { it.toVarselDto() }
                                                             },
                                                         notater =
-                                                            notatDao
+                                                            daos.notatApiDao
                                                                 .finnNotater(vedtaksperiodeId)
                                                                 .map { it.tilApiNotat() },
                                                     )
@@ -968,7 +941,7 @@ class PersonQueryHandler(
                                                     val fødselsnummer = snapshot.fodselsnummer
                                                     val orgnummer = "SELVSTENDIG"
                                                     val risikovurderinger =
-                                                        risikovurderingApiDao.finnRisikovurderinger(
+                                                        daos.risikovurderingApiDao.finnRisikovurderinger(
                                                             identitetsnummer.value,
                                                         )
 
@@ -976,7 +949,13 @@ class PersonQueryHandler(
                                                         periode.periodetilstand.tilApiPeriodetilstand(erSisteBehandling)
                                                     val vedtaksperiodeId = periode.vedtaksperiodeId
                                                     val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-                                                        if (erSisteBehandling) oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId) else null
+                                                        if (erSisteBehandling) {
+                                                            daos.oppgaveApiDao.finnPeriodeoppgave(
+                                                                periode.vedtaksperiodeId,
+                                                            )
+                                                        } else {
+                                                            null
+                                                        }
                                                     }
 
                                                     fun byggHandlinger(): List<ApiHandling> =
@@ -1053,11 +1032,11 @@ class PersonQueryHandler(
                                                             ),
                                                         hendelser = periode.hendelser.map { it.tilApiHendelse() },
                                                         notater =
-                                                            notatDao
+                                                            daos.notatApiDao
                                                                 .finnNotater(vedtaksperiodeId)
                                                                 .map { it.tilApiNotat() },
                                                         historikkinnslag =
-                                                            periodehistorikkApiDao
+                                                            daos.periodehistorikkApiDao
                                                                 .finn(periode.utbetaling.id)
                                                                 .map {
                                                                     when (it.type) {
@@ -1076,7 +1055,7 @@ class PersonQueryHandler(
                                                                                 frist = frist,
                                                                                 notattekst = notattekst,
                                                                                 kommentarer =
-                                                                                    notatDao
+                                                                                    daos.notatApiDao
                                                                                         .finnKommentarer(it.dialogRef!!.toLong())
                                                                                         .map { kommentar ->
                                                                                             ApiKommentar(
@@ -1105,7 +1084,7 @@ class PersonQueryHandler(
                                                                                 frist = frist,
                                                                                 notattekst = notattekst,
                                                                                 kommentarer =
-                                                                                    notatDao
+                                                                                    daos.notatApiDao
                                                                                         .finnKommentarer(it.dialogRef!!.toLong())
                                                                                         .map { kommentar ->
                                                                                             ApiKommentar(
@@ -1141,7 +1120,7 @@ class PersonQueryHandler(
                                                                                 notattekst = notattekst,
                                                                                 kommentarer =
                                                                                     it.dialogRef?.let { dialogRef ->
-                                                                                        notatDao
+                                                                                        daos.notatApiDao
                                                                                             .finnKommentarer(dialogRef.toLong())
                                                                                             .map { kommentar ->
                                                                                                 ApiKommentar(
@@ -1167,7 +1146,7 @@ class PersonQueryHandler(
                                                                                 dialogRef = it.dialogRef,
                                                                                 notattekst = notattekst,
                                                                                 kommentarer =
-                                                                                    notatDao
+                                                                                    daos.notatApiDao
                                                                                         .finnKommentarer(it.dialogRef!!.toLong())
                                                                                         .map { kommentar ->
                                                                                             ApiKommentar(
@@ -1192,7 +1171,7 @@ class PersonQueryHandler(
                                                                                 dialogRef = it.dialogRef,
                                                                                 notattekst = notattekst,
                                                                                 kommentarer =
-                                                                                    notatDao
+                                                                                    daos.notatApiDao
                                                                                         .finnKommentarer(it.dialogRef!!.toLong())
                                                                                         .map { kommentar ->
                                                                                             ApiKommentar(
@@ -1296,13 +1275,13 @@ class PersonQueryHandler(
                                                             },
                                                         varsler =
                                                             if (erSisteBehandling) {
-                                                                varselRepository
+                                                                daos.varselApiRepository
                                                                     .finnVarslerSomIkkeErInaktiveForSisteBehandling(
                                                                         vedtaksperiodeId,
                                                                         periode.utbetaling.id,
                                                                     ).map { it.toVarselDto() }
                                                             } else {
-                                                                varselRepository
+                                                                daos.varselApiRepository
                                                                     .finnVarslerSomIkkeErInaktiveFor(
                                                                         vedtaksperiodeId,
                                                                         periode.utbetaling.id,
@@ -1335,14 +1314,14 @@ class PersonQueryHandler(
                                                                 }
                                                             },
                                                         paVent =
-                                                            påVentApiDao.hentAktivPåVent(vedtaksperiodeId)?.let {
+                                                            daos.påVentApiDao.hentAktivPåVent(vedtaksperiodeId)?.let {
                                                                 ApiPaVent(
                                                                     frist = it.frist,
                                                                     oid = it.oid,
                                                                 )
                                                             },
                                                         avslag =
-                                                            vedtakBegrunnelseDao
+                                                            daos.vedtakBegrunnelseDao
                                                                 .finnAlleVedtakBegrunnelser(
                                                                     vedtaksperiodeId = periode.vedtaksperiodeId,
                                                                     utbetalingId = periode.utbetaling.id,
@@ -1367,7 +1346,7 @@ class PersonQueryHandler(
                                                                     )
                                                                 },
                                                         vedtakBegrunnelser =
-                                                            vedtakBegrunnelseDao
+                                                            daos.vedtakBegrunnelseDao
                                                                 .finnAlleVedtakBegrunnelser(
                                                                     vedtaksperiodeId = periode.vedtaksperiodeId,
                                                                     utbetalingId = periode.utbetaling.id,
@@ -1386,11 +1365,11 @@ class PersonQueryHandler(
                                                                 },
                                                         annullering =
                                                             if (erSisteBehandling) {
-                                                                annulleringRepository
+                                                                daos.annulleringRepository
                                                                     .finnAnnullering(vedtaksperiodeId)
                                                                     ?.let {
                                                                         val saksbehandler =
-                                                                            saksbehandlerRepository.finn(it.saksbehandlerOid)
+                                                                            daos.saksbehandlerRepository.finn(it.saksbehandlerOid)
                                                                                 ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                                                                         ApiAnnullering(
                                                                             saksbehandlerIdent = saksbehandler.ident.value,
@@ -1430,7 +1409,7 @@ class PersonQueryHandler(
                                 )
                             },
                         overstyringer =
-                            overstyringApiDao
+                            daos.overstyringApiDao
                                 .finnOverstyringer(snapshot.fodselsnummer)
                                 .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
                                 .map { overstyring ->
@@ -1445,7 +1424,7 @@ class PersonQueryHandler(
                     )
                 },
             infotrygdutbetalinger =
-                personApiDao
+                daos.personApiDao
                     .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
                     ?.let { jsonString ->
                         objectMapper

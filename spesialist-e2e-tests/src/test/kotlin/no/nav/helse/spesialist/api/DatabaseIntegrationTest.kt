@@ -51,18 +51,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ARBEIDSGIVER_NAVN = lagOrganisasjonsnavn()
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
 
-    protected val apiVarselRepository = daos.varselApiRepository
-    protected val arbeidsgiverApiDao = daos.arbeidsgiverApiDao
-    protected val risikovurderingApiDao = daos.risikovurderingApiDao
-    protected val notatDao = daos.notatApiDao
-    protected val påVentApiDao = daos.påVentApiDao
-    protected val personApiDao = daos.personApiDao
-    protected val tildelingApiDao = daos.tildelingApiDao
-    protected val overstyringApiDao = daos.overstyringApiDao
-    protected val oppgaveApiDao = daos.oppgaveApiDao
-    protected val periodehistorikkApiDao = daos.periodehistorikkApiDao
-    protected val vergemålApiDao = daos.vergemålApiDao
-
     protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)
 
     protected fun opprettVedtaksperiode(

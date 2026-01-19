@@ -20,7 +20,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
-import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -313,19 +312,8 @@ class OverstyringE2ETest : AbstractE2ETest() {
         PersonQuery(
             handler =
                 PersonQueryHandler(
-                    personApiDao = daos.personApiDao,
-                    vergemålApiDao = daos.vergemålApiDao,
-                    tildelingApiDao = daos.tildelingApiDao,
-                    arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
-                    overstyringApiDao = daos.overstyringApiDao,
-                    risikovurderingApiDao = daos.risikovurderingApiDao,
-                    varselRepository = daos.varselApiRepository,
-                    oppgaveApiDao = daos.oppgaveApiDao,
-                    periodehistorikkApiDao = daos.periodehistorikkApiDao,
-                    notatDao = daos.notatApiDao,
-                    påVentApiDao = daos.påVentApiDao,
+                    daos = daos,
                     apiOppgaveService = mockk(relaxed = true),
-                    saksbehandlerMediator = mockk(relaxed = true),
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer =
                         object : Personhåndterer {
@@ -333,12 +321,8 @@ class OverstyringE2ETest : AbstractE2ETest() {
 
                             override fun klargjørPersonForVisning(fødselsnummer: String) {}
                         },
-                    snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
+                    snapshothenter = snapshothenter,
                     sessionFactory = sessionFactory,
-                    vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
-                    stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                    annulleringRepository = daos.annulleringRepository,
-                    saksbehandlerRepository = daos.saksbehandlerRepository,
                 ),
         )
 }

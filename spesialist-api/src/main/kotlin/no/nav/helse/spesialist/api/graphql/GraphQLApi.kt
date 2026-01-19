@@ -45,7 +45,6 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
-import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -113,27 +112,12 @@ fun lagSchemaMedResolversOgHandlers(
             SpesialistSchema.QueryHandlers(
                 person =
                     PersonQueryHandler(
-                        personApiDao = daos.personApiDao,
-                        vergemålApiDao = daos.vergemålApiDao,
-                        tildelingApiDao = daos.tildelingApiDao,
-                        arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
-                        overstyringApiDao = daos.overstyringApiDao,
-                        risikovurderingApiDao = daos.risikovurderingApiDao,
-                        varselRepository = daos.varselApiRepository,
-                        oppgaveApiDao = daos.oppgaveApiDao,
-                        periodehistorikkApiDao = daos.periodehistorikkApiDao,
-                        notatDao = daos.notatApiDao,
-                        påVentApiDao = daos.påVentApiDao,
+                        daos = daos,
                         apiOppgaveService = apiOppgaveService,
-                        saksbehandlerMediator = saksbehandlerMediator,
                         stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                         personhåndterer = personhåndterer,
-                        snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
+                        snapshothenter = snapshothenter,
                         sessionFactory = sessionFactory,
-                        vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
-                        stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                        annulleringRepository = daos.annulleringRepository,
-                        saksbehandlerRepository = daos.saksbehandlerRepository,
                     ),
                 oppgaver =
                     OppgaverQueryHandler(
