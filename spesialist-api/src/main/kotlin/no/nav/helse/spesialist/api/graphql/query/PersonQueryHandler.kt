@@ -228,14 +228,6 @@ class PersonQueryHandler(
             personIkkeFunnet(saksbehandler, identitetsnummer)
         }
 
-        if (snapshot.arbeidsgivere.isEmpty()) {
-            loggWarn(
-                melding = "Fikk snapshot uten arbeidsgivere, returnerer at personen ikke ble funnet",
-                sikkerloggDetaljer = "snapshot: $snapshot",
-            )
-            personIkkeFunnet(saksbehandler, identitetsnummer)
-        }
-
         if (snapshot.fodselsnummer != identitetsnummer.value) {
             error("Fikk snapshot for et annet identitetsnummer enn det som ble etterspurt")
         }
