@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer.GetOpptegnelseSekvensnummerSisteBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetKrrStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetOpptegnelserForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
@@ -83,8 +82,6 @@ fun Routing.restRoutes(
             get(GetOpptegnelserForPersonBehandler(), restAdapter)
 
             post(PostPersonSokBehandler(), restAdapter)
-
-            get(GetKrrStatusForPersonBehandler(krrRegistrertStatusHenter), restAdapter)
 
             get(GetKrrRegistrertStatusForPersonBehandler(krrRegistrertStatusHenter), restAdapter)
         }
