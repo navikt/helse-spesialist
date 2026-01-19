@@ -1,12 +1,18 @@
 package no.nav.helse.spesialist.api.graphql.query
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.asLocalDate
+import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import io.ktor.utils.io.core.toByteArray
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
@@ -20,39 +26,83 @@ import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiNotat
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodehistorikkType
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlagV2
-import no.nav.helse.spesialist.api.graphql.resolvers.ApiBeregnetPeriodeResolver
-import no.nav.helse.spesialist.api.graphql.resolvers.ApiUberegnetPeriodeResolver
+import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
+import no.nav.helse.spesialist.api.graphql.schema.ApiAlder
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnetFodselsnummer
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringskandidat
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverInntekterFraAOrdningen
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
+import no.nav.helse.spesialist.api.graphql.schema.ApiEndrePaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiEnhet
+import no.nav.helse.spesialist.api.graphql.schema.ApiFaresignal
+import no.nav.helse.spesialist.api.graphql.schema.ApiFjernetFraPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
+import no.nav.helse.spesialist.api.graphql.schema.ApiLagtPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveForPeriodevisning
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpphevStansAutomatiskBehandlingSaksbehandler
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
+import no.nav.helse.spesialist.api.graphql.schema.ApiPensjonsgivendeInntekt
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodeHistorikkElementNy
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodevilkar
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
+import no.nav.helse.spesialist.api.graphql.schema.ApiRisikovurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiSelvstendigNaering
+import no.nav.helse.spesialist.api.graphql.schema.ApiSimulering
+import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsdetaljer
+import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringslinje
+import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsperiode
+import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
+import no.nav.helse.spesialist.api.graphql.schema.ApiStansAutomatiskBehandlingSaksbehandler
+import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
+import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurdering
+import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurderingRetur
 import no.nav.helse.spesialist.api.graphql.schema.ApiUberegnetPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetaling
+import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingstatus
+import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingtype
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
+import no.nav.helse.spesialist.api.graphql.schema.ApiVurdering
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
@@ -60,6 +110,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -70,13 +121,18 @@ import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
 import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import java.time.LocalDate
+import java.util.UUID
 
 class PersonQueryHandler(
     private val personApiDao: PersonApiDao,
@@ -252,17 +308,17 @@ class PersonQueryHandler(
                     snapshot.arbeidsgivere
                         .filterNot { it.organisasjonsnummer == "SELVSTENDIG" }
                         .map { arbeidsgiver ->
-                            val organisasjonsnummer = arbeidsgiver.organisasjonsnummer
-                            val navn = finnNavnForOrganisasjonsnummer(organisasjonsnummer)
+                            val orgnummer = arbeidsgiver.organisasjonsnummer
+                            val navn = finnNavnForOrganisasjonsnummer(orgnummer)
                             val ghostPerioder =
                                 arbeidsgiver.ghostPerioder.map {
-                                    it.tilGhostPeriode(organisasjonsnummer)
+                                    it.tilGhostPeriode(orgnummer)
                                 }
                             val fødselsnummer = snapshot.fodselsnummer
                             val behandlinger = arbeidsgiver.behandlinger
                             val risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
                             ApiArbeidsgiver(
-                                organisasjonsnummer = organisasjonsnummer,
+                                organisasjonsnummer = orgnummer,
                                 navn = navn,
                                 ghostPerioder = ghostPerioder,
                                 behandlinger =
@@ -273,47 +329,528 @@ class PersonQueryHandler(
                                         ApiBehandling(
                                             id = behandling.id,
                                             perioder =
-                                                behandling.perioder.map {
-                                                    when (it) {
-                                                        is SnapshotUberegnetPeriode ->
+                                                behandling.perioder.map { periode ->
+                                                    val erSisteBehandling = index == 0
+                                                    when (periode) {
+                                                        is SnapshotUberegnetPeriode -> {
+                                                            val vedtaksperiodeId = periode.vedtaksperiodeId
+                                                            val skalViseAktiveVarsler =
+                                                                erSisteBehandling &&
+                                                                    perioderSomSkalViseAktiveVarsler.contains(
+                                                                        vedtaksperiodeId,
+                                                                    )
                                                             ApiUberegnetPeriode(
-                                                                resolver =
-                                                                    ApiUberegnetPeriodeResolver(
-                                                                        varselRepository = varselRepository,
-                                                                        periode = it,
-                                                                        skalViseAktiveVarsler =
-                                                                            index == 0 &&
-                                                                                perioderSomSkalViseAktiveVarsler.contains(
-                                                                                    it.vedtaksperiodeId,
-                                                                                ),
-                                                                        notatDao = notatDao,
-                                                                        index = index,
+                                                                behandlingId = periode.behandlingId,
+                                                                erForkastet = periode.erForkastet,
+                                                                fom = periode.fom,
+                                                                tom = periode.tom,
+                                                                id =
+                                                                    UUID.nameUUIDFromBytes(
+                                                                        vedtaksperiodeId
+                                                                            .toString()
+                                                                            .toByteArray() + index.toByte(),
                                                                     ),
+                                                                inntektstype = periode.inntektstype.tilApiInntektstype(),
+                                                                opprettet = periode.opprettet,
+                                                                periodetype = periode.tilApiPeriodetype(),
+                                                                tidslinje = periode.tidslinje.map { it.tilApiDag() },
+                                                                vedtaksperiodeId = vedtaksperiodeId,
+                                                                periodetilstand =
+                                                                    periode.periodetilstand.tilApiPeriodetilstand(
+                                                                        true,
+                                                                    ),
+                                                                skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                                hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                                varsler =
+                                                                    if (skalViseAktiveVarsler) {
+                                                                        varselRepository
+                                                                            .finnVarslerForUberegnetPeriode(
+                                                                                vedtaksperiodeId,
+                                                                            ).map { it.toVarselDto() }
+                                                                    } else {
+                                                                        varselRepository
+                                                                            .finnGodkjenteVarslerForUberegnetPeriode(
+                                                                                vedtaksperiodeId,
+                                                                            ).map { it.toVarselDto() }
+                                                                    },
+                                                                notater =
+                                                                    notatDao
+                                                                        .finnNotater(vedtaksperiodeId)
+                                                                        .map { it.tilApiNotat() },
                                                             )
+                                                        }
 
-                                                        is SnapshotBeregnetPeriode ->
+                                                        is SnapshotBeregnetPeriode -> {
+                                                            val periodetilstand =
+                                                                periode.periodetilstand.tilApiPeriodetilstand(
+                                                                    erSisteBehandling,
+                                                                )
+                                                            val vedtaksperiodeId = periode.vedtaksperiodeId
+                                                            val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
+                                                                if (erSisteBehandling) {
+                                                                    oppgaveApiDao.finnPeriodeoppgave(
+                                                                        periode.vedtaksperiodeId,
+                                                                    )
+                                                                } else {
+                                                                    null
+                                                                }
+                                                            }
+
+                                                            fun byggHandlinger(): List<ApiHandling> =
+                                                                if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
+                                                                    listOf(
+                                                                        ApiHandling(
+                                                                            ApiPeriodehandling.UTBETALE,
+                                                                            false,
+                                                                            "perioden er ikke til godkjenning",
+                                                                        ),
+                                                                    )
+                                                                } else {
+                                                                    val handlinger =
+                                                                        listOf(
+                                                                            ApiHandling(
+                                                                                ApiPeriodehandling.UTBETALE,
+                                                                                true,
+                                                                            ),
+                                                                        )
+                                                                    handlinger +
+                                                                        when (oppgaveDto?.kanAvvises) {
+                                                                            true ->
+                                                                                ApiHandling(
+                                                                                    ApiPeriodehandling.AVVISE,
+                                                                                    true,
+                                                                                )
+
+                                                                            else ->
+                                                                                ApiHandling(
+                                                                                    ApiPeriodehandling.AVVISE,
+                                                                                    false,
+                                                                                    "Spleis støtter ikke å avvise perioden",
+                                                                                )
+                                                                        }
+                                                                }
+
+                                                            fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
+                                                                val node = objectMapper.readTree(json)
+                                                                val påVentÅrsaker =
+                                                                    node["årsaker"].map { it["årsak"].asText() }
+                                                                val frist =
+                                                                    node["frist"]
+                                                                        ?.takeUnless { it.isMissingOrNull() }
+                                                                        ?.asLocalDate()
+                                                                val notattekst =
+                                                                    node["notattekst"]
+                                                                        ?.takeUnless { it.isMissingOrNull() }
+                                                                        ?.asText()
+                                                                return Triple(påVentÅrsaker, frist, notattekst)
+                                                            }
+
+                                                            fun mapNotattekstJson(json: String): String? {
+                                                                val node = objectMapper.readTree(json)
+                                                                val notattekst =
+                                                                    node["notattekst"]
+                                                                        ?.takeUnless { it.isMissingOrNull() }
+                                                                        ?.asText()
+                                                                return notattekst
+                                                            }
                                                             ApiBeregnetPeriode(
-                                                                resolver =
-                                                                    ApiBeregnetPeriodeResolver(
-                                                                        fødselsnummer = fødselsnummer,
-                                                                        orgnummer = organisasjonsnummer,
-                                                                        periode = it,
-                                                                        apiOppgaveService = apiOppgaveService,
-                                                                        saksbehandlerMediator = saksbehandlerMediator,
-                                                                        risikovurderinger = risikovurderinger,
-                                                                        varselRepository = varselRepository,
-                                                                        oppgaveApiDao = oppgaveApiDao,
-                                                                        periodehistorikkApiDao = periodehistorikkApiDao,
-                                                                        notatDao = notatDao,
-                                                                        påVentApiDao = påVentApiDao,
-                                                                        erSisteBehandling = index == 0,
-                                                                        index = index,
-                                                                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                                                        sessionFactory = sessionFactory,
-                                                                        annulleringRepository = annulleringRepository,
-                                                                        saksbehandlerRepository = saksbehandlerRepository,
+                                                                behandlingId = periode.behandlingId,
+                                                                erForkastet = periode.erForkastet,
+                                                                fom = periode.fom,
+                                                                tom = periode.tom,
+                                                                id =
+                                                                    UUID.nameUUIDFromBytes(
+                                                                        vedtaksperiodeId
+                                                                            .toString()
+                                                                            .toByteArray() + index.toByte(),
                                                                     ),
+                                                                inntektstype = periode.inntektstype.tilApiInntektstype(),
+                                                                opprettet = periode.opprettet,
+                                                                periodetype = periode.tilApiPeriodetype(),
+                                                                tidslinje = periode.tidslinje.map { it.tilApiDag() },
+                                                                vedtaksperiodeId = vedtaksperiodeId,
+                                                                periodetilstand = periodetilstand,
+                                                                handlinger = byggHandlinger(),
+                                                                egenskaper =
+                                                                    apiOppgaveService.hentEgenskaper(
+                                                                        periode.vedtaksperiodeId,
+                                                                        periode.utbetaling.id,
+                                                                    ),
+                                                                hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                                notater =
+                                                                    notatDao
+                                                                        .finnNotater(vedtaksperiodeId)
+                                                                        .map { it.tilApiNotat() },
+                                                                historikkinnslag =
+                                                                    periodehistorikkApiDao
+                                                                        .finn(periode.utbetaling.id)
+                                                                        .map {
+                                                                            when (it.type) {
+                                                                                PeriodehistorikkType.LEGG_PA_VENT -> {
+                                                                                    val (påVentÅrsaker, frist, notattekst) =
+                                                                                        mapLagtPåVentJson(
+                                                                                            json = it.json,
+                                                                                        )
+                                                                                    ApiLagtPaVent(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        timestamp = it.timestamp,
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                        arsaker = påVentÅrsaker,
+                                                                                        frist = frist,
+                                                                                        notattekst = notattekst,
+                                                                                        kommentarer =
+                                                                                            notatDao
+                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                                .map { kommentar ->
+                                                                                                    ApiKommentar(
+                                                                                                        id = kommentar.id,
+                                                                                                        tekst = kommentar.tekst,
+                                                                                                        opprettet = kommentar.opprettet,
+                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                                    )
+                                                                                                },
+                                                                                    )
+                                                                                }
+
+                                                                                PeriodehistorikkType.ENDRE_PA_VENT -> {
+                                                                                    val (påVentÅrsaker, frist, notattekst) =
+                                                                                        mapLagtPåVentJson(
+                                                                                            json = it.json,
+                                                                                        )
+                                                                                    ApiEndrePaVent(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        timestamp = it.timestamp,
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                        arsaker = påVentÅrsaker,
+                                                                                        frist = frist,
+                                                                                        notattekst = notattekst,
+                                                                                        kommentarer =
+                                                                                            notatDao
+                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                                .map { kommentar ->
+                                                                                                    ApiKommentar(
+                                                                                                        id = kommentar.id,
+                                                                                                        tekst = kommentar.tekst,
+                                                                                                        opprettet = kommentar.opprettet,
+                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                                    )
+                                                                                                },
+                                                                                    )
+                                                                                }
+
+                                                                                PeriodehistorikkType.FJERN_FRA_PA_VENT -> {
+                                                                                    ApiFjernetFraPaVent(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        timestamp = it.timestamp,
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                    )
+                                                                                }
+
+                                                                                PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
+                                                                                    val notattekst =
+                                                                                        mapNotattekstJson(json = it.json)
+                                                                                    ApiTotrinnsvurderingRetur(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        timestamp = it.timestamp,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                        notattekst = notattekst,
+                                                                                        kommentarer =
+                                                                                            it.dialogRef?.let { dialogRef ->
+                                                                                                notatDao
+                                                                                                    .finnKommentarer(
+                                                                                                        dialogRef.toLong(),
+                                                                                                    ).map { kommentar ->
+                                                                                                        ApiKommentar(
+                                                                                                            id = kommentar.id,
+                                                                                                            tekst = kommentar.tekst,
+                                                                                                            opprettet = kommentar.opprettet,
+                                                                                                            saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                                        )
+                                                                                                    }
+                                                                                            } ?: emptyList(),
+                                                                                    )
+                                                                                }
+
+                                                                                PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                                                                                    val notattekst =
+                                                                                        mapNotattekstJson(json = it.json)
+                                                                                    ApiStansAutomatiskBehandlingSaksbehandler(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        timestamp = it.timestamp,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                        notattekst = notattekst,
+                                                                                        kommentarer =
+                                                                                            notatDao
+                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                                .map { kommentar ->
+                                                                                                    ApiKommentar(
+                                                                                                        id = kommentar.id,
+                                                                                                        tekst = kommentar.tekst,
+                                                                                                        opprettet = kommentar.opprettet,
+                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                                    )
+                                                                                                },
+                                                                                    )
+                                                                                }
+
+                                                                                PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                                                                                    val notattekst =
+                                                                                        mapNotattekstJson(json = it.json)
+                                                                                    ApiOpphevStansAutomatiskBehandlingSaksbehandler(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        timestamp = it.timestamp,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                        notattekst = notattekst,
+                                                                                        kommentarer =
+                                                                                            notatDao
+                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                                .map { kommentar ->
+                                                                                                    ApiKommentar(
+                                                                                                        id = kommentar.id,
+                                                                                                        tekst = kommentar.tekst,
+                                                                                                        opprettet = kommentar.opprettet,
+                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                                    )
+                                                                                                },
+                                                                                    )
+                                                                                }
+
+                                                                                else -> {
+                                                                                    ApiPeriodeHistorikkElementNy(
+                                                                                        id = it.id,
+                                                                                        type = it.type.tilApiPeriodehistorikkType(),
+                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                        timestamp = it.timestamp,
+                                                                                        dialogRef = it.dialogRef,
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                beregningId = periode.beregningId,
+                                                                forbrukteSykedager = periode.forbrukteSykedager,
+                                                                gjenstaendeSykedager = periode.gjenstaendeSykedager,
+                                                                maksdato = periode.maksdato,
+                                                                periodevilkar =
+                                                                    ApiPeriodevilkar(
+                                                                        alder =
+                                                                            periode.periodevilkar.alder.let {
+                                                                                ApiAlder(
+                                                                                    alderSisteSykedag = it.alderSisteSykedag,
+                                                                                    oppfylt = it.oppfylt,
+                                                                                )
+                                                                            },
+                                                                        sykepengedager =
+                                                                            periode.periodevilkar.sykepengedager.let {
+                                                                                ApiSykepengedager(
+                                                                                    forbrukteSykedager = it.forbrukteSykedager,
+                                                                                    gjenstaendeSykedager = it.gjenstaendeSykedager,
+                                                                                    maksdato = it.maksdato,
+                                                                                    oppfylt = it.oppfylt,
+                                                                                    skjaeringstidspunkt = it.skjaeringstidspunkt,
+                                                                                )
+                                                                            },
+                                                                    ),
+                                                                skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                                utbetaling =
+                                                                    periode.utbetaling.let {
+                                                                        ApiUtbetaling(
+                                                                            id = it.id,
+                                                                            arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                                                                            arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
+                                                                            personFagsystemId = it.personFagsystemId,
+                                                                            personNettoBelop = it.personNettoBelop,
+                                                                            status =
+                                                                                when (it.statusEnum) {
+                                                                                    SnapshotUtbetalingstatus.ANNULLERT -> ApiUtbetalingstatus.ANNULLERT
+                                                                                    SnapshotUtbetalingstatus.FORKASTET -> ApiUtbetalingstatus.FORKASTET
+                                                                                    SnapshotUtbetalingstatus.GODKJENT -> ApiUtbetalingstatus.GODKJENT
+                                                                                    SnapshotUtbetalingstatus.GODKJENTUTENUTBETALING -> ApiUtbetalingstatus.GODKJENTUTENUTBETALING
+                                                                                    SnapshotUtbetalingstatus.IKKEGODKJENT -> ApiUtbetalingstatus.IKKEGODKJENT
+                                                                                    SnapshotUtbetalingstatus.OVERFORT -> ApiUtbetalingstatus.OVERFORT
+                                                                                    SnapshotUtbetalingstatus.SENDT -> ApiUtbetalingstatus.SENDT
+                                                                                    SnapshotUtbetalingstatus.UBETALT -> ApiUtbetalingstatus.UBETALT
+                                                                                    SnapshotUtbetalingstatus.UTBETALINGFEILET -> ApiUtbetalingstatus.UTBETALINGFEILET
+                                                                                    SnapshotUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
+                                                                                    SnapshotUtbetalingstatus.UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
+                                                                                },
+                                                                            type =
+                                                                                when (it.typeEnum) {
+                                                                                    SnapshotUtbetalingtype.ANNULLERING -> ApiUtbetalingtype.ANNULLERING
+                                                                                    SnapshotUtbetalingtype.ETTERUTBETALING -> ApiUtbetalingtype.ETTERUTBETALING
+                                                                                    SnapshotUtbetalingtype.FERIEPENGER -> ApiUtbetalingtype.FERIEPENGER
+                                                                                    SnapshotUtbetalingtype.REVURDERING -> ApiUtbetalingtype.REVURDERING
+                                                                                    SnapshotUtbetalingtype.UTBETALING -> ApiUtbetalingtype.UTBETALING
+                                                                                    SnapshotUtbetalingtype.UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
+                                                                                },
+                                                                            vurdering =
+                                                                                it.vurdering?.let { vurdering ->
+                                                                                    ApiVurdering(
+                                                                                        automatisk = vurdering.automatisk,
+                                                                                        godkjent = vurdering.godkjent,
+                                                                                        ident = vurdering.ident,
+                                                                                        tidsstempel = vurdering.tidsstempel,
+                                                                                    )
+                                                                                },
+                                                                            arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
+                                                                            personsimulering = it.personoppdrag?.tilSimulering(),
+                                                                        )
+                                                                    },
+                                                                vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
+                                                                risikovurdering =
+                                                                    risikovurderinger[vedtaksperiodeId]?.let { vurdering ->
+                                                                        ApiRisikovurdering(
+                                                                            funn = vurdering.funn.tilFaresignaler(),
+                                                                            kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
+                                                                        )
+                                                                    },
+                                                                varsler =
+                                                                    if (erSisteBehandling) {
+                                                                        varselRepository
+                                                                            .finnVarslerSomIkkeErInaktiveForSisteBehandling(
+                                                                                vedtaksperiodeId,
+                                                                                periode.utbetaling.id,
+                                                                            ).map { it.toVarselDto() }
+                                                                    } else {
+                                                                        varselRepository
+                                                                            .finnVarslerSomIkkeErInaktiveFor(
+                                                                                vedtaksperiodeId,
+                                                                                periode.utbetaling.id,
+                                                                            ).map { it.toVarselDto() }
+                                                                    },
+                                                                oppgave =
+                                                                    oppgaveDto?.let { oppgaveDto ->
+                                                                        ApiOppgaveForPeriodevisning(
+                                                                            id = oppgaveDto.id,
+                                                                        )
+                                                                    },
+                                                                totrinnsvurdering =
+                                                                    run {
+                                                                        if (oppgaveDto == null) {
+                                                                            null
+                                                                        } else {
+                                                                            sessionFactory.transactionalSessionScope { sessionContext ->
+                                                                                sessionContext.totrinnsvurderingRepository
+                                                                                    .finnAktivForPerson(
+                                                                                        fødselsnummer,
+                                                                                    )?.let {
+                                                                                        ApiTotrinnsvurdering(
+                                                                                            erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
+                                                                                            saksbehandler = it.saksbehandler?.value,
+                                                                                            beslutter = it.beslutter?.value,
+                                                                                            erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
+                                                                                        )
+                                                                                    }
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                paVent =
+                                                                    påVentApiDao
+                                                                        .hentAktivPåVent(vedtaksperiodeId)
+                                                                        ?.let {
+                                                                            ApiPaVent(
+                                                                                frist = it.frist,
+                                                                                oid = it.oid,
+                                                                            )
+                                                                        },
+                                                                avslag =
+                                                                    vedtakBegrunnelseDao
+                                                                        .finnAlleVedtakBegrunnelser(
+                                                                            vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                            utbetalingId = periode.utbetaling.id,
+                                                                        ).filter {
+                                                                            it.type in
+                                                                                setOf(
+                                                                                    VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                                                                                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+                                                                                )
+                                                                        }.map { vedtakBegrunnelse ->
+                                                                            ApiAvslag(
+                                                                                type =
+                                                                                    when (vedtakBegrunnelse.type) {
+                                                                                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
+                                                                                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
+                                                                                        else -> error("")
+                                                                                    },
+                                                                                begrunnelse = vedtakBegrunnelse.begrunnelse,
+                                                                                opprettet = vedtakBegrunnelse.opprettet,
+                                                                                saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                                                                                invalidert = vedtakBegrunnelse.invalidert,
+                                                                            )
+                                                                        },
+                                                                vedtakBegrunnelser =
+                                                                    vedtakBegrunnelseDao
+                                                                        .finnAlleVedtakBegrunnelser(
+                                                                            vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                            utbetalingId = periode.utbetaling.id,
+                                                                        ).map { vedtakBegrunnelse ->
+                                                                            ApiVedtakBegrunnelse(
+                                                                                utfall =
+                                                                                    when (vedtakBegrunnelse.type) {
+                                                                                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
+                                                                                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
+                                                                                        VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
+                                                                                    },
+                                                                                begrunnelse = vedtakBegrunnelse.begrunnelse,
+                                                                                opprettet = vedtakBegrunnelse.opprettet,
+                                                                                saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                                                                            )
+                                                                        },
+                                                                annullering =
+                                                                    if (erSisteBehandling) {
+                                                                        annulleringRepository
+                                                                            .finnAnnullering(vedtaksperiodeId)
+                                                                            ?.let {
+                                                                                val saksbehandler =
+                                                                                    saksbehandlerRepository.finn(it.saksbehandlerOid)
+                                                                                        ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
+                                                                                ApiAnnullering(
+                                                                                    saksbehandlerIdent = saksbehandler.ident.value,
+                                                                                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                                                                                    personFagsystemId = it.personFagsystemId,
+                                                                                    tidspunkt = it.tidspunkt,
+                                                                                    arsaker = it.årsaker,
+                                                                                    begrunnelse = it.kommentar,
+                                                                                    vedtaksperiodeId = it.vedtaksperiodeId,
+                                                                                )
+                                                                            }
+                                                                    } else {
+                                                                        null
+                                                                    },
+                                                                pensjonsgivendeInntekter =
+                                                                    periode.pensjonsgivendeInntekter.map {
+                                                                        ApiPensjonsgivendeInntekt(
+                                                                            arligBelop = it.arligBelop,
+                                                                            inntektsar = it.inntektsar,
+                                                                        )
+                                                                    },
+                                                                annulleringskandidater =
+                                                                    periode.annulleringskandidater.map {
+                                                                        ApiAnnulleringskandidat(
+                                                                            fom = it.fom,
+                                                                            organisasjonsnummer = it.organisasjonsnummer,
+                                                                            tom = it.tom,
+                                                                            vedtaksperiodeId = it.vedtaksperiodeId,
+                                                                        )
+                                                                    },
                                                             )
+                                                        }
 
                                                         else -> throw Exception("Ukjent tidslinjeperiode")
                                                     }
@@ -322,7 +859,7 @@ class PersonQueryHandler(
                                     },
                                 overstyringer =
                                     overstyringer
-                                        .filter { it.relevantFor(organisasjonsnummer) }
+                                        .filter { it.relevantFor(orgnummer) }
                                         .map { overstyring ->
                                             when (overstyring) {
                                                 is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
@@ -336,7 +873,7 @@ class PersonQueryHandler(
                                     arbeidsgiverApiDao
                                         .finnArbeidsforhold(
                                             fødselsnummer,
-                                            organisasjonsnummer,
+                                            orgnummer,
                                         ).map {
                                             ApiArbeidsforhold(
                                                 stillingstittel = it.stillingstittel,
@@ -349,7 +886,7 @@ class PersonQueryHandler(
                                     arbeidsgiverApiDao
                                         .finnArbeidsgiverInntekterFraAordningen(
                                             fødselsnummer,
-                                            organisasjonsnummer,
+                                            orgnummer,
                                         ).map { fraAO ->
                                             ApiArbeidsgiverInntekterFraAOrdningen(
                                                 skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
@@ -381,50 +918,511 @@ class PersonQueryHandler(
                                 ApiBehandling(
                                     id = behandling.id,
                                     perioder =
-                                        behandling.perioder.map {
-                                            when (it) {
-                                                is SnapshotUberegnetPeriode ->
+                                        behandling.perioder.map { periode ->
+                                            val erSisteBehandling = index == 0
+                                            when (periode) {
+                                                is SnapshotUberegnetPeriode -> {
+                                                    val vedtaksperiodeId = periode.vedtaksperiodeId
+                                                    val skalViseAktiveVarsler =
+                                                        erSisteBehandling &&
+                                                            perioderSomSkalViseAktiveVarsler.contains(vedtaksperiodeId)
                                                     ApiUberegnetPeriode(
-                                                        resolver =
-                                                            ApiUberegnetPeriodeResolver(
-                                                                varselRepository = varselRepository,
-                                                                periode = it,
-                                                                skalViseAktiveVarsler =
-                                                                    index == 0 &&
-                                                                        perioderSomSkalViseAktiveVarsler.contains(
-                                                                            it.vedtaksperiodeId,
-                                                                        ),
-                                                                notatDao = notatDao,
-                                                                index = index,
+                                                        behandlingId = periode.behandlingId,
+                                                        erForkastet = periode.erForkastet,
+                                                        fom = periode.fom,
+                                                        tom = periode.tom,
+                                                        id =
+                                                            UUID.nameUUIDFromBytes(
+                                                                vedtaksperiodeId.toString().toByteArray() + index.toByte(),
                                                             ),
+                                                        inntektstype = periode.inntektstype.tilApiInntektstype(),
+                                                        opprettet = periode.opprettet,
+                                                        periodetype = periode.tilApiPeriodetype(),
+                                                        tidslinje = periode.tidslinje.map { it.tilApiDag() },
+                                                        vedtaksperiodeId = vedtaksperiodeId,
+                                                        periodetilstand =
+                                                            periode.periodetilstand
+                                                                .tilApiPeriodetilstand(true),
+                                                        skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                        hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                        varsler =
+                                                            if (skalViseAktiveVarsler) {
+                                                                varselRepository
+                                                                    .finnVarslerForUberegnetPeriode(
+                                                                        vedtaksperiodeId,
+                                                                    ).map { it.toVarselDto() }
+                                                            } else {
+                                                                varselRepository
+                                                                    .finnGodkjenteVarslerForUberegnetPeriode(
+                                                                        vedtaksperiodeId,
+                                                                    ).map { it.toVarselDto() }
+                                                            },
+                                                        notater =
+                                                            notatDao
+                                                                .finnNotater(vedtaksperiodeId)
+                                                                .map { it.tilApiNotat() },
                                                     )
+                                                }
 
-                                                is SnapshotBeregnetPeriode ->
+                                                is SnapshotBeregnetPeriode -> {
+                                                    val fødselsnummer = snapshot.fodselsnummer
+                                                    val orgnummer = "SELVSTENDIG"
+                                                    val risikovurderinger =
+                                                        risikovurderingApiDao.finnRisikovurderinger(
+                                                            identitetsnummer.value,
+                                                        )
+
+                                                    val periodetilstand =
+                                                        periode.periodetilstand.tilApiPeriodetilstand(erSisteBehandling)
+                                                    val vedtaksperiodeId = periode.vedtaksperiodeId
+                                                    val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
+                                                        if (erSisteBehandling) oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId) else null
+                                                    }
+
+                                                    fun byggHandlinger(): List<ApiHandling> =
+                                                        if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
+                                                            listOf(
+                                                                ApiHandling(
+                                                                    ApiPeriodehandling.UTBETALE,
+                                                                    false,
+                                                                    "perioden er ikke til godkjenning",
+                                                                ),
+                                                            )
+                                                        } else {
+                                                            val handlinger =
+                                                                listOf(ApiHandling(ApiPeriodehandling.UTBETALE, true))
+                                                            handlinger +
+                                                                when (oppgaveDto?.kanAvvises) {
+                                                                    true ->
+                                                                        ApiHandling(
+                                                                            ApiPeriodehandling.AVVISE,
+                                                                            true,
+                                                                        )
+
+                                                                    else ->
+                                                                        ApiHandling(
+                                                                            ApiPeriodehandling.AVVISE,
+                                                                            false,
+                                                                            "Spleis støtter ikke å avvise perioden",
+                                                                        )
+                                                                }
+                                                        }
+
+                                                    fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
+                                                        val node = objectMapper.readTree(json)
+                                                        val påVentÅrsaker = node["årsaker"].map { it["årsak"].asText() }
+                                                        val frist =
+                                                            node["frist"]
+                                                                ?.takeUnless { it.isMissingOrNull() }
+                                                                ?.asLocalDate()
+                                                        val notattekst =
+                                                            node["notattekst"]
+                                                                ?.takeUnless { it.isMissingOrNull() }
+                                                                ?.asText()
+                                                        return Triple(påVentÅrsaker, frist, notattekst)
+                                                    }
+
+                                                    fun mapNotattekstJson(json: String): String? {
+                                                        val node = objectMapper.readTree(json)
+                                                        val notattekst =
+                                                            node["notattekst"]
+                                                                ?.takeUnless { it.isMissingOrNull() }
+                                                                ?.asText()
+                                                        return notattekst
+                                                    }
                                                     ApiBeregnetPeriode(
-                                                        resolver =
-                                                            ApiBeregnetPeriodeResolver(
-                                                                fødselsnummer = snapshot.fodselsnummer,
-                                                                orgnummer = "SELVSTENDIG",
-                                                                periode = it,
-                                                                apiOppgaveService = apiOppgaveService,
-                                                                saksbehandlerMediator = saksbehandlerMediator,
-                                                                risikovurderinger =
-                                                                    risikovurderingApiDao.finnRisikovurderinger(
-                                                                        identitetsnummer.value,
-                                                                    ),
-                                                                varselRepository = varselRepository,
-                                                                oppgaveApiDao = oppgaveApiDao,
-                                                                periodehistorikkApiDao = periodehistorikkApiDao,
-                                                                notatDao = notatDao,
-                                                                påVentApiDao = påVentApiDao,
-                                                                erSisteBehandling = index == 0,
-                                                                index = index,
-                                                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                                                sessionFactory = sessionFactory,
-                                                                annulleringRepository = annulleringRepository,
-                                                                saksbehandlerRepository = saksbehandlerRepository,
+                                                        behandlingId = periode.behandlingId,
+                                                        erForkastet = periode.erForkastet,
+                                                        fom = periode.fom,
+                                                        tom = periode.tom,
+                                                        id =
+                                                            UUID.nameUUIDFromBytes(
+                                                                vedtaksperiodeId.toString().toByteArray() + index.toByte(),
                                                             ),
+                                                        inntektstype = periode.inntektstype.tilApiInntektstype(),
+                                                        opprettet = periode.opprettet,
+                                                        periodetype = periode.tilApiPeriodetype(),
+                                                        tidslinje = periode.tidslinje.map { it.tilApiDag() },
+                                                        vedtaksperiodeId = vedtaksperiodeId,
+                                                        periodetilstand = periodetilstand,
+                                                        handlinger = byggHandlinger(),
+                                                        egenskaper =
+                                                            apiOppgaveService.hentEgenskaper(
+                                                                periode.vedtaksperiodeId,
+                                                                periode.utbetaling.id,
+                                                            ),
+                                                        hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                        notater =
+                                                            notatDao
+                                                                .finnNotater(vedtaksperiodeId)
+                                                                .map { it.tilApiNotat() },
+                                                        historikkinnslag =
+                                                            periodehistorikkApiDao
+                                                                .finn(periode.utbetaling.id)
+                                                                .map {
+                                                                    when (it.type) {
+                                                                        PeriodehistorikkType.LEGG_PA_VENT -> {
+                                                                            val (påVentÅrsaker, frist, notattekst) =
+                                                                                mapLagtPåVentJson(
+                                                                                    json = it.json,
+                                                                                )
+                                                                            ApiLagtPaVent(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                timestamp = it.timestamp,
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                dialogRef = it.dialogRef,
+                                                                                arsaker = påVentÅrsaker,
+                                                                                frist = frist,
+                                                                                notattekst = notattekst,
+                                                                                kommentarer =
+                                                                                    notatDao
+                                                                                        .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                        .map { kommentar ->
+                                                                                            ApiKommentar(
+                                                                                                id = kommentar.id,
+                                                                                                tekst = kommentar.tekst,
+                                                                                                opprettet = kommentar.opprettet,
+                                                                                                saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                            )
+                                                                                        },
+                                                                            )
+                                                                        }
+
+                                                                        PeriodehistorikkType.ENDRE_PA_VENT -> {
+                                                                            val (påVentÅrsaker, frist, notattekst) =
+                                                                                mapLagtPåVentJson(
+                                                                                    json = it.json,
+                                                                                )
+                                                                            ApiEndrePaVent(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                timestamp = it.timestamp,
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                dialogRef = it.dialogRef,
+                                                                                arsaker = påVentÅrsaker,
+                                                                                frist = frist,
+                                                                                notattekst = notattekst,
+                                                                                kommentarer =
+                                                                                    notatDao
+                                                                                        .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                        .map { kommentar ->
+                                                                                            ApiKommentar(
+                                                                                                id = kommentar.id,
+                                                                                                tekst = kommentar.tekst,
+                                                                                                opprettet = kommentar.opprettet,
+                                                                                                saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                            )
+                                                                                        },
+                                                                            )
+                                                                        }
+
+                                                                        PeriodehistorikkType.FJERN_FRA_PA_VENT -> {
+                                                                            ApiFjernetFraPaVent(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                timestamp = it.timestamp,
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                dialogRef = it.dialogRef,
+                                                                            )
+                                                                        }
+
+                                                                        PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
+                                                                            val notattekst =
+                                                                                mapNotattekstJson(json = it.json)
+                                                                            ApiTotrinnsvurderingRetur(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                timestamp = it.timestamp,
+                                                                                dialogRef = it.dialogRef,
+                                                                                notattekst = notattekst,
+                                                                                kommentarer =
+                                                                                    it.dialogRef?.let { dialogRef ->
+                                                                                        notatDao
+                                                                                            .finnKommentarer(dialogRef.toLong())
+                                                                                            .map { kommentar ->
+                                                                                                ApiKommentar(
+                                                                                                    id = kommentar.id,
+                                                                                                    tekst = kommentar.tekst,
+                                                                                                    opprettet = kommentar.opprettet,
+                                                                                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                                )
+                                                                                            }
+                                                                                    } ?: emptyList(),
+                                                                            )
+                                                                        }
+
+                                                                        PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                                                                            val notattekst =
+                                                                                mapNotattekstJson(json = it.json)
+                                                                            ApiStansAutomatiskBehandlingSaksbehandler(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                timestamp = it.timestamp,
+                                                                                dialogRef = it.dialogRef,
+                                                                                notattekst = notattekst,
+                                                                                kommentarer =
+                                                                                    notatDao
+                                                                                        .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                        .map { kommentar ->
+                                                                                            ApiKommentar(
+                                                                                                id = kommentar.id,
+                                                                                                tekst = kommentar.tekst,
+                                                                                                opprettet = kommentar.opprettet,
+                                                                                                saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                            )
+                                                                                        },
+                                                                            )
+                                                                        }
+
+                                                                        PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                                                                            val notattekst =
+                                                                                mapNotattekstJson(json = it.json)
+                                                                            ApiOpphevStansAutomatiskBehandlingSaksbehandler(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                timestamp = it.timestamp,
+                                                                                dialogRef = it.dialogRef,
+                                                                                notattekst = notattekst,
+                                                                                kommentarer =
+                                                                                    notatDao
+                                                                                        .finnKommentarer(it.dialogRef!!.toLong())
+                                                                                        .map { kommentar ->
+                                                                                            ApiKommentar(
+                                                                                                id = kommentar.id,
+                                                                                                tekst = kommentar.tekst,
+                                                                                                opprettet = kommentar.opprettet,
+                                                                                                saksbehandlerident = kommentar.saksbehandlerident,
+                                                                                                feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                                                                            )
+                                                                                        },
+                                                                            )
+                                                                        }
+
+                                                                        else -> {
+                                                                            ApiPeriodeHistorikkElementNy(
+                                                                                id = it.id,
+                                                                                type = it.type.tilApiPeriodehistorikkType(),
+                                                                                saksbehandlerIdent = it.saksbehandlerIdent,
+                                                                                timestamp = it.timestamp,
+                                                                                dialogRef = it.dialogRef,
+                                                                            )
+                                                                        }
+                                                                    }
+                                                                },
+                                                        beregningId = periode.beregningId,
+                                                        forbrukteSykedager = periode.forbrukteSykedager,
+                                                        gjenstaendeSykedager = periode.gjenstaendeSykedager,
+                                                        maksdato = periode.maksdato,
+                                                        periodevilkar =
+                                                            ApiPeriodevilkar(
+                                                                alder =
+                                                                    periode.periodevilkar.alder.let {
+                                                                        ApiAlder(
+                                                                            alderSisteSykedag = it.alderSisteSykedag,
+                                                                            oppfylt = it.oppfylt,
+                                                                        )
+                                                                    },
+                                                                sykepengedager =
+                                                                    periode.periodevilkar.sykepengedager.let {
+                                                                        ApiSykepengedager(
+                                                                            forbrukteSykedager = it.forbrukteSykedager,
+                                                                            gjenstaendeSykedager = it.gjenstaendeSykedager,
+                                                                            maksdato = it.maksdato,
+                                                                            oppfylt = it.oppfylt,
+                                                                            skjaeringstidspunkt = it.skjaeringstidspunkt,
+                                                                        )
+                                                                    },
+                                                            ),
+                                                        skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                        utbetaling =
+                                                            periode.utbetaling.let {
+                                                                ApiUtbetaling(
+                                                                    id = it.id,
+                                                                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                                                                    arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
+                                                                    personFagsystemId = it.personFagsystemId,
+                                                                    personNettoBelop = it.personNettoBelop,
+                                                                    status =
+                                                                        when (it.statusEnum) {
+                                                                            SnapshotUtbetalingstatus.ANNULLERT -> ApiUtbetalingstatus.ANNULLERT
+                                                                            SnapshotUtbetalingstatus.FORKASTET -> ApiUtbetalingstatus.FORKASTET
+                                                                            SnapshotUtbetalingstatus.GODKJENT -> ApiUtbetalingstatus.GODKJENT
+                                                                            SnapshotUtbetalingstatus.GODKJENTUTENUTBETALING -> ApiUtbetalingstatus.GODKJENTUTENUTBETALING
+                                                                            SnapshotUtbetalingstatus.IKKEGODKJENT -> ApiUtbetalingstatus.IKKEGODKJENT
+                                                                            SnapshotUtbetalingstatus.OVERFORT -> ApiUtbetalingstatus.OVERFORT
+                                                                            SnapshotUtbetalingstatus.SENDT -> ApiUtbetalingstatus.SENDT
+                                                                            SnapshotUtbetalingstatus.UBETALT -> ApiUtbetalingstatus.UBETALT
+                                                                            SnapshotUtbetalingstatus.UTBETALINGFEILET -> ApiUtbetalingstatus.UTBETALINGFEILET
+                                                                            SnapshotUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
+                                                                            SnapshotUtbetalingstatus.UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
+                                                                        },
+                                                                    type =
+                                                                        when (it.typeEnum) {
+                                                                            SnapshotUtbetalingtype.ANNULLERING -> ApiUtbetalingtype.ANNULLERING
+                                                                            SnapshotUtbetalingtype.ETTERUTBETALING -> ApiUtbetalingtype.ETTERUTBETALING
+                                                                            SnapshotUtbetalingtype.FERIEPENGER -> ApiUtbetalingtype.FERIEPENGER
+                                                                            SnapshotUtbetalingtype.REVURDERING -> ApiUtbetalingtype.REVURDERING
+                                                                            SnapshotUtbetalingtype.UTBETALING -> ApiUtbetalingtype.UTBETALING
+                                                                            SnapshotUtbetalingtype.UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
+                                                                        },
+                                                                    vurdering =
+                                                                        it.vurdering?.let { vurdering ->
+                                                                            ApiVurdering(
+                                                                                automatisk = vurdering.automatisk,
+                                                                                godkjent = vurdering.godkjent,
+                                                                                ident = vurdering.ident,
+                                                                                tidsstempel = vurdering.tidsstempel,
+                                                                            )
+                                                                        },
+                                                                    arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
+                                                                    personsimulering = it.personoppdrag?.tilSimulering(),
+                                                                )
+                                                            },
+                                                        vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
+                                                        risikovurdering =
+                                                            risikovurderinger[vedtaksperiodeId]?.let { vurdering ->
+                                                                ApiRisikovurdering(
+                                                                    funn = vurdering.funn.tilFaresignaler(),
+                                                                    kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
+                                                                )
+                                                            },
+                                                        varsler =
+                                                            if (erSisteBehandling) {
+                                                                varselRepository
+                                                                    .finnVarslerSomIkkeErInaktiveForSisteBehandling(
+                                                                        vedtaksperiodeId,
+                                                                        periode.utbetaling.id,
+                                                                    ).map { it.toVarselDto() }
+                                                            } else {
+                                                                varselRepository
+                                                                    .finnVarslerSomIkkeErInaktiveFor(
+                                                                        vedtaksperiodeId,
+                                                                        periode.utbetaling.id,
+                                                                    ).map { it.toVarselDto() }
+                                                            },
+                                                        oppgave =
+                                                            oppgaveDto?.let { oppgaveDto ->
+                                                                ApiOppgaveForPeriodevisning(
+                                                                    id = oppgaveDto.id,
+                                                                )
+                                                            },
+                                                        totrinnsvurdering =
+                                                            run {
+                                                                if (oppgaveDto == null) {
+                                                                    null
+                                                                } else {
+                                                                    sessionFactory.transactionalSessionScope { sessionContext ->
+                                                                        sessionContext.totrinnsvurderingRepository
+                                                                            .finnAktivForPerson(
+                                                                                fødselsnummer,
+                                                                            )?.let {
+                                                                                ApiTotrinnsvurdering(
+                                                                                    erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
+                                                                                    saksbehandler = it.saksbehandler?.value,
+                                                                                    beslutter = it.beslutter?.value,
+                                                                                    erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
+                                                                                )
+                                                                            }
+                                                                    }
+                                                                }
+                                                            },
+                                                        paVent =
+                                                            påVentApiDao.hentAktivPåVent(vedtaksperiodeId)?.let {
+                                                                ApiPaVent(
+                                                                    frist = it.frist,
+                                                                    oid = it.oid,
+                                                                )
+                                                            },
+                                                        avslag =
+                                                            vedtakBegrunnelseDao
+                                                                .finnAlleVedtakBegrunnelser(
+                                                                    vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                    utbetalingId = periode.utbetaling.id,
+                                                                ).filter {
+                                                                    it.type in
+                                                                        setOf(
+                                                                            VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                                                                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+                                                                        )
+                                                                }.map { vedtakBegrunnelse ->
+                                                                    ApiAvslag(
+                                                                        type =
+                                                                            when (vedtakBegrunnelse.type) {
+                                                                                VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
+                                                                                VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
+                                                                                else -> error("")
+                                                                            },
+                                                                        begrunnelse = vedtakBegrunnelse.begrunnelse,
+                                                                        opprettet = vedtakBegrunnelse.opprettet,
+                                                                        saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                                                                        invalidert = vedtakBegrunnelse.invalidert,
+                                                                    )
+                                                                },
+                                                        vedtakBegrunnelser =
+                                                            vedtakBegrunnelseDao
+                                                                .finnAlleVedtakBegrunnelser(
+                                                                    vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                    utbetalingId = periode.utbetaling.id,
+                                                                ).map { vedtakBegrunnelse ->
+                                                                    ApiVedtakBegrunnelse(
+                                                                        utfall =
+                                                                            when (vedtakBegrunnelse.type) {
+                                                                                VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
+                                                                                VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
+                                                                                VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
+                                                                            },
+                                                                        begrunnelse = vedtakBegrunnelse.begrunnelse,
+                                                                        opprettet = vedtakBegrunnelse.opprettet,
+                                                                        saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                                                                    )
+                                                                },
+                                                        annullering =
+                                                            if (erSisteBehandling) {
+                                                                annulleringRepository
+                                                                    .finnAnnullering(vedtaksperiodeId)
+                                                                    ?.let {
+                                                                        val saksbehandler =
+                                                                            saksbehandlerRepository.finn(it.saksbehandlerOid)
+                                                                                ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
+                                                                        ApiAnnullering(
+                                                                            saksbehandlerIdent = saksbehandler.ident.value,
+                                                                            arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                                                                            personFagsystemId = it.personFagsystemId,
+                                                                            tidspunkt = it.tidspunkt,
+                                                                            arsaker = it.årsaker,
+                                                                            begrunnelse = it.kommentar,
+                                                                            vedtaksperiodeId = it.vedtaksperiodeId,
+                                                                        )
+                                                                    }
+                                                            } else {
+                                                                null
+                                                            },
+                                                        pensjonsgivendeInntekter =
+                                                            periode.pensjonsgivendeInntekter.map {
+                                                                ApiPensjonsgivendeInntekt(
+                                                                    arligBelop = it.arligBelop,
+                                                                    inntektsar = it.inntektsar,
+                                                                )
+                                                            },
+                                                        annulleringskandidater =
+                                                            periode.annulleringskandidater.map {
+                                                                ApiAnnulleringskandidat(
+                                                                    fom = it.fom,
+                                                                    organisasjonsnummer = it.organisasjonsnummer,
+                                                                    tom = it.tom,
+                                                                    vedtaksperiodeId = it.vedtaksperiodeId,
+                                                                )
+                                                            },
                                                     )
+                                                }
 
                                                 else -> throw Exception("Ukjent tidslinjeperiode")
                                             }
@@ -748,3 +1746,55 @@ private fun SnapshotGhostPeriode.tilGhostPeriode(organisasjonsnummer: String): A
         deaktivert = deaktivert,
         organisasjonsnummer = organisasjonsnummer,
     )
+
+private fun SnapshotOppdrag.tilSimulering(): ApiSimulering =
+    ApiSimulering(
+        fagsystemId = fagsystemId,
+        tidsstempel = tidsstempel,
+        utbetalingslinjer =
+            utbetalingslinjer.map { linje ->
+                ApiSimuleringslinje(
+                    fom = linje.fom,
+                    tom = linje.tom,
+                    dagsats = linje.dagsats,
+                    grad = linje.grad,
+                )
+            },
+        totalbelop = simulering?.totalbelop,
+        perioder =
+            simulering?.perioder?.map { periode ->
+                ApiSimuleringsperiode(
+                    fom = periode.fom,
+                    tom = periode.tom,
+                    utbetalinger =
+                        periode.utbetalinger.map { utbetaling ->
+                            ApiSimuleringsutbetaling(
+                                mottakerNavn = utbetaling.utbetalesTilNavn,
+                                mottakerId = utbetaling.utbetalesTilId,
+                                forfall = utbetaling.forfall,
+                                feilkonto = utbetaling.feilkonto,
+                                detaljer =
+                                    utbetaling.detaljer.map { detaljer ->
+                                        ApiSimuleringsdetaljer(
+                                            fom = detaljer.faktiskFom,
+                                            tom = detaljer.faktiskTom,
+                                            belop = detaljer.belop,
+                                            antallSats = detaljer.antallSats,
+                                            klassekode = detaljer.klassekode,
+                                            klassekodebeskrivelse = detaljer.klassekodeBeskrivelse,
+                                            konto = detaljer.konto,
+                                            refunderesOrgNr = detaljer.refunderesOrgNr,
+                                            sats = detaljer.sats,
+                                            tilbakeforing = detaljer.tilbakeforing,
+                                            typeSats = detaljer.typeSats,
+                                            uforegrad = detaljer.uforegrad,
+                                            utbetalingstype = detaljer.utbetalingstype,
+                                        )
+                                    },
+                            )
+                        },
+                )
+            },
+    )
+
+private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { objectMapper.readValue(it.traverse(), object : TypeReference<ApiFaresignal>() {}) }

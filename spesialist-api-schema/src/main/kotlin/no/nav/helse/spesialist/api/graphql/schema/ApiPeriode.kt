@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
-import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -304,45 +303,41 @@ data class ApiVarselDTO(
 }
 
 @GraphQLName("Periode")
-interface ApiPeriode {
-    fun behandlingId(): UUID
-
-    fun erForkastet(): Boolean
-
-    fun fom(): LocalDate
-
-    fun tom(): LocalDate
-
-    fun id(): UUID
-
-    fun inntektstype(): ApiInntektstype
-
-    fun opprettet(): LocalDateTime
-
-    fun periodetype(): ApiPeriodetype
-
-    fun tidslinje(): List<ApiDag>
-
-    fun vedtaksperiodeId(): UUID
-
-    fun periodetilstand(): ApiPeriodetilstand
-
-    fun skjaeringstidspunkt(): LocalDate
-
-    fun varsler(): List<ApiVarselDTO>
-
-    fun hendelser(): List<ApiHendelse>
-}
-
-@GraphQLIgnore
-interface UberegnetPeriodeSchema : ApiPeriode {
-    fun notater(): List<ApiNotat>
+sealed interface ApiPeriode {
+    val behandlingId: UUID
+    val erForkastet: Boolean
+    val fom: LocalDate
+    val tom: LocalDate
+    val id: UUID
+    val inntektstype: ApiInntektstype
+    val opprettet: LocalDateTime
+    val periodetype: ApiPeriodetype
+    val tidslinje: List<ApiDag>
+    val vedtaksperiodeId: UUID
+    val periodetilstand: ApiPeriodetilstand
+    val skjaeringstidspunkt: LocalDate
+    val varsler: List<ApiVarselDTO>
+    val hendelser: List<ApiHendelse>
 }
 
 @GraphQLName("UberegnetPeriode")
-class ApiUberegnetPeriode(
-    private val resolver: UberegnetPeriodeSchema,
-) : UberegnetPeriodeSchema by resolver
+data class ApiUberegnetPeriode(
+    override val behandlingId: UUID,
+    override val erForkastet: Boolean,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val id: UUID,
+    override val inntektstype: ApiInntektstype,
+    override val opprettet: LocalDateTime,
+    override val periodetype: ApiPeriodetype,
+    override val tidslinje: List<ApiDag>,
+    override val vedtaksperiodeId: UUID,
+    override val periodetilstand: ApiPeriodetilstand,
+    override val skjaeringstidspunkt: LocalDate,
+    override val varsler: List<ApiVarselDTO>,
+    override val hendelser: List<ApiHendelse>,
+    val notater: List<ApiNotat>,
+) : ApiPeriode
 
 @GraphQLName("Periodehandling")
 enum class ApiPeriodehandling {
@@ -357,53 +352,43 @@ data class ApiHandling(
     val begrunnelse: String? = null,
 )
 
-@GraphQLIgnore
-interface BeregnetPeriodeSchema : ApiPeriode {
-    fun oppgave(): ApiOppgaveForPeriodevisning?
-
-    fun handlinger(): List<ApiHandling>
-
-    fun egenskaper(): List<ApiOppgaveegenskap>
-
-    fun notater(): List<ApiNotat>
-
-    fun historikkinnslag(): List<ApiHistorikkinnslag>
-
-    fun beregningId(): UUID
-
-    fun forbrukteSykedager(): Int?
-
-    fun gjenstaendeSykedager(): Int?
-
-    fun maksdato(): LocalDate
-
-    fun periodevilkar(): ApiPeriodevilkar
-
-    fun utbetaling(): ApiUtbetaling
-
-    fun vilkarsgrunnlagId(): UUID?
-
-    fun risikovurdering(): ApiRisikovurdering?
-
-    fun totrinnsvurdering(): ApiTotrinnsvurdering?
-
-    fun paVent(): ApiPaVent?
-
-    fun avslag(): List<ApiAvslag>
-
-    fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse>
-
-    fun annullering(): ApiAnnullering?
-
-    fun pensjonsgivendeInntekter(): List<ApiPensjonsgivendeInntekt>
-
-    fun annulleringskandidater(): List<ApiAnnulleringskandidat>
-}
-
 @GraphQLName("BeregnetPeriode")
 class ApiBeregnetPeriode(
-    private val resolver: BeregnetPeriodeSchema,
-) : BeregnetPeriodeSchema by resolver
+    override val behandlingId: UUID,
+    override val erForkastet: Boolean,
+    override val fom: LocalDate,
+    override val tom: LocalDate,
+    override val id: UUID,
+    override val inntektstype: ApiInntektstype,
+    override val opprettet: LocalDateTime,
+    override val periodetype: ApiPeriodetype,
+    override val tidslinje: List<ApiDag>,
+    override val vedtaksperiodeId: UUID,
+    override val periodetilstand: ApiPeriodetilstand,
+    override val skjaeringstidspunkt: LocalDate,
+    override val varsler: List<ApiVarselDTO>,
+    override val hendelser: List<ApiHendelse>,
+    val oppgave: ApiOppgaveForPeriodevisning?,
+    val handlinger: List<ApiHandling>,
+    val egenskaper: List<ApiOppgaveegenskap>,
+    val notater: List<ApiNotat>,
+    val historikkinnslag: List<ApiHistorikkinnslag>,
+    val beregningId: UUID,
+    val forbrukteSykedager: Int?,
+    val gjenstaendeSykedager: Int?,
+    val maksdato: LocalDate,
+    val periodevilkar: ApiPeriodevilkar,
+    val utbetaling: ApiUtbetaling,
+    val vilkarsgrunnlagId: UUID?,
+    val risikovurdering: ApiRisikovurdering?,
+    val totrinnsvurdering: ApiTotrinnsvurdering?,
+    val paVent: ApiPaVent?,
+    val avslag: List<ApiAvslag>,
+    val vedtakBegrunnelser: List<ApiVedtakBegrunnelse>,
+    val annullering: ApiAnnullering?,
+    val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>,
+    val annulleringskandidater: List<ApiAnnulleringskandidat>,
+) : ApiPeriode
 
 @GraphQLName("PeriodehistorikkType")
 enum class ApiPeriodehistorikkType {
