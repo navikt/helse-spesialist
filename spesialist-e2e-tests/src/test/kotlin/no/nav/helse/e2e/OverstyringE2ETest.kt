@@ -200,7 +200,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
             runBlocking { personQuery.person(personPseudoId, env = dataFetchingEnvironment).data!! }
 
         assertNotNull(snapshot)
-        val overstyringer = snapshot.arbeidsgivere.first().overstyringer()
+        val overstyringer = snapshot.arbeidsgivere.first().overstyringer
         assertEquals(3, overstyringer.size)
         assertEquals(1, (overstyringer[0] as ApiDagoverstyring).dager.size)
         assertEquals(25000.0, (overstyringer[1] as ApiInntektoverstyring).inntekt.manedligInntekt)

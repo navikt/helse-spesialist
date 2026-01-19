@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
-import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -157,24 +156,13 @@ data class ApiGhostPeriode(
     val id = UUID.nameUUIDFromBytes(fom.toString().toByteArray() + organisasjonsnummer.toByteArray()).toString()
 }
 
-@GraphQLIgnore
-interface ArbeidsgiverSchema {
-    fun organisasjonsnummer(): String
-
-    fun navn(): String
-
-    fun ghostPerioder(): List<ApiGhostPeriode>
-
-    fun behandlinger(): List<ApiBehandling>
-
-    fun overstyringer(): List<ApiOverstyring>
-
-    fun arbeidsforhold(): List<ApiArbeidsforhold>
-
-    fun inntekterFraAordningen(): List<ApiArbeidsgiverInntekterFraAOrdningen>
-}
-
 @GraphQLName("Arbeidsgiver")
-class ApiArbeidsgiver(
-    private val resolver: ArbeidsgiverSchema,
-) : ArbeidsgiverSchema by resolver
+data class ApiArbeidsgiver(
+    val organisasjonsnummer: String,
+    val navn: String,
+    val ghostPerioder: List<ApiGhostPeriode>,
+    val behandlinger: List<ApiBehandling>,
+    val overstyringer: List<ApiOverstyring>,
+    val arbeidsforhold: List<ApiArbeidsforhold>,
+    val inntekterFraAordningen: List<ApiArbeidsgiverInntekterFraAOrdningen>,
+)
