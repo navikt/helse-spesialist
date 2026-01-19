@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiBeregnetPeriodeResolver
-import no.nav.helse.spesialist.api.graphql.resolvers.ApiSelvstendigNaeringResolver
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiUberegnetPeriodeResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnetFodselsnummer
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforhold
@@ -368,42 +367,83 @@ class PersonQueryHandler(
                 },
             selvstendigNaering =
                 run {
-                    val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
                     val selvstendig =
                         snapshot.arbeidsgivere
                             .firstOrNull { it.organisasjonsnummer == "SELVSTENDIG" }
                             ?: return@run null
 
                     ApiSelvstendigNaering(
-                        resolver =
-                            ApiSelvstendigNaeringResolver(
-                                behandlinger = selvstendig.behandlinger,
-                                fødselsnummer = snapshot.fodselsnummer,
-                                apiOppgaveService = apiOppgaveService,
-                                saksbehandlerMediator = saksbehandlerMediator,
-                                risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value),
-                                varselRepository = varselRepository,
-                                oppgaveApiDao = oppgaveApiDao,
-                                periodehistorikkApiDao = periodehistorikkApiDao,
-                                notatDao = notatDao,
-                                påVentApiDao = påVentApiDao,
-                                overstyringer =
-                                    overstyringer
-                                        .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
-                                        .map { overstyring ->
-                                            when (overstyring) {
-                                                is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
-                                                is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
-                                                is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
-                                                is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
-                                                is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
+                        behandlinger =
+                            selvstendig.behandlinger.mapIndexed { index, behandling ->
+                                val oppgaveId = oppgaveApiDao.finnOppgaveId(snapshot.fodselsnummer)
+                                val perioderSomSkalViseAktiveVarsler =
+                                    varselRepository.perioderSomSkalViseVarsler(oppgaveId)
+                                ApiBehandling(
+                                    id = behandling.id,
+                                    perioder =
+                                        behandling.perioder.map {
+                                            when (it) {
+                                                is SnapshotUberegnetPeriode ->
+                                                    ApiUberegnetPeriode(
+                                                        resolver =
+                                                            ApiUberegnetPeriodeResolver(
+                                                                varselRepository = varselRepository,
+                                                                periode = it,
+                                                                skalViseAktiveVarsler =
+                                                                    index == 0 &&
+                                                                        perioderSomSkalViseAktiveVarsler.contains(
+                                                                            it.vedtaksperiodeId,
+                                                                        ),
+                                                                notatDao = notatDao,
+                                                                index = index,
+                                                            ),
+                                                    )
+
+                                                is SnapshotBeregnetPeriode ->
+                                                    ApiBeregnetPeriode(
+                                                        resolver =
+                                                            ApiBeregnetPeriodeResolver(
+                                                                fødselsnummer = snapshot.fodselsnummer,
+                                                                orgnummer = "SELVSTENDIG",
+                                                                periode = it,
+                                                                apiOppgaveService = apiOppgaveService,
+                                                                saksbehandlerMediator = saksbehandlerMediator,
+                                                                risikovurderinger =
+                                                                    risikovurderingApiDao.finnRisikovurderinger(
+                                                                        identitetsnummer.value,
+                                                                    ),
+                                                                varselRepository = varselRepository,
+                                                                oppgaveApiDao = oppgaveApiDao,
+                                                                periodehistorikkApiDao = periodehistorikkApiDao,
+                                                                notatDao = notatDao,
+                                                                påVentApiDao = påVentApiDao,
+                                                                erSisteBehandling = index == 0,
+                                                                index = index,
+                                                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                                                                sessionFactory = sessionFactory,
+                                                                annulleringRepository = annulleringRepository,
+                                                                saksbehandlerRepository = saksbehandlerRepository,
+                                                            ),
+                                                    )
+
+                                                else -> throw Exception("Ukjent tidslinjeperiode")
                                             }
                                         },
-                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                sessionFactory = sessionFactory,
-                                annulleringRepository = annulleringRepository,
-                                saksbehandlerRepository = saksbehandlerRepository,
-                            ),
+                                )
+                            },
+                        overstyringer =
+                            overstyringApiDao
+                                .finnOverstyringer(snapshot.fodselsnummer)
+                                .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
+                                .map { overstyring ->
+                                    when (overstyring) {
+                                        is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
+                                        is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
+                                        is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
+                                        is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
+                                        is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
+                                    }
+                                },
                     )
                 },
             infotrygdutbetalinger =
