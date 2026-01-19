@@ -74,5 +74,10 @@ class Personer {
         class KrrStatus(
             val parent: PersonPseudoId,
         )
+
+        @Resource("krr-registrert-status")
+        class KrrRegistrertStatus(
+            val parent: PersonPseudoId,
+        )
     }
 }

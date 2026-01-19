@@ -14,7 +14,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
-import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
@@ -28,7 +28,7 @@ class ApiModule(
     private val sessionFactory: SessionFactory,
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
-    private val reservasjonshenter: Reservasjonshenter,
+    private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
 ) {
     data class Configuration(
         val clientId: String,
@@ -81,7 +81,7 @@ class ApiModule(
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
             snapshothenter = snapshothenter,
-            reservasjonshenter = reservasjonshenter,
+            krrRegistrertStatusHenter = krrRegistrertStatusHenter,
             sessionFactory = sessionFactory,
             behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
         )
@@ -96,7 +96,7 @@ class ApiModule(
             environmentToggles = environmentToggles,
             sessionFactory = sessionFactory,
             meldingPubliserer = meldingPubliserer,
-            reservasjonshenter = reservasjonshenter,
+            krrRegistrertStatusHenter = krrRegistrertStatusHenter,
         )
     }
 }

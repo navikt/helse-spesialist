@@ -13,13 +13,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class GetKrrStatusForPersonIntegrationTest {
+class GetKrrRegistrertStatusForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
-    fun `henter status for reservert person som forventet`() {
+    fun `henter registrert status for reservert person som forventet`() {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
@@ -32,14 +32,14 @@ class GetKrrStatusForPersonIntegrationTest {
         // When:
         val response =
             integrationTestFixture.get(
-                url = "/api/personer/${personPseudoId.value}/krr-status",
+                url = "/api/personer/${personPseudoId.value}/krr-registrert-status",
             )
 
         // Then:
         assertEquals(200, response.status)
-        val body = response.bodyAsJsonNode
+        val body = response.bodyAsText
         assertNotNull(body)
-        assertJsonEquals("""{ "kanVarsles": false, "reservert": true }""", body)
+        assertEquals("\"RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING\"", body)
     }
 
     @Test
@@ -56,18 +56,18 @@ class GetKrrStatusForPersonIntegrationTest {
         // When:
         val response =
             integrationTestFixture.get(
-                url = "/api/personer/${personPseudoId.value}/krr-status",
+                url = "/api/personer/${personPseudoId.value}/krr-registrert-status",
             )
 
         // Then:
         assertEquals(200, response.status)
-        val body = response.bodyAsJsonNode
+        val body = response.bodyAsText
         assertNotNull(body)
-        assertJsonEquals("""{ "kanVarsles": true, "reservert": false }""", body)
+        assertEquals("\"IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING\"", body)
     }
 
     @Test
-    fun `gir feilmelding om personen ikke er registrert i KRR - legacy-oppførsel`() {
+    fun `henter status for person som ikke er registrert i KRR som forventet`() {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
@@ -80,24 +80,14 @@ class GetKrrStatusForPersonIntegrationTest {
         // When:
         val response =
             integrationTestFixture.get(
-                url = "/api/personer/${personPseudoId.value}/krr-status",
+                url = "/api/personer/${personPseudoId.value}/krr-registrert-status",
             )
 
         // Then:
-        assertEquals(500, response.status)
-        val body = response.bodyAsJsonNode
+        assertEquals(200, response.status)
+        val body = response.bodyAsText
         assertNotNull(body)
-        assertJsonEquals(
-            """
-              {
-                "type" : "about:blank",
-                "status" : 500,
-                "title" : "Klarte ikke hente status fra Kontakt- og Reservasjonsregisteret",
-                "code" : "FEIL_VED_VIDERE_KALL"
-              }
-        """.trimIndent(),
-            body
-        )
+        assertEquals("\"IKKE_REGISTRERT_I_KRR\"", body)
     }
 
     @Test
@@ -108,7 +98,7 @@ class GetKrrStatusForPersonIntegrationTest {
         // When:
         val response =
             integrationTestFixture.get(
-                url = "/api/personer/${personPseudoId.value}/krr-status",
+                url = "/api/personer/${personPseudoId.value}/krr-registrert-status",
             )
 
         // Then:
@@ -144,7 +134,7 @@ class GetKrrStatusForPersonIntegrationTest {
         // When:
         val response =
             integrationTestFixture.get(
-                url = "/api/personer/${personPseudoId.value}/krr-status",
+                url = "/api/personer/${personPseudoId.value}/krr-registrert-status",
             )
 
         // Then:
@@ -180,7 +170,7 @@ class GetKrrStatusForPersonIntegrationTest {
         // When:
         val response =
             integrationTestFixture.get(
-                url = "/api/personer/${personPseudoId.value}/krr-status",
+                url = "/api/personer/${personPseudoId.value}/krr-registrert-status",
             )
 
         // Then:

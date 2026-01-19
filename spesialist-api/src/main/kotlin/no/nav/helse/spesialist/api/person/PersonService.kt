@@ -31,9 +31,8 @@ import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
@@ -71,7 +70,7 @@ class PersonService(
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
-    private val reservasjonshenter: Reservasjonshenter,
+    private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     private val sessionFactory: SessionFactory,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
@@ -152,7 +151,7 @@ class PersonService(
         fødselsnummer: String,
         fødselsnumrePseudoIdMap: Map<String, PersonPseudoId>,
         snapshot: Pair<ApiPersoninfo, SnapshotPerson>,
-        reservasjon: Deferred<ReservasjonDto?>,
+        reservasjon: Deferred<KrrRegistrertStatusHenter.KrrRegistrertStatus>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
@@ -168,7 +167,7 @@ class PersonService(
                         snapshot = personSnapshot,
                         personinfo =
                             personinfo.copy(
-                                reservasjon = reservasjon.await()?.toApiReservasjon(),
+                                reservasjon = reservasjon.await().toApiReservasjon(),
                                 unntattFraAutomatisering =
                                     stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
                                 fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
@@ -198,7 +197,7 @@ class PersonService(
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
         CoroutineScope(Dispatchers.IO).async {
-            reservasjonshenter.hentForPerson(fødselsnummer)
+            krrRegistrertStatusHenter.hentForPerson(fødselsnummer)
         }
 
     private fun hentSnapshot(fødselsnummer: String): HentSnapshotResult {

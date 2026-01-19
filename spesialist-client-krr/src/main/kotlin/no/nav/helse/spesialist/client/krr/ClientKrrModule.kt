@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.client.krr
 
 import no.nav.helse.spesialist.application.AccessTokenGenerator
-import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.logg.logg
 
 class ClientKrrModule(
@@ -17,13 +17,14 @@ class ClientKrrModule(
         )
     }
 
-    val reservasjonshenter = (
+    val krrRegistrertStatusHenter = (
         configuration.client?.let {
-            KRRClientReservasjonshenter(
+            KRRClientKrrRegistrertStatusHenter(
                 configuration = it,
                 accessTokenGenerator = accessTokenGenerator,
             )
         }
-            ?: Reservasjonshenter { null }.also { logg.info("Bruker nulloperasjonsversjon av reservasjonshenter") }
+            ?: KrrRegistrertStatusHenter { KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR }
+                .also { logg.info("Bruker nulloperasjonsversjon av reservasjonshenter") }
     )
 }

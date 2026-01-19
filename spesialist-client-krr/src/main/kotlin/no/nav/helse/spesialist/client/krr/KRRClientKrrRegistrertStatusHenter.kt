@@ -19,10 +19,10 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
-import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import java.util.UUID
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
@@ -39,10 +39,10 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .description("Status på kall til digdir-krr-proxy, success eller failure")
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
-class KRRClientReservasjonshenter(
+class KRRClientKrrRegistrertStatusHenter(
     private val configuration: ClientKrrModule.Configuration.Client,
     private val accessTokenGenerator: AccessTokenGenerator,
-) : Reservasjonshenter {
+) : KrrRegistrertStatusHenter {
     private val httpClient: HttpClient =
         HttpClient(Apache) {
             install(ContentNegotiation) {
@@ -55,10 +55,9 @@ class KRRClientReservasjonshenter(
             }
         }
 
-    override suspend fun hentForPerson(fødselsnummer: String): ReservasjonDto? {
+    override suspend fun hentForPerson(fødselsnummer: String): KrrRegistrertStatus {
         val sample = Timer.start(registry)
         return try {
-            logg.debug("Henter accessToken")
             val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
             val callId = UUID.randomUUID().toString()
 
@@ -76,40 +75,49 @@ class KRRClientReservasjonshenter(
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
                 .withTag("status", "success")
-            parseResponse(response, fødselsnummer)
+
+            if (response["feil"]?.isEmpty == false) {
+                responseError("Fikk feil tilbake fra KRR", response)
+            } else {
+                response["personer"][fødselsnummer].let {
+                    if (it == null) {
+                        responseError("Fant ikke igjen personen i responsen fra KRR", response)
+                    }
+                    if (it.getIfBoolean("aktiv") == false) {
+                        KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+                    } else {
+                        val reservert = it.getRequiredBoolean("reservert", response)
+                        val kanVarsles = it.getRequiredBoolean("kanVarsles", response)
+                        if (reservert || !kanVarsles) {
+                            KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                        } else {
+                            KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                        }
+                    }
+                }
+            }
         } catch (e: Exception) {
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
                 .withTag("status", "failure")
-            logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
-            sikkerlogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
-            null
+            throw e
         } finally {
             sample.stop(responstidReservasjonsstatus)
         }
     }
 
-    private fun parseResponse(
-        response: JsonNode,
-        fødselsnummer: String,
-    ): ReservasjonDto? {
-        val feil = response["feil"]
-        return if (!feil.isEmpty) {
-            logg.warn("Feil fra Kontakt- og reservasjonsregisteret")
-            sikkerlogg.warn("Feil fra Kontakt- og reservasjonsregisteret: {}", feil)
-            null
-        } else {
-            response["personer"][fødselsnummer].let {
-                ReservasjonDto(
-                    kanVarsles = it.getBoolean("kanVarsles"),
-                    reservert = it.getBoolean("reservert"),
-                )
-            }
-        }
-    }
+    private fun JsonNode.getIfBoolean(fieldName: String): Boolean? = this[fieldName]?.takeIf(JsonNode::isBoolean)?.asBoolean()
 
-    private fun JsonNode.getBoolean(fieldName: String) =
-        this[fieldName].let { fieldNode ->
-            fieldNode.takeIf(JsonNode::isBoolean)?.asBoolean() ?: error("Fikk ugyldig boolean-verdi: $fieldNode")
-        }
+    private fun JsonNode.getRequiredBoolean(
+        fieldName: String,
+        response: JsonNode,
+    ): Boolean = getIfBoolean(fieldName) ?: responseError("Fant ikke boolean-verdi for feltet $fieldName", response)
+
+    private fun responseError(
+        melding: String,
+        response: JsonNode,
+    ): Nothing {
+        loggErrorWithNoThrowable(melding, "Full respons: $response")
+        error(melding)
+    }
 }

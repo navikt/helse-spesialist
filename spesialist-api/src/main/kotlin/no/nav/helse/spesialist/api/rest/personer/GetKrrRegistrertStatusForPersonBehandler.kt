@@ -5,7 +5,7 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiKrrStatus
+import no.nav.helse.spesialist.api.rest.ApiKrrRegistrertStatus
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
@@ -16,20 +16,20 @@ import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class GetKrrStatusForPersonBehandler(
-    private val krrStatusHenter: KrrRegistrertStatusHenter,
-) : GetBehandler<Personer.PersonPseudoId.KrrStatus, ApiKrrStatus, ApiGetKrrStatusForPersonErrorCode> {
+class GetKrrRegistrertStatusForPersonBehandler(
+    private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+) : GetBehandler<Personer.PersonPseudoId.KrrRegistrertStatus, ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
     override fun behandle(
-        resource: Personer.PersonPseudoId.KrrStatus,
+        resource: Personer.PersonPseudoId.KrrRegistrertStatus,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<ApiKrrStatus, ApiGetKrrStatusForPersonErrorCode> {
+    ): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
         val personId = resource.parent.pseudoId
         val pseudoId = PersonPseudoId.fraString(personId)
         val identitetsnummer =
             transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
-                ?: return RestResponse.Error(ApiGetKrrStatusForPersonErrorCode.PERSON_IKKE_FUNNET)
+                ?: return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_IKKE_FUNNET)
 
         if (!saksbehandler.harTilgangTilPerson(
                 identitetsnummer = identitetsnummer,
@@ -37,27 +37,24 @@ class GetKrrStatusForPersonBehandler(
                 transaksjon = transaksjon,
             )
         ) {
-            return RestResponse.Error(ApiGetKrrStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
-        val hentetStatus =
+        val registrertStatus =
             try {
-                runBlocking { krrStatusHenter.hentForPerson(identitetsnummer.value) }
+                runBlocking { krrRegistrertStatusHenter.hentForPerson(identitetsnummer.value) }
             } catch (e: Exception) {
                 loggThrowable("Feil ved kall til KRR", e)
-                return RestResponse.Error(ApiGetKrrStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)
+                return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)
             }
 
-        return when (hentetStatus) {
-            KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING ->
-                RestResponse.OK(ApiKrrStatus(kanVarsles = false, reservert = true))
-
-            KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING ->
-                RestResponse.OK(ApiKrrStatus(kanVarsles = true, reservert = false))
-
-            KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR ->
-                RestResponse.Error(ApiGetKrrStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)
-        }
+        return RestResponse.OK(
+            when (registrertStatus) {
+                KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING -> ApiKrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING -> ApiKrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR -> ApiKrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+            },
+        )
     }
 
     override fun openApi(config: RouteConfig) {
@@ -67,7 +64,7 @@ class GetKrrStatusForPersonBehandler(
     }
 }
 
-enum class ApiGetKrrStatusForPersonErrorCode(
+enum class ApiGetKrrRegistrertStatusForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {

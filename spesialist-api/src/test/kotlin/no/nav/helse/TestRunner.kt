@@ -28,7 +28,7 @@ import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
-import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
@@ -98,7 +98,7 @@ object TestRunner {
                 stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                 behandlingstatistikk = mockk(relaxed = true),
                 snapshothenter = mockk(relaxed = true),
-                reservasjonshenter = mockk(relaxed = true),
+                krrRegistrertStatusHenter = mockk(relaxed = true),
                 tilgangsgruppeUuider = tilgangsgruppeUuider,
                 meldingPubliserer = mockk(relaxed = true),
             )
@@ -112,7 +112,7 @@ object TestRunner {
                         stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
                         personhåndterer = avhengigheter.personhåndterer,
                         snapshothenter = avhengigheter.snapshothenter,
-                        reservasjonshenter = avhengigheter.reservasjonshenter,
+                        krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                         sessionFactory = avhengigheter.sessionFactory,
                         behandlingstatistikk = avhengigheter.behandlingstatistikk,
                     )
@@ -129,7 +129,7 @@ object TestRunner {
                             override val kanBeslutteEgneSaker: Boolean = false
                             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
                         },
-                    reservasjonshenter = avhengigheter.reservasjonshenter,
+                    krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                 )
             }
 
@@ -164,7 +164,7 @@ object TestRunner {
         val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
-        val reservasjonshenter: Reservasjonshenter,
+        val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
         val tilgangsgruppeUuider: TilgangsgruppeUuider,
         val meldingPubliserer: MeldingPubliserer,
     )

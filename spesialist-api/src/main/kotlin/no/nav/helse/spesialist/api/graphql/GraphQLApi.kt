@@ -48,7 +48,7 @@ import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
-import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
@@ -63,7 +63,7 @@ fun kobleOppApi(
     meldingPubliserer: MeldingPubliserer,
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
-    reservasjonshenter: Reservasjonshenter,
+    krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -95,7 +95,7 @@ fun kobleOppApi(
                 meldingPubliserer = meldingPubliserer,
                 versjonAvKode = apiModuleConfiguration.versjonAvKode,
             )
-        restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles, reservasjonshenter)
+        restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles, krrRegistrertStatusHenter)
     }
 }
 
@@ -106,7 +106,7 @@ fun lagSchemaMedResolversOgHandlers(
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     personhåndterer: Personhåndterer,
     snapshothenter: Snapshothenter,
-    reservasjonshenter: Reservasjonshenter,
+    krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     sessionFactory: SessionFactory,
     behandlingstatistikk: IBehandlingsstatistikkService,
 ): SpesialistSchema =
@@ -133,7 +133,7 @@ fun lagSchemaMedResolversOgHandlers(
                                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
                                 snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
-                                reservasjonshenter = reservasjonshenter,
+                                krrRegistrertStatusHenter = krrRegistrertStatusHenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                                 stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,

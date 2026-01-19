@@ -42,7 +42,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -56,7 +56,7 @@ import java.util.UUID
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
 
-    private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
+    private val krrRegistrertStatusHenter = mockk<KrrRegistrertStatusHenter>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
@@ -108,7 +108,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                         stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                         personhåndterer = personhåndterer,
                                         snapshotService = snapshotService,
-                                        reservasjonshenter = reservasjonshenter,
+                                        krrRegistrertStatusHenter = krrRegistrertStatusHenter,
                                         sessionFactory = sessionFactory,
                                         vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                         stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,

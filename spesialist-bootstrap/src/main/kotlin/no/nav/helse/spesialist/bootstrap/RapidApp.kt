@@ -156,7 +156,7 @@ class RapidApp {
                 sessionFactory = dbModule.sessionFactory,
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
-                reservasjonshenter = clientKrrModule.reservasjonshenter,
+                krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
             )
 
         kafkaModule.kobleOppRivers()
