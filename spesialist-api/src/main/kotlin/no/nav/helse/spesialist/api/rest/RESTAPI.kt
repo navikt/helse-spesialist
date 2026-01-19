@@ -14,7 +14,6 @@ import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.rest.behandlinger.PostBehandlingNotaterBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer.GetOpptegnelseSekvensnummerSisteBehandler
@@ -31,6 +30,7 @@ import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostNotatBehandler
 import no.nav.helse.spesialist.application.Reservasjonshenter
 
 fun Routing.restRoutes(
@@ -74,7 +74,7 @@ fun Routing.restRoutes(
             put(PutVarselvurderingBehandler(), restAdapter)
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
-            post(PostBehandlingNotaterBehandler(), restAdapter)
+            post(PostNotatBehandler(), restAdapter)
 
             get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)
             get(GetOpptegnelserForPersonBehandler(), restAdapter)

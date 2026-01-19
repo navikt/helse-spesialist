@@ -14,11 +14,6 @@ class Behandlinger {
         val parent: Behandlinger = Behandlinger(),
         val behandlingId: UUID,
     ) {
-        @Resource("notater")
-        class Notater(
-            val parent: BehandlingId,
-        )
-
         @Resource("vedtak")
         class Vedtak(
             val parent: BehandlingId,

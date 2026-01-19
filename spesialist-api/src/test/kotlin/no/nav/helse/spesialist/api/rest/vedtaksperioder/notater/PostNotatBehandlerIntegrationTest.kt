@@ -1,11 +1,10 @@
-package no.nav.helse.spesialist.api.rest.behandlinger.notater
+package no.nav.helse.spesialist.api.rest.vedtaksperioder.notater
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -17,7 +16,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class PostBehandlingNotaterIntegrationTest {
+class PostNotatBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
@@ -32,13 +31,10 @@ class PostBehandlingNotaterIntegrationTest {
         val vedtaksperiodeId = lagVedtaksperiode(identitetsnummer = identitetsnummer)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
             .id
-        val behandlingId = lagBehandling(vedtaksperiodeId = vedtaksperiodeId)
-            .also(sessionContext.behandlingRepository::lagre)
-            .id
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandlingId.value}/notater",
+            url = "/api/vedtaksperioder/${vedtaksperiodeId.value}/notater",
             body = """{ "tekst": "Dette er et notat" }""",
             saksbehandler = saksbehandler,
         )

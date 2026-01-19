@@ -14,6 +14,11 @@ class Vedtaksperioder {
         val parent: Vedtaksperioder = Vedtaksperioder(),
         val vedtaksperiodeId: UUID,
     ) {
+        @Resource("notater")
+        class Notater(
+            val parent: Id,
+        )
+
         @Resource("annuller")
         class Annuller(
             val parent: Id,
