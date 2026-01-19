@@ -285,17 +285,13 @@ class PersonQueryHandler(
                                 arbeidsgiver.ghostPerioder.map {
                                     it.tilGhostPeriode(orgnummer)
                                 }
-                            val fødselsnummer = snapshot.fodselsnummer
-                            val behandlinger = arbeidsgiver.behandlinger
-                            val risikovurderinger =
-                                daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
                             ApiArbeidsgiver(
                                 organisasjonsnummer = orgnummer,
                                 navn = navn,
                                 ghostPerioder = ghostPerioder,
                                 behandlinger =
-                                    behandlinger.mapIndexed { index, behandling ->
-                                        val oppgaveId = daos.oppgaveApiDao.finnOppgaveId(fødselsnummer)
+                                    arbeidsgiver.behandlinger.mapIndexed { index, behandling ->
+                                        val oppgaveId = daos.oppgaveApiDao.finnOppgaveId(snapshot.fodselsnummer)
                                         val perioderSomSkalViseAktiveVarsler =
                                             daos.varselApiRepository.perioderSomSkalViseVarsler(oppgaveId)
                                         ApiBehandling(
@@ -686,12 +682,16 @@ class PersonQueryHandler(
                                                                     },
                                                                 vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                                 risikovurdering =
-                                                                    risikovurderinger[vedtaksperiodeId]?.let { vurdering ->
-                                                                        ApiRisikovurdering(
-                                                                            funn = vurdering.funn.tilFaresignaler(),
-                                                                            kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
-                                                                        )
-                                                                    },
+                                                                    daos.risikovurderingApiDao
+                                                                        .finnRisikovurderinger(
+                                                                            identitetsnummer.value,
+                                                                        )[vedtaksperiodeId]
+                                                                        ?.let { vurdering ->
+                                                                            ApiRisikovurdering(
+                                                                                funn = vurdering.funn.tilFaresignaler(),
+                                                                                kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
+                                                                            )
+                                                                        },
                                                                 varsler =
                                                                     if (erSisteBehandling) {
                                                                         daos.varselApiRepository
@@ -720,7 +720,7 @@ class PersonQueryHandler(
                                                                             sessionFactory.transactionalSessionScope { sessionContext ->
                                                                                 sessionContext.totrinnsvurderingRepository
                                                                                     .finnAktivForPerson(
-                                                                                        fødselsnummer,
+                                                                                        snapshot.fodselsnummer,
                                                                                     )?.let {
                                                                                         ApiTotrinnsvurdering(
                                                                                             erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
@@ -844,7 +844,7 @@ class PersonQueryHandler(
                                 arbeidsforhold =
                                     daos.arbeidsgiverApiDao
                                         .finnArbeidsforhold(
-                                            fødselsnummer,
+                                            snapshot.fodselsnummer,
                                             orgnummer,
                                         ).map {
                                             ApiArbeidsforhold(
@@ -857,7 +857,7 @@ class PersonQueryHandler(
                                 inntekterFraAordningen =
                                     daos.arbeidsgiverApiDao
                                         .finnArbeidsgiverInntekterFraAordningen(
-                                            fødselsnummer,
+                                            snapshot.fodselsnummer,
                                             orgnummer,
                                         ).map { fraAO ->
                                             ApiArbeidsgiverInntekterFraAOrdningen(
@@ -941,13 +941,6 @@ class PersonQueryHandler(
                                                 }
 
                                                 is SnapshotBeregnetPeriode -> {
-                                                    val fødselsnummer = snapshot.fodselsnummer
-                                                    val orgnummer = "SELVSTENDIG"
-                                                    val risikovurderinger =
-                                                        daos.risikovurderingApiDao.finnRisikovurderinger(
-                                                            identitetsnummer.value,
-                                                        )
-
                                                     val periodetilstand =
                                                         periode.periodetilstand.tilApiPeriodetilstand(erSisteBehandling)
                                                     val vedtaksperiodeId = periode.vedtaksperiodeId
@@ -1272,7 +1265,7 @@ class PersonQueryHandler(
                                                             },
                                                         vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                         risikovurdering =
-                                                            risikovurderinger[vedtaksperiodeId]?.let { vurdering ->
+                                                            daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)[vedtaksperiodeId]?.let { vurdering ->
                                                                 ApiRisikovurdering(
                                                                     funn = vurdering.funn.tilFaresignaler(),
                                                                     kontrollertOk = vurdering.kontrollertOk.tilFaresignaler(),
@@ -1306,7 +1299,7 @@ class PersonQueryHandler(
                                                                     sessionFactory.transactionalSessionScope { sessionContext ->
                                                                         sessionContext.totrinnsvurderingRepository
                                                                             .finnAktivForPerson(
-                                                                                fødselsnummer,
+                                                                                snapshot.fodselsnummer,
                                                                             )?.let {
                                                                                 ApiTotrinnsvurdering(
                                                                                     erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
