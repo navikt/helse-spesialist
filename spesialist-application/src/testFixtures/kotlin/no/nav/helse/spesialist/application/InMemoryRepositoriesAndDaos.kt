@@ -77,7 +77,6 @@ class InMemoryRepositoriesAndDaos {
     private val periodehistorikkDao = InMemoryDoNothingPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
     private val personApiDao = UnimplementedPersonApiDao()
-    private val personinfoDao = UnimplementedPersoninfoDao()
     private val påVentApiDao = UnimplementedPåVentApiDao()
     private val risikovurderingDao = UnimplementedRisikovurderingDao()
     private val risikovurderingApiDao = UnimplementedRisikovurderingApiDao()
@@ -118,7 +117,6 @@ class InMemoryRepositoriesAndDaos {
             periodehistorikkApiDao = periodehistorikkApiDao,
             personDao = personDao,
             personApiDao = personApiDao,
-            personinfoDao = personinfoDao,
             poisonPillDao = poisonPillDao,
             påVentDao = påVentDao,
             påVentApiDao = påVentApiDao,

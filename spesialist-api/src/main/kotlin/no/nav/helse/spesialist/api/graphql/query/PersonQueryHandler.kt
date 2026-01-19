@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
+import no.nav.helse.spesialist.api.graphql.schema.ApiAdressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiAlder
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnetFodselsnummer
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
@@ -52,6 +53,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiKjonn
 import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiLagtPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
@@ -64,6 +66,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodevilkar
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiRisikovurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiSelvstendigNaering
@@ -97,13 +100,13 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
@@ -113,6 +116,8 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
@@ -125,11 +130,10 @@ class PersonQueryHandler(
     private val apiOppgaveService: ApiOppgaveService,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
-    snapshothenter: Snapshothenter,
+    private val snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
 ) : PersonQuerySchema {
     private val auditLog = LoggerFactory.getLogger("auditLogger")
-    private val snapshotService = SnapshotService(daos.personinfoDao, snapshothenter)
 
     override suspend fun person(
         personPseudoId: String,
@@ -199,29 +203,25 @@ class PersonQueryHandler(
             manglerTilgangTilPerson(saksbehandler, identitetsnummer)
         }
 
-        val personinfoOgSnapshot =
-            runCatching { snapshotService.hentSnapshot(identitetsnummer.value) }
-                .getOrElse { e ->
-                    loggThrowable(
-                        message = "Klarte ikke hente snapshot fra Spleis",
-                        securelogDetails = "identitetsnummer=${identitetsnummer.value}",
-                        throwable = e,
-                    )
-                    klarteIkkeHentePerson(saksbehandler, identitetsnummer)
-                }?.takeUnless { it.second.arbeidsgivere.isEmpty() }
+        val snapshot =
+            try {
+                loggInfo("Henter snapshot for person", "fødselsnummer: ${identitetsnummer.value}")
+                (
+                    snapshothenter.hentPerson(identitetsnummer.value)
+                        ?: null.also { loggWarn("Fikk ikke personsnapshot fra Spleis") }
+                )
+            } catch (e: Exception) {
+                loggThrowable(
+                    message = "Klarte ikke hente snapshot fra Spleis",
+                    securelogDetails = "identitetsnummer=${identitetsnummer.value}",
+                    throwable = e,
+                )
+                klarteIkkeHentePerson(saksbehandler, identitetsnummer)
+            }?.takeUnless { it.arbeidsgivere.isEmpty() }
 
-        if (personinfoOgSnapshot == null) {
+        if (snapshot == null) {
             personIkkeFunnet(saksbehandler, identitetsnummer)
         }
-
-        val (personinfo, snapshot) = personinfoOgSnapshot
-
-        fun finnNavnForOrganisasjonsnummer(organisasjonsnummer: String): String =
-            transaction.arbeidsgiverRepository
-                .finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
-                ?.navn
-                ?.navn
-                ?: "navn er utilgjengelig"
 
         return ApiPerson(
             versjon = snapshot.versjon,
@@ -242,18 +242,7 @@ class PersonQueryHandler(
                     .toList()
                     .map { ApiAnnetFodselsnummer(it.first.value, it.second.value) },
             dodsdato = snapshot.dodsdato,
-            personinfo =
-                personinfo.copy(
-                    unntattFraAutomatisering =
-                        stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(
-                            identitetsnummer.value,
-                        ),
-                    fullmakt = daos.vergemålApiDao.harFullmakt(identitetsnummer.value),
-                    automatiskBehandlingStansetAvSaksbehandler =
-                        daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(
-                            identitetsnummer.value,
-                        ),
-                ),
+            personinfo = personEntity.tilApiPersoninfo(),
             enhet = daos.personApiDao.finnEnhet(snapshot.fodselsnummer).let { ApiEnhet(it.id, it.navn) },
             tildeling = daos.tildelingApiDao.tildelingForPerson(snapshot.fodselsnummer)?.tilTildeling(),
             tilleggsinfoForInntektskilder =
@@ -270,7 +259,12 @@ class PersonQueryHandler(
                     .map { organisasjonsnummer ->
                         ApiTilleggsinfoForInntektskilde(
                             orgnummer = organisasjonsnummer,
-                            navn = finnNavnForOrganisasjonsnummer(organisasjonsnummer),
+                            navn =
+                                transaction.arbeidsgiverRepository
+                                    .finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
+                                    ?.navn
+                                    ?.navn
+                                    ?: "navn er utilgjengelig",
                         )
                     },
             arbeidsgivere =
@@ -281,7 +275,12 @@ class PersonQueryHandler(
                         .filterNot { it.organisasjonsnummer == "SELVSTENDIG" }
                         .map { arbeidsgiver ->
                             val orgnummer = arbeidsgiver.organisasjonsnummer
-                            val navn = finnNavnForOrganisasjonsnummer(orgnummer)
+                            val navn =
+                                transaction.arbeidsgiverRepository
+                                    .finn(ArbeidsgiverIdentifikator.fraString(orgnummer))
+                                    ?.navn
+                                    ?.navn
+                                    ?: "navn er utilgjengelig"
                             val ghostPerioder =
                                 arbeidsgiver.ghostPerioder.map {
                                     it.tilGhostPeriode(orgnummer)
@@ -898,7 +897,9 @@ class PersonQueryHandler(
                                                     val vedtaksperiodeId = periode.vedtaksperiodeId
                                                     val skalViseAktiveVarsler =
                                                         erSisteBehandling &&
-                                                            perioderSomSkalViseAktiveVarsler.contains(vedtaksperiodeId)
+                                                            perioderSomSkalViseAktiveVarsler.contains(
+                                                                vedtaksperiodeId,
+                                                            )
                                                     ApiUberegnetPeriode(
                                                         behandlingId = periode.behandlingId,
                                                         erForkastet = periode.erForkastet,
@@ -906,7 +907,9 @@ class PersonQueryHandler(
                                                         tom = periode.tom,
                                                         id =
                                                             UUID.nameUUIDFromBytes(
-                                                                vedtaksperiodeId.toString().toByteArray() + index.toByte(),
+                                                                vedtaksperiodeId
+                                                                    .toString()
+                                                                    .toByteArray() + index.toByte(),
                                                             ),
                                                         inntektstype = periode.inntektstype.tilApiInntektstype(),
                                                         opprettet = periode.opprettet,
@@ -1016,7 +1019,9 @@ class PersonQueryHandler(
                                                         tom = periode.tom,
                                                         id =
                                                             UUID.nameUUIDFromBytes(
-                                                                vedtaksperiodeId.toString().toByteArray() + index.toByte(),
+                                                                vedtaksperiodeId
+                                                                    .toString()
+                                                                    .toByteArray() + index.toByte(),
                                                             ),
                                                         inntektstype = periode.inntektstype.tilApiInntektstype(),
                                                         opprettet = periode.opprettet,
@@ -1446,6 +1451,36 @@ class PersonQueryHandler(
             auditLoggOk(saksbehandler, identitetsnummer)
             byggRespons(it)
         }
+    }
+
+    private fun Person.tilApiPersoninfo(): ApiPersoninfo {
+        val personinfo = info ?: error("Fant ikke personinfo i databasen")
+
+        return ApiPersoninfo(
+            fornavn = personinfo.fornavn,
+            mellomnavn = personinfo.mellomnavn,
+            etternavn = personinfo.etternavn,
+            fodselsdato = personinfo.fødselsdato!!,
+            kjonn =
+                when (personinfo.kjønn) {
+                    Personinfo.Kjønn.Kvinne -> ApiKjonn.Kvinne
+                    Personinfo.Kjønn.Mann -> ApiKjonn.Mann
+                    Personinfo.Kjønn.Ukjent, null -> ApiKjonn.Ukjent
+                },
+            adressebeskyttelse =
+                when (personinfo.adressebeskyttelse) {
+                    Personinfo.Adressebeskyttelse.Ugradert -> ApiAdressebeskyttelse.Ugradert
+                    Personinfo.Adressebeskyttelse.Fortrolig -> ApiAdressebeskyttelse.Fortrolig
+                    Personinfo.Adressebeskyttelse.StrengtFortrolig -> ApiAdressebeskyttelse.StrengtFortrolig
+                    Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiAdressebeskyttelse.StrengtFortroligUtland
+                    Personinfo.Adressebeskyttelse.Ukjent -> ApiAdressebeskyttelse.Ukjent
+                },
+            unntattFraAutomatisering =
+                stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(id.value),
+            fullmakt = daos.vergemålApiDao.harFullmakt(id.value),
+            automatiskBehandlingStansetAvSaksbehandler =
+                daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(id.value),
+        )
     }
 
     private fun TildelingApiDto.tilTildeling(): ApiTildeling =

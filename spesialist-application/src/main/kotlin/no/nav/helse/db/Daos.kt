@@ -8,7 +8,6 @@ import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.OverstyringApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.db.api.PersoninfoDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.db.api.TildelingApiDao
@@ -53,7 +52,6 @@ interface Daos {
     val personApiDao: PersonApiDao
     val påVentApiDao: PåVentApiDao
     val risikovurderingApiDao: RisikovurderingApiDao
-    val personinfoDao: PersoninfoDao
     val tildelingApiDao: TildelingApiDao
     val varselApiRepository: VarselApiRepository
     val vergemålApiDao: VergemålApiDao
