@@ -217,9 +217,17 @@ class PersonQueryHandler(
                     throwable = e,
                 )
                 klarteIkkeHentePerson(saksbehandler, identitetsnummer)
-            }?.takeUnless { it.arbeidsgivere.isEmpty() }
+            }
 
         if (snapshot == null) {
+            personIkkeFunnet(saksbehandler, identitetsnummer)
+        }
+
+        if (snapshot.arbeidsgivere.isEmpty()) {
+            loggWarn(
+                melding = "Fikk snapshot uten arbeidsgivere, returnerer at personen ikke ble funnet",
+                sikkerloggDetaljer = "snapshot: $snapshot",
+            )
             personIkkeFunnet(saksbehandler, identitetsnummer)
         }
 
