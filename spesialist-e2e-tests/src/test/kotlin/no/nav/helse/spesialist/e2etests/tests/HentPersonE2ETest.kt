@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.e2etests.tests
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
 
 class HentPersonE2ETest : AbstractE2EIntegrationTest() {
     @Test
@@ -80,7 +82,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
           "sammenligningsgrunnlag" : {
             "belop" : 650000.0,
             "inntektFraAOrdningen" : [ {
-              "maned" : "2026-01",
+              "maned" : "${YearMonth.now()}",
               "sum" : 650000.0,
               "__typename" : "InntektFraAOrdningen"
             } ],
@@ -138,7 +140,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
         "organisasjonsnummer" : "${testContext.arbeidsgiver.organisasjonsnummer}",
         "arbeidsforhold" : [ {
           "sluttdato" : null,
-          "startdato" : "2026-01-19",
+          "startdato" : "${LocalDate.now()}",
           "stillingsprosent" : 100,
           "stillingstittel" : "en-stillingstittel",
           "__typename" : "Arbeidsforhold"
