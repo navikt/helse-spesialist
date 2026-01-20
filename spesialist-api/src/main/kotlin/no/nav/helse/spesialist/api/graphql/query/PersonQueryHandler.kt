@@ -51,6 +51,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiFaresignal
 import no.nav.helse.spesialist.api.graphql.schema.ApiFjernetFraPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiHistorikkinnslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
@@ -100,6 +101,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
@@ -259,7 +261,7 @@ class PersonQueryHandler(
             dodsdato = snapshot.dodsdato,
             personinfo = personEntity.tilApiPersoninfo(),
             enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),
-            tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilTildeling(),
+            tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilApiTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag
                     .flatMap { vilkårsgrunnlag ->
@@ -378,161 +380,7 @@ class PersonQueryHandler(
                                                                 historikkinnslag =
                                                                     daos.periodehistorikkApiDao
                                                                         .finn(periode.utbetaling.id)
-                                                                        .map {
-                                                                            when (it.type) {
-                                                                                PeriodehistorikkType.LEGG_PA_VENT -> {
-                                                                                    val (påVentÅrsaker, frist, notattekst) =
-                                                                                        mapLagtPåVentJson(json = it.json)
-                                                                                    ApiLagtPaVent(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        timestamp = it.timestamp,
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                        arsaker = påVentÅrsaker,
-                                                                                        frist = frist,
-                                                                                        notattekst = notattekst,
-                                                                                        kommentarer =
-                                                                                            daos.notatApiDao
-                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                                .map { kommentar ->
-                                                                                                    ApiKommentar(
-                                                                                                        id = kommentar.id,
-                                                                                                        tekst = kommentar.tekst,
-                                                                                                        opprettet = kommentar.opprettet,
-                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                    )
-                                                                                                },
-                                                                                    )
-                                                                                }
-
-                                                                                PeriodehistorikkType.ENDRE_PA_VENT -> {
-                                                                                    val (påVentÅrsaker, frist, notattekst) =
-                                                                                        mapLagtPåVentJson(json = it.json)
-                                                                                    ApiEndrePaVent(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        timestamp = it.timestamp,
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                        arsaker = påVentÅrsaker,
-                                                                                        frist = frist,
-                                                                                        notattekst = notattekst,
-                                                                                        kommentarer =
-                                                                                            daos.notatApiDao
-                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                                .map { kommentar ->
-                                                                                                    ApiKommentar(
-                                                                                                        id = kommentar.id,
-                                                                                                        tekst = kommentar.tekst,
-                                                                                                        opprettet = kommentar.opprettet,
-                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                    )
-                                                                                                },
-                                                                                    )
-                                                                                }
-
-                                                                                PeriodehistorikkType.FJERN_FRA_PA_VENT -> {
-                                                                                    ApiFjernetFraPaVent(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        timestamp = it.timestamp,
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                    )
-                                                                                }
-
-                                                                                PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
-                                                                                    val notattekst =
-                                                                                        mapNotattekstJson(json = it.json)
-                                                                                    ApiTotrinnsvurderingRetur(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        timestamp = it.timestamp,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                        notattekst = notattekst,
-                                                                                        kommentarer =
-                                                                                            it.dialogRef?.let { dialogRef ->
-                                                                                                daos.notatApiDao
-                                                                                                    .finnKommentarer(
-                                                                                                        dialogRef.toLong(),
-                                                                                                    ).map { kommentar ->
-                                                                                                        ApiKommentar(
-                                                                                                            id = kommentar.id,
-                                                                                                            tekst = kommentar.tekst,
-                                                                                                            opprettet = kommentar.opprettet,
-                                                                                                            saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                            feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                        )
-                                                                                                    }
-                                                                                            } ?: emptyList(),
-                                                                                    )
-                                                                                }
-
-                                                                                PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
-                                                                                    val notattekst =
-                                                                                        mapNotattekstJson(json = it.json)
-                                                                                    ApiStansAutomatiskBehandlingSaksbehandler(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        timestamp = it.timestamp,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                        notattekst = notattekst,
-                                                                                        kommentarer =
-                                                                                            daos.notatApiDao
-                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                                .map { kommentar ->
-                                                                                                    ApiKommentar(
-                                                                                                        id = kommentar.id,
-                                                                                                        tekst = kommentar.tekst,
-                                                                                                        opprettet = kommentar.opprettet,
-                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                    )
-                                                                                                },
-                                                                                    )
-                                                                                }
-
-                                                                                PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
-                                                                                    val notattekst =
-                                                                                        mapNotattekstJson(json = it.json)
-                                                                                    ApiOpphevStansAutomatiskBehandlingSaksbehandler(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        timestamp = it.timestamp,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                        notattekst = notattekst,
-                                                                                        kommentarer =
-                                                                                            daos.notatApiDao
-                                                                                                .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                                .map { kommentar ->
-                                                                                                    ApiKommentar(
-                                                                                                        id = kommentar.id,
-                                                                                                        tekst = kommentar.tekst,
-                                                                                                        opprettet = kommentar.opprettet,
-                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                    )
-                                                                                                },
-                                                                                    )
-                                                                                }
-
-                                                                                else -> {
-                                                                                    ApiPeriodeHistorikkElementNy(
-                                                                                        id = it.id,
-                                                                                        type = it.type.tilApiPeriodehistorikkType(),
-                                                                                        saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                        timestamp = it.timestamp,
-                                                                                        dialogRef = it.dialogRef,
-                                                                                    )
-                                                                                }
-                                                                            }
-                                                                        },
+                                                                        .map { it.toApiHistorikkinnslag() },
                                                                 beregningId = periode.beregningId,
                                                                 forbrukteSykedager = periode.forbrukteSykedager,
                                                                 gjenstaendeSykedager = periode.gjenstaendeSykedager,
@@ -831,165 +679,7 @@ class PersonQueryHandler(
                                                             historikkinnslag =
                                                                 daos.periodehistorikkApiDao
                                                                     .finn(periode.utbetaling.id)
-                                                                    .map {
-                                                                        when (it.type) {
-                                                                            PeriodehistorikkType.LEGG_PA_VENT -> {
-                                                                                val (påVentÅrsaker, frist, notattekst) =
-                                                                                    mapLagtPåVentJson(
-                                                                                        json = it.json,
-                                                                                    )
-                                                                                ApiLagtPaVent(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    timestamp = it.timestamp,
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                    arsaker = påVentÅrsaker,
-                                                                                    frist = frist,
-                                                                                    notattekst = notattekst,
-                                                                                    kommentarer =
-                                                                                        daos.notatApiDao
-                                                                                            .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                            .map { kommentar ->
-                                                                                                ApiKommentar(
-                                                                                                    id = kommentar.id,
-                                                                                                    tekst = kommentar.tekst,
-                                                                                                    opprettet = kommentar.opprettet,
-                                                                                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                )
-                                                                                            },
-                                                                                )
-                                                                            }
-
-                                                                            PeriodehistorikkType.ENDRE_PA_VENT -> {
-                                                                                val (påVentÅrsaker, frist, notattekst) =
-                                                                                    mapLagtPåVentJson(
-                                                                                        json = it.json,
-                                                                                    )
-                                                                                ApiEndrePaVent(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    timestamp = it.timestamp,
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                    arsaker = påVentÅrsaker,
-                                                                                    frist = frist,
-                                                                                    notattekst = notattekst,
-                                                                                    kommentarer =
-                                                                                        daos.notatApiDao
-                                                                                            .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                            .map { kommentar ->
-                                                                                                ApiKommentar(
-                                                                                                    id = kommentar.id,
-                                                                                                    tekst = kommentar.tekst,
-                                                                                                    opprettet = kommentar.opprettet,
-                                                                                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                )
-                                                                                            },
-                                                                                )
-                                                                            }
-
-                                                                            PeriodehistorikkType.FJERN_FRA_PA_VENT -> {
-                                                                                ApiFjernetFraPaVent(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    timestamp = it.timestamp,
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                )
-                                                                            }
-
-                                                                            PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
-                                                                                val notattekst =
-                                                                                    mapNotattekstJson(json = it.json)
-                                                                                ApiTotrinnsvurderingRetur(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    timestamp = it.timestamp,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                    notattekst = notattekst,
-                                                                                    kommentarer =
-                                                                                        it.dialogRef?.let { dialogRef ->
-                                                                                            daos.notatApiDao
-                                                                                                .finnKommentarer(
-                                                                                                    dialogRef.toLong(),
-                                                                                                ).map { kommentar ->
-                                                                                                    ApiKommentar(
-                                                                                                        id = kommentar.id,
-                                                                                                        tekst = kommentar.tekst,
-                                                                                                        opprettet = kommentar.opprettet,
-                                                                                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                    )
-                                                                                                }
-                                                                                        } ?: emptyList(),
-                                                                                )
-                                                                            }
-
-                                                                            PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
-                                                                                val notattekst =
-                                                                                    mapNotattekstJson(json = it.json)
-                                                                                ApiStansAutomatiskBehandlingSaksbehandler(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    timestamp = it.timestamp,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                    notattekst = notattekst,
-                                                                                    kommentarer =
-                                                                                        daos.notatApiDao
-                                                                                            .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                            .map { kommentar ->
-                                                                                                ApiKommentar(
-                                                                                                    id = kommentar.id,
-                                                                                                    tekst = kommentar.tekst,
-                                                                                                    opprettet = kommentar.opprettet,
-                                                                                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                )
-                                                                                            },
-                                                                                )
-                                                                            }
-
-                                                                            PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
-                                                                                val notattekst =
-                                                                                    mapNotattekstJson(json = it.json)
-                                                                                ApiOpphevStansAutomatiskBehandlingSaksbehandler(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    timestamp = it.timestamp,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                    notattekst = notattekst,
-                                                                                    kommentarer =
-                                                                                        daos.notatApiDao
-                                                                                            .finnKommentarer(it.dialogRef!!.toLong())
-                                                                                            .map { kommentar ->
-                                                                                                ApiKommentar(
-                                                                                                    id = kommentar.id,
-                                                                                                    tekst = kommentar.tekst,
-                                                                                                    opprettet = kommentar.opprettet,
-                                                                                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                                                                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                                                                                )
-                                                                                            },
-                                                                                )
-                                                                            }
-
-                                                                            else -> {
-                                                                                ApiPeriodeHistorikkElementNy(
-                                                                                    id = it.id,
-                                                                                    type = it.type.tilApiPeriodehistorikkType(),
-                                                                                    saksbehandlerIdent = it.saksbehandlerIdent,
-                                                                                    timestamp = it.timestamp,
-                                                                                    dialogRef = it.dialogRef,
-                                                                                )
-                                                                            }
-                                                                        }
-                                                                    },
+                                                                    .map { it.toApiHistorikkinnslag() },
                                                             beregningId = periode.beregningId,
                                                             forbrukteSykedager = periode.forbrukteSykedager,
                                                             gjenstaendeSykedager = periode.gjenstaendeSykedager,
@@ -1175,6 +865,161 @@ class PersonQueryHandler(
         }
     }
 
+    private fun PeriodehistorikkDto.toApiHistorikkinnslag(): ApiHistorikkinnslag =
+        when (type) {
+            PeriodehistorikkType.LEGG_PA_VENT -> {
+                val (påVentÅrsaker, frist, notattekst) =
+                    mapLagtPåVentJson(json = json)
+                ApiLagtPaVent(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    timestamp = timestamp,
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    dialogRef = dialogRef,
+                    arsaker = påVentÅrsaker,
+                    frist = frist,
+                    notattekst = notattekst,
+                    kommentarer =
+                        daos.notatApiDao
+                            .finnKommentarer(dialogRef!!.toLong())
+                            .map { kommentar ->
+                                ApiKommentar(
+                                    id = kommentar.id,
+                                    tekst = kommentar.tekst,
+                                    opprettet = kommentar.opprettet,
+                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                )
+                            },
+                )
+            }
+
+            PeriodehistorikkType.ENDRE_PA_VENT -> {
+                val (påVentÅrsaker, frist, notattekst) =
+                    mapLagtPåVentJson(json = json)
+                ApiEndrePaVent(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    timestamp = timestamp,
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    dialogRef = dialogRef,
+                    arsaker = påVentÅrsaker,
+                    frist = frist,
+                    notattekst = notattekst,
+                    kommentarer =
+                        daos.notatApiDao
+                            .finnKommentarer(dialogRef!!.toLong())
+                            .map { kommentar ->
+                                ApiKommentar(
+                                    id = kommentar.id,
+                                    tekst = kommentar.tekst,
+                                    opprettet = kommentar.opprettet,
+                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                )
+                            },
+                )
+            }
+
+            PeriodehistorikkType.FJERN_FRA_PA_VENT -> {
+                ApiFjernetFraPaVent(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    timestamp = timestamp,
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    dialogRef = dialogRef,
+                )
+            }
+
+            PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
+                val notattekst =
+                    mapNotattekstJson(json = json)
+                ApiTotrinnsvurderingRetur(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    timestamp = timestamp,
+                    dialogRef = dialogRef,
+                    notattekst = notattekst,
+                    kommentarer =
+                        dialogRef?.let { dialogRef ->
+                            daos.notatApiDao
+                                .finnKommentarer(
+                                    dialogRef.toLong(),
+                                ).map { kommentar ->
+                                    ApiKommentar(
+                                        id = kommentar.id,
+                                        tekst = kommentar.tekst,
+                                        opprettet = kommentar.opprettet,
+                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                    )
+                                }
+                        } ?: emptyList(),
+                )
+            }
+
+            PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                val notattekst =
+                    mapNotattekstJson(json = json)
+                ApiStansAutomatiskBehandlingSaksbehandler(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    timestamp = timestamp,
+                    dialogRef = dialogRef,
+                    notattekst = notattekst,
+                    kommentarer =
+                        daos.notatApiDao
+                            .finnKommentarer(dialogRef!!.toLong())
+                            .map { kommentar ->
+                                ApiKommentar(
+                                    id = kommentar.id,
+                                    tekst = kommentar.tekst,
+                                    opprettet = kommentar.opprettet,
+                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                )
+                            },
+                )
+            }
+
+            PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                val notattekst =
+                    mapNotattekstJson(json = json)
+                ApiOpphevStansAutomatiskBehandlingSaksbehandler(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    timestamp = timestamp,
+                    dialogRef = dialogRef,
+                    notattekst = notattekst,
+                    kommentarer =
+                        daos.notatApiDao
+                            .finnKommentarer(dialogRef!!.toLong())
+                            .map { kommentar ->
+                                ApiKommentar(
+                                    id = kommentar.id,
+                                    tekst = kommentar.tekst,
+                                    opprettet = kommentar.opprettet,
+                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                )
+                            },
+                )
+            }
+
+            else -> {
+                ApiPeriodeHistorikkElementNy(
+                    id = id,
+                    type = type.tilApiPeriodehistorikkType(),
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    timestamp = timestamp,
+                    dialogRef = dialogRef,
+                )
+            }
+        }
+
     private fun genererPeriodeid(
         vedtaksperiodeId: UUID,
         behandlingIndex: Int,
@@ -1201,14 +1046,12 @@ class PersonQueryHandler(
             varsler =
                 if (behandlingIndex == 0 && vedtaksperiodeId in perioderSomSkalViseAktiveVarsler) {
                     daos.varselApiRepository
-                        .finnVarslerForUberegnetPeriode(
-                            vedtaksperiodeId,
-                        ).map { it.toVarselDto() }
+                        .finnVarslerForUberegnetPeriode(vedtaksperiodeId)
+                        .map { it.toVarselDto() }
                 } else {
                     daos.varselApiRepository
-                        .finnGodkjenteVarslerForUberegnetPeriode(
-                            vedtaksperiodeId,
-                        ).map { it.toVarselDto() }
+                        .finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
+                        .map { it.toVarselDto() }
                 },
             notater =
                 daos.notatApiDao
@@ -1233,25 +1076,11 @@ class PersonQueryHandler(
             mellomnavn = personinfo.mellomnavn,
             etternavn = personinfo.etternavn,
             fodselsdato = personinfo.fødselsdato!!,
-            kjonn =
-                when (personinfo.kjønn) {
-                    Personinfo.Kjønn.Kvinne -> ApiKjonn.Kvinne
-                    Personinfo.Kjønn.Mann -> ApiKjonn.Mann
-                    Personinfo.Kjønn.Ukjent, null -> ApiKjonn.Ukjent
-                },
-            adressebeskyttelse =
-                when (personinfo.adressebeskyttelse) {
-                    Personinfo.Adressebeskyttelse.Ugradert -> ApiAdressebeskyttelse.Ugradert
-                    Personinfo.Adressebeskyttelse.Fortrolig -> ApiAdressebeskyttelse.Fortrolig
-                    Personinfo.Adressebeskyttelse.StrengtFortrolig -> ApiAdressebeskyttelse.StrengtFortrolig
-                    Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiAdressebeskyttelse.StrengtFortroligUtland
-                    Personinfo.Adressebeskyttelse.Ukjent -> ApiAdressebeskyttelse.Ukjent
-                },
-            unntattFraAutomatisering =
-                stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(id.value),
+            kjonn = personinfo.kjønn.tilApiKjonn(),
+            adressebeskyttelse = personinfo.adressebeskyttelse.tilApiAdressebeskyttelse(),
+            unntattFraAutomatisering = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(id.value),
             fullmakt = daos.vergemålApiDao.harFullmakt(id.value),
-            automatiskBehandlingStansetAvSaksbehandler =
-                daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(id.value),
+            automatiskBehandlingStansetAvSaksbehandler = daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(id.value),
         )
     }
 
@@ -1669,9 +1498,25 @@ private fun tilApiInfotrygdutbetalinger(jsonString: String): List<ApiInfotrygdut
             )
         }
 
-private fun TildelingApiDto.tilTildeling(): ApiTildeling =
+private fun TildelingApiDto.tilApiTildeling(): ApiTildeling =
     ApiTildeling(
         navn = navn,
         epost = epost,
         oid = oid,
     )
+
+private fun Personinfo.Adressebeskyttelse.tilApiAdressebeskyttelse(): ApiAdressebeskyttelse =
+    when (this) {
+        Personinfo.Adressebeskyttelse.Ugradert -> ApiAdressebeskyttelse.Ugradert
+        Personinfo.Adressebeskyttelse.Fortrolig -> ApiAdressebeskyttelse.Fortrolig
+        Personinfo.Adressebeskyttelse.StrengtFortrolig -> ApiAdressebeskyttelse.StrengtFortrolig
+        Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiAdressebeskyttelse.StrengtFortroligUtland
+        Personinfo.Adressebeskyttelse.Ukjent -> ApiAdressebeskyttelse.Ukjent
+    }
+
+private fun Personinfo.Kjønn?.tilApiKjonn(): ApiKjonn =
+    when (this) {
+        Personinfo.Kjønn.Kvinne -> ApiKjonn.Kvinne
+        Personinfo.Kjønn.Mann -> ApiKjonn.Mann
+        Personinfo.Kjønn.Ukjent, null -> ApiKjonn.Ukjent
+    }
