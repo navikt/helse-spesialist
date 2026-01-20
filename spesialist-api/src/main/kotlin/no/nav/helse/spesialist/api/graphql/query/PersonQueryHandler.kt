@@ -244,20 +244,18 @@ class PersonQueryHandler(
             aktorId = snapshot.aktorId,
             fodselsnummer = identitetsnummer.value,
             andreFodselsnummer =
-                daos.personApiDao
-                    .finnFødselsnumre(personEntity.aktørId)
-                    .toSet()
-                    .filterNot { fnr -> fnr == identitetsnummer.value }
-                    .map { fnr ->
+                transaction.personRepository
+                    .finnAlleMedAktørId(personEntity.aktørId)
+                    .asSequence()
+                    .map(Person::id)
+                    .filterNot { it == identitetsnummer }
+                    .distinct()
+                    .map {
                         ApiAnnetFodselsnummer(
-                            fodselsnummer = fnr,
-                            personPseudoId =
-                                transaction.personPseudoIdDao
-                                    .nyPersonPseudoId(
-                                        identitetsnummer = Identitetsnummer.fraString(fnr),
-                                    ).value,
+                            fodselsnummer = it.value,
+                            personPseudoId = transaction.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = it).value,
                         )
-                    },
+                    }.toList(),
             dodsdato = snapshot.dodsdato,
             personinfo = personEntity.tilApiPersoninfo(),
             enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),

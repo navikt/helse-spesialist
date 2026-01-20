@@ -17,35 +17,4 @@ class PgPersonApiDao internal constructor(
         """,
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { row -> row.string("data") }
-
-    override fun finnesPersonMedFødselsnummer(fødselsnummer: String) =
-        asSQL(
-            " SELECT 1 FROM person WHERE fødselsnummer = :fodselsnummer; ",
-            "fodselsnummer" to fødselsnummer,
-        ).singleOrNull { true } ?: false
-
-    override fun finnAktørId(fødselsnummer: String): String =
-        asSQL(
-            "SELECT aktør_id FROM person WHERE fødselsnummer = :fodselsnummer",
-            "fodselsnummer" to fødselsnummer,
-        ).single { it.string("aktør_id") }
-
-    override fun finnFødselsnumre(aktørId: String): List<String> =
-        asSQL(
-            " SELECT fødselsnummer FROM person WHERE aktør_id = :aktor_id; ",
-            "aktor_id" to aktørId,
-        ).list { it.string("fødselsnummer") }
-
-    override fun harDataNødvendigForVisning(fødselsnummer: String) =
-        asSQL(
-            """
-            select 1
-            from person p
-            join person_info pi on p.info_ref = pi.id
-            join egen_ansatt ea on ea.person_ref = p.id
-            join enhet e on p.enhet_ref = e.id
-            where p.fødselsnummer = :fodselsnummer
-            """.trimIndent(),
-            "fodselsnummer" to fødselsnummer,
-        ).singleOrNull { true } ?: false
 }

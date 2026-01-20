@@ -5,7 +5,6 @@ import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.Sekvensnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
@@ -67,7 +66,15 @@ class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
     }
 
     private fun assertHarTilgangsdata(fødselsnummer: String) {
-        val dao = daos.personApiDao
-        assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
+        assertEquals(
+            true,
+            sessionFactory.transactionalSessionScope {
+                it.personRepository.finn(
+                    Identitetsnummer.fraString(
+                        fødselsnummer
+                    )
+                )?.harDataNødvendigForVisning()
+            }
+        )
     }
 }
