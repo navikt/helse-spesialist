@@ -258,7 +258,7 @@ class PersonQueryHandler(
                     },
             dodsdato = snapshot.dodsdato,
             personinfo = personEntity.tilApiPersoninfo(),
-            enhet = daos.personApiDao.finnEnhet(identitetsnummer.value).let { ApiEnhet(it.id, it.navn) },
+            enhet = daos.personApiDao.finnEnhet(identitetsnummer.value).let { ApiEnhet(it.id) },
             tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag
@@ -756,7 +756,9 @@ class PersonQueryHandler(
 
                                                     is SnapshotBeregnetPeriode -> {
                                                         val periodetilstand =
-                                                            periode.periodetilstand.tilApiPeriodetilstand(behandlingIndex == 0)
+                                                            periode.periodetilstand.tilApiPeriodetilstand(
+                                                                behandlingIndex == 0,
+                                                            )
                                                         val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
                                                             if (behandlingIndex == 0) {
                                                                 daos.oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
@@ -776,7 +778,12 @@ class PersonQueryHandler(
                                                                 )
                                                             } else {
                                                                 val handlinger =
-                                                                    listOf(ApiHandling(ApiPeriodehandling.UTBETALE, true))
+                                                                    listOf(
+                                                                        ApiHandling(
+                                                                            ApiPeriodehandling.UTBETALE,
+                                                                            true,
+                                                                        ),
+                                                                    )
                                                                 handlinger +
                                                                     when (oppgaveDto?.kanAvvises) {
                                                                         true ->
@@ -907,8 +914,9 @@ class PersonQueryHandler(
                                                                                     kommentarer =
                                                                                         it.dialogRef?.let { dialogRef ->
                                                                                             daos.notatApiDao
-                                                                                                .finnKommentarer(dialogRef.toLong())
-                                                                                                .map { kommentar ->
+                                                                                                .finnKommentarer(
+                                                                                                    dialogRef.toLong(),
+                                                                                                ).map { kommentar ->
                                                                                                     ApiKommentar(
                                                                                                         id = kommentar.id,
                                                                                                         tekst = kommentar.tekst,

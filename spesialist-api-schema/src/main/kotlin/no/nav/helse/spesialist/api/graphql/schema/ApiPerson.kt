@@ -51,7 +51,6 @@ data class ApiUnntattFraAutomatiskGodkjenning(
 @GraphQLName("Enhet")
 data class ApiEnhet(
     val id: String,
-    val navn: String,
 )
 
 @Serializable

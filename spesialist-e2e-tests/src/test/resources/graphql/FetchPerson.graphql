@@ -591,7 +591,6 @@ fragment person on Person {
     dodsdato
     enhet {
         id
-        navn
         __typename
     }
     infotrygdutbetalinger {

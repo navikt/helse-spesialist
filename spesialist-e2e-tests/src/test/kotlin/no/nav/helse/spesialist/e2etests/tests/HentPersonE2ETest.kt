@@ -45,7 +45,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
       "dodsdato" : null,
       "enhet" : {
         "id" : "0301",
-        "navn" : "Oslo",
         "__typename" : "Enhet"
       },
       "infotrygdutbetalinger" : [ {
