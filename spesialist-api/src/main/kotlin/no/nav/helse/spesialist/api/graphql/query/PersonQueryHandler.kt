@@ -258,7 +258,7 @@ class PersonQueryHandler(
                     },
             dodsdato = snapshot.dodsdato,
             personinfo = personEntity.tilApiPersoninfo(),
-            enhet = daos.personApiDao.finnEnhet(identitetsnummer.value).let { ApiEnhet(it.id) },
+            enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),
             tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag

@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
@@ -11,12 +10,6 @@ class PgPersonApiDao internal constructor(
     dataSource: DataSource,
 ) : QueryRunner by MedDataSource(dataSource),
     PersonApiDao {
-    override fun finnEnhet(fødselsnummer: String) =
-        asSQL(
-            " SELECT id, navn from enhet WHERE id = (SELECT enhet_ref FROM person where fødselsnummer = :fodselsnummer); ",
-            "fodselsnummer" to fødselsnummer,
-        ).single { row -> EnhetDto(row.string("id"), row.string("navn")) }
-
     override fun finnInfotrygdutbetalinger(fødselsnummer: String) =
         asSQL(
             """ SELECT data FROM infotrygdutbetalinger

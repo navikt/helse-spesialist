@@ -1,10 +1,6 @@
 package no.nav.helse.db.api
 
-import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
-
 interface PersonApiDao {
-    fun finnEnhet(fødselsnummer: String): EnhetDto
-
     fun finnInfotrygdutbetalinger(fødselsnummer: String): String?
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean

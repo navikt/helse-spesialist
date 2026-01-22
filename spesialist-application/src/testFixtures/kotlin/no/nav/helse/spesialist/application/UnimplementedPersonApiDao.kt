@@ -1,12 +1,8 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 
 class UnimplementedPersonApiDao : PersonApiDao {
-    override fun finnEnhet(fødselsnummer: String): EnhetDto {
-        TODO("Not yet implemented")
-    }
 
     override fun finnInfotrygdutbetalinger(fødselsnummer: String): String? {
         TODO("Not yet implemented")
