@@ -31,7 +31,18 @@ class Vedtaksperioder {
                 @Resource("kommentarer")
                 class Kommentarer(
                     val parent: NotatId,
-                )
+                ) {
+                    @Resource("{kommentarId}")
+                    class KommentarId(
+                        val parent: Kommentarer,
+                        val kommentarId: Int,
+                    ) {
+                        @Resource("feilregistrer")
+                        class Feilregistrer(
+                            val parent: KommentarId,
+                        )
+                    }
+                }
             }
         }
 
