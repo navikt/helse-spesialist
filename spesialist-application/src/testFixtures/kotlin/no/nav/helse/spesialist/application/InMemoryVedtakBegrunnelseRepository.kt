@@ -10,7 +10,7 @@ class InMemoryVedtakBegrunnelseRepository : VedtakBegrunnelseRepository,
     override fun finn(spleisBehandlingId: SpleisBehandlingId): VedtakBegrunnelse? =
         alle().find { it.spleisBehandlingId == spleisBehandlingId }
 
-    override fun tildelIder(root: VedtakBegrunnelse) {
+    override fun tildelIderSomMangler(root: VedtakBegrunnelse) {
         if (!root.harFåttTildeltId())
             root.tildelId(VedtakBegrunnelseId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
     }

@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.Sekvensnummer
 
 class InMemoryOpptegnelseRepository : OpptegnelseRepository,
     AbstractLateIdInMemoryRepository<Sekvensnummer, Opptegnelse>() {
-    override fun tildelIder(root: Opptegnelse) {
+    override fun tildelIderSomMangler(root: Opptegnelse) {
         if (!root.harFåttTildeltId())
             root.tildelId(Sekvensnummer((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
     }

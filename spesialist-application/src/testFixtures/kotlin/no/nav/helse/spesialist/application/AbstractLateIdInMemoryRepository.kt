@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.ddd.ValueObject
 abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateIdAggregateRoot<IDTYPE>>() {
     private val data = mutableListOf<T>()
 
-    protected abstract fun tildelIder(root: T)
+    protected abstract fun tildelIderSomMangler(root: T)
 
     protected abstract fun deepCopy(original: T): T
 
@@ -17,14 +17,15 @@ abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateId
     fun alle(): List<T> = data.map(::deepCopy)
 
     fun lagre(root: T) {
-        if (root.harFåttTildeltId()) {
-            val index = data.indexOfFirst { it.id() == root.id() }
-            data.remove(root)
-            data.add(index, deepCopy(root))
+        val index = if (root.harFåttTildeltId()) {
+            data.indexOfFirst { it.id() == root.id() }.also {
+                data.remove(root)
+            }
         } else {
-            tildelIder(root)
-            data.add(deepCopy(root))
+            data.size
         }
+        tildelIderSomMangler(root)
+        data.add(index, deepCopy(root))
     }
 
     fun lagreAlle(roots: Collection<T>) {

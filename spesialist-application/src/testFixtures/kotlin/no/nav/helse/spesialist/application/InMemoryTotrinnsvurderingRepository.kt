@@ -13,7 +13,7 @@ class InMemoryTotrinnsvurderingRepository : TotrinnsvurderingRepository,
     AbstractLateIdInMemoryRepository<TotrinnsvurderingId, Totrinnsvurdering>() {
     override fun finnAktivForPerson(fødselsnummer: String) = alle().find { it.fødselsnummer == fødselsnummer }
 
-    override fun tildelIder(root: Totrinnsvurdering) {
+    override fun tildelIderSomMangler(root: Totrinnsvurdering) {
         if (!root.harFåttTildeltId())
             root.tildelId(genererTotrinnsvurderingId())
         root.overstyringer.forEach { overstyring ->

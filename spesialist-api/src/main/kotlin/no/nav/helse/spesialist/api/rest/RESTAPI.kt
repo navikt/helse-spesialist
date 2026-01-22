@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostKommentarBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostNotatBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PutFeilregistrerNotatBehandler
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -76,6 +77,7 @@ fun Routing.restRoutes(
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
             post(PostNotatBehandler(), restAdapter)
+            post(PostKommentarBehandler(), restAdapter)
             put(PutFeilregistrerNotatBehandler(), restAdapter)
 
             get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)

@@ -8,7 +8,7 @@ class InMemoryNotatRepository : NotatRepository, AbstractLateIdInMemoryRepositor
     override fun finnAlleForVedtaksperiode(vedtaksperiodeId: UUID): List<Notat> =
         alle().filter { it.vedtaksperiodeId == vedtaksperiodeId }
 
-    override fun tildelIder(root: Notat) {
+    override fun tildelIderSomMangler(root: Notat) {
         if (!root.harFåttTildeltId())
             root.tildelId(NotatId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
     }

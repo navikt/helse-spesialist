@@ -26,3 +26,13 @@ data class ApiNotatRequest(
 data class ApiNotatResponse(
     val id: Int,
 )
+
+@Serializable
+data class ApiKommentarRequest(
+    val tekst: String,
+)
+
+@Serializable
+data class ApiKommentarResponse(
+    val id: Int,
+)

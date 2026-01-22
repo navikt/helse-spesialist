@@ -8,9 +8,16 @@ import no.nav.helse.spesialist.domain.KommentarId
 class InMemoryDialogRepository : DialogRepository, AbstractLateIdInMemoryRepository<DialogId, Dialog>() {
     override fun finnForKommentar(id: KommentarId): Dialog? = alle().find { id in it.kommentarer.map(Kommentar::id) }
 
-    override fun tildelIder(root: Dialog) {
+    override fun tildelIderSomMangler(root: Dialog) {
         if (!root.harFåttTildeltId())
             root.tildelId(DialogId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
+        root.kommentarer.forEach { kommentar ->
+            if (!kommentar.harFåttTildeltId()) {
+                kommentar.tildelId(KommentarId(((alle().flatMap { dialog ->
+                    dialog.kommentarer.filterNot { it.harFåttTildeltId() }.map(Kommentar::id)
+                }).maxOfOrNull { it.value } ?: 0) + 1))
+            }
+        }
     }
 
     override fun deepCopy(original: Dialog): Dialog = Dialog.Factory.fraLagring(

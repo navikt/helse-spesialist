@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.PåVentId
 
 class InMemoryPåVentRepository : PåVentRepository, AbstractLateIdInMemoryRepository<PåVentId, PåVent>() {
-    override fun tildelIder(root: PåVent) {
+    override fun tildelIderSomMangler(root: PåVent) {
         if (!root.harFåttTildeltId())
             root.tildelId(PåVentId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
     }

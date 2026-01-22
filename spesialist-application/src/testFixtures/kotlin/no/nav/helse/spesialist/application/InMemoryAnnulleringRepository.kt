@@ -21,7 +21,7 @@ class InMemoryAnnulleringRepository : AnnulleringRepository, AbstractLateIdInMem
     ): Annullering? =
         alle().find { it.arbeidsgiverFagsystemId == arbeidsgiverFagsystemId || it.personFagsystemId == personFagsystemId }
 
-    override fun tildelIder(root: Annullering) {
+    override fun tildelIderSomMangler(root: Annullering) {
         if (!root.harFåttTildeltId())
             root.tildelId(AnnulleringId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
     }
