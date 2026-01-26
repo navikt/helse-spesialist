@@ -35,9 +35,8 @@ class Totrinnsvurdering private constructor(
     tilstand: TotrinnsvurderingTilstand,
     vedtaksperiodeForkastet: Boolean,
 ) : LateIdAggregateRoot<TotrinnsvurderingId>(id) {
-    private val _overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
     val overstyringer: List<Overstyring>
-        get() = _overstyringer
+        field = overstyringer.toMutableList()
 
     var saksbehandler: SaksbehandlerOid? = saksbehandler
         private set
@@ -66,7 +65,7 @@ class Totrinnsvurdering private constructor(
 
     fun nyOverstyring(overstyring: Overstyring) =
         oppdatering {
-            _overstyringer.add(overstyring)
+            overstyringer.add(overstyring)
         }
 
     fun sendTilBeslutter(
@@ -94,7 +93,7 @@ class Totrinnsvurdering private constructor(
     fun ferdigstill() =
         oppdatering {
             tilstand = GODKJENT
-            this._overstyringer.forEach { it.ferdigstill() }
+            this.overstyringer.forEach { it.ferdigstill() }
         }
 
     fun vedtaksperiodeForkastet(alleForkastedeVedtaksperiodeIder: List<UUID>) =
@@ -103,7 +102,7 @@ class Totrinnsvurdering private constructor(
             // før man kommer ut av brukPersonHvisFinnes scopet, så totrinnsvurderingen som hentes i
             // AvbrytTotrinnsvurderingCommand får med seg overstyringer som er knyttet til vedtaksperioder som nettopp
             // kan ha blitt forkastet.
-            if (_overstyringer.all { it.vedtaksperiodeId in alleForkastedeVedtaksperiodeIder }) {
+            if (overstyringer.all { it.vedtaksperiodeId in alleForkastedeVedtaksperiodeIder }) {
                 vedtaksperiodeForkastet = true
             }
         }

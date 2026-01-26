@@ -22,8 +22,8 @@ value class TilkommenInntektId(
 class TilkommenInntekt private constructor(
     opprettetEvent: TilkommenInntektOpprettetEvent,
 ) : AggregateRoot<TilkommenInntektId>(opprettetEvent.metadata.tilkommenInntektId) {
-    private val _events: MutableList<TilkommenInntektEvent> = mutableListOf(opprettetEvent)
-    val events: List<TilkommenInntektEvent> get() = _events
+    val events: List<TilkommenInntektEvent>
+        field = mutableListOf<TilkommenInntektEvent>(opprettetEvent)
 
     val fødselsnummer: String = opprettetEvent.fødselsnummer
     var totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.metadata.totrinnsvurderingId
@@ -182,7 +182,7 @@ class TilkommenInntekt private constructor(
         }
         this.totrinnsvurderingId = event.metadata.totrinnsvurderingId
         this.versjon = event.metadata.sekvensnummer
-        this._events.add(event)
+        this.events.add(event)
     }
 
     private fun håndterEndringer(endringer: TilkommenInntektEvent.Endringer) {

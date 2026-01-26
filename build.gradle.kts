@@ -43,6 +43,9 @@ allprojects {
 subprojects {
     kotlin {
         jvmToolchain(21)
+        compilerOptions {
+            freeCompilerArgs.add("-Xexplicit-backing-fields")
+        }
     }
     tasks {
         named<Test>("test") {
