@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application.logg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+val teamLogs: Logger = LoggerFactory.getLogger("tjenestekall")
 inline val <reified T> T.logg: Logger
     get() = LoggerFactory.getLogger(T::class.java)
 
@@ -12,7 +12,7 @@ inline fun <reified T> T.loggInfo(
     sikkerloggDetaljer: String = "",
 ) {
     logg.info(melding)
-    sikkerlogg.info(
+    teamLogs.info(
         buildString {
             append(melding)
             if (sikkerloggDetaljer.isNotEmpty()) {
@@ -28,7 +28,7 @@ inline fun <reified T> T.loggWarn(
     sikkerloggDetaljer: String = "",
 ) {
     logg.warn(melding)
-    sikkerlogg.warn(
+    teamLogs.warn(
         buildString {
             append(melding)
             if (sikkerloggDetaljer.isNotEmpty()) {
@@ -44,7 +44,7 @@ inline fun <reified T> T.loggDebug(
     sikkerloggDetaljer: String = "",
 ) {
     logg.debug(melding)
-    sikkerlogg.debug(
+    teamLogs.debug(
         buildString {
             append(melding)
             if (sikkerloggDetaljer.isNotEmpty()) {
@@ -57,16 +57,16 @@ inline fun <reified T> T.loggDebug(
 
 inline fun <reified T> T.loggThrowable(
     message: String,
-    securelogDetails: String = "",
+    teamLogsDetails: String = "",
     throwable: Throwable,
 ) {
     logg.error(message)
-    sikkerlogg.error(
+    teamLogs.error(
         buildString {
             append(message)
-            if (securelogDetails.isNotEmpty()) {
+            if (teamLogsDetails.isNotEmpty()) {
                 append(" - ")
-                append(securelogDetails)
+                append(teamLogsDetails)
             }
         },
         throwable,
@@ -75,15 +75,15 @@ inline fun <reified T> T.loggThrowable(
 
 inline fun <reified T> T.loggErrorWithNoThrowable(
     message: String,
-    securelogDetails: String = "",
+    teamLogsDetails: String = "",
 ) {
     logg.error(message)
-    sikkerlogg.error(
+    teamLogs.error(
         buildString {
             append(message)
-            if (securelogDetails.isNotEmpty()) {
+            if (teamLogsDetails.isNotEmpty()) {
                 append(" - ")
-                append(securelogDetails)
+                append(teamLogsDetails)
             }
         },
     )
@@ -98,16 +98,16 @@ inline fun <reified T> T.loggThrowable(
 
 inline fun <reified T> T.loggWarnThrowable(
     message: String,
-    securelogDetails: String = "",
+    teamLogsDetails: String = "",
     throwable: Throwable,
 ) {
     logg.warn(message)
-    sikkerlogg.warn(
+    teamLogs.warn(
         buildString {
             append(message)
-            if (securelogDetails.isNotEmpty()) {
+            if (teamLogsDetails.isNotEmpty()) {
                 append(" - ")
-                append(securelogDetails)
+                append(teamLogsDetails)
             }
         },
         throwable,

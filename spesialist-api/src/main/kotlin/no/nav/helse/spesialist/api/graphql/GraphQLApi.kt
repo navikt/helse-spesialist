@@ -48,7 +48,7 @@ import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import java.time.Duration
 
@@ -158,7 +158,7 @@ fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
         loggFeil(result)
 
         val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
-        sikkerlogg.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
+        teamLogs.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
         call.respond(result)
     }
 }
@@ -166,7 +166,7 @@ fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
 private fun loggFeil(result: GraphQLServerResponse) {
     if (result is GraphQLResponse<*>) {
         result.errors.takeUnless { it.isNullOrEmpty() }?.let {
-            sikkerlogg.warn("GraphQL-respons inneholder feil: ${it.joinToString()}")
+            teamLogs.warn("GraphQL-respons inneholder feil: ${it.joinToString()}")
         }
     }
 }

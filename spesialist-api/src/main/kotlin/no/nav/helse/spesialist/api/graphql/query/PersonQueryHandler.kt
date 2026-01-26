@@ -111,7 +111,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarn
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
@@ -220,7 +220,7 @@ class PersonQueryHandler(
             } catch (e: Exception) {
                 loggThrowable(
                     message = "Klarte ikke hente snapshot fra Spleis",
-                    securelogDetails = "identitetsnummer=${identitetsnummer.value}",
+                    teamLogsDetails = "identitetsnummer=${identitetsnummer.value}",
                     throwable = e,
                 )
                 klarteIkkeHentePerson(saksbehandler, identitetsnummer)
@@ -1166,7 +1166,7 @@ class PersonQueryHandler(
                 " operation=PersonQuery" +
                 suffix
         auditLog.atLevel(level).log(message)
-        sikkerlogg.debug("audit-logget: $level - $message")
+        teamLogs.debug("audit-logget: $level - $message")
     }
 }
 

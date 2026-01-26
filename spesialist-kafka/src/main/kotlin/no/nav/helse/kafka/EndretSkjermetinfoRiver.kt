@@ -9,7 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 
 class EndretSkjermetinfoRiver(
     private val meldingMediator: MeldingMediator,
@@ -34,7 +34,7 @@ class EndretSkjermetinfoRiver(
         try {
             fødselsnummer.toLong()
         } catch (_: Exception) {
-            sikkerlogg.warn("Mottok ugyldig fødselsnummer $fødselsnummer, skipper videre håndtering")
+            teamLogs.warn("Mottok ugyldig fødselsnummer $fødselsnummer, skipper videre håndtering")
             return
         }
 

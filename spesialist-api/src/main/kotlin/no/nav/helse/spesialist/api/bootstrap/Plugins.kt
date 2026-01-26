@@ -47,7 +47,7 @@ import no.nav.helse.spesialist.api.serialization.LocalDateIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateTimeIsoSerializer
 import no.nav.helse.spesialist.api.serialization.UUIDStringSerializer
 import no.nav.helse.spesialist.application.logg.loggThrowable
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import org.slf4j.event.Level
 import java.math.BigDecimal
 import java.time.Instant
@@ -66,7 +66,7 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
     install(StatusPages) { configureStatusPages() }
     install(CallLogging) {
         disableDefaultColors()
-        logger = sikkerlogg
+        logger = teamLogs
         level = Level.INFO
         callIdMdc("callId")
         filter { call ->
@@ -77,7 +77,7 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, UnitFriendlyJacksonConverter(objectMapper))
     }
-    requestResponseTracing(sikkerlogg)
+    requestResponseTracing(teamLogs)
     if (eksponerOpenApi) {
         install(OpenApi) { configureOpenApi() }
     }

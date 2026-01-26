@@ -24,7 +24,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 import java.time.Duration
@@ -75,7 +75,7 @@ class EntraIDAccessTokenGenerator(
                                         )
                                     }
                                 if (response.status != HttpStatusCode.OK) {
-                                    sikkerlogg.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
+                                    teamLogs.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
                                 }
                                 response.body()
                             } catch (e: Exception) {

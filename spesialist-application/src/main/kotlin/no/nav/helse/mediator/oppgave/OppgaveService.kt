@@ -15,7 +15,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter.Feil
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -57,7 +57,7 @@ class OppgaveService(
         egenskaper: Set<Egenskap>,
     ) {
         logg.info("Oppretter saksbehandleroppgave")
-        sikkerlogg.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
+        teamLogs.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgavemelder = Oppgavemelder(fødselsnummer, meldingPubliserer)
         val oppgave =
@@ -148,17 +148,17 @@ class OppgaveService(
     ) {
         val oppgaveId =
             oppgaveDao.finnOppgaveId(fødselsnummer) ?: run {
-                sikkerlogg.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
+                teamLogs.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
                 return
             }
         oppgave(oppgaveId) {
             if (erEgenAnsatt) {
                 logg.info("Legger til egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
-                sikkerlogg.info("Legger til egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
+                teamLogs.info("Legger til egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
                 leggTilEgenAnsatt()
             } else {
                 logg.info("Fjerner egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
-                sikkerlogg.info("Fjerner egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
+                teamLogs.info("Fjerner egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
                 fjernEgenAnsatt()
             }
         }
@@ -192,7 +192,7 @@ class OppgaveService(
             reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
         } catch (e: SQLException) {
             logg.warn("Kunne ikke reservere person. Se sikker logg for mer informasjon")
-            sikkerlogg.warn("Kunne ikke reservere person", e)
+            teamLogs.warn("Kunne ikke reservere person", e)
         }
     }
 
@@ -222,7 +222,7 @@ class OppgaveService(
                     oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result)
                 } catch (manglerTilgang: ManglerTilgang) {
                     logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
-                    sikkerlogg.info(
+                    teamLogs.info(
                         "Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon",
                         manglerTilgang,
                     )

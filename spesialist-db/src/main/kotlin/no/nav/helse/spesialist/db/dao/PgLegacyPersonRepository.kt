@@ -9,7 +9,7 @@ import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.list
 
@@ -29,7 +29,7 @@ class PgLegacyPersonRepository(
             hentPerson(fødselsnummer) ?: run {
                 "Behandler ikke melding for ukjent person".let { melding ->
                     logg.info(melding)
-                    sikkerlogg.info("$melding med fødselsnummer={}", fødselsnummer)
+                    teamLogs.info("$melding med fødselsnummer={}", fødselsnummer)
                 }
                 return
             }

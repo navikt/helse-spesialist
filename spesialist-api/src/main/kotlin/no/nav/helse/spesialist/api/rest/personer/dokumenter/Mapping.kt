@@ -22,7 +22,7 @@ import no.nav.helse.spesialist.api.rest.ApiSporsmal
 import no.nav.helse.spesialist.api.rest.ApiSvar
 import no.nav.helse.spesialist.api.rest.ApiSvartype
 import no.nav.helse.spesialist.api.rest.ApiVisningskriterium
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 
 fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
     ApiDokumentInntektsmelding(
@@ -134,7 +134,7 @@ private fun String.tilNaturalytelse(): ApiNaturalytelse {
         "YRKEBILTJENESTLIGBEHOVLISTEPRIS" -> ApiNaturalytelse.YRKEBILTJENESTLIGBEHOVLISTEPRIS
         "YRKEBILTJENESTLIGBEHOVKILOMETER" -> ApiNaturalytelse.YRKEBILTJENESTLIGBEHOVKILOMETER
         else -> {
-            sikkerlogg.error(
+            teamLogs.error(
                 "Inntektsmelding har ny Naturalytelse som må støttes: {}, returnerer UKJENT enn så lenge",
                 this,
             )
@@ -165,7 +165,7 @@ private fun String.tilSoknadstype(): ApiSoknadstype {
         "REISETILSKUDD" -> ApiSoknadstype.Reisetilskudd
         "GRADERT_REISETILSKUDD" -> ApiSoknadstype.Gradert_reisetilskudd
         else -> {
-            sikkerlogg.error(
+            teamLogs.error(
                 "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge",
                 this,
             )
@@ -270,7 +270,7 @@ private fun String.tilSvartype(): ApiSvartype {
         "AAR_MAANED",
         -> ApiSvartype.AAR_MAANED
         else -> {
-            sikkerlogg.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
+            teamLogs.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
             return ApiSvartype.UKJENT
         }
     }
@@ -282,7 +282,7 @@ private fun String.tilVisningskriterium(): ApiVisningskriterium {
         "JA" -> ApiVisningskriterium.JA
         "CHECKED" -> ApiVisningskriterium.CHECKED
         else -> {
-            sikkerlogg.error(
+            teamLogs.error(
                 "Søknad har nytt Visningskriterium som må støttes: {}, returnerer UKJENT enn så lenge",
                 this,
             )

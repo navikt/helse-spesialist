@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
@@ -193,7 +193,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             if (feltverdi != null) {
                 val forventetVerdi = mapping(feltverdi.fra)
                 if (forventetVerdi != faktiskVerdi) {
-                    sikkerlogg.warn(
+                    teamLogs.warn(
                         "Feil / utdatert fra-verdi i request for $feltnavn." +
                             " Requesten forventet $feltnavn=$forventetVerdi," +
                             " men inntekten hadde $feltnavn=$faktiskVerdi",

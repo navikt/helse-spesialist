@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -77,7 +77,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
                 vedtaksperiodeId = request.initierendeVedtaksperiodeId,
             )
 
-        sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
+        teamLogs.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         transaksjon.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
 
         val totrinnsvurdering =

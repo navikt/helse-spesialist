@@ -23,7 +23,7 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import java.io.IOException
@@ -69,7 +69,7 @@ class SpleisClient(
         retries: Int,
     ): GraphQLClientResponse<T> =
         try {
-            sikkerlogg.info(
+            teamLogs.info(
                 "Henter nytt graphql-snapshot for {}",
                 StructuredArguments.keyValue("fødselsnummer", fnr),
             )
@@ -83,7 +83,7 @@ class SpleisClient(
                         delay(RETRY_INTERVAL)
                         execute(request, fnr, retries - 1)
                     } else {
-                        sikkerlogg.error(
+                        teamLogs.error(
                             "Gir opp etter $RETRIES forsøk på å hente graphql-snapshot for fødselsnummer: $fnr",
                             e,
                         )
@@ -92,7 +92,7 @@ class SpleisClient(
                 }
 
                 else -> {
-                    sikkerlogg.error("Kunne ikke hente graphql-snapshot for $fnr", e)
+                    teamLogs.error("Kunne ikke hente graphql-snapshot for $fnr", e)
                     throw e
                 }
             }
@@ -121,24 +121,24 @@ class SpleisClient(
         val responseBody = response.body<String>()
 
         if (loggRespons) {
-            sikkerlogg.trace("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+            teamLogs.trace("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
         }
 
         if (!response.status.isSuccess()) {
             logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
-            sikkerlogg.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+            teamLogs.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
         }
 
         val graphQLResponse = serializer.deserialize(responseBody, request.responseType())
 
         if (graphQLResponse.data == null && graphQLResponse.errors == null) {
             logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
-            sikkerlogg.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
+            teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
         }
 
         if (graphQLResponse.errors !== null) {
             logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
-            sikkerlogg.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
+            teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
         }
 
         return graphQLResponse

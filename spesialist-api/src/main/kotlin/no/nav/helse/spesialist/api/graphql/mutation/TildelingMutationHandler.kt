@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Saksbehandler
 
 class TildelingMutationHandler(
@@ -57,7 +57,7 @@ class TildelingMutationHandler(
 
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
-        sikkerlogg.error(message)
+        teamLogs.error(message)
         return graphqlErrorException(500, message)
     }
 

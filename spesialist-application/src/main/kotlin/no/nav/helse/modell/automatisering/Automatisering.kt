@@ -30,7 +30,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -326,7 +326,7 @@ internal class Automatisering(
             !utbetaling.erRevurdering() ||
                 (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
                     if (it) {
-                        sikkerlogg.info(
+                        teamLogs.info(
                             "Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering",
                         )
                     }

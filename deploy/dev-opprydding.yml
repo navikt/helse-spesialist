@@ -39,8 +39,6 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
-  secureLogs:
-    enabled: true
   envFrom:
     - secret: google-sql-spesialist-spesialist-spesialist-opprydding-b203ea44
   env:

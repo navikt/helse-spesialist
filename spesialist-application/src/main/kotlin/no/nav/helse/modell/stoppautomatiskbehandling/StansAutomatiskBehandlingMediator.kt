@@ -19,7 +19,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingStansAutomatiskBeh
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
@@ -67,7 +67,7 @@ class StansAutomatiskBehandlingMediator(
             val innslag = Historikkinnslag.automatiskBehandlingStanset()
             periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
         } else {
-            sikkerlogg.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
+            teamLogs.info("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret historikkinnslag om stans av automatisk behandling")
         }
     }
 

@@ -10,7 +10,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -53,11 +53,11 @@ class PersonAvstemmingRiver(
         if (antallBehandlingerISpesialist == antallBehandlingerISpleis) {
             val melding = "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer med antall behandlinger i Spesialist ($antallBehandlingerISpesialist)"
             logg.info(melding)
-            sikkerlogg.info("$melding for person med fødselsnummer $fødselsnummer")
+            teamLogs.info("$melding for person med fødselsnummer $fødselsnummer")
         } else {
             val melding = "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist)"
             logg.warn(melding)
-            sikkerlogg.warn("$melding for person med fødselsnummer $fødselsnummer")
+            teamLogs.warn("$melding for person med fødselsnummer $fødselsnummer")
         }
     }
 

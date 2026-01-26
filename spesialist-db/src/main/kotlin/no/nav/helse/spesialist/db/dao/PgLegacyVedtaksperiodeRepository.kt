@@ -6,7 +6,7 @@ import no.nav.helse.db.VedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import java.util.UUID
 
 class PgLegacyVedtaksperiodeRepository(
@@ -83,7 +83,7 @@ class PgLegacyVedtaksperiodeRepository(
                 builder.appendLine("Historiske behandlinger ble ikke endret")
             }
         }
-        sikkerlogg.info(builder.toString())
+        teamLogs.info(builder.toString())
     }
 
     private fun StringBuilder.diffMellomToBehandlinger(

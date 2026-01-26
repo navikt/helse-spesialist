@@ -4,7 +4,7 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import java.util.UUID
 
 internal class ReserverPersonHvisTildeltCommand(
@@ -23,7 +23,7 @@ internal class ReserverPersonHvisTildeltCommand(
                 tildeltSaksbehandler.oid
             }
 
-        sikkerlogg.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlerOid pga eksisterende tildeling")
+        teamLogs.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlerOid pga eksisterende tildeling")
         reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer)
 
         return true

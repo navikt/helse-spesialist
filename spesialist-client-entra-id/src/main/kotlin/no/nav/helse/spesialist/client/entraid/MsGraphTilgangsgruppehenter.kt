@@ -23,7 +23,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -53,7 +53,7 @@ class MsGraphTilgangsgruppehenter(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Either<Set<Tilgangsgruppe>, Tilgangsgruppehenter.Feil> {
-        sikkerlogg.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
+        teamLogs.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
         val (responseStatus, responseBody) =
             runBlocking {
                 val response =
@@ -78,7 +78,7 @@ class MsGraphTilgangsgruppehenter(
             }
 
         if (!responseStatus.isSuccess()) {
-            sikkerlogg.warn("Fikk kode ${responseStatus.value} fra MS Graph: $responseBody")
+            teamLogs.warn("Fikk kode ${responseStatus.value} fra MS Graph: $responseBody")
             if (responseStatus == HttpStatusCode.NotFound) {
                 val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
                 if (errorCode == "Request_ResourceNotFound") {

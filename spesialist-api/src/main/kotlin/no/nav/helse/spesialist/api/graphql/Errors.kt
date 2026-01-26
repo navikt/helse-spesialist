@@ -5,7 +5,7 @@ import graphql.GraphqlErrorException
 import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 
 internal fun forbiddenError(fødselsnummer: String): GraphqlErrorException =
     graphqlErrorException(
@@ -43,7 +43,7 @@ private fun <T> dataFetcherError(
     message: String,
     vararg extensions: Pair<String, Any>,
 ): DataFetcherResult<T> {
-    sikkerlogg.error("Returnerer $httpCode-feil for GraphQL-operasjon: $message")
+    teamLogs.error("Returnerer $httpCode-feil for GraphQL-operasjon: $message")
     return byggFeilrespons(graphqlErrorException(httpCode, message, *extensions))
 }
 

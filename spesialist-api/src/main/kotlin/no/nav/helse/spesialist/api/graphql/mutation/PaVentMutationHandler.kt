@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Saksbehandler
 import java.time.LocalDate
 
@@ -50,7 +50,7 @@ class PaVentMutationHandler(
                 graphqlErrorException(e.httpkode.value, "Oppgave tildelt noen andre", "tildeling" to e.tildeling),
             )
         } catch (e: Exception) {
-            sikkerlogg.error(e)
+            teamLogs.error(e)
             byggFeilrespons(getUpdateError(oppgaveId))
         }
     }
@@ -98,14 +98,14 @@ class PaVentMutationHandler(
             e.logger()
             byggFeilrespons(getUpdateError(oppgaveId))
         } catch (e: Exception) {
-            sikkerlogg.error(e)
+            teamLogs.error(e)
             byggFeilrespons(getUpdateError(oppgaveId))
         }
     }
 
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
-        sikkerlogg.error(message)
+        teamLogs.error(message)
         return graphqlErrorException(500, message)
     }
 }
