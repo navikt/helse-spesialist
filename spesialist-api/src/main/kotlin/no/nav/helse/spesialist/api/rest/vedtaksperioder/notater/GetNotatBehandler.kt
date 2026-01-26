@@ -55,7 +55,7 @@ class GetNotatBehandler : GetBehandler<Vedtaksperioder.VedtaksperiodeId.Notater.
     }
 
     override fun openApi(config: RouteConfig) {
-        config.tags("varsler")
+        config.tags("Notater")
     }
 }
 

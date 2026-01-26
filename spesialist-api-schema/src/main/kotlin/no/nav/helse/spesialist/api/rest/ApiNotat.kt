@@ -27,6 +27,7 @@ data class ApiNotatResponse(
     val id: Int,
 )
 
+@Serializable
 data class ApiNotat(
     val id: Int,
     val dialogRef: Int,
@@ -50,6 +51,7 @@ enum class ApiNotatType {
     OpphevStans,
 }
 
+@Serializable
 data class ApiKommentar(
     val id: Int,
     val tekst: String,
