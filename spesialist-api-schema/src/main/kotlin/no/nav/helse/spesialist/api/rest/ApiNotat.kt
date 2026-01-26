@@ -27,6 +27,37 @@ data class ApiNotatResponse(
     val id: Int,
 )
 
+data class ApiNotat(
+    val id: Int,
+    val dialogRef: Int,
+    val tekst: String,
+    val opprettet: LocalDateTime,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerEpost: String,
+    val saksbehandlerIdent: String,
+    val vedtaksperiodeId: UUID,
+    val feilregistrert: Boolean,
+    val feilregistrert_tidspunkt: LocalDateTime?,
+    val type: ApiNotatType,
+    val kommentarer: List<ApiKommentar>,
+)
+
+enum class ApiNotatType {
+    Retur,
+    Generelt,
+    PaaVent,
+    OpphevStans,
+}
+
+data class ApiKommentar(
+    val id: Int,
+    val tekst: String,
+    val opprettet: LocalDateTime,
+    val saksbehandlerident: String,
+    val feilregistrert_tidspunkt: LocalDateTime?,
+)
+
 @Serializable
 data class ApiKommentarRequest(
     val tekst: String,
