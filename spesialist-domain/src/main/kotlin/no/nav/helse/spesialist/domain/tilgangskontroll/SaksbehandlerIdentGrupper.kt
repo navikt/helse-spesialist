@@ -26,5 +26,7 @@ object SaksbehandlerIdentGrupper {
             "M136300",
             "A148751",
             "S161635",
+            "K104953",
+            "J150708",
         )
 }
