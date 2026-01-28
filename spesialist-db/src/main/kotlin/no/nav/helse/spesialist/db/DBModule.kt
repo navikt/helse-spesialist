@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db
 
-import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.spesialist.application.logg.loggInfo
 import javax.sql.DataSource
 
@@ -13,14 +12,15 @@ class DBModule(
         val password: String,
     )
 
-    private val _dataSource: HikariDataSource = DataSourceBuilder(configuration).build()
-    val dataSource: DataSource = _dataSource
+    val dataSource: DataSource
+        field = DataSourceBuilder(configuration).build()
+
     val daos = DBDaos(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
 
     fun shutdown() {
         loggInfo("Forsøker å lukke datasource...")
-        _dataSource.close()
+        dataSource.close()
         loggInfo("Lukket datasource")
     }
 }

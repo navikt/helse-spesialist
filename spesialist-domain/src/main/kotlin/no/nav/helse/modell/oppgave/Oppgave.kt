@@ -40,7 +40,9 @@ class Oppgave private constructor(
     tildeltTil: SaksbehandlerOid?,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
-    private val _egenskaper = egenskaper.toMutableSet()
+
+    val egenskaper: Set<Egenskap>
+        field = egenskaper.toMutableSet()
 
     var ferdigstiltAvOid = ferdigstiltAvOid
         private set
@@ -52,8 +54,6 @@ class Oppgave private constructor(
 
     var tildeltTil: SaksbehandlerOid? = tildeltTil
         private set
-
-    val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
 
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
@@ -103,7 +103,7 @@ class Oppgave private constructor(
             "Oppgave med {} forsøkes tildelt $saksbehandlerWrapper grunnet reservasjon.",
             kv("oppgaveId", id),
         )
-        if (_egenskaper.contains(STIKKPRØVE)) {
+        if (egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
@@ -115,36 +115,36 @@ class Oppgave private constructor(
     }
 
     fun sendTilBeslutter(beslutter: SaksbehandlerWrapper?) {
-        _egenskaper.remove(RETUR)
-        _egenskaper.add(BESLUTTER)
+        egenskaper.remove(RETUR)
+        egenskaper.add(BESLUTTER)
         tildeltTil = beslutter?.saksbehandler?.id
         oppgaveEndret()
     }
 
     fun sendIRetur(opprinneligSaksbehandlerWrapper: SaksbehandlerWrapper) {
-        _egenskaper.remove(BESLUTTER)
-        _egenskaper.add(RETUR)
+        egenskaper.remove(BESLUTTER)
+        egenskaper.add(RETUR)
         tildeltTil = opprinneligSaksbehandlerWrapper.saksbehandler.id
         oppgaveEndret()
     }
 
     fun leggTilEgenAnsatt() {
-        _egenskaper.add(EGEN_ANSATT)
+        egenskaper.add(EGEN_ANSATT)
         oppgaveEndret()
     }
 
     fun fjernEgenAnsatt() {
-        _egenskaper.remove(EGEN_ANSATT)
+        egenskaper.remove(EGEN_ANSATT)
         oppgaveEndret()
     }
 
     fun fjernTilbakedatert() {
-        _egenskaper.remove(TILBAKEDATERT)
+        egenskaper.remove(TILBAKEDATERT)
         oppgaveEndret()
     }
 
     fun fjernGosys() {
-        if (_egenskaper.remove(GOSYS)) {
+        if (egenskaper.remove(GOSYS)) {
             logg.info(
                 "Fjerner egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id),
@@ -155,7 +155,7 @@ class Oppgave private constructor(
     }
 
     fun leggTilGosys() {
-        if (_egenskaper.add(GOSYS)) {
+        if (egenskaper.add(GOSYS)) {
             logg.info(
                 "Legger til egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id),
@@ -175,7 +175,7 @@ class Oppgave private constructor(
         if (this.tildeltTil != null && !skalTildeles) {
             avmeld(saksbehandlerWrapper)
         }
-        _egenskaper.add(PÅ_VENT)
+        egenskaper.add(PÅ_VENT)
         oppgaveEndret()
     }
 
@@ -193,7 +193,7 @@ class Oppgave private constructor(
     }
 
     fun fjernFraPåVent() {
-        _egenskaper.remove(PÅ_VENT)
+        egenskaper.remove(PÅ_VENT)
         oppgaveEndret()
     }
 

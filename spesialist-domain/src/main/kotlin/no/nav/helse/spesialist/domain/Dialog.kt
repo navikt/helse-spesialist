@@ -14,9 +14,8 @@ class Dialog private constructor(
     val opprettetTidspunkt: LocalDateTime,
     kommentarer: List<Kommentar>,
 ) : LateIdAggregateRoot<DialogId>(id) {
-    private val _kommentarer: MutableList<Kommentar> = kommentarer.toMutableList()
     val kommentarer: List<Kommentar>
-        get() = _kommentarer
+        field = kommentarer.toMutableList()
 
     fun leggTilKommentar(
         tekst: String,
@@ -26,7 +25,7 @@ class Dialog private constructor(
             .ny(
                 tekst = tekst,
                 saksbehandlerident = saksbehandlerident,
-            ).also(_kommentarer::add)
+            ).also(kommentarer::add)
 
     fun finnKommentar(kommentarId: KommentarId): Kommentar? = kommentarer.firstOrNull { it.harFåttTildeltId() && it.id() == kommentarId }
 
