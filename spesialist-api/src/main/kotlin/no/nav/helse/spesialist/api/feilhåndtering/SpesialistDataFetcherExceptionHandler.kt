@@ -12,7 +12,7 @@ class SpesialistDataFetcherExceptionHandler : SimpleDataFetcherExceptionHandler(
         exception: Throwable,
     ) {
         val httpCode = (exception as? GraphqlErrorException)?.extensions?.get("code") as? Int
-        if (httpCode != null && (httpCode !in 400..499)) {
+        if (httpCode != null && (httpCode in 400..499)) {
             loggWarnThrowable("Returnerer klientfeil (kode $httpCode) for GraphQL-kall til ${error.path}", exception)
         } else {
             loggThrowable("Uhåndtert feil ved GraphQL-kall til ${error.path}", exception)
