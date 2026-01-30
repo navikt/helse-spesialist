@@ -6,14 +6,18 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class GrupperTilRollerTest {
+class TilgangsgrupperTilBrukerrollerTest {
 
     private val næringsdrivendeGruppeId = UUID.randomUUID()
     private val annenGruppeId1 = UUID.randomUUID()
     private val annenGruppeId2 = UUID.randomUUID()
 
     private val tilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(
-        næringsdrivendeBeta = listOf(næringsdrivendeGruppeId)
+        næringsdrivendeBeta = listOf(næringsdrivendeGruppeId),
+        beslutter = emptyList(),
+        egenAnsatt = emptyList(),
+        kode7 = emptyList(),
+        stikkprøve = emptyList()
     )
 
     @Test

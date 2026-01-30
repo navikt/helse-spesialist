@@ -88,6 +88,10 @@ fun main() {
                 tilgangsgrupperTilBrukerroller =
                     TilgangsgrupperTilBrukerroller(
                         næringsdrivendeBeta = env.getUUIDList("ROLLE_SELVSTENDIG_BETA"),
+                        beslutter = env.getUUIDList("ROLLE_BESLUTTER"),
+                        egenAnsatt = env.getUUIDList("ROLLE_EGEN_ANSATT"),
+                        kode7 = env.getUUIDList("ROLLE_KODE_7"),
+                        stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),
