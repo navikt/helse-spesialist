@@ -124,7 +124,7 @@ spec:
     - name: ROLLE_STIKKPROVE
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_SELVSTENDIG_BETA
-      value: {{ENTRAID_UUID_TBD}}
+      value: {{ENTRAID_UUID_TBD}},{{ENTRAID_UUID_NAIS_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL
