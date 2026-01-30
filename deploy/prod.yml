@@ -53,14 +53,14 @@ spec:
         extra:
           - "NAVident"
         groups:
-          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a" # saksbehandler (speil-brukere)
-          - id: "f787f900-6697-440d-a086-d5bb56e26a9c" # gammel hjemmemekka tbd-gruppe
-          - id: "c0227409-2085-4eb2-b487-c4ba270986a3" # nais-tbd
-          - id: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # kode 7
-          - id: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # egne ansatte
-          - id: "59f26eef-0a4f-4038-bf46-3a5b2f252155" # beslutter
-          - id: "e382880a-e12f-4d56-a92e-2283d7da43af" # stikkprøver
-          - id: "39c09f12-4a2f-44da-ab6a-ac43d680294c" # spesialsaker
+          - id: {{ENTRAID_UUID_SAKSBEHANDLER}}
+          - id: {{ENTRAID_UUID_TBD}}
+          - id: {{ENTRAID_UUID_NAIS_TBD}}
+          - id: {{ENTRAID_UUID_KODE_7}}
+          - id: {{ENTRAID_UUID_EGEN_ANSATT}}
+          - id: {{ENTRAID_UUID_BESLUTTER}}
+          - id: {{ENTRAID_UUID_STIKKPROVE}}
+          - id: {{ENTRAID_UUID_SPESIALSAKER}}
   accessPolicy:
     inbound:
       rules:
@@ -116,15 +116,15 @@ spec:
     - name: KAFKA_RESET_POLICY
       value: none
     - name: TILGANGSGRUPPE_UUID_BESLUTTER
-      value: 59f26eef-0a4f-4038-bf46-3a5b2f252155
+      value: {{ENTRAID_UUID_BESLUTTER}}
     - name: TILGANGSGRUPPE_UUID_EGEN_ANSATT
-      value: e750ceb5-b70b-4d94-b4fa-9d22467b786b
+      value: {{ENTRAID_UUID_EGEN_ANSATT}}
     - name: TILGANGSGRUPPE_UUID_KODE_7
-      value: 9ec6487d-f37a-4aad-a027-cd221c1ac32b
+      value: {{ENTRAID_UUID_KODE_7}}
     - name: TILGANGSGRUPPE_UUID_STIKKPROVE
-      value: e382880a-e12f-4d56-a92e-2283d7da43af
+      value: {{ENTRAID_UUID_STIKKPROVE}}
     - name: TILGANGSGRUPPE_UUID_TBD
-      value: f787f900-6697-440d-a086-d5bb56e26a9c
+      value: {{ENTRAID_UUID_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
