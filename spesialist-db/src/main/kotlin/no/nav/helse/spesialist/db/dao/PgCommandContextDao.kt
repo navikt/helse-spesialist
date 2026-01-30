@@ -139,7 +139,7 @@ class PgCommandContextDao private constructor(
     override fun tidsbrukForContext(contextId: UUID) =
         asSQL(
             """
-            select extract(milliseconds from (max(opprettet) - min(opprettet))) as tid_brukt_ms
+            select extract(epoch from (max(opprettet) - min(opprettet))) * 1_000 as tid_brukt_ms
             from command_context
             where context_id = :contextId
             """.trimIndent(),
