@@ -7,14 +7,12 @@ class TilgangsgruppeUuider(
     private val beslutterGruppeUuid: UUID,
     private val egenAnsattGruppeUuid: UUID,
     private val kode7GruppeUuid: UUID,
-    private val stikkprøveGruppeUuid: UUID,
 ) {
     fun uuidFor(tilgangsgruppe: Tilgangsgruppe): UUID =
         when (tilgangsgruppe) {
             Tilgangsgruppe.BESLUTTER -> beslutterGruppeUuid
             Tilgangsgruppe.EGEN_ANSATT -> egenAnsattGruppeUuid
             Tilgangsgruppe.KODE_7 -> kode7GruppeUuid
-            Tilgangsgruppe.STIKKPRØVE -> stikkprøveGruppeUuid
         }
 
     fun uuiderFor(grupper: Collection<Tilgangsgruppe>) = grupper.map(::uuidFor).toSet()

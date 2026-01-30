@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -223,7 +224,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerMedTilgang,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            brukerroller = emptySet()
+            brukerroller = setOf(Brukerrolle.STIKKPRØVE)
         )
 
         inspektør(oppgave) {

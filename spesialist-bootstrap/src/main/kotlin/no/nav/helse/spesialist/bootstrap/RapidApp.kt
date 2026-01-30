@@ -82,7 +82,6 @@ fun main() {
                         beslutterGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_BESLUTTER"),
                         egenAnsattGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_EGEN_ANSATT"),
                         kode7GruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_KODE_7"),
-                        stikkprøveGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_STIKKPROVE"),
                     ),
                 tilgangsgrupperTilBrukerroller =
                     TilgangsgrupperTilBrukerroller(

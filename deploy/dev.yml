@@ -111,8 +111,6 @@ spec:
       value: {{ENTRAID_UUID_TBD}}
     - name: TILGANGSGRUPPE_UUID_KODE_7
       value: {{ENTRAID_UUID_KODE_7_DEV}}
-    - name: TILGANGSGRUPPE_UUID_STIKKPROVE
-      value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_BESLUTTER
       value: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
     - name: ROLLE_EGEN_ANSATT

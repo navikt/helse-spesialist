@@ -412,7 +412,7 @@ class Oppgave private constructor(
             ) &&
                 when (it) {
                     BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
-                    STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
+                    STIKKPRØVE -> Brukerrolle.STIKKPRØVE in brukerroller
                     else -> true
                 }
         }

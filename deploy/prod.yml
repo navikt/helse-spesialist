@@ -121,8 +121,6 @@ spec:
       value: {{ENTRAID_UUID_EGEN_ANSATT}}
     - name: TILGANGSGRUPPE_UUID_KODE_7
       value: {{ENTRAID_UUID_KODE_7}}
-    - name: TILGANGSGRUPPE_UUID_STIKKPROVE
-      value: {{ENTRAID_UUID_STIKKPROVE}}
     - name: ROLLE_BESLUTTER
       value: {{ENTRAID_UUID_BESLUTTER}}
     - name: ROLLE_EGEN_ANSATT
