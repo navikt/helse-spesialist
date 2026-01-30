@@ -16,6 +16,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.UUID
@@ -57,6 +58,7 @@ class RestAdapterTest {
                 tilgangsgruppeUuider = IntegrationTestFixture.tilgangsgruppeUuider,
                 meldingPubliserer = integrationTestFixture.meldingPubliserer,
                 versjonAvKode = "0.0.0",
+                tilgangsgrupperTilBrukerroller = IntegrationTestFixture.tilgangsgrupperTilBrukerroller
             )
 
         runBlocking {
@@ -75,6 +77,7 @@ class RestAdapterTest {
             saksbehandler: Saksbehandler,
             tilgangsgrupper: Set<Tilgangsgruppe>,
             transaksjon: SessionContext,
+            brukerroller: Set<Brukerrolle>,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
 
         override fun openApi(config: RouteConfig) {}

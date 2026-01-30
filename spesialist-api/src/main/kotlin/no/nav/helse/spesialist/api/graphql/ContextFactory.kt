@@ -7,10 +7,12 @@ import graphql.GraphQLContext
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
+import no.nav.helse.spesialist.api.graphql.ContextValues.BRUKERROLLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -18,11 +20,13 @@ import java.util.UUID
 
 enum class ContextValues {
     TILGANGSGRUPPER,
+    BRUKERROLLER,
     SAKSBEHANDLER,
 }
 
 class ContextFactory(
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
+    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) : KtorGraphQLContextFactory() {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
         val jwt =
@@ -33,9 +37,14 @@ class ContextFactory(
                 }
             ).payload
 
+        val gruppeUuider = jwt.gruppeUuider()
         return mapOf(
-            TILGANGSGRUPPER to tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider()),
+            TILGANGSGRUPPER to tilgangsgruppeUuider.grupperFor(gruppeUuider),
             SAKSBEHANDLER to jwt.tilSaksbehandler(),
+            BRUKERROLLER to
+                tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(
+                    gruppeUuider,
+                ),
         ).toGraphQLContext()
     }
 

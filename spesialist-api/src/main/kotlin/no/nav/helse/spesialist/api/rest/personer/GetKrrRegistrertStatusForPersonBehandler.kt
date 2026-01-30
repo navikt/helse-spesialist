@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetKrrRegistrertStatusForPersonBehandler(
@@ -24,6 +25,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        brukerroller: Set<Brukerrolle>,
     ): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
         val personId = resource.parent.pseudoId
         val pseudoId = PersonPseudoId.fraString(personId)

@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter.Feil
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.sql.SQLException
 import java.util.UUID
@@ -209,7 +210,7 @@ class OppgaveService(
             }
 
         when (val result = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id)) {
-            is Either.Failure<Set<Tilgangsgruppe>, Feil> -> {
+            is Either.Failure<Pair<Set<Tilgangsgruppe>, Set<Brukerrolle>>, Feil> -> {
                 when (result.error) {
                     Feil.SaksbehandlerFinnesIkke -> {
                         logg.info("Saksbehandler personen er reservert til eksisterer ikke (lenger). Tildeler ikke oppgaven.")
@@ -217,9 +218,9 @@ class OppgaveService(
                 }
             }
 
-            is Either.Success<Set<Tilgangsgruppe>, Feil> -> {
+            is Either.Success<Pair<Set<Tilgangsgruppe>, Set<Brukerrolle>>, Feil> -> {
                 try {
-                    oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result)
+                    oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result.first, result.result.second)
                 } catch (manglerTilgang: ManglerTilgang) {
                     logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
                     teamLogs.info(

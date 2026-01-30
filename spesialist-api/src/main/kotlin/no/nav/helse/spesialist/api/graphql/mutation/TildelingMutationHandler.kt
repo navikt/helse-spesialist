@@ -29,6 +29,7 @@ class TildelingMutationHandler(
                 TildelOppgave(oppgaveId = oppgaveId.toLong()),
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
             byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.id.value))
         } catch (e: OppgaveTildeltNoenAndre) {
@@ -47,6 +48,7 @@ class TildelingMutationHandler(
                 handlingFraApi = AvmeldOppgave(oppgaveId = oppgaveId.toLong()),
                 saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
             byggRespons(true)
         } catch (_: OppgaveIkkeTildelt) {

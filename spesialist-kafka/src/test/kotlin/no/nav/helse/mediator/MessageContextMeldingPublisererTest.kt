@@ -203,7 +203,8 @@ internal class MessageContextMeldingPublisererTest {
         val beslutter = SaksbehandlerWrapper(lagSaksbehandler())
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandler,
-            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            brukerroller = emptySet()
         )
         oppgave.sendTilBeslutter(beslutter)
 

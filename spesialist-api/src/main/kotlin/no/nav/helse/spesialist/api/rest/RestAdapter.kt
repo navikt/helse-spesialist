@@ -19,12 +19,15 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarnThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class RestAdapter(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
+    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val meldingPubliserer: MeldingPubliserer,
     private val versjonAvKode: String,
 ) {
@@ -35,12 +38,13 @@ class RestAdapter(
         call: RoutingCall,
         behandler: GetBehandler<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, _ ->
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, _, brukerroller ->
             behandler.behandle(
                 resource = resource,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
+                brukerroller = brukerroller,
             )
         }
     }
@@ -50,7 +54,7 @@ class RestAdapter(
         call: RoutingCall,
         behandler: DeleteBehandler<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox ->
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox, _ ->
             behandler.behandle(
                 resource = resource,
                 saksbehandler = saksbehandler,
@@ -67,7 +71,7 @@ class RestAdapter(
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
         val request: REQUEST = call.receive()
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox ->
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox, _ ->
             behandler.behandle(
                 resource = resource,
                 request = request,
@@ -81,7 +85,7 @@ class RestAdapter(
 
     suspend fun <RESPONSE, ERROR : ApiErrorCode> wrapOgDeleger(
         call: RoutingCall,
-        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox) -> RestResponse<RESPONSE, ERROR>,
+        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox, Set<Brukerrolle>) -> RestResponse<RESPONSE, ERROR>,
     ) {
         val jwt =
             (
@@ -92,7 +96,8 @@ class RestAdapter(
             ).payload
 
         val saksbehandler = jwt.tilSaksbehandler()
-        val tilgangsgrupper = tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider())
+        val tilgangsgruppeUuider = jwt.gruppeUuider()
+        val tilgangsgrupper = this@RestAdapter.tilgangsgruppeUuider.grupperFor(tilgangsgruppeUuider)
 
         sessionFactory.transactionalSessionScope {
             it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler)
@@ -108,6 +113,7 @@ class RestAdapter(
                             tilgangsgrupper,
                             transaksjon,
                             outbox,
+                            tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(tilgangsgruppeUuider),
                         )
 
                     if (response is RestResponse.Error) {

@@ -63,6 +63,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
 
         inspektør(oppgave) {
@@ -79,6 +80,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandler,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            brukerroller = emptySet()
         )
 
         inspektør(oppgave) {
@@ -94,6 +96,7 @@ internal class OppgaveTest {
             oppgave.forsøkTildelingVedReservasjon(
                 saksbehandlerWrapper = saksbehandler(),
                 saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE_7),
+                brukerroller = emptySet()
             )
         }
 
@@ -109,6 +112,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
 
         inspektør(oppgave) {
@@ -124,6 +128,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
 
         inspektør(oppgave) {
@@ -138,6 +143,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
 
@@ -154,6 +160,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandler(oid = UUID.randomUUID()),
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
 
@@ -180,6 +187,7 @@ internal class OppgaveTest {
             oppgave.forsøkTildelingVedReservasjon(
                 saksbehandlerWrapper = saksbehandlerUtenTilgang,
                 saksbehandlerTilgangsgrupper = emptySet(),
+                brukerroller = emptySet()
             )
         }
 
@@ -197,6 +205,7 @@ internal class OppgaveTest {
             oppgave.forsøkTildeling(
                 saksbehandlerWrapper = saksbehandlerUtenTilgang,
                 saksbehandlerTilgangsgrupper = emptySet(),
+                brukerroller = emptySet()
             )
         }
 
@@ -214,6 +223,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerMedTilgang,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            brukerroller = emptySet()
         )
 
         inspektør(oppgave) {
@@ -229,11 +239,13 @@ internal class OppgaveTest {
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         assertThrows<OppgaveTildeltNoenAndre> {
             oppgave.forsøkTildeling(
                 saksbehandlerWrapper = saksbehandler(oid = UUID.randomUUID()),
                 saksbehandlerTilgangsgrupper = emptySet(),
+                brukerroller = emptySet()
             )
         }
 
@@ -281,6 +293,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.sendTilBeslutter(null)
         inspektør(oppgave) {
@@ -314,11 +327,13 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = beslutter,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            brukerroller = emptySet()
         )
         oppgave.sendIRetur(beslutter)
         inspektør(oppgave) {
@@ -475,6 +490,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
@@ -501,6 +517,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.leggPåVent(true, beslutter)
 
@@ -517,6 +534,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.leggPåVent(false, saksbehandlerUtenTilgang)
 
@@ -547,6 +565,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
@@ -566,6 +585,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = emptySet()
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
         oppgave.fjernFraPåVent()

@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.bootstrap
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
@@ -39,6 +40,7 @@ fun main() {
                 override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
                 override fun fullRefusjonEnArbeidsgiver(): Boolean = false
             },
+            tilgangsgrupperTilBrukerroller =  TilgangsgrupperTilBrukerroller(næringsdrivendeBeta = listOf())
         ),
         rapidsConnection = KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
             rapidApp.ktorSetupCallback(ktorApplication)

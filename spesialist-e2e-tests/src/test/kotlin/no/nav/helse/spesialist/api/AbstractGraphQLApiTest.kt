@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -118,7 +119,8 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         install(GraphQL) {
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
-                contextFactory = ContextFactory(tilgangsgruppeUuider = tilgangsgruppeUuider)
+                contextFactory = ContextFactory(tilgangsgruppeUuider = tilgangsgruppeUuider, tilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(næringsdrivendeBeta = listOf(
+                    UUID.randomUUID())))
             }
             schema(spesialistSchema::setup)
         }

@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 
 class ApiModule(
     private val configuration: Configuration,
@@ -29,6 +30,7 @@ class ApiModule(
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     data class Configuration(
         val clientId: String,
@@ -96,6 +98,7 @@ class ApiModule(
             sessionFactory = sessionFactory,
             meldingPubliserer = meldingPubliserer,
             krrRegistrertStatusHenter = krrRegistrertStatusHenter,
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
         )
     }
 }

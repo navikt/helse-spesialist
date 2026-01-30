@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetSoknadBehandler(
@@ -23,6 +24,7 @@ class GetSoknadBehandler(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        brukerroller: Set<Brukerrolle>,
     ): RestResponse<ApiSoknad, ApiGetSoknadErrorCode> {
         val personId = resource.parent.parent.parent.pseudoId
         val pseudoId = PersonPseudoId.fraString(personId)

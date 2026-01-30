@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -17,40 +17,41 @@ class OppgaveTilgangskontrollTest {
         assertFalse(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                saksbehandler = lagSaksbehandler(ident = "A123456"),
-                saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+                saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+                brukerroller = emptySet()
             )
         )
     }
 
-    @ParameterizedTest(name = "egenskap={0}, ident={1}, grupper={2}")
+    @ParameterizedTest(name = "egenskap={0}, grupper={1}, roller={2}")
     @MethodSource("kombinasjonerSomGirTilgang")
     fun `saksbehandler har tilgang til oppgaveegenskap`(
         egenskap: Egenskap,
-        ident: String,
-        grupper: Set<Tilgangsgruppe>
+        grupper: Set<Tilgangsgruppe>,
+        roller: Set<Brukerrolle>
     ) {
         assertTrue(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                saksbehandler = lagSaksbehandler(ident = ident),
-                saksbehandlerTilgangsgrupper = grupper
+                saksbehandlerTilgangsgrupper = grupper,
+                brukerroller = roller
             )
         )
     }
 
-    @ParameterizedTest(name = "egenskap={0}, ident={1}, grupper={2}")
+    @ParameterizedTest(name = "egenskap={0}, grupper={1}, roller={2}")
     @MethodSource("kombinasjonerSomIkkeGirTilgang")
     fun `saksbehandler har ikke tilgang til oppgaveegenskap`(
         egenskap: Egenskap,
-        ident: String,
-        grupper: Set<Tilgangsgruppe>
+        grupper: Set<Tilgangsgruppe>,
+        roller: Set<Brukerrolle>
+
     ) {
         assertFalse(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                saksbehandler = lagSaksbehandler(ident = ident),
-                saksbehandlerTilgangsgrupper = grupper
+                saksbehandlerTilgangsgrupper = grupper,
+                brukerroller = roller
             )
         )
     }
@@ -60,23 +61,19 @@ class OppgaveTilgangskontrollTest {
         private fun kombinasjonerSomGirTilgang(): Stream<Arguments> = Stream.of(
             Arguments.of(
                 Egenskap.FORTROLIG_ADRESSE,
-                "A123456",
-                setOf(Tilgangsgruppe.KODE_7)
+                setOf(Tilgangsgruppe.KODE_7),
+                emptySet<Brukerrolle>()
+
             ),
             Arguments.of(
                 Egenskap.EGEN_ANSATT,
-                "A123456",
-                setOf(Tilgangsgruppe.EGEN_ANSATT)
+                setOf(Tilgangsgruppe.EGEN_ANSATT),
+                emptySet<Brukerrolle>()
             ),
             Arguments.of(
                 Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                "A123456",
-                setOf(Tilgangsgruppe.TBD)
-            ),
-            Arguments.of(
-                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                "G155258", // En coach
-                emptySet<Tilgangsgruppe>()
+                emptySet<Tilgangsgruppe>(),
+                setOf(Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA)
             ),
         )
 
@@ -85,33 +82,33 @@ class OppgaveTilgangskontrollTest {
             Stream.of(
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
-                    "A123456",
-                    emptySet<Tilgangsgruppe>()
+                    emptySet<Tilgangsgruppe>(),
+                    emptySet<Brukerrolle>()
+
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
-                    "A123456",
-                    emptySet<Tilgangsgruppe>()
+                    emptySet<Tilgangsgruppe>(),
+                    emptySet<Brukerrolle>()
+
                 ),
                 Arguments.of(
                     Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    "A123456",
-                    emptySet<Tilgangsgruppe>()
+                    emptySet<Tilgangsgruppe>(),
+                    emptySet<Brukerrolle>()
+
                 ),
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
-                    "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.KODE_7).toSet()
+                    (Tilgangsgruppe.entries - Tilgangsgruppe.KODE_7).toSet(),
+                    emptySet<Brukerrolle>()
+
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
-                    "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.EGEN_ANSATT).toSet()
-                ),
-                Arguments.of(
-                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.TBD).toSet()
+                    (Tilgangsgruppe.entries - Tilgangsgruppe.EGEN_ANSATT).toSet(),
+                    emptySet<Brukerrolle>()
+
                 ),
             )
     }

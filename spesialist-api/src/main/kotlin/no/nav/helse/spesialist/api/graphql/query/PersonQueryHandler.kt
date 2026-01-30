@@ -126,6 +126,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -153,8 +154,9 @@ class PersonQueryHandler(
                         PersonPseudoId.fraString(personPseudoId)
                     }.getOrElse { badRequest("Ugyldig format på personPseudoId") },
                 transaction = transaction,
-                saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER),
-                tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER),
+                saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
         }
 
@@ -163,6 +165,7 @@ class PersonQueryHandler(
         transaction: SessionContext,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ): DataFetcherResult<ApiPerson?> {
         val identitetsnummer = (
             transaction.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
@@ -204,7 +207,7 @@ class PersonQueryHandler(
             oppgaveId?.let { oppgaveId ->
                 transaction.oppgaveRepository
                     .finn(oppgaveId)
-                    ?.kanSeesAv(saksbehandler, tilgangsgrupper)
+                    ?.kanSeesAv(brukerroller, tilgangsgrupper)
             } ?: true
 
         if (!harTilgangTilOppgave) {

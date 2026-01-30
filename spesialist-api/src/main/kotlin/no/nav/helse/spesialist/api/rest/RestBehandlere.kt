@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 interface RestBehandler {
@@ -77,5 +78,6 @@ interface GetBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandler
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        brukerroller: Set<Brukerrolle>,
     ): RestResponse<RESPONSE, ERROR>
 }

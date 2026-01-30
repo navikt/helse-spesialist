@@ -23,12 +23,14 @@ import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
+import java.util.UUID
 import kotlin.test.assertEquals
 
 class IntegrationTestFixture() {
@@ -44,6 +46,7 @@ class IntegrationTestFixture() {
             mockOAuth2Server = mockOAuth2Server,
             tilgangsgruppeUuider = tilgangsgruppeUuider
         )
+        val tilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(listOf(UUID.randomUUID()))
 
         fun Response.get(sti: String): JsonNode {
             val stiSegments = sti.split(".")
@@ -61,11 +64,12 @@ class IntegrationTestFixture() {
         tilgangsgruppeUuider = tilgangsgruppeUuider,
         daos = daos,
         meldingPubliserer = meldingPubliserer,
-        tilgangsgruppehenter = { Either.Success(emptySet()) },
+        tilgangsgruppehenter = { Either.Success(emptySet<Tilgangsgruppe>() to emptySet()) },
         sessionFactory = sessionFactory,
         environmentToggles = mockk(relaxed = true),
         snapshothenter = mockk(relaxed = true),
         krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
+        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
     )
 
     class Response(

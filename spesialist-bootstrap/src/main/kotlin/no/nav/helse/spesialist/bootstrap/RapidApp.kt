@@ -10,6 +10,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
@@ -84,6 +85,10 @@ fun main() {
                         stikkprøveGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_STIKKPROVE"),
                         tbdGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_TBD"),
                     ),
+                tilgangsgrupperTilBrukerroller =
+                    TilgangsgrupperTilBrukerroller(
+                        næringsdrivendeBeta = env.getUUIDList("ROLLE_SELVSTENDIG_BETA"),
+                    ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),
             ),
@@ -103,6 +108,8 @@ fun main() {
 
 private fun Map<String, String>.getUUID(key: String): UUID = UUID.fromString(getValue(key))
 
+private fun Map<String, String>.getUUIDList(key: String): List<UUID> = this[key]?.split(",")?.map { UUID.fromString(it.trim()) } ?: emptyList()
+
 private fun Map<String, String>.getBoolean(key: String): Boolean = this[key].toBoolean()
 
 class RapidApp {
@@ -120,6 +127,7 @@ class RapidApp {
             ClientEntraIDModule(
                 configuration = configuration.clientEntraID,
                 tilgangsgruppeUuider = configuration.tilgangsgruppeUuider,
+                tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
             )
 
         val clientKrrModule =
@@ -157,6 +165,7 @@ class RapidApp {
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
+                tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
             )
 
         kafkaModule.kobleOppRivers()

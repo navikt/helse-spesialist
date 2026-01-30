@@ -32,7 +32,7 @@ class TestMediator(
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = { Either.Success(emptySet()) },
+            tilgangsgruppehenter = { Either.Success(emptySet<Tilgangsgruppe>() to emptySet()) },
         )
     private val apiOppgaveService =
         ApiOppgaveService(
@@ -109,6 +109,6 @@ class TestMediator(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
-        saksbehandlerMediator.håndter(handling, saksbehandler, tilgangsgrupper)
+        saksbehandlerMediator.håndter(handling, saksbehandler, tilgangsgrupper, emptySet())
     }
 }

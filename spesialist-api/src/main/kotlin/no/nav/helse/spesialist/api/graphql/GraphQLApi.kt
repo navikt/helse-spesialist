@@ -50,6 +50,7 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import java.time.Duration
 
 fun kobleOppApi(
@@ -62,6 +63,7 @@ fun kobleOppApi(
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+    tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -72,7 +74,7 @@ fun kobleOppApi(
             }
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
-                contextFactory = ContextFactory(tilgangsgruppeUuider = tilgangsgruppeUuider)
+                contextFactory = ContextFactory(tilgangsgruppeUuider = tilgangsgruppeUuider, tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller)
             }
             schema(spesialistSchema::setup)
         }
@@ -92,6 +94,7 @@ fun kobleOppApi(
                 tilgangsgruppeUuider = tilgangsgruppeUuider,
                 meldingPubliserer = meldingPubliserer,
                 versjonAvKode = apiModuleConfiguration.versjonAvKode,
+                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             )
         restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles, krrRegistrertStatusHenter)
     }

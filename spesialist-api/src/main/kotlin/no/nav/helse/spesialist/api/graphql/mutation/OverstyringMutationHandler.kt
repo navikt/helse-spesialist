@@ -24,6 +24,7 @@ class OverstyringMutationHandler(
                 handlingFraApi = overstyring,
                 saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
             byggRespons(true)
         } catch (e: Exception) {
@@ -41,6 +42,7 @@ class OverstyringMutationHandler(
                 handlingFraApi = overstyring,
                 saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
             byggRespons(true)
         } catch (e: Exception) {
@@ -58,6 +60,7 @@ class OverstyringMutationHandler(
                 handlingFraApi = overstyring,
                 saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
             byggRespons(true)
         } catch (e: Exception) {

@@ -31,12 +31,14 @@ import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
+import java.util.UUID
 
 object TestRunner {
     private val mockOAuth2Server: MockOAuth2Server =
@@ -101,6 +103,7 @@ object TestRunner {
                 krrRegistrertStatusHenter = mockk(relaxed = true),
                 tilgangsgruppeUuider = tilgangsgruppeUuider,
                 meldingPubliserer = mockk(relaxed = true),
+                tilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(næringsdrivendeBeta = listOf(UUID.randomUUID()))
             )
         testApplication {
             application {
@@ -129,6 +132,7 @@ object TestRunner {
                             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
                         },
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
+                    tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller
                 )
             }
 
@@ -165,6 +169,7 @@ object TestRunner {
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
         val tilgangsgruppeUuider: TilgangsgruppeUuider,
+        val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val meldingPubliserer: MeldingPubliserer,
     )
 }

@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Sekvensnummer
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.Opptegnelser, List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> {
@@ -21,6 +22,7 @@ class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.O
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        brukerroller: Set<Brukerrolle>,
     ): RestResponse<List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> {
         val personId = resource.parent.pseudoId
         val pseudoId = PersonPseudoId.fraString(personId)

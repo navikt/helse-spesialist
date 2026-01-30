@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.OpptegnelseSekvensnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekvensnummer.Siste, Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> {
@@ -16,6 +17,7 @@ class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekven
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        brukerroller: Set<Brukerrolle>,
     ): RestResponse<Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> = RestResponse.OK(transaksjon.opptegnelseRepository.finnNyesteSekvensnummer().value)
 
     override fun openApi(config: RouteConfig) {

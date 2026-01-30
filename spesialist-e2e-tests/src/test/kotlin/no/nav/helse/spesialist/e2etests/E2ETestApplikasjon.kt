@@ -7,6 +7,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
@@ -17,6 +18,7 @@ import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import java.util.UUID
 import kotlin.random.Random
 
 object E2ETestApplikasjon {
@@ -53,6 +55,8 @@ object E2ETestApplikasjon {
                 override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
                 override fun fullRefusjonEnArbeidsgiver(): Boolean = false
             },
+            tilgangsgrupperTilBrukerroller =  TilgangsgrupperTilBrukerroller(næringsdrivendeBeta = listOf(UUID.randomUUID()))
+
         ),
         rapidsConnection = testRapid,
     )

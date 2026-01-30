@@ -15,10 +15,10 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerIdentGrupper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -62,6 +62,7 @@ class Oppgave private constructor(
     fun forsøkTildeling(
         saksbehandlerWrapper: SaksbehandlerWrapper,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
@@ -73,6 +74,7 @@ class Oppgave private constructor(
             oppgave = this,
             saksbehandlerWrapper = saksbehandlerWrapper,
             saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+            brukerroller = brukerroller,
         )
     }
 
@@ -97,6 +99,7 @@ class Oppgave private constructor(
     fun forsøkTildelingVedReservasjon(
         saksbehandlerWrapper: SaksbehandlerWrapper,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
         sikkerlogg.info(
@@ -111,6 +114,7 @@ class Oppgave private constructor(
             oppgave = this,
             saksbehandlerWrapper = saksbehandlerWrapper,
             saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+            brukerroller = brukerroller,
         )
     }
 
@@ -289,6 +293,7 @@ class Oppgave private constructor(
             oppgave: Oppgave,
             saksbehandlerWrapper: SaksbehandlerWrapper,
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+            brukerroller: Set<Brukerrolle>,
         ) {
             logg.warn(
                 "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $saksbehandlerWrapper",
@@ -328,10 +333,11 @@ class Oppgave private constructor(
             oppgave: Oppgave,
             saksbehandlerWrapper: SaksbehandlerWrapper,
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+            brukerroller: Set<Brukerrolle>,
         ) {
             if (!oppgave.kanTildelesTil(
-                    saksbehandler = saksbehandlerWrapper.saksbehandler,
                     saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+                    brukerroller = brukerroller,
                 )
             ) {
                 logg.info(
@@ -383,26 +389,26 @@ class Oppgave private constructor(
     override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
 
     fun kanSeesAv(
-        saksbehandler: Saksbehandler,
+        brukerroller: Set<Brukerrolle>,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         egenskaper.all {
             harTilgangTilEgenskap(
                 egenskap = it,
-                saksbehandler = saksbehandler,
                 saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+                brukerroller = brukerroller,
             )
         }
 
     fun kanTildelesTil(
-        saksbehandler: Saksbehandler,
+        brukerroller: Set<Brukerrolle>,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         egenskaper.all {
             harTilgangTilEgenskap(
                 egenskap = it,
-                saksbehandler = saksbehandler,
                 saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+                brukerroller = brukerroller,
             ) &&
                 when (it) {
                     BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
@@ -475,8 +481,8 @@ class Oppgave private constructor(
 
         fun harTilgangTilEgenskap(
             egenskap: Egenskap,
-            saksbehandler: Saksbehandler,
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+            brukerroller: Set<Brukerrolle>,
         ): Boolean =
             when (egenskap) {
                 STRENGT_FORTROLIG_ADRESSE -> {
@@ -493,9 +499,7 @@ class Oppgave private constructor(
                 }
 
                 SELVSTENDIG_NÆRINGSDRIVENDE -> {
-                    "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME") ||
-                        Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
-                        SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
+                    brukerroller.contains(SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA)
                 }
 
                 else -> {

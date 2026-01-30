@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
 
@@ -30,6 +31,7 @@ class GetNotatBehandler : GetBehandler<Vedtaksperioder.VedtaksperiodeId.Notater.
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        brukerroller: Set<Brukerrolle>,
     ): RestResponse<ApiNotat, GetNotatErrorCode> {
         val notatId = NotatId(resource.notatId)
         val notat = transaksjon.notatRepository.finn(notatId) ?: return RestResponse.Error(NOTAT_IKKE_FUNNET)

@@ -65,6 +65,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.tell
 import java.util.UUID
@@ -88,11 +89,13 @@ class SaksbehandlerMediator(
         handlingFraApi: HandlingFraApi,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ) {
         val modellhandling =
             handlingFraApi.tilModellversjon(
                 saksbehandlerOid = saksbehandler.id,
                 saksbehandlerTilgangsgrupper = tilgangsgrupper,
+                brukerroller = brukerroller,
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
@@ -538,13 +541,14 @@ class SaksbehandlerMediator(
     private fun HandlingFraApi.tilModellversjon(
         saksbehandlerOid: SaksbehandlerOid,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ): Handling =
         when (this) {
             is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandlerOid)
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
-            is TildelOppgave -> this.tilModellversjon(saksbehandlerTilgangsgrupper)
+            is TildelOppgave -> this.tilModellversjon(saksbehandlerTilgangsgrupper, brukerroller)
             is AvmeldOppgave -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
@@ -700,9 +704,10 @@ class SaksbehandlerMediator(
 
     private fun TildelOppgave.tilModellversjon(
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
         no.nav.helse.modell.saksbehandler.handlinger
-            .TildelOppgave(this.oppgaveId, saksbehandlerTilgangsgrupper)
+            .TildelOppgave(this.oppgaveId, saksbehandlerTilgangsgrupper, brukerroller)
 
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
         no.nav.helse.modell.saksbehandler.handlinger
