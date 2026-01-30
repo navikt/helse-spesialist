@@ -7,5 +7,4 @@ fun randomTilgangsgruppeUuider(): TilgangsgruppeUuider = TilgangsgruppeUuider(
     egenAnsattGruppeUuid = UUID.randomUUID(),
     kode7GruppeUuid = UUID.randomUUID(),
     stikkprøveGruppeUuid = UUID.randomUUID(),
-    tbdGruppeUuid = UUID.randomUUID(),
 )
