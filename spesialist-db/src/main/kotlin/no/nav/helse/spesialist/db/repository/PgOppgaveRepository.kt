@@ -189,6 +189,8 @@ class PgOppgaveRepository private constructor(
         val parameterMap = mutableMapOf<String, Any>()
         val sql =
             buildString {
+                val tildeltTilOidTekst =
+                    if (erTildelt == false) "null::uuid as tildelt_til_oid," else "t.saksbehandler_ref as tildelt_til_oid,"
                 append(
                     """
                     SELECT
@@ -197,7 +199,7 @@ class PgOppgaveRepository private constructor(
                         o.første_opprettet,
                         p.fødselsnummer,
                         os.soknad_mottatt AS opprinnelig_soknadsdato,
-                        t.saksbehandler_ref as tildelt_til_oid,
+                        $tildeltTilOidTekst
                         pv.id AS på_vent_id,
                         b.opprettet_tidspunkt as behandling_opprettet_tidspunkt,
                         count(1) OVER() AS filtered_count
@@ -207,11 +209,16 @@ class PgOppgaveRepository private constructor(
                     INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
                     INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-                    LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
-                    LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-                    
-                    """.trimIndent(),
+                    """,
                 )
+                if (ikkeSendtTilBeslutterAvOid != null) {
+                    append(
+                        """
+                        LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
+                        """,
+                    )
+                }
+                append("LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id\n")
                 if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
                     append("LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid\n")
                 }
@@ -245,11 +252,11 @@ class PgOppgaveRepository private constructor(
                     parameterMap[parameterName] = tildeltTilOid.value
                 }
                 if (erTildelt != null) {
-                    if (erTildelt) {
-                        append("AND t.oppgave_id_ref IS NOT NULL\n")
-                    } else {
-                        append("AND t.oppgave_id_ref IS NULL\n")
-                    }
+                    append(
+                        """
+                        AND ${if (erTildelt) "" else "NOT"} EXISTS (SELECT 1 FROM tildeling WHERE oppgave_id_ref = o.id)
+                        """,
+                    )
                 }
                 append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
 
