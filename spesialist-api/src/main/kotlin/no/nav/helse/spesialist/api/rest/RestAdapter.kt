@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.rest
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -12,22 +11,17 @@ import io.ktor.server.routing.RoutingCall
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
-import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
+import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarnThrowable
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class RestAdapter(
     private val sessionFactory: SessionFactory,
-    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
-    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val meldingPubliserer: MeldingPubliserer,
     private val versjonAvKode: String,
 ) {
@@ -87,20 +81,14 @@ class RestAdapter(
         call: RoutingCall,
         behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox, Set<Brukerrolle>) -> RestResponse<RESPONSE, ERROR>,
     ) {
-        val jwt =
-            (
-                call.principal<JWTPrincipal>() ?: run {
-                    call.respondWithProblem(genericProblemDetails(HttpStatusCode.Unauthorized))
-                    return@wrapOgDeleger
-                }
-            ).payload
-
-        val saksbehandler = jwt.tilSaksbehandler()
-        val tilgangsgruppeUuider = jwt.gruppeUuider()
-        val tilgangsgrupper = this@RestAdapter.tilgangsgruppeUuider.grupperFor(tilgangsgruppeUuider)
+        val principal =
+            call.principal<SaksbehandlerPrincipal>() ?: run {
+                call.respondWithProblem(genericProblemDetails(HttpStatusCode.Unauthorized))
+                return@wrapOgDeleger
+            }
 
         sessionFactory.transactionalSessionScope {
-            it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler)
+            it.saksbehandlerRepository.lagre(saksbehandler = principal.saksbehandler)
         }
 
         runCatching {
@@ -109,11 +97,11 @@ class RestAdapter(
                 .transactionalSessionScope { transaksjon ->
                     val response =
                         behandler.invoke(
-                            saksbehandler,
-                            tilgangsgrupper,
+                            principal.saksbehandler,
+                            principal.tilgangsgrupper,
                             transaksjon,
                             outbox,
-                            tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(tilgangsgruppeUuider),
+                            principal.brukerroller,
                         )
 
                     if (response is RestResponse.Error) {

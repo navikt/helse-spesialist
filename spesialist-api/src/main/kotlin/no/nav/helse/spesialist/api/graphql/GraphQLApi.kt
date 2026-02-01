@@ -66,7 +66,11 @@ fun kobleOppApi(
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
-    ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
+    ktorApplication.azureAdAppAuthentication(
+        config = apiModuleConfiguration,
+        tilgangsgruppeUuider = tilgangsgruppeUuider,
+        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+    )
     val graphQLPlugin =
         ktorApplication.install(GraphQL) {
             engine {
@@ -74,7 +78,7 @@ fun kobleOppApi(
             }
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
-                contextFactory = ContextFactory(tilgangsgruppeUuider = tilgangsgruppeUuider, tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller)
+                contextFactory = ContextFactory()
             }
             schema(spesialistSchema::setup)
         }
@@ -91,10 +95,8 @@ fun kobleOppApi(
         val restAdapter =
             RestAdapter(
                 sessionFactory = sessionFactory,
-                tilgangsgruppeUuider = tilgangsgruppeUuider,
                 meldingPubliserer = meldingPubliserer,
                 versjonAvKode = apiModuleConfiguration.versjonAvKode,
-                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             )
         restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles, krrRegistrertStatusHenter)
     }

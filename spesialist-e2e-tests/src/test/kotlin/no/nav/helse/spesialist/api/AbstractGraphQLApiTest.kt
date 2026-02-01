@@ -63,7 +63,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private val apiTesting =
         ApiTesting(
-            jwtStub,
+            jwtStub = jwtStub,
             applicationBuilder = {
                 graphQL()
             },
@@ -72,6 +72,8 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     queryHandler(application.plugin(GraphQL).server)
                 }
             },
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
+            tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
         )
 
     private fun ApplicationTestBuilder.graphQL() {
@@ -119,10 +121,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         install(GraphQL) {
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
-                contextFactory = ContextFactory(
-                    tilgangsgruppeUuider = tilgangsgruppeUuider,
-                    tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
-                )
+                contextFactory = ContextFactory()
             }
             schema(spesialistSchema::setup)
         }
