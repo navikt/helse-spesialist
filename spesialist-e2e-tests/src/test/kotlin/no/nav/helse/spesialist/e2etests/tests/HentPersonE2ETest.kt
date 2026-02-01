@@ -812,7 +812,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
         "inntekterFraAordningen" : [ {
           "skjaeringstidspunkt" : "2018-01-01",
           "inntekter" : [ {
-            "maned" : "2025-12",
+            "maned" : "${YearMonth.now().minusMonths(1)}",
             "sum" : 20000.0,
             "__typename" : "InntektFraAOrdningen"
           } ],
