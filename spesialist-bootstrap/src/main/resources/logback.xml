@@ -3,7 +3,7 @@
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeMdcKeyName>callId</includeMdcKeyName>
-            <!--<includeMdcKeyName>trace_flags</includeMdcKeyName>-->
+            <includeMdcKeyName>trace_flags</includeMdcKeyName>
             <includeMdcKeyName>span_id</includeMdcKeyName>
             <includeMdcKeyName>trace_id</includeMdcKeyName>
         </encoder>
