@@ -55,7 +55,6 @@ spec:
         groups:
           - id: {{ENTRAID_UUID_SAKSBEHANDLER}}
           - id: {{ENTRAID_UUID_TBD}}
-          - id: {{ENTRAID_UUID_NAIS_TBD}}
           - id: {{ENTRAID_UUID_KODE_7}}
           - id: {{ENTRAID_UUID_EGEN_ANSATT}}
           - id: {{ENTRAID_UUID_BESLUTTER}}
