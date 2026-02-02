@@ -16,6 +16,8 @@ import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
+import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandlerV2
+import no.nav.helse.spesialist.api.rest.notater.PutNotatBehandler
 import no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer.GetOpptegnelseSekvensnummerSisteBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetOpptegnelserForPersonBehandler
@@ -79,9 +81,11 @@ fun Routing.restRoutes(
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
             get(GetNotatBehandler(), restAdapter)
+            get(GetNotatBehandlerV2(), restAdapter)
             post(PostNotatBehandler(), restAdapter)
             post(PostKommentarBehandler(), restAdapter)
             put(PutFeilregistrerNotatBehandler(), restAdapter)
+            put(PutNotatBehandler(), restAdapter)
             put(PutFeilregistrerKommentarBehandler(), restAdapter)
 
             get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)

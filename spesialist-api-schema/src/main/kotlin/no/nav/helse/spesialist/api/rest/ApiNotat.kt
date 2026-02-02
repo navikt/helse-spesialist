@@ -69,3 +69,8 @@ data class ApiKommentarRequest(
 data class ApiKommentarResponse(
     val id: Int,
 )
+
+@Serializable
+data class ApiPutNotatRequest(
+    val feilregistrert: Boolean,
+)
