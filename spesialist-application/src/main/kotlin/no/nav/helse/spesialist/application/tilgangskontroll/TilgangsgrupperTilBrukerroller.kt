@@ -30,4 +30,11 @@ class TilgangsgrupperTilBrukerroller(
         }
         return roller
     }
+
+    fun alleUuider(): Set<UUID> =
+        næringsdrivendeBeta.toSet() +
+            beslutter.toSet() +
+            egenAnsatt.toSet() +
+            kode7.toSet() +
+            stikkprøve.toSet()
 }

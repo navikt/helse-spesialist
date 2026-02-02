@@ -71,8 +71,8 @@ class MsGraphTilgangsgruppehenter(
                             setBody(
                                 mapOf(
                                     "groupIds" to
-                                        tilgangsgruppeUuider
-                                            .uuiderFor(Tilgangsgruppe.entries)
+                                        tilgangsgrupperTilBrukerroller
+                                            .alleUuider()
                                             .map { it.toString() },
                                 ),
                             )
