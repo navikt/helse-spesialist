@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -486,7 +486,7 @@ class Oppgave private constructor(
                 }
 
                 SELVSTENDIG_NÆRINGSDRIVENDE -> {
-                    SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller
+                    SELVSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller
                 }
 
                 else -> {

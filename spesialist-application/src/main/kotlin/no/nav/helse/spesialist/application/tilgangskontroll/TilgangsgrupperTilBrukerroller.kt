@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
 import java.util.UUID
 
 class TilgangsgrupperTilBrukerroller(
@@ -15,7 +15,7 @@ class TilgangsgrupperTilBrukerroller(
     fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> {
         val roller = mutableSetOf<Brukerrolle>()
         if (tilgangsgrupper.any { it in næringsdrivendeBeta }) {
-            roller.add(SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA)
+            roller.add(SELVSTENDIG_NÆRINGSDRIVENDE_BETA)
         }
         if (tilgangsgrupper.any { it in beslutter }) {
             roller.add(Brukerrolle.BESLUTTER)

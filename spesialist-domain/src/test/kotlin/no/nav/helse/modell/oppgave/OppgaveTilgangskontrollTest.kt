@@ -16,8 +16,8 @@ class OppgaveTilgangskontrollTest {
         assertFalse(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                brukerroller = emptySet()
-            )
+                brukerroller = emptySet(),
+            ),
         )
     }
 
@@ -25,13 +25,13 @@ class OppgaveTilgangskontrollTest {
     @MethodSource("kombinasjonerSomGirTilgang")
     fun `saksbehandler har tilgang til oppgaveegenskap`(
         egenskap: Egenskap,
-        roller: Set<Brukerrolle>
+        roller: Set<Brukerrolle>,
     ) {
         assertTrue(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                brukerroller = roller
-            )
+                brukerroller = roller,
+            ),
         )
     }
 
@@ -39,64 +39,56 @@ class OppgaveTilgangskontrollTest {
     @MethodSource("kombinasjonerSomIkkeGirTilgang")
     fun `saksbehandler har ikke tilgang til oppgaveegenskap`(
         egenskap: Egenskap,
-        roller: Set<Brukerrolle>
-
+        roller: Set<Brukerrolle>,
     ) {
         assertFalse(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                brukerroller = roller
-            )
+                brukerroller = roller,
+            ),
         )
     }
 
     companion object {
         @JvmStatic
-        private fun kombinasjonerSomGirTilgang(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                Egenskap.FORTROLIG_ADRESSE,
-
-                setOf(Brukerrolle.KODE_7)
-
-
-            ),
-            Arguments.of(
-                Egenskap.EGEN_ANSATT,
-                setOf(Brukerrolle.EGEN_ANSATT)
-            ),
-            Arguments.of(
-                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                setOf(Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA)
-            ),
-        )
+        private fun kombinasjonerSomGirTilgang(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(
+                    Egenskap.FORTROLIG_ADRESSE,
+                    setOf(Brukerrolle.KODE_7),
+                ),
+                Arguments.of(
+                    Egenskap.EGEN_ANSATT,
+                    setOf(Brukerrolle.EGEN_ANSATT),
+                ),
+                Arguments.of(
+                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                    setOf(Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA),
+                ),
+            )
 
         @JvmStatic
         private fun kombinasjonerSomIkkeGirTilgang(): Stream<Arguments> =
             Stream.of(
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
-                    emptySet<Brukerrolle>()
-
+                    emptySet<Brukerrolle>(),
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
-                    emptySet<Brukerrolle>()
-
+                    emptySet<Brukerrolle>(),
                 ),
                 Arguments.of(
                     Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    emptySet<Brukerrolle>()
-
+                    emptySet<Brukerrolle>(),
                 ),
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
                     (Brukerrolle.entries - Brukerrolle.KODE_7).toSet(),
-
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
                     (Brukerrolle.entries - Brukerrolle.EGEN_ANSATT).toSet(),
-
                 ),
             )
     }

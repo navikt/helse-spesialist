@@ -7,19 +7,19 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class TilgangsgrupperTilBrukerrollerTest {
-
     private val næringsdrivendeGruppeId = UUID.randomUUID()
     private val annenGruppeId1 = UUID.randomUUID()
     private val annenGruppeId2 = UUID.randomUUID()
 
-    private val tilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(
-        næringsdrivendeBeta = listOf(næringsdrivendeGruppeId),
-        beslutter = emptyList(),
-        egenAnsatt = emptyList(),
-        kode7 = emptyList(),
-        stikkprøve = emptyList(),
-        utvikler = emptyList(),
-    )
+    private val tilgangsgrupperTilBrukerroller =
+        TilgangsgrupperTilBrukerroller(
+            næringsdrivendeBeta = listOf(næringsdrivendeGruppeId),
+            beslutter = emptyList(),
+            egenAnsatt = emptyList(),
+            kode7 = emptyList(),
+            stikkprøve = emptyList(),
+            utvikler = emptyList(),
+        )
 
     @Test
     fun `ingen grupper gir ingen roller`() {
@@ -34,7 +34,7 @@ class TilgangsgrupperTilBrukerrollerTest {
         val roller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(grupper)
 
         assertEquals(1, roller.size)
-        assertTrue(roller.contains(Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA))
+        assertTrue(roller.contains(Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA))
     }
 
     @Test

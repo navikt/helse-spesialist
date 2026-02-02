@@ -12,7 +12,7 @@ class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>
         RestResponse.OK(
             kallKontekst.brukerroller.map {
                 when (it) {
-                    Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA -> ApiBrukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA
+                    Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA -> ApiBrukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
                     Brukerrolle.BESLUTTER -> ApiBrukerrolle.BESLUTTER
                     Brukerrolle.EGEN_ANSATT -> ApiBrukerrolle.EGEN_ANSATT
                     Brukerrolle.KODE_7 -> ApiBrukerrolle.KODE_7

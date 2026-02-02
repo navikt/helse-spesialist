@@ -98,7 +98,7 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     if (Brukerrolle.BESLUTTER in brukerroller) {
         uuider.addAll(beslutter)
     }
-    if (Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller) {
+    if (Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller) {
         uuider.addAll(næringsdrivendeBeta)
     }
     if (Brukerrolle.STIKKPRØVE in brukerroller) {
