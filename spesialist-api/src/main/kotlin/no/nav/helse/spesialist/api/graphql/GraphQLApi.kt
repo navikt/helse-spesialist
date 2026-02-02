@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.api.GraphQLCallLogging
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
@@ -42,6 +41,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHan
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.jwtAuthentication
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
@@ -67,7 +67,7 @@ fun kobleOppApi(
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
-    ktorApplication.azureAdAppAuthentication(
+    ktorApplication.jwtAuthentication(
         config = apiModuleConfiguration,
         tilgangsgruppeUuider = tilgangsgruppeUuider,
         tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,

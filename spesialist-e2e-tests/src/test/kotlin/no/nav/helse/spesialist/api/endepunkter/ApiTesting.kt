@@ -7,7 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import no.nav.helse.spesialist.api.JwtStub
-import no.nav.helse.spesialist.api.azureAdAppAuthentication
+import no.nav.helse.spesialist.api.jwtAuthentication
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -27,7 +27,7 @@ class ApiTesting(
     private fun ApplicationTestBuilder.setUpApplication() {
         install(ServerContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         application {
-            azureAdAppAuthentication(
+            jwtAuthentication(
                 jwkProvider = jwtStub.getJwkProviderMock(),
                 issuerUrl = issuer,
                 clientId = clientId,

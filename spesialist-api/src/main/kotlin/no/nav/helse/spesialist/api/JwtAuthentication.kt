@@ -19,12 +19,12 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.net.URI
 import java.util.UUID
 
-fun Application.azureAdAppAuthentication(
+fun Application.jwtAuthentication(
     config: ApiModule.Configuration,
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
-    azureAdAppAuthentication(
+    jwtAuthentication(
         jwkProvider = JwkProviderBuilder(URI(config.jwkProviderUri).toURL()).build(),
         issuerUrl = config.issuerUrl,
         clientId = config.clientId,
@@ -33,7 +33,7 @@ fun Application.azureAdAppAuthentication(
     )
 }
 
-fun Application.azureAdAppAuthentication(
+fun Application.jwtAuthentication(
     jwkProvider: JwkProvider,
     issuerUrl: String,
     clientId: String,
