@@ -43,7 +43,7 @@ class GetSoknadBehandler(
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = identitetsnummer,
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {

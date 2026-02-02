@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 
@@ -9,7 +9,7 @@ class EgenAnsattStatusEndretE2ETest : AbstractE2EIntegrationTest() {
     fun `oppgave får egen ansatt egenskap når person får status egen ansatt`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        saksbehandlerHarTilgang(Tilgangsgruppe.EGEN_ANSATT)
+        saksbehandlerHarTilgang(Brukerrolle.EGEN_ANSATT)
         søknadOgGodkjenningbehovKommerInn()
         medPersonISpeil {
             assertHarIkkeOppgaveegenskap("EGEN_ANSATT")
@@ -27,7 +27,7 @@ class EgenAnsattStatusEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `oppgave har ikke lenger egen ansatt egenskap når person ikke lenger er egen ansatt`() {
         // Given:
-        saksbehandlerHarTilgang(Tilgangsgruppe.EGEN_ANSATT)
+        saksbehandlerHarTilgang(Brukerrolle.EGEN_ANSATT)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
         medPersonISpeil {

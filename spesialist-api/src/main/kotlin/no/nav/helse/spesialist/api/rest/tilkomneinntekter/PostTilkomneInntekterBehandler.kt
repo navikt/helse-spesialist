@@ -24,7 +24,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
     ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = request.fodselsnummer),
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {

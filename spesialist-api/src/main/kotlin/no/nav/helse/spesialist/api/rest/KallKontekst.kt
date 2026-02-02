@@ -37,7 +37,7 @@ class KallKontekst(
                 return@withMDC RestResponse.Error(personIkkeFunnetErrorCode)
             }
 
-            if (!person.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
+            if (!person.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
                 teamLogs.warn("Saksbehandler har ikke tilgang til person med identitetsnummer $identitetsnummer")
                 return@withMDC RestResponse.Error(manglerTilgangTilPersonErrorCode)
             }

@@ -37,7 +37,7 @@ class GetNotatBehandler : GetBehandler<Vedtaksperioder.VedtaksperiodeId.Notater.
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {

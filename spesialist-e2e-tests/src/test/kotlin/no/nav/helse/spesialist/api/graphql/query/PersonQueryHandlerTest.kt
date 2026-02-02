@@ -38,7 +38,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -150,7 +150,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
-            tilgangsgruppe = Tilgangsgruppe.KODE_7,
+            brukerrolle = Brukerrolle.KODE_7,
         )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
@@ -185,7 +185,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         val body = runQuery(
             query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
-            tilgangsgruppe = Tilgangsgruppe.EGEN_ANSATT,
+            brukerrolle = Brukerrolle.EGEN_ANSATT,
         )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())

@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPersoninfo
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -22,37 +22,37 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
             info = adressebeskyttelse?.let { lagPersoninfo(adressebeskyttelse = it) }
         )
 
-        assertFalse(person.kanSeesAvSaksbehandlerMedGrupper(Tilgangsgruppe.entries.toSet()))
+        assertFalse(person.kanSeesAvSaksbehandlerMedGrupper(Brukerrolle.entries.toSet()))
     }
 
-    @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, grupper={2}")
+    @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, roller={2}")
     @MethodSource("personKombinasjonerSomGirTilgang")
     fun `saksbehandler med visse grupper har tilgang til visse personer`(
         egenAnsatt: Boolean,
         adressebeskyttelse: Personinfo.Adressebeskyttelse,
-        grupper: Set<Tilgangsgruppe>
+        roller: Set<Brukerrolle>
     ) {
         val person = lagPerson(
             erEgenAnsatt = egenAnsatt,
             info = lagPersoninfo(adressebeskyttelse = adressebeskyttelse)
         )
 
-        assertTrue(person.kanSeesAvSaksbehandlerMedGrupper(grupper))
+        assertTrue(person.kanSeesAvSaksbehandlerMedGrupper(roller))
     }
 
-    @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, grupper={2}")
+    @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, roller={2}")
     @MethodSource("personKombinasjonerSomIkkeGirTilgang")
     fun `saksbehandler med visse grupper har ikke tilgang til visse personer`(
         egenAnsatt: Boolean,
         adressebeskyttelse: Personinfo.Adressebeskyttelse,
-        grupper: Set<Tilgangsgruppe>
+        roller: Set<Brukerrolle>
     ) {
         val person = lagPerson(
             erEgenAnsatt = egenAnsatt,
             info = lagPersoninfo(adressebeskyttelse = adressebeskyttelse)
         )
 
-        assertFalse(person.kanSeesAvSaksbehandlerMedGrupper(grupper))
+        assertFalse(person.kanSeesAvSaksbehandlerMedGrupper(roller))
     }
 
     companion object {
@@ -77,9 +77,9 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
         @JvmStatic
         private fun personKombinasjonerSomGirTilgang(): Stream<Arguments> =
             Stream.of(
-                Arguments.of(false, Personinfo.Adressebeskyttelse.Ugradert, emptySet<Tilgangsgruppe>()),
-                Arguments.of(false, Personinfo.Adressebeskyttelse.Fortrolig, setOf(Tilgangsgruppe.KODE_7)),
-                Arguments.of(true, Personinfo.Adressebeskyttelse.Ugradert, setOf(Tilgangsgruppe.EGEN_ANSATT)),
+                Arguments.of(false, Personinfo.Adressebeskyttelse.Ugradert, emptySet<Brukerrolle>()),
+                Arguments.of(false, Personinfo.Adressebeskyttelse.Fortrolig, setOf(Brukerrolle.KODE_7)),
+                Arguments.of(true, Personinfo.Adressebeskyttelse.Ugradert, setOf(Brukerrolle.EGEN_ANSATT)),
             )
 
         @JvmStatic
@@ -87,22 +87,22 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
             Arguments.of(
                 false,
                 Personinfo.Adressebeskyttelse.Fortrolig,
-                emptySet<Tilgangsgruppe>()
+                emptySet<Brukerrolle>()
             ),
             Arguments.of(
                 false,
                 Personinfo.Adressebeskyttelse.Fortrolig,
-                (Tilgangsgruppe.entries - Tilgangsgruppe.KODE_7).toSet()
+                (Brukerrolle.entries - Brukerrolle.KODE_7).toSet()
             ),
             Arguments.of(
                 true,
                 Personinfo.Adressebeskyttelse.Ugradert,
-                emptySet<Tilgangsgruppe>()
+                emptySet<Brukerrolle>()
             ),
             Arguments.of(
                 true,
                 Personinfo.Adressebeskyttelse.Ugradert,
-                (Tilgangsgruppe.entries - Tilgangsgruppe.EGEN_ANSATT).toSet()
+                (Brukerrolle.entries - Brukerrolle.EGEN_ANSATT).toSet()
             ),
         )
     }

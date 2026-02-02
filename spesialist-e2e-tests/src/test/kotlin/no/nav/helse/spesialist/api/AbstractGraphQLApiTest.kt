@@ -38,13 +38,14 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
+import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -61,6 +62,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
 
+    val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
     private val apiTesting =
         ApiTesting(
             jwtStub = jwtStub,
@@ -73,7 +75,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 }
             },
             tilgangsgruppeUuider = tilgangsgruppeUuider,
-            tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
         )
 
     private fun ApplicationTestBuilder.graphQL() {
@@ -193,7 +195,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     protected fun runQuery(
         @Language("GraphQL") query: String,
-        tilgangsgruppe: Tilgangsgruppe? = null,
+        brukerrolle: Brukerrolle? = null,
     ): JsonNode =
         apiTesting
             .spesialistApi {
@@ -206,7 +208,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                             epost = SAKSBEHANDLER.epost,
                             ident = SAKSBEHANDLER.ident.value,
                             oid = SAKSBEHANDLER.id.value.toString(),
-                            group = tilgangsgruppe?.let(tilgangsgruppeUuider::uuidFor)?.toString(),
+                            group = brukerrolle?.let { tilgangsgrupperTilBrukerroller.uuiderFor(setOf(it)) }?.single()?.toString(),
                         )
                         setBody(mapOf("query" to query))
                     }.body<String>()

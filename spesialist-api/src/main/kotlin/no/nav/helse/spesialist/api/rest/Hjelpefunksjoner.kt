@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 internal fun finnEllerOpprettTotrinnsvurdering(
     fodselsnummer: String,
@@ -17,7 +17,7 @@ internal fun finnEllerOpprettTotrinnsvurdering(
 
 internal fun Saksbehandler.harTilgangTilPerson(
     identitetsnummer: Identitetsnummer,
-    tilgangsgrupper: Set<Tilgangsgruppe>,
+    brukerroller: Set<Brukerrolle>,
     transaksjon: SessionContext,
 ): Boolean {
     val person = transaksjon.personRepository.finn(identitetsnummer)
@@ -25,7 +25,7 @@ internal fun Saksbehandler.harTilgangTilPerson(
         teamLogs.warn("Person med identitetsnummer $identitetsnummer ble ikke funnet")
         return false
     }
-    if (!person.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
+    if (!person.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
         teamLogs.warn("Saksbehandler ${id.value} har ikke tilgang til person med identitetsnummer $identitetsnummer")
         return false
     }

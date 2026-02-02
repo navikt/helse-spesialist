@@ -74,7 +74,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Kan hente person som er kode6 dersom saksbehandler har tilgang til kode6`() {
+    fun `Kan hente person som er kode7 dersom saksbehandler har tilgang til kode7`() {
         settOppDefaultDataOgTilganger()
         sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         mockSnapshot()
@@ -150,15 +150,19 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
+        every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
+                setOfNotNull(Brukerrolle.EGEN_ANSATT.takeIf { harTilgang })
         every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
-                setOfNotNull(Tilgangsgruppe.EGEN_ANSATT.takeIf { harTilgang })
+                emptySet()
     }
 
     private fun saksbehandlertilgangTilKode7(
         @Suppress("SameParameterValue") harTilgang: Boolean,
     ) {
+        every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
+                setOfNotNull(Brukerrolle.KODE_7.takeIf { harTilgang })
         every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
-                setOfNotNull(Tilgangsgruppe.KODE_7.takeIf { harTilgang })
+                emptySet()
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)

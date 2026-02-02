@@ -35,7 +35,7 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {

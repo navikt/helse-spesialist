@@ -50,7 +50,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {

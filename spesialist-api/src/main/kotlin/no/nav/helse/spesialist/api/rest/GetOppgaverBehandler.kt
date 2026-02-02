@@ -258,7 +258,6 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
         Oppgave.harTilgangTilEgenskap(
             egenskap = this,
             brukerroller = brukerroller,
-            saksbehandlerTilgangsgrupper = tilgangsgrupper,
         ) &&
             when (this) {
                 Egenskap.BESLUTTER -> Brukerrolle.BESLUTTER in brukerroller

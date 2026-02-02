@@ -195,7 +195,7 @@ class PersonQueryHandler(
             personIkkeKlarTilVisning(saksbehandler, identitetsnummer)
         }
 
-        if (!personEntity.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
+        if (!personEntity.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
             manglerTilgangTilPerson(saksbehandler, identitetsnummer)
         }
 

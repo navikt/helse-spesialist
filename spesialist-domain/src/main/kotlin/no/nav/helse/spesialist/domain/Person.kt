@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.Instant
 import java.time.LocalDate
 
@@ -73,21 +73,21 @@ class Person private constructor(
             )
     }
 
-    fun kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
-        girTilgangTilEgenAnsattStatus(tilgangsgrupper) &&
-            girTilgangTilAdressebeskyttelse(tilgangsgrupper)
+    fun kanSeesAvSaksbehandlerMedGrupper(brukerroller: Set<Brukerrolle>): Boolean =
+        girTilgangTilEgenAnsattStatus(brukerroller) &&
+            girTilgangTilAdressebeskyttelse(brukerroller)
 
-    private fun girTilgangTilEgenAnsattStatus(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
+    private fun girTilgangTilEgenAnsattStatus(brukerroller: Set<Brukerrolle>): Boolean =
         when (egenAnsattStatus?.erEgenAnsatt) {
-            true -> Tilgangsgruppe.EGEN_ANSATT in tilgangsgrupper
+            true -> Brukerrolle.EGEN_ANSATT in brukerroller
             false -> true
             null -> false
         }
 
-    private fun girTilgangTilAdressebeskyttelse(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
+    private fun girTilgangTilAdressebeskyttelse(brukerroller: Set<Brukerrolle>): Boolean =
         when (info?.adressebeskyttelse) {
             Personinfo.Adressebeskyttelse.Ugradert -> true
-            Personinfo.Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE_7 in tilgangsgrupper
+            Personinfo.Adressebeskyttelse.Fortrolig -> Brukerrolle.KODE_7 in brukerroller
             else -> false
         }
 

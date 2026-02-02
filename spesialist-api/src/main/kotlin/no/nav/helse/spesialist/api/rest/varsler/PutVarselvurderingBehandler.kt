@@ -42,7 +42,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         val identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer)
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer,
-                kallKontekst.tilgangsgrupper,
+                kallKontekst.brukerroller,
                 kallKontekst.transaksjon,
             )
         ) {

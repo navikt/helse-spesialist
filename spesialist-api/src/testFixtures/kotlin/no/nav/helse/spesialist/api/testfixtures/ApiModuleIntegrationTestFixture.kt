@@ -91,7 +91,7 @@ class ApiModuleIntegrationTestFixture(
     }
 }
 
-private fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): List<UUID> {
+fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): List<UUID> {
     val uuider = mutableListOf<UUID>()
     if (Brukerrolle.EGEN_ANSATT in brukerroller) {
         uuider.addAll(egenAnsatt)

@@ -34,9 +34,6 @@ abstract class AbstractE2EIntegrationTest {
 
     protected var beslutter = lagSaksbehandler()
 
-    protected fun saksbehandlerHarTilgang(tilgangsgruppe: Tilgangsgruppe) {
-        saksbehandlerTilgangsgrupper += tilgangsgruppe
-    }
     protected fun saksbehandlerHarTilgang(brukerrolle: Brukerrolle) {
         brukerroller += brukerrolle
     }

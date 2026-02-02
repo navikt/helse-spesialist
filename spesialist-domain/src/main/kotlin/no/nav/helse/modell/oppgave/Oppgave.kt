@@ -395,7 +395,6 @@ class Oppgave private constructor(
         egenskaper.all {
             harTilgangTilEgenskap(
                 egenskap = it,
-                saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
                 brukerroller = brukerroller,
             )
         }
@@ -407,7 +406,6 @@ class Oppgave private constructor(
         egenskaper.all {
             harTilgangTilEgenskap(
                 egenskap = it,
-                saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
                 brukerroller = brukerroller,
             ) &&
                 when (it) {
@@ -481,7 +479,6 @@ class Oppgave private constructor(
 
         fun harTilgangTilEgenskap(
             egenskap: Egenskap,
-            saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
             brukerroller: Set<Brukerrolle>,
         ): Boolean =
             when (egenskap) {
@@ -491,11 +488,11 @@ class Oppgave private constructor(
                 }
 
                 EGEN_ANSATT -> {
-                    Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
+                    Brukerrolle.EGEN_ANSATT in brukerroller
                 }
 
                 FORTROLIG_ADRESSE -> {
-                    Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
+                    Brukerrolle.KODE_7 in brukerroller
                 }
 
                 SELVSTENDIG_NÆRINGSDRIVENDE -> {

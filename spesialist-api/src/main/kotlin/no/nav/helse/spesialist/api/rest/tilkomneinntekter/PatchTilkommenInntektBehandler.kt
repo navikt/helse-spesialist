@@ -39,7 +39,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = tilkommenInntekt.fødselsnummer),
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {

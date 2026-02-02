@@ -81,7 +81,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandler,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            brukerroller = emptySet()
+            brukerroller = Brukerrolle.entries.toSet()
         )
 
         inspektør(oppgave) {
@@ -96,8 +96,8 @@ internal class OppgaveTest {
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
                 saksbehandlerWrapper = saksbehandler(),
-                saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE_7),
-                brukerroller = emptySet()
+                saksbehandlerTilgangsgrupper = emptySet(),
+                brukerroller = setOf(Brukerrolle.KODE_7)
             )
         }
 
@@ -223,8 +223,8 @@ internal class OppgaveTest {
         val saksbehandlerMedTilgang = saksbehandler()
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerMedTilgang,
-            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            brukerroller = setOf(Brukerrolle.STIKKPRØVE, Brukerrolle.BESLUTTER)
+            saksbehandlerTilgangsgrupper = emptySet(),
+            brukerroller = Brukerrolle.entries.toSet()
         )
 
         inspektør(oppgave) {

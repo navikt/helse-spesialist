@@ -43,7 +43,7 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer,
-                kallKontekst.tilgangsgrupper,
+                kallKontekst.brukerroller,
                 kallKontekst.transaksjon,
             )
         ) {
