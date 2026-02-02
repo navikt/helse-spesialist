@@ -485,11 +485,11 @@ class Oppgave private constructor(
             brukerroller: Set<Brukerrolle>,
         ): Boolean =
             when (egenskap) {
+                // Ingen skal ha tilgang til strengt fortrolig adresse i Speil foreløpig
                 STRENGT_FORTROLIG_ADRESSE -> {
                     false
                 }
 
-                // Ingen skal ha tilgang til disse i Speil foreløpig
                 EGEN_ANSATT -> {
                     Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
                 }
@@ -499,7 +499,7 @@ class Oppgave private constructor(
                 }
 
                 SELVSTENDIG_NÆRINGSDRIVENDE -> {
-                    brukerroller.contains(SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA)
+                    SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller
                 }
 
                 else -> {

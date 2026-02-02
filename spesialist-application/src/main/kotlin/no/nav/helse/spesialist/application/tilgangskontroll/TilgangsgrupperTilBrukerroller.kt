@@ -13,19 +13,19 @@ class TilgangsgrupperTilBrukerroller(
 ) {
     fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> {
         val roller = mutableSetOf<Brukerrolle>()
-        if (tilgangsgrupper.any { næringsdrivendeBeta.contains(it) }) {
+        if (tilgangsgrupper.any { it in næringsdrivendeBeta }) {
             roller.add(SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA)
         }
-        if (tilgangsgrupper.any { beslutter.contains(it) }) {
+        if (tilgangsgrupper.any { it in beslutter }) {
             roller.add(Brukerrolle.BESLUTTER)
         }
-        if (tilgangsgrupper.any { egenAnsatt.contains(it) }) {
+        if (tilgangsgrupper.any { it in egenAnsatt }) {
             roller.add(Brukerrolle.EGEN_ANSATT)
         }
-        if (tilgangsgrupper.any { kode7.contains(it) }) {
+        if (tilgangsgrupper.any { it in kode7 }) {
             roller.add(Brukerrolle.KODE_7)
         }
-        if (tilgangsgrupper.any { stikkprøve.contains(it) }) {
+        if (tilgangsgrupper.any { it in stikkprøve }) {
             roller.add(Brukerrolle.STIKKPRØVE)
         }
         return roller
