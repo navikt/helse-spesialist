@@ -15,7 +15,7 @@ import java.util.UUID
 
 class ApiModuleIntegrationTestFixture(
     private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
-    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller
+    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     val token: String =
         mockOAuth2Server
@@ -103,6 +103,9 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     }
     if (Brukerrolle.STIKKPRØVE in brukerroller) {
         uuider.addAll(stikkprøve)
+    }
+    if (Brukerrolle.UTVIKLER in brukerroller) {
+        uuider.addAll(utvikler)
     }
     return uuider
 }
