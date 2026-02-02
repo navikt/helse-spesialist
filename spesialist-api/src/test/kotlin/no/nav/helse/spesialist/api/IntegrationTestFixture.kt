@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -32,7 +33,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import kotlin.test.assertEquals
 
-class IntegrationTestFixture() {
+class IntegrationTestFixture {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
     val daos = inMemoryRepositoriesAndDaos.daos
     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
@@ -41,10 +42,10 @@ class IntegrationTestFixture() {
     companion object {
         val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
         val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
-        val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(
-            mockOAuth2Server = mockOAuth2Server,
-            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
-
+        val apiModuleIntegrationTestFixture =
+            ApiModuleIntegrationTestFixture(
+                mockOAuth2Server = mockOAuth2Server,
+                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             )
 
         fun Response.get(sti: String): JsonNode {
@@ -58,23 +59,26 @@ class IntegrationTestFixture() {
 
     val krrRegistrertStatusHenterMock: KrrRegistrertStatusHenter = mockk(relaxed = true)
 
-    private val apiModule = ApiModule(
-        configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
-        daos = daos,
-        meldingPubliserer = meldingPubliserer,
-        tilgangsgruppehenter = { Either.Success(emptySet()) },
-        sessionFactory = sessionFactory,
-        environmentToggles = mockk(relaxed = true),
-        snapshothenter = mockk(relaxed = true),
-        krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
-        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
-    )
+    private val apiModule =
+        ApiModule(
+            configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
+            daos = daos,
+            meldingPubliserer = meldingPubliserer,
+            tilgangsgruppehenter = { Either.Success(emptySet()) },
+            sessionFactory = sessionFactory,
+            environmentToggles = mockk(relaxed = true),
+            snapshothenter = mockk(relaxed = true),
+            krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+        )
 
     class Response(
         val status: Int,
-        val bodyAsText: String
+        val bodyAsText: String,
     ) {
         val bodyAsJsonNode = bodyAsText.takeUnless(String::isEmpty)?.let(objectMapper::readTree)
+
+        inline fun <reified T> body(): T = objectMapper.readValue<T>(bodyAsText)
     }
 
     fun get(
@@ -89,18 +93,20 @@ class IntegrationTestFixture() {
                 apiModule.setUpApi(this)
             }
 
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
             runBlocking {
                 logg.info("Sender GET $url")
-                val httpResponse = client.get(url) {
-                    accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                }
+                val httpResponse =
+                    client.get(url) {
+                        accept(ContentType.Application.Json)
+                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                    }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")
                 response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
@@ -123,20 +129,22 @@ class IntegrationTestFixture() {
                 apiModule.setUpApi(this)
             }
 
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
             runBlocking {
                 logg.info("Sender POST $url med data $body")
-                val httpResponse = client.post(url) {
-                    contentType(ContentType.Application.Json)
-                    accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                    setBody(body)
-                }
+                val httpResponse =
+                    client.post(url) {
+                        contentType(ContentType.Application.Json)
+                        accept(ContentType.Application.Json)
+                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                        setBody(body)
+                    }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")
                 response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
@@ -151,8 +159,7 @@ class IntegrationTestFixture() {
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         brukerroller: Set<Brukerrolle> = emptySet(),
-
-        ): Response {
+    ): Response {
         lateinit var response: Response
 
         testApplication {
@@ -160,20 +167,22 @@ class IntegrationTestFixture() {
                 apiModule.setUpApi(this)
             }
 
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
             runBlocking {
                 logg.info("Sender PUT $url med data $body")
-                val httpResponse = client.put(url) {
-                    contentType(ContentType.Application.Json)
-                    accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                    setBody(body)
-                }
+                val httpResponse =
+                    client.put(url) {
+                        contentType(ContentType.Application.Json)
+                        accept(ContentType.Application.Json)
+                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                        setBody(body)
+                    }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")
                 response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
@@ -224,8 +233,7 @@ class IntegrationTestFixture() {
         url: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         brukerroller: Set<Brukerrolle> = emptySet(),
-
-        ): Response {
+    ): Response {
         lateinit var response: Response
 
         testApplication {
@@ -233,19 +241,21 @@ class IntegrationTestFixture() {
                 apiModule.setUpApi(this)
             }
 
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
             runBlocking {
                 logg.info("Sender DELETE $url")
-                val httpResponse = client.delete(url) {
-                    contentType(ContentType.Application.Json)
-                    accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                }
+                val httpResponse =
+                    client.delete(url) {
+                        contentType(ContentType.Application.Json)
+                        accept(ContentType.Application.Json)
+                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                    }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")
                 response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
@@ -256,25 +266,25 @@ class IntegrationTestFixture() {
     }
 
     fun assertPubliserteBehovLister(
-        vararg publiserteBehovLister: InMemoryMeldingPubliserer.PublisertBehovListe
+        vararg publiserteBehovLister: InMemoryMeldingPubliserer.PublisertBehovListe,
     ) {
         assertEquals(
             publiserteBehovLister.toList(),
-            meldingPubliserer.publiserteBehovLister
+            meldingPubliserer.publiserteBehovLister,
         )
     }
 
     fun assertPubliserteKommandokjedeEndretEvents(
-        vararg publiserteKommandokjedeEndretEvents: InMemoryMeldingPubliserer.PublisertKommandokjedeEndretEvent
+        vararg publiserteKommandokjedeEndretEvents: InMemoryMeldingPubliserer.PublisertKommandokjedeEndretEvent,
     ) {
         assertEquals(
             publiserteKommandokjedeEndretEvents.toList(),
-            meldingPubliserer.publiserteKommandokjedeEndretEvents
+            meldingPubliserer.publiserteKommandokjedeEndretEvents,
         )
     }
 
     fun assertPubliserteSubsumsjoner(
-        vararg publiserteSubsumsjoner: InMemoryMeldingPubliserer.PublisertSubsumsjon
+        vararg publiserteSubsumsjoner: InMemoryMeldingPubliserer.PublisertSubsumsjon,
     ) {
         assertEquals(publiserteSubsumsjoner.size, meldingPubliserer.publiserteSubsumsjoner.size)
         publiserteSubsumsjoner.zip(meldingPubliserer.publiserteSubsumsjoner).forEach { (expected, actual) ->
@@ -284,7 +294,10 @@ class IntegrationTestFixture() {
         }
     }
 
-    private fun assertSubsumsjonEventEquals(expected: SubsumsjonEvent, actual: SubsumsjonEvent) {
+    private fun assertSubsumsjonEventEquals(
+        expected: SubsumsjonEvent,
+        actual: SubsumsjonEvent,
+    ) {
         assertEquals(expected.fødselsnummer, actual.fødselsnummer)
         assertEquals(expected.paragraf, actual.paragraf)
         assertEquals(expected.ledd, actual.ledd)
@@ -299,21 +312,21 @@ class IntegrationTestFixture() {
     }
 
     fun assertPubliserteUtgåendeHendelser(
-        vararg publiserteUtgåendeHendelse: InMemoryMeldingPubliserer.PublisertUtgåendeHendelse
+        vararg publiserteUtgåendeHendelse: InMemoryMeldingPubliserer.PublisertUtgåendeHendelse,
     ) {
         assertEquals(
             publiserteUtgåendeHendelse.toList(),
-            meldingPubliserer.publiserteUtgåendeHendelser
+            meldingPubliserer.publiserteUtgåendeHendelser,
         )
     }
 
     fun assertPubliserteUtgåendeHendelser(
-        vararg assertionsPerHendelse: (actualUtgåendeHendelse: InMemoryMeldingPubliserer.PublisertUtgåendeHendelse) -> Unit
+        vararg assertionsPerHendelse: (actualUtgåendeHendelse: InMemoryMeldingPubliserer.PublisertUtgåendeHendelse) -> Unit,
     ) {
         assertEquals(
             expected = assertionsPerHendelse.size,
             actual = meldingPubliserer.publiserteUtgåendeHendelser.size,
-            message = "Uventet antall meldinger. Faktiske meldinger: ${meldingPubliserer.publiserteUtgåendeHendelser}"
+            message = "Uventet antall meldinger. Faktiske meldinger: ${meldingPubliserer.publiserteUtgåendeHendelser}",
         )
         assertionsPerHendelse
             .zip(meldingPubliserer.publiserteUtgåendeHendelser)
@@ -324,7 +337,7 @@ class IntegrationTestFixture() {
         assertEquals(
             expected = 0,
             actual = meldingPubliserer.publiserteUtgåendeHendelser.size,
-            message = "Forventet ingen meldinger, men følgende ble publisert: ${meldingPubliserer.publiserteUtgåendeHendelser}"
+            message = "Forventet ingen meldinger, men følgende ble publisert: ${meldingPubliserer.publiserteUtgåendeHendelser}",
         )
     }
 }
