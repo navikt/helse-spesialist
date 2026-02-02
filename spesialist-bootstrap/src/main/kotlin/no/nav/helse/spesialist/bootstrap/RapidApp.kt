@@ -83,6 +83,7 @@ fun main() {
                         egenAnsatt = env.getUUIDList("ROLLE_EGEN_ANSATT"),
                         kode7 = env.getUUIDList("ROLLE_KODE_7"),
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
+                        utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),
@@ -100,8 +101,6 @@ fun main() {
             ),
     )
 }
-
-private fun Map<String, String>.getUUID(key: String): UUID = UUID.fromString(getValue(key))
 
 private fun Map<String, String>.getUUIDList(key: String): List<UUID> = this[key]?.split(",")?.map { UUID.fromString(it.trim()) } ?: emptyList()
 

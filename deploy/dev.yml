@@ -56,6 +56,7 @@ spec:
         groups:
           - id: {{ENTRAID_UUID_SAKSBEHANDLER}} # speil-brukere-prod - har du tilgang i prod har du tilgang i dev også er tanken her
           - id: {{ENTRAID_UUID_TBD}}
+          - id: {{ENTRAID_UUID_NAIS_TBD}}
           - id: {{ENTRAID_UUID_KODE_7_DEV}}
           - id: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
           - id: {{ENTRAID_UUID_SPEIL_BRUKERE_DEV}}
@@ -114,6 +115,8 @@ spec:
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_SELVSTENDIG_BETA
       value: {{ENTRAID_UUID_TBD}}
+    - name: ROLLE_UTVIKLER
+      value: {{ENTRAID_UUID_NAIS_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL

@@ -6,4 +6,5 @@ enum class Brukerrolle {
     EGEN_ANSATT,
     KODE_7,
     STIKKPRØVE,
+    UTVIKLER,
 }

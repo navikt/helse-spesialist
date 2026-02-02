@@ -17,7 +17,8 @@ class TilgangsgrupperTilBrukerrollerTest {
         beslutter = emptyList(),
         egenAnsatt = emptyList(),
         kode7 = emptyList(),
-        stikkprøve = emptyList()
+        stikkprøve = emptyList(),
+        utvikler = emptyList(),
     )
 
     @Test

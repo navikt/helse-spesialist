@@ -8,5 +8,6 @@ fun randomTilgangsgrupperTilBrukerroller(): TilgangsgrupperTilBrukerroller =
         beslutter = listOf(UUID.randomUUID()),
         egenAnsatt = listOf(UUID.randomUUID()),
         kode7 = listOf(UUID.randomUUID()),
-        stikkprøve = listOf(UUID.randomUUID())
+        stikkprøve = listOf(UUID.randomUUID()),
+        utvikler = listOf(UUID.randomUUID()),
     )
