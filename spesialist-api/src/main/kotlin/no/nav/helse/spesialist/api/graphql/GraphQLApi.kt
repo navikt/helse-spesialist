@@ -45,6 +45,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
+import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -157,14 +158,15 @@ fun lagSchemaMedResolversOgHandlers(
 fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
     post {
         val start = System.nanoTime()
+        withSaksbehandlerIdentMdc(call) {
+            val result = checkNotNull(server.execute(call.request)) { "Kall mot GraphQL server feilet" }
 
-        val result = checkNotNull(server.execute(call.request)) { "Kall mot GraphQL server feilet" }
+            loggFeil(result)
 
-        loggFeil(result)
-
-        val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
-        teamLogs.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
-        call.respond(result)
+            val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
+            teamLogs.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
+            call.respond(result)
+        }
     }
 }
 

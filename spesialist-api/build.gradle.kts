@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logback)
     implementation(libs.micrometer.prometheus)
+    implementation(libs.bundles.kotlinx.coroutines)
     implementation(libs.bundles.smiley4.ktor.openapi.tools)
 
     testImplementation(testFixtures(project(":spesialist-application")))

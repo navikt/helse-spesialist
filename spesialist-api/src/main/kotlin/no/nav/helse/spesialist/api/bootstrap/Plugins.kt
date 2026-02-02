@@ -39,6 +39,7 @@ import io.ktor.utils.io.readText
 import io.swagger.v3.oas.models.media.Schema
 import kotlinx.serialization.modules.SerializersModule
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
+import no.nav.helse.spesialist.api.getSaksbehandlerIdentForMdc
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.serialization.BigDecimalStringSerializer
 import no.nav.helse.spesialist.api.serialization.BooleanStrictSerializer
@@ -69,6 +70,7 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
         logger = teamLogs
         level = Level.INFO
         callIdMdc("callId")
+        mdc("saksbehandlerIdent", ApplicationCall::getSaksbehandlerIdentForMdc)
         filter { call ->
             call.request.path().let { it.startsWith("/graphql") || it.startsWith("/ws/") || it.startsWith("/api/") }
         }

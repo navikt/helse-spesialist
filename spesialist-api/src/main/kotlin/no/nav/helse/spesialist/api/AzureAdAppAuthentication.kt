@@ -3,9 +3,11 @@ package no.nav.helse.spesialist.api
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.auth.principal
 import io.ktor.server.request.uri
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -77,3 +79,5 @@ data class SaksbehandlerPrincipal(
     val tilgangsgrupper: Set<Tilgangsgruppe>,
     val brukerroller: Set<Brukerrolle>,
 )
+
+fun ApplicationCall.getSaksbehandlerIdentForMdc(): String? = principal<SaksbehandlerPrincipal>()?.saksbehandler?.ident?.value
