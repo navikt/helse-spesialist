@@ -6,6 +6,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -44,7 +45,7 @@ class IntegrationTestFixture() {
             mockOAuth2Server = mockOAuth2Server,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
 
-        )
+            )
 
         fun Response.get(sti: String): JsonNode {
             val stiSegments = sti.split(".")
@@ -61,7 +62,7 @@ class IntegrationTestFixture() {
         configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
         daos = daos,
         meldingPubliserer = meldingPubliserer,
-        tilgangsgruppehenter = { Either.Success( emptySet()) },
+        tilgangsgruppehenter = { Either.Success(emptySet()) },
         sessionFactory = sessionFactory,
         environmentToggles = mockk(relaxed = true),
         snapshothenter = mockk(relaxed = true),
@@ -98,7 +99,7 @@ class IntegrationTestFixture() {
                 logg.info("Sender GET $url")
                 val httpResponse = client.get(url) {
                     accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler,  brukerroller))
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
                 }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")
@@ -168,6 +169,43 @@ class IntegrationTestFixture() {
             runBlocking {
                 logg.info("Sender PUT $url med data $body")
                 val httpResponse = client.put(url) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                    setBody(body)
+                }
+                val bodyAsText = httpResponse.bodyAsText()
+                logg.info("Fikk respons: $bodyAsText")
+                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
+            }
+        }
+
+        return response
+    }
+
+    fun patch(
+        url: String,
+        @Language("JSON") body: String,
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
+        brukerroller: Set<Brukerrolle> = emptySet(),
+
+        ): Response {
+        lateinit var response: Response
+
+        testApplication {
+            application {
+                apiModule.setUpApi(this)
+            }
+
+            client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }
+
+            runBlocking {
+                logg.info("Sender PATCH $url med data $body")
+                val httpResponse = client.patch(url) {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
                     bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))

@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PutNotatBehandlerIntegrationTest {
+class PatchNotatBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
@@ -38,7 +38,7 @@ class PutNotatBehandlerIntegrationTest {
         ).also(sessionContext.notatRepository::lagre).id()
 
         // When:
-        val response = integrationTestFixture.put(
+        val response = integrationTestFixture.patch(
             url = "/api/notater/${notatId.value}",
             body = """{ "feilregistrert": true }""",
             saksbehandler = saksbehandler,

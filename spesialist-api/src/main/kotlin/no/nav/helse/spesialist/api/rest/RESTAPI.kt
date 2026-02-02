@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandlerV2
-import no.nav.helse.spesialist.api.rest.notater.PutNotatBehandler
+import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer.GetOpptegnelseSekvensnummerSisteBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetOpptegnelserForPersonBehandler
@@ -85,8 +85,8 @@ fun Routing.restRoutes(
             post(PostNotatBehandler(), restAdapter)
             post(PostKommentarBehandler(), restAdapter)
             put(PutFeilregistrerNotatBehandler(), restAdapter)
-            put(PutNotatBehandler(), restAdapter)
             put(PutFeilregistrerKommentarBehandler(), restAdapter)
+            patch(PatchNotatBehandler(), restAdapter)
 
             get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)
             get(GetOpptegnelserForPersonBehandler(), restAdapter)
