@@ -23,6 +23,12 @@ data class ApiNotatRequest(
 )
 
 @Serializable
+data class ApiNotatV2Request(
+    val vedtaksperiodeId: UUID,
+    val tekst: String,
+)
+
+@Serializable
 data class ApiNotatResponse(
     val id: Int,
 )
