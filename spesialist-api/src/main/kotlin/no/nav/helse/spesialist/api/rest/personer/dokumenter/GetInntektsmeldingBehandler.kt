@@ -2,38 +2,32 @@ package no.nav.helse.spesialist.api.rest.personer.dokumenter
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
 ) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        brukerroller: Set<Brukerrolle>,
+        kallKontekst: KallKontekst,
     ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
         val personId = resource.parent.parent.parent.pseudoId
         val pseudoId = PersonPseudoId.fraString(personId)
         val identitetsnummer =
-            transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
+            kallKontekst.transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
                 ?: return RestResponse.Error(ApiGetInntektsmeldingErrorCode.PERSON_IKKE_FUNNET)
 
         val dokument =
             dokumentMediator.hentDokument(
-                dokumentDao = transaksjon.dokumentDao,
+                dokumentDao = kallKontekst.transaksjon.dokumentDao,
                 fødselsnummer = identitetsnummer.value,
                 dokumentId = resource.parent.dokumentId,
                 dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING,
@@ -52,15 +46,21 @@ class GetInntektsmeldingBehandler(
                 .takeUnless { it.isEmpty() }
 
         val fødselsnumreForIM =
-            fødselsnummerForIM + aktørIdForIM?.let { transaksjon.legacyPersonRepository.finnFødselsnumre(aktørIdForIM).toSet() }.orEmpty()
+            fødselsnummerForIM +
+                aktørIdForIM
+                    ?.let {
+                        kallKontekst.transaksjon.legacyPersonRepository
+                            .finnFødselsnumre(aktørIdForIM)
+                            .toSet()
+                    }.orEmpty()
 
         if (fødselsnumreForIM.isEmpty()) return RestResponse.Error(ApiGetInntektsmeldingErrorCode.MANGLER_FØDSELSNUMMER_OG_AKTØRID)
         if (identitetsnummer.value !in fødselsnumreForIM) return RestResponse.Error(ApiGetInntektsmeldingErrorCode.FANT_IKKE_DOKUMENT)
 
-        if (!saksbehandler.harTilgangTilPerson(
+        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = identitetsnummer,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
+                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                transaksjon = kallKontekst.transaksjon,
             )
         ) {
             return RestResponse.Error(ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON)

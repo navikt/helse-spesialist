@@ -14,13 +14,9 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
@@ -33,33 +29,20 @@ import java.time.ZoneId
 class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        brukerroller: Set<Brukerrolle>,
-    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
-        val personId = resource.parent.pseudoId
-        val pseudoId = PersonPseudoId.fraString(personId)
-        val identitetsnummer =
-            transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
-                ?: return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET)
-
-        if (!saksbehandler.harTilgangTilPerson(
-                identitetsnummer = identitetsnummer,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
+        kallKontekst: KallKontekst,
+    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
+        kallKontekst.medPerson(
+            personPseudoIdResource = resource.parent,
+            personIkkeFunnetErrorCode = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET,
+            manglerTilgangTilPersonErrorCode = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
+        ) { person ->
+            RestResponse.OK(
+                hentTilkomneInntektskilder(
+                    fødselsnummer = person.id.value,
+                    transaksjon = kallKontekst.transaksjon,
+                ),
             )
-        ) {
-            return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
-
-        return RestResponse.OK(
-            hentTilkomneInntektskilder(
-                fødselsnummer = identitetsnummer.value,
-                transaksjon = transaksjon,
-            ),
-        )
-    }
 
     private fun hentTilkomneInntektskilder(
         fødselsnummer: String,

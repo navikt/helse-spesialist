@@ -2,42 +2,35 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.resources.Opphevstans
-import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Unit, ApiPostOpphevStansErrorCode> {
     override fun behandle(
         resource: Opphevstans,
         request: ApiOpphevStansRequest,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        outbox: Outbox,
+        kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostOpphevStansErrorCode> {
         val fødselsnummer = request.fodselsnummer
-        if (!saksbehandler.harTilgangTilPerson(
+        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
+                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                transaksjon = kallKontekst.transaksjon,
             )
         ) {
             return RestResponse.Error(ApiPostOpphevStansErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
-        transaksjon.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fødselsnummer)
-        transaksjon.notatDao.lagreForOppgaveId(
+        kallKontekst.transaksjon.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fødselsnummer)
+        kallKontekst.transaksjon.notatDao.lagreForOppgaveId(
             oppgaveId =
-                transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = fødselsnummer)
-                    ?: transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = fødselsnummer),
+                kallKontekst.transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = fødselsnummer)
+                    ?: kallKontekst.transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = fødselsnummer),
             tekst = request.begrunnelse,
-            saksbehandlerOid = saksbehandler.id.value,
+            saksbehandlerOid = kallKontekst.saksbehandler.id.value,
             notatType = NotatType.OpphevStans,
-            dialogRef = transaksjon.dialogDao.lagre(),
+            dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
         )
 
         return RestResponse.NoContent()

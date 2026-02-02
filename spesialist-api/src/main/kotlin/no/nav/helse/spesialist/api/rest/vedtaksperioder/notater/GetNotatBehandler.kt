@@ -2,12 +2,12 @@ package no.nav.helse.spesialist.api.rest.vedtaksperioder.notater
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiKommentar
 import no.nav.helse.spesialist.api.rest.ApiNotat
 import no.nav.helse.spesialist.api.rest.ApiNotatType
 import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
@@ -21,39 +21,34 @@ import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
 
 class GetNotatBehandler : GetBehandler<Vedtaksperioder.VedtaksperiodeId.Notater.NotatId, ApiNotat, GetNotatErrorCode> {
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.Notater.NotatId,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        brukerroller: Set<Brukerrolle>,
+        kallKontekst: KallKontekst,
     ): RestResponse<ApiNotat, GetNotatErrorCode> {
         val notatId = NotatId(resource.notatId)
-        val notat = transaksjon.notatRepository.finn(notatId) ?: return RestResponse.Error(NOTAT_IKKE_FUNNET)
+        val notat = kallKontekst.transaksjon.notatRepository.finn(notatId) ?: return RestResponse.Error(NOTAT_IKKE_FUNNET)
 
         val vedtaksperiode =
-            transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(notat.vedtaksperiodeId))
+            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(notat.vedtaksperiodeId))
                 ?: error("Fant ikke vedtaksperiode")
 
-        if (!saksbehandler.harTilgangTilPerson(
+        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
+                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                transaksjon = kallKontekst.transaksjon,
             )
         ) {
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
 
         val dialog =
-            transaksjon.dialogRepository.finn(notat.dialogRef)
+            kallKontekst.transaksjon.dialogRepository.finn(notat.dialogRef)
                 ?: error("Kunne ikke finne dialog med id ${notat.dialogRef}")
 
-        return RestResponse.OK(notat.tilApiNotat(saksbehandler, dialog))
+        return RestResponse.OK(notat.tilApiNotat(kallKontekst.saksbehandler, dialog))
     }
 
     override fun openApi(config: RouteConfig) {

@@ -11,6 +11,7 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.BEHANDLING_IKKE_FUNNET
@@ -29,59 +30,55 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
 
 class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasting, ApiForkastingRequest, Unit, ApiPostForkastingErrorCode> {
     override fun behandle(
         resource: Behandlinger.BehandlingId.Forkasting,
         request: ApiForkastingRequest,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        outbox: Outbox,
+        kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostForkastingErrorCode> {
         val spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId)
         val behandling =
-            transaksjon.behandlingRepository.finn(spleisBehandlingId)
+            kallKontekst.transaksjon.behandlingRepository.finn(spleisBehandlingId)
                 ?: return RestResponse.Error(BEHANDLING_IKKE_FUNNET)
         val vedtaksperiode =
-            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
+            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                 ?: return RestResponse.Error(VEDTAKSPERIODE_IKKE_FUNNET)
 
         val fødselsnummer = vedtaksperiode.fødselsnummer
 
-        if (!saksbehandler.harTilgangTilPerson(
+        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
+                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                transaksjon = kallKontekst.transaksjon,
             )
         ) {
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
         val oppgave =
-            transaksjon.oppgaveRepository.finn(spleisBehandlingId)
+            kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
                 ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
         if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
 
-        oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
+        oppgave.avventerSystem(kallKontekst.saksbehandler.ident, kallKontekst.saksbehandler.id.value)
         oppgave.fjernFraPåVent()
-        outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
-        transaksjon.påVentDao.slettPåVent(oppgave.id)
-        transaksjon.oppgaveRepository.lagre(oppgave)
+        kallKontekst.outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
+        kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id)
+        kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
 
-        val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
+        val totrinnsvurdering = kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         if (totrinnsvurdering != null) {
             if (totrinnsvurdering.tilstand == TotrinnsvurderingTilstand.AVVENTER_BESLUTTER) {
                 return RestResponse.Error(TOTRINNSVURDERING_SENDT_TIL_BESLUTTER)
             }
             totrinnsvurdering.ferdigstill()
-            transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+            kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
 
-        transaksjon.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
+        kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, fødselsnummer)
 
-        val varsler = transaksjon.varselRepository.finnVarslerFor(listOf(behandling.id))
+        val varsler = kallKontekst.transaksjon.varselRepository.finnVarslerFor(listOf(behandling.id))
         varsler
             .filter {
                 it.kanAvvises()
@@ -89,20 +86,27 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
                 val gammelStatus = it.status
                 it.avvis()
                 val varseldefinisjon =
-                    transaksjon.varseldefinisjonRepository.finnGjeldendeFor(it.kode)
+                    kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(it.kode)
                         ?: error("Varsel mangler varseldefinisjon")
-                outbox.leggTilAvvistVarsel(gammelStatus, it, vedtaksperiode.id, spleisBehandlingId, fødselsnummer, varseldefinisjon)
+                kallKontekst.outbox.leggTilAvvistVarsel(
+                    gammelStatus,
+                    it,
+                    vedtaksperiode.id,
+                    spleisBehandlingId,
+                    fødselsnummer,
+                    varseldefinisjon,
+                )
             }.let { avvisteVarsler ->
-                transaksjon.varselRepository.lagre(avvisteVarsler)
+                kallKontekst.transaksjon.varselRepository.lagre(avvisteVarsler)
             }
         byttTilstandOgPubliserMeldinger(
             fødselsnummer = fødselsnummer,
             behandling = behandling,
             oppgave = oppgave,
             totrinnsvurdering = totrinnsvurdering,
-            saksbehandler = saksbehandler,
-            outbox = outbox,
-            transaksjon = transaksjon,
+            saksbehandler = kallKontekst.saksbehandler,
+            outbox = kallKontekst.outbox,
+            transaksjon = kallKontekst.transaksjon,
             årsak = request.årsak,
             begrunnelser = request.begrunnelser,
             kommentar = request.kommentar,

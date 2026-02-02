@@ -7,19 +7,17 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiPatchEndring
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
-import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
@@ -30,22 +28,19 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
     override fun behandle(
         resource: TilkomneInntekter.Id,
         request: ApiTilkommenInntektPatch,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        outbox: Outbox,
+        kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchTilkommenInntektErrorCode> {
         val tilkommenInntekt =
-            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.tilkommenInntektId))
+            kallKontekst.transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.tilkommenInntektId))
                 ?: return RestResponse.Error(
                     errorCode = ApiPatchTilkommenInntektErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT,
                     detail = "Tilkommen inntekt med id ${resource.tilkommenInntektId} ble ikke funnet",
                 )
 
-        if (!saksbehandler.harTilgangTilPerson(
+        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(identitetsnummer = tilkommenInntekt.fødselsnummer),
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
+                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                transaksjon = kallKontekst.transaksjon,
             )
         ) {
             return RestResponse.Error(ApiPatchTilkommenInntektErrorCode.MANGLER_TILGANG_TIL_PERSON)
@@ -69,29 +64,29 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         val tidligerePublisertTilstand = tilkommenInntekt.tilPubliserbarTilstand()
 
-        val saksbehandlerIdent = saksbehandler.ident
+        val saksbehandlerIdent = kallKontekst.saksbehandler.ident
         val notatTilBeslutter = request.notatTilBeslutter
         if (endringer.fjernet?.fra == true && endringer.fjernet?.til == false) {
             // Gjenopprettelse har endringer bakt inn i seg, så vi kaller bare endre hvis vi ikke gjenoppretter samtidig
-            gjenopprett(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, transaksjon)
+            gjenopprett(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         } else {
-            endre(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, transaksjon)
+            endre(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         }
         TilkommenInntektPeriodeValidator.validerPeriode(
             periode = tilkommenInntekt.periode,
             organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
             andreTilkomneInntekter =
-                transaksjon.tilkommenInntektRepository
+                kallKontekst.transaksjon.tilkommenInntektRepository
                     .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                     .minus(tilkommenInntekt),
-            vedtaksperioder = transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+            vedtaksperioder = kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
         )
 
         if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {
-            fjern(tilkommenInntekt, saksbehandlerIdent, notatTilBeslutter, transaksjon)
+            fjern(tilkommenInntekt, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         }
 
-        transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
+        kallKontekst.transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
         val nåværendeTilstand = tilkommenInntekt.tilPubliserbarTilstand()
 
@@ -102,7 +97,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             )
 
         event?.let {
-            outbox.leggTil(
+            kallKontekst.outbox.leggTil(
                 fødselsnummer = tilkommenInntekt.fødselsnummer,
                 hendelse = it,
                 årsak = "endring av tilkommen inntekt",

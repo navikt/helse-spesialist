@@ -11,7 +11,6 @@ import io.ktor.server.routing.RoutingCall
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.getSaksbehandlerIdentForMdc
@@ -19,9 +18,6 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarnThrowable
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.MDC
 
 class RestAdapter(
@@ -34,33 +30,9 @@ class RestAdapter(
     suspend inline fun <RESOURCE, RESPONSE, ERROR : ApiErrorCode> behandle(
         resource: RESOURCE,
         call: RoutingCall,
-        behandler: GetBehandler<RESOURCE, RESPONSE, ERROR>,
+        behandler: RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, _, brukerroller ->
-            behandler.behandle(
-                resource = resource,
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
-                brukerroller = brukerroller,
-            )
-        }
-    }
-
-    suspend inline fun <RESOURCE, RESPONSE, ERROR : ApiErrorCode> behandle(
-        resource: RESOURCE,
-        call: RoutingCall,
-        behandler: DeleteBehandler<RESOURCE, RESPONSE, ERROR>,
-    ) {
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox, _ ->
-            behandler.behandle(
-                resource = resource,
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
-                outbox = outbox,
-            )
-        }
+        wrapOgDeleger(call) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
     }
 
     suspend inline fun <RESOURCE, reified REQUEST, RESPONSE, ERROR : ApiErrorCode> behandle(
@@ -69,21 +41,12 @@ class RestAdapter(
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
         val request: REQUEST = call.receive()
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox, _ ->
-            behandler.behandle(
-                resource = resource,
-                request = request,
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
-                outbox = outbox,
-            )
-        }
+        wrapOgDeleger(call) { kallKontekst -> behandler.behandle(resource, request, kallKontekst) }
     }
 
     suspend fun <RESPONSE, ERROR : ApiErrorCode> wrapOgDeleger(
         call: RoutingCall,
-        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox, Set<Brukerrolle>) -> RestResponse<RESPONSE, ERROR>,
+        behandler: (KallKontekst) -> RestResponse<RESPONSE, ERROR>,
     ) {
         withSaksbehandlerIdentMdc(call) {
             val principal =
@@ -100,14 +63,15 @@ class RestAdapter(
                 val outbox = Outbox(versjonAvKode)
                 sessionFactory
                     .transactionalSessionScope { transaksjon ->
-                        val response =
-                            behandler.invoke(
-                                principal.saksbehandler,
-                                principal.tilgangsgrupper,
-                                transaksjon,
-                                outbox,
-                                principal.brukerroller,
+                        val kallKontekst =
+                            KallKontekst(
+                                saksbehandler = principal.saksbehandler,
+                                tilgangsgrupper = principal.tilgangsgrupper,
+                                brukerroller = principal.brukerroller,
+                                transaksjon = transaksjon,
+                                outbox = outbox,
                             )
+                        val response = behandler.invoke(kallKontekst)
 
                         if (response is RestResponse.Error) {
                             throw WrappedApiHttpProblemDetailsException(

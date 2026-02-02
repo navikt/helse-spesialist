@@ -10,13 +10,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 
@@ -58,10 +54,7 @@ class RestAdapterTest {
     private class UnitUnitErrorGetBehandler : GetBehandler<Unit, Unit, Error> {
         override fun behandle(
             resource: Unit,
-            saksbehandler: Saksbehandler,
-            tilgangsgrupper: Set<Tilgangsgruppe>,
-            transaksjon: SessionContext,
-            brukerroller: Set<Brukerrolle>,
+            kallKontekst: KallKontekst,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
 
         override fun openApi(config: RouteConfig) {}

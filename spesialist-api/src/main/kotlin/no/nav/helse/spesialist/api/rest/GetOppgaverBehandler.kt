@@ -28,25 +28,22 @@ import kotlin.time.measureTimedValue
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
     override fun behandle(
         resource: Oppgaver,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        brukerroller: Set<Brukerrolle>,
+        kallKontekst: KallKontekst,
     ): RestResponse<ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
         val (finnOppgaveProjeksjoner, tidsbruk) =
             measureTimedValue {
-                transaksjon.oppgaveRepository
+                kallKontekst.transaksjon.oppgaveRepository
                     .finnOppgaveProjeksjoner(
                         minstEnAvEgenskapene = resource.minstEnAvEgenskapene.map { it.tilEgenskaper() },
                         ingenAvEgenskapene =
                             Egenskap.entries
-                                .filterNot { it.skalDukkeOppFor(brukerroller, tilgangsgrupper) }
+                                .filterNot { it.skalDukkeOppFor(kallKontekst.brukerroller, kallKontekst.tilgangsgrupper) }
                                 .plus(resource.ingenAvEgenskapene.tilEgenskaper())
                                 .toSet(),
                         erTildelt = resource.erTildelt,
                         tildeltTilOid = resource.tildeltTilOid?.let(::SaksbehandlerOid),
                         erPåVent = resource.erPaaVent,
-                        ikkeSendtTilBeslutterAvOid = saksbehandler.id,
+                        ikkeSendtTilBeslutterAvOid = kallKontekst.saksbehandler.id,
                         sorterPå =
                             when (resource.sorteringsfelt) {
                                 null,
@@ -75,7 +72,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             }
         logg.info("Hentet oppgaver på ${tidsbruk.inWholeMilliseconds} ms.\nParametere: $resource")
         return RestResponse.OK(
-            finnOppgaveProjeksjoner.tilApiType(transaksjon),
+            finnOppgaveProjeksjoner.tilApiType(kallKontekst.transaksjon),
         )
     }
 

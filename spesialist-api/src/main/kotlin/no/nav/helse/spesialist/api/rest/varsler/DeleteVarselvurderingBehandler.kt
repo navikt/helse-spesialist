@@ -2,19 +2,17 @@ package no.nav.helse.spesialist.api.rest.varsler
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.DeleteBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_HAR_FEIL_STATUS
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
-import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.ResultatAvSletting
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel.Status.AKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIKLET
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIST
@@ -22,32 +20,33 @@ import no.nav.helse.spesialist.domain.Varsel.Status.GODKJENT
 import no.nav.helse.spesialist.domain.Varsel.Status.INAKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.VURDERT
 import no.nav.helse.spesialist.domain.VarselId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurdering, Unit, DeleteVarselvurderingErrorCode> {
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        outbox: Outbox,
+        kallKontekst: KallKontekst,
     ): RestResponse<Unit, DeleteVarselvurderingErrorCode> {
         val varselId = VarselId(resource.parent.varselId)
         val varsel =
-            transaksjon.varselRepository.finn(varselId)
+            kallKontekst.transaksjon.varselRepository.finn(varselId)
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
         val behandling =
-            transaksjon.behandlingRepository.finn(varsel.behandlingUnikId)
+            kallKontekst.transaksjon.behandlingRepository.finn(varsel.behandlingUnikId)
                 ?: error("Fant ikke behandling")
 
         val vedtaksperiode =
-            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
+            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                 ?: error("Fant ikke vedtaksperiode")
 
         val identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer)
 
-        if (!saksbehandler.harTilgangTilPerson(identitetsnummer, tilgangsgrupper, transaksjon)) {
+        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
+                identitetsnummer,
+                kallKontekst.tilgangsgrupper,
+                kallKontekst.transaksjon,
+            )
+        ) {
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
 
@@ -56,7 +55,7 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
             AKTIV, VURDERT -> {
                 val resultat = varsel.slettVurdering()
                 if (resultat is ResultatAvSletting.Slettet) {
-                    transaksjon.varselRepository.lagre(varsel)
+                    kallKontekst.transaksjon.varselRepository.lagre(varsel)
                 }
                 RestResponse.NoContent()
             }

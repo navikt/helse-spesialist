@@ -2,23 +2,22 @@ package no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.OpptegnelseSekvensnummer
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekvensnummer.Siste, Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> {
     override fun behandle(
         resource: OpptegnelseSekvensnummer.Siste,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        brukerroller: Set<Brukerrolle>,
-    ): RestResponse<Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> = RestResponse.OK(transaksjon.opptegnelseRepository.finnNyesteSekvensnummer().value)
+        kallKontekst: KallKontekst,
+    ): RestResponse<Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> =
+        RestResponse.OK(
+            kallKontekst.transaksjon.opptegnelseRepository
+                .finnNyesteSekvensnummer()
+                .value,
+        )
 
     override fun openApi(config: RouteConfig) {
         with(config) {
