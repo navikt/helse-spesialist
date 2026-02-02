@@ -21,7 +21,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDateTime
 
-class GetNotatBehandlerV2 : GetBehandler<Notater.NotatId, ApiNotat, GetNotatV2ErrorCode> {
+class GetNotatV2Behandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatV2ErrorCode> {
     override fun behandle(
         resource: Notater.NotatId,
         kallKontekst: KallKontekst,
