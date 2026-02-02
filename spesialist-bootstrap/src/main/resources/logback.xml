@@ -2,6 +2,7 @@
 <configuration>
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Inkluder bare spesifikke MDC-felter, ettersom noen MDC-felter kan inneholde personinformasjon -->
             <includeMdcKeyName>callId</includeMdcKeyName>
             <includeMdcKeyName>trace_flags</includeMdcKeyName>
             <includeMdcKeyName>span_id</includeMdcKeyName>
