@@ -35,8 +35,8 @@ class GetNotatBehandlerV2 : GetBehandler<Notater.NotatId, ApiNotat, GetNotatV2Er
                 ?: error("Fant ikke vedtaksperiode")
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-                tilgangsgrupper = kallKontekst.tilgangsgrupper,
+                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = vedtaksperiode.fødselsnummer),
+                brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {
