@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -203,7 +202,6 @@ internal class MessageContextMeldingPublisererTest {
         val beslutter = SaksbehandlerWrapper(lagSaksbehandler())
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandler,
-            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
             brukerroller = emptySet()
         )
         oppgave.sendTilBeslutter(beslutter)

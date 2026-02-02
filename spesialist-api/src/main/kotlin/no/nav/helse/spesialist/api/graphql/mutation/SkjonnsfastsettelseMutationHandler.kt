@@ -21,7 +21,6 @@ class SkjonnsfastsettelseMutationHandler(
             saksbehandlerMediator.håndter(
                 handlingFraApi = skjonnsfastsettelse,
                 saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
-                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                 brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
             byggRespons(true)

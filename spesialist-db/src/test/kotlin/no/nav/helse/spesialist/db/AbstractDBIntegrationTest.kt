@@ -57,7 +57,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.AfterEach
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -485,7 +484,6 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun Oppgave.tildelOgLagre(
         saksbehandlerWrapper: SaksbehandlerWrapper,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Oppgave {
         opprettSaksbehandler(
@@ -494,7 +492,7 @@ abstract class AbstractDBIntegrationTest {
             epost = saksbehandlerWrapper.saksbehandler.epost,
             ident = saksbehandlerWrapper.saksbehandler.ident,
         )
-        this.forsøkTildeling(saksbehandlerWrapper, saksbehandlerTilgangsgrupper, brukerroller)
+        this.forsøkTildeling(saksbehandlerWrapper,  brukerroller)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }

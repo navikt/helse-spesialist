@@ -300,7 +300,6 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = beslutter,
-                tilgangsgrupper = emptySet(),
             )
 
         // Then:

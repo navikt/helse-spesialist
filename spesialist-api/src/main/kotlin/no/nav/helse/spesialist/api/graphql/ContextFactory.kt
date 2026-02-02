@@ -8,11 +8,9 @@ import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.graphql.ContextValues.BRUKERROLLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 
 enum class ContextValues {
-    TILGANGSGRUPPER,
     BRUKERROLLER,
     SAKSBEHANDLER,
 }
@@ -26,7 +24,6 @@ class ContextFactory : KtorGraphQLContextFactory() {
             }
 
         return mapOf(
-            TILGANGSGRUPPER to principal.tilgangsgrupper,
             SAKSBEHANDLER to principal.saksbehandler,
             BRUKERROLLER to principal.brukerroller,
         ).toGraphQLContext()

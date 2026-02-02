@@ -20,7 +20,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertTrue
 
 object REST {
@@ -39,7 +38,7 @@ object REST {
     fun get(
         relativeUrl: String,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
+
         brukerroller: Set<Brukerrolle>
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
@@ -49,7 +48,6 @@ object REST {
                 accept(ContentType.Application.Json)
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
                     saksbehandler,
-                    tilgangsgrupper,
                     brukerroller
                 ))
             }.let { it.status to it.bodyAsText() }
@@ -62,7 +60,6 @@ object REST {
     fun patch(
         relativeUrl: String,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
         request: Any
     ): JsonNode {
@@ -72,7 +69,6 @@ object REST {
             httpClient.patch(url) {
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
                     saksbehandler,
-                    tilgangsgrupper,
                     brukerroller
                 ))
                 accept(ContentType.Application.Json)
@@ -88,7 +84,6 @@ object REST {
     fun post(
         relativeUrl: String,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
         request: Any
     ): JsonNode {
@@ -98,8 +93,7 @@ object REST {
             httpClient.post(url) {
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
                     saksbehandler,
-                    tilgangsgrupper,
-                    brukerroller
+                    brukerroller,
                 ))
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -114,7 +108,6 @@ object REST {
     fun put(
         relativeUrl: String,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
         request: Any
     ): JsonNode {
@@ -124,7 +117,6 @@ object REST {
             httpClient.put(url) {
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
                     saksbehandler,
-                    tilgangsgrupper,
                     brukerroller
                 ))
                 accept(ContentType.Application.Json)

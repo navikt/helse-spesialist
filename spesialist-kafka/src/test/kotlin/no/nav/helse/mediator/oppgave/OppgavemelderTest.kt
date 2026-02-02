@@ -55,8 +55,7 @@ class OppgavemelderTest {
         val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = saksbehandler,
-            saksbehandlerTilgangsgrupper = emptySet(),
-            brukerroller = emptySet()
+                        brukerroller = emptySet()
         )
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
         oppgave.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())

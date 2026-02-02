@@ -29,7 +29,6 @@ class RestAdapterTest {
                 every { principal<SaksbehandlerPrincipal>() } returns
                         SaksbehandlerPrincipal(
                             saksbehandler = lagSaksbehandler(),
-                            tilgangsgrupper = emptySet(),
                             brukerroller = emptySet(),
                         )
             }

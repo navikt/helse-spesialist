@@ -66,7 +66,6 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.tell
 import java.util.UUID
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil as ApiModellfeil
@@ -88,13 +87,11 @@ class SaksbehandlerMediator(
     fun håndter(
         handlingFraApi: HandlingFraApi,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ) {
         val modellhandling =
             handlingFraApi.tilModellversjon(
                 saksbehandlerOid = saksbehandler.id,
-                saksbehandlerTilgangsgrupper = tilgangsgrupper,
                 brukerroller = brukerroller,
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
@@ -540,7 +537,6 @@ class SaksbehandlerMediator(
 
     private fun HandlingFraApi.tilModellversjon(
         saksbehandlerOid: SaksbehandlerOid,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ): Handling =
         when (this) {
@@ -548,7 +544,7 @@ class SaksbehandlerMediator(
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
-            is TildelOppgave -> this.tilModellversjon(saksbehandlerTilgangsgrupper, brukerroller)
+            is TildelOppgave -> this.tilModellversjon(brukerroller)
             is AvmeldOppgave -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
@@ -703,11 +699,10 @@ class SaksbehandlerMediator(
     private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag = FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
     private fun TildelOppgave.tilModellversjon(
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
         no.nav.helse.modell.saksbehandler.handlinger
-            .TildelOppgave(this.oppgaveId, saksbehandlerTilgangsgrupper, brukerroller)
+            .TildelOppgave(this.oppgaveId, brukerroller)
 
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
         no.nav.helse.modell.saksbehandler.handlinger

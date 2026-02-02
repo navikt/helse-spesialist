@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -152,8 +151,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
                 setOfNotNull(Brukerrolle.EGEN_ANSATT.takeIf { harTilgang })
-        every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
-                emptySet()
     }
 
     private fun saksbehandlertilgangTilKode7(
@@ -161,8 +158,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     ) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
                 setOfNotNull(Brukerrolle.KODE_7.takeIf { harTilgang })
-        every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
-                emptySet()
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)

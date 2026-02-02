@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
@@ -34,7 +33,6 @@ class ApiModuleIntegrationTestFixture(
 
     fun token(
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ): String =
         mockOAuth2Server

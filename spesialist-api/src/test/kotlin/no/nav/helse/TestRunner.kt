@@ -34,7 +34,6 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 
@@ -61,7 +60,6 @@ object TestRunner {
 
     private fun token(
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): String =
         mockOAuth2Server
             .issueToken(
@@ -80,7 +78,6 @@ object TestRunner {
 
     fun runQuery(
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         given: (avhengigheter: Avhengigheter) -> Unit = {},
         @Language("GraphQL") whenever: String,
         then: suspend (response: HttpResponse, body: JsonNode, avhengigheter: Avhengigheter) -> Unit,
@@ -143,7 +140,7 @@ object TestRunner {
                 client.post("/graphql") {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
-                    bearerAuth(token(saksbehandler, tilgangsgrupper))
+                    bearerAuth(token(saksbehandler))
                     setBody(mapOf("query" to whenever))
                 }
 

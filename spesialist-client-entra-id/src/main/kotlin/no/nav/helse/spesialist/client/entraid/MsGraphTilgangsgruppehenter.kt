@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
@@ -53,7 +52,7 @@ class MsGraphTilgangsgruppehenter(
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Either<Pair<Set<Tilgangsgruppe>, Set<Brukerrolle>>, Tilgangsgruppehenter.Feil> {
+    override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Tilgangsgruppehenter.Feil> {
         teamLogs.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
         val (responseStatus, responseBody) =
             runBlocking {
@@ -97,6 +96,6 @@ class MsGraphTilgangsgruppehenter(
         logg.debug("Hentet ${grupper.size} grupper fra MS")
         val uuider = grupper.toSet()
         val brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(uuider)
-        return Either.Success(emptySet<Tilgangsgruppe>() to brukerroller)
+        return Either.Success(brukerroller)
     }
 }

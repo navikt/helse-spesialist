@@ -10,11 +10,9 @@ import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class KallKontekst(
     val saksbehandler: Saksbehandler,
-    val tilgangsgrupper: Set<Tilgangsgruppe>,
     val brukerroller: Set<Brukerrolle>,
     val transaksjon: SessionContext,
     val outbox: Outbox,
@@ -50,7 +48,7 @@ class KallKontekst(
                 oppgaveId?.let { oppgaveId ->
                     transaksjon.oppgaveRepository
                         .finn(oppgaveId)
-                        ?.kanSeesAv(brukerroller, tilgangsgrupper)
+                        ?.kanSeesAv(brukerroller)
                 } ?: true
 
             if (!harTilgangTilOppgave) {

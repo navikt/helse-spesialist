@@ -127,7 +127,6 @@ import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.time.LocalDate
@@ -155,7 +154,6 @@ class PersonQueryHandler(
                     }.getOrElse { badRequest("Ugyldig format på personPseudoId") },
                 transaction = transaction,
                 saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
-                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                 brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
             )
         }
@@ -164,7 +162,6 @@ class PersonQueryHandler(
         personPseudoId: PersonPseudoId,
         transaction: SessionContext,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ): DataFetcherResult<ApiPerson?> {
         val identitetsnummer = (
@@ -207,7 +204,7 @@ class PersonQueryHandler(
             oppgaveId?.let { oppgaveId ->
                 transaction.oppgaveRepository
                     .finn(oppgaveId)
-                    ?.kanSeesAv(brukerroller, tilgangsgrupper)
+                    ?.kanSeesAv(brukerroller)
             } ?: true
 
         if (!harTilgangTilOppgave) {

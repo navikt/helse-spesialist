@@ -957,7 +957,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     "En begrunnelse",
                     dager,
                 )
-            testMediator.håndter(handling, saksbehandler, emptySet())
+            testMediator.håndter(handling, saksbehandler)
             // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
         }
     }
@@ -992,7 +992,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     arbeidsgivere,
                     vedtaksperiodeId,
                 )
-            testMediator.håndter(handling, saksbehandler, emptySet())
+            testMediator.håndter(handling, saksbehandler   )
         }
     }
 
@@ -1022,7 +1022,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     overstyrteArbeidsforhold = overstyrteArbeidsforhold,
                     vedtaksperiodeId = vedtaksperiodeId,
                 )
-            testMediator.håndter(handling, saksbehandler, emptySet())
+            testMediator.håndter(handling, saksbehandler)
         }
     }
 

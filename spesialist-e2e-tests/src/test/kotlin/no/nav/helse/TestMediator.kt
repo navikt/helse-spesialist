@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import javax.sql.DataSource
 
 class TestMediator(
@@ -32,7 +31,7 @@ class TestMediator(
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = { Either.Success(emptySet<Tilgangsgruppe>() to emptySet()) },
+            tilgangsgruppehenter = { Either.Success( emptySet()) },
         )
     private val apiOppgaveService =
         ApiOppgaveService(
@@ -107,8 +106,7 @@ class TestMediator(
     fun håndter(
         handling: HandlingFraApi,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
-        saksbehandlerMediator.håndter(handling, saksbehandler, tilgangsgrupper, emptySet())
+        saksbehandlerMediator.håndter(handling, saksbehandler, emptySet())
     }
 }

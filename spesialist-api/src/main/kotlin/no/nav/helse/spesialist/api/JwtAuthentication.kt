@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.net.URI
 import java.util.UUID
 
@@ -45,7 +44,6 @@ fun Application.jwtAuthentication(
             validate { credentials ->
                 SaksbehandlerPrincipal(
                     saksbehandler = credentials.tilSaksbehandler(),
-                    tilgangsgrupper = emptySet(),
                     brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
                 )
             }
@@ -72,7 +70,6 @@ private fun JWTCredential.tilSaksbehandler(): Saksbehandler =
 
 data class SaksbehandlerPrincipal(
     val saksbehandler: Saksbehandler,
-    val tilgangsgrupper: Set<Tilgangsgruppe>,
     val brukerroller: Set<Brukerrolle>,
 )
 

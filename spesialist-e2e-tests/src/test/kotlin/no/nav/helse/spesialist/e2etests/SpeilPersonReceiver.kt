@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -21,7 +20,6 @@ import kotlin.test.assertEquals
 class SpeilPersonReceiver(
     private val testContext: TestContext,
     private val saksbehandler: Saksbehandler,
-    private val tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
     private val brukerroller: Set<Brukerrolle>
 ) {
     val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asText()
@@ -120,15 +118,15 @@ class SpeilPersonReceiver(
                 mapOf(
                     "tekst" to tekst,
                     "dialogRef" to (
-                        person["arbeidsgivere"]
-                            .flatMap { it["behandlinger"] }
-                            .flatMap { it["perioder"] }
-                            .flatMap { it["historikkinnslag"] }
-                            .find { it["__typename"].asText() == "LagtPaVent" }
-                            ?.get("dialogRef")
-                            ?.asInt()
-                            ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
-                    ),
+                            person["arbeidsgivere"]
+                                .flatMap { it["behandlinger"] }
+                                .flatMap { it["perioder"] }
+                                .flatMap { it["historikkinnslag"] }
+                                .find { it["__typename"].asText() == "LagtPaVent" }
+                                ?.get("dialogRef")
+                                ?.asInt()
+                                ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
+                            ),
                     "saksbehandlerident" to saksbehandler.ident.value,
                 ),
         )
@@ -141,16 +139,16 @@ class SpeilPersonReceiver(
             variables =
                 mapOf(
                     "id" to (
-                        person["arbeidsgivere"]
-                            .flatMap { it["behandlinger"] }
-                            .flatMap { it["perioder"] }
-                            .flatMap { it["historikkinnslag"] }
-                            .flatMap { it["kommentarer"] }
-                            .firstOrNull()
-                            ?.get("id")
-                            ?.asInt()
-                            ?: error("Fant ikke noen kommentar på noe historikkinnslag på personen")
-                    ),
+                            person["arbeidsgivere"]
+                                .flatMap { it["behandlinger"] }
+                                .flatMap { it["perioder"] }
+                                .flatMap { it["historikkinnslag"] }
+                                .flatMap { it["kommentarer"] }
+                                .firstOrNull()
+                                ?.get("id")
+                                ?.asInt()
+                                ?: error("Fant ikke noen kommentar på noe historikkinnslag på personen")
+                            ),
                 ),
         )
         hentOppdatertPerson()
@@ -169,16 +167,16 @@ class SpeilPersonReceiver(
                 mapOf(
                     "fodselsnummer" to testContext.person.fødselsnummer,
                     "verdier" to
-                        mapOf(
-                            "organisasjonsnummer" to organisasjonsnummer,
-                            "periode" to
-                                mapOf(
-                                    "fom" to periode.fom.toString(),
-                                    "tom" to periode.tom.toString(),
-                                ),
-                            "periodebelop" to periodebeløp.toString(),
-                            "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
-                        ),
+                            mapOf(
+                                "organisasjonsnummer" to organisasjonsnummer,
+                                "periode" to
+                                        mapOf(
+                                            "fom" to periode.fom.toString(),
+                                            "tom" to periode.tom.toString(),
+                                        ),
+                                "periodebelop" to periodebeløp.toString(),
+                                "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
+                            ),
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )["tilkommenInntektId"].asUUID().also {
@@ -198,44 +196,44 @@ class SpeilPersonReceiver(
             request =
                 mapOf(
                     "endringer" to
-                        listOfNotNull(
-                            organisasjonsnummerEndring?.let { (fra, til) ->
-                                "organisasjonsnummer" to
-                                    mapOf(
-                                        "fra" to fra,
-                                        "til" to til,
-                                    )
-                            },
-                            periodeEndring?.let { (fra, til) ->
-                                "periode" to
-                                    mapOf(
-                                        "fra" to
+                            listOfNotNull(
+                                organisasjonsnummerEndring?.let { (fra, til) ->
+                                    "organisasjonsnummer" to
                                             mapOf(
-                                                "fom" to fra.fom.toString(),
-                                                "tom" to fra.tom.toString(),
-                                            ),
-                                        "til" to
+                                                "fra" to fra,
+                                                "til" to til,
+                                            )
+                                },
+                                periodeEndring?.let { (fra, til) ->
+                                    "periode" to
                                             mapOf(
-                                                "fom" to til.fom.toString(),
-                                                "tom" to til.tom.toString(),
-                                            ),
-                                    )
-                            },
-                            periodebeløpEndring?.let { (fra, til) ->
-                                "periodebeløp" to
-                                    mapOf(
-                                        "fra" to fra.toString(),
-                                        "til" to til.toString(),
-                                    )
-                            },
-                            ekskluderteUkedagerEndring?.let { (fra, til) ->
-                                "ekskluderteUkedager" to
-                                    mapOf(
-                                        "fra" to fra.map(LocalDate::toString),
-                                        "til" to til.map(LocalDate::toString),
-                                    )
-                            },
-                        ).toMap(),
+                                                "fra" to
+                                                        mapOf(
+                                                            "fom" to fra.fom.toString(),
+                                                            "tom" to fra.tom.toString(),
+                                                        ),
+                                                "til" to
+                                                        mapOf(
+                                                            "fom" to til.fom.toString(),
+                                                            "tom" to til.tom.toString(),
+                                                        ),
+                                            )
+                                },
+                                periodebeløpEndring?.let { (fra, til) ->
+                                    "periodebeløp" to
+                                            mapOf(
+                                                "fra" to fra.toString(),
+                                                "til" to til.toString(),
+                                            )
+                                },
+                                ekskluderteUkedagerEndring?.let { (fra, til) ->
+                                    "ekskluderteUkedager" to
+                                            mapOf(
+                                                "fra" to fra.map(LocalDate::toString),
+                                                "til" to til.map(LocalDate::toString),
+                                            )
+                                },
+                            ).toMap(),
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )
@@ -251,13 +249,13 @@ class SpeilPersonReceiver(
             request =
                 mapOf(
                     "endringer" to
-                        mapOf(
-                            "fjernet" to
-                                mapOf(
-                                    "fra" to false,
-                                    "til" to true,
-                                ),
-                        ),
+                            mapOf(
+                                "fjernet" to
+                                        mapOf(
+                                            "fra" to false,
+                                            "til" to true,
+                                        ),
+                            ),
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )
@@ -277,49 +275,49 @@ class SpeilPersonReceiver(
             request =
                 mapOf(
                     "endringer" to
-                        listOfNotNull(
-                            "fjernet" to
-                                mapOf(
-                                    "fra" to true,
-                                    "til" to false,
-                                ),
-                            organisasjonsnummerEndring?.let { (fra, til) ->
-                                "organisasjonsnummer" to
-                                    mapOf(
-                                        "fra" to fra,
-                                        "til" to til,
-                                    )
-                            },
-                            periodeEndring?.let { (fra, til) ->
-                                "periode" to
-                                    mapOf(
-                                        "fra" to
+                            listOfNotNull(
+                                "fjernet" to
+                                        mapOf(
+                                            "fra" to true,
+                                            "til" to false,
+                                        ),
+                                organisasjonsnummerEndring?.let { (fra, til) ->
+                                    "organisasjonsnummer" to
                                             mapOf(
-                                                "fom" to fra.fom.toString(),
-                                                "tom" to fra.tom.toString(),
-                                            ),
-                                        "til" to
+                                                "fra" to fra,
+                                                "til" to til,
+                                            )
+                                },
+                                periodeEndring?.let { (fra, til) ->
+                                    "periode" to
                                             mapOf(
-                                                "fom" to til.fom.toString(),
-                                                "tom" to til.tom.toString(),
-                                            ),
-                                    )
-                            },
-                            periodebeløpEndring?.let { (fra, til) ->
-                                "periodebeløp" to
-                                    mapOf(
-                                        "fra" to fra.toString(),
-                                        "til" to til.toString(),
-                                    )
-                            },
-                            ekskluderteUkedagerEndring?.let { (fra, til) ->
-                                "ekskluderteUkedager" to
-                                    mapOf(
-                                        "fra" to fra.map(LocalDate::toString),
-                                        "til" to til.map(LocalDate::toString),
-                                    )
-                            },
-                        ).toMap(),
+                                                "fra" to
+                                                        mapOf(
+                                                            "fom" to fra.fom.toString(),
+                                                            "tom" to fra.tom.toString(),
+                                                        ),
+                                                "til" to
+                                                        mapOf(
+                                                            "fom" to til.fom.toString(),
+                                                            "tom" to til.tom.toString(),
+                                                        ),
+                                            )
+                                },
+                                periodebeløpEndring?.let { (fra, til) ->
+                                    "periodebeløp" to
+                                            mapOf(
+                                                "fra" to fra.toString(),
+                                                "til" to til.toString(),
+                                            )
+                                },
+                                ekskluderteUkedagerEndring?.let { (fra, til) ->
+                                    "ekskluderteUkedager" to
+                                            mapOf(
+                                                "fra" to fra.map(LocalDate::toString),
+                                                "til" to til.map(LocalDate::toString),
+                                            )
+                                },
+                            ).toMap(),
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )
@@ -332,37 +330,37 @@ class SpeilPersonReceiver(
             variables =
                 mapOf(
                     "skjonnsfastsettelse" to
-                        mapOf(
-                            "aktorId" to testContext.person.aktørId,
-                            "fodselsnummer" to testContext.person.fødselsnummer,
-                            "skjaringstidspunkt" to
-                                testContext.vedtaksperioder
-                                    .first()
-                                    .skjæringstidspunkt
-                                    .toString(),
-                            "vedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
-                            "arbeidsgivere" to
-                                listOf(
-                                    mapOf(
-                                        "arlig" to 450000,
-                                        "arsak" to "Skjønnsfastsettelse ved mangelfull eller uriktig rapportering (§ 8-30 tredje avsnitt)",
-                                        "lovhjemmel" to
+                            mapOf(
+                                "aktorId" to testContext.person.aktørId,
+                                "fodselsnummer" to testContext.person.fødselsnummer,
+                                "skjaringstidspunkt" to
+                                        testContext.vedtaksperioder
+                                            .first()
+                                            .skjæringstidspunkt
+                                            .toString(),
+                                "vedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
+                                "arbeidsgivere" to
+                                        listOf(
                                             mapOf(
-                                                "ledd" to "3",
-                                                "paragraf" to "8-30",
-                                                "lovverk" to "folketrygdloven",
-                                                "lovverksversjon" to "2019-01-01",
+                                                "arlig" to 450000,
+                                                "arsak" to "Skjønnsfastsettelse ved mangelfull eller uriktig rapportering (§ 8-30 tredje avsnitt)",
+                                                "lovhjemmel" to
+                                                        mapOf(
+                                                            "ledd" to "3",
+                                                            "paragraf" to "8-30",
+                                                            "lovverk" to "folketrygdloven",
+                                                            "lovverksversjon" to "2019-01-01",
+                                                        ),
+                                                "begrunnelseFritekst" to begrunnelseFritekst,
+                                                "begrunnelseKonklusjon" to "Vi har fastsatt sykepengegrunnlaget ditt til 450 000,00 kroner.",
+                                                "begrunnelseMal" to "Inntekten som arbeidsgiver har rapportert til Skatteetaten er mangelfull eller uriktig. Vi har derfor skjønnsfastsatt sykepengegrunnlaget ditt. Se folketrygdloven § 8-30 tredje avsnitt.\n\nMålet med den skjønnsmessige vurderingen er å komme frem til inntekten du ville hatt om du ikke hadde blitt syk.",
+                                                "fraArlig" to 480000,
+                                                "initierendeVedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
+                                                "organisasjonsnummer" to testContext.arbeidsgiver.organisasjonsnummer,
+                                                "type" to "ANNET",
                                             ),
-                                        "begrunnelseFritekst" to begrunnelseFritekst,
-                                        "begrunnelseKonklusjon" to "Vi har fastsatt sykepengegrunnlaget ditt til 450 000,00 kroner.",
-                                        "begrunnelseMal" to "Inntekten som arbeidsgiver har rapportert til Skatteetaten er mangelfull eller uriktig. Vi har derfor skjønnsfastsatt sykepengegrunnlaget ditt. Se folketrygdloven § 8-30 tredje avsnitt.\n\nMålet med den skjønnsmessige vurderingen er å komme frem til inntekten du ville hatt om du ikke hadde blitt syk.",
-                                        "fraArlig" to 480000,
-                                        "initierendeVedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
-                                        "organisasjonsnummer" to testContext.arbeidsgiver.organisasjonsnummer,
-                                        "type" to "ANNET",
-                                    ),
-                                ),
-                        ),
+                                        ),
+                            ),
                 ),
         ).also {
             if (it["data"].isMissingOrNull()) {
@@ -402,7 +400,7 @@ class SpeilPersonReceiver(
     fun assertPeriodeHarIkkeOppgave() {
         assertTrue(person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].isNull) {
             "Forventet at oppgave var null for perioden, men den var: " +
-                person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].toPrettyString()
+                    person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].toPrettyString()
         }
     }
 
@@ -419,7 +417,9 @@ class SpeilPersonReceiver(
                 }.find { it["behandlingId"].asText() == behandlingId.toString() }
                 ?: error("Fant ikke periode med behandlingId $behandlingId i FetchPerson-svaret")
 
-        assertTrue(vedtaksperiodeFraFetchPerson["varsler"].map { it["vurdering"]["status"].asText() }.sorted().all { it == status })
+        assertTrue(
+            vedtaksperiodeFraFetchPerson["varsler"].map { it["vurdering"]["status"].asText() }.sorted()
+                .all { it == status })
     }
 
     fun assertVarselkoder(
@@ -462,27 +462,30 @@ class SpeilPersonReceiver(
         request = mapOf("identitetsnummer" to fødselsnummer)
     )
 
-    private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asText()
+    private fun getOppgaveId(): String =
+        person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asText()
 
     private fun callGraphQL(
         operationName: String,
         variables: Map<String, Any>,
-    ) = GraphQL.call(operationName, saksbehandler, tilgangsgrupper, brukerroller, variables)
+    ) = GraphQL.call(operationName, saksbehandler, brukerroller, variables)
 
-    private fun callHttpGet(relativeUrl: String) = REST.get(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller)
+    private fun callHttpGet(relativeUrl: String) = REST.get(
+        relativeUrl, saksbehandler, brukerroller
+    )
 
     private fun callHttpPut(
         relativeUrl: String,
         request: Any,
-    ) = REST.put(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller, request)
+    ) = REST.put(relativeUrl, saksbehandler, brukerroller, request)
 
     private fun callHttpPatch(
         relativeUrl: String,
         request: Any,
-    ) = REST.patch(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller, request)
+    ) = REST.patch(relativeUrl, saksbehandler, brukerroller, request)
 
     private fun callHttpPost(
         relativeUrl: String,
         request: Any,
-    ) = REST.post(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller,request)
+    ) = REST.post(relativeUrl, saksbehandler, brukerroller, request)
 }

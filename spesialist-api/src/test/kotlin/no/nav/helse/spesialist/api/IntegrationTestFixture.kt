@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppe
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import kotlin.test.assertEquals
@@ -62,7 +61,7 @@ class IntegrationTestFixture() {
         configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
         daos = daos,
         meldingPubliserer = meldingPubliserer,
-        tilgangsgruppehenter = { Either.Success(emptySet<Tilgangsgruppe>() to emptySet()) },
+        tilgangsgruppehenter = { Either.Success( emptySet()) },
         sessionFactory = sessionFactory,
         environmentToggles = mockk(relaxed = true),
         snapshothenter = mockk(relaxed = true),
@@ -80,7 +79,6 @@ class IntegrationTestFixture() {
     fun get(
         url: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response
@@ -100,7 +98,7 @@ class IntegrationTestFixture() {
                 logg.info("Sender GET $url")
                 val httpResponse = client.get(url) {
                     accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper, brukerroller))
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler,  brukerroller))
                 }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")
@@ -115,7 +113,6 @@ class IntegrationTestFixture() {
         url: String,
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response
@@ -136,7 +133,7 @@ class IntegrationTestFixture() {
                 val httpResponse = client.post(url) {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper, brukerroller))
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
                     setBody(body)
                 }
                 val bodyAsText = httpResponse.bodyAsText()
@@ -152,7 +149,6 @@ class IntegrationTestFixture() {
         url: String,
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         brukerroller: Set<Brukerrolle> = emptySet(),
 
         ): Response {
@@ -174,7 +170,7 @@ class IntegrationTestFixture() {
                 val httpResponse = client.put(url) {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper, brukerroller))
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
                     setBody(body)
                 }
                 val bodyAsText = httpResponse.bodyAsText()
@@ -189,7 +185,6 @@ class IntegrationTestFixture() {
     fun delete(
         url: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         brukerroller: Set<Brukerrolle> = emptySet(),
 
         ): Response {
@@ -211,7 +206,7 @@ class IntegrationTestFixture() {
                 val httpResponse = client.delete(url) {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper, brukerroller))
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
                 }
                 val bodyAsText = httpResponse.bodyAsText()
                 logg.info("Fikk respons: $bodyAsText")

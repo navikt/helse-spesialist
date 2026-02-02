@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.ZoneId
 import kotlin.time.measureTimedValue
 
@@ -37,7 +36,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                         minstEnAvEgenskapene = resource.minstEnAvEgenskapene.map { it.tilEgenskaper() },
                         ingenAvEgenskapene =
                             Egenskap.entries
-                                .filterNot { it.skalDukkeOppFor(kallKontekst.brukerroller, kallKontekst.tilgangsgrupper) }
+                                .filterNot { it.skalDukkeOppFor(kallKontekst.brukerroller) }
                                 .plus(resource.ingenAvEgenskapene.tilEgenskaper())
                                 .toSet(),
                         erTildelt = resource.erTildelt,
@@ -253,7 +252,6 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
 
     private fun Egenskap.skalDukkeOppFor(
         brukerroller: Set<Brukerrolle>,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         Oppgave.harTilgangTilEgenskap(
             egenskap = this,

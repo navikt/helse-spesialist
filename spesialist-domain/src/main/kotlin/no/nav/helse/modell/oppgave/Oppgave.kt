@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -61,7 +60,6 @@ class Oppgave private constructor(
 
     fun forsøkTildeling(
         saksbehandlerWrapper: SaksbehandlerWrapper,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
@@ -73,7 +71,6 @@ class Oppgave private constructor(
         tilstand.tildel(
             oppgave = this,
             saksbehandlerWrapper = saksbehandlerWrapper,
-            saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
             brukerroller = brukerroller,
         )
     }
@@ -98,7 +95,6 @@ class Oppgave private constructor(
 
     fun forsøkTildelingVedReservasjon(
         saksbehandlerWrapper: SaksbehandlerWrapper,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
@@ -113,7 +109,6 @@ class Oppgave private constructor(
         tilstand.tildel(
             oppgave = this,
             saksbehandlerWrapper = saksbehandlerWrapper,
-            saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
             brukerroller = brukerroller,
         )
     }
@@ -292,7 +287,6 @@ class Oppgave private constructor(
         fun tildel(
             oppgave: Oppgave,
             saksbehandlerWrapper: SaksbehandlerWrapper,
-            saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
             brukerroller: Set<Brukerrolle>,
         ) {
             logg.warn(
@@ -332,11 +326,9 @@ class Oppgave private constructor(
         override fun tildel(
             oppgave: Oppgave,
             saksbehandlerWrapper: SaksbehandlerWrapper,
-            saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
             brukerroller: Set<Brukerrolle>,
         ) {
             if (!oppgave.kanTildelesTil(
-                    saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
                     brukerroller = brukerroller,
                 )
             ) {
@@ -390,7 +382,6 @@ class Oppgave private constructor(
 
     fun kanSeesAv(
         brukerroller: Set<Brukerrolle>,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         egenskaper.all {
             harTilgangTilEgenskap(
@@ -401,7 +392,6 @@ class Oppgave private constructor(
 
     fun kanTildelesTil(
         brukerroller: Set<Brukerrolle>,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         egenskaper.all {
             harTilgangTilEgenskap(

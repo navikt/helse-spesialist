@@ -24,7 +24,6 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -87,7 +86,7 @@ internal class ApiOppgaveServiceTest {
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveRepository = oppgaveRepository,
-                tilgangsgruppehenter = { Either.Success(emptySet<Tilgangsgruppe>() to emptySet()) },
+                tilgangsgruppehenter = { Either.Success( emptySet()) },
             ),
             sessionFactory = sessionFactory
         )

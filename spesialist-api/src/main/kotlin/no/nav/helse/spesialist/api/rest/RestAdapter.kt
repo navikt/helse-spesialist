@@ -66,7 +66,6 @@ class RestAdapter(
                         val kallKontekst =
                             KallKontekst(
                                 saksbehandler = principal.saksbehandler,
-                                tilgangsgrupper = principal.tilgangsgrupper,
                                 brukerroller = principal.brukerroller,
                                 transaksjon = transaksjon,
                                 outbox = outbox,

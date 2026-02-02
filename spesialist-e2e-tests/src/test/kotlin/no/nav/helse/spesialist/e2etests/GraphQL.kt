@@ -17,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertNull
 
@@ -37,7 +36,6 @@ object GraphQL {
     fun call(
         operationName: String,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
         brukerroller: Set<Brukerrolle>,
         variables: Map<String, Any>
     ): JsonNode {
@@ -47,7 +45,6 @@ object GraphQL {
                 accept(ContentType.Application.Json)
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
                     saksbehandler,
-                    tilgangsgrupper,
                     brukerroller
                 ))
                 setBody(
