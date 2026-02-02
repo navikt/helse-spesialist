@@ -16,13 +16,11 @@ import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 
 class ApiModule(
     private val configuration: Configuration,
-    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     daos: Daos,
     private val meldingPubliserer: MeldingPubliserer,
     tilgangsgruppehenter: Tilgangsgruppehenter,
@@ -91,7 +89,6 @@ class ApiModule(
         kobleOppApi(
             ktorApplication = application,
             apiModuleConfiguration = configuration,
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
             dokumentMediator = dokumentMediator,
             environmentToggles = environmentToggles,

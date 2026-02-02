@@ -40,7 +40,6 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -52,7 +51,6 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-    protected val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
 
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
@@ -74,7 +72,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     queryHandler(application.plugin(GraphQL).server)
                 }
             },
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
         )
 

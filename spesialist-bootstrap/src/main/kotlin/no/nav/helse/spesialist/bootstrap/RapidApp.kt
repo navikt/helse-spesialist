@@ -9,7 +9,6 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
@@ -77,11 +76,6 @@ fun main() {
                         ignorerMeldingerForUkjentePersoner =
                             env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER"),
                     ),
-                tilgangsgruppeUuider =
-                    TilgangsgruppeUuider(
-                        egenAnsattGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_EGEN_ANSATT"),
-                        kode7GruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_KODE_7"),
-                    ),
                 tilgangsgrupperTilBrukerroller =
                     TilgangsgrupperTilBrukerroller(
                         næringsdrivendeBeta = env.getUUIDList("ROLLE_SELVSTENDIG_BETA"),
@@ -127,7 +121,6 @@ class RapidApp {
         val clientEntraIdModule =
             ClientEntraIDModule(
                 configuration = configuration.clientEntraID,
-                tilgangsgruppeUuider = configuration.tilgangsgruppeUuider,
                 tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
             )
 
@@ -158,7 +151,6 @@ class RapidApp {
         val apiModule =
             ApiModule(
                 configuration = configuration.api,
-                tilgangsgruppeUuider = configuration.tilgangsgruppeUuider,
                 daos = dbModule.daos,
                 meldingPubliserer = kafkaModule.meldingPubliserer,
                 tilgangsgruppehenter = clientEntraIdModule.tilgangsgruppehenter,

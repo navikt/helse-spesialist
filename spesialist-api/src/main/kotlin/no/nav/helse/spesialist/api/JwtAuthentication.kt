@@ -9,7 +9,6 @@ import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.auth.principal
 import io.ktor.server.request.uri
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -21,14 +20,12 @@ import java.util.UUID
 
 fun Application.jwtAuthentication(
     config: ApiModule.Configuration,
-    tilgangsgruppeUuider: TilgangsgruppeUuider,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     jwtAuthentication(
         jwkProvider = JwkProviderBuilder(URI(config.jwkProviderUri).toURL()).build(),
         issuerUrl = config.issuerUrl,
         clientId = config.clientId,
-        tilgangsgruppeUuider = tilgangsgruppeUuider,
         tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
     )
 }
@@ -37,7 +34,6 @@ fun Application.jwtAuthentication(
     jwkProvider: JwkProvider,
     issuerUrl: String,
     clientId: String,
-    tilgangsgruppeUuider: TilgangsgruppeUuider,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     authentication {
@@ -49,7 +45,7 @@ fun Application.jwtAuthentication(
             validate { credentials ->
                 SaksbehandlerPrincipal(
                     saksbehandler = credentials.tilSaksbehandler(),
-                    tilgangsgrupper = tilgangsgruppeUuider.grupperFor(credentials.groupsAsUuids()),
+                    tilgangsgrupper = emptySet(),
                     brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
                 )
             }

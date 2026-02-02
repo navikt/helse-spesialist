@@ -23,7 +23,6 @@ import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -41,11 +40,9 @@ class IntegrationTestFixture() {
 
     companion object {
         val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
-        val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
         val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
         val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(
             mockOAuth2Server = mockOAuth2Server,
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
 
         )
@@ -63,7 +60,6 @@ class IntegrationTestFixture() {
 
     private val apiModule = ApiModule(
         configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
-        tilgangsgruppeUuider = tilgangsgruppeUuider,
         daos = daos,
         meldingPubliserer = meldingPubliserer,
         tilgangsgruppehenter = { Either.Success(emptySet<Tilgangsgruppe>() to emptySet()) },

@@ -50,14 +50,12 @@ import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import java.time.Duration
 
 fun kobleOppApi(
     ktorApplication: Application,
     apiModuleConfiguration: ApiModule.Configuration,
-    tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
     sessionFactory: SessionFactory,
     meldingPubliserer: MeldingPubliserer,
@@ -69,7 +67,6 @@ fun kobleOppApi(
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.jwtAuthentication(
         config = apiModuleConfiguration,
-        tilgangsgruppeUuider = tilgangsgruppeUuider,
         tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
     )
     val graphQLPlugin =

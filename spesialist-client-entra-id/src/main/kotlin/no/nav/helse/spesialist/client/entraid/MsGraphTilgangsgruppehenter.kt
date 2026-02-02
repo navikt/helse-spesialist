@@ -24,7 +24,6 @@ import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -34,7 +33,6 @@ import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
     private val accessTokenGenerator: AccessTokenGenerator,
-    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val msGraphUrl: String,
 ) : Tilgangsgruppehenter {
@@ -99,6 +97,6 @@ class MsGraphTilgangsgruppehenter(
         logg.debug("Hentet ${grupper.size} grupper fra MS")
         val uuider = grupper.toSet()
         val brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(uuider)
-        return Either.Success(tilgangsgruppeUuider.grupperFor(uuider) to brukerroller)
+        return Either.Success(emptySet<Tilgangsgruppe>() to brukerroller)
     }
 }

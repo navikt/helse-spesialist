@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.bootstrap
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
@@ -15,9 +14,8 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 fun main() {
     val rapidApp = RapidApp()
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
-    val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
     val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgruppeUuider, tilgangsgrupperTilBrukerroller)
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server,  tilgangsgrupperTilBrukerroller)
     rapidApp.start(
         configuration = Configuration(
             api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
@@ -26,7 +24,6 @@ fun main() {
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false

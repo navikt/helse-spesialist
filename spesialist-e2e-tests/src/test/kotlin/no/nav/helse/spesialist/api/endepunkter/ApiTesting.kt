@@ -9,7 +9,6 @@ import io.ktor.server.testing.testApplication
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.jwtAuthentication
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
@@ -18,7 +17,6 @@ class ApiTesting(
     private val jwtStub: JwtStub = JwtStub(),
     private val applicationBuilder: ApplicationTestBuilder.() -> Unit,
     private val routeBuilder: Route.() -> Unit,
-    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     private val clientId = "client_id"
@@ -31,7 +29,6 @@ class ApiTesting(
                 jwkProvider = jwtStub.getJwkProviderMock(),
                 issuerUrl = issuer,
                 clientId = clientId,
-                tilgangsgruppeUuider = tilgangsgruppeUuider,
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
             )
         }

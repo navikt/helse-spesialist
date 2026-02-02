@@ -30,9 +30,7 @@ import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -60,7 +58,6 @@ object TestRunner {
 
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
 
-    private val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
 
     private fun token(
         saksbehandler: Saksbehandler,
@@ -77,7 +74,7 @@ object TestRunner {
                         "preferred_username" to saksbehandler.epost,
                         "oid" to saksbehandler.id.value.toString(),
                         "name" to saksbehandler.navn,
-                        "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() },
+                        "groups" to emptyList<String>(),
                     ),
             ).serialize()
 
@@ -101,7 +98,6 @@ object TestRunner {
                 behandlingstatistikk = mockk(relaxed = true),
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
-                tilgangsgruppeUuider = tilgangsgruppeUuider,
                 meldingPubliserer = mockk(relaxed = true),
                 tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
             )
@@ -121,7 +117,6 @@ object TestRunner {
                 kobleOppApi(
                     ktorApplication = this,
                     apiModuleConfiguration = configuration,
-                    tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema,
                     dokumentMediator = avhengigheter.dokumentMediator,
                     sessionFactory = avhengigheter.sessionFactory,
@@ -168,7 +163,6 @@ object TestRunner {
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
-        val tilgangsgruppeUuider: TilgangsgruppeUuider,
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val meldingPubliserer: MeldingPubliserer,
     )

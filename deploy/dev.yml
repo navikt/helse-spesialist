@@ -104,8 +104,6 @@ spec:
       value: tbd-spesialist-v1
     - name: KAFKA_EXTRA_TOPIC
       value: tbd.sis
-    - name: TILGANGSGRUPPE_UUID_KODE_7
-      value: {{ENTRAID_UUID_KODE_7_DEV}}
     - name: ROLLE_BESLUTTER
       value: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
     - name: ROLLE_EGEN_ANSATT
