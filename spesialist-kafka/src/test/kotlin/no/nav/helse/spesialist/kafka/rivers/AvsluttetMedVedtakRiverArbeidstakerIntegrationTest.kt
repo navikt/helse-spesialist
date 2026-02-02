@@ -863,7 +863,6 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         """
         {
           "@event_name": "avsluttet_med_vedtak",
-          "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
           "yrkesaktivitetstype": "ARBEIDSTAKER",
           "vedtaksperiodeId": "${vedtaksperiode.id.value}",
           "behandlingId": "${behandling.spleisBehandlingId?.value}",

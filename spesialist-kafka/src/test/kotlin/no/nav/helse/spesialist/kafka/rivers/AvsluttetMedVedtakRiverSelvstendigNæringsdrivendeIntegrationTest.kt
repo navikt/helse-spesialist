@@ -345,7 +345,6 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         """
         {
           "@event_name": "avsluttet_med_vedtak",
-          "organisasjonsnummer": "SELVSTENDIG",
           "yrkesaktivitetstype": "SELVSTENDIG",
           "vedtaksperiodeId": "${vedtaksperiode.id.value}",
           "behandlingId": "${behandling.spleisBehandlingId?.value}",
