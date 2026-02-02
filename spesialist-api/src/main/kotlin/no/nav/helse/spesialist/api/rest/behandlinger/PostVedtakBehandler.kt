@@ -30,7 +30,7 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.LocalDateTime
 
 class PostVedtakBehandler(
@@ -91,7 +91,7 @@ class PostVedtakBehandler(
                         saksbehandlerIdent = saksbehandlerSomFattetVedtaket.ident,
                         beslutterIdent = beslutter.ident,
                     )
-                totrinnsvurdering.godkjenn(beslutter, kallKontekst.tilgangsgrupper)
+                totrinnsvurdering.godkjenn(beslutter, kallKontekst.brukerroller)
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
                 kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -230,9 +230,9 @@ class PostVedtakBehandler(
 
     private fun Totrinnsvurdering.godkjenn(
         beslutter: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ) {
-        if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+        if (Brukerrolle.BESLUTTER !in brukerroller && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
             throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
         }
         if (this.saksbehandler?.value == beslutter.id.value && !environmentToggles.kanBeslutteEgneSaker) {

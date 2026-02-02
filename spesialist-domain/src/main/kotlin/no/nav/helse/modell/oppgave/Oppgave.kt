@@ -411,7 +411,7 @@ class Oppgave private constructor(
                 brukerroller = brukerroller,
             ) &&
                 when (it) {
-                    BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
+                    BESLUTTER -> Brukerrolle.BESLUTTER in brukerroller
                     STIKKPRØVE -> Brukerrolle.STIKKPRØVE in brukerroller
                     else -> true
                 }

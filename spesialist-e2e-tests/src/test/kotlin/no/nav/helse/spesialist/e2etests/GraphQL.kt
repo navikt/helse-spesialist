@@ -16,6 +16,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertNull
@@ -37,13 +38,18 @@ object GraphQL {
         operationName: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
         variables: Map<String, Any>
     ): JsonNode {
         val (status, bodyAsText) = runBlocking {
             httpClient.post("http://localhost:${E2ETestApplikasjon.port}/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
+                    saksbehandler,
+                    tilgangsgrupper,
+                    brukerroller
+                ))
                 setBody(
                     mapOf(
                         "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")

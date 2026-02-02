@@ -8,7 +8,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
@@ -16,6 +18,7 @@ import java.util.UUID
 class ApiModuleIntegrationTestFixture(
     private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
+    private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller
 ) {
     val token: String =
         mockOAuth2Server
@@ -34,6 +37,7 @@ class ApiModuleIntegrationTestFixture(
     fun token(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
     ): String =
         mockOAuth2Server
             .issueToken(
@@ -46,7 +50,7 @@ class ApiModuleIntegrationTestFixture(
                         "preferred_username" to saksbehandler.epost,
                         "oid" to saksbehandler.id.value.toString(),
                         "name" to saksbehandler.navn,
-                        "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() },
+                        "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() } +  tilgangsgrupperTilBrukerroller.uuiderFor(brukerroller).map { it.toString() },
                     ),
             ).serialize()
 
@@ -85,4 +89,24 @@ class ApiModuleIntegrationTestFixture(
         private const val CLIENT_ID = "en-client-id"
         private const val ISSUER_ID = "LocalTestIssuer"
     }
+}
+
+private fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): List<UUID> {
+    val uuider = mutableListOf<UUID>()
+    if (Brukerrolle.EGEN_ANSATT in brukerroller) {
+        uuider.addAll(egenAnsatt)
+    }
+    if (Brukerrolle.KODE_7 in brukerroller) {
+        uuider.addAll(kode7)
+    }
+    if (Brukerrolle.BESLUTTER in brukerroller) {
+        uuider.addAll(beslutter)
+    }
+    if (Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller) {
+        uuider.addAll(næringsdrivendeBeta)
+    }
+    if (Brukerrolle.STIKKPRØVE in brukerroller) {
+        uuider.addAll(stikkprøve)
+    }
+    return uuider
 }

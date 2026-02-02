@@ -261,7 +261,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             saksbehandlerTilgangsgrupper = tilgangsgrupper,
         ) &&
             when (this) {
-                Egenskap.BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
+                Egenskap.BESLUTTER -> Brukerrolle.BESLUTTER in brukerroller
                 Egenskap.STIKKPRØVE -> Brukerrolle.STIKKPRØVE in brukerroller
                 else -> true
             }

@@ -115,8 +115,6 @@ spec:
       value: tbd-spesialist-v1
     - name: KAFKA_RESET_POLICY
       value: none
-    - name: TILGANGSGRUPPE_UUID_BESLUTTER
-      value: {{ENTRAID_UUID_BESLUTTER}}
     - name: TILGANGSGRUPPE_UUID_EGEN_ANSATT
       value: {{ENTRAID_UUID_EGEN_ANSATT}}
     - name: TILGANGSGRUPPE_UUID_KODE_7

@@ -19,6 +19,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertTrue
 
@@ -39,13 +40,18 @@ object REST {
         relativeUrl: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
         logg.info("Gjør HTTP GET $url")
         val (status, bodyAsText) = runBlocking {
             httpClient.get(url) {
                 accept(ContentType.Application.Json)
-                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
+                    saksbehandler,
+                    tilgangsgrupper,
+                    brukerroller
+                ))
             }.let { it.status to it.bodyAsText() }
         }
         logg.info("Respons fra HTTP GET: $bodyAsText")
@@ -57,13 +63,18 @@ object REST {
         relativeUrl: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
         request: Any
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
         logg.info("Gjør HTTP PATCH $url med body: ${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)}")
         val (status, bodyAsText) = runBlocking {
             httpClient.patch(url) {
-                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
+                    saksbehandler,
+                    tilgangsgrupper,
+                    brukerroller
+                ))
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 if (request !is Unit) setBody(request)
@@ -78,13 +89,18 @@ object REST {
         relativeUrl: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
         request: Any
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
         logg.info("Gjør HTTP POST $url med body: ${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)}")
         val (status, bodyAsText) = runBlocking {
             httpClient.post(url) {
-                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
+                    saksbehandler,
+                    tilgangsgrupper,
+                    brukerroller
+                ))
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 if (request !is Unit) setBody(request)
@@ -99,13 +115,18 @@ object REST {
         relativeUrl: String,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
+        brukerroller: Set<Brukerrolle>,
         request: Any
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
         logg.info("Gjør HTTP PUT $url med body: ${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)}")
         val (status, bodyAsText) = runBlocking {
             httpClient.put(url) {
-                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
+                    saksbehandler,
+                    tilgangsgrupper,
+                    brukerroller
+                ))
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 if (request !is Unit) setBody(request)

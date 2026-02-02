@@ -16,7 +16,8 @@ fun main() {
     val rapidApp = RapidApp()
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgruppeUuider)
+    val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgruppeUuider, tilgangsgrupperTilBrukerroller)
     rapidApp.start(
         configuration = Configuration(
             api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
@@ -40,7 +41,7 @@ fun main() {
                 override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
                 override fun fullRefusjonEnArbeidsgiver(): Boolean = false
             },
-            tilgangsgrupperTilBrukerroller =  randomTilgangsgrupperTilBrukerroller()
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
         ),
         rapidsConnection = KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
             rapidApp.ktorSetupCallback(ktorApplication)

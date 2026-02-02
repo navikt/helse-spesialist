@@ -29,7 +29,8 @@ object E2ETestApplikasjon {
 
     private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgruppeUuider)
+    val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgruppeUuider, tilgangsgrupperTilBrukerroller)
     private val rapidApp = RapidApp()
     private val modules = rapidApp.start(
         configuration = Configuration(
@@ -54,7 +55,7 @@ object E2ETestApplikasjon {
                 override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
                 override fun fullRefusjonEnArbeidsgiver(): Boolean = false
             },
-            tilgangsgrupperTilBrukerroller =  randomTilgangsgrupperTilBrukerroller()
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
         ),
         rapidsConnection = testRapid,
     )

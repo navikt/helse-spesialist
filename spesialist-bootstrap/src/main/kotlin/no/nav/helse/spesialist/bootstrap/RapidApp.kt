@@ -79,7 +79,6 @@ fun main() {
                     ),
                 tilgangsgruppeUuider =
                     TilgangsgruppeUuider(
-                        beslutterGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_BESLUTTER"),
                         egenAnsattGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_EGEN_ANSATT"),
                         kode7GruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_KODE_7"),
                     ),

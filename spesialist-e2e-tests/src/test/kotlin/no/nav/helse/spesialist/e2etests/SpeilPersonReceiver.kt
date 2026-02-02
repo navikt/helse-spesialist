@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
@@ -20,7 +21,8 @@ import kotlin.test.assertEquals
 class SpeilPersonReceiver(
     private val testContext: TestContext,
     private val saksbehandler: Saksbehandler,
-    private val tilgangsgrupper: Set<Tilgangsgruppe>,
+    private val tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
+    private val brukerroller: Set<Brukerrolle>
 ) {
     val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asText()
     var person: JsonNode = fetchPerson(personPseudoId)
@@ -465,22 +467,22 @@ class SpeilPersonReceiver(
     private fun callGraphQL(
         operationName: String,
         variables: Map<String, Any>,
-    ) = GraphQL.call(operationName, saksbehandler, tilgangsgrupper, variables)
+    ) = GraphQL.call(operationName, saksbehandler, tilgangsgrupper, brukerroller, variables)
 
-    private fun callHttpGet(relativeUrl: String) = REST.get(relativeUrl, saksbehandler, tilgangsgrupper)
+    private fun callHttpGet(relativeUrl: String) = REST.get(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller)
 
     private fun callHttpPut(
         relativeUrl: String,
         request: Any,
-    ) = REST.put(relativeUrl, saksbehandler, tilgangsgrupper, request)
+    ) = REST.put(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller, request)
 
     private fun callHttpPatch(
         relativeUrl: String,
         request: Any,
-    ) = REST.patch(relativeUrl, saksbehandler, tilgangsgrupper, request)
+    ) = REST.patch(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller, request)
 
     private fun callHttpPost(
         relativeUrl: String,
         request: Any,
-    ) = REST.post(relativeUrl, saksbehandler, tilgangsgrupper, request)
+    ) = REST.post(relativeUrl, saksbehandler, tilgangsgrupper, brukerroller,request)
 }

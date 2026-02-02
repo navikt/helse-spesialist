@@ -224,7 +224,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandlerMedTilgang,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            brukerroller = setOf(Brukerrolle.STIKKPRØVE)
+            brukerroller = setOf(Brukerrolle.STIKKPRØVE, Brukerrolle.BESLUTTER)
         )
 
         inspektør(oppgave) {
@@ -334,7 +334,7 @@ internal class OppgaveTest {
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandlerWrapper = beslutter,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            brukerroller = emptySet()
+            brukerroller = Brukerrolle.entries.toSet(),
         )
         oppgave.sendIRetur(beslutter)
         inspektør(oppgave) {
