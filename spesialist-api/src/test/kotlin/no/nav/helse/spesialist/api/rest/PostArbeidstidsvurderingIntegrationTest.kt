@@ -6,6 +6,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -41,12 +42,12 @@ class PostArbeidstidsvurderingIntegrationTest {
     @Test
     fun `Forbidden dersom personen har adressebeskyttelse som saksbehandler ikke har tilgang til`() {
         // Given:
-        lagrePerson(Personinfo.Adressebeskyttelse.Fortrolig)
+        val personPseudoId = lagrePerson(Personinfo.Adressebeskyttelse.Fortrolig)
 
         // When:
         val response =
             integrationTestFixture.post(
-                url = "/api/personer/$aktørId/vurderinger/arbeidstid",
+                url = "/api/personer/${personPseudoId.value}/vurderinger/arbeidstid",
                 saksbehandler = saksbehandler,
                 body = """
                 {
@@ -99,12 +100,12 @@ class PostArbeidstidsvurderingIntegrationTest {
     @Test
     fun `Bad request dersom request ikke inneholder noen vurderte perioder`() {
         // Given:
-        lagrePerson()
+        val personPseudoId = lagrePerson()
 
         // When:
         val response =
             integrationTestFixture.post(
-                url = "/api/personer/$aktørId/vurderinger/arbeidstid",
+                url = "/api/personer/${personPseudoId.value}/vurderinger/arbeidstid",
                 saksbehandler = saksbehandler,
                 body = """
                 {
@@ -166,12 +167,12 @@ class PostArbeidstidsvurderingIntegrationTest {
         val ikkeOkPeriode2Fom = "2020-06-07"
         val ikkeOkPeriode2Tom = "2020-08-09"
 
-        lagrePerson()
+        val personPseudoId = lagrePerson()
 
         // When:
         val response =
             integrationTestFixture.post(
-                url = "/api/personer/$aktørId/vurderinger/arbeidstid",
+                url = "/api/personer/${personPseudoId.value}/vurderinger/arbeidstid",
                 saksbehandler = saksbehandler,
                 body = """
                 {
@@ -285,12 +286,13 @@ class PostArbeidstidsvurderingIntegrationTest {
         )
     }
 
-    private fun lagrePerson(adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert) {
+    private fun lagrePerson(adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert): PersonPseudoId =
         lagPerson(
             id = identitetsnummer,
             adressebeskyttelse = adressebeskyttelse,
         ).also(sessionContext.personRepository::lagre)
-    }
+            .id
+            .let(sessionContext.personPseudoIdDao::nyPersonPseudoId)
 
     private fun lagPublisertSubsumsjon(
         utfall: String,
@@ -319,15 +321,15 @@ class PostArbeidstidsvurderingIntegrationTest {
                 sporing =
                     mapOf(
                         "vedtaksperiode" to
-                            listOf(
-                                arbeidsgiver1BerortVedtaksperiodeId,
-                                arbeidsgiver2BerortVedtaksperiodeId,
-                            ).map(UUID::toString),
+                                listOf(
+                                    arbeidsgiver1BerortVedtaksperiodeId,
+                                    arbeidsgiver2BerortVedtaksperiodeId,
+                                ).map(UUID::toString),
                         "organisasjonsnummer" to
-                            listOf(
-                                arbeidsgiver1Organisasjonsnummer,
-                                arbeidsgiver2Organisasjonsnummer,
-                            ),
+                                listOf(
+                                    arbeidsgiver1Organisasjonsnummer,
+                                    arbeidsgiver2Organisasjonsnummer,
+                                ),
                         "saksbehandler" to listOf(saksbehandler.epost),
                         "vurdertMinimumSykdomsgrad" to listOf(overstyring.eksternHendelseId.toString()),
                     ),

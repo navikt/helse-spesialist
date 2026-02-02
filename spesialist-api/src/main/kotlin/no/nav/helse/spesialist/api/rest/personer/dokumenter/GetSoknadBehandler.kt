@@ -5,27 +5,26 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiSoknad
-import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Person
 
 class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
-) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode> {
+) : GetForPersonBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode>(
+        personPseudoId = { resource -> resource.parent.parent.parent },
+        personIkkeFunnet = ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET,
+        manglerTilgangTilPerson = ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON,
+    ) {
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
+        person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiSoknad, ApiGetSoknadErrorCode> {
-        val personId = resource.parent.parent.parent.pseudoId
-        val pseudoId = PersonPseudoId.fraString(personId)
-        val identitetsnummer =
-            kallKontekst.transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
-                ?: return RestResponse.Error(ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET)
-
+        val identitetsnummer = person.id
         val dokument =
             dokumentMediator.hentDokument(
                 dokumentDao = kallKontekst.transaksjon.dokumentDao,
@@ -41,18 +40,7 @@ class GetSoknadBehandler(
             return RestResponse.Error(ApiGetSoknadErrorCode.FANT_IKKE_DOKUMENT)
         }
 
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = identitetsnummer,
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON)
-        }
-
-        return RestResponse.OK(
-            dokument.tilSøknad(),
-        )
+        return RestResponse.OK(dokument.tilSøknad())
     }
 
     override fun openApi(config: RouteConfig) {

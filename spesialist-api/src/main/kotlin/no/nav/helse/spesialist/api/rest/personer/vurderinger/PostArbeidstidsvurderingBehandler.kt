@@ -11,31 +11,30 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykd
 import no.nav.helse.spesialist.api.rest.ApiArbeidstidsvurderingRequest
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PostBehandler
+import no.nav.helse.spesialist.api.rest.PostForPersonBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import java.time.LocalDateTime
 import java.util.UUID
 
-class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
+class PostArbeidstidsvurderingBehandler :
+    PostForPersonBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode>(
+        personPseudoId = { it.parent.parent },
+        personIkkeFunnet = ApiArbeidstidsvurderingErrorCode.PERSON_IKKE_FUNNET,
+        manglerTilgangTilPerson = ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON,
+    ) {
     override fun behandle(
         resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,
         request: ApiArbeidstidsvurderingRequest,
+        person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiArbeidstidsvurderingErrorCode> {
-        val fødselsnummer = request.fødselsnummer
-
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON)
+        // TODO: Denne bør ikke både ha fødselsnummer i request body, og personPseudoId i URL
+        if (request.fødselsnummer != person.id.value) {
+            return RestResponse.Error(ApiArbeidstidsvurderingErrorCode.MISMATCH_I_IDENTITETSNUMRE)
         }
 
         if (request.perioderVurdertOk.isEmpty() && request.perioderVurdertIkkeOk.isEmpty()) {
@@ -71,6 +70,8 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
                     },
                 vedtaksperiodeId = request.initierendeVedtaksperiodeId,
             )
+
+        val fødselsnummer = person.id.value
 
         teamLogs.info("Reserverer person $fødselsnummer til saksbehandler ${kallKontekst.saksbehandler}")
         kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, fødselsnummer)
@@ -158,6 +159,8 @@ enum class ApiArbeidstidsvurderingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
+    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    MISMATCH_I_IDENTITETSNUMRE("Person referert til i URL matcher ikke person referert til i request", HttpStatusCode.BadRequest),
     MANGLER_VURDERTE_PERIODER("Mangler vurderte perioder", HttpStatusCode.BadRequest),
 }

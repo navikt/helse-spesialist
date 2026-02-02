@@ -1,12 +1,17 @@
 package no.nav.helse.spesialist.api.rest
 
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.uri
+import io.ktor.server.routing.RoutingCall
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.withMDC
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -16,28 +21,47 @@ class KallKontekst(
     val brukerroller: Set<Brukerrolle>,
     val transaksjon: SessionContext,
     val outbox: Outbox,
+    private val ktorCall: RoutingCall,
 ) {
     fun <R, E : ApiErrorCode> medPerson(
         personPseudoIdResource: Personer.PersonPseudoId,
-        personIkkeFunnetErrorCode: E,
-        manglerTilgangTilPersonErrorCode: E,
+        personIkkeFunnet: E,
+        manglerTilgangTilPerson: E,
         block: (person: Person) -> RestResponse<R, E>,
     ): RestResponse<R, E> {
-        val identitetsnummer =
-            transaksjon.personPseudoIdDao.hentIdentitetsnummer(PersonPseudoId.fraString(personPseudoIdResource.pseudoId))
-                ?: return RestResponse.Error(personIkkeFunnetErrorCode)
+        val personPseudoId = personPseudoIdResource.pseudoId
+        return withMDC("personPseudoId" to personPseudoId) {
+            medPerson(
+                identitetsnummer =
+                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(
+                        PersonPseudoId.fraString(personPseudoId),
+                    ) ?: return@withMDC RestResponse.Error(personIkkeFunnet),
+                personIkkeFunnet = personIkkeFunnet,
+                manglerTilgangTilPerson = manglerTilgangTilPerson,
+                block = block,
+            )
+        }
+    }
 
-        return withMDC(mapOf("identitetsnummer" to identitetsnummer.value)) {
+    fun <R, E : ApiErrorCode> medPerson(
+        identitetsnummer: Identitetsnummer,
+        personIkkeFunnet: E,
+        manglerTilgangTilPerson: E,
+        block: (Person) -> RestResponse<R, E>,
+    ): RestResponse<R, E> =
+        withMDC("identitetsnummer" to identitetsnummer.value) {
+            loggInfo("Behandler ${ktorCall.request.httpMethod} ${ktorCall.request.uri}")
+
             val person = transaksjon.personRepository.finn(identitetsnummer)
 
             if (person == null) {
                 teamLogs.warn("Person med identitetsnummer $identitetsnummer ble ikke funnet")
-                return@withMDC RestResponse.Error(personIkkeFunnetErrorCode)
+                return@withMDC RestResponse.Error(personIkkeFunnet)
             }
 
             if (!person.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
                 teamLogs.warn("Saksbehandler har ikke tilgang til person med identitetsnummer $identitetsnummer")
-                return@withMDC RestResponse.Error(manglerTilgangTilPersonErrorCode)
+                return@withMDC RestResponse.Error(manglerTilgangTilPerson)
             }
 
             val oppgaveId = transaksjon.oppgaveDao.finnOppgaveId(identitetsnummer.value)
@@ -53,10 +77,9 @@ class KallKontekst(
 
             if (!harTilgangTilOppgave) {
                 loggWarn("Saksbehandler mangler tilgang til aktiv oppgave på denne personen")
-                return@withMDC RestResponse.Error(manglerTilgangTilPersonErrorCode)
+                return@withMDC RestResponse.Error(manglerTilgangTilPerson)
             }
 
             block(person)
         }
-    }
 }

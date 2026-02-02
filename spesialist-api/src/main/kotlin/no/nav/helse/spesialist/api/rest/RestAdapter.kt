@@ -69,6 +69,7 @@ class RestAdapter(
                                 brukerroller = principal.brukerroller,
                                 transaksjon = transaksjon,
                                 outbox = outbox,
+                                ktorCall = call,
                             )
                         val response = behandler.invoke(kallKontekst)
 

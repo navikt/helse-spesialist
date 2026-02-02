@@ -13,10 +13,11 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
-import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
@@ -26,23 +27,23 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettet
 import java.math.BigDecimal
 import java.time.ZoneId
 
-class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+class GetTilkomneInntektskilderForPersonBehandler :
+    GetForPersonBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode>(
+        personPseudoId = { resource -> resource.parent },
+        personIkkeFunnet = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET,
+        manglerTilgangTilPerson = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
+    ) {
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,
+        person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
-        kallKontekst.medPerson(
-            personPseudoIdResource = resource.parent,
-            personIkkeFunnetErrorCode = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET,
-            manglerTilgangTilPersonErrorCode = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
-        ) { person ->
-            RestResponse.OK(
-                hentTilkomneInntektskilder(
-                    fødselsnummer = person.id.value,
-                    transaksjon = kallKontekst.transaksjon,
-                ),
-            )
-        }
+        RestResponse.OK(
+            hentTilkomneInntektskilder(
+                fødselsnummer = person.id.value,
+                transaksjon = kallKontekst.transaksjon,
+            ),
+        )
 
     private fun hentTilkomneInntektskilder(
         fødselsnummer: String,

@@ -2,6 +2,8 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.domain.Person
 
 interface RestBehandler {
     fun openApi(config: RouteConfig)
@@ -64,3 +66,104 @@ interface PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : Re
 interface PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
 
 interface PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
+
+abstract class ForPersonBehandlerUtenBody<RESOURCE, RESPONSE, ERROR : ApiErrorCode>(
+    private val personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    private val personIkkeFunnet: ERROR,
+    private val manglerTilgangTilPerson: ERROR,
+) : RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR> {
+    abstract fun behandle(
+        resource: RESOURCE,
+        person: Person,
+        kallKontekst: KallKontekst,
+    ): RestResponse<RESPONSE, ERROR>
+
+    final override fun behandle(
+        resource: RESOURCE,
+        kallKontekst: KallKontekst,
+    ): RestResponse<RESPONSE, ERROR> =
+        kallKontekst.medPerson(
+            personPseudoIdResource = personPseudoId(resource),
+            personIkkeFunnet = personIkkeFunnet,
+            manglerTilgangTilPerson = manglerTilgangTilPerson,
+        ) { person -> behandle(resource, person, kallKontekst) }
+}
+
+abstract class ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
+    private val personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    private val personIkkeFunnet: ERROR,
+    private val manglerTilgangTilPerson: ERROR,
+) : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR> {
+    abstract fun behandle(
+        resource: RESOURCE,
+        request: REQUEST,
+        person: Person,
+        kallKontekst: KallKontekst,
+    ): RestResponse<RESPONSE, ERROR>
+
+    final override fun behandle(
+        resource: RESOURCE,
+        request: REQUEST,
+        kallKontekst: KallKontekst,
+    ): RestResponse<RESPONSE, ERROR> =
+        kallKontekst.medPerson(
+            personPseudoIdResource = personPseudoId(resource),
+            personIkkeFunnet = personIkkeFunnet,
+            manglerTilgangTilPerson = manglerTilgangTilPerson,
+        ) { person -> behandle(resource, request, person, kallKontekst) }
+}
+
+abstract class GetForPersonBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode>(
+    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    personIkkeFunnet: ERROR,
+    manglerTilgangTilPerson: ERROR,
+) : ForPersonBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>(
+        personPseudoId = personPseudoId,
+        personIkkeFunnet = personIkkeFunnet,
+        manglerTilgangTilPerson = manglerTilgangTilPerson,
+    ),
+    GetBehandler<RESOURCE, RESPONSE, ERROR>
+
+abstract class DeleteForPersonBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode>(
+    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    personIkkeFunnet: ERROR,
+    manglerTilgangTilPerson: ERROR,
+) : ForPersonBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>(
+        personPseudoId = personPseudoId,
+        personIkkeFunnet = personIkkeFunnet,
+        manglerTilgangTilPerson = manglerTilgangTilPerson,
+    ),
+    DeleteBehandler<RESOURCE, RESPONSE, ERROR>
+
+abstract class PatchForPersonBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
+    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    personIkkeFunnet: ERROR,
+    manglerTilgangTilPerson: ERROR,
+) : ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>(
+        personPseudoId = personPseudoId,
+        personIkkeFunnet = personIkkeFunnet,
+        manglerTilgangTilPerson = manglerTilgangTilPerson,
+    ),
+    PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>
+
+abstract class PostForPersonBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
+    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    personIkkeFunnet: ERROR,
+    manglerTilgangTilPerson: ERROR,
+) : ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>(
+        personPseudoId = personPseudoId,
+        personIkkeFunnet = personIkkeFunnet,
+        manglerTilgangTilPerson = manglerTilgangTilPerson,
+    ),
+    PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>
+
+abstract class PutForPersonBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
+    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
+    personIkkeFunnet: ERROR,
+    manglerTilgangTilPerson: ERROR,
+) : ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>(
+        personPseudoId = personPseudoId,
+        personIkkeFunnet = personIkkeFunnet,
+        manglerTilgangTilPerson = manglerTilgangTilPerson,
+    ),
+    PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>

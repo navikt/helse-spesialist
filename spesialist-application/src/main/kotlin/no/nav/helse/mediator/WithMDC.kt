@@ -14,3 +14,16 @@ fun <T> withMDC(
         MDC.setContextMap(contextMap)
     }
 }
+
+fun <T> withMDC(
+    vararg pairs: Pair<String, String>,
+    block: () -> T,
+): T {
+    val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+    try {
+        MDC.setContextMap(contextMap + pairs)
+        return block()
+    } finally {
+        MDC.setContextMap(contextMap)
+    }
+}
