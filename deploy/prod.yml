@@ -131,7 +131,7 @@ spec:
     - name: ROLLE_STIKKPROVE
       value: {{ENTRAID_UUID_STIKKPROVE}}
     - name: ROLLE_SELVSTENDIG_BETA
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}}
+      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}},{{ENTRAID_UUID_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
