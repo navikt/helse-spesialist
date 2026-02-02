@@ -2,14 +2,24 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.rest.resources.Brukerroller
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
-class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<String>, GetBrukerrollerErrorCode> {
+class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>, GetBrukerrollerErrorCode> {
     override fun behandle(
         resource: Brukerroller,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<String>, GetBrukerrollerErrorCode> =
+    ): RestResponse<List<ApiBrukerrolle>, GetBrukerrollerErrorCode> =
         RestResponse.OK(
-            kallKontekst.brukerroller.map { it.name },
+            kallKontekst.brukerroller.map {
+                when (it) {
+                    Brukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA -> ApiBrukerrolle.SELVSTSTENDIG_NÆRINGSDRIVENDE_BETA
+                    Brukerrolle.BESLUTTER -> ApiBrukerrolle.BESLUTTER
+                    Brukerrolle.EGEN_ANSATT -> ApiBrukerrolle.EGEN_ANSATT
+                    Brukerrolle.KODE_7 -> ApiBrukerrolle.KODE_7
+                    Brukerrolle.STIKKPRØVE -> ApiBrukerrolle.STIKKPRØVE
+                    Brukerrolle.UTVIKLER -> ApiBrukerrolle.UTVIKLER
+                }
+            },
         )
 
     override fun openApi(config: RouteConfig) {
