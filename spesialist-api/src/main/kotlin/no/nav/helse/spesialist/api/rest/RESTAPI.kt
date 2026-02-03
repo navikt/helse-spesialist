@@ -16,6 +16,8 @@ import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
+import no.nav.helse.spesialist.api.rest.dialoger.kommentarer.PatchKommentarBehandler
+import no.nav.helse.spesialist.api.rest.dialoger.kommentarer.PostKommentarBehandler
 import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
@@ -33,8 +35,6 @@ import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostKommentarBehandler
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PutFeilregistrerKommentarBehandler
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun Routing.restRoutes(
@@ -80,7 +80,8 @@ fun Routing.restRoutes(
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
             post(PostKommentarBehandler(), restAdapter)
-            put(PutFeilregistrerKommentarBehandler(), restAdapter)
+            patch(PatchKommentarBehandler(), restAdapter)
+
             get(GetNotatBehandler(), restAdapter)
             post(PostNotatBehandler(), restAdapter)
             patch(PatchNotatBehandler(), restAdapter)

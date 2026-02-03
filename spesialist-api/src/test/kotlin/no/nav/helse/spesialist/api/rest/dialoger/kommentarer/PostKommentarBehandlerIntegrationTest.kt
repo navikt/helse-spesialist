@@ -1,13 +1,10 @@
-package no.nav.helse.spesialist.api.rest.vedtaksperioder.notater
+package no.nav.helse.spesialist.api.rest.dialoger.kommentarer
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.KommentarId
-import no.nav.helse.spesialist.domain.testfixtures.lagNotat
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.time.LocalDateTime
 import kotlin.test.Test
@@ -25,24 +22,13 @@ class PostKommentarBehandlerIntegrationTest {
         // Given:
         val saksbehandler = lagSaksbehandler()
 
-        val identitetsnummer = lagPerson()
-            .also(sessionContext.personRepository::lagre)
-            .id
-        val vedtaksperiodeId = lagVedtaksperiode(identitetsnummer = identitetsnummer)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-            .id
         val dialogId = Dialog.Factory.ny()
             .also(sessionContext.dialogRepository::lagre)
             .id()
-        val notatId = lagNotat(
-            dialogRef = dialogId,
-            saksbehandlerOid = saksbehandler.id,
-            vedtaksperiodeId = vedtaksperiodeId.value
-        ).also(sessionContext.notatRepository::lagre).id()
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtaksperioder/${vedtaksperiodeId.value}/notater/${notatId.value}/kommentarer",
+            url = "/api/dialoger/${dialogId.value}/kommentarer",
             body = """{"tekst" :  "Dette er en kommentar"}""",
             saksbehandler = saksbehandler,
         )

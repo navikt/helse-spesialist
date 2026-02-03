@@ -72,6 +72,11 @@ data class ApiKommentarResponse(
 )
 
 @Serializable
+data class ApiPatchKommentarRequest(
+    val feilregistrert: Boolean,
+)
+
+@Serializable
 data class ApiPatchNotatRequest(
     val feilregistrert: Boolean,
 )

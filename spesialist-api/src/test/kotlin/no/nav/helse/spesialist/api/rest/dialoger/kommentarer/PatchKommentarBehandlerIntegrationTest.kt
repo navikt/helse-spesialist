@@ -1,11 +1,8 @@
-package no.nav.helse.spesialist.api.rest.vedtaksperioder.notater
+package no.nav.helse.spesialist.api.rest.dialoger.kommentarer
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Dialog
-import no.nav.helse.spesialist.domain.testfixtures.lagNotat
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -13,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PutFeilregistrerKommentarBehandlerIntegrationTest {
+class PatchKommentarBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
@@ -22,19 +19,8 @@ class PutFeilregistrerKommentarBehandlerIntegrationTest {
         // Given:
         val saksbehandler = lagSaksbehandler()
 
-        val identitetsnummer = lagPerson()
-            .also(sessionContext.personRepository::lagre)
-            .id
-        val vedtaksperiodeId = lagVedtaksperiode(identitetsnummer = identitetsnummer)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-            .id
         val dialog = Dialog.Factory.ny()
             .also(sessionContext.dialogRepository::lagre)
-        val notatId = lagNotat(
-            dialogRef = dialog.id(),
-            saksbehandlerOid = saksbehandler.id,
-            vedtaksperiodeId = vedtaksperiodeId.value
-        ).also(sessionContext.notatRepository::lagre).id()
         val kommentar = dialog.leggTilKommentar(
             tekst = "Dette er en kommentar",
             saksbehandlerident = saksbehandler.ident,
@@ -43,9 +29,9 @@ class PutFeilregistrerKommentarBehandlerIntegrationTest {
         sessionContext.dialogRepository.lagre(dialog)
 
         // When:
-        val response = integrationTestFixture.put(
-            url = "/api/vedtaksperioder/${vedtaksperiodeId.value}/notater/${notatId.value}/kommentarer/${kommentar.id().value}/feilregistrer",
-            body = "{}",
+        val response = integrationTestFixture.patch(
+            url = "/api/dialoger/${dialog.id().value}/kommentarer/${kommentar.id().value}",
+            body = """{ "feilregistrert":  true }""",
             saksbehandler = saksbehandler,
         )
 
