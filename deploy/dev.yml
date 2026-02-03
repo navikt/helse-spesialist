@@ -110,7 +110,7 @@ spec:
     - name: ROLLE_LESETILGANG
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_BESLUTTER
-      value: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
+      value: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}},{{ENTRAID_UUID_TBD}}
     - name: ROLLE_EGEN_ANSATT
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_KODE_7
