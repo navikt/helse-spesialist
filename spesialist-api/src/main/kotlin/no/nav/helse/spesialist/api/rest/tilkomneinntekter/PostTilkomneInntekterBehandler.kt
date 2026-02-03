@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
@@ -21,54 +20,56 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
         resource: TilkomneInntekter,
         request: ApiLeggTilTilkommenInntektRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = request.fodselsnummer),
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON)
-        }
-
-        val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
-        TilkommenInntektPeriodeValidator.validerPeriode(
-            periode = periode,
-            organisasjonsnummer = request.verdier.organisasjonsnummer,
-            andreTilkomneInntekter = kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForFødselsnummer(request.fodselsnummer),
-            vedtaksperioder = kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(request.fodselsnummer),
-        )
-
-        val tilkommenInntekt =
-            TilkommenInntekt.ny(
-                fødselsnummer = request.fodselsnummer,
-                saksbehandlerIdent = kallKontekst.saksbehandler.ident,
-                notatTilBeslutter = request.notatTilBeslutter,
-                totrinnsvurderingId =
-                    finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer = request.fodselsnummer,
-                        totrinnsvurderingRepository = kallKontekst.transaksjon.totrinnsvurderingRepository,
-                    ).id(),
-                organisasjonsnummer = request.verdier.organisasjonsnummer,
+    ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> =
+        kallKontekst.medPerson(
+            identitetsnummer = Identitetsnummer.fraString(identitetsnummer = request.fodselsnummer),
+            personIkkeFunnet = ApiPostTilkomneInntekterErrorCode.PERSON_IKKE_FUNNET,
+            manglerTilgangTilPerson = ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON,
+        ) { person ->
+            val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
+            TilkommenInntektPeriodeValidator.validerPeriode(
                 periode = periode,
-                periodebeløp = request.verdier.periodebelop,
-                ekskluderteUkedager = request.verdier.ekskluderteUkedager.toSet(),
+                organisasjonsnummer = request.verdier.organisasjonsnummer,
+                andreTilkomneInntekter =
+                    kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForFødselsnummer(
+                        person.id.value,
+                    ),
+                vedtaksperioder =
+                    kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(
+                        person.id.value,
+                    ),
             )
-        kallKontekst.transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        kallKontekst.outbox.leggTil(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            hendelse =
-                InntektsendringerEventBygger.forNy(
-                    inntektskilde = tilkommenInntekt.organisasjonsnummer,
-                    dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
-                    dagsbeløp = tilkommenInntekt.dagbeløp(),
-                ),
-            årsak = "tilkommen inntekt lagt til",
-        )
+            val tilkommenInntekt =
+                TilkommenInntekt.ny(
+                    fødselsnummer = person.id.value,
+                    saksbehandlerIdent = kallKontekst.saksbehandler.ident,
+                    notatTilBeslutter = request.notatTilBeslutter,
+                    totrinnsvurderingId =
+                        finnEllerOpprettTotrinnsvurdering(
+                            fodselsnummer = person.id.value,
+                            totrinnsvurderingRepository = kallKontekst.transaksjon.totrinnsvurderingRepository,
+                        ).id(),
+                    organisasjonsnummer = request.verdier.organisasjonsnummer,
+                    periode = periode,
+                    periodebeløp = request.verdier.periodebelop,
+                    ekskluderteUkedager = request.verdier.ekskluderteUkedager.toSet(),
+                )
+            kallKontekst.transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
-    }
+            kallKontekst.outbox.leggTil(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                hendelse =
+                    InntektsendringerEventBygger.forNy(
+                        inntektskilde = tilkommenInntekt.organisasjonsnummer,
+                        dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
+                        dagsbeløp = tilkommenInntekt.dagbeløp(),
+                    ),
+                årsak = "tilkommen inntekt lagt til",
+            )
+
+            RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
+        }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
@@ -81,5 +82,6 @@ enum class ApiPostTilkomneInntekterErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
+    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.BadRequest),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }
