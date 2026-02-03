@@ -33,11 +33,8 @@ import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.GetNotatBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostKommentarBehandler
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PostNotatBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PutFeilregistrerKommentarBehandler
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.notater.PutFeilregistrerNotatBehandler
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun Routing.restRoutes(
@@ -82,10 +79,7 @@ fun Routing.restRoutes(
             put(PutVarselvurderingBehandler(), restAdapter)
             delete(DeleteVarselvurderingBehandler(), restAdapter)
 
-            get(GetNotatBehandler(), restAdapter)
-            post(PostNotatBehandler(), restAdapter)
             post(PostKommentarBehandler(), restAdapter)
-            put(PutFeilregistrerNotatBehandler(), restAdapter)
             put(PutFeilregistrerKommentarBehandler(), restAdapter)
             get(GetNotatV2Behandler(), restAdapter)
             post(PostNotatV2Behandler(), restAdapter)
@@ -106,14 +100,26 @@ private inline fun <reified RESOURCE : Any, reified RESPONSE : Any, reified ERRO
     behandler: DeleteBehandler<RESOURCE, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    delete<RESOURCE>({ behandler.openApiUtenRequestBody<RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+    delete<RESOURCE>({ behandler.openApiUtenRequestBody<RESPONSE, ERROR>(this) }) { resource ->
+        adapter.behandle(
+            resource,
+            call,
+            behandler,
+        )
+    }
 }
 
 private inline fun <reified RESOURCE : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.get(
     behandler: GetBehandler<RESOURCE, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    get<RESOURCE>({ behandler.openApiUtenRequestBody<RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+    get<RESOURCE>({ behandler.openApiUtenRequestBody<RESPONSE, ERROR>(this) }) { resource ->
+        adapter.behandle(
+            resource,
+            call,
+            behandler,
+        )
+    }
 }
 
 @Suppress("unused")
@@ -121,19 +127,37 @@ private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPO
     behandler: PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    patch<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+    patch<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource ->
+        adapter.behandle(
+            resource,
+            call,
+            behandler,
+        )
+    }
 }
 
 private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.post(
     behandler: PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    post<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+    post<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource ->
+        adapter.behandle(
+            resource,
+            call,
+            behandler,
+        )
+    }
 }
 
 private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.put(
     behandler: PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    put<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+    put<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource ->
+        adapter.behandle(
+            resource,
+            call,
+            behandler,
+        )
+    }
 }
