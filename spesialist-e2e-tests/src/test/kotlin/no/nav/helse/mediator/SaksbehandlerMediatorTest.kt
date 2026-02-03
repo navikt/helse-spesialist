@@ -11,7 +11,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
@@ -24,10 +24,11 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.api.SendIReturResult
-import no.nav.helse.spesialist.api.SendTilGodkjenningResult
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
+import no.nav.helse.spesialist.api.graphql.SendIReturResult
+import no.nav.helse.spesialist.api.graphql.SendTilGodkjenningResult
+import no.nav.helse.spesialist.api.graphql.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.OppgaveTildeltNoenAndre
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel

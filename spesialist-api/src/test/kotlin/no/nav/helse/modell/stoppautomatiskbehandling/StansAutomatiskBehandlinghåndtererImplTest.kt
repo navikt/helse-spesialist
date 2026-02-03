@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
+import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,7 +16,7 @@ class StansAutomatiskBehandlinghåndtererImplTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
 
     private val stansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlinghåndtererImpl(stansAutomatiskBehandlingDao)
+        `StansAutomatiskBehandlinghåndtererImpl`(stansAutomatiskBehandlingDao)
 
     @Test
     fun `Kan stanses på nytt etter stans er opphevet`() {

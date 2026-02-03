@@ -16,15 +16,28 @@ import io.mockk.mockk
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.mediator.SaksbehandlerMediator
-import no.nav.helse.mediator.dokument.DokumentMediator
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.rest.DokumentMediator
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.graphql.`StansAutomatiskBehandlinghåndterer`
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.api.graphql.kobleOppApi
-import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
+import no.nav.helse.spesialist.api.configureKtorApplication
+import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
+import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
@@ -101,17 +114,46 @@ object TestRunner {
         testApplication {
             application {
                 val spesialistSchema =
-                    lagSchemaMedResolversOgHandlers(
-                        daos = avhengigheter.daos,
-                        apiOppgaveService = avhengigheter.apiOppgaveService,
-                        saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
-                        stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
-                        personhåndterer = avhengigheter.personhåndterer,
-                        snapshothenter = avhengigheter.snapshothenter,
-                        sessionFactory = avhengigheter.sessionFactory,
-                        behandlingstatistikk = avhengigheter.behandlingstatistikk,
+                    SpesialistSchema(
+                        queryHandlers =
+                            QueryHandlers(
+                                person =
+                                    PersonQueryHandler(
+                                        daos = avhengigheter.daos,
+                                        apiOppgaveService = avhengigheter.apiOppgaveService,
+                                        stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
+                                        personhåndterer = avhengigheter.personhåndterer,
+                                        snapshothenter = avhengigheter.snapshothenter,
+                                        sessionFactory = avhengigheter.sessionFactory,
+                                    ),
+                                oppgaver =
+                                    OppgaverQueryHandler(
+                                        apiOppgaveService = avhengigheter.apiOppgaveService,
+                                    ),
+                                behandlingsstatistikk =
+                                    BehandlingsstatistikkQueryHandler(
+                                        behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
+                                    ),
+                            ),
+                        mutationHandlers =
+                            MutationHandlers(
+                                notat = NotatMutationHandler(sessionFactory = avhengigheter.sessionFactory),
+                                tildeling = TildelingMutationHandler(saksbehandlerMediator = avhengigheter.saksbehandlerMediator),
+                                overstyring =
+                                    OverstyringMutationHandler(
+                                        saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
+                                    ),
+                                skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = avhengigheter.saksbehandlerMediator),
+                                totrinnsvurdering =
+                                    TotrinnsvurderingMutationHandler(
+                                        saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
+                                    ),
+                                person = PersonMutationHandler(personhåndterer = avhengigheter.personhåndterer),
+                                paVent = PaVentMutationHandler(saksbehandlerMediator = avhengigheter.saksbehandlerMediator),
+                                stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory = avhengigheter.sessionFactory),
+                            ),
                     )
-                kobleOppApi(
+                configureKtorApplication(
                     ktorApplication = this,
                     apiModuleConfiguration = configuration,
                     spesialistSchema = spesialistSchema,

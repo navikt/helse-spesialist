@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.api.graphql
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.server.application.createRouteScopedPlugin

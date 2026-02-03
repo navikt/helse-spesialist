@@ -1,6 +1,4 @@
-package no.nav.helse.spesialist.api
-
-import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
+package no.nav.helse.spesialist.api.graphql
 
 sealed interface SendTilGodkjenningResult {
     data object Ok : SendTilGodkjenningResult

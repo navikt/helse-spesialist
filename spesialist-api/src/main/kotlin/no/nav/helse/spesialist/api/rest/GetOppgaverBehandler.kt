@@ -4,7 +4,6 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
-import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
@@ -276,3 +275,40 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
 }
 
 enum class ApiGetOppgaverErrorCode : ApiErrorCode
+
+private fun Egenskap.tilApiversjon(): ApiEgenskap =
+    when (this) {
+        Egenskap.RISK_QA -> ApiEgenskap.RISK_QA
+        Egenskap.FORTROLIG_ADRESSE -> ApiEgenskap.FORTROLIG_ADRESSE
+        Egenskap.STRENGT_FORTROLIG_ADRESSE -> ApiEgenskap.STRENGT_FORTROLIG_ADRESSE
+        Egenskap.EGEN_ANSATT -> ApiEgenskap.EGEN_ANSATT
+        Egenskap.BESLUTTER -> ApiEgenskap.BESLUTTER
+        Egenskap.SPESIALSAK -> ApiEgenskap.SPESIALSAK
+        Egenskap.REVURDERING -> ApiEgenskap.REVURDERING
+        Egenskap.SØKNAD -> ApiEgenskap.SOKNAD
+        Egenskap.STIKKPRØVE -> ApiEgenskap.STIKKPROVE
+        Egenskap.UTBETALING_TIL_SYKMELDT -> ApiEgenskap.UTBETALING_TIL_SYKMELDT
+        Egenskap.DELVIS_REFUSJON -> ApiEgenskap.DELVIS_REFUSJON
+        Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> ApiEgenskap.UTBETALING_TIL_ARBEIDSGIVER
+        Egenskap.INGEN_UTBETALING -> ApiEgenskap.INGEN_UTBETALING
+        Egenskap.HASTER -> ApiEgenskap.HASTER
+        Egenskap.RETUR -> ApiEgenskap.RETUR
+        Egenskap.VERGEMÅL -> ApiEgenskap.VERGEMAL
+        Egenskap.EN_ARBEIDSGIVER -> ApiEgenskap.EN_ARBEIDSGIVER
+        Egenskap.FLERE_ARBEIDSGIVERE -> ApiEgenskap.FLERE_ARBEIDSGIVERE
+        Egenskap.UTLAND -> ApiEgenskap.UTLAND
+        Egenskap.FORLENGELSE -> ApiEgenskap.FORLENGELSE
+        Egenskap.FORSTEGANGSBEHANDLING -> ApiEgenskap.FORSTEGANGSBEHANDLING
+        Egenskap.INFOTRYGDFORLENGELSE -> ApiEgenskap.INFOTRYGDFORLENGELSE
+        Egenskap.OVERGANG_FRA_IT -> ApiEgenskap.OVERGANG_FRA_IT
+        Egenskap.SKJØNNSFASTSETTELSE -> ApiEgenskap.SKJONNSFASTSETTELSE
+        Egenskap.PÅ_VENT -> ApiEgenskap.PA_VENT
+        Egenskap.TILBAKEDATERT -> ApiEgenskap.TILBAKEDATERT
+        Egenskap.GOSYS -> ApiEgenskap.GOSYS
+        Egenskap.MANGLER_IM -> ApiEgenskap.MANGLER_IM
+        Egenskap.MEDLEMSKAP -> ApiEgenskap.MEDLEMSKAP
+        Egenskap.GRUNNBELØPSREGULERING -> ApiEgenskap.GRUNNBELOPSREGULERING
+        Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE
+        Egenskap.ARBEIDSTAKER -> ApiEgenskap.ARBEIDSTAKER
+        Egenskap.JORDBRUKER_REINDRIFT -> ApiEgenskap.JORDBRUKER_REINDRIFT
+    }

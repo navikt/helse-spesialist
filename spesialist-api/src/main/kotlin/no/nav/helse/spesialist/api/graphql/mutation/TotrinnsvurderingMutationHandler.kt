@@ -3,10 +3,10 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.mediator.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.SendIReturResult
-import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.graphql.SendIReturResult
+import no.nav.helse.spesialist.api.graphql.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException

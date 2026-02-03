@@ -12,7 +12,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler

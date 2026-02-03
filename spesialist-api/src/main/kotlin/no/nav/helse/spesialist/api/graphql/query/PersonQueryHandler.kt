@@ -11,14 +11,14 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.auditLogTeller
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.`StansAutomatiskBehandlinghåndterer`
+import no.nav.helse.spesialist.api.graphql.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag

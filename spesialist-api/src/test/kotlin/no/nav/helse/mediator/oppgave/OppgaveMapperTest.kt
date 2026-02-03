@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
+import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap

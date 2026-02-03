@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
 import no.nav.helse.e2e.AbstractDatabaseTest
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering

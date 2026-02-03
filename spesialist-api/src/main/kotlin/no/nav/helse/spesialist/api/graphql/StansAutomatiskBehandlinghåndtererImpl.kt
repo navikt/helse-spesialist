@@ -1,8 +1,8 @@
-package no.nav.helse.modell.stoppautomatiskbehandling
+package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
 import no.nav.helse.spesialist.application.logg.logg
 
@@ -42,7 +42,7 @@ class StansAutomatiskBehandlinghåndtererImpl(
         } else {
             ApiUnntattFraAutomatiskGodkjenning(
                 erUnntatt = true,
-                arsaker = flatMap { it.årsaker.map(StoppknappÅrsak::name) },
+                arsaker = flatMap { it.årsaker.map(`StoppknappÅrsak`::name) },
                 tidspunkt = last().opprettet,
             )
         }

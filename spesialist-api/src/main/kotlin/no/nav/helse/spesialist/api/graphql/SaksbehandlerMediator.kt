@@ -1,4 +1,4 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
@@ -7,7 +7,7 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
@@ -41,12 +41,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegru
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
-import no.nav.helse.spesialist.api.SendIReturResult
-import no.nav.helse.spesialist.api.SendTilGodkjenningResult
-import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
-import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
-import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
@@ -70,7 +64,7 @@ import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.tell
 import java.util.UUID
-import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil as ApiModellfeil
+import no.nav.helse.spesialist.api.graphql.Modellfeil as ApiModellfeil
 
 class SaksbehandlerMediator(
     daos: Daos,
@@ -494,7 +488,7 @@ class SaksbehandlerMediator(
                                 },
                             ),
                     )
-                no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
+                OppgaveTildeltNoenAndre(
                     TildelingApiDto(
                         saksbehandler.saksbehandler.navn,
                         saksbehandler.saksbehandler.epost,
@@ -504,19 +498,19 @@ class SaksbehandlerMediator(
             }
 
             is OppgaveAlleredeSendtBeslutter -> {
-                no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(
+                no.nav.helse.spesialist.api.graphql.OppgaveAlleredeSendtBeslutter(
                     oppgaveId,
                 )
             }
 
             is OppgaveAlleredeSendtIRetur -> {
-                no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(
+                no.nav.helse.spesialist.api.graphql.OppgaveAlleredeSendtIRetur(
                     oppgaveId,
                 )
             }
 
             is OppgaveKreverVurderingAvToSaksbehandlere -> {
-                no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(
+                no.nav.helse.spesialist.api.graphql.OppgaveKreverVurderingAvToSaksbehandlere(
                     oppgaveId,
                 )
             }

@@ -7,13 +7,25 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.PersonhåndtererImpl
-import no.nav.helse.mediator.SaksbehandlerMediator
-import no.nav.helse.mediator.dokument.DokumentMediator
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
-import no.nav.helse.spesialist.api.graphql.kobleOppApi
-import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
+import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
+import no.nav.helse.spesialist.api.graphql.`StansAutomatiskBehandlinghåndtererImpl`
+import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
+import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
@@ -74,19 +86,51 @@ class ApiModule(
         )
 
     private val spesialistSchema =
-        lagSchemaMedResolversOgHandlers(
-            daos = daos,
-            apiOppgaveService = apiOppgaveService,
-            saksbehandlerMediator = saksbehandlerMediator,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-            personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
-            snapshothenter = snapshothenter,
-            sessionFactory = sessionFactory,
-            behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
-        )
+        run {
+            val personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
+            SpesialistSchema(
+                queryHandlers =
+                    QueryHandlers(
+                        person =
+                            PersonQueryHandler(
+                                daos = daos,
+                                apiOppgaveService = apiOppgaveService,
+                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                personhåndterer = personhåndterer,
+                                snapshothenter = snapshothenter,
+                                sessionFactory = sessionFactory,
+                            ),
+                        oppgaver =
+                            OppgaverQueryHandler(
+                                apiOppgaveService = apiOppgaveService,
+                            ),
+                        behandlingsstatistikk =
+                            BehandlingsstatistikkQueryHandler(
+                                behandlingsstatistikkMediator = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
+                            ),
+                    ),
+                mutationHandlers =
+                    MutationHandlers(
+                        notat = NotatMutationHandler(sessionFactory = sessionFactory),
+                        tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        overstyring =
+                            OverstyringMutationHandler(
+                                saksbehandlerMediator = saksbehandlerMediator,
+                            ),
+                        skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        totrinnsvurdering =
+                            TotrinnsvurderingMutationHandler(
+                                saksbehandlerMediator = saksbehandlerMediator,
+                            ),
+                        person = PersonMutationHandler(personhåndterer = personhåndterer),
+                        paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                        stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory = sessionFactory),
+                    ),
+            )
+        }
 
     fun setUpApi(application: Application) {
-        kobleOppApi(
+        configureKtorApplication(
             ktorApplication = application,
             apiModuleConfiguration = configuration,
             spesialistSchema = spesialistSchema,

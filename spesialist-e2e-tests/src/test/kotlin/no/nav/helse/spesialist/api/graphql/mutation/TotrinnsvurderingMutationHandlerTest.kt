@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.SendIReturResult
-import no.nav.helse.spesialist.api.SendTilGodkjenningResult
+import no.nav.helse.spesialist.api.graphql.SendIReturResult
+import no.nav.helse.spesialist.api.graphql.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.testfixtures.mutation.sendIReturMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.sendTilbeslutterMutation
 import org.junit.jupiter.api.Assertions.assertEquals

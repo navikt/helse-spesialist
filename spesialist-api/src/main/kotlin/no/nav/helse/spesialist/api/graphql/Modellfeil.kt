@@ -1,6 +1,7 @@
-package no.nav.helse.spesialist.api.feilhåndtering
+package no.nav.helse.spesialist.api.graphql
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.spesialist.api.feilhåndtering.FeilDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID

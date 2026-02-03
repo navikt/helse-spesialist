@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.types.GraphQLRequest
 import com.expediagroup.graphql.server.types.GraphQLServerRequest

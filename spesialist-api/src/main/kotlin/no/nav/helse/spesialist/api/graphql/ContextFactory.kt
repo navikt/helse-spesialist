@@ -5,7 +5,7 @@ import com.expediagroup.graphql.server.ktor.KtorGraphQLContextFactory
 import graphql.GraphQLContext
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
-import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
+import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.graphql.ContextValues.BRUKERROLLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable

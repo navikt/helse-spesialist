@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.feilhåndtering
+package no.nav.helse.spesialist.api.graphql
 
 import graphql.ExceptionWhileDataFetching
 import graphql.GraphqlErrorException

@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.dokument
+package no.nav.helse.spesialist.api.rest
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.delay

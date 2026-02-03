@@ -2,9 +2,9 @@ package no.nav.helse.spesialist.api.rest.personer.dokumenter
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse

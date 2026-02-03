@@ -10,6 +10,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

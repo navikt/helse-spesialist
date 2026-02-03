@@ -12,7 +12,7 @@ import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
+import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.coMedMdcOgAttribute
 import no.nav.helse.spesialist.api.mdcMapAttribute
 import no.nav.helse.spesialist.api.objectMapper

@@ -1,10 +1,11 @@
-package no.nav.helse.mediator.oppgave
+package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
-import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
-import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
+import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilApiversjon
+import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilBehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap

@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.TestRunner.runQuery
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
+import no.nav.helse.spesialist.api.graphql.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.testfixtures.mutation.fjernTildelingMutation

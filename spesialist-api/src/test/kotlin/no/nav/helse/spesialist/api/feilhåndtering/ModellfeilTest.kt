@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.spesialist.api.graphql.Modellfeil
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test

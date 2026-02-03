@@ -16,6 +16,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
@@ -86,7 +87,7 @@ internal class ApiOppgaveServiceTest {
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveRepository = oppgaveRepository,
-                tilgangsgruppehenter = { Either.Success( emptySet()) },
+                tilgangsgruppehenter = { Either.Success(emptySet()) },
             ),
             sessionFactory = sessionFactory
         )

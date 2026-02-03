@@ -13,7 +13,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
+import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
 

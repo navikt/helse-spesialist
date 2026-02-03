@@ -2,6 +2,8 @@ package no.nav.helse.spesialist.api
 
 import com.expediagroup.graphql.server.ktor.GraphQL
 import com.expediagroup.graphql.server.ktor.KtorGraphQLRequestParser
+import com.expediagroup.graphql.server.types.GraphQLResponse
+import com.expediagroup.graphql.server.types.GraphQLServerResponse
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
@@ -12,12 +14,14 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.server.application.plugin
+import io.ktor.server.response.respond
 import io.ktor.server.routing.application
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -26,6 +30,7 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriod
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
+import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
@@ -37,9 +42,10 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHan
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
-import no.nav.helse.spesialist.api.graphql.queryHandler
+import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -48,6 +54,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
+import java.time.Duration.ofNanos
 import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
@@ -55,7 +62,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-    private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
+    private val stansAutomatiskBehandlinghåndterer = mockk<`StansAutomatiskBehandlinghåndterer`>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
@@ -69,7 +76,23 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             },
             routeBuilder = {
                 route("graphql") {
-                    queryHandler(application.plugin(GraphQL).server)
+                    this.post {
+                        val start = System.nanoTime()
+                        withSaksbehandlerIdentMdc(call) {
+                            val result =
+                                checkNotNull<GraphQLServerResponse>(application.plugin(GraphQL).server.execute(call.request)) { "Kall mot GraphQL server feilet" }
+
+                            if (result is GraphQLResponse<*>) {
+                                result.errors.takeUnless { it.isNullOrEmpty() }?.let {
+                                    teamLogs.warn("GraphQL-respons inneholder feil: ${it.joinToString()}")
+                                }
+                            }
+
+                            val tidBrukt = ofNanos(System.nanoTime() - start)
+                            teamLogs.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
+                            call.respond<GraphQLServerResponse>(result)
+                        }
+                    }
                 }
             },
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller

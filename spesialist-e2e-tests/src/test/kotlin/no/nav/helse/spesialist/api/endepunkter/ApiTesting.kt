@@ -3,11 +3,13 @@ package no.nav.helse.spesialist.api.endepunkter
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import no.nav.helse.spesialist.api.JwtStub
-import no.nav.helse.spesialist.api.jwtAuthentication
+import no.nav.helse.spesialist.api.auth.configureJwtAuthentication
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
@@ -25,12 +27,16 @@ class ApiTesting(
     private fun ApplicationTestBuilder.setUpApplication() {
         install(ServerContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         application {
-            jwtAuthentication(
-                jwkProvider = jwtStub.getJwkProviderMock(),
-                issuerUrl = issuer,
-                clientId = clientId,
-                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
-            )
+            authentication {
+                this.jwt("oidc") {
+                    configureJwtAuthentication(
+                        jwkProvider = jwtStub.getJwkProviderMock(),
+                        issuerUrl = issuer,
+                        clientId = clientId,
+                        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
+                    )
+                }
+            }
         }
         applicationBuilder(this)
         routing {
