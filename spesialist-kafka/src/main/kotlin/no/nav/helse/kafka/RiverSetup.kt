@@ -11,12 +11,13 @@ import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.withMDC
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.medMdc
 import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -132,14 +133,10 @@ class DuplikatsjekkendeRiver(
                     name = eventName,
                     `@id` = packet["@id"].asUUID(),
                 )
-            withMDC(
-                buildMap {
-                    put("meldingId", eventMetadata.`@id`.toString())
-                    put("meldingnavn", eventMetadata.name.toString())
-                    if (vedtaksperiodeId != null) {
-                        put("vedtaksperiodeId", vedtaksperiodeId)
-                    }
-                },
+            medMdc(
+                MdcKey.MELDING_ID to eventMetadata.`@id`.toString(),
+                MdcKey.MELDINGNAVN to eventMetadata.name.toString(),
+                vedtaksperiodeId?.let { MdcKey.VEDTAKSPERIODE_ID to it },
             ) {
                 loggInfo("Melding ${eventMetadata.name} mottatt", "json:\n${packet.toJson()}")
                 sessionFactory.transactionalSessionScope { transaksjon ->

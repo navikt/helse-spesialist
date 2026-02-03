@@ -16,6 +16,7 @@ import io.ktor.serialization.ContentConverter
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
@@ -39,7 +40,7 @@ import io.ktor.utils.io.readText
 import io.swagger.v3.oas.models.media.Schema
 import kotlinx.serialization.modules.SerializersModule
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
-import no.nav.helse.spesialist.api.getSaksbehandlerIdentForMdc
+import no.nav.helse.spesialist.api.mdcMapAttribute
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.serialization.BigDecimalStringSerializer
 import no.nav.helse.spesialist.api.serialization.BooleanStrictSerializer
@@ -47,6 +48,7 @@ import no.nav.helse.spesialist.api.serialization.InstantIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateTimeIsoSerializer
 import no.nav.helse.spesialist.api.serialization.UUIDStringSerializer
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.teamLogs
 import org.slf4j.event.Level
@@ -70,7 +72,13 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
         logger = teamLogs
         level = Level.INFO
         callIdMdc("callId")
-        mdc("saksbehandlerIdent", ApplicationCall::getSaksbehandlerIdentForMdc)
+        mdc(MdcKey.REQUEST_METHOD.value) { it.request.httpMethod.value }
+        mdc(MdcKey.REQUEST_URI.value) { it.request.uri }
+        MdcKey.entries
+            .filterNot { it in setOf(MdcKey.REQUEST_METHOD, MdcKey.REQUEST_URI) }
+            .forEach { mdcKey ->
+                mdc(mdcKey.value) { it.mdcMapAttribute[mdcKey] }
+            }
         filter { call ->
             call.request.path().let { it.startsWith("/graphql") || it.startsWith("/ws/") || it.startsWith("/api/") }
         }
@@ -79,12 +87,18 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, UnitFriendlyJacksonConverter(objectMapper))
     }
-    requestResponseTracing(teamLogs)
+    requestResponseTracing()
     if (eksponerOpenApi) {
         install(OpenApi) { configureOpenApi() }
     }
     install(Resources) { serializersModule = customSerializersModule }
+    install(RequestLoggingPlugin)
 }
+
+val RequestLoggingPlugin =
+    createApplicationPlugin(name = "RequestLoggingPlugin") {
+        onCall { _ -> teamLogs.info("Mottok kall") }
+    }
 
 private val customSerializersModule =
     SerializersModule {

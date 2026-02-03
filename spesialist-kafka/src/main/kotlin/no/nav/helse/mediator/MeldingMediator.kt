@@ -19,9 +19,11 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.kafka.objectMapper
 import java.time.Duration
 import java.util.UUID
@@ -97,12 +99,10 @@ class MeldingMediator(
         løsning: Any,
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {
-        withMDC(
-            mapOf(
-                "contextId" to "$contextId",
-                "meldingId" to "$behovId",
-                "opprinneligMeldingId" to "$hendelseId",
-            ),
+        medMdc(
+            MdcKey.CONTEXT_ID to contextId.toString(),
+            MdcKey.MELDING_ID to behovId.toString(),
+            MdcKey.OPPRINNELIG_MELDING_ID to hendelseId.toString(),
         ) {
             løsninger(kontekstbasertPubliserer, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: loggInfo(
@@ -117,12 +117,10 @@ class MeldingMediator(
         hendelseId: UUID,
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {
-        withMDC(
-            mapOf(
-                "contextId" to "$contextId",
-                "opprinneligMeldingId" to "$hendelseId",
-                "meldingId" to "$meldingId",
-            ),
+        medMdc(
+            MdcKey.CONTEXT_ID to contextId.toString(),
+            MdcKey.OPPRINNELIG_MELDING_ID to hendelseId.toString(),
+            MdcKey.MELDING_ID to meldingId.toString(),
         ) {
             påminnelse(kontekstbasertPubliserer, hendelseId, contextId)?.fortsett(this)
                 ?: loggInfo("mottok påminnelse som ikke kan brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
@@ -220,11 +218,7 @@ class MeldingMediator(
         message: String,
     ) {
         val meldingId = runCatching { objectMapper.readTree(message)["@id"]?.asUUID() }.getOrNull()
-        withMDC(
-            buildMap {
-                meldingId?.let { put("meldingId", it.toString()) }
-            },
-        ) {
+        medMdc(meldingId?.let { MdcKey.MELDING_ID to it.toString() }) {
             loggThrowable(
                 "alvorlig feil: ${err.message}",
                 "json:\n$message",
@@ -238,12 +232,10 @@ class MeldingMediator(
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
-        withMDC(
-            buildMap {
-                put("meldingId", melding.id.toString())
-                put("meldingnavn", meldingnavn)
-                if (melding is Vedtaksperiodemelding) put("vedtaksperiodeId", melding.vedtaksperiodeId().toString())
-            },
+        medMdc(
+            MdcKey.MELDING_ID to melding.id.toString(),
+            MdcKey.MELDINGNAVN to meldingnavn,
+            (melding as? Vedtaksperiodemelding)?.let { MdcKey.VEDTAKSPERIODE_ID to it.vedtaksperiodeId().toString() },
         ) {
             loggInfo("Melding $meldingnavn mottatt", "json: \n${melding.toJson()}")
             meldingDao.lagre(melding)
@@ -257,11 +249,9 @@ class MeldingMediator(
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
-        withMDC(
-            mapOf(
-                "meldingId" to melding.id.toString(),
-                "meldingnavn" to meldingnavn,
-            ),
+        medMdc(
+            MdcKey.MELDING_ID to melding.id.toString(),
+            MdcKey.MELDINGNAVN to meldingnavn,
         ) {
             loggInfo("Melding $meldingnavn gjenopptatt", "json: \n${melding.toJson()}")
             behandleMelding(melding, kontekstbasertPubliserer) { commandContext }

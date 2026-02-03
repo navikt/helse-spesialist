@@ -59,8 +59,10 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -101,11 +103,9 @@ class SaksbehandlerMediator(
         saksbehandlerWrapper.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
         val handlingId = UUID.randomUUID()
 
-        withMDC(
-            mapOf(
-                "saksbehandlerOid" to saksbehandler.id.value.toString(),
-                "handlingId" to handlingId.toString(),
-            ),
+        medMdc(
+            MdcKey.SAKSBEHANDLER_IDENT to saksbehandler.ident.value,
+            MdcKey.HANDLING_ID to handlingId.toString(),
         ) {
             loggInfo(
                 "Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler",
@@ -161,16 +161,11 @@ class SaksbehandlerMediator(
         tell(modellhandling)
         val handlingId = UUID.randomUUID()
 
-        withMDC(
-            mapOf(
-                "saksbehandlerOid" to saksbehandler.id.value.toString(),
-                "handlingId" to handlingId.toString(),
-            ),
+        medMdc(
+            MdcKey.SAKSBEHANDLER_IDENT to saksbehandler.ident.value,
+            MdcKey.HANDLING_ID to handlingId.toString(),
         ) {
-            loggInfo(
-                "Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler",
-                "saksbehandler: $saksbehandler",
-            )
+            loggInfo("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler")
             val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
             when (modellhandling) {
                 is LeggPåVent -> {

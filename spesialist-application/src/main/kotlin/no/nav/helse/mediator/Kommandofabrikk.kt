@@ -37,8 +37,10 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.util.UUID
 
@@ -322,9 +324,7 @@ class Kommandofabrikk(
     ) {
         commandContextObservers.forEach { commandContext.nyObserver(it) }
         val contextId = commandContext.id()
-        withMDC(
-            mapOf("contextId" to contextId.toString()),
-        ) {
+        medMdc(MdcKey.CONTEXT_ID to contextId.toString()) {
             try {
                 if (commandContext.utfør(commandContextDao, meldingId, command)) {
                     val kjøretid = commandContextDao.tidsbrukForContext(contextId)

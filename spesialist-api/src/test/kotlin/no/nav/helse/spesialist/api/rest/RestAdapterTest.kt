@@ -3,8 +3,10 @@ package no.nav.helse.spesialist.api.rest
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
-import io.ktor.server.auth.principal
+import io.ktor.server.auth.AuthenticationContext
 import io.ktor.server.routing.RoutingCall
+import io.ktor.util.AttributeKey
+import io.ktor.util.Attributes
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -26,11 +28,14 @@ class RestAdapterTest {
         val call =
             mockk<RoutingCall>(relaxed = true) {
                 coEvery { respond(capture(responseTextSlot), any()) } returns Unit
-                every { principal<SaksbehandlerPrincipal>() } returns
-                        SaksbehandlerPrincipal(
+                every { attributes } returns Attributes().apply {
+                    put(AttributeKey<AuthenticationContext>("AuthContext"), mockk<AuthenticationContext>() {
+                        every { principal<SaksbehandlerPrincipal>() } returns SaksbehandlerPrincipal(
                             saksbehandler = lagSaksbehandler(),
                             brukerroller = emptySet(),
                         )
+                    })
+                }
             }
 
         val adapter =

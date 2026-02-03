@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.application.logg
 
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 
 val teamLogs: Logger = LoggerFactory.getLogger("tjenestekall")
 inline val <reified T> T.logg: Logger
@@ -120,3 +123,43 @@ inline fun <reified T> T.loggWarnThrowable(
 ) {
     loggWarnThrowable(message, "", throwable)
 }
+
+enum class MdcKey(
+    val value: String,
+) {
+    SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
+    HANDLING_ID("handlingId"), // TODO: Denne er antageligvis unødvendig
+    PERSON_PSEUDO_ID("personPseudoId"),
+    IDENTITETSNUMMER("identitetsnummer"),
+    CONTEXT_ID("contextId"),
+    MELDING_ID("meldingId"),
+    MELDINGNAVN("meldingnavn"),
+    VEDTAKSPERIODE_ID("vedtaksperiodeId"),
+    OPPRINNELIG_MELDING_ID("opprinneligMeldingId"),
+    REQUEST_METHOD("request.method"),
+    REQUEST_URI("request.uri"),
+}
+
+fun <T> medMdc(
+    vararg pairs: Pair<MdcKey, String>?,
+    block: () -> T,
+): T {
+    val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+    try {
+        MDC.setContextMap(contextMap + pairs.filterNotNull().map { it.first.value to it.second })
+        return block()
+    } finally {
+        MDC.setContextMap(contextMap)
+    }
+}
+
+suspend fun <T> coMedMdc(
+    vararg pairs: Pair<MdcKey, String>?,
+    block: suspend () -> T,
+): T =
+    withContext(
+        MDCContext(
+            MDC.getCopyOfContextMap().orEmpty() +
+                pairs.filterNotNull().map { it.first.value to it.second },
+        ),
+    ) { block() }

@@ -13,9 +13,11 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.SaksbehandlerPrincipal
-import no.nav.helse.spesialist.api.getSaksbehandlerIdentForMdc
+import no.nav.helse.spesialist.api.coMedMdcOgAttribute
+import no.nav.helse.spesialist.api.mdcMapAttribute
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarnThrowable
 import org.slf4j.MDC
@@ -59,61 +61,71 @@ class RestAdapter(
                 it.saksbehandlerRepository.lagre(saksbehandler = principal.saksbehandler)
             }
 
-            runCatching {
-                val outbox = Outbox(versjonAvKode)
-                sessionFactory
-                    .transactionalSessionScope { transaksjon ->
-                        val kallKontekst =
-                            KallKontekst(
-                                saksbehandler = principal.saksbehandler,
-                                brukerroller = principal.brukerroller,
-                                transaksjon = transaksjon,
-                                outbox = outbox,
-                                ktorCall = call,
-                            )
-                        val response = behandler.invoke(kallKontekst)
+            val result =
+                runCatching {
+                    val outbox = Outbox(versjonAvKode)
+                    sessionFactory
+                        .transactionalSessionScope { transaksjon ->
+                            val kallKontekst =
+                                KallKontekst(
+                                    saksbehandler = principal.saksbehandler,
+                                    brukerroller = principal.brukerroller,
+                                    transaksjon = transaksjon,
+                                    outbox = outbox,
+                                    ktorCall = call,
+                                )
+                            val response = behandler.invoke(kallKontekst)
 
-                        if (response is RestResponse.Error) {
-                            throw WrappedApiHttpProblemDetailsException(
-                                ApiHttpProblemDetails(
-                                    status = response.errorCode.statusCode.value,
-                                    title = response.errorCode.title,
-                                    detail = response.detail,
-                                    code = response.errorCode,
-                                ),
-                            )
+                            if (response is RestResponse.Error) {
+                                throw WrappedApiHttpProblemDetailsException(
+                                    ApiHttpProblemDetails(
+                                        status = response.errorCode.statusCode.value,
+                                        title = response.errorCode.title,
+                                        detail = response.detail,
+                                        code = response.errorCode,
+                                    ),
+                                )
+                            }
+                            response as RestResponse.Success
+                        }.also {
+                            coMedMdcFraKall(call) {
+                                outbox.sendAlle(meldingPubliserer)
+                            }
                         }
-                        response as RestResponse.Success
-                    }.also { outbox.sendAlle(meldingPubliserer) }
-            }.onFailure { cause ->
-                val problemDetails =
-                    if (cause is WrappedApiHttpProblemDetailsException) {
-                        cause.problemDetails
-                    } else {
-                        genericProblemDetails<ERROR>(HttpStatusCode.InternalServerError)
-                    }
-                val statusCode = problemDetails.status
-                val title = problemDetails.title
-                val loggmelding =
-                    buildString {
-                        append("Returnerer HTTP $statusCode - $title")
-                        if (cause !is WrappedApiHttpProblemDetailsException) {
-                            append(" (pga. ${cause::class.simpleName})")
+                }
+
+            coMedMdcFraKall(call) {
+                result
+                    .onFailure { cause ->
+                        val problemDetails =
+                            if (cause is WrappedApiHttpProblemDetailsException) {
+                                cause.problemDetails
+                            } else {
+                                genericProblemDetails<ERROR>(HttpStatusCode.InternalServerError)
+                            }
+                        val statusCode = problemDetails.status
+                        val title = problemDetails.title
+                        val loggmelding =
+                            buildString {
+                                append("Returnerer HTTP $statusCode - $title")
+                                if (cause !is WrappedApiHttpProblemDetailsException) {
+                                    append(" (pga. ${cause::class.simpleName})")
+                                }
+                            }
+                        if (statusCode in 400..<500) {
+                            loggWarnThrowable(loggmelding, cause)
+                        } else {
+                            val teamLogsDetails = "Request body: ${call.receive<String>()}"
+                            loggThrowable(loggmelding, teamLogsDetails, cause)
+                        }
+                        call.respondWithProblem(problemDetails)
+                    }.onSuccess { result ->
+                        when (result) {
+                            is RestResponse.NoContent<*> -> call.respond(HttpStatusCode.NoContent)
+                            is RestResponse.OK<*, *> -> call.respond(HttpStatusCode.OK, result.body as Any)
+                            is RestResponse.Created<*, *> -> call.respond(HttpStatusCode.Created, result.body as Any)
                         }
                     }
-                if (statusCode in 400..<500) {
-                    loggWarnThrowable(loggmelding, cause)
-                } else {
-                    val teamLogsDetails = "Request body: ${call.receive<String>()}"
-                    loggThrowable(loggmelding, teamLogsDetails, cause)
-                }
-                call.respondWithProblem(problemDetails)
-            }.onSuccess { result ->
-                when (result) {
-                    is RestResponse.NoContent<*> -> call.respond(HttpStatusCode.NoContent)
-                    is RestResponse.OK<*, *> -> call.respond(HttpStatusCode.OK, result.body as Any)
-                    is RestResponse.Created<*, *> -> call.respond(HttpStatusCode.Created, result.body as Any)
-                }
             }
         }
     }
@@ -134,6 +146,19 @@ class RestAdapter(
         )
 }
 
+private suspend fun <T> coMedMdcFraKall(
+    call: RoutingCall,
+    block: suspend () -> T,
+) {
+    val mdcFromAttributes =
+        MdcKey.entries
+            .filterNot { it in setOf(MdcKey.REQUEST_METHOD, MdcKey.REQUEST_URI) }
+            .mapNotNull { mdcKey ->
+                call.mdcMapAttribute[mdcKey]?.let { mdcKey.value to it }
+            }
+    return withContext(MDCContext(MDC.getCopyOfContextMap().orEmpty() + mdcFromAttributes)) { block() }
+}
+
 private class WrappedApiHttpProblemDetailsException(
     val problemDetails: ApiHttpProblemDetails<*>,
 ) : Exception()
@@ -142,8 +167,13 @@ suspend fun <T> withSaksbehandlerIdentMdc(
     call: RoutingCall,
     block: suspend () -> T,
 ): T {
-    val saksbehandlerIdent = call.getSaksbehandlerIdentForMdc() ?: return block()
-    return MDC.putCloseable("saksbehandlerIdent", saksbehandlerIdent).use {
-        withContext(MDCContext()) { block() }
+    val saksbehandlerIdent =
+        call
+            .principal<SaksbehandlerPrincipal>()
+            ?.saksbehandler
+            ?.ident
+            ?.value ?: return block()
+    return call.coMedMdcOgAttribute(MdcKey.SAKSBEHANDLER_IDENT to saksbehandlerIdent) {
+        block()
     }
 }
