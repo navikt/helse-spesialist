@@ -87,7 +87,6 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, UnitFriendlyJacksonConverter(objectMapper))
     }
-    requestResponseTracing()
     if (eksponerOpenApi) {
         install(OpenApi) { configureOpenApi() }
     }

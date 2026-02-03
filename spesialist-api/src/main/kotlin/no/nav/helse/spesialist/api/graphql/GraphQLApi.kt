@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.feilhåndtering.SpesialistDataFetcherExceptionHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
@@ -82,7 +81,6 @@ fun kobleOppApi(
         }
     ktorApplication.routing {
         webSocketsApi()
-        debugMinneApi()
         route("graphql") {
             authenticate("oidc") {
                 install(GraphQLMetrikker)
