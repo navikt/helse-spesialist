@@ -190,25 +190,22 @@ class PgOppgaveRepository private constructor(
         val sql =
             buildString {
                 val tildeltTilOidTekst =
-                    if (erTildelt == false) "null::uuid as tildelt_til_oid," else "t.saksbehandler_ref as tildelt_til_oid,"
+                    if (erTildelt == false) "null::uuid" else "t.saksbehandler_ref"
                 append(
                     """
-                    SELECT
-                        o.id as oppgave_id,
-                        o.egenskaper,
-                        o.første_opprettet,
-                        p.fødselsnummer,
-                        os.soknad_mottatt AS opprinnelig_soknadsdato,
-                        $tildeltTilOidTekst
-                        pv.id AS på_vent_id,
-                        b.opprettet_tidspunkt as behandling_opprettet_tidspunkt,
-                        count(1) OVER() AS filtered_count
-                    FROM oppgave o
-                    INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
-                    INNER JOIN person p ON v.person_ref = p.id
-                    INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
-                    INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
-                    LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                    WITH utvalg AS (
+                        SELECT
+                            o.id AS oppgave_id,
+                            o.egenskaper,
+                            o.første_opprettet,
+                            $tildeltTilOidTekst AS tildelt_til_oid,
+                            o.behandling_id,
+                            v.person_ref,
+                            v.vedtaksperiode_id,
+                            count(1) OVER() AS filtered_count
+                        FROM oppgave o
+                        INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+                        LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                     """,
                 )
                 if (ikkeSendtTilBeslutterAvOid != null) {
@@ -217,10 +214,6 @@ class PgOppgaveRepository private constructor(
                         LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
                         """,
                     )
-                }
-                append("LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id\n")
-                if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
-                    append("LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid\n")
                 }
                 append("WHERE o.status = 'AvventerSaksbehandler'\n")
                 minstEnAvEgenskapene.filter { it.isNotEmpty() }.forEachIndexed { index, minstEnAvEgenskapeneGruppe ->
@@ -258,7 +251,6 @@ class PgOppgaveRepository private constructor(
                         """,
                     )
                 }
-                append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
 
                 val offsetParameterName = "offset"
                 append("OFFSET :$offsetParameterName\n")
@@ -267,6 +259,28 @@ class PgOppgaveRepository private constructor(
                 val limitParameterName = "limit"
                 append("LIMIT :$limitParameterName\n")
                 parameterMap[limitParameterName] = sidestørrelse
+
+                // END OF CTE
+                append(")")
+
+                append(
+                    """
+                    SELECT u.*,
+                        p.fødselsnummer,
+                        os.soknad_mottatt AS opprinnelig_soknadsdato,
+                        pv.id AS på_vent_id,
+                        b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt
+                    FROM utvalg u
+                    INNER JOIN person p ON u.person_ref = p.id
+                    INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = u.vedtaksperiode_id
+                    INNER JOIN behandling b ON b.spleis_behandling_id = u.behandling_id
+                    LEFT JOIN pa_vent pv ON u.vedtaksperiode_id = pv.vedtaksperiode_id
+                    """,
+                )
+                if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
+                    append("LEFT JOIN saksbehandler s ON tildelt_til_oid = s.oid\n")
+                }
+                append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
             }
         return queryOf(statement = sql, paramMap = parameterMap)
             .list { row ->
