@@ -310,7 +310,7 @@ internal class PubliserSykepengevedtakTest {
                 sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta =
                     VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                        omregnetÅrsinntektTotalt = BigDecimal("10000.0"),
                         seksG = BigDecimal("711720.0"),
                         avviksprosent = BigDecimal("30.0"),
                         innrapportertÅrsinntekt = BigDecimal("12000.0"),
@@ -433,7 +433,7 @@ internal class PubliserSykepengevedtakTest {
                 sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta =
                     VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-                        omregnetÅrsinntekt = BigDecimal("10000.0"),
+                        omregnetÅrsinntektTotalt = BigDecimal("10000.0"),
                         seksG = BigDecimal("711720.0"),
                         avviksprosent = BigDecimal("30.0"),
                         innrapportertÅrsinntekt = BigDecimal("13000.0"),

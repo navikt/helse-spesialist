@@ -225,6 +225,7 @@ object Meldingsbygger {
                         innrapportertÅrsinntekt = 600000.0,
                         avviksprosent = 0.0,
                         skjønnsfastsatt = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
+                        sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
                         arbeidsgivere =
                             vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
                                 buildMap {

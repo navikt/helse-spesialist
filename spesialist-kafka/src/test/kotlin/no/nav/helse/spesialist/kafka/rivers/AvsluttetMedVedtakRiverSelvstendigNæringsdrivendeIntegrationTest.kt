@@ -352,22 +352,17 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
           "tom": "${behandling.tom}",
           "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
           "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
-          "sykepengegrunnlag": $sykepengegrunnlag,
           "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
           "utbetalingId": "${behandling.utbetalingId?.value}",
           "sykepengegrunnlagsfakta": {
             "fastsatt": "EtterHovedregel",
-            "omregnetÅrsinntekt": 0.0,
             "omregnetÅrsinntektTotalt": 0.0,
             "sykepengegrunnlag": $sykepengegrunnlag,
             "6G": $seksG,
-            "arbeidsgivere": [
-              {
-                "arbeidsgiver": "SELVSTENDIG",
-                "omregnetÅrsinntekt": $beregningsgrunnlag,
-                "inntektskilde": "AOrdningen"
-              }
-            ]
+            "arbeidsgivere": [],
+            "selvstendig" : {
+              "beregningsgrunnlag": $beregningsgrunnlag
+            }
           },
           "@id": "60839d76-0619-4028-8ae0-9946088335f3",
           "@opprettet": "2025-08-07T16:01:33.811264213",

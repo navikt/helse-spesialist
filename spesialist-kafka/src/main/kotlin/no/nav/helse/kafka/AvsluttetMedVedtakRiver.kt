@@ -52,7 +52,6 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                 "behandlingId",
                 "vedtakFattetTidspunkt",
                 "hendelser",
-                "sykepengegrunnlag",
                 "sykepengegrunnlagsfakta",
             )
             it.requireArray("hendelser")
@@ -190,7 +189,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
             tom = behandling.tom(),
             skjæringstidspunkt = behandling.skjæringstidspunkt,
             hendelser = packet["hendelser"].map<JsonNode, UUID> { it.asUUID() },
-            sykepengegrunnlag = packet["sykepengegrunnlag"].asBigDecimal(),
+            sykepengegrunnlag = packet["sykepengegrunnlagsfakta"]["sykepengegrunnlag"].asBigDecimal(),
             vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
             tags =
                 (
@@ -288,10 +287,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
     ) = VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         beregningsgrunnlag =
             BigDecimal(
-                packet["sykepengegrunnlagsfakta"]["arbeidsgivere"]
-                    .single { it["arbeidsgiver"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE }
-                    ["omregnetÅrsinntekt"]
-                    .asText(),
+                packet["sykepengegrunnlagsfakta"]["selvstendig"]["beregningsgrunnlag"].asText(),
             ),
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
         seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
@@ -336,7 +332,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
         avviksvurdering: Avviksvurdering,
         tags: List<String>,
     ) = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
+        omregnetÅrsinntektTotalt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
         seksG = packet["sykepengegrunnlagsfakta"]["6G"].asBigDecimal(),
         avviksprosent = avviksvurdering.avviksprosent.toBigDecimal(),
         innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),

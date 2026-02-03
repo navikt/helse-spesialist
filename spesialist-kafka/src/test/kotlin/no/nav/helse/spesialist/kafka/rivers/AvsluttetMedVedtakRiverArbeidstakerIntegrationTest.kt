@@ -870,7 +870,6 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           "tom": "${behandling.tom}",
           "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
           "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
-          "sykepengegrunnlag": $sykepengegrunnlag,
           "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
           "utbetalingId": "${behandling.utbetalingId?.value}",
           "sykepengegrunnlagsfakta": {
@@ -885,7 +884,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 "omregnetÅrsinntekt": $omregnetÅrsinntekt,
                 "inntektskilde": "Arbeidsgiver"
               }
-            ]
+            ],
+            "selvstendig" : null
           },
           "@id": "0c9012d8-75e3-4f5e-93d2-c91d4439489c",
           "@opprettet": "2025-08-06T07:20:35.789710579",
@@ -931,12 +931,11 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           "tom": "${behandling.tom}",
           "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
           "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
-          "sykepengegrunnlag": $skjønnsfastsattSykepengegrunnlag,
           "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
           "utbetalingId": "${behandling.utbetalingId?.value}",
           "sykepengegrunnlagsfakta": {
             "fastsatt": "EtterSkjønn",
-            "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+            "sykepengegrunnlag": $skjønnsfastsattSykepengegrunnlag,
             "omregnetÅrsinntektTotalt": $omregnetÅrsinntekt,
             "6G": $seksG,
             "arbeidsgivere": [
@@ -947,6 +946,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 "inntektskilde": "Saksbehandler"
               }
             ],
+            "selvstendig" : null,
             "skjønnsfastsatt": $skjønnsfastsattSykepengegrunnlag
           },
           "@id": "5a3603c9-8da2-49c0-8860-964e6f1f2eaf",
@@ -993,10 +993,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           "tom": "${behandling.tom}",
           "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
           "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
-          "sykepengegrunnlag": $sykepengegrunnlag,
           "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
           "utbetalingId": "${behandling.utbetalingId?.value}",
           "sykepengegrunnlagsfakta": {
+            "sykepengegrunnlag": $sykepengegrunnlag,
             "fastsatt": "IInfotrygd",
             "omregnetÅrsinntektTotalt": $omregnetÅrsinntekt
           },

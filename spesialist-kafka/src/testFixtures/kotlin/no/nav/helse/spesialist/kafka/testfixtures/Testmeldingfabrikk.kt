@@ -1116,6 +1116,7 @@ object Testmeldingfabrikk {
         settInnAvviksvurderingFraSpleis: Boolean = true,
         omregnetÅrsinntektTotalt: Double = 500000.0,
         skjønnsfastsatt: Double = 600000.0,
+        sykepengegrunnlag: Double = 600000.0,
         innrapportertÅrsinntekt: Double = 600000.0,
         avviksprosent: Double = 16.67,
         arbeidsgivere: List<Map<String, Any>> =
@@ -1132,6 +1133,7 @@ object Testmeldingfabrikk {
             "fastsatt" to "EtterSkjønn",
             "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
             "skjønnsfastsatt" to skjønnsfastsatt,
+            "sykepengegrunnlag" to sykepengegrunnlag,
             "6G" to 6 * 118620.0,
             "arbeidsgivere" to arbeidsgivere,
         ).apply {
@@ -1170,8 +1172,9 @@ object Testmeldingfabrikk {
             }
         }
 
-    fun avsluttetMedVedtakFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> =
+    fun avsluttetMedVedtakFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0, sykepengegrunnlag: Double = 600000.0): Map<String, Any> =
         mapOf(
+            "sykepengegrunnlag" to sykepengegrunnlag,
             "fastsatt" to "IInfotrygd",
             "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
         )

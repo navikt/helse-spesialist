@@ -50,7 +50,7 @@ data class VedtakFattetMelding(
     }
 
     data class FastsattEtterSkjønnSykepengegrunnlagsfakta(
-        val omregnetÅrsinntekt: BigDecimal,
+        val omregnetÅrsinntektTotalt: BigDecimal,
         val innrapportertÅrsinntekt: BigDecimal,
         val avviksprosent: BigDecimal,
         val seksG: BigDecimal,
