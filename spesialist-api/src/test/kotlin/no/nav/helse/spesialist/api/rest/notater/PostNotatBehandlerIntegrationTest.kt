@@ -16,7 +16,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class PostNotatV2BehandlerIntegrationTest {
+class PostNotatÏBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 

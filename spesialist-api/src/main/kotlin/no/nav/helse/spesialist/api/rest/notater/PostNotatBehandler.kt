@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.api.rest.notater
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiNotatRequest
 import no.nav.helse.spesialist.api.rest.ApiNotatResponse
-import no.nav.helse.spesialist.api.rest.ApiNotatV2Request
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
@@ -15,10 +15,10 @@ import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
-class PostNotatV2Behandler : PostBehandler<Notater, ApiNotatV2Request, ApiNotatResponse, ApiPostNotatErrorCode> {
+class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatResponse, ApiPostNotatErrorCode> {
     override fun behandle(
         resource: Notater,
-        request: ApiNotatV2Request,
+        request: ApiNotatRequest,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiNotatResponse, ApiPostNotatErrorCode> {
         val vedtaksperiode =

@@ -21,14 +21,14 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDateTime
 
-class GetNotatV2Behandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatV2ErrorCode> {
+class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorCode> {
     override fun behandle(
         resource: Notater.NotatId,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiNotat, GetNotatV2ErrorCode> {
+    ): RestResponse<ApiNotat, GetNotatErrorCode> {
         val notatId = NotatId(resource.notatId)
         val notat =
-            kallKontekst.transaksjon.notatRepository.finn(notatId) ?: return RestResponse.Error(GetNotatV2ErrorCode.NOTAT_IKKE_FUNNET)
+            kallKontekst.transaksjon.notatRepository.finn(notatId) ?: return RestResponse.Error(GetNotatErrorCode.NOTAT_IKKE_FUNNET)
 
         val vedtaksperiode =
             kallKontekst.transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(notat.vedtaksperiodeId))
@@ -40,7 +40,7 @@ class GetNotatV2Behandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatV2Er
                 transaksjon = kallKontekst.transaksjon,
             )
         ) {
-            return RestResponse.Error(GetNotatV2ErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            return RestResponse.Error(GetNotatErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
         val dialog =
@@ -90,7 +90,7 @@ private fun Kommentar.tilApiKommentar() =
         feilregistrert_tidspunkt = feilregistrertTidspunkt?.roundToMicroseconds(),
     )
 
-enum class GetNotatV2ErrorCode(
+enum class GetNotatErrorCode(
     override val statusCode: HttpStatusCode,
     override val title: String,
 ) : ApiErrorCode {

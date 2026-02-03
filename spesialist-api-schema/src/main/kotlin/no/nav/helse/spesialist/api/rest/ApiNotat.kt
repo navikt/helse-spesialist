@@ -19,11 +19,6 @@ import java.util.UUID
 
 @Serializable
 data class ApiNotatRequest(
-    val tekst: String,
-)
-
-@Serializable
-data class ApiNotatV2Request(
     val vedtaksperiodeId: UUID,
     val tekst: String,
 )
