@@ -31,7 +31,6 @@ import io.ktor.server.request.uri
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
-import io.ktor.server.websocket.WebSockets
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.charsets.Charset
@@ -65,7 +64,6 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
             UUID.randomUUID().toString()
         }
     }
-    install(WebSockets)
     install(StatusPages) { configureStatusPages() }
     install(CallLogging) {
         disableDefaultColors()
@@ -79,9 +77,7 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
             .forEach { mdcKey ->
                 mdc(mdcKey.value) { it.mdcMapAttribute[mdcKey] }
             }
-        filter { call ->
-            call.request.path().let { it.startsWith("/graphql") || it.startsWith("/ws/") || it.startsWith("/api/") }
-        }
+        filter { call -> call.request.path().let { it.startsWith("/graphql") || it.startsWith("/api/") } }
     }
     install(DoubleReceive)
     install(ContentNegotiation) {

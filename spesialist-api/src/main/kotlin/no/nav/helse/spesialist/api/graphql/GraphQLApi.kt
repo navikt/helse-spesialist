@@ -45,7 +45,6 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
-import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.teamLogs
@@ -80,7 +79,6 @@ fun kobleOppApi(
             schema(spesialistSchema::setup)
         }
     ktorApplication.routing {
-        webSocketsApi()
         route("graphql") {
             authenticate("oidc") {
                 install(GraphQLMetrikker)
