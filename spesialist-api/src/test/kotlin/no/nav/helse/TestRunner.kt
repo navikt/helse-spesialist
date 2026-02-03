@@ -31,7 +31,7 @@ import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -96,7 +96,7 @@ object TestRunner {
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
                 meldingPubliserer = mockk(relaxed = true),
-                tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
             )
         testApplication {
             application {

@@ -12,13 +12,8 @@ class TilgangsgrupperTilBrukerrollerTest {
     private val annenGruppeId2 = UUID.randomUUID()
 
     private val tilgangsgrupperTilBrukerroller =
-        TilgangsgrupperTilBrukerroller(
+        tilgangsgrupperTilBrukerroller(
             næringsdrivendeBeta = listOf(næringsdrivendeGruppeId),
-            beslutter = emptyList(),
-            egenAnsatt = emptyList(),
-            kode7 = emptyList(),
-            stikkprøve = emptyList(),
-            utvikler = emptyList(),
         )
 
     @Test

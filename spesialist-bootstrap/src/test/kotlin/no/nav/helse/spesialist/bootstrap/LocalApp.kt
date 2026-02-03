@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.bootstrap
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
@@ -14,7 +14,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 fun main() {
     val rapidApp = RapidApp()
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
-    val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+    val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server,  tilgangsgrupperTilBrukerroller)
     rapidApp.start(
         configuration = Configuration(

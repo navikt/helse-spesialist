@@ -107,5 +107,11 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     if (Brukerrolle.UTVIKLER in brukerroller) {
         uuider.addAll(utvikler)
     }
+    if (Brukerrolle.SAKSBEHANDLER in brukerroller) {
+        uuider.addAll(saksbehandler)
+    }
+    if (Brukerrolle.LESETILGANG in brukerroller) {
+        uuider.addAll(lesetilgang)
+    }
     return uuider
 }

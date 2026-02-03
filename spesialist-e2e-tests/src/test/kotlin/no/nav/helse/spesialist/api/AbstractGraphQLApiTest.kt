@@ -40,7 +40,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -60,7 +60,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
 
-    val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+    val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     private val apiTesting =
         ApiTesting(
             jwtStub = jwtStub,

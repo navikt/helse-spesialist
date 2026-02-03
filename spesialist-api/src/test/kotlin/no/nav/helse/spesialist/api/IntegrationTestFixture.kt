@@ -25,7 +25,7 @@ import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -41,7 +41,7 @@ class IntegrationTestFixture {
 
     companion object {
         val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
-        val tilgangsgrupperTilBrukerroller = randomTilgangsgrupperTilBrukerroller()
+        val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
         val apiModuleIntegrationTestFixture =
             ApiModuleIntegrationTestFixture(
                 mockOAuth2Server = mockOAuth2Server,

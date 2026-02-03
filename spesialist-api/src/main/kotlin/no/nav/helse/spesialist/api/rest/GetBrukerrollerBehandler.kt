@@ -18,6 +18,8 @@ class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>
                     Brukerrolle.KODE_7 -> ApiBrukerrolle.KODE_7
                     Brukerrolle.STIKKPRØVE -> ApiBrukerrolle.STIKKPRØVE
                     Brukerrolle.UTVIKLER -> ApiBrukerrolle.UTVIKLER
+                    Brukerrolle.SAKSBEHANDLER -> ApiBrukerrolle.SAKSBEHANDLER
+                    Brukerrolle.LESETILGANG -> ApiBrukerrolle.LESETILGANG
                 }
             },
         )

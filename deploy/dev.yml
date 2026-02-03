@@ -105,6 +105,10 @@ spec:
       value: tbd-spesialist-v1
     - name: KAFKA_EXTRA_TOPIC
       value: tbd.sis
+    - name: ROLLE_SAKSBEHANDLER
+      value: {{ENTRAID_UUID_TBD}},{{ENTRAID_UUID_SAKSBEHANDLER}}
+    - name: ROLLE_LESETILGANG
+      value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_BESLUTTER
       value: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
     - name: ROLLE_EGEN_ANSATT

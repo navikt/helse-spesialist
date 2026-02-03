@@ -84,6 +84,8 @@ fun main() {
                         kode7 = env.getUUIDList("ROLLE_KODE_7"),
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
                         utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
+                        saksbehandler = env.getUUIDList("ROLLE_SAKSBEHANDLER"),
+                        lesetilgang = env.getUUIDList("ROLLE_LESETILGANG"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),
