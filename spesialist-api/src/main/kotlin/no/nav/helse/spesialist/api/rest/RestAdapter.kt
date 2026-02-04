@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarnThrowable
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.slf4j.MDC
 
 class RestAdapter(
@@ -34,7 +35,7 @@ class RestAdapter(
         call: RoutingCall,
         behandler: RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
+        wrapOgDeleger(call, behandler.autoriserteBrukerroller) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
     }
 
     suspend inline fun <RESOURCE, reified REQUEST, RESPONSE, ERROR : ApiErrorCode> behandle(
@@ -43,11 +44,18 @@ class RestAdapter(
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
         val request: REQUEST = call.receive()
-        wrapOgDeleger(call) { kallKontekst -> behandler.behandle(resource, request, kallKontekst) }
+        wrapOgDeleger(call, behandler.autoriserteBrukerroller) { kallKontekst ->
+            behandler.behandle(
+                resource,
+                request,
+                kallKontekst,
+            )
+        }
     }
 
     suspend fun <RESPONSE, ERROR : ApiErrorCode> wrapOgDeleger(
         call: RoutingCall,
+        autoriserteBrukerroller: Set<Brukerrolle>,
         behandler: (KallKontekst) -> RestResponse<RESPONSE, ERROR>,
     ) {
         withSaksbehandlerIdentMdc(call) {
@@ -56,6 +64,12 @@ class RestAdapter(
                     call.respondWithProblem(genericProblemDetails(HttpStatusCode.Unauthorized))
                     return@withSaksbehandlerIdentMdc
                 }
+
+            val autorisert = principal.brukerroller.any { it in autoriserteBrukerroller } || autoriserteBrukerroller.isEmpty()
+            if (!autorisert) {
+                call.respondWithProblem(genericProblemDetails(HttpStatusCode.Forbidden))
+                return@withSaksbehandlerIdentMdc
+            }
 
             sessionFactory.transactionalSessionScope {
                 it.saksbehandlerRepository.lagre(saksbehandler = principal.saksbehandler)

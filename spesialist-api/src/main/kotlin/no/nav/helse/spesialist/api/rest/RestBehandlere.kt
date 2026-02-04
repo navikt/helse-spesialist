@@ -4,9 +4,12 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 interface RestBehandler {
     fun openApi(config: RouteConfig)
+
+    val autoriserteBrukerroller: Set<Brukerrolle> get() = emptySet()
 
     fun operationIdBasertPåKlassenavn(): String =
         this::class
