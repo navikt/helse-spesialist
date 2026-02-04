@@ -267,12 +267,10 @@ class PgOppgaveRepository private constructor(
                     """
                     SELECT u.*,
                         p.fødselsnummer,
-                        os.soknad_mottatt AS opprinnelig_soknadsdato,
                         pv.id AS på_vent_id,
                         b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt
                     FROM utvalg u
                     INNER JOIN person p ON u.person_ref = p.id
-                    INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = u.vedtaksperiode_id
                     INNER JOIN behandling b ON b.spleis_behandling_id = u.behandling_id
                     LEFT JOIN pa_vent pv ON u.vedtaksperiode_id = pv.vedtaksperiode_id
                     """,
