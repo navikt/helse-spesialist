@@ -200,14 +200,20 @@ class PgOppgaveRepository private constructor(
                             o.første_opprettet,
                             $tildeltTilOidTekst AS tildelt_til_oid,
                             o.behandling_id,
+                            pv.id AS på_vent_id,
+                            b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
                             v.person_ref,
-                            v.vedtaksperiode_id,
                             count(1) OVER() AS filtered_count
                         FROM oppgave o
                         INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+                        INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
                         LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                        LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
                     """,
                 )
+                if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
+                    append("LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid\n")
+                }
                 if (ikkeSendtTilBeslutterAvOid != null) {
                     append(
                         """
@@ -252,6 +258,8 @@ class PgOppgaveRepository private constructor(
                     )
                 }
 
+                append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
+
                 val offsetParameterName = "offset"
                 append("OFFSET :$offsetParameterName\n")
                 parameterMap[offsetParameterName] = (sidetall - 1) * sidestørrelse
@@ -265,20 +273,11 @@ class PgOppgaveRepository private constructor(
 
                 append(
                     """
-                    SELECT u.*,
-                        p.fødselsnummer,
-                        pv.id AS på_vent_id,
-                        b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt
+                    SELECT u.*, p.fødselsnummer
                     FROM utvalg u
                     INNER JOIN person p ON u.person_ref = p.id
-                    INNER JOIN behandling b ON b.spleis_behandling_id = u.behandling_id
-                    LEFT JOIN pa_vent pv ON u.vedtaksperiode_id = pv.vedtaksperiode_id
                     """,
                 )
-                if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
-                    append("LEFT JOIN saksbehandler s ON tildelt_til_oid = s.oid\n")
-                }
-                append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
             }
         return queryOf(statement = sql, paramMap = parameterMap)
             .list { row ->
