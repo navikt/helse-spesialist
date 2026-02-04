@@ -65,7 +65,7 @@ class RestAdapter(
                     return@withSaksbehandlerIdentMdc
                 }
 
-            val autorisert = principal.brukerroller.any { it in autoriserteBrukerroller } || autoriserteBrukerroller.isEmpty()
+            val autorisert = principal.brukerroller.any { it in autoriserteBrukerroller }
             if (!autorisert) {
                 call.respondWithProblem(genericProblemDetails(HttpStatusCode.Forbidden))
                 return@withSaksbehandlerIdentMdc
