@@ -28,14 +28,14 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 
 class ApiModule(
     private val configuration: Configuration,
     daos: Daos,
     private val meldingPubliserer: MeldingPubliserer,
-    tilgangsgruppehenter: Tilgangsgruppehenter,
+    brukerrollehenter: Brukerrollehenter,
     private val sessionFactory: SessionFactory,
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
@@ -62,7 +62,7 @@ class ApiModule(
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = tilgangsgruppehenter,
+            brukerrollehenter = brukerrollehenter,
         )
 
     private val apiOppgaveService =

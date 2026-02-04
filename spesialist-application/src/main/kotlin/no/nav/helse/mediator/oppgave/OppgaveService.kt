@@ -16,8 +16,8 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter.Feil
+import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.sql.SQLException
@@ -35,7 +35,7 @@ class OppgaveService(
     private val reservasjonDao: ReservasjonDao,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveRepository: OppgaveRepository,
-    private val tilgangsgruppehenter: Tilgangsgruppehenter,
+    private val brukerrollehenter: Brukerrollehenter,
 ) : Oppgavehåndterer,
     Oppgavefinner {
     fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
@@ -44,7 +44,7 @@ class OppgaveService(
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = sessionContext.oppgaveRepository,
-            tilgangsgruppehenter = tilgangsgruppehenter,
+            brukerrollehenter = brukerrollehenter,
         )
 
     fun nyOppgave(
@@ -208,7 +208,7 @@ class OppgaveService(
                 return
             }
 
-        when (val result = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id)) {
+        when (val result = brukerrollehenter.hentBrukerroller(saksbehandler.id)) {
             is Either.Failure<Set<Brukerrolle>, Feil> -> {
                 when (result.error) {
                     Feil.SaksbehandlerFinnesIkke -> {

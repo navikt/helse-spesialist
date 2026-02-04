@@ -146,7 +146,7 @@ class RapidApp {
                 sessionFactory = dbModule.sessionFactory,
                 daos = dbModule.daos,
                 stikkprøver = configuration.stikkprøver,
-                tilgangsgruppehenter = clientEntraIdModule.tilgangsgruppehenter,
+                brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
             )
 
         val apiModule =
@@ -154,7 +154,7 @@ class RapidApp {
                 configuration = configuration.api,
                 daos = dbModule.daos,
                 meldingPubliserer = kafkaModule.meldingPubliserer,
-                tilgangsgruppehenter = clientEntraIdModule.tilgangsgruppehenter,
+                brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
                 sessionFactory = dbModule.sessionFactory,
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,

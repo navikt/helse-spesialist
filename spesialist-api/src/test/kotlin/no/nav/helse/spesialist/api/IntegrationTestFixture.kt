@@ -64,7 +64,7 @@ class IntegrationTestFixture {
             configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
             daos = daos,
             meldingPubliserer = meldingPubliserer,
-            tilgangsgruppehenter = { Either.Success(emptySet()) },
+            brukerrollehenter = { Either.Success(emptySet()) },
             sessionFactory = sessionFactory,
             environmentToggles = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),

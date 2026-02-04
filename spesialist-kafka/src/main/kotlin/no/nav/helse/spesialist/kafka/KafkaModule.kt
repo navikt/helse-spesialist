@@ -12,7 +12,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 
 class KafkaModule(
     configuration: Configuration,
@@ -20,7 +20,7 @@ class KafkaModule(
     sessionFactory: SessionFactory,
     daos: Daos,
     stikkprøver: Stikkprøver,
-    tilgangsgruppehenter: Tilgangsgruppehenter,
+    brukerrollehenter: Brukerrollehenter,
 ) {
     data class Configuration(
         val versjonAvKode: String,
@@ -46,7 +46,7 @@ class KafkaModule(
                                     reservasjonDao = daos.reservasjonDao,
                                     meldingPubliserer = meldingPubliserer,
                                     oppgaveRepository = daos.oppgaveRepository,
-                                    tilgangsgruppehenter = tilgangsgruppehenter,
+                                    brukerrollehenter = brukerrollehenter,
                                 )
                             },
                             subsumsjonsmelderProvider = {

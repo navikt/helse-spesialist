@@ -27,7 +27,7 @@ class IntegrationTestFixture(val testRapid: TestRapid) {
                 override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
                 override fun fullRefusjonEnArbeidsgiver() = false
             },
-            tilgangsgruppehenter = { Either.Success( emptySet()) },
+            brukerrollehenter = { Either.Success( emptySet()) },
         ).also(KafkaModule::kobleOppRivers)
     }
 }

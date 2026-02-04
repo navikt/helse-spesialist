@@ -5,12 +5,12 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.db.DBDaos
@@ -31,7 +31,7 @@ class TestMediator(
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = { Either.Success( emptySet()) },
+            brukerrollehenter = { Either.Success( emptySet()) },
         )
     private val apiOppgaveService =
         ApiOppgaveService(

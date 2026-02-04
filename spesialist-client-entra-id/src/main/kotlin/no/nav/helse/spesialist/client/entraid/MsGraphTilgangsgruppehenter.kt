@@ -24,7 +24,7 @@ import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -34,7 +34,7 @@ class MsGraphTilgangsgruppehenter(
     private val accessTokenGenerator: AccessTokenGenerator,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val msGraphUrl: String,
-) : Tilgangsgruppehenter {
+) : Brukerrollehenter {
     private val httpClient: HttpClient =
         HttpClient(Apache) {
             install(ContentNegotiation) {
@@ -52,7 +52,7 @@ class MsGraphTilgangsgruppehenter(
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Tilgangsgruppehenter.Feil> {
+    override fun hentBrukerroller(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Brukerrollehenter.Feil> {
         teamLogs.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
         val (responseStatus, responseBody) =
             runBlocking {
@@ -82,7 +82,7 @@ class MsGraphTilgangsgruppehenter(
             if (responseStatus == HttpStatusCode.NotFound) {
                 val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
                 if (errorCode == "Request_ResourceNotFound") {
-                    return Either.Failure(Tilgangsgruppehenter.Feil.SaksbehandlerFinnesIkke)
+                    return Either.Failure(Brukerrollehenter.Feil.SaksbehandlerFinnesIkke)
                 }
             }
             error("Fikk HTTP-kode ${responseStatus.value} fra MS Graph. Se sikkerlogg for detaljer.")

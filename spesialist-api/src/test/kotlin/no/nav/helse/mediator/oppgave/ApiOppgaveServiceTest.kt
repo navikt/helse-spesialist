@@ -87,7 +87,7 @@ internal class ApiOppgaveServiceTest {
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveRepository = oppgaveRepository,
-                tilgangsgruppehenter = { Either.Success(emptySet()) },
+                brukerrollehenter = { Either.Success(emptySet()) },
             ),
             sessionFactory = sessionFactory
         )
