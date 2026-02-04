@@ -28,12 +28,12 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     protected val testContext: TestContext = TestContext()
     protected var saksbehandler = lagSaksbehandler()
-    private var brukerroller = mutableSetOf<Brukerrolle>()
+    private val brukerroller = mutableSetOf(Brukerrolle.SAKSBEHANDLER)
 
     protected var beslutter = lagSaksbehandler()
 
     protected fun saksbehandlerHarTilgang(brukerrolle: Brukerrolle) {
-        brukerroller += brukerrolle
+        brukerroller.add(brukerrolle)
     }
 
     private val behovLøserStub =

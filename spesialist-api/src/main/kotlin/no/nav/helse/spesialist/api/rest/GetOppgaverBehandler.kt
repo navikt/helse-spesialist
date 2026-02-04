@@ -24,6 +24,8 @@ import java.time.ZoneId
 import kotlin.time.measureTimedValue
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER, Brukerrolle.LESETILGANG)
+
     override fun behandle(
         resource: Oppgaver,
         kallKontekst: KallKontekst,

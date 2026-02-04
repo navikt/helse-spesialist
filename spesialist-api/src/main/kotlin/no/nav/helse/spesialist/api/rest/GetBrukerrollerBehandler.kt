@@ -5,6 +5,8 @@ import no.nav.helse.spesialist.api.rest.resources.Brukerroller
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>, GetBrukerrollerErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = Brukerrolle.entries.toSet()
+
     override fun behandle(
         resource: Brukerroller,
         kallKontekst: KallKontekst,

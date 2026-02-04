@@ -38,7 +38,6 @@ object REST {
     fun get(
         relativeUrl: String,
         saksbehandler: Saksbehandler,
-
         brukerroller: Set<Brukerrolle>
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
