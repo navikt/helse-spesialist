@@ -23,7 +23,7 @@ import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurdering, Unit, DeleteVarselvurderingErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,

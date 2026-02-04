@@ -69,7 +69,7 @@ class RestAdapterTest {
             kallKontekst: KallKontekst,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
 
-        override val påkrevdeTilganger: Set<Tilgang> = Tilgang.entries.toSet()
+        override val påkrevdTilgang = Tilgang.Les
 
         override fun openApi(config: RouteConfig) {}
     }

@@ -7,10 +7,11 @@ class TilgangsgrupperTilTilganger(
     val skrivetilgang: List<UUID>,
     val lesetilgang: List<UUID>,
 ) {
-    fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Tilgang> {
+    fun finnTilgangerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Tilgang> {
         val tilganger = mutableSetOf<Tilgang>()
         if (tilgangsgrupper.any { it in skrivetilgang }) {
             tilganger.add(Tilgang.Skriv)
+            tilganger.add(Tilgang.Les)
         }
         if (tilgangsgrupper.any { it in lesetilgang }) {
             tilganger.add(Tilgang.Les)

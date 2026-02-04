@@ -36,7 +36,7 @@ class RestAdapter(
         call: RoutingCall,
         behandler: RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdeTilganger) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
+        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdTilgang) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
     }
 
     suspend inline fun <RESOURCE, reified REQUEST, RESPONSE, ERROR : ApiErrorCode> behandle(
@@ -45,7 +45,7 @@ class RestAdapter(
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
         val request: REQUEST = call.receive()
-        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdeTilganger) { kallKontekst ->
+        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdTilgang) { kallKontekst ->
             behandler.behandle(
                 resource,
                 request,
@@ -57,7 +57,7 @@ class RestAdapter(
     suspend fun <RESPONSE, ERROR : ApiErrorCode> wrapOgDeleger(
         call: RoutingCall,
         påkrevdeBrukerroller: Set<Brukerrolle>,
-        påkrevdeTilganger: Set<Tilgang>,
+        påkrevdTilgang: Tilgang,
         behandler: (KallKontekst) -> RestResponse<RESPONSE, ERROR>,
     ) {
         withSaksbehandlerIdentMdc(call) {
@@ -67,8 +67,7 @@ class RestAdapter(
                     return@withSaksbehandlerIdentMdc
                 }
 
-            val harPåkrevdTilgang = principal.tilganger.any { it in påkrevdeTilganger }
-            if (!harPåkrevdTilgang) {
+            if (påkrevdTilgang !in principal.tilganger) {
                 call.respondWithProblem(genericProblemDetails(HttpStatusCode.Forbidden))
                 return@withSaksbehandlerIdentMdc
             }

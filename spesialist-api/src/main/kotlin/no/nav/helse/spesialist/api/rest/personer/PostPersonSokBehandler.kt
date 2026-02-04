@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, ApiPersonSokResponse, ApiPostPersonSokErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Personer.Sok,

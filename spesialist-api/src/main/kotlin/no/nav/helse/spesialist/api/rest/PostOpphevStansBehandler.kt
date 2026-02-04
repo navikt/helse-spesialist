@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Unit, ApiPostOpphevStansErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Opphevstans,

@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest, Unit, ApiPatchNotatErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Notater.NotatId,

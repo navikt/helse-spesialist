@@ -37,7 +37,7 @@ import java.time.LocalDateTime
 class PostVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
 ) : PostBehandler<Behandlinger.BehandlingId.Vedtak, ApiVedtakRequest, Unit, ApiPostVedtakErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Behandlinger.BehandlingId.Vedtak,

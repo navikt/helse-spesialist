@@ -26,7 +26,7 @@ fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
         SaksbehandlerPrincipal(
             saksbehandler = credentials.tilSaksbehandler(),
             brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
-            tilganger = tilgangsgrupperTilTilganger.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
+            tilganger = tilgangsgrupperTilTilganger.finnTilgangerFraTilgangsgrupper(credentials.groupsAsUuids()),
         )
     }
 }

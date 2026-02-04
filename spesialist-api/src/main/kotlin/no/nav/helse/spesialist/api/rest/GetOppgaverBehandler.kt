@@ -25,7 +25,7 @@ import java.time.ZoneId
 import kotlin.time.measureTimedValue
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv, Tilgang.Les)
+    override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Oppgaver,

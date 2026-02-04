@@ -34,7 +34,7 @@ class GetTilkomneInntektskilderForPersonBehandler :
         personIkkeFunnet = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,

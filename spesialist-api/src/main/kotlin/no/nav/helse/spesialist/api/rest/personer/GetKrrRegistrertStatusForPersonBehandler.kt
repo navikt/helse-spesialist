@@ -21,7 +21,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
         personIkkeFunnet = ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetKrrRegistrertStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Personer.PersonPseudoId.KrrRegistrertStatus,

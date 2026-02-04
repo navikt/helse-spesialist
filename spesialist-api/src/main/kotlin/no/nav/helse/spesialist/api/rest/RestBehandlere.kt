@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 interface RestBehandler {
     fun openApi(config: RouteConfig)
 
-    val påkrevdeTilganger: Set<Tilgang>
+    val påkrevdTilgang: Tilgang
     val påkrevdeBrukerroller: Set<Brukerrolle> get() = emptySet()
 
     fun operationIdBasertPåKlassenavn(): String =

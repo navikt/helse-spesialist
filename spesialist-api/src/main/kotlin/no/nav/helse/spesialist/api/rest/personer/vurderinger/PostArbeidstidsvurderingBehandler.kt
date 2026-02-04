@@ -27,7 +27,7 @@ class PostArbeidstidsvurderingBehandler :
         personIkkeFunnet = ApiArbeidstidsvurderingErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,

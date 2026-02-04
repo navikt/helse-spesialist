@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>, GetBrukerrollerErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = Tilgang.entries.toSet()
+    override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Brukerroller,

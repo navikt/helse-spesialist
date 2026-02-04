@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.rest.resources.OpptegnelseSekvensnummer
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekvensnummer.Siste, Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: OpptegnelseSekvensnummer.Siste,

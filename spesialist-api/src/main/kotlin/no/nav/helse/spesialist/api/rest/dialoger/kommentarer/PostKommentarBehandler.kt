@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKommentarRequest, ApiKommentarResponse, ApiPostKommentarErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
+    override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Dialoger.DialogId.Kommentar,
