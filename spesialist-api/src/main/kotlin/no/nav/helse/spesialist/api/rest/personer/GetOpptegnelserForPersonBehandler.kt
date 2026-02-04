@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Sekvensnummer
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class GetOpptegnelserForPersonBehandler :
     GetForPersonBehandler<Personer.PersonPseudoId.Opptegnelser, List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode>(
@@ -18,6 +19,8 @@ class GetOpptegnelserForPersonBehandler :
         personIkkeFunnet = ApiGetOpptegnelserForPersonErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetOpptegnelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Opptegnelser,
         person: Person,

@@ -7,8 +7,11 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.OpptegnelseSekvensnummer
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekvensnummer.Siste, Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: OpptegnelseSekvensnummer.Siste,
         kallKontekst: KallKontekst,

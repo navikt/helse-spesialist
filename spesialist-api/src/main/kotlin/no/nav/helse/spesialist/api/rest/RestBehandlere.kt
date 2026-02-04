@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 interface RestBehandler {
     fun openApi(config: RouteConfig)
 
-    val autoriserteBrukerroller: Set<Brukerrolle> get() = emptySet()
+    val autoriserteBrukerroller: Set<Brukerrolle>
 
     fun operationIdBasertPåKlassenavn(): String =
         this::class

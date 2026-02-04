@@ -11,8 +11,11 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, ApiPersonSokResponse, ApiPostPersonSokErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Personer.Sok,
         request: ApiPersonSokRequest,

@@ -14,8 +14,11 @@ import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_F
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Varsler.VarselId,
         kallKontekst: KallKontekst,

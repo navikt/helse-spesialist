@@ -12,10 +12,13 @@ import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
 class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: TilkomneInntekter,
         request: ApiLeggTilTilkommenInntektRequest,

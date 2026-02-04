@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -26,6 +27,8 @@ class PostArbeidstidsvurderingBehandler :
         personIkkeFunnet = ApiArbeidstidsvurderingErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,
         request: ApiArbeidstidsvurderingRequest,

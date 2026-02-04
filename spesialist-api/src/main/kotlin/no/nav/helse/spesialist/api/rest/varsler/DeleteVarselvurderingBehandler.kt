@@ -20,8 +20,11 @@ import no.nav.helse.spesialist.domain.Varsel.Status.GODKJENT
 import no.nav.helse.spesialist.domain.Varsel.Status.INAKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.VURDERT
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurdering, Unit, DeleteVarselvurderingErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
         kallKontekst: KallKontekst,

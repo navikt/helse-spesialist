@@ -306,7 +306,7 @@ abstract class AbstractE2EIntegrationTest {
         SpeilPersonReceiver(
             testContext = testContext,
             saksbehandler = beslutter,
-            brukerroller = setOf(Brukerrolle.BESLUTTER),
+            brukerroller = setOf(Brukerrolle.BESLUTTER, Brukerrolle.SAKSBEHANDLER),
         ).block()
     }
 

@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
@@ -19,6 +20,8 @@ class GetSoknadBehandler(
         personIkkeFunnet = ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
         person: Person,

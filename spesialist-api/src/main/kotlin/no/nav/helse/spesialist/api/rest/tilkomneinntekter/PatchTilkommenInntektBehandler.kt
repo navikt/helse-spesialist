@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
@@ -25,6 +26,8 @@ import java.time.LocalDate
 import kotlin.reflect.KProperty0
 
 class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiTilkommenInntektPatch, Unit, ApiPatchTilkommenInntektErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: TilkomneInntekter.Id,
         request: ApiTilkommenInntektPatch,
