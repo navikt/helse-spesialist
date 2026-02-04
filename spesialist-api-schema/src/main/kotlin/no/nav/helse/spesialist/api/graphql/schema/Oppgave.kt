@@ -90,7 +90,6 @@ enum class ApiKategori {
 enum class ApiOppgaveSorteringsfelt {
     tildeling,
     opprettetTidspunkt,
-    opprinneligSoeknadstidspunkt,
     paVentInfo_tidsfrist,
     behandlingOpprettetTidspunkt,
 }

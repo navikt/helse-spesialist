@@ -52,7 +52,6 @@ interface OppgaveRepository {
         val egenskaper: Set<Egenskap>,
         val tildeltTilOid: SaksbehandlerOid?,
         val opprettetTidspunkt: Instant,
-        val opprinneligSøknadstidspunkt: Instant,
         val behandlingOpprettetTidspunkt: Instant,
         val påVentId: PåVentId?,
     )

@@ -23,7 +23,6 @@ data class BehandletOppgaveFraDatabaseForVisning(
 enum class SorteringsnøkkelForDatabase {
     TILDELT_TIL,
     OPPRETTET,
-    SØKNAD_MOTTATT,
     TIDSFRIST,
     BEHANDLING_OPPRETTET_TIDSPUNKT,
 }

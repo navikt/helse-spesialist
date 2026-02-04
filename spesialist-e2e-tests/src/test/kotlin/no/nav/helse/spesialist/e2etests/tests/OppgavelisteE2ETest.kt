@@ -27,7 +27,6 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
         val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
-        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
         assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
 
@@ -63,7 +62,6 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         val tiMinutterSidenLocalDateTime = LocalDateTime.now().minusSeconds(60 * 10)
         val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
-        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
         assertIsNumber(oppgave["paVentInfo"]["dialogRef"])
         assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["paVentInfo"]["opprettet"].asText()))

@@ -52,8 +52,6 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
 
                                 ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
 
-                                ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
-
                                 ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
 
                                 ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt -> SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
@@ -203,7 +201,6 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                                     )
                                 },
                         opprettetTidspunkt = oppgave.opprettetTidspunkt,
-                        opprinneligSoeknadstidspunkt = oppgave.opprinneligSøknadstidspunkt,
                         behandlingOpprettetTidspunkt = oppgave.behandlingOpprettetTidspunkt,
                         paVentInfo =
                             oppgave.påVentId

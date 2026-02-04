@@ -295,7 +295,6 @@ class PgOppgaveRepository private constructor(
                                 .tilModellversjoner(),
                         tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
                         opprettetTidspunkt = row.instant("første_opprettet"),
-                        opprinneligSøknadstidspunkt = row.instant("opprinnelig_soknadsdato"),
                         behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
                         påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
                     )
@@ -407,7 +406,6 @@ class PgOppgaveRepository private constructor(
             SorteringsnøkkelForDatabase.TILDELT_TIL -> "s.navn"
             SorteringsnøkkelForDatabase.OPPRETTET -> "første_opprettet"
             SorteringsnøkkelForDatabase.TIDSFRIST -> "pv.frist"
-            SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
             SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT -> "behandling_opprettet_tidspunkt"
         }
 
