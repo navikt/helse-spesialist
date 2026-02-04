@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.client.krr
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.header
@@ -46,7 +46,7 @@ class KRRClientKrrRegistrertStatusHenter(
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : KrrRegistrertStatusHenter {
     private val httpClient: HttpClient =
-        HttpClient(Apache) {
+        HttpClient(Apache5) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter())
             }

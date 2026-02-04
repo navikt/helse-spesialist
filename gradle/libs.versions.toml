@@ -32,7 +32,7 @@ kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 
 kotlinx-serialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0"
 
-ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor" }
+ktor-client-apache5 = { module = "io.ktor:ktor-client-apache5", version.ref = "ktor" }
 ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
@@ -95,7 +95,7 @@ kotlinx-coroutines = [
     "kotlinx-coroutines-slf4j",
 ]
 ktor-client = [
-    "ktor-client-apache",
+    "ktor-client-apache5",
     "ktor-client-contentNegotiation",
     "ktor-client-core",
     "ktor-serialization-jackson"

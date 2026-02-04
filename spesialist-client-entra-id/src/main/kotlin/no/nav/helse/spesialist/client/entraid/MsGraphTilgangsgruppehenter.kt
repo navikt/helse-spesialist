@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -36,7 +36,7 @@ class MsGraphTilgangsgruppehenter(
     private val msGraphUrl: String,
 ) : Brukerrollehenter {
     private val httpClient: HttpClient =
-        HttpClient(Apache) {
+        HttpClient(Apache5) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter())
             }

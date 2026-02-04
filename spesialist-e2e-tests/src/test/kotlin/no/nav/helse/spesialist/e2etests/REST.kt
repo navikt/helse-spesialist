@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 
 object REST {
     private val httpClient: HttpClient =
-        HttpClient(Apache) {
+        HttpClient(Apache5) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter())
             }

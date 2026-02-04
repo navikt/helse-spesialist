@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.jwk.RSAKey
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
@@ -25,7 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner
 import java.net.ProxySelector
 import java.time.Duration
 import java.time.Instant
@@ -115,7 +115,7 @@ class EntraIDAccessTokenGenerator(
     }
 
     private fun createHttpClient() =
-        HttpClient(Apache) {
+        HttpClient(Apache5) {
             install(HttpRequestRetry) {
                 retryOnExceptionIf(3) { request, throwable ->
                     logg.warn("Caught exception ${throwable.message}, for url ${request.url}")
