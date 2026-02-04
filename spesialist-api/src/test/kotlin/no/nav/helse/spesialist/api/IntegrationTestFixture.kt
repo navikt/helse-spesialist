@@ -17,7 +17,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
@@ -100,17 +99,15 @@ class IntegrationTestFixture {
                     }
                 }
 
-            runBlocking {
-                logg.info("Sender GET $url")
-                val httpResponse =
-                    client.get(url) {
-                        accept(ContentType.Application.Json)
-                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                    }
-                val bodyAsText = httpResponse.bodyAsText()
-                logg.info("Fikk respons: $bodyAsText")
-                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
-            }
+            logg.info("Sender GET $url")
+            val httpResponse =
+                client.get(url) {
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                }
+            val bodyAsText = httpResponse.bodyAsText()
+            logg.info("Fikk respons: $bodyAsText")
+            response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
         }
 
         return response
@@ -136,19 +133,17 @@ class IntegrationTestFixture {
                     }
                 }
 
-            runBlocking {
-                logg.info("Sender POST $url med data $body")
-                val httpResponse =
-                    client.post(url) {
-                        contentType(ContentType.Application.Json)
-                        accept(ContentType.Application.Json)
-                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                        setBody(body)
-                    }
-                val bodyAsText = httpResponse.bodyAsText()
-                logg.info("Fikk respons: $bodyAsText")
-                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
-            }
+            logg.info("Sender POST $url med data $body")
+            val httpResponse =
+                client.post(url) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                    setBody(body)
+                }
+            val bodyAsText = httpResponse.bodyAsText()
+            logg.info("Fikk respons: $bodyAsText")
+            response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
         }
 
         return response
@@ -174,19 +169,17 @@ class IntegrationTestFixture {
                     }
                 }
 
-            runBlocking {
-                logg.info("Sender PUT $url med data $body")
-                val httpResponse =
-                    client.put(url) {
-                        contentType(ContentType.Application.Json)
-                        accept(ContentType.Application.Json)
-                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                        setBody(body)
-                    }
-                val bodyAsText = httpResponse.bodyAsText()
-                logg.info("Fikk respons: $bodyAsText")
-                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
-            }
+            logg.info("Sender PUT $url med data $body")
+            val httpResponse =
+                client.put(url) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                    setBody(body)
+                }
+            val bodyAsText = httpResponse.bodyAsText()
+            logg.info("Fikk respons: $bodyAsText")
+            response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
         }
 
         return response
@@ -197,8 +190,7 @@ class IntegrationTestFixture {
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         brukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER),
-
-        ): Response {
+    ): Response {
         lateinit var response: Response
 
         testApplication {
@@ -206,24 +198,24 @@ class IntegrationTestFixture {
                 apiModule.setUpApi(this)
             }
 
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
-            runBlocking {
-                logg.info("Sender PATCH $url med data $body")
-                val httpResponse = client.patch(url) {
+            logg.info("Sender PATCH $url med data $body")
+            val httpResponse =
+                client.patch(url) {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
                     bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
                     setBody(body)
                 }
-                val bodyAsText = httpResponse.bodyAsText()
-                logg.info("Fikk respons: $bodyAsText")
-                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
-            }
+            val bodyAsText = httpResponse.bodyAsText()
+            logg.info("Fikk respons: $bodyAsText")
+            response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
         }
 
         return response
@@ -248,18 +240,16 @@ class IntegrationTestFixture {
                     }
                 }
 
-            runBlocking {
-                logg.info("Sender DELETE $url")
-                val httpResponse =
-                    client.delete(url) {
-                        contentType(ContentType.Application.Json)
-                        accept(ContentType.Application.Json)
-                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
-                    }
-                val bodyAsText = httpResponse.bodyAsText()
-                logg.info("Fikk respons: $bodyAsText")
-                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
-            }
+            logg.info("Sender DELETE $url")
+            val httpResponse =
+                client.delete(url) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, brukerroller))
+                }
+            val bodyAsText = httpResponse.bodyAsText()
+            logg.info("Fikk respons: $bodyAsText")
+            response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
         }
 
         return response
