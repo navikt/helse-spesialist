@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,6 +53,7 @@ class PostOpphevStansIntegrationTest {
             "/api/opphevstans",
             body = """{ "fodselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
             saksbehandler = saksbehandler,
+            brukerroller = setOf(Brukerrolle.SAKSBEHANDLER),
         )
         assertEquals(204, response.status)
         assertEquals("", response.bodyAsText)

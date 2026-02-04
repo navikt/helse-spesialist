@@ -5,8 +5,11 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.resources.Opphevstans
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Unit, ApiPostOpphevStansErrorCode> {
+    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+
     override fun behandle(
         resource: Opphevstans,
         request: ApiOpphevStansRequest,
