@@ -55,6 +55,7 @@ fun Routing.restRoutes(
         authenticate("oidc") {
             get(GetAktiveSaksbehandlereBehandler(), restAdapter)
             get(GetBrukerrollerBehandler(), restAdapter)
+            get(GetBrukerBehandler(), restAdapter)
 
             get(GetOppgaverBehandler(), restAdapter)
 
