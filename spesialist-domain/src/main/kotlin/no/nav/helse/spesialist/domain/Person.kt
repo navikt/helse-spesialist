@@ -79,7 +79,7 @@ class Person private constructor(
 
     private fun girTilgangTilEgenAnsattStatus(brukerroller: Set<Brukerrolle>): Boolean =
         when (egenAnsattStatus?.erEgenAnsatt) {
-            true -> Brukerrolle.EGEN_ANSATT in brukerroller
+            true -> Brukerrolle.EgenAnsatt in brukerroller
             false -> true
             null -> false
         }
@@ -87,7 +87,7 @@ class Person private constructor(
     private fun girTilgangTilAdressebeskyttelse(brukerroller: Set<Brukerrolle>): Boolean =
         when (info?.adressebeskyttelse) {
             Personinfo.Adressebeskyttelse.Ugradert -> true
-            Personinfo.Adressebeskyttelse.Fortrolig -> Brukerrolle.KODE_7 in brukerroller
+            Personinfo.Adressebeskyttelse.Fortrolig -> Brukerrolle.Kode7 in brukerroller
             else -> false
         }
 

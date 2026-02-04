@@ -25,7 +25,7 @@ import java.time.ZoneId
 import kotlin.time.measureTimedValue
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER, Tilgang.LESETILGANG)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv, Tilgang.Les)
 
     override fun behandle(
         resource: Oppgaver,
@@ -257,8 +257,8 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             brukerroller = brukerroller,
         ) &&
             when (this) {
-                Egenskap.BESLUTTER -> Brukerrolle.BESLUTTER in brukerroller
-                Egenskap.STIKKPRØVE -> Brukerrolle.STIKKPRØVE in brukerroller
+                Egenskap.BESLUTTER -> Brukerrolle.Beslutter in brukerroller
+                Egenskap.STIKKPRØVE -> Brukerrolle.Stikkprøve in brukerroller
                 else -> true
             }
 

@@ -89,7 +89,7 @@ class IntegrationTestFixture {
     fun get(
         url: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG),
+        tilganger: Set<Tilgang> = setOf(Tilgang.Les),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response
@@ -124,7 +124,7 @@ class IntegrationTestFixture {
         url: String,
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER),
+        tilganger: Set<Tilgang> = setOf(Tilgang.Skriv),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response
@@ -161,7 +161,7 @@ class IntegrationTestFixture {
         url: String,
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER),
+        tilganger: Set<Tilgang> = setOf(Tilgang.Skriv),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response
@@ -198,7 +198,7 @@ class IntegrationTestFixture {
         url: String,
         @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER),
+        tilganger: Set<Tilgang> = setOf(Tilgang.Skriv),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response
@@ -234,7 +234,7 @@ class IntegrationTestFixture {
     fun delete(
         url: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER),
+        tilganger: Set<Tilgang> = setOf(Tilgang.Skriv),
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Response {
         lateinit var response: Response

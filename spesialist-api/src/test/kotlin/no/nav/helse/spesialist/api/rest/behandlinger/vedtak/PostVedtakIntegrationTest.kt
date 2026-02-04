@@ -100,8 +100,8 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = beslutter,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.Skriv),
+                brukerroller = setOf(Brukerrolle.Beslutter),
             )
 
         // Then:
@@ -345,8 +345,8 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.Skriv),
+                brukerroller = setOf(Brukerrolle.Beslutter),
             )
 
         // Then:
@@ -390,7 +390,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
 
         // Then:
@@ -481,7 +481,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
 
         // Then:
@@ -533,7 +533,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
 
         // Then:
@@ -589,7 +589,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
 
         // Then:
@@ -631,7 +631,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
 
         // Then:

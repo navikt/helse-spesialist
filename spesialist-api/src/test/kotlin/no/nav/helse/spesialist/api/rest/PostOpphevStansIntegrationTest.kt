@@ -55,7 +55,7 @@ class PostOpphevStansIntegrationTest {
                 "/api/opphevstans",
                 body = """{ "fodselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
                 saksbehandler = saksbehandler,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
         assertEquals(204, response.status)
         assertEquals("", response.bodyAsText)

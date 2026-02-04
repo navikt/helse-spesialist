@@ -30,7 +30,7 @@ abstract class AbstractE2EIntegrationTest {
     protected val testContext: TestContext = TestContext()
     protected var saksbehandler = lagSaksbehandler()
     private val brukerroller = mutableSetOf<Brukerrolle>()
-    private val tilganger = mutableSetOf(Tilgang.SAKSBEHANDLER)
+    private val tilganger = mutableSetOf(Tilgang.Skriv)
 
     protected var beslutter = lagSaksbehandler()
 
@@ -310,7 +310,7 @@ abstract class AbstractE2EIntegrationTest {
         SpeilPersonReceiver(
             testContext = testContext,
             saksbehandler = beslutter,
-            brukerroller = setOf(Brukerrolle.BESLUTTER),
+            brukerroller = setOf(Brukerrolle.Beslutter),
             tilganger = tilganger,
         ).block()
     }

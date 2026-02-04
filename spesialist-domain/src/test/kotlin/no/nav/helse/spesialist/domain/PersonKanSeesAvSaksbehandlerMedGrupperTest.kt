@@ -17,10 +17,11 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
         egenAnsatt: Boolean?,
         adressebeskyttelse: Personinfo.Adressebeskyttelse?,
     ) {
-        val person = lagPerson(
-            erEgenAnsatt = egenAnsatt,
-            info = adressebeskyttelse?.let { lagPersoninfo(adressebeskyttelse = it) }
-        )
+        val person =
+            lagPerson(
+                erEgenAnsatt = egenAnsatt,
+                info = adressebeskyttelse?.let { lagPersoninfo(adressebeskyttelse = it) },
+            )
 
         assertFalse(person.kanSeesAvSaksbehandlerMedGrupper(Brukerrolle.entries.toSet()))
     }
@@ -30,12 +31,13 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
     fun `saksbehandler med visse grupper har tilgang til visse personer`(
         egenAnsatt: Boolean,
         adressebeskyttelse: Personinfo.Adressebeskyttelse,
-        roller: Set<Brukerrolle>
+        roller: Set<Brukerrolle>,
     ) {
-        val person = lagPerson(
-            erEgenAnsatt = egenAnsatt,
-            info = lagPersoninfo(adressebeskyttelse = adressebeskyttelse)
-        )
+        val person =
+            lagPerson(
+                erEgenAnsatt = egenAnsatt,
+                info = lagPersoninfo(adressebeskyttelse = adressebeskyttelse),
+            )
 
         assertTrue(person.kanSeesAvSaksbehandlerMedGrupper(roller))
     }
@@ -45,12 +47,13 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
     fun `saksbehandler med visse grupper har ikke tilgang til visse personer`(
         egenAnsatt: Boolean,
         adressebeskyttelse: Personinfo.Adressebeskyttelse,
-        roller: Set<Brukerrolle>
+        roller: Set<Brukerrolle>,
     ) {
-        val person = lagPerson(
-            erEgenAnsatt = egenAnsatt,
-            info = lagPersoninfo(adressebeskyttelse = adressebeskyttelse)
-        )
+        val person =
+            lagPerson(
+                erEgenAnsatt = egenAnsatt,
+                info = lagPersoninfo(adressebeskyttelse = adressebeskyttelse),
+            )
 
         assertFalse(person.kanSeesAvSaksbehandlerMedGrupper(roller))
     }
@@ -58,52 +61,57 @@ class PersonKanSeesAvSaksbehandlerMedGrupperTest {
     companion object {
         @JvmStatic
         private fun personKombinasjonerIngenHarTilgangTil(): Stream<Arguments> =
-            (Personinfo.Adressebeskyttelse.entries + null).flatMap { adressebeskyttelse ->
-                // Ingen har tilgang til personer som har erEgenAnsatt == null
-                listOf(Arguments.of(null, adressebeskyttelse)) +
-                        if (adressebeskyttelse !in setOf(
+            (Personinfo.Adressebeskyttelse.entries + null)
+                .flatMap { adressebeskyttelse ->
+                    // Ingen har tilgang til personer som har erEgenAnsatt == null
+                    listOf(Arguments.of(null, adressebeskyttelse)) +
+                        if (adressebeskyttelse !in
+                            setOf(
                                 Personinfo.Adressebeskyttelse.Ugradert,
-                                Personinfo.Adressebeskyttelse.Fortrolig
+                                Personinfo.Adressebeskyttelse.Fortrolig,
                             )
                         ) {
                             // Ingen har tilgang til noe annet enn (kjent) Adressebeskyttelse Ugradert eller Fortrolig
                             listOf(
                                 Arguments.of(false, adressebeskyttelse),
-                                Arguments.of(true, adressebeskyttelse)
+                                Arguments.of(true, adressebeskyttelse),
                             )
-                        } else emptyList()
-            }.stream()
+                        } else {
+                            emptyList()
+                        }
+                }.stream()
 
         @JvmStatic
         private fun personKombinasjonerSomGirTilgang(): Stream<Arguments> =
             Stream.of(
                 Arguments.of(false, Personinfo.Adressebeskyttelse.Ugradert, emptySet<Brukerrolle>()),
-                Arguments.of(false, Personinfo.Adressebeskyttelse.Fortrolig, setOf(Brukerrolle.KODE_7)),
-                Arguments.of(true, Personinfo.Adressebeskyttelse.Ugradert, setOf(Brukerrolle.EGEN_ANSATT)),
+                Arguments.of(false, Personinfo.Adressebeskyttelse.Fortrolig, setOf(Brukerrolle.Kode7)),
+                Arguments.of(true, Personinfo.Adressebeskyttelse.Ugradert, setOf(Brukerrolle.EgenAnsatt)),
             )
 
         @JvmStatic
-        private fun personKombinasjonerSomIkkeGirTilgang(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                false,
-                Personinfo.Adressebeskyttelse.Fortrolig,
-                emptySet<Brukerrolle>()
-            ),
-            Arguments.of(
-                false,
-                Personinfo.Adressebeskyttelse.Fortrolig,
-                (Brukerrolle.entries - Brukerrolle.KODE_7).toSet()
-            ),
-            Arguments.of(
-                true,
-                Personinfo.Adressebeskyttelse.Ugradert,
-                emptySet<Brukerrolle>()
-            ),
-            Arguments.of(
-                true,
-                Personinfo.Adressebeskyttelse.Ugradert,
-                (Brukerrolle.entries - Brukerrolle.EGEN_ANSATT).toSet()
-            ),
-        )
+        private fun personKombinasjonerSomIkkeGirTilgang(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(
+                    false,
+                    Personinfo.Adressebeskyttelse.Fortrolig,
+                    emptySet<Brukerrolle>(),
+                ),
+                Arguments.of(
+                    false,
+                    Personinfo.Adressebeskyttelse.Fortrolig,
+                    (Brukerrolle.entries - Brukerrolle.Kode7).toSet(),
+                ),
+                Arguments.of(
+                    true,
+                    Personinfo.Adressebeskyttelse.Ugradert,
+                    emptySet<Brukerrolle>(),
+                ),
+                Arguments.of(
+                    true,
+                    Personinfo.Adressebeskyttelse.Ugradert,
+                    (Brukerrolle.entries - Brukerrolle.EgenAnsatt).toSet(),
+                ),
+            )
     }
 }

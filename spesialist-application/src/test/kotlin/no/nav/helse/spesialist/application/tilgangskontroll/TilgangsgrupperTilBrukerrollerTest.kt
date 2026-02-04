@@ -29,7 +29,7 @@ class TilgangsgrupperTilBrukerrollerTest {
         val roller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(grupper)
 
         assertEquals(1, roller.size)
-        assertTrue(roller.contains(Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA))
+        assertTrue(roller.contains(Brukerrolle.SelvstendigNæringsdrivendeBeta))
     }
 
     @Test

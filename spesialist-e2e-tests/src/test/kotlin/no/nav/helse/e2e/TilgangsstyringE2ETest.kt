@@ -112,14 +112,18 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterArbeidsforholdløsning()
     }
 
-    private fun fetchPerson() = runBlocking {
-        personQuery.person(
-            personPseudoId = sessionFactory.transactionalSessionScope {
-                it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-            }.value.toString(),
-            env = dataFetchingEnvironment
-        )
-    }
+    private fun fetchPerson() =
+        runBlocking {
+            personQuery.person(
+                personPseudoId =
+                    sessionFactory
+                        .transactionalSessionScope {
+                            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                        }.value
+                        .toString(),
+                env = dataFetchingEnvironment,
+            )
+        }
 
     private fun assertKanIkkeHentePerson(feilmelding: String) {
         runCatching { fetchPerson() }.let { result ->
@@ -138,26 +142,26 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun settOppDefaultDataOgTilganger() {
         every { dataFetchingEnvironment.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER) } returns
-                Saksbehandler(
-                    id = SaksbehandlerOid(value = UUID.randomUUID()),
-                    navn = "epost",
-                    epost = "navn",
-                    ident = NAVIdent("A123456"),
-                )
+            Saksbehandler(
+                id = SaksbehandlerOid(value = UUID.randomUUID()),
+                navn = "epost",
+                epost = "navn",
+                ident = NAVIdent("A123456"),
+            )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns emptySet()
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
-                setOfNotNull(Brukerrolle.EGEN_ANSATT.takeIf { harTilgang })
+            setOfNotNull(Brukerrolle.EgenAnsatt.takeIf { harTilgang })
     }
 
     private fun saksbehandlertilgangTilKode7(
         @Suppress("SameParameterValue") harTilgang: Boolean,
     ) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
-                setOfNotNull(Brukerrolle.KODE_7.takeIf { harTilgang })
+            setOfNotNull(Brukerrolle.Kode7.takeIf { harTilgang })
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)

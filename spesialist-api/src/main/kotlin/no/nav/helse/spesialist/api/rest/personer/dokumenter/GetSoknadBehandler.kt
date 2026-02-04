@@ -20,7 +20,7 @@ class GetSoknadBehandler(
         personIkkeFunnet = ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,

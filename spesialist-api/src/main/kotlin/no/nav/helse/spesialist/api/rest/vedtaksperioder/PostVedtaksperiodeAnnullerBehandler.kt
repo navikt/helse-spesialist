@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Annuller, ApiVedtaksperiodeAnnullerRequest, Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
 
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.Annuller,

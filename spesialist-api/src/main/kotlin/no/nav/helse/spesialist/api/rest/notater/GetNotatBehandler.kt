@@ -23,7 +23,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 
 class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER, Tilgang.LESETILGANG)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv, Tilgang.Les)
 
     override fun behandle(
         resource: Notater.NotatId,

@@ -19,7 +19,7 @@ class GetOpptegnelserForPersonBehandler :
         personIkkeFunnet = ApiGetOpptegnelserForPersonErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetOpptegnelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Opptegnelser,

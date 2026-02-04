@@ -24,7 +24,7 @@ class GetAktiveSaksbehandlereIntegrationTest {
             integrationTestFixture.get(
                 url = "/api/aktive-saksbehandlere",
                 saksbehandler = saksbehandler1,
-                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.Skriv),
             )
 
         // Then:

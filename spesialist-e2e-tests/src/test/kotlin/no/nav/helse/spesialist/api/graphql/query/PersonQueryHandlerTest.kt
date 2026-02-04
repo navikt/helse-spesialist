@@ -68,7 +68,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery",
-            Level.INFO
+            Level.INFO,
         )
     }
 
@@ -82,7 +82,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         assertEquals(
             "Exception while fetching data (/person) : PseudoId er ugyldig eller utgått",
-            body["errors"].first()["message"].asText()
+            body["errors"].first()["message"].asText(),
         )
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$personPseudoId operation=PersonQuery msg=Finner ikke data for person med identifikator $personPseudoId",
@@ -98,7 +98,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
         assertEquals(
             "Exception while fetching data (/person) : Ugyldig format på personPseudoId",
-            body["errors"].first()["message"].asText()
+            body["errors"].first()["message"].asText(),
         )
     }
 
@@ -135,7 +135,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(dNummer, body["data"]["person"]["andreFodselsnummer"][0]["fodselsnummer"].asText())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery",
-            Level.INFO
+            Level.INFO,
         )
     }
 
@@ -148,10 +148,11 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val logglytter = Logglytter()
         val pseudoId = opprettPersonPseudoId()
 
-        val body = runQuery(
-            query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
-            brukerrolle = Brukerrolle.KODE_7,
-        )
+        val body =
+            runQuery(
+                query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
+                brukerrolle = Brukerrolle.Kode7,
+            )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER", Level.INFO)
@@ -183,15 +184,16 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val logglytter = Logglytter()
         val pseudoId = opprettPersonPseudoId()
 
-        val body = runQuery(
-            query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
-            brukerrolle = Brukerrolle.EGEN_ANSATT,
-        )
+        val body =
+            runQuery(
+                query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
+                brukerrolle = Brukerrolle.EgenAnsatt,
+            )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery",
-            Level.INFO
+            Level.INFO,
         )
     }
 
@@ -399,67 +401,77 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
-        val person = lagPerson()
-            .also { sessionFactory.transactionalSessionScope { transaction -> transaction.personRepository.lagre(it) } }
+        val person =
+            lagPerson()
+                .also { sessionFactory.transactionalSessionScope { transaction -> transaction.personRepository.lagre(it) } }
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val arbeidsgiver1 = Arbeidsgiver.Factory.ny(
-            id = ArbeidsgiverIdentifikator.Organisasjonsnummer(organisasjonsnummer),
-            navnString = lagOrganisasjonsnavn()
-        ).also {
-            sessionFactory.transactionalSessionScope { transaction ->
-                transaction.arbeidsgiverRepository.lagre(
-                    it
-                )
-            }
-        }
+        val arbeidsgiver1 =
+            Arbeidsgiver.Factory
+                .ny(
+                    id = ArbeidsgiverIdentifikator.Organisasjonsnummer(organisasjonsnummer),
+                    navnString = lagOrganisasjonsnavn(),
+                ).also {
+                    sessionFactory.transactionalSessionScope { transaction ->
+                        transaction.arbeidsgiverRepository.lagre(
+                            it,
+                        )
+                    }
+                }
         val vedtaksperiode =
             lagVedtaksperiode(identitetsnummer = person.id, organisasjonsnummer = organisasjonsnummer)
                 .also {
                     sessionFactory.transactionalSessionScope { transaction ->
                         transaction.vedtaksperiodeRepository.lagre(
-                            it
+                            it,
                         )
                     }
                 }
-        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-            .also { sessionFactory.transactionalSessionScope { transaction -> transaction.behandlingRepository.lagre(it) } }
+        val behandling =
+            lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+                .also { sessionFactory.transactionalSessionScope { transaction -> transaction.behandlingRepository.lagre(it) } }
         val oppgave = lagOppgave(behandling.spleisBehandlingId!!, UUID.randomUUID())
-        val saksbehandler = lagSaksbehandler().also {
-            sessionFactory.transactionalSessionScope { transaction ->
-                transaction.saksbehandlerRepository.lagre(it)
+        val saksbehandler =
+            lagSaksbehandler().also {
+                sessionFactory.transactionalSessionScope { transaction ->
+                    transaction.saksbehandlerRepository.lagre(it)
+                }
             }
-        }
-        val vedtakBegrunnelse = VedtakBegrunnelse.ny(
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            tekst = avslagsbegrunnelse,
-            utfall = Utfall.AVSLAG,
-            saksbehandlerOid = saksbehandler.id
-        ).also {
-            sessionFactory.transactionalSessionScope { transaction ->
-                transaction.vedtakBegrunnelseRepository.lagre(it)
-            }
-        }
+        val vedtakBegrunnelse =
+            VedtakBegrunnelse
+                .ny(
+                    spleisBehandlingId = behandling.spleisBehandlingId!!,
+                    tekst = avslagsbegrunnelse,
+                    utfall = Utfall.AVSLAG,
+                    saksbehandlerOid = saksbehandler.id,
+                ).also {
+                    sessionFactory.transactionalSessionScope { transaction ->
+                        transaction.vedtakBegrunnelseRepository.lagre(it)
+                    }
+                }
 
         mockSnapshot(
             fødselsnummer = person.id.value,
-            arbeidsgivere = listOf(
-                opprettSnapshotArbeidsgiver(
-                    organisasjonsnummer = organisasjonsnummer,
-                    generasjoner = listOf(
-                        opprettSnapshotGenerasjon(
-                            perioder = listOf(
-                                opprettBeregnetPeriode(
-                                    fom = behandling.fom,
-                                    tom = behandling.tom,
-                                    vedtaksperiodeId = vedtaksperiode.id.value,
-                                    utbetalingId = behandling.utbetalingId!!.value
-                                )
+            arbeidsgivere =
+                listOf(
+                    opprettSnapshotArbeidsgiver(
+                        organisasjonsnummer = organisasjonsnummer,
+                        generasjoner =
+                            listOf(
+                                opprettSnapshotGenerasjon(
+                                    perioder =
+                                        listOf(
+                                            opprettBeregnetPeriode(
+                                                fom = behandling.fom,
+                                                tom = behandling.tom,
+                                                vedtaksperiodeId = vedtaksperiode.id.value,
+                                                utbetalingId = behandling.utbetalingId!!.value,
+                                            ),
+                                        ),
+                                    id = behandling.spleisBehandlingId!!.value,
+                                ),
                             ),
-                            id = behandling.spleisBehandlingId!!.value
-                        )
-                    )
-                )
-            )
+                    ),
+                ),
         )
 
         val body = runPersonQuery(person.id)
@@ -578,9 +590,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         )
 
     private fun opprettPersonPseudoId(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)): UUID =
-        sessionFactory.transactionalSessionScope {
-            it.personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
-        }.value
+        sessionFactory
+            .transactionalSessionScope {
+                it.personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
+            }.value
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {
         val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
@@ -627,10 +640,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
             level: Level,
         ) = assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
             """
-                Forventet at loggen skulle inneholde ett $level-innslag som inneholder teksten:
-                    $melding
-                Dette ble logget:
-                    ${appender.list}}
+            Forventet at loggen skulle inneholde ett $level-innslag som inneholder teksten:
+                $melding
+            Dette ble logget:
+                ${appender.list}}
             """.trimIndent()
         }
     }

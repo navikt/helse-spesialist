@@ -15,18 +15,18 @@ class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>
         RestResponse.OK(
             kallKontekst.brukerroller.map {
                 when (it) {
-                    Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA -> ApiBrukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
-                    Brukerrolle.BESLUTTER -> ApiBrukerrolle.BESLUTTER
-                    Brukerrolle.EGEN_ANSATT -> ApiBrukerrolle.EGEN_ANSATT
-                    Brukerrolle.KODE_7 -> ApiBrukerrolle.KODE_7
-                    Brukerrolle.STIKKPRØVE -> ApiBrukerrolle.STIKKPRØVE
-                    Brukerrolle.UTVIKLER -> ApiBrukerrolle.UTVIKLER
+                    Brukerrolle.SelvstendigNæringsdrivendeBeta -> ApiBrukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
+                    Brukerrolle.Beslutter -> ApiBrukerrolle.BESLUTTER
+                    Brukerrolle.EgenAnsatt -> ApiBrukerrolle.EGEN_ANSATT
+                    Brukerrolle.Kode7 -> ApiBrukerrolle.KODE_7
+                    Brukerrolle.Stikkprøve -> ApiBrukerrolle.STIKKPRØVE
+                    Brukerrolle.Feilsøking -> ApiBrukerrolle.UTVIKLER
                 }
             } +
                 kallKontekst.tilganger.map {
                     when (it) {
-                        Tilgang.SAKSBEHANDLER -> ApiBrukerrolle.SAKSBEHANDLER
-                        Tilgang.LESETILGANG -> ApiBrukerrolle.LESETILGANG
+                        Tilgang.Skriv -> ApiBrukerrolle.SAKSBEHANDLER
+                        Tilgang.Les -> ApiBrukerrolle.LESETILGANG
                     }
                 },
         )

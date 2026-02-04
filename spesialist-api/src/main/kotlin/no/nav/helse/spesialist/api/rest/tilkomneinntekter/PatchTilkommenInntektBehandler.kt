@@ -26,7 +26,7 @@ import java.time.LocalDate
 import kotlin.reflect.KProperty0
 
 class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiTilkommenInntektPatch, Unit, ApiPatchTilkommenInntektErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
 
     override fun behandle(
         resource: TilkomneInntekter.Id,

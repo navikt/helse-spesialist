@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.domain.KommentarId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.KommentarId, ApiPatchKommentarRequest, Unit, ApiPatchKommentarErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
 
     override fun behandle(
         resource: Dialoger.DialogId.Kommentar.KommentarId,

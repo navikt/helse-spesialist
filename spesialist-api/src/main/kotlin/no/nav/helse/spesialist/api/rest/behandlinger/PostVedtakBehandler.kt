@@ -37,7 +37,7 @@ import java.time.LocalDateTime
 class PostVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
 ) : PostBehandler<Behandlinger.BehandlingId.Vedtak, ApiVedtakRequest, Unit, ApiPostVedtakErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Skriv)
 
     override fun behandle(
         resource: Behandlinger.BehandlingId.Vedtak,
@@ -235,7 +235,7 @@ class PostVedtakBehandler(
         beslutter: Saksbehandler,
         brukerroller: Set<Brukerrolle>,
     ) {
-        if (Brukerrolle.BESLUTTER !in brukerroller && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+        if (Brukerrolle.Beslutter !in brukerroller && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
             throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
         }
         if (this.saksbehandler?.value == beslutter.id.value && !environmentToggles.kanBeslutteEgneSaker) {

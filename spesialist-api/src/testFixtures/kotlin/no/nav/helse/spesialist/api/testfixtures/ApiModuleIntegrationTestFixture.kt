@@ -93,22 +93,22 @@ class ApiModuleIntegrationTestFixture(
 
 fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): List<UUID> {
     val uuider = mutableListOf<UUID>()
-    if (Brukerrolle.EGEN_ANSATT in brukerroller) {
+    if (Brukerrolle.EgenAnsatt in brukerroller) {
         uuider.addAll(egenAnsatt)
     }
-    if (Brukerrolle.KODE_7 in brukerroller) {
+    if (Brukerrolle.Kode7 in brukerroller) {
         uuider.addAll(kode7)
     }
-    if (Brukerrolle.BESLUTTER in brukerroller) {
+    if (Brukerrolle.Beslutter in brukerroller) {
         uuider.addAll(beslutter)
     }
-    if (Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller) {
+    if (Brukerrolle.SelvstendigNæringsdrivendeBeta in brukerroller) {
         uuider.addAll(næringsdrivendeBeta)
     }
-    if (Brukerrolle.STIKKPRØVE in brukerroller) {
+    if (Brukerrolle.Stikkprøve in brukerroller) {
         uuider.addAll(stikkprøve)
     }
-    if (Brukerrolle.UTVIKLER in brukerroller) {
+    if (Brukerrolle.Feilsøking in brukerroller) {
         uuider.addAll(utvikler)
     }
     return uuider
@@ -116,10 +116,10 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
 
 fun TilgangsgrupperTilTilganger.uuiderFor(tilganger: Set<Tilgang>): List<UUID> {
     val uuider = mutableListOf<UUID>()
-    if (Tilgang.LESETILGANG in tilganger) {
+    if (Tilgang.Les in tilganger) {
         uuider.addAll(lesetilgang)
     }
-    if (Tilgang.SAKSBEHANDLER in tilganger) {
+    if (Tilgang.Skriv in tilganger) {
         uuider.addAll(skrivetilgang)
     }
     return uuider

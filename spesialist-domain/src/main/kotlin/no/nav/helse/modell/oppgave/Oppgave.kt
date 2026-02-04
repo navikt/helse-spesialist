@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SelvstendigNæringsdrivendeBeta
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -399,8 +399,8 @@ class Oppgave private constructor(
                 brukerroller = brukerroller,
             ) &&
                 when (it) {
-                    BESLUTTER -> Brukerrolle.BESLUTTER in brukerroller
-                    STIKKPRØVE -> Brukerrolle.STIKKPRØVE in brukerroller
+                    BESLUTTER -> Brukerrolle.Beslutter in brukerroller
+                    STIKKPRØVE -> Brukerrolle.Stikkprøve in brukerroller
                     else -> true
                 }
         }
@@ -478,15 +478,15 @@ class Oppgave private constructor(
                 }
 
                 EGEN_ANSATT -> {
-                    Brukerrolle.EGEN_ANSATT in brukerroller
+                    Brukerrolle.EgenAnsatt in brukerroller
                 }
 
                 FORTROLIG_ADRESSE -> {
-                    Brukerrolle.KODE_7 in brukerroller
+                    Brukerrolle.Kode7 in brukerroller
                 }
 
                 SELVSTENDIG_NÆRINGSDRIVENDE -> {
-                    SELVSTENDIG_NÆRINGSDRIVENDE_BETA in brukerroller
+                    SelvstendigNæringsdrivendeBeta in brukerroller
                 }
 
                 else -> {

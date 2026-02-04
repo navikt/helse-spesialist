@@ -55,15 +55,15 @@ class OppgaveTilgangskontrollTest {
             Stream.of(
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
-                    setOf(Brukerrolle.KODE_7),
+                    setOf(Brukerrolle.Kode7),
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
-                    setOf(Brukerrolle.EGEN_ANSATT),
+                    setOf(Brukerrolle.EgenAnsatt),
                 ),
                 Arguments.of(
                     Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    setOf(Brukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA),
+                    setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta),
                 ),
             )
 
@@ -84,11 +84,11 @@ class OppgaveTilgangskontrollTest {
                 ),
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
-                    (Brukerrolle.entries - Brukerrolle.KODE_7).toSet(),
+                    (Brukerrolle.entries - Brukerrolle.Kode7).toSet(),
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
-                    (Brukerrolle.entries - Brukerrolle.EGEN_ANSATT).toSet(),
+                    (Brukerrolle.entries - Brukerrolle.EgenAnsatt).toSet(),
                 ),
             )
     }

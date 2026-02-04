@@ -9,7 +9,7 @@ class EgenAnsattStatusEndretE2ETest : AbstractE2EIntegrationTest() {
     fun `oppgave får egen ansatt egenskap når person får status egen ansatt`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        saksbehandlerHarRolle(Brukerrolle.EGEN_ANSATT)
+        saksbehandlerHarRolle(Brukerrolle.EgenAnsatt)
         søknadOgGodkjenningbehovKommerInn()
         medPersonISpeil {
             assertHarIkkeOppgaveegenskap("EGEN_ANSATT")
@@ -27,7 +27,7 @@ class EgenAnsattStatusEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `oppgave har ikke lenger egen ansatt egenskap når person ikke lenger er egen ansatt`() {
         // Given:
-        saksbehandlerHarRolle(Brukerrolle.EGEN_ANSATT)
+        saksbehandlerHarRolle(Brukerrolle.EgenAnsatt)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
         medPersonISpeil {

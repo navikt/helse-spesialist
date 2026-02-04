@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselErrorCode> {
-    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.Les, Tilgang.Skriv)
 
     override fun behandle(
         resource: Varsler.VarselId,
