@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
@@ -19,7 +19,7 @@ class GetInntektsmeldingBehandler(
         personIkkeFunnet = ApiGetInntektsmeldingErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding,

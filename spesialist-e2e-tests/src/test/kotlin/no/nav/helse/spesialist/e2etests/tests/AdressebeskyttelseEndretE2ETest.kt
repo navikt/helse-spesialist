@@ -9,7 +9,7 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
         // Given:
-        saksbehandlerHarTilgang(Brukerrolle.KODE_7)
+        saksbehandlerHarRolle(Brukerrolle.KODE_7)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
         søknadOgGodkjenningbehovKommerInn()
@@ -30,7 +30,7 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `oppdaterer ikke adressebeskyttelse dersom personen er ukjent`() {
         // Given:
-        saksbehandlerHarTilgang(Brukerrolle.KODE_7)
+        saksbehandlerHarRolle(Brukerrolle.KODE_7)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
         søknadOgGodkjenningbehovKommerInn()
@@ -51,7 +51,7 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `oppdaterer adressebeskyttelse dersom personen er kjent, men forsøker ikke å forkaste periode`() {
         // Given:
-        saksbehandlerHarTilgang(Brukerrolle.KODE_7)
+        saksbehandlerHarRolle(Brukerrolle.KODE_7)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
         søknadOgGodkjenningbehovKommerInn()

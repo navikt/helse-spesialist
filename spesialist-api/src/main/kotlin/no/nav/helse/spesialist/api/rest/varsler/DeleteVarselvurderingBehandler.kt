@@ -20,10 +20,10 @@ import no.nav.helse.spesialist.domain.Varsel.Status.GODKJENT
 import no.nav.helse.spesialist.domain.Varsel.Status.INAKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.VURDERT
 import no.nav.helse.spesialist.domain.VarselId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurdering, Unit, DeleteVarselvurderingErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
@@ -54,7 +54,10 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
         }
 
         return when (varsel.status) {
-            GODKJENT, INAKTIV, AVVIST, AVVIKLET -> RestResponse.Error(VARSEL_HAR_FEIL_STATUS)
+            GODKJENT, INAKTIV, AVVIST, AVVIKLET -> {
+                RestResponse.Error(VARSEL_HAR_FEIL_STATUS)
+            }
+
             AKTIV, VURDERT -> {
                 val resultat = varsel.slettVurdering()
                 if (resultat is ResultatAvSletting.Slettet) {

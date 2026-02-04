@@ -11,10 +11,10 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, ApiPersonSokResponse, ApiPostPersonSokErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Personer.Sok,
@@ -25,19 +25,23 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
         val identitetsnummer = request.identitetsnummer
         val person =
             when {
-                aktørId != null && identitetsnummer != null ->
+                aktørId != null && identitetsnummer != null -> {
                     return RestResponse.Error(ApiPostPersonSokErrorCode.FOR_MANGE_INPUTPARAMETERE)
+                }
 
-                aktørId != null ->
+                aktørId != null -> {
                     kallKontekst.transaksjon.personRepository
                         .finnAlleMedAktørId(aktørId)
                         .firstOrNull()
+                }
 
-                identitetsnummer != null ->
+                identitetsnummer != null -> {
                     kallKontekst.transaksjon.personRepository.finn(Identitetsnummer.fraString(identitetsnummer))
+                }
 
-                else ->
+                else -> {
                     return RestResponse.Error(ApiPostPersonSokErrorCode.MANGLER_INPUTPARAMETERE)
+                }
             }
         if (person == null) {
             return RestResponse.Error(ApiPostPersonSokErrorCode.PERSON_IKKE_FUNNET)

@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.test.assertNotNull
@@ -24,7 +24,7 @@ class GetAktiveSaksbehandlereIntegrationTest {
             integrationTestFixture.get(
                 url = "/api/aktive-saksbehandlere",
                 saksbehandler = saksbehandler1,
-                brukerroller = setOf(Brukerrolle.SAKSBEHANDLER),
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
             )
 
         // Then:

@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
@@ -28,11 +29,12 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     protected val testContext: TestContext = TestContext()
     protected var saksbehandler = lagSaksbehandler()
-    private val brukerroller = mutableSetOf(Brukerrolle.SAKSBEHANDLER)
+    private val brukerroller = mutableSetOf<Brukerrolle>()
+    private val tilganger = mutableSetOf(Tilgang.SAKSBEHANDLER)
 
     protected var beslutter = lagSaksbehandler()
 
-    protected fun saksbehandlerHarTilgang(brukerrolle: Brukerrolle) {
+    protected fun saksbehandlerHarRolle(brukerrolle: Brukerrolle) {
         brukerroller.add(brukerrolle)
     }
 
@@ -291,13 +293,15 @@ abstract class AbstractE2EIntegrationTest {
     protected fun medPersonISpeil(
         saksbehandler: Saksbehandler = this.saksbehandler,
         brukerroller: Set<Brukerrolle> = this.brukerroller,
+        tilganger: Set<Tilgang> = this.tilganger,
         block: SpeilPersonReceiver.() -> Unit,
     ) {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
             testContext = testContext,
             saksbehandler = saksbehandler,
-            brukerroller = brukerroller
+            brukerroller = brukerroller,
+            tilganger = tilganger,
         ).block()
     }
 
@@ -306,7 +310,8 @@ abstract class AbstractE2EIntegrationTest {
         SpeilPersonReceiver(
             testContext = testContext,
             saksbehandler = beslutter,
-            brukerroller = setOf(Brukerrolle.BESLUTTER, Brukerrolle.SAKSBEHANDLER),
+            brukerroller = setOf(Brukerrolle.BESLUTTER),
+            tilganger = tilganger,
         ).block()
     }
 
@@ -377,23 +382,26 @@ abstract class AbstractE2EIntegrationTest {
     protected fun callHttpGet(
         relativeUrl: String,
         saksbehandler: Saksbehandler = this.saksbehandler,
+        tilganger: Set<Tilgang> = this.tilganger,
         brukerroller: Set<Brukerrolle> = this.brukerroller,
     ) = REST.get(
         relativeUrl = relativeUrl,
         saksbehandler = saksbehandler,
+        tilganger = tilganger,
         brukerroller = brukerroller,
     )
 
     protected fun callHttpPost(
         relativeUrl: String,
         saksbehandler: Saksbehandler = this.saksbehandler,
+        tilganger: Set<Tilgang> = this.tilganger,
         brukerroller: Set<Brukerrolle> = this.brukerroller,
-
         request: Any,
     ) = REST.post(
         relativeUrl = relativeUrl,
         saksbehandler = saksbehandler,
-        brukerroller = brukerroller,
         request = request,
+        tilganger = tilganger,
+        brukerroller = brukerroller,
     )
 }

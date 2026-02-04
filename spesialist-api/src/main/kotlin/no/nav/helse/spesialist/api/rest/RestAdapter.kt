@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarnThrowable
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.slf4j.MDC
 
 class RestAdapter(
@@ -35,7 +36,7 @@ class RestAdapter(
         call: RoutingCall,
         behandler: RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call, behandler.autoriserteBrukerroller) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
+        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdeTilganger) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
     }
 
     suspend inline fun <RESOURCE, reified REQUEST, RESPONSE, ERROR : ApiErrorCode> behandle(
@@ -44,7 +45,7 @@ class RestAdapter(
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
         val request: REQUEST = call.receive()
-        wrapOgDeleger(call, behandler.autoriserteBrukerroller) { kallKontekst ->
+        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdeTilganger) { kallKontekst ->
             behandler.behandle(
                 resource,
                 request,
@@ -55,7 +56,8 @@ class RestAdapter(
 
     suspend fun <RESPONSE, ERROR : ApiErrorCode> wrapOgDeleger(
         call: RoutingCall,
-        autoriserteBrukerroller: Set<Brukerrolle>,
+        påkrevdeBrukerroller: Set<Brukerrolle>,
+        påkrevdeTilganger: Set<Tilgang>,
         behandler: (KallKontekst) -> RestResponse<RESPONSE, ERROR>,
     ) {
         withSaksbehandlerIdentMdc(call) {
@@ -65,8 +67,14 @@ class RestAdapter(
                     return@withSaksbehandlerIdentMdc
                 }
 
-            val autorisert = principal.brukerroller.any { it in autoriserteBrukerroller }
-            if (!autorisert) {
+            val harPåkrevdTilgang = principal.tilganger.any { it in påkrevdeTilganger }
+            if (!harPåkrevdTilgang) {
+                call.respondWithProblem(genericProblemDetails(HttpStatusCode.Forbidden))
+                return@withSaksbehandlerIdentMdc
+            }
+
+            val harPåkrevdeBrukerroller = principal.brukerroller.any { it in påkrevdeBrukerroller } || påkrevdeBrukerroller.isEmpty()
+            if (!harPåkrevdeBrukerroller) {
                 call.respondWithProblem(genericProblemDetails(HttpStatusCode.Forbidden))
                 return@withSaksbehandlerIdentMdc
             }
@@ -84,6 +92,7 @@ class RestAdapter(
                                 KallKontekst(
                                     saksbehandler = principal.saksbehandler,
                                     brukerroller = principal.brukerroller,
+                                    tilganger = principal.tilganger,
                                     transaksjon = transaksjon,
                                     outbox = outbox,
                                     ktorCall = call,

@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
-import no.nav.helse.spesialist.api.graphql.`StansAutomatiskBehandlinghåndtererImpl`
+import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 
 class ApiModule(
     private val configuration: Configuration,
@@ -41,6 +42,7 @@ class ApiModule(
     snapshothenter: Snapshothenter,
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+    private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
     data class Configuration(
         val clientId: String,
@@ -140,6 +142,7 @@ class ApiModule(
             meldingPubliserer = meldingPubliserer,
             krrRegistrertStatusHenter = krrRegistrertStatusHenter,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+            tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         )
     }
 }

@@ -20,11 +20,12 @@ import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.ZoneId
 import kotlin.time.measureTimedValue
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER, Brukerrolle.LESETILGANG)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER, Tilgang.LESETILGANG)
 
     override fun behandle(
         resource: Oppgaver,

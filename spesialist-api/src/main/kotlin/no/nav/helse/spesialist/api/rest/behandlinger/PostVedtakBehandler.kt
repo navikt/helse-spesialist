@@ -31,12 +31,13 @@ import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 
 class PostVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
 ) : PostBehandler<Behandlinger.BehandlingId.Vedtak, ApiVedtakRequest, Unit, ApiPostVedtakErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER, Brukerrolle.BESLUTTER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Behandlinger.BehandlingId.Vedtak,

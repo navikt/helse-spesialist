@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
@@ -34,7 +34,7 @@ class GetTilkomneInntektskilderForPersonBehandler :
         personIkkeFunnet = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,

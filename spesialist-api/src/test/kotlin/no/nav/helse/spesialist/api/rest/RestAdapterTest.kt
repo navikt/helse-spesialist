@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 
@@ -29,21 +30,27 @@ class RestAdapterTest {
         val call =
             mockk<RoutingCall>(relaxed = true) {
                 coEvery { respond(capture(responseTextSlot), any()) } returns Unit
-                every { attributes } returns Attributes().apply {
-                    put(AttributeKey<AuthenticationContext>("AuthContext"), mockk<AuthenticationContext>() {
-                        every { principal<SaksbehandlerPrincipal>() } returns SaksbehandlerPrincipal(
-                            saksbehandler = lagSaksbehandler(),
-                            brukerroller = Brukerrolle.entries.toSet(),
+                every { attributes } returns
+                    Attributes().apply {
+                        put(
+                            AttributeKey<AuthenticationContext>("AuthContext"),
+                            mockk<AuthenticationContext> {
+                                every { principal<SaksbehandlerPrincipal>() } returns
+                                    SaksbehandlerPrincipal(
+                                        saksbehandler = lagSaksbehandler(),
+                                        brukerroller = Brukerrolle.entries.toSet(),
+                                        tilganger = Tilgang.entries.toSet(),
+                                    )
+                            },
                         )
-                    })
-                }
+                    }
             }
 
         val adapter =
             RestAdapter(
                 sessionFactory = sessionFactory,
                 meldingPubliserer = integrationTestFixture.meldingPubliserer,
-                versjonAvKode = "0.0.0"
+                versjonAvKode = "0.0.0",
             )
 
         runBlocking {
@@ -62,7 +69,7 @@ class RestAdapterTest {
             kallKontekst: KallKontekst,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
 
-        override val autoriserteBrukerroller: Set<Brukerrolle> = Brukerrolle.entries.toSet()
+        override val påkrevdeTilganger: Set<Tilgang> = Tilgang.entries.toSet()
 
         override fun openApi(config: RouteConfig) {}
     }

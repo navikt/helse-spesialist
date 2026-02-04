@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.rest
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import kotlin.test.Test
@@ -12,33 +12,32 @@ class GetBrukerrollerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
 
     @Test
-    fun `returnerer brukerens roller når man har alle roller`() {
+    fun `returnerer brukerens tilganger når man har alle tilganger`() {
         // When: Kaller GET /api/brukerroller
-        val response = integrationTestFixture.get("api/brukerroller", brukerroller = Brukerrolle.entries.toSet())
+        val response = integrationTestFixture.get("api/brukerroller", tilganger = Tilgang.entries.toSet())
         assertEquals(HttpStatusCode.OK.value, response.status)
 
         // Then: Responsen inneholder de forventede rollene
         val roller = response.body<Set<String>>()
-        assertEquals(Brukerrolle.entries.map { it.name }.toSet(), roller)
+        assertEquals(Tilgang.entries.map { it.name }.toSet(), roller)
     }
 
     @ParameterizedTest
-    @EnumSource(Brukerrolle::class)
-    fun `alle roller har tilgang til endepunktet`(rolle: Brukerrolle) {
+    @EnumSource(Tilgang::class)
+    fun `alle roller har tilgang til endepunktet`(tilgang: Tilgang) {
         // When: Kaller GET /api/brukerroller
-        val response = integrationTestFixture.get("api/brukerroller", brukerroller = setOf(rolle))
+        val response = integrationTestFixture.get("api/brukerroller", tilganger = setOf(tilgang))
         assertEquals(HttpStatusCode.OK.value, response.status)
 
         // Then: Responsen inneholder de forventede rollene
         val roller = response.body<Set<String>>()
-        assertEquals(setOf(rolle.name), roller)
+        assertEquals(setOf(tilgang.name), roller)
     }
 
     @Test
-    fun `uten roller har man ikke tilgang`() {
+    fun `uten tilganger har man ikke tilgang`() {
         // When: Kaller GET /api/brukerroller
-        val response = integrationTestFixture.get("api/brukerroller", brukerroller = emptySet())
+        val response = integrationTestFixture.get("api/brukerroller", tilganger = emptySet())
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-
     }
 }

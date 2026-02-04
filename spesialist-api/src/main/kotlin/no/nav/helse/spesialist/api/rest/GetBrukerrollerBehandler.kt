@@ -3,9 +3,10 @@ package no.nav.helse.spesialist.api.rest
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.rest.resources.Brukerroller
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>, GetBrukerrollerErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = Brukerrolle.entries.toSet()
+    override val påkrevdeTilganger: Set<Tilgang> = Tilgang.entries.toSet()
 
     override fun behandle(
         resource: Brukerroller,
@@ -20,10 +21,14 @@ class GetBrukerrollerBehandler : GetBehandler<Brukerroller, List<ApiBrukerrolle>
                     Brukerrolle.KODE_7 -> ApiBrukerrolle.KODE_7
                     Brukerrolle.STIKKPRØVE -> ApiBrukerrolle.STIKKPRØVE
                     Brukerrolle.UTVIKLER -> ApiBrukerrolle.UTVIKLER
-                    Brukerrolle.SAKSBEHANDLER -> ApiBrukerrolle.SAKSBEHANDLER
-                    Brukerrolle.LESETILGANG -> ApiBrukerrolle.LESETILGANG
                 }
-            },
+            } +
+                kallKontekst.tilganger.map {
+                    when (it) {
+                        Tilgang.SAKSBEHANDLER -> ApiBrukerrolle.SAKSBEHANDLER
+                        Tilgang.LESETILGANG -> ApiBrukerrolle.LESETILGANG
+                    }
+                },
         )
 
     override fun openApi(config: RouteConfig) {

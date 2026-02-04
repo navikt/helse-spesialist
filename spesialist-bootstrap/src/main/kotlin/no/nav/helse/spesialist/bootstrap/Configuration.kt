@@ -4,6 +4,7 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
@@ -20,4 +21,5 @@ data class Configuration(
     val environmentToggles: EnvironmentToggles,
     val stikkprøver: Stikkprøver,
     val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+    val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 )

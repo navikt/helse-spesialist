@@ -5,11 +5,13 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 interface RestBehandler {
     fun openApi(config: RouteConfig)
 
-    val autoriserteBrukerroller: Set<Brukerrolle>
+    val påkrevdeTilganger: Set<Tilgang>
+    val påkrevdeBrukerroller: Set<Brukerrolle> get() = emptySet()
 
     fun operationIdBasertPåKlassenavn(): String =
         this::class

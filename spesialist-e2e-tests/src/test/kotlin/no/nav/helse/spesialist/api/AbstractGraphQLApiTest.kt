@@ -21,7 +21,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -29,6 +28,7 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.graphQLSpleisVilkarsg
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -58,16 +59,16 @@ import java.time.Duration.ofNanos
 import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-    private val stansAutomatiskBehandlinghåndterer = mockk<`StansAutomatiskBehandlinghåndterer`>(relaxed = true)
+    private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
 
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
+    val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
     private val apiTesting =
         ApiTesting(
             jwtStub = jwtStub,
@@ -95,7 +96,8 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     }
                 }
             },
-            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+            tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         )
 
     private fun ApplicationTestBuilder.graphQL() {

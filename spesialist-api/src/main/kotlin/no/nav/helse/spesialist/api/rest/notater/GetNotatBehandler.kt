@@ -19,11 +19,11 @@ import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 
 class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER, Brukerrolle.LESETILGANG)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER, Tilgang.LESETILGANG)
 
     override fun behandle(
         resource: Notater.NotatId,

@@ -3,10 +3,10 @@ package no.nav.helse.spesialist.api.rest
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.graphql.schema.ApiAktivSaksbehandler
 import no.nav.helse.spesialist.api.rest.resources.AktiveSaksbehandlere
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetAktiveSaksbehandlereBehandler : GetBehandler<AktiveSaksbehandlere, List<ApiAktivSaksbehandler>, ApiGetAktiveSaksbehandlereErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER, Brukerrolle.LESETILGANG)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER, Tilgang.LESETILGANG)
 
     override fun behandle(
         resource: AktiveSaksbehandlere,

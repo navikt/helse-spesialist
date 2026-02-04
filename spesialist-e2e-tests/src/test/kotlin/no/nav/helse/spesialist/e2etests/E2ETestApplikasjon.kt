@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
@@ -22,40 +23,54 @@ import kotlin.random.Random
 object E2ETestApplikasjon {
     val testRapid = LoopbackTestRapid()
     val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
-    val spleisStub = SpleisStub(testRapid, ClientSpleisModuleIntegrationTestFixture.wireMockServer).also {
-        it.registerOn(testRapid)
-    }
+    val spleisStub =
+        SpleisStub(testRapid, ClientSpleisModuleIntegrationTestFixture.wireMockServer).also {
+            it.registerOn(testRapid)
+        }
 
     private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupperTilBrukerroller)
+    val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
     private val rapidApp = RapidApp()
-    private val modules = rapidApp.start(
-        configuration = Configuration(
-            api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
-            clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
-            clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
-            clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
-            db = DBTestFixture.database.dbModuleConfiguration,
-            kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
-            environmentToggles = object : EnvironmentToggles {
-                override val kanBeslutteEgneSaker = false
-                override val kanGodkjenneUtenBesluttertilgang = false
-            },
-            stikkprøver = object : Stikkprøver {
-                override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
-                override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
-                override fun selvstendigNæringsdrivendeForlengelse(): Boolean = false
-                override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
-                override fun utsEnArbeidsgiverForlengelse(): Boolean = false
-                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
-                override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
-                override fun fullRefusjonEnArbeidsgiver(): Boolean = false
-            },
-            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
-        ),
-        rapidsConnection = testRapid,
-    )
+    private val modules =
+        rapidApp.start(
+            configuration =
+                Configuration(
+                    api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
+                    clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
+                    clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
+                    clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
+                    db = DBTestFixture.database.dbModuleConfiguration,
+                    kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
+                    environmentToggles =
+                        object : EnvironmentToggles {
+                            override val kanBeslutteEgneSaker = false
+                            override val kanGodkjenneUtenBesluttertilgang = false
+                        },
+                    stikkprøver =
+                        object : Stikkprøver {
+                            override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
+
+                            override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
+
+                            override fun selvstendigNæringsdrivendeForlengelse(): Boolean = false
+
+                            override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
+
+                            override fun utsEnArbeidsgiverForlengelse(): Boolean = false
+
+                            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
+
+                            override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
+
+                            override fun fullRefusjonEnArbeidsgiver(): Boolean = false
+                        },
+                    tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+                    tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+                ),
+            rapidsConnection = testRapid,
+        )
 
     val port = Random.nextInt(10000, 20000)
 
@@ -68,9 +83,10 @@ object E2ETestApplikasjon {
             readyCheck = { true },
             preStopHook = { },
             cioConfiguration = { },
-            modules = listOf {
-                rapidApp.ktorSetupCallback(this)
-            }
+            modules =
+                listOf {
+                    rapidApp.ktorSetupCallback(this)
+                },
         ).also { it.start() }
     }
 

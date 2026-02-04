@@ -13,10 +13,12 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class KallKontekst(
     val saksbehandler: Saksbehandler,
     val brukerroller: Set<Brukerrolle>,
+    val tilganger: Set<Tilgang>,
     val transaksjon: SessionContext,
     val outbox: Outbox,
     private val ktorCall: RoutingCall,

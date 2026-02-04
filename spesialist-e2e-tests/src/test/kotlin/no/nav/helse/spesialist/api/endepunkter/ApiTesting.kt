@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.auth.configureJwtAuthentication
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
 
@@ -20,6 +21,7 @@ class ApiTesting(
     private val applicationBuilder: ApplicationTestBuilder.() -> Unit,
     private val routeBuilder: Route.() -> Unit,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+    private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
     private val clientId = "client_id"
     private val issuer = "https://jwt-provider-domain"
@@ -33,7 +35,8 @@ class ApiTesting(
                         jwkProvider = jwtStub.getJwkProviderMock(),
                         issuerUrl = issuer,
                         clientId = clientId,
-                        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller
+                        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+                        tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
                     )
                 }
             }

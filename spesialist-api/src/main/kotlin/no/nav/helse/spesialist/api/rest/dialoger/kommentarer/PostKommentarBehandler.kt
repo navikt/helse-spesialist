@@ -10,10 +10,10 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Dialoger
 import no.nav.helse.spesialist.domain.DialogId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKommentarRequest, ApiKommentarResponse, ApiPostKommentarErrorCode> {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Dialoger.DialogId.Kommentar,

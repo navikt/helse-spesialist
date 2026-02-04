@@ -16,17 +16,16 @@ import io.mockk.mockk
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.rest.DokumentMediator
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.graphql.`StansAutomatiskBehandlinghåndterer`
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
+import no.nav.helse.spesialist.api.configureKtorApplication
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
+import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
-import no.nav.helse.spesialist.api.configureKtorApplication
+import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
@@ -39,12 +38,15 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -69,7 +71,6 @@ object TestRunner {
         )
 
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
-
 
     private fun token(
         saksbehandler: Saksbehandler,
@@ -109,7 +110,8 @@ object TestRunner {
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
                 meldingPubliserer = mockk(relaxed = true),
-                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
+                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
+                tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
             )
         testApplication {
             application {
@@ -166,7 +168,8 @@ object TestRunner {
                             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
                         },
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
-                    tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller
+                    tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
+                    tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
                 )
             }
 
@@ -203,6 +206,7 @@ object TestRunner {
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+        val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,
     )
 }

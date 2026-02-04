@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetKrrRegistrertStatusForPersonBehandler(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
@@ -21,7 +21,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
         personIkkeFunnet = ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetKrrRegistrertStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
-    override val autoriserteBrukerroller: Set<Brukerrolle> = setOf(Brukerrolle.LESETILGANG, Brukerrolle.SAKSBEHANDLER)
+    override val påkrevdeTilganger: Set<Tilgang> = setOf(Tilgang.LESETILGANG, Tilgang.SAKSBEHANDLER)
 
     override fun behandle(
         resource: Personer.PersonPseudoId.KrrRegistrertStatus,

@@ -5,6 +5,7 @@ import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.request.uri
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -15,6 +16,7 @@ fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
     issuerUrl: String,
     clientId: String,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+    tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
     skipWhen { call -> call.request.uri == "/graphql/playground" }
     verifier(jwkProvider, issuerUrl) {
@@ -24,6 +26,7 @@ fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
         SaksbehandlerPrincipal(
             saksbehandler = credentials.tilSaksbehandler(),
             brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
+            tilganger = tilgangsgrupperTilTilganger.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
         )
     }
 }

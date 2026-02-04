@@ -8,13 +8,16 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
 class ApiModuleIntegrationTestFixture(
     private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
+    private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     val token: String =
@@ -33,6 +36,7 @@ class ApiModuleIntegrationTestFixture(
 
     fun token(
         saksbehandler: Saksbehandler,
+        tilganger: Set<Tilgang>,
         brukerroller: Set<Brukerrolle>,
     ): String =
         mockOAuth2Server
@@ -46,7 +50,7 @@ class ApiModuleIntegrationTestFixture(
                         "preferred_username" to saksbehandler.epost,
                         "oid" to saksbehandler.id.value.toString(),
                         "name" to saksbehandler.navn,
-                        "groups" to tilgangsgrupperTilBrukerroller.uuiderFor(brukerroller).map { it.toString() },
+                        "groups" to (tilgangsgrupperTilTilganger.uuiderFor(tilganger) + tilgangsgrupperTilBrukerroller.uuiderFor(brukerroller)).map { it.toString() },
                     ),
             ).serialize()
 
@@ -107,11 +111,16 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     if (Brukerrolle.UTVIKLER in brukerroller) {
         uuider.addAll(utvikler)
     }
-    if (Brukerrolle.SAKSBEHANDLER in brukerroller) {
-        uuider.addAll(saksbehandler)
-    }
-    if (Brukerrolle.LESETILGANG in brukerroller) {
+    return uuider
+}
+
+fun TilgangsgrupperTilTilganger.uuiderFor(tilganger: Set<Tilgang>): List<UUID> {
+    val uuider = mutableListOf<UUID>()
+    if (Tilgang.LESETILGANG in tilganger) {
         uuider.addAll(lesetilgang)
+    }
+    if (Tilgang.SAKSBEHANDLER in tilganger) {
+        uuider.addAll(skrivetilgang)
     }
     return uuider
 }

@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import java.net.URI
 
 fun configureKtorApplication(
@@ -46,6 +47,7 @@ fun configureKtorApplication(
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
+    tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
     with(ktorApplication) {
         install(CallId) { configureCallIdPlugin() }
@@ -71,6 +73,7 @@ fun configureKtorApplication(
                     issuerUrl = apiModuleConfiguration.issuerUrl,
                     clientId = apiModuleConfiguration.clientId,
                     tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+                    tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
                 )
             }
         }

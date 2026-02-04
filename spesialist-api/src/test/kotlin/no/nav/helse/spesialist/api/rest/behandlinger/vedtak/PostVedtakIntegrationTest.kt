@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
@@ -99,6 +100,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = beslutter,
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
                 brukerroller = setOf(Brukerrolle.BESLUTTER),
             )
 
@@ -343,6 +345,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
                 brukerroller = setOf(Brukerrolle.BESLUTTER),
             )
 
@@ -387,7 +390,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
             )
 
         // Then:
@@ -478,7 +481,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
             )
 
         // Then:
@@ -530,7 +533,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
             )
 
         // Then:
@@ -586,7 +589,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
             )
 
         // Then:
@@ -628,7 +631,7 @@ class PostVedtakIntegrationTest {
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.BESLUTTER),
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
             )
 
         // Then:

@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,9 +25,10 @@ class PostOpphevStansIntegrationTest {
         val saksbehandler = lagSaksbehandler()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val person = lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
@@ -44,17 +45,18 @@ class PostOpphevStansIntegrationTest {
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
                 egenskaper = emptySet(),
-            )
+            ),
         )
         val begrunnelse = "begrunnelse"
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/opphevstans",
-            body = """{ "fodselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
-            saksbehandler = saksbehandler,
-            brukerroller = setOf(Brukerrolle.SAKSBEHANDLER),
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/opphevstans",
+                body = """{ "fodselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
+                saksbehandler = saksbehandler,
+                tilganger = setOf(Tilgang.SAKSBEHANDLER),
+            )
         assertEquals(204, response.status)
         assertEquals("", response.bodyAsText)
 
@@ -84,5 +86,4 @@ class PostOpphevStansIntegrationTest {
         integrationTestFixture.assertPubliserteSubsumsjoner()
         integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
-
 }

@@ -10,6 +10,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
@@ -84,7 +85,10 @@ fun main() {
                         kode7 = env.getUUIDList("ROLLE_KODE_7"),
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
                         utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
-                        saksbehandler = env.getUUIDList("ROLLE_SAKSBEHANDLER"),
+                    ),
+                tilgangsgrupperTilTilganger =
+                    TilgangsgrupperTilTilganger(
+                        skrivetilgang = env.getUUIDList("ROLLE_SAKSBEHANDLER"),
                         lesetilgang = env.getUUIDList("ROLLE_LESETILGANG"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
@@ -160,6 +164,7 @@ class RapidApp {
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
                 tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
+                tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
             )
 
         kafkaModule.kobleOppRivers()
