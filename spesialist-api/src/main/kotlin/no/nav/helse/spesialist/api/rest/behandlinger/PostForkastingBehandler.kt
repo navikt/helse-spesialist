@@ -18,13 +18,12 @@ import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_FEIL_TILSTAND
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.PERSON_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.TOTRINNSVURDERING_SENDT_TIL_BESLUTTER
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -40,82 +39,75 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         resource: Behandlinger.BehandlingId.Forkasting,
         request: ApiForkastingRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<Unit, ApiPostForkastingErrorCode> {
-        val spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId)
-        val behandling =
-            kallKontekst.transaksjon.behandlingRepository.finn(spleisBehandlingId)
-                ?: return RestResponse.Error(BEHANDLING_IKKE_FUNNET)
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                ?: return RestResponse.Error(VEDTAKSPERIODE_IKKE_FUNNET)
+    ): RestResponse<Unit, ApiPostForkastingErrorCode> =
+        kallKontekst.medBehandling(
+            spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId),
+            behandlingIkkeFunnet = BEHANDLING_IKKE_FUNNET,
+            vedtaksperiodeIkkeFunnet = VEDTAKSPERIODE_IKKE_FUNNET,
+            personIkkeFunnet = PERSON_IKKE_FUNNET,
+            manglerTilgangTilPerson = MANGLER_TILGANG_TIL_PERSON,
+        ) { behandling, vedtaksperiode, person ->
+            val fødselsnummer = person.id.value
+            val oppgave =
+                kallKontekst.transaksjon.oppgaveRepository.finn(behandling.spleisBehandlingId!!)
+                    ?: return@medBehandling RestResponse.Error(OPPGAVE_IKKE_FUNNET)
+            if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
+                return@medBehandling RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
+            }
 
-        val fødselsnummer = vedtaksperiode.fødselsnummer
+            oppgave.avventerSystem(kallKontekst.saksbehandler.ident, kallKontekst.saksbehandler.id.value)
+            oppgave.fjernFraPåVent()
+            kallKontekst.outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
+            kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id)
+            kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
 
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
-                brukerroller = kallKontekst.brukerroller,
+            val totrinnsvurdering =
+                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
+            if (totrinnsvurdering != null) {
+                if (totrinnsvurdering.tilstand == TotrinnsvurderingTilstand.AVVENTER_BESLUTTER) {
+                    return@medBehandling RestResponse.Error(TOTRINNSVURDERING_SENDT_TIL_BESLUTTER)
+                }
+                totrinnsvurdering.ferdigstill()
+                kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+            }
+
+            kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, fødselsnummer)
+
+            val varsler = kallKontekst.transaksjon.varselRepository.finnVarslerFor(listOf(behandling.id))
+            varsler
+                .filter {
+                    it.kanAvvises()
+                }.onEach {
+                    val gammelStatus = it.status
+                    it.avvis()
+                    val varseldefinisjon =
+                        kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(it.kode)
+                            ?: error("Varsel mangler varseldefinisjon")
+                    kallKontekst.outbox.leggTilAvvistVarsel(
+                        gammelStatus = gammelStatus,
+                        varsel = it,
+                        vedtaksperiodeId = vedtaksperiode.id,
+                        spleisBehandlingId = behandling.spleisBehandlingId!!,
+                        fødselsnummer = fødselsnummer,
+                        varseldefinisjon = varseldefinisjon,
+                    )
+                }.let { avvisteVarsler ->
+                    kallKontekst.transaksjon.varselRepository.lagre(avvisteVarsler)
+                }
+            byttTilstandOgPubliserMeldinger(
+                fødselsnummer = fødselsnummer,
+                behandling = behandling,
+                oppgave = oppgave,
+                totrinnsvurdering = totrinnsvurdering,
+                saksbehandler = kallKontekst.saksbehandler,
+                outbox = kallKontekst.outbox,
                 transaksjon = kallKontekst.transaksjon,
+                årsak = request.årsak,
+                begrunnelser = request.begrunnelser,
+                kommentar = request.kommentar,
             )
-        ) {
-            return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
+            RestResponse.NoContent()
         }
-        val oppgave =
-            kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
-                ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
-        if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
-
-        oppgave.avventerSystem(kallKontekst.saksbehandler.ident, kallKontekst.saksbehandler.id.value)
-        oppgave.fjernFraPåVent()
-        kallKontekst.outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
-        kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id)
-        kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
-
-        val totrinnsvurdering = kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-        if (totrinnsvurdering != null) {
-            if (totrinnsvurdering.tilstand == TotrinnsvurderingTilstand.AVVENTER_BESLUTTER) {
-                return RestResponse.Error(TOTRINNSVURDERING_SENDT_TIL_BESLUTTER)
-            }
-            totrinnsvurdering.ferdigstill()
-            kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
-        }
-
-        kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, fødselsnummer)
-
-        val varsler = kallKontekst.transaksjon.varselRepository.finnVarslerFor(listOf(behandling.id))
-        varsler
-            .filter {
-                it.kanAvvises()
-            }.onEach {
-                val gammelStatus = it.status
-                it.avvis()
-                val varseldefinisjon =
-                    kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(it.kode)
-                        ?: error("Varsel mangler varseldefinisjon")
-                kallKontekst.outbox.leggTilAvvistVarsel(
-                    gammelStatus,
-                    it,
-                    vedtaksperiode.id,
-                    spleisBehandlingId,
-                    fødselsnummer,
-                    varseldefinisjon,
-                )
-            }.let { avvisteVarsler ->
-                kallKontekst.transaksjon.varselRepository.lagre(avvisteVarsler)
-            }
-        byttTilstandOgPubliserMeldinger(
-            fødselsnummer = fødselsnummer,
-            behandling = behandling,
-            oppgave = oppgave,
-            totrinnsvurdering = totrinnsvurdering,
-            saksbehandler = kallKontekst.saksbehandler,
-            outbox = kallKontekst.outbox,
-            transaksjon = kallKontekst.transaksjon,
-            årsak = request.årsak,
-            begrunnelser = request.begrunnelser,
-            kommentar = request.kommentar,
-        )
-        return RestResponse.NoContent()
-    }
 
     override fun openApi(config: RouteConfig) {
         config.tags("Behandlinger")
@@ -208,9 +200,13 @@ enum class ApiPostForkastingErrorCode(
     override val title: String,
 ) : ApiErrorCode {
     BEHANDLING_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke behandling"),
-    VEDTAKSPERIODE_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode"),
+    VEDTAKSPERIODE_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Fant ikke vedtaksperiode"),
     OPPGAVE_IKKE_FUNNET(HttpStatusCode.BadRequest, "Fant ikke oppgave."),
+    PERSON_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Person ikke funnet"),
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     OPPGAVE_FEIL_TILSTAND(HttpStatusCode.BadRequest, "Oppgaven er i feil tilstand."),
-    TOTRINNSVURDERING_SENDT_TIL_BESLUTTER(HttpStatusCode.BadRequest, "Totrinnsvurdering er sendt til beslutter, saken må returneres til saksbehandler før den kan kastes ut"),
+    TOTRINNSVURDERING_SENDT_TIL_BESLUTTER(
+        HttpStatusCode.BadRequest,
+        "Totrinnsvurdering er sendt til beslutter, saken må returneres til saksbehandler før den kan kastes ut",
+    ),
 }

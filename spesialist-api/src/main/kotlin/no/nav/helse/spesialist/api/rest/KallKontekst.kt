@@ -9,9 +9,13 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -23,6 +27,48 @@ class KallKontekst(
     val outbox: Outbox,
     private val ktorCall: RoutingCall,
 ) {
+    fun <R, E : ApiErrorCode> medBehandling(
+        spleisBehandlingId: SpleisBehandlingId,
+        behandlingIkkeFunnet: E,
+        vedtaksperiodeIkkeFunnet: E,
+        personIkkeFunnet: E,
+        manglerTilgangTilPerson: E,
+        block: (Behandling, Vedtaksperiode, Person) -> RestResponse<R, E>,
+    ): RestResponse<R, E> {
+        val behandling =
+            transaksjon.behandlingRepository.finn(spleisBehandlingId)
+                ?: return RestResponse.Error(behandlingIkkeFunnet)
+
+        return ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
+            medVedtaksperiode(
+                behandling.vedtaksperiodeId,
+                vedtaksperiodeIkkeFunnet,
+                personIkkeFunnet,
+                manglerTilgangTilPerson,
+            ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
+        }
+    }
+
+    fun <R, E : ApiErrorCode> medVedtaksperiode(
+        vedtaksperiodeId: VedtaksperiodeId,
+        vedtaksperiodeIkkeFunnet: E,
+        personIkkeFunnet: E,
+        manglerTilgangTilPerson: E,
+        block: (Vedtaksperiode, Person) -> RestResponse<R, E>,
+    ): RestResponse<R, E> {
+        val vedtaksperiode =
+            transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
+                ?: return RestResponse.Error(vedtaksperiodeIkkeFunnet)
+
+        return ktorCall.medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
+            medPerson(
+                Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
+                personIkkeFunnet,
+                manglerTilgangTilPerson,
+            ) { person -> block(vedtaksperiode, person) }
+        }
+    }
+
     fun <R, E : ApiErrorCode> medPerson(
         personPseudoIdResource: Personer.PersonPseudoId,
         personIkkeFunnet: E,

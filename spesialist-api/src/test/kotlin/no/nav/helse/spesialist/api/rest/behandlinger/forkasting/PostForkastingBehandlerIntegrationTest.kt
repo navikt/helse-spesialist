@@ -127,7 +127,7 @@ class PostForkastingBehandlerIntegrationTest {
     }
 
     @Test
-    fun `gir NotFound hvis vedtaksperioden ikke finnes`() {
+    fun `gir Internal Server Error hvis vedtaksperioden ikke finnes`() {
         // Given:
         val saksbehandler = lagSaksbehandler()
         val behandlingId = lagSpleisBehandlingId()
@@ -150,12 +150,12 @@ class PostForkastingBehandlerIntegrationTest {
             )
 
         // Then:
-        assertEquals(HttpStatusCode.NotFound.value, response.status)
+        assertEquals(HttpStatusCode.InternalServerError.value, response.status)
         assertJsonEquals(
             """
             {
               "type": "about:blank",
-              "status": 404,
+              "status": 500,
               "title": "Fant ikke vedtaksperiode",
               "code": "VEDTAKSPERIODE_IKKE_FUNNET" 
             }
