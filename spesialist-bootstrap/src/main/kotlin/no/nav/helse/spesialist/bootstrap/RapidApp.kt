@@ -84,12 +84,12 @@ fun main() {
                         egenAnsatt = env.getUUIDList("ROLLE_EGEN_ANSATT"),
                         kode7 = env.getUUIDList("ROLLE_KODE_7"),
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
-                        utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
+                        feilsøking = env.getUUIDList("ROLLE_FEILSOKING"),
                     ),
                 tilgangsgrupperTilTilganger =
                     TilgangsgrupperTilTilganger(
-                        skrivetilgang = env.getUUIDList("ROLLE_SAKSBEHANDLER"),
-                        lesetilgang = env.getUUIDList("ROLLE_LESETILGANG"),
+                        skrivetilgang = env.getUUIDList("TILGANG_SKRIV"),
+                        lesetilgang = env.getUUIDList("TILGANG_LES"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),

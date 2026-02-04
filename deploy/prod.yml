@@ -116,9 +116,9 @@ spec:
       value: tbd-spesialist-v1
     - name: KAFKA_RESET_POLICY
       value: none
-    - name: ROLLE_SAKSBEHANDLER
+    - name: TILGANG_SKRIV
       value: {{ENTRAID_UUID_SAKSBEHANDLER}}
-    - name: ROLLE_LESETILGANG
+    - name: TILGANG_LES
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_BESLUTTER
       value: {{ENTRAID_UUID_BESLUTTER}}
@@ -130,7 +130,7 @@ spec:
       value: {{ENTRAID_UUID_STIKKPROVE}}
     - name: ROLLE_SELVSTENDIG_BETA
       value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}},{{ENTRAID_UUID_TBD}}
-    - name: ROLLE_UTVIKLER
+    - name: ROLLE_FEILSOKING
       value: {{ENTRAID_UUID_NAIS_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
