@@ -9,8 +9,10 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.serialization.jackson.JacksonConverter
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
@@ -70,24 +72,29 @@ class KRRClientKrrRegistrertStatusHenter(
                         accept(ContentType.Application.Json)
                         contentType(ContentType.Application.Json)
                         setBody(""" { "personidenter": [ "$fødselsnummer" ] } """)
-                    }.body<JsonNode>()
+                    }
+            if (!response.status.isSuccess()) {
+                responseError("Fikk HTTP ${response.status.value} tilbake fra KRR", response.bodyAsText())
+            }
+
+            val responseJson = response.body<JsonNode>()
 
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
                 .withTag("status", "success")
 
-            if (response["feil"]?.isEmpty == false) {
-                responseError("Fikk feil tilbake fra KRR", response)
+            if (responseJson["feil"]?.isEmpty == false) {
+                responseError("Fikk feil tilbake fra KRR", responseJson.toString())
             } else {
-                response["personer"][fødselsnummer].let {
+                responseJson["personer"][fødselsnummer].let {
                     if (it == null) {
-                        responseError("Fant ikke igjen personen i responsen fra KRR", response)
+                        responseError("Fant ikke igjen personen i responsen fra KRR", responseJson.toString())
                     }
                     if (it.getIfBoolean("aktiv") == false) {
                         KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
                     } else {
-                        val reservert = it.getRequiredBoolean("reservert", response)
-                        val kanVarsles = it.getRequiredBoolean("kanVarsles", response)
+                        val reservert = it.getRequiredBoolean("reservert", responseJson)
+                        val kanVarsles = it.getRequiredBoolean("kanVarsles", responseJson)
                         if (reservert || !kanVarsles) {
                             KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
                         } else {
@@ -111,11 +118,13 @@ class KRRClientKrrRegistrertStatusHenter(
     private fun JsonNode.getRequiredBoolean(
         fieldName: String,
         response: JsonNode,
-    ): Boolean = getIfBoolean(fieldName) ?: responseError("Fant ikke boolean-verdi for feltet $fieldName", response)
+    ): Boolean =
+        getIfBoolean(fieldName)
+            ?: responseError("Fant ikke boolean-verdi for feltet $fieldName", response.toString())
 
     private fun responseError(
         melding: String,
-        response: JsonNode,
+        response: String,
     ): Nothing {
         loggErrorWithNoThrowable(melding, "Full respons: $response")
         error(melding)

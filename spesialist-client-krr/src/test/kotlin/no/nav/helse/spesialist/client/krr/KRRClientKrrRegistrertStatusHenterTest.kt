@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.client.krr
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
@@ -171,6 +172,14 @@ class KRRClientKrrRegistrertStatusHenterTest {
                 """.trimIndent()
             ),
             expectedException = IllegalStateException("Fikk feil tilbake fra KRR")
+        )
+    }
+
+    @Test
+    fun `feiler om KRR gir tilbake HTTP 500`() {
+        testMedForventningOmFeiletKall(
+            stubResponse = WireMock.serverError().withBody("Her står det en feilmelding som ikke engang er JSON"),
+            expectedException = IllegalStateException("Fikk HTTP 500 tilbake fra KRR")
         )
     }
 
