@@ -189,26 +189,24 @@ class PgOppgaveRepository private constructor(
         val parameterMap = mutableMapOf<String, Any>()
         val sql =
             buildString {
-                val tildeltTilOidTekst =
-                    if (erTildelt == false) "null::uuid" else "t.saksbehandler_ref"
+                val tildeltTilOidTekst = if (erTildelt == false) "null::uuid" else "t.saksbehandler_ref"
                 append(
                     """
-                    WITH utvalg AS (
-                        SELECT
-                            o.id AS oppgave_id,
-                            o.egenskaper,
-                            o.første_opprettet,
-                            $tildeltTilOidTekst AS tildelt_til_oid,
-                            o.behandling_id,
-                            pv.id AS på_vent_id,
-                            b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
-                            v.person_ref,
-                            count(1) OVER() AS filtered_count
-                        FROM oppgave o
-                        INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
-                        INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
-                        LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-                        LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
+                    SELECT
+                        o.id AS oppgave_id,
+                        o.egenskaper,
+                        o.første_opprettet,
+                        p.fødselsnummer,
+                        $tildeltTilOidTekst AS tildelt_til_oid,
+                        pv.id AS på_vent_id,
+                        b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
+                        count(1) OVER() AS filtered_count
+                    FROM oppgave o
+                    INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+                    INNER JOIN person p ON v.person_ref = p.id
+                    INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
+                    LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                    LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
                     """,
                 )
                 if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
@@ -257,7 +255,6 @@ class PgOppgaveRepository private constructor(
                         """,
                     )
                 }
-
                 append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
 
                 val offsetParameterName = "offset"
@@ -267,17 +264,6 @@ class PgOppgaveRepository private constructor(
                 val limitParameterName = "limit"
                 append("LIMIT :$limitParameterName\n")
                 parameterMap[limitParameterName] = sidestørrelse
-
-                // END OF CTE
-                append(")")
-
-                append(
-                    """
-                    SELECT u.*, p.fødselsnummer
-                    FROM utvalg u
-                    INNER JOIN person p ON u.person_ref = p.id
-                    """,
-                )
             }
         return queryOf(statement = sql, paramMap = parameterMap)
             .list { row ->
