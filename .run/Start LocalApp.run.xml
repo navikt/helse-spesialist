@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Start LocalApp" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="no.nav.helse.spesialist.bootstrap.LocalAppKt" />
+    <module name="spesialist.spesialist-bootstrap.test" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
