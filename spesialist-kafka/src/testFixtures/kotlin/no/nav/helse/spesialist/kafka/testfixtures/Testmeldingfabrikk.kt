@@ -226,7 +226,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         aktørId: String,
         fødselsnummer: String,
-        organisasjonsnummer: String,
+        organisasjonsnummer: String?,
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID,
         fom: LocalDate = 1 jan 2018,
@@ -240,10 +240,12 @@ object Testmeldingfabrikk {
             "behandlingId" to "$spleisBehandlingId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
-            "organisasjonsnummer" to organisasjonsnummer,
             "fom" to fom,
             "tom" to tom,
             "yrkesaktivitetstype" to yrkesaktivitetstype,
+        ).plus (
+            if (organisasjonsnummer != null) mapOf("organisasjonsnummer" to organisasjonsnummer)
+            else emptyMap<String, Any>(),
         ),
     )
 

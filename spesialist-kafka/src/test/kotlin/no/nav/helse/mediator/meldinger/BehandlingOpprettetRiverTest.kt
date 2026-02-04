@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.BehandlingOpprettetRiver
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -45,9 +46,10 @@ internal class BehandlingOpprettetRiverTest {
             Testmeldingfabrikk.lagBehandlingOpprettet(
                 aktørId = testperson.aktørId,
                 fødselsnummer = testperson.fødselsnummer,
-                organisasjonsnummer = "ARBEIDSLEDIG",
+                organisasjonsnummer = null,
                 vedtaksperiodeId = vedtaksperiodeId.value,
                 spleisBehandlingId = spleisBehandlingId.value,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSLEDIG
             ),
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
@@ -64,9 +66,10 @@ internal class BehandlingOpprettetRiverTest {
             Testmeldingfabrikk.lagBehandlingOpprettet(
                 aktørId = testperson.aktørId,
                 fødselsnummer = testperson.fødselsnummer,
-                organisasjonsnummer = "FRILANS",
+                organisasjonsnummer = null,
                 vedtaksperiodeId = vedtaksperiodeId.value,
                 spleisBehandlingId = spleisBehandlingId.value,
+                yrkesaktivitetstype = Yrkesaktivitetstype.FRILANS
             ),
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {

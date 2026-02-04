@@ -3,6 +3,7 @@ package no.nav.helse.kafka
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asEnum
@@ -29,16 +30,16 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
                 "vedtaksperiodeId",
                 "behandlingId",
                 "fødselsnummer",
-                "organisasjonsnummer",
                 "yrkesaktivitetstype",
             )
             it.requireKey("fom", "tom")
+            it.interestedIn("organisasjonsnummer")
         }
 
-    fun behandlerIkke(organisasjonsnummer: String) {
+    fun behandlerIkke(yrkesaktivitetstype: String) {
         loggInfo(
             "Tar ikke imot behandling_opprettet på grunn av manglende støtte for yrkesaktivitetstype",
-            "organisasjonsnummer: $organisasjonsnummer",
+            "organisasjonsnummer: $yrkesaktivitetstype",
         )
     }
 
@@ -48,14 +49,17 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
         transaksjon: SessionContext,
         eventMetadata: EventMetadata,
     ) {
-        val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-        if (organisasjonsnummer in listOf("ARBEIDSLEDIG", "FRILANS", "JORDBRUKER")) {
-            behandlerIkke(organisasjonsnummer)
+        val yrkesaktivitetstype = packet["yrkesaktivitetstype"].asText()
+
+        if (yrkesaktivitetstype !in listOf("ARBEIDSTAKER", "SELVSTENDIG")) {
+            behandlerIkke(yrkesaktivitetstype)
             return
         }
         val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText())
         val vedtaksperiodeId = VedtaksperiodeId(packet["vedtaksperiodeId"].asUUID())
         val spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID())
+
+        val organisasjonsnummer = packet["organisasjonsnummer"].takeUnless { it.isMissingOrNull() }?.asText() ?: yrkesaktivitetstype
 
         transaksjon.meldingDao.lagre(
             id = packet["@id"].asUUID(),

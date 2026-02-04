@@ -62,7 +62,7 @@ class BehandlingOpprettetRiverTest {
         opprettet: LocalDateTime = LocalDateTime.now(),
     ) = """{
   "@event_name": "behandling_opprettet",
-  "organisasjonsnummer": "$organisasjonsnummer",
+  ${if (yrkesaktivitetstype == "ARBEIDSTAKER") """"organisasjonsnummer": "$organisasjonsnummer",""" else ""}
   "yrkesaktivitetstype": "$yrkesaktivitetstype",
   "vedtaksperiodeId": "$vedtaksperiodeId",
   "behandlingId": "$behandlingId",
