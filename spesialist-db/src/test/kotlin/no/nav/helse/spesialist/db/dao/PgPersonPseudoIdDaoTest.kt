@@ -5,8 +5,8 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.assertThrows
-import java.time.Duration
-import java.time.temporal.ChronoUnit
+import java.time.Duration.between
+import java.time.Instant.now
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,9 +25,10 @@ class PgPersonPseudoIdDaoTest : AbstractDBIntegrationTest() {
         val fødselsnummer = Fødselsnummer(lagFødselsnummer())
         runAndRollback {
             val pseudoId1 = it.nyPersonPseudoId(fødselsnummer)
-            Thread.sleep(2000)
+            val tidEtterFørsteInsert = now()
+            Thread.sleep(1L)
             val pseudoId2 = it.nyPersonPseudoId(fødselsnummer)
-            val antallSlettet = it.slettPseudoIderEldreEnn(Duration.of(1, ChronoUnit.SECONDS))
+            val antallSlettet = it.slettPseudoIderEldreEnn(between(tidEtterFørsteInsert, now()))
             assertEquals(null, it.hentIdentitetsnummer(pseudoId1))
             assertEquals(fødselsnummer, it.hentIdentitetsnummer(pseudoId2))
             assertAtLeast(1, antallSlettet)
