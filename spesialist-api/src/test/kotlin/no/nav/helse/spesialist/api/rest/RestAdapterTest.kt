@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 
@@ -32,7 +33,7 @@ class RestAdapterTest {
                     put(AttributeKey<AuthenticationContext>("AuthContext"), mockk<AuthenticationContext>() {
                         every { principal<SaksbehandlerPrincipal>() } returns SaksbehandlerPrincipal(
                             saksbehandler = lagSaksbehandler(),
-                            brukerroller = emptySet(),
+                            brukerroller = Brukerrolle.entries.toSet(),
                         )
                     })
                 }
@@ -60,6 +61,8 @@ class RestAdapterTest {
             resource: Unit,
             kallKontekst: KallKontekst,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
+
+        override val autoriserteBrukerroller: Set<Brukerrolle> = Brukerrolle.entries.toSet()
 
         override fun openApi(config: RouteConfig) {}
     }
