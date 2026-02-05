@@ -20,6 +20,7 @@ class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.Komme
         request: ApiPatchKommentarRequest,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchKommentarErrorCode> {
+        // TODO: Mangler tilgangskontroll / relasjon til person
         if (!request.feilregistrert) return RestResponse.Error(ApiPatchKommentarErrorCode.KAN_IKKE_FJERNE_FEILREGISTRERING)
 
         val kommentarId = KommentarId(resource.kommentarId)

@@ -33,11 +33,10 @@ class GetInntektsmeldingBehandler(
         person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
-        val identitetsnummer = person.id
         val dokument =
             dokumentMediator.hentDokument(
                 dokumentDao = kallKontekst.transaksjon.dokumentDao,
-                fødselsnummer = identitetsnummer.value,
+                fødselsnummer = person.id.value,
                 dokumentId = resource.parent.dokumentId,
                 dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING,
             ) ?: return RestResponse.Error(ApiGetInntektsmeldingErrorCode.FANT_IKKE_DOKUMENT)
@@ -64,7 +63,7 @@ class GetInntektsmeldingBehandler(
                     }.orEmpty()
 
         if (fødselsnumreForIM.isEmpty()) return RestResponse.Error(ApiGetInntektsmeldingErrorCode.MANGLER_FØDSELSNUMMER_OG_AKTØRID)
-        if (identitetsnummer.value !in fødselsnumreForIM) {
+        if (person.id.value !in fødselsnumreForIM) {
             return RestResponse.Error(
                 ApiGetInntektsmeldingErrorCode.FANT_IKKE_DOKUMENT,
             )

@@ -31,10 +31,9 @@ class GetKrrRegistrertStatusForPersonBehandler(
         ) { person -> behandleForPerson(person) }
 
     private fun behandleForPerson(person: Person): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
-        val identitetsnummer = person.id
         val registrertStatus =
             try {
-                runBlocking { krrRegistrertStatusHenter.hentForPerson(identitetsnummer.value) }
+                runBlocking { krrRegistrertStatusHenter.hentForPerson(person.id.value) }
             } catch (e: Exception) {
                 loggThrowable("Feil ved kall til KRR", e)
                 return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)

@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
@@ -41,18 +40,14 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { person -> behandleForPerson(person, kallKontekst) }
-
-    private fun behandleForPerson(
-        person: Person,
-        kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
-        RestResponse.OK(
-            hentTilkomneInntektskilder(
-                identitetsnummer = person.id,
-                transaksjon = kallKontekst.transaksjon,
-            ),
-        )
+        ) { person ->
+            RestResponse.OK(
+                hentTilkomneInntektskilder(
+                    identitetsnummer = person.id,
+                    transaksjon = kallKontekst.transaksjon,
+                ),
+            )
+        }
 
     private fun hentTilkomneInntektskilder(
         identitetsnummer: Identitetsnummer,

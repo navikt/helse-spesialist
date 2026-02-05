@@ -34,12 +34,14 @@ import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -60,83 +62,93 @@ class PostVedtakBehandler(
             behandlingIkkeFunnet = { BEHANDLING_IKKE_FUNNET },
             manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { behandling, vedtaksperiode, person ->
-            try {
-                val spleisBehandlingId = behandling.spleisBehandlingId!!
+            behandleForBehandling(request, behandling, vedtaksperiode, person, kallKontekst)
+        }
 
-                if (kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) != behandling) {
-                    return@medBehandling RestResponse.Error(KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
-                }
+    private fun behandleForBehandling(
+        request: ApiVedtakRequest,
+        behandling: Behandling,
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, ApiPostVedtakErrorCode> {
+        try {
+            val spleisBehandlingId = behandling.spleisBehandlingId!!
 
-                val oppgave =
-                    kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
-                        ?: return@medBehandling RestResponse.Error(OPPGAVE_IKKE_FUNNET)
-                if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
-                    return@medBehandling RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
-                }
-
-                val totrinnsvurdering =
-                    kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
-                val saksbehandlerSomFattetVedtaket: Saksbehandler
-                val beslutter: Saksbehandler?
-
-                if (kallKontekst.transaksjon.vedtakRepository.finn(spleisBehandlingId) != null) {
-                    return@medBehandling RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
-                }
-
-                val vedtak: Vedtak
-
-                if (totrinnsvurdering != null) {
-                    beslutter = kallKontekst.saksbehandler
-                    saksbehandlerSomFattetVedtaket =
-                        totrinnsvurdering.saksbehandler?.let { kallKontekst.transaksjon.saksbehandlerRepository.finn(it) }
-                            ?: return@medBehandling RestResponse.Error(TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
-                    vedtak =
-                        Vedtak.manueltMedTotrinnskontroll(
-                            id = spleisBehandlingId,
-                            saksbehandlerIdent = saksbehandlerSomFattetVedtaket.ident,
-                            beslutterIdent = beslutter.ident,
-                        )
-                    totrinnsvurdering.godkjenn(beslutter, kallKontekst.brukerroller)
-                    val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
-                    kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
-                    kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
-                } else {
-                    beslutter = null
-                    saksbehandlerSomFattetVedtaket = kallKontekst.saksbehandler
-                    vedtak =
-                        Vedtak.manueltUtenTotrinnskontroll(spleisBehandlingId, saksbehandlerSomFattetVedtaket.ident)
-                }
-                kallKontekst.transaksjon.vedtakRepository.lagre(vedtak)
-                kallKontekst.transaksjon.reservasjonDao.reserverPerson(
-                    saksbehandlerSomFattetVedtaket.id.value,
-                    person.id.value,
-                )
-                behandling.fattVedtak(
-                    transaksjon = kallKontekst.transaksjon,
-                    identitetsnummer = person.id,
-                    saksbehandler = saksbehandlerSomFattetVedtaket,
-                    oppgave = oppgave,
-                    spleisBehandlingId = spleisBehandlingId,
-                    begrunnelse = request.begrunnelse,
-                    outbox = kallKontekst.outbox,
-                )
-
-                byttTilstandOgPubliserMeldinger(
-                    identitetsnummer = person.id,
-                    behandling = behandling,
-                    oppgave = oppgave,
-                    totrinnsvurdering = totrinnsvurdering,
-                    saksbehandlerSomFattetVedtak = saksbehandlerSomFattetVedtaket,
-                    beslutter = beslutter,
-                    outbox = kallKontekst.outbox,
-                    transaksjon = kallKontekst.transaksjon,
-                )
-            } catch (e: FattVedtakException) {
-                return@medBehandling RestResponse.Error(e.code)
+            if (kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) != behandling) {
+                return RestResponse.Error(KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
             }
 
-            return@medBehandling RestResponse.NoContent()
+            val oppgave =
+                kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
+                    ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
+            if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
+                return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
+            }
+
+            val totrinnsvurdering =
+                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+            val saksbehandlerSomFattetVedtaket: Saksbehandler
+            val beslutter: Saksbehandler?
+
+            if (kallKontekst.transaksjon.vedtakRepository.finn(spleisBehandlingId) != null) {
+                return RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
+            }
+
+            val vedtak: Vedtak
+
+            if (totrinnsvurdering != null) {
+                beslutter = kallKontekst.saksbehandler
+                saksbehandlerSomFattetVedtaket =
+                    totrinnsvurdering.saksbehandler?.let { kallKontekst.transaksjon.saksbehandlerRepository.finn(it) }
+                        ?: return RestResponse.Error(TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
+                vedtak =
+                    Vedtak.manueltMedTotrinnskontroll(
+                        id = spleisBehandlingId,
+                        saksbehandlerIdent = saksbehandlerSomFattetVedtaket.ident,
+                        beslutterIdent = beslutter.ident,
+                    )
+                totrinnsvurdering.godkjenn(beslutter, kallKontekst.brukerroller)
+                val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
+                kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
+                kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+            } else {
+                beslutter = null
+                saksbehandlerSomFattetVedtaket = kallKontekst.saksbehandler
+                vedtak =
+                    Vedtak.manueltUtenTotrinnskontroll(spleisBehandlingId, saksbehandlerSomFattetVedtaket.ident)
+            }
+            kallKontekst.transaksjon.vedtakRepository.lagre(vedtak)
+            kallKontekst.transaksjon.reservasjonDao.reserverPerson(
+                saksbehandlerSomFattetVedtaket.id.value,
+                person.id.value,
+            )
+            behandling.fattVedtak(
+                transaksjon = kallKontekst.transaksjon,
+                identitetsnummer = person.id,
+                saksbehandler = saksbehandlerSomFattetVedtaket,
+                oppgave = oppgave,
+                spleisBehandlingId = spleisBehandlingId,
+                begrunnelse = request.begrunnelse,
+                outbox = kallKontekst.outbox,
+            )
+
+            byttTilstandOgPubliserMeldinger(
+                identitetsnummer = person.id,
+                behandling = behandling,
+                oppgave = oppgave,
+                totrinnsvurdering = totrinnsvurdering,
+                saksbehandlerSomFattetVedtak = saksbehandlerSomFattetVedtaket,
+                beslutter = beslutter,
+                outbox = kallKontekst.outbox,
+                transaksjon = kallKontekst.transaksjon,
+            )
+        } catch (e: FattVedtakException) {
+            return RestResponse.Error(e.code)
         }
+
+        return RestResponse.NoContent()
+    }
 
     private fun Behandling.fattVedtak(
         transaksjon: SessionContext,

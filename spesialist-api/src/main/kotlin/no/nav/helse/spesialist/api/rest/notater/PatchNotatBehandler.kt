@@ -7,9 +7,7 @@ import no.nav.helse.spesialist.api.rest.ApiPatchNotatRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Notater
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -30,25 +28,18 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
                 ApiPatchNotatErrorCode.NOTAT_IKKE_FUNNET,
             )
 
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(notat.vedtaksperiodeId))
-                ?: return RestResponse.Error(ApiPatchNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
+        return kallKontekst.medVedtaksperiode(
+            vedtaksperiodeId = VedtaksperiodeId(notat.vedtaksperiodeId),
+            vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
+            manglerTilgangTilPerson = { ApiPatchNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { _, _ ->
+            if (!notat.feilregistrert) {
+                notat.feilregistrer()
+                kallKontekst.transaksjon.notatRepository.lagre(notat)
+            }
 
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = vedtaksperiode.fødselsnummer),
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(ApiPatchNotatErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            RestResponse.OK(Unit)
         }
-
-        if (!notat.feilregistrert) {
-            notat.feilregistrer()
-            kallKontekst.transaksjon.notatRepository.lagre(notat)
-        }
-
-        return RestResponse.OK(Unit)
     }
 
     override fun openApi(config: RouteConfig) {
@@ -63,7 +54,6 @@ enum class ApiPatchNotatErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     NOTAT_IKKE_FUNNET("Fant ikke notat", HttpStatusCode.NotFound),
     KAN_IKKE_FJERNE_FEILREGISTRERING("Kan ikke fjerne feilregistrering", HttpStatusCode.BadRequest),
 }
