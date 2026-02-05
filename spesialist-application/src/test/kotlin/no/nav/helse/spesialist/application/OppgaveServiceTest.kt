@@ -15,7 +15,12 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -72,7 +77,7 @@ internal class OppgaveServiceTest {
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = oppgaveRepository,
-            brukerrollehenter = { Either.Success( emptySet()) },
+            brukerrollehenter = { Either.Success(emptySet()) },
         )
 
     private fun lagSøknadsoppgave(
@@ -86,6 +91,11 @@ internal class OppgaveServiceTest {
             hendelseId = HENDELSE_ID,
             kanAvvises = true,
             egenskaper = setOf(SØKNAD),
+            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+            type = Oppgavetype.Søknad,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektsforhold = Inntektsforhold.Arbeidstaker,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
     }
 
@@ -100,6 +110,11 @@ internal class OppgaveServiceTest {
             hendelseId = HENDELSE_ID,
             kanAvvises = true,
             egenskaper = setOf(STIKKPRØVE),
+            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+            type = Oppgavetype.Søknad,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektsforhold = Inntektsforhold.Arbeidstaker,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
     }
 
@@ -122,11 +137,16 @@ internal class OppgaveServiceTest {
                     id = oppgaveId,
                     førsteOpprettet = null,
                     hendelseId = HENDELSE_ID,
-                    egenskaper = setOf(EGENSKAP_SØKNAD),
                     vedtaksperiodeId = VEDTAKSPERIODE_ID,
                     behandlingId = BEHANDLING_ID,
                     utbetalingId = UTBETALING_ID,
                     kanAvvises = true,
+                    egenskaper = setOf(EGENSKAP_SØKNAD),
+                    mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                    type = Oppgavetype.Søknad,
+                    inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                    inntektsforhold = Inntektsforhold.Arbeidstaker,
+                    periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
                 )
             )
         }
@@ -183,5 +203,10 @@ internal class OppgaveServiceTest {
         ferdigstiltAvIdent = null,
         ferdigstiltAvOid = null,
         tildeltTil = SaksbehandlerOid(SAKSBEHANDLEROID).takeIf { tildelt },
+        mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+        type = Oppgavetype.Søknad,
+        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        inntektsforhold = Inntektsforhold.Arbeidstaker,
+        periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
     )
 }

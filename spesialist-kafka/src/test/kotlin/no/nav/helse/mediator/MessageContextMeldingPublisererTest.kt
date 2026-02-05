@@ -13,7 +13,12 @@ import no.nav.helse.modell.melding.OppgaveOpprettet
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -150,6 +155,11 @@ internal class MessageContextMeldingPublisererTest {
             hendelseId = hendelseId,
             kanAvvises = true,
             egenskaper = setOf(Egenskap.SØKNAD),
+            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+            type = Oppgavetype.Søknad,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektsforhold = Inntektsforhold.Arbeidstaker,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
 
         // When:
@@ -195,7 +205,12 @@ internal class MessageContextMeldingPublisererTest {
             utbetalingId = UUID.randomUUID(),
             hendelseId = hendelseId,
             kanAvvises = true,
-            egenskaper = setOf(Egenskap.SØKNAD)
+            egenskaper = setOf(Egenskap.SØKNAD),
+            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+            type = Oppgavetype.Søknad,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektsforhold = Inntektsforhold.Arbeidstaker,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
 
         val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())

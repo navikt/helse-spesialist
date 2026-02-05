@@ -10,7 +10,12 @@ import no.nav.helse.db.Sorteringsrekkefølge.STIGENDE
 import no.nav.helse.db.Sorteringsrekkefølge.SYNKENDE
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -142,6 +147,11 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             hendelseId = godkjenningsbehovId,
             kanAvvises = true,
             egenskaper = setOf(Egenskap.SØKNAD),
+            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+            type = Oppgavetype.Søknad,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektsforhold = Inntektsforhold.Arbeidstaker,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
         repository.lagre(oppgave)
         return oppgave

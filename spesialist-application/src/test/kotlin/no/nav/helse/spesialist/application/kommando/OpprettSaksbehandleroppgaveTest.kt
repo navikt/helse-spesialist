@@ -51,6 +51,11 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -417,7 +422,12 @@ internal class OpprettSaksbehandleroppgaveTest {
                 UTBETALING_ID,
                 HENDELSE_ID,
                 kanAvvises,
-                egenskaper.toSet()
+                egenskaper.toSet(),
+                mottaker = egenskaper.finnMottaker(),
+                type = egenskaper.finnOppgavetype(),
+                inntektskilde = egenskaper.finnInntektskilde(),
+                inntektsforhold = egenskaper.finnInntektsforhold(),
+                periodetype = egenskaper.finnPeriodetype(),
             )
         }
     }

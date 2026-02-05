@@ -5,7 +5,12 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -84,5 +89,10 @@ class OppgavemelderTest {
             hendelseId = HENDELSE_ID,
             kanAvvises = true,
             egenskaper = setOf(SØKNAD),
+            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+            type = Oppgavetype.Søknad,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektsforhold = Inntektsforhold.Arbeidstaker,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
 }

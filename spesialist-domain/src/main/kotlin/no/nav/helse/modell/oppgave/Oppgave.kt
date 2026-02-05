@@ -14,6 +14,8 @@ import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -37,9 +39,25 @@ class Oppgave private constructor(
     ferdigstiltAvOid: UUID?,
     egenskaper: Set<Egenskap>,
     tildeltTil: SaksbehandlerOid?,
+    mottaker: Mottaker,
+    type: Oppgavetype,
+    inntektskilde: Inntektskilde,
+    inntektsforhold: Inntektsforhold,
+    periodetype: Periodetype,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
     private val _egenskaper = egenskaper.toMutableSet()
+
+    var mottaker: Mottaker = mottaker
+        private set
+    var type: Oppgavetype = type
+        private set
+    var inntektskilde: Inntektskilde = inntektskilde
+        private set
+    var inntektsforhold: Inntektsforhold = inntektsforhold
+        private set
+    var periodetype: Periodetype = periodetype
+        private set
 
     var ferdigstiltAvOid = ferdigstiltAvOid
         private set
@@ -418,6 +436,11 @@ class Oppgave private constructor(
             hendelseId: UUID,
             kanAvvises: Boolean,
             egenskaper: Set<Egenskap>,
+            mottaker: Mottaker,
+            type: Oppgavetype,
+            inntektskilde: Inntektskilde,
+            inntektsforhold: Inntektsforhold,
+            periodetype: Periodetype,
         ): Oppgave {
             val opprettet = LocalDateTime.now()
             return Oppgave(
@@ -434,6 +457,11 @@ class Oppgave private constructor(
                 ferdigstiltAvIdent = null,
                 ferdigstiltAvOid = null,
                 tildeltTil = null,
+                mottaker = mottaker,
+                type = type,
+                inntektskilde = inntektskilde,
+                inntektsforhold = inntektsforhold,
+                periodetype = periodetype,
             )
         }
 
@@ -451,6 +479,11 @@ class Oppgave private constructor(
             ferdigstiltAvIdent: NAVIdent?,
             tildeltTil: SaksbehandlerOid?,
             egenskaper: Set<Egenskap>,
+            mottaker: Mottaker,
+            type: Oppgavetype,
+            inntektskilde: Inntektskilde,
+            inntektsforhold: Inntektsforhold,
+            periodetype: Periodetype,
         ) = Oppgave(
             id = id,
             opprettet = opprettet,
@@ -465,6 +498,11 @@ class Oppgave private constructor(
             ferdigstiltAvIdent = ferdigstiltAvIdent,
             tildeltTil = tildeltTil,
             egenskaper = egenskaper,
+            mottaker = mottaker,
+            type = type,
+            inntektskilde = inntektskilde,
+            inntektsforhold = inntektsforhold,
+            periodetype = periodetype,
         )
 
         fun harTilgangTilEgenskap(

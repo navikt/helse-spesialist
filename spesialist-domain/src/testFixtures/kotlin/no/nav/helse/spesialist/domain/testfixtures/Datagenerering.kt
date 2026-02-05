@@ -1,10 +1,15 @@
 package no.nav.helse.spesialist.domain.testfixtures
 
 import no.nav.helse.Varselvurdering
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
@@ -107,6 +112,11 @@ fun lagOppgave(behandlingId: SpleisBehandlingId, godkjenningsbehovId: UUID): Opp
     hendelseId = godkjenningsbehovId,
     kanAvvises = true,
     egenskaper = emptySet(),
+    mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+    type = Oppgavetype.Søknad,
+    inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+    inntektsforhold = Inntektsforhold.Arbeidstaker,
+    periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
 )
 
 fun lagSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())

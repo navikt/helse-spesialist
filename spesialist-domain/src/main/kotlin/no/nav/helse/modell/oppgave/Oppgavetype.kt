@@ -1,10 +1,10 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.oppgave
 
-enum class Inntektskilde {
-    EN_ARBEIDSGIVER {
+enum class Oppgavetype {
+    Revurdering {
         override val dbVerdi = this.name
     },
-    FLERE_ARBEIDSGIVERE {
+    Søknad {
         override val dbVerdi = this.name
     }, ;
 

@@ -9,6 +9,11 @@ import no.nav.helse.spesialist.application.testing.assertNotEqualsByMicrosecond
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -256,6 +261,11 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         hendelseId = godkjenningsbehovId,
         kanAvvises = true,
         egenskaper = egenskaper,
+        mottaker = egenskaper.finnMottaker(),
+        type = egenskaper.finnOppgavetype(),
+        inntektskilde = egenskaper.finnInntektskilde(),
+        inntektsforhold = egenskaper.finnInntektsforhold(),
+        periodetype = egenskaper.finnPeriodetype(),
     )
 
     private fun assertEquals(

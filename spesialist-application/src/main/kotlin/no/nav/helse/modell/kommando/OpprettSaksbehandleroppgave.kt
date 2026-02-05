@@ -37,6 +37,9 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.oppgave.Egenskap.VERGEMÅL
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
+import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
@@ -76,19 +79,37 @@ internal class OpprettSaksbehandleroppgave(
         val periodetype = behovData.periodetype
         val inntektskilde = behovData.inntektskilde
         val kanAvvises = behovData.kanAvvises
+        val oppgavetype = if (utbetalingtype == Utbetalingtype.REVURDERING) Oppgavetype.Revurdering else Oppgavetype.Søknad
+        val mottaker =
+            when {
+                utbetaling.delvisRefusjon() -> Mottaker.DelvisRefusjon
+                utbetaling.kunUtbetalingTilSykmeldt() -> Mottaker.UtbetalingTilSykmeldt
+                utbetaling.kunUtbetalingTilArbeidsgiver() -> Mottaker.UtbetalingTilArbeidsgiver
+                else -> Mottaker.IngenUtbetaling
+            }
+        val inntektsforhold =
+            when (behovData.yrkesaktivitetstype) {
+                Yrkesaktivitetstype.SELVSTENDIG -> Inntektsforhold.SelvstendigNæringsdrivende
+
+                Yrkesaktivitetstype.ARBEIDSTAKER -> Inntektsforhold.Arbeidstaker
+
+                Yrkesaktivitetstype.FRILANS,
+                Yrkesaktivitetstype.ARBEIDSLEDIG,
+                -> error("Støtter ikke yrkesaktivitetstype ${behovData.yrkesaktivitetstype}")
+            }
 
         val egenskaper =
             buildSet {
                 egenAnsatt(fødselsnummer)
                 adressebeskyttelse(fødselsnummer)
-                oppgavetype(utbetalingtype)
+                oppgavetype(oppgavetype)
                 stikkprøve(vedtaksperiodeId, hendelseId)
                 vurderingsmomenter(vedtaksperiodeId, utbetalingtype)
                 vergemål(fødselsnummer)
                 enhetUtland(fødselsnummer)
-                mottaker()
+                mottaker(mottaker)
                 inntektskilde(inntektskilde)
-                inntektsforhold(behovData.yrkesaktivitetstype)
+                inntektsforhold(inntektsforhold)
                 arbeidssituasjon(behovData.arbeidssituasjon)
                 periodetype(periodetype)
                 påVent(vedtaksperiodeId)
@@ -110,6 +131,11 @@ internal class OpprettSaksbehandleroppgave(
             hendelseId = hendelseId,
             kanAvvises = kanAvvises,
             egenskaper = egenskaper,
+            mottaker = mottaker,
+            type = oppgavetype,
+            inntektskilde = inntektskilde,
+            inntektsforhold = inntektsforhold,
+            periodetype = periodetype,
         )
         val opptegnelse =
             Opptegnelse.ny(
@@ -131,12 +157,13 @@ internal class OpprettSaksbehandleroppgave(
             -> add(STRENGT_FORTROLIG_ADRESSE)
 
             Fortrolig -> add(FORTROLIG_ADRESSE)
+
             else -> Unit
         }
     }
 
-    private fun MutableSet<Egenskap>.oppgavetype(utbetalingtype: Utbetalingtype) {
-        add(if (utbetalingtype == Utbetalingtype.REVURDERING) REVURDERING else SØKNAD)
+    private fun MutableSet<Egenskap>.oppgavetype(oppgavetype: Oppgavetype) {
+        add(if (oppgavetype == Oppgavetype.Revurdering) REVURDERING else SØKNAD)
     }
 
     private fun MutableSet<Egenskap>.stikkprøve(
@@ -167,13 +194,12 @@ internal class OpprettSaksbehandleroppgave(
         if (arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) add(Egenskap.JORDBRUKER_REINDRIFT)
     }
 
-    private fun MutableSet<Egenskap>.mottaker() {
-        when {
-            utbetaling.delvisRefusjon() -> add(DELVIS_REFUSJON)
-            utbetaling.kunUtbetalingTilSykmeldt() -> add(UTBETALING_TIL_SYKMELDT)
-            utbetaling.kunUtbetalingTilArbeidsgiver() -> add(UTBETALING_TIL_ARBEIDSGIVER)
-            utbetaling.ingenUtbetaling() -> add(INGEN_UTBETALING)
-            else -> Unit
+    private fun MutableSet<Egenskap>.mottaker(mottaker: Mottaker) {
+        when (mottaker) {
+            Mottaker.UtbetalingTilSykmeldt -> add(UTBETALING_TIL_SYKMELDT)
+            Mottaker.DelvisRefusjon -> add(DELVIS_REFUSJON)
+            Mottaker.UtbetalingTilArbeidsgiver -> add(UTBETALING_TIL_ARBEIDSGIVER)
+            Mottaker.IngenUtbetaling -> add(INGEN_UTBETALING)
         }
     }
 
@@ -184,13 +210,10 @@ internal class OpprettSaksbehandleroppgave(
         }
     }
 
-    private fun MutableSet<Egenskap>.inntektsforhold(yrkesaktivitetstype: Yrkesaktivitetstype) {
-        when (yrkesaktivitetstype) {
-            Yrkesaktivitetstype.SELVSTENDIG -> add(SELVSTENDIG_NÆRINGSDRIVENDE)
-            Yrkesaktivitetstype.ARBEIDSTAKER -> add(ARBEIDSTAKER)
-            Yrkesaktivitetstype.FRILANS,
-            Yrkesaktivitetstype.ARBEIDSLEDIG,
-            -> error("Støtter ikke yrkesaktivitetstype $yrkesaktivitetstype")
+    private fun MutableSet<Egenskap>.inntektsforhold(inntektsforhold: Inntektsforhold) {
+        when (inntektsforhold) {
+            Inntektsforhold.SelvstendigNæringsdrivende -> add(SELVSTENDIG_NÆRINGSDRIVENDE)
+            Inntektsforhold.Arbeidstaker -> add(ARBEIDSTAKER)
         }
     }
 

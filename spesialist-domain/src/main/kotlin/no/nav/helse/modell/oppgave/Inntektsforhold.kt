@@ -1,10 +1,10 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell.oppgave
 
-enum class Inntektskilde {
-    EN_ARBEIDSGIVER {
+enum class Inntektsforhold {
+    SelvstendigNæringsdrivende {
         override val dbVerdi = this.name
     },
-    FLERE_ARBEIDSGIVERE {
+    Arbeidstaker {
         override val dbVerdi = this.name
     }, ;
 
