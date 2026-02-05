@@ -41,8 +41,4 @@ class UnimplementedVedtakDao : VedtakDao {
     ) {
         TODO("Not yet implemented")
     }
-
-    override fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID) {
-        TODO("Not yet implemented")
-    }
 }

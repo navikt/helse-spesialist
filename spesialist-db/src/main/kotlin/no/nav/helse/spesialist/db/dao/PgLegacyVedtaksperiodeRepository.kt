@@ -45,7 +45,6 @@ class PgLegacyVedtaksperiodeRepository(
         vedtaksperiode.behandlinger.forEach { behandlingDto ->
             legacyBehandlingDao.finnLegacyBehandling(behandlingDto)
         }
-        vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
 
     private fun loggDiffMellomHentetOgSkalLagres(vedtaksperiode: VedtaksperiodeDto) {

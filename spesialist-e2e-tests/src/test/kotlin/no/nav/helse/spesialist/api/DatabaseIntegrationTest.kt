@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
 import no.nav.helse.e2e.AbstractDatabaseTest
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
@@ -11,6 +10,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
+import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -172,12 +172,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
-    private fun opprettOpprinneligSøknadsdato(periode: Periode) =
-        dbQuery.update(
-            "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())",
-            "vedtaksperiode_id" to periode.id,
-        )
-
     protected fun opprettVedtak(
         behandlingId: UUID = UUID.randomUUID(),
         personId: Long,
@@ -186,7 +180,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
     ): Long {
         opprettBehandling(behandlingId, periode, skjæringstidspunkt)
-        opprettOpprinneligSøknadsdato(periode)
         return dbQuery.updateAndReturnGeneratedKey(
             """
                 INSERT INTO vedtaksperiode (vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)

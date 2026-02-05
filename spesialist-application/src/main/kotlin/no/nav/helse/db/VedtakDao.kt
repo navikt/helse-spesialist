@@ -29,6 +29,4 @@ interface VedtakDao {
         fødselsnummer: String,
         vedtaksperiodeDto: VedtaksperiodeDto,
     )
-
-    fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID)
 }

@@ -502,18 +502,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             ),
         )
 
-    private fun insertOpprinneligSoknadsdato(vedtaksperiodeId: UUID): Int =
-        dbQuery.update(
-            """
-            INSERT INTO opprinnelig_soknadsdato
-            (vedtaksperiode_id, soknad_mottatt)
-            VALUES
-            (:vedtaksperiode_id, :soknad_mottatt)
-            """.trimIndent(),
-            "vedtaksperiode_id" to vedtaksperiodeId,
-            "soknad_mottatt" to LocalDateTime.now(),
-        )
-
     private fun opprettVedtak(
         personId: Long,
         arbeidsgiverIdentifikator: String,
@@ -529,7 +517,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
         )
-        insertOpprinneligSoknadsdato(vedtaksperiodeId = vedtaksperiodeId)
         return dbQuery.updateAndReturnGeneratedKey(
             """
                 INSERT INTO vedtaksperiode (vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)

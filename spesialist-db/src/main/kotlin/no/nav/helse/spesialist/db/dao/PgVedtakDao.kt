@@ -56,20 +56,6 @@ class PgVedtakDao private constructor(
         ).update()
     }
 
-    override fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID) {
-        asSQL(
-            """
-            INSERT INTO opprinnelig_soknadsdato 
-            SELECT vedtaksperiode_id, opprettet_tidspunkt
-            FROM behandling
-            WHERE vedtaksperiode_id = :vedtaksperiode_id
-            ORDER BY opprettet_tidspunkt LIMIT 1
-            ON CONFLICT DO NOTHING;
-            """,
-            "vedtaksperiode_id" to vedtaksperiodeId,
-        ).update()
-    }
-
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
