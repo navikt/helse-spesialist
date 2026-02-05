@@ -4,7 +4,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.math.BigDecimal
 import kotlin.random.Random
@@ -18,7 +18,7 @@ class TilkommenInntektTest {
     @Test
     fun `kan opprette tilkommen Inntekt`() {
         //given
-        val fødselsnummer = lagFødselsnummer()
+        val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
 
@@ -27,7 +27,7 @@ class TilkommenInntektTest {
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             saksbehandlerIdent = saksbehandlerIdent,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
@@ -59,13 +59,13 @@ class TilkommenInntektTest {
     @Test
     fun `kan endre tilkommen inntekt`() {
         //given
-        val fødselsnummer = lagFødselsnummer()
+        val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
@@ -114,13 +114,13 @@ class TilkommenInntektTest {
     @Test
     fun `kan gjenoprette tilkommen inntekt`() {
         //given
-        val fødselsnummer = lagFødselsnummer()
+        val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
@@ -171,13 +171,13 @@ class TilkommenInntektTest {
     @Test
     fun `kan fjerne tilkommen inntekt`() {
         // given
-        val fødselsnummer = lagFødselsnummer()
+        val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),

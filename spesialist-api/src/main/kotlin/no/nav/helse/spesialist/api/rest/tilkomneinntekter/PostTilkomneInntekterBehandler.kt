@@ -34,23 +34,19 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
                 periode = periode,
                 organisasjonsnummer = request.verdier.organisasjonsnummer,
                 andreTilkomneInntekter =
-                    kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForFødselsnummer(
-                        person.id.value,
-                    ),
+                    kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForIdentitetsnummer(person.id),
                 vedtaksperioder =
-                    kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(
-                        person.id.value,
-                    ),
+                    kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(person.id.value),
             )
 
             val tilkommenInntekt =
                 TilkommenInntekt.ny(
-                    fødselsnummer = person.id.value,
+                    identitetsnummer = person.id,
                     saksbehandlerIdent = kallKontekst.saksbehandler.ident,
                     notatTilBeslutter = request.notatTilBeslutter,
                     totrinnsvurderingId =
                         finnEllerOpprettTotrinnsvurdering(
-                            fodselsnummer = person.id.value,
+                            identitetsnummer = person.id,
                             totrinnsvurderingRepository = kallKontekst.transaksjon.totrinnsvurderingRepository,
                         ).id(),
                     organisasjonsnummer = request.verdier.organisasjonsnummer,
@@ -61,7 +57,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             kallKontekst.transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             kallKontekst.outbox.leggTil(
-                identitetsnummer = Identitetsnummer.fraString(tilkommenInntekt.fødselsnummer),
+                identitetsnummer = tilkommenInntekt.identitetsnummer,
                 hendelse =
                     InntektsendringerEventBygger.forNy(
                         inntektskilde = tilkommenInntekt.organisasjonsnummer,

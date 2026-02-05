@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jul
 import no.nav.helse.spesialist.domain.testfixtures.jun
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.mai
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator.tilSykefraværstillfellePerioder
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,13 +31,13 @@ import kotlin.test.Test
 class TilkommenInntektPeriodeValidatorTest {
     @Test
     fun `kan ikke legge til periode som overlapper med annen periode`() {
-        val fødselsnummer = lagFødselsnummer()
+        val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
             ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000.0"),
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             saksbehandlerIdent = lagSaksbehandler().ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),

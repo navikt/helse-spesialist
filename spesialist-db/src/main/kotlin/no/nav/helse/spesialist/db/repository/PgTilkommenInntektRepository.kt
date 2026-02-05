@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -26,13 +27,13 @@ class PgTilkommenInntektRepository(
     session: Session,
 ) : QueryRunner by MedSession(session),
     TilkommenInntektRepository {
-    override fun finnAlleForFødselsnummer(fødselsnummer: String): List<TilkommenInntekt> =
+    override fun finnAlleForIdentitetsnummer(identitetsnummer: Identitetsnummer): List<TilkommenInntekt> =
         asSQL(
             """
             SELECT * FROM tilkommen_inntekt_events
             WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fodselsnummer" to fødselsnummer,
+            "fodselsnummer" to identitetsnummer.value,
         ).list { it.tilTilkommenInntektEvent() }
             .groupBy { it.metadata.tilkommenInntektId }
             .map { (_, events) -> events.tilTilkommenInntekt() }
@@ -172,7 +173,7 @@ class PgTilkommenInntektRepository(
                   :data_json
                 )
                 """.trimIndent(),
-                "fodselsnummer" to tilkommenInntekt.fødselsnummer,
+                "fodselsnummer" to tilkommenInntekt.identitetsnummer.value,
                 "tilkommen_inntekt_id" to event.metadata.tilkommenInntektId.value,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,

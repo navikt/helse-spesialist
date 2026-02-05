@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
@@ -41,7 +40,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                 )
 
         if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = tilkommenInntekt.fødselsnummer),
+                identitetsnummer = tilkommenInntekt.identitetsnummer,
                 brukerroller = kallKontekst.brukerroller,
                 transaksjon = kallKontekst.transaksjon,
             )
@@ -80,9 +79,9 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
             andreTilkomneInntekter =
                 kallKontekst.transaksjon.tilkommenInntektRepository
-                    .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
+                    .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
                     .minus(tilkommenInntekt),
-            vedtaksperioder = kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+            vedtaksperioder = kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.identitetsnummer.value),
         )
 
         if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {
@@ -101,7 +100,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         event?.let {
             kallKontekst.outbox.leggTil(
-                identitetsnummer = Identitetsnummer.fraString(tilkommenInntekt.fødselsnummer),
+                identitetsnummer = tilkommenInntekt.identitetsnummer,
                 hendelse = it,
                 årsak = "endring av tilkommen inntekt",
             )
@@ -130,7 +129,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             notatTilBeslutter = notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
-                    fodselsnummer = tilkommenInntekt.fødselsnummer,
+                    identitetsnummer = tilkommenInntekt.identitetsnummer,
                     totrinnsvurderingRepository = transaksjon.totrinnsvurderingRepository,
                 ).id(),
         )
@@ -147,7 +146,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             notatTilBeslutter = notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
-                    fodselsnummer = tilkommenInntekt.fødselsnummer,
+                    identitetsnummer = tilkommenInntekt.identitetsnummer,
                     totrinnsvurderingRepository = transaksjon.totrinnsvurderingRepository,
                 ).id(),
         )
@@ -173,7 +172,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             notatTilBeslutter = notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
-                    fodselsnummer = tilkommenInntekt.fødselsnummer,
+                    identitetsnummer = tilkommenInntekt.identitetsnummer,
                     totrinnsvurderingRepository = transaksjon.totrinnsvurderingRepository,
                 ).id(),
         )

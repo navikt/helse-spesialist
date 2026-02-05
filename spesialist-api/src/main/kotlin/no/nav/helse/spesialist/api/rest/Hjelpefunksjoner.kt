@@ -9,11 +9,11 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 
 internal fun finnEllerOpprettTotrinnsvurdering(
-    fodselsnummer: String,
+    identitetsnummer: Identitetsnummer,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ): Totrinnsvurdering =
-    totrinnsvurderingRepository.finnAktivForPerson(fodselsnummer)
-        ?: Totrinnsvurdering.ny(fødselsnummer = fodselsnummer).also(totrinnsvurderingRepository::lagre)
+    totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value)
+        ?: Totrinnsvurdering.ny(fødselsnummer = identitetsnummer.value).also(totrinnsvurderingRepository::lagre)
 
 internal fun Saksbehandler.harTilgangTilPerson(
     identitetsnummer: Identitetsnummer,

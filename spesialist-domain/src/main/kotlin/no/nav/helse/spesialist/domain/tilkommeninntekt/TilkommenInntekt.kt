@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
@@ -25,7 +26,7 @@ class TilkommenInntekt private constructor(
     private val _events: MutableList<TilkommenInntektEvent> = mutableListOf(opprettetEvent)
     val events: List<TilkommenInntektEvent> get() = _events
 
-    val fødselsnummer: String = opprettetEvent.fødselsnummer
+    val identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(opprettetEvent.fødselsnummer)
     var totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.metadata.totrinnsvurderingId
         private set
     var organisasjonsnummer: String = opprettetEvent.organisasjonsnummer
@@ -207,7 +208,7 @@ class TilkommenInntekt private constructor(
 
     companion object {
         fun ny(
-            fødselsnummer: String,
+            identitetsnummer: Identitetsnummer,
             saksbehandlerIdent: NAVIdent,
             notatTilBeslutter: String,
             totrinnsvurderingId: TotrinnsvurderingId,
@@ -225,7 +226,7 @@ class TilkommenInntekt private constructor(
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId = totrinnsvurderingId,
                 ),
-                fødselsnummer = fødselsnummer,
+                fødselsnummer = identitetsnummer.value,
                 organisasjonsnummer = organisasjonsnummer,
                 periode = periode,
                 periodebeløp = periodebeløp,
