@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Inkluder bare spesifikke MDC-felter, ettersom noen MDC-felter kan inneholde personinformasjon -->
+            <includeMdcKeyName>callId</includeMdcKeyName>
+            <includeMdcKeyName>trace_flags</includeMdcKeyName>
+            <includeMdcKeyName>span_id</includeMdcKeyName>
+            <includeMdcKeyName>trace_id</includeMdcKeyName>
+        </encoder>
     </appender>
 
     <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
