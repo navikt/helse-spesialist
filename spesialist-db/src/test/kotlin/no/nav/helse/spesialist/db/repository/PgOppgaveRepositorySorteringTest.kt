@@ -49,7 +49,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         }
 
         assertEquals(
-            opprettedeOppgaver.map { it.opprettet.somInstantISystemetsTidssone().roundToMicroseconds() }.sorted(),
+            opprettedeOppgaver.map { it.opprettet.somInstantISystemetsTidssone() }.sorted(),
             hentOppgaverTiOgTi(OPPRETTET, STIGENDE).map { it.opprettetTidspunkt })
         assertEquals(
             opprettedeOppgaver.map { it.opprettet.somInstantISystemetsTidssone() }.sorted().reversed(),
@@ -197,6 +197,6 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
     }
 }
 
-private fun LocalDateTime.somInstantISystemetsTidssone(): Instant = atZone(ZoneId.systemDefault()).toInstant()
+private fun LocalDateTime.somInstantISystemetsTidssone(): Instant = atZone(ZoneId.systemDefault()).toInstant().roundToMicroseconds()
 
 private fun Instant.roundToMicroseconds() = plus(500, ChronoUnit.NANOS).truncatedTo(ChronoUnit.MICROS)
