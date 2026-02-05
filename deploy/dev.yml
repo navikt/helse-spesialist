@@ -106,7 +106,7 @@ spec:
     - name: KAFKA_EXTRA_TOPIC
       value: tbd.sis
     - name: TILGANG_SKRIV
-      value: {{ENTRAID_UUID_TBD}},{{ENTRAID_UUID_SAKSBEHANDLER}}
+      value: {{ENTRAID_UUID_TBD}},{{ENTRAID_UUID_SAKSBEHANDLER}},{{ENTRAID_UUID_SPEIL_BRUKERE_DEV}}
     - name: TILGANG_LES
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_BESLUTTER
