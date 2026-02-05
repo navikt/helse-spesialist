@@ -69,7 +69,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                     sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
                 ).tilApiType(kallKontekst.transaksjon)
 
-        loggInfo("Hentet ${oppgaver.elementer.size} oppgaver (av totalt ${oppgaver.totaltAntall}")
+        loggInfo("Hentet ${oppgaver.elementer.size} oppgaver (av totalt ${oppgaver.totaltAntall})")
 
         return RestResponse.OK(oppgaver)
     }
