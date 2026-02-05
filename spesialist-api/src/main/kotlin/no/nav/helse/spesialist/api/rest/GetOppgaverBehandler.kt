@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefølge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.rest.resources.Oppgaver
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
@@ -23,7 +22,6 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.ZoneId
-import kotlin.time.measureTimedValue
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
@@ -122,48 +120,28 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
 
     private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
         val personer =
-            measureTimedValue {
-                transaksjon.personRepository
-                    .finnAlle(elementer.map { it.identitetsnummer }.toSet())
-                    .associateBy { it.id }
-            }.let {
-                logg.info("Hentet personer for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
-                it.value
-            }
+            transaksjon.personRepository
+                .finnAlle(elementer.map { it.identitetsnummer }.toSet())
+                .associateBy { it.id }
 
         val påVenter =
-            measureTimedValue {
-                transaksjon.påVentRepository
-                    .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
-                    .associateBy { it.id() }
-            }.let {
-                logg.info("Hentet påventer for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
-                it.value
-            }
+            transaksjon.påVentRepository
+                .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
+                .associateBy { it.id() }
 
         val dialoger =
-            measureTimedValue {
-                transaksjon.dialogRepository
-                    .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
-                    .associateBy { it.id() }
-            }.let {
-                logg.info("Hentet dialoger for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
-                it.value
-            }
+            transaksjon.dialogRepository
+                .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
+                .associateBy { it.id() }
 
         val saksbehandlere =
-            measureTimedValue {
-                transaksjon.saksbehandlerRepository
-                    .finnAlle(
-                        elementer
-                            .mapNotNull { it.tildeltTilOid }
-                            .plus(påVenter.values.map { it.saksbehandlerOid })
-                            .toSet(),
-                    ).associateBy { it.id }
-            }.let {
-                logg.info("Hentet saksbehandlere for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
-                it.value
-            }
+            transaksjon.saksbehandlerRepository
+                .finnAlle(
+                    elementer
+                        .mapNotNull { it.tildeltTilOid }
+                        .plus(påVenter.values.map { it.saksbehandlerOid })
+                        .toSet(),
+                ).associateBy { it.id }
 
         return ApiOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
