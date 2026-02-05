@@ -6,5 +6,5 @@ enum class Brukerrolle {
     EgenAnsatt,
     Kode7,
     Stikkprøve,
-    Feilsøking,
+    Utvikler,
 }

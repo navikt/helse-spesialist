@@ -23,7 +23,7 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
                                 Brukerrolle.EgenAnsatt -> ApiBrukerrolle.EGEN_ANSATT
                                 Brukerrolle.Kode7 -> ApiBrukerrolle.KODE_7
                                 Brukerrolle.Stikkprøve -> ApiBrukerrolle.STIKKPRØVE
-                                Brukerrolle.Feilsøking -> ApiBrukerrolle.UTVIKLER
+                                Brukerrolle.Utvikler -> ApiBrukerrolle.UTVIKLER
                             }
                         }.toSet(),
                 tilganger =

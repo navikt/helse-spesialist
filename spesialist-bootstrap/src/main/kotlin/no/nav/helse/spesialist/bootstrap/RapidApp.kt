@@ -84,7 +84,7 @@ fun main() {
                         egenAnsatt = env.getUUIDList("ROLLE_EGEN_ANSATT"),
                         kode7 = env.getUUIDList("ROLLE_KODE_7"),
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
-                        feilsøking = env.getUUIDList("ROLLE_FEILSOKING"),
+                        utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
                     ),
                 tilgangsgrupperTilTilganger =
                     TilgangsgrupperTilTilganger(

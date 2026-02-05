@@ -16,5 +16,5 @@ fun tilgangsgrupperTilBrukerroller(
         egenAnsatt = egenAnsatt,
         kode7 = kode7,
         stikkprøve = stikkprøve,
-        feilsøking = utvikler,
+        utvikler = utvikler,
     )

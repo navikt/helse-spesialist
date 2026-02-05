@@ -10,7 +10,7 @@ class TilgangsgrupperTilBrukerroller(
     val egenAnsatt: List<UUID>,
     val kode7: List<UUID>,
     val stikkprøve: List<UUID>,
-    val feilsøking: List<UUID>,
+    val utvikler: List<UUID>,
 ) {
     fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> {
         val roller = mutableSetOf<Brukerrolle>()
@@ -29,8 +29,8 @@ class TilgangsgrupperTilBrukerroller(
         if (tilgangsgrupper.any { it in stikkprøve }) {
             roller.add(Brukerrolle.Stikkprøve)
         }
-        if (tilgangsgrupper.any { it in feilsøking }) {
-            roller.add(Brukerrolle.Feilsøking)
+        if (tilgangsgrupper.any { it in utvikler }) {
+            roller.add(Brukerrolle.Utvikler)
         }
         return roller
     }
@@ -41,5 +41,5 @@ class TilgangsgrupperTilBrukerroller(
             egenAnsatt.toSet() +
             kode7.toSet() +
             stikkprøve.toSet() +
-            feilsøking.toSet()
+            utvikler.toSet()
 }

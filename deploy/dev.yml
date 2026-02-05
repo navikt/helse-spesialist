@@ -119,7 +119,7 @@ spec:
       value: {{ENTRAID_UUID_TBD}}
     - name: ROLLE_SELVSTENDIG_BETA
       value: {{ENTRAID_UUID_TBD}}
-    - name: ROLLE_FEILSOKING
+    - name: ROLLE_UTVIKLER
       value: {{ENTRAID_UUID_NAIS_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default

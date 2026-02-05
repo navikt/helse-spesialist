@@ -108,8 +108,8 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     if (Brukerrolle.Stikkprøve in brukerroller) {
         uuider.addAll(stikkprøve)
     }
-    if (Brukerrolle.Feilsøking in brukerroller) {
-        uuider.addAll(feilsøking)
+    if (Brukerrolle.Utvikler in brukerroller) {
+        uuider.addAll(utvikler)
     }
     return uuider
 }
