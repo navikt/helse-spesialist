@@ -17,7 +17,7 @@ class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
 ) : GetForPersonBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode>(
         personPseudoId = { resource -> resource.parent.parent.parent },
-        personIkkeFunnet = ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET,
+        personPseudoIdIkkeFunnet = ApiGetSoknadErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
     override val påkrevdTilgang = Tilgang.Les
@@ -57,7 +57,7 @@ enum class ApiGetSoknadErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
+    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_DOKUMENT("Fant ikke søknadsdokument", HttpStatusCode.NotFound),
 }

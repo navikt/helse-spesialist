@@ -18,9 +18,7 @@ import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_FEIL_TILSTAND
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.PERSON_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.TOTRINNSVURDERING_SENDT_TIL_BESLUTTER
-import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Behandling
@@ -42,10 +40,8 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
     ): RestResponse<Unit, ApiPostForkastingErrorCode> =
         kallKontekst.medBehandling(
             spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId),
-            behandlingIkkeFunnet = BEHANDLING_IKKE_FUNNET,
-            vedtaksperiodeIkkeFunnet = VEDTAKSPERIODE_IKKE_FUNNET,
-            personIkkeFunnet = PERSON_IKKE_FUNNET,
-            manglerTilgangTilPerson = MANGLER_TILGANG_TIL_PERSON,
+            behandlingIkkeFunnet = { BEHANDLING_IKKE_FUNNET },
+            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { behandling, vedtaksperiode, person ->
             val oppgave =
                 kallKontekst.transaksjon.oppgaveRepository.finn(behandling.spleisBehandlingId!!)
@@ -199,9 +195,7 @@ enum class ApiPostForkastingErrorCode(
     override val title: String,
 ) : ApiErrorCode {
     BEHANDLING_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke behandling"),
-    VEDTAKSPERIODE_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Fant ikke vedtaksperiode"),
     OPPGAVE_IKKE_FUNNET(HttpStatusCode.BadRequest, "Fant ikke oppgave."),
-    PERSON_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Person ikke funnet"),
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     OPPGAVE_FEIL_TILSTAND(HttpStatusCode.BadRequest, "Oppgaven er i feil tilstand."),
     TOTRINNSVURDERING_SENDT_TIL_BESLUTTER(

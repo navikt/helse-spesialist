@@ -16,7 +16,7 @@ class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
 ) : GetForPersonBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode>(
         personPseudoId = { resource -> resource.parent.parent.parent },
-        personIkkeFunnet = ApiGetInntektsmeldingErrorCode.PERSON_IKKE_FUNNET,
+        personPseudoIdIkkeFunnet = ApiGetInntektsmeldingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
     override val påkrevdTilgang = Tilgang.Les
@@ -77,7 +77,7 @@ enum class ApiGetInntektsmeldingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
+    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_DOKUMENT("Fant ikke inntektsmeldingdokument", HttpStatusCode.NotFound),
     MANGLER_FØDSELSNUMMER_OG_AKTØRID("IM mangler fødselsnummer og aktørId", HttpStatusCode.NotFound),

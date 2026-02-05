@@ -143,7 +143,7 @@ class PostVedtakIntegrationTest {
     }
 
     @Test
-    fun `gir NotFound hvis vedtaksperioden ikke finnes`() {
+    fun `gir Internal Server Error hvis vedtaksperioden ikke finnes`() {
         // Given:
         val saksbehandler = lagSaksbehandler()
         val behandlingId = lagSpleisBehandlingId()
@@ -161,14 +161,13 @@ class PostVedtakIntegrationTest {
             )
 
         // Then:
-        assertEquals(HttpStatusCode.NotFound.value, response.status)
+        assertEquals(HttpStatusCode.InternalServerError.value, response.status)
         assertJsonEquals(
             """
             {
               "type": "about:blank",
-              "status": 404,
-              "title": "Fant ikke vedtaksperiode",
-              "code": "VEDTAKSPERIODE_IKKE_FUNNET" 
+              "status": 500,
+              "title": "Internal Server Error" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -228,7 +227,7 @@ class PostVedtakIntegrationTest {
             {
               "type": "about:blank",
               "status": 400,
-              "title": "Fant ikke oppgave.",
+              "title": "Fant ikke oppgave",
               "code": "OPPGAVE_IKKE_FUNNET" 
             }
             """.trimIndent(),
@@ -266,7 +265,7 @@ class PostVedtakIntegrationTest {
             {
               "type": "about:blank",
               "status": 400,
-              "title": "Oppgaven er i feil tilstand.",
+              "title": "Oppgaven er i feil tilstand",
               "code": "OPPGAVE_FEIL_TILSTAND" 
             }
             """.trimIndent(),

@@ -18,7 +18,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
 ) : GetForPersonBehandler<Personer.PersonPseudoId.KrrRegistrertStatus, ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode>(
         personPseudoId = { resource -> resource.parent },
-        personIkkeFunnet = ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_IKKE_FUNNET,
+        personPseudoIdIkkeFunnet = ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetKrrRegistrertStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
     override val påkrevdTilgang = Tilgang.Les
@@ -57,7 +57,7 @@ enum class ApiGetKrrRegistrertStatusForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
+    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FEIL_VED_VIDERE_KALL(
         "Klarte ikke hente status fra Kontakt- og Reservasjonsregisteret",

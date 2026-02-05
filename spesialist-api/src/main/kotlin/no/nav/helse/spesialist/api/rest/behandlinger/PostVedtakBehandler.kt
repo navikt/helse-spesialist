@@ -16,6 +16,18 @@ import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.BEHANDLING_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OPPGAVE_FEIL_TILSTAND
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OPPGAVE_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OVERLAPPER_MED_INFOTRYGD
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.VARSEL_MANGLER_VARSELDEFINISJON
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.VARSLER_MANGLER_VURDERING
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.VEDTAK_ALLEREDE_FATTET
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
@@ -44,25 +56,21 @@ class PostVedtakBehandler(
     ): RestResponse<Unit, ApiPostVedtakErrorCode> =
         kallKontekst.medBehandling(
             spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId),
-            behandlingIkkeFunnet = ApiPostVedtakErrorCode.BEHANDLING_IKKE_FUNNET,
-            vedtaksperiodeIkkeFunnet = ApiPostVedtakErrorCode.VEDTAKSPERIODE_IKKE_FUNNET,
-            personIkkeFunnet = ApiPostVedtakErrorCode.PERSON_IKKE_FUNNET,
-            manglerTilgangTilPerson = ApiPostVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON,
+            behandlingIkkeFunnet = { BEHANDLING_IKKE_FUNNET },
+            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { behandling, vedtaksperiode, person ->
             try {
                 val spleisBehandlingId = behandling.spleisBehandlingId!!
 
                 if (kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) != behandling) {
-                    return@medBehandling RestResponse.Error(ApiPostVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
+                    return@medBehandling RestResponse.Error(KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
                 }
 
                 val oppgave =
                     kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
-                        ?: return@medBehandling RestResponse.Error(ApiPostVedtakErrorCode.OPPGAVE_IKKE_FUNNET)
+                        ?: return@medBehandling RestResponse.Error(OPPGAVE_IKKE_FUNNET)
                 if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
-                    return@medBehandling RestResponse.Error(
-                        ApiPostVedtakErrorCode.OPPGAVE_FEIL_TILSTAND,
-                    )
+                    return@medBehandling RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
                 }
 
                 val totrinnsvurdering =
@@ -71,7 +79,7 @@ class PostVedtakBehandler(
                 val beslutter: Saksbehandler?
 
                 if (kallKontekst.transaksjon.vedtakRepository.finn(spleisBehandlingId) != null) {
-                    return@medBehandling RestResponse.Error(ApiPostVedtakErrorCode.VEDTAK_ALLEREDE_FATTET)
+                    return@medBehandling RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
                 }
 
                 val vedtak: Vedtak
@@ -80,7 +88,7 @@ class PostVedtakBehandler(
                     beslutter = kallKontekst.saksbehandler
                     saksbehandlerSomFattetVedtaket =
                         totrinnsvurdering.saksbehandler?.let { kallKontekst.transaksjon.saksbehandlerRepository.finn(it) }
-                            ?: return@medBehandling RestResponse.Error(ApiPostVedtakErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
+                            ?: return@medBehandling RestResponse.Error(TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
                     vedtak =
                         Vedtak.manueltMedTotrinnskontroll(
                             id = spleisBehandlingId,
@@ -138,7 +146,7 @@ class PostVedtakBehandler(
         begrunnelse: String?,
         outbox: Outbox,
     ) {
-        if (overlapperMedInfotrygd()) throw FattVedtakException(ApiPostVedtakErrorCode.OVERLAPPER_MED_INFOTRYGD)
+        if (overlapperMedInfotrygd()) throw FattVedtakException(OVERLAPPER_MED_INFOTRYGD)
         val saksbehandlerOid = saksbehandler.id
         validerOgGodkjennVarsler(
             behandlingRepository = transaksjon.behandlingRepository,
@@ -185,7 +193,7 @@ class PostVedtakBehandler(
         val behandlingspakke = behandlingRepository.finnBehandlingspakke(this, fødselsnummer)
         val behandlingUnikIder = behandlingspakke.map { behandling -> behandling.id }
         val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
-        if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(ApiPostVedtakErrorCode.VARSLER_MANGLER_VURDERING)
+        if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(VARSLER_MANGLER_VURDERING)
         varsler
             .filter { it.kanGodkjennes() }
             .forEach {
@@ -211,7 +219,7 @@ class PostVedtakBehandler(
         godkjenn()
         val varseldefinisjon =
             varseldefinisjonRepository.finnGjeldendeFor(kode)
-                ?: throw FattVedtakException(ApiPostVedtakErrorCode.VARSEL_MANGLER_VARSELDEFINISJON)
+                ?: throw FattVedtakException(VARSEL_MANGLER_VARSELDEFINISJON)
         outbox.leggTil(
             fødselsnummer = fødselsnummer,
             hendelse =
@@ -233,10 +241,10 @@ class PostVedtakBehandler(
         brukerroller: Set<Brukerrolle>,
     ) {
         if (Brukerrolle.Beslutter !in brukerroller && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
-            throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
+            throw FattVedtakException(SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
         }
         if (this.saksbehandler?.value == beslutter.id.value && !environmentToggles.kanBeslutteEgneSaker) {
-            throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
+            throw FattVedtakException(SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
         }
         settBeslutter(beslutter.id)
         ferdigstill()
@@ -324,10 +332,9 @@ enum class ApiPostVedtakErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.InternalServerError),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    OPPGAVE_IKKE_FUNNET("Fant ikke oppgave.", HttpStatusCode.BadRequest),
-    OPPGAVE_FEIL_TILSTAND("Oppgaven er i feil tilstand.", HttpStatusCode.BadRequest),
+    OPPGAVE_IKKE_FUNNET("Fant ikke oppgave", HttpStatusCode.BadRequest),
+    OPPGAVE_FEIL_TILSTAND("Oppgaven er i feil tilstand", HttpStatusCode.BadRequest),
     SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG("Mangler besluttertilgang", HttpStatusCode.Forbidden),
     SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE("Kan ikke beslutte egen oppgave", HttpStatusCode.Forbidden),
     VARSLER_MANGLER_VURDERING(
@@ -343,7 +350,6 @@ enum class ApiPostVedtakErrorCode(
         "Kan ikke fatte vedtak på en eldre behandling av vedtaksperioden",
         HttpStatusCode.BadRequest,
     ),
-    VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER(
         "Behandlende saksbehandler mangler i totrinnsvurdering",
         HttpStatusCode.Conflict,

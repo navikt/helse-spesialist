@@ -24,7 +24,7 @@ import java.util.UUID
 class PostArbeidstidsvurderingBehandler :
     PostForPersonBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode>(
         personPseudoId = { it.parent.parent },
-        personIkkeFunnet = ApiArbeidstidsvurderingErrorCode.PERSON_IKKE_FUNNET,
+        personPseudoIdIkkeFunnet = ApiArbeidstidsvurderingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
     override val påkrevdTilgang = Tilgang.Skriv
@@ -162,7 +162,7 @@ enum class ApiArbeidstidsvurderingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
+    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     MISMATCH_I_IDENTITETSNUMRE("Person referert til i URL matcher ikke person referert til i request", HttpStatusCode.BadRequest),
     MANGLER_VURDERTE_PERIODER("Mangler vurderte perioder", HttpStatusCode.BadRequest),

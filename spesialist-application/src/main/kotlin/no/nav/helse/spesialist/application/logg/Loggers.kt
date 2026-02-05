@@ -135,6 +135,7 @@ enum class MdcKey(
     MELDING_ID("meldingId"),
     MELDINGNAVN("meldingnavn"),
     VEDTAKSPERIODE_ID("vedtaksperiodeId"),
+    BEHANDLING_UNIK_ID("behandlingUnikId"),
     SPLEIS_BEHANDLING_ID("spleisBehandlingId"),
     OPPRINNELIG_MELDING_ID("opprinneligMeldingId"),
     REQUEST_METHOD("request.method"),

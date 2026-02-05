@@ -9,9 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.MANGLER_TILGANG_TIL_PERSON
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.PERSON_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_FUNNET
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -27,19 +25,11 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
             kallKontekst.transaksjon.varselRepository.finn(VarselId(resource.varselId))
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
-        val behandling =
-            kallKontekst.transaksjon.behandlingRepository.finn(varsel.behandlingUnikId)
-                ?: error("Fant ikke behandling")
-
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                ?: error("Fant ikke vedtaksperiode")
-
-        return kallKontekst.medPerson(
-            identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-            personIkkeFunnet = PERSON_IKKE_FUNNET,
-            manglerTilgangTilPerson = MANGLER_TILGANG_TIL_PERSON,
-        ) {
+        return kallKontekst.medBehandling(
+            behandlingUnikId = varsel.behandlingUnikId,
+            behandlingIkkeFunnet = { error("Fant ikke behandling") },
+            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
+        ) { _, _, _ ->
             val varselvurdering = varsel.vurdering
             val varseldefinisjon =
                 if (varselvurdering != null) {
@@ -86,10 +76,9 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
 }
 
 enum class GetVarselErrorCode(
-    override val statusCode: HttpStatusCode,
     override val title: String,
+    override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Person ikke funnet"),
-    MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
-    VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke varsel"),
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    VARSEL_IKKE_FUNNET("Fant ikke varsel", HttpStatusCode.NotFound),
 }

@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 class GetOpptegnelserForPersonBehandler :
     GetForPersonBehandler<Personer.PersonPseudoId.Opptegnelser, List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode>(
         personPseudoId = { resource -> resource.parent },
-        personIkkeFunnet = ApiGetOpptegnelserForPersonErrorCode.PERSON_IKKE_FUNNET,
+        personPseudoIdIkkeFunnet = ApiGetOpptegnelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetOpptegnelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
     override val påkrevdTilgang = Tilgang.Les
@@ -64,6 +64,6 @@ enum class ApiGetOpptegnelserForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
+    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

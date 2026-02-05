@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Notater
 import no.nav.helse.spesialist.domain.Dialog
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -23,17 +22,12 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
         resource: Notater,
         request: ApiNotatRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiNotatResponse, ApiPostNotatErrorCode> {
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(request.vedtaksperiodeId))
-                ?: return RestResponse.Error(ApiPostNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
-
-        val identitetsnummer = Identitetsnummer.fraString(identitetsnummer = vedtaksperiode.fødselsnummer)
-        return kallKontekst.medPerson(
-            identitetsnummer = identitetsnummer,
-            personIkkeFunnet = ApiPostNotatErrorCode.PERSON_IKKE_FUNNET,
-            manglerTilgangTilPerson = ApiPostNotatErrorCode.MANGLER_TILGANG_TIL_PERSON,
-        ) {
+    ): RestResponse<ApiNotatResponse, ApiPostNotatErrorCode> =
+        kallKontekst.medVedtaksperiode(
+            vedtaksperiodeId = VedtaksperiodeId(request.vedtaksperiodeId),
+            vedtaksperiodeIkkeFunnet = { ApiPostNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiPostNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { vedtaksperiode, _ ->
             val dialog = Dialog.Factory.ny()
             kallKontekst.transaksjon.dialogRepository.lagre(dialog)
 
@@ -49,7 +43,6 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
 
             RestResponse.Created(ApiNotatResponse(id = notat.id().value))
         }
-    }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
@@ -62,7 +55,6 @@ enum class ApiPostNotatErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.InternalServerError),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
 }

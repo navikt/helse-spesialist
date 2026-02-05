@@ -156,8 +156,7 @@ class PostForkastingBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Fant ikke vedtaksperiode",
-              "code": "VEDTAKSPERIODE_IKKE_FUNNET" 
+              "title": "Internal Server Error" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,

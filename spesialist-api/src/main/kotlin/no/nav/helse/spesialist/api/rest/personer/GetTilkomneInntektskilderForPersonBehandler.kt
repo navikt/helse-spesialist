@@ -31,7 +31,7 @@ import java.time.ZoneId
 class GetTilkomneInntektskilderForPersonBehandler :
     GetForPersonBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode>(
         personPseudoId = { resource -> resource.parent },
-        personIkkeFunnet = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET,
+        personPseudoIdIkkeFunnet = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
         manglerTilgangTilPerson = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
     ) {
     override val påkrevdTilgang = Tilgang.Les
@@ -165,6 +165,6 @@ enum class ApiGetTilkomneInntektskilderForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
+    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

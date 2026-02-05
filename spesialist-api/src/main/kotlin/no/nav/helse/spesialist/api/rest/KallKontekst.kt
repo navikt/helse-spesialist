@@ -3,13 +3,12 @@ package no.nav.helse.spesialist.api.rest
 import io.ktor.server.routing.RoutingCall
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.medMdcOgAttribute
-import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggWarn
-import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -27,85 +26,130 @@ class KallKontekst(
     val outbox: Outbox,
     private val ktorCall: RoutingCall,
 ) {
-    fun <R, E : ApiErrorCode> medBehandling(
+    fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
         spleisBehandlingId: SpleisBehandlingId,
-        behandlingIkkeFunnet: E,
-        vedtaksperiodeIkkeFunnet: E,
-        personIkkeFunnet: E,
-        manglerTilgangTilPerson: E,
-        block: (Behandling, Vedtaksperiode, Person) -> RestResponse<R, E>,
-    ): RestResponse<R, E> {
-        val behandling =
-            transaksjon.behandlingRepository.finn(spleisBehandlingId)
-                ?: return RestResponse.Error(behandlingIkkeFunnet)
+        behandlingIkkeFunnet: () -> ERROR,
+        vedtaksperiodeIkkeFunnet: () -> ERROR = { error("Vedtaksperioden ble ikke funnet") },
+        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
+        manglerTilgangTilPerson: () -> ERROR,
+        block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
+    ): RestResponse<RESPONSE, ERROR> =
+        ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
+            val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
 
-        return ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
-            medVedtaksperiode(
-                behandling.vedtaksperiodeId,
-                vedtaksperiodeIkkeFunnet,
-                personIkkeFunnet,
-                manglerTilgangTilPerson,
-            ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
+            if (behandling == null) {
+                loggWarn("Behandlingen ble ikke funnet", spleisBehandlingId.toString())
+                return@medMdcOgAttribute RestResponse.Error(behandlingIkkeFunnet())
+            }
+
+            ktorCall.medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandling.id.value.toString()) {
+                medVedtaksperiode(
+                    vedtaksperiodeId = behandling.vedtaksperiodeId,
+                    vedtaksperiodeIkkeFunnet = vedtaksperiodeIkkeFunnet,
+                    personIkkeFunnet = personIkkeFunnet,
+                    manglerTilgangTilPerson = manglerTilgangTilPerson,
+                ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
+            }
         }
-    }
 
-    fun <R, E : ApiErrorCode> medVedtaksperiode(
+    fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
+        behandlingUnikId: BehandlingUnikId,
+        behandlingIkkeFunnet: () -> ERROR,
+        vedtaksperiodeIkkeFunnet: () -> ERROR = { error("Vedtaksperioden ble ikke funnet") },
+        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
+        manglerTilgangTilPerson: () -> ERROR,
+        block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
+    ): RestResponse<RESPONSE, ERROR> =
+        ktorCall.medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandlingUnikId.value.toString()) {
+            val behandling = transaksjon.behandlingRepository.finn(behandlingUnikId)
+
+            if (behandling == null) {
+                loggWarn("Behandlingen ble ikke funnet", behandlingUnikId.toString())
+                return@medMdcOgAttribute RestResponse.Error(behandlingIkkeFunnet())
+            }
+
+            val spleisBehandlingId = behandling.spleisBehandlingId
+            if (spleisBehandlingId == null) {
+                medVedtaksperiode(
+                    vedtaksperiodeId = behandling.vedtaksperiodeId,
+                    vedtaksperiodeIkkeFunnet = vedtaksperiodeIkkeFunnet,
+                    personIkkeFunnet = personIkkeFunnet,
+                    manglerTilgangTilPerson = manglerTilgangTilPerson,
+                ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
+            } else {
+                ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
+                    medVedtaksperiode(
+                        vedtaksperiodeId = behandling.vedtaksperiodeId,
+                        vedtaksperiodeIkkeFunnet = vedtaksperiodeIkkeFunnet,
+                        personIkkeFunnet = personIkkeFunnet,
+                        manglerTilgangTilPerson = manglerTilgangTilPerson,
+                    ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
+                }
+            }
+        }
+
+    fun <RESPONSE, ERROR : ApiErrorCode> medVedtaksperiode(
         vedtaksperiodeId: VedtaksperiodeId,
-        vedtaksperiodeIkkeFunnet: E,
-        personIkkeFunnet: E,
-        manglerTilgangTilPerson: E,
-        block: (Vedtaksperiode, Person) -> RestResponse<R, E>,
-    ): RestResponse<R, E> {
-        val vedtaksperiode =
-            transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
-                ?: return RestResponse.Error(vedtaksperiodeIkkeFunnet)
+        vedtaksperiodeIkkeFunnet: () -> ERROR,
+        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
+        manglerTilgangTilPerson: () -> ERROR,
+        block: (Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
+    ): RestResponse<RESPONSE, ERROR> =
+        ktorCall.medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
+            val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
 
-        return ktorCall.medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
+            if (vedtaksperiode == null) {
+                loggWarn("Vedtaksperioden ble ikke funnet", vedtaksperiodeId.toString())
+                return@medMdcOgAttribute RestResponse.Error(vedtaksperiodeIkkeFunnet())
+            }
+
             medPerson(
                 Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
                 personIkkeFunnet,
                 manglerTilgangTilPerson,
             ) { person -> block(vedtaksperiode, person) }
         }
-    }
 
-    fun <R, E : ApiErrorCode> medPerson(
-        personPseudoIdResource: Personer.PersonPseudoId,
-        personIkkeFunnet: E,
-        manglerTilgangTilPerson: E,
-        block: (person: Person) -> RestResponse<R, E>,
-    ): RestResponse<R, E> {
-        val personPseudoId = personPseudoIdResource.pseudoId
-        return ktorCall.medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId) {
+    fun <RESPONSE, ERROR : ApiErrorCode> medPerson(
+        personPseudoId: PersonPseudoId,
+        personPseudoIdIkkeFunnet: () -> ERROR,
+        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
+        manglerTilgangTilPerson: () -> ERROR,
+        block: (Person) -> RestResponse<RESPONSE, ERROR>,
+    ): RestResponse<RESPONSE, ERROR> =
+        ktorCall.medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
+            val identitetsnummer = transaksjon.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+
+            if (identitetsnummer == null) {
+                loggWarn("Identitetsnummeret ble ikke funnet", personPseudoId.toString())
+                return@medMdcOgAttribute RestResponse.Error(personPseudoIdIkkeFunnet())
+            }
+
             medPerson(
-                identitetsnummer =
-                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(
-                        PersonPseudoId.fraString(personPseudoId),
-                    ) ?: return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet),
+                identitetsnummer = identitetsnummer,
                 personIkkeFunnet = personIkkeFunnet,
                 manglerTilgangTilPerson = manglerTilgangTilPerson,
                 block = block,
             )
         }
-    }
 
-    fun <R, E : ApiErrorCode> medPerson(
+    fun <RESPONSE, ERROR : ApiErrorCode> medPerson(
         identitetsnummer: Identitetsnummer,
-        personIkkeFunnet: E,
-        manglerTilgangTilPerson: E,
-        block: (Person) -> RestResponse<R, E>,
-    ): RestResponse<R, E> =
+        personIkkeFunnet: () -> ERROR,
+        manglerTilgangTilPerson: () -> ERROR,
+        block: (Person) -> RestResponse<RESPONSE, ERROR>,
+    ): RestResponse<RESPONSE, ERROR> =
         ktorCall.medMdcOgAttribute(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
             val person = transaksjon.personRepository.finn(identitetsnummer)
 
             if (person == null) {
-                teamLogs.warn("Person med identitetsnummer $identitetsnummer ble ikke funnet")
-                return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet)
+                loggWarn("Personen ble ikke funnet", identitetsnummer.toString())
+                return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
             }
 
             if (!person.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
-                teamLogs.warn("Saksbehandler har ikke tilgang til person med identitetsnummer $identitetsnummer")
-                return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson)
+                loggWarn("Saksbehandler har ikke tilgang til personen", identitetsnummer.toString())
+                return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
             }
 
             val oppgaveId = transaksjon.oppgaveDao.finnOppgaveId(identitetsnummer.value)
@@ -120,8 +164,8 @@ class KallKontekst(
                 } ?: true
 
             if (!harTilgangTilOppgave) {
-                loggWarn("Saksbehandler mangler tilgang til aktiv oppgave på denne personen")
-                return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson)
+                loggWarn("Saksbehandler har ikke tilgang til aktiv oppgave på personen", identitetsnummer.toString())
+                return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
             }
 
             block(person)

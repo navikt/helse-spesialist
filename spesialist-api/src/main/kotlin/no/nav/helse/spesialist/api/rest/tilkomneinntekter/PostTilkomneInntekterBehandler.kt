@@ -26,8 +26,8 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
     ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> =
         kallKontekst.medPerson(
             identitetsnummer = Identitetsnummer.fraString(identitetsnummer = request.fodselsnummer),
-            personIkkeFunnet = ApiPostTilkomneInntekterErrorCode.PERSON_IKKE_FUNNET,
-            manglerTilgangTilPerson = ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON,
+            personIkkeFunnet = { ApiPostTilkomneInntekterErrorCode.PERSON_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
             TilkommenInntektPeriodeValidator.validerPeriode(
