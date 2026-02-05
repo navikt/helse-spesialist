@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.api.rest.personer
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntekt
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEndretEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEvent
+import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEvent.Metadata
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
@@ -18,16 +18,20 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettetEvent
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.ZoneId
+import java.util.SortedSet
 
 class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
@@ -41,119 +45,121 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
             personPseudoIdIkkeFunnet = { ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
-            RestResponse.OK(
-                hentTilkomneInntektskilder(
-                    identitetsnummer = person.id,
-                    transaksjon = kallKontekst.transaksjon,
-                ),
-            )
+            behandleForPerson(person, kallKontekst)
         }
 
-    private fun hentTilkomneInntektskilder(
-        identitetsnummer: Identitetsnummer,
-        transaksjon: SessionContext,
-    ): List<ApiTilkommenInntektskilde> =
-        transaksjon.tilkommenInntektRepository
-            .finnAlleForIdentitetsnummer(identitetsnummer)
-            .groupBy { it.organisasjonsnummer }
-            .map { (organisasjonsnummer, inntekter) ->
-                ApiTilkommenInntektskilde(
-                    organisasjonsnummer = organisasjonsnummer,
-                    inntekter =
-                        inntekter
-                            .map { tilkommenInntekt ->
-                                ApiTilkommenInntekt(
-                                    tilkommenInntektId = tilkommenInntekt.id.value,
-                                    organisasjonsnummer = organisasjonsnummer,
-                                    periode =
-                                        ApiDatoPeriode(
-                                            fom = tilkommenInntekt.periode.fom,
-                                            tom = tilkommenInntekt.periode.tom,
-                                        ),
-                                    periodebelop = tilkommenInntekt.periodebeløp,
-                                    ekskluderteUkedager = tilkommenInntekt.ekskluderteUkedager.sorted(),
-                                    fjernet = tilkommenInntekt.fjernet,
-                                    erDelAvAktivTotrinnsvurdering =
-                                        transaksjon.totrinnsvurderingRepository
-                                            .finn(
-                                                id = tilkommenInntekt.totrinnsvurderingId,
-                                            )?.tilstand != TotrinnsvurderingTilstand.GODKJENT,
-                                    events =
-                                        tilkommenInntekt.events.map { event ->
-                                            val metadata =
-                                                ApiTilkommenInntektEvent.Metadata(
-                                                    sekvensnummer = event.metadata.sekvensnummer,
-                                                    tidspunkt =
-                                                        event.metadata.tidspunkt
-                                                            .atZone(ZoneId.of("Europe/Oslo"))
-                                                            .toLocalDateTime(),
-                                                    utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent.value,
-                                                    notatTilBeslutter = event.metadata.notatTilBeslutter,
-                                                )
-                                            when (event) {
-                                                is TilkommenInntektOpprettetEvent -> {
-                                                    ApiTilkommenInntektOpprettetEvent(
-                                                        metadata = metadata,
-                                                        organisasjonsnummer = event.organisasjonsnummer,
-                                                        periode =
-                                                            ApiDatoPeriode(
-                                                                fom = event.periode.fom,
-                                                                tom = event.periode.tom,
-                                                            ),
-                                                        periodebelop = event.periodebeløp,
-                                                        ekskluderteUkedager = event.ekskluderteUkedager.sorted(),
-                                                    )
-                                                }
-
-                                                is TilkommenInntektEndretEvent -> {
-                                                    ApiTilkommenInntektEndretEvent(
-                                                        metadata = metadata,
-                                                        endringer = event.endringer.toApiEndringer(),
-                                                    )
-                                                }
-
-                                                is TilkommenInntektFjernetEvent -> {
-                                                    ApiTilkommenInntektFjernetEvent(
-                                                        metadata = metadata,
-                                                    )
-                                                }
-
-                                                is TilkommenInntektGjenopprettetEvent -> {
-                                                    ApiTilkommenInntektGjenopprettetEvent(
-                                                        metadata = metadata,
-                                                        endringer = event.endringer.toApiEndringer(),
-                                                    )
-                                                }
-                                            }
-                                        },
-                                )
-                            }.sortedBy { it.periode.fom },
-                )
-            }.sortedBy { it.organisasjonsnummer }
-
-    private fun TilkommenInntektEvent.Endringer.toApiEndringer() =
-        ApiTilkommenInntektEvent.Endringer(
-            organisasjonsnummer = organisasjonsnummer?.tilApiEndring(),
-            periode =
-                periode?.let {
-                    ApiTilkommenInntektEvent.Endringer.DatoPeriodeEndring(
-                        fra = ApiDatoPeriode(fom = it.fra.fom, tom = it.fra.tom),
-                        til = ApiDatoPeriode(fom = it.til.fom, tom = it.til.tom),
+    private fun behandleForPerson(
+        person: Person,
+        kallKontekst: KallKontekst,
+    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
+        RestResponse.OK(
+            kallKontekst.transaksjon.tilkommenInntektRepository
+                .finnAlleForIdentitetsnummer(identitetsnummer = person.id)
+                .groupBy { it.organisasjonsnummer }
+                .map { (organisasjonsnummer, inntekter) ->
+                    tilApiTilkommenInntektskilde(
+                        organisasjonsnummer = organisasjonsnummer,
+                        inntekter = inntekter,
+                        kallKontekst = kallKontekst,
                     )
-                },
-            periodebelop = periodebeløp?.tilApiEndring(),
-            ekskluderteUkedager =
-                ekskluderteUkedager?.let {
-                    ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(
-                        fra = it.fra.toList(),
-                        til = it.til.toList(),
-                    )
-                },
+                }.sortedBy { it.organisasjonsnummer },
         )
 
-    private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring = ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
+    private fun tilApiTilkommenInntektskilde(
+        organisasjonsnummer: String,
+        inntekter: List<TilkommenInntekt>,
+        kallKontekst: KallKontekst,
+    ): ApiTilkommenInntektskilde =
+        ApiTilkommenInntektskilde(
+            organisasjonsnummer = organisasjonsnummer,
+            inntekter =
+                inntekter
+                    .map { tilApiTilkommenInntekt(it, organisasjonsnummer, kallKontekst) }
+                    .sortedBy { it.periode.fom },
+        )
 
-    private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
+    private fun tilApiTilkommenInntekt(
+        tilkommenInntekt: TilkommenInntekt,
+        organisasjonsnummer: String,
+        kallKontekst: KallKontekst,
+    ): ApiTilkommenInntekt =
+        ApiTilkommenInntekt(
+            tilkommenInntektId = tilkommenInntekt.id.value,
+            organisasjonsnummer = organisasjonsnummer,
+            periode = tilkommenInntekt.periode.tilApiDatoPeriode(),
+            periodebelop = tilkommenInntekt.periodebeløp,
+            ekskluderteUkedager = tilkommenInntekt.ekskluderteUkedager.sorted(),
+            fjernet = tilkommenInntekt.fjernet,
+            erDelAvAktivTotrinnsvurdering =
+                kallKontekst.transaksjon.totrinnsvurderingRepository
+                    .finn(id = tilkommenInntekt.totrinnsvurderingId)
+                    ?.tilstand != TotrinnsvurderingTilstand.GODKJENT,
+            events = tilkommenInntekt.events.map { it.tilApiTilkommenInntektEvent() },
+        )
+
+    private fun Periode.tilApiDatoPeriode(): ApiDatoPeriode = ApiDatoPeriode(fom = fom, tom = tom)
+
+    private fun TilkommenInntektEvent.tilApiTilkommenInntektEvent(): ApiTilkommenInntektEvent =
+        when (this) {
+            is TilkommenInntektOpprettetEvent -> tilApiTilkommenInntektOpprettetEvent()
+            is TilkommenInntektEndretEvent -> tilApiTilkommenInntektEndretEvent()
+            is TilkommenInntektFjernetEvent -> tilApiTilkommenInntektFjernetEvent()
+            is TilkommenInntektGjenopprettetEvent -> tilApiTilkommenInntektGjenopprettetEvent()
+        }
+
+    private fun TilkommenInntektGjenopprettetEvent.tilApiTilkommenInntektGjenopprettetEvent(): ApiTilkommenInntektGjenopprettetEvent =
+        ApiTilkommenInntektGjenopprettetEvent(
+            metadata = tilApiTilkommenInntektEventMetadata(),
+            endringer = endringer.tilApiEndringer(),
+        )
+
+    private fun TilkommenInntektFjernetEvent.tilApiTilkommenInntektFjernetEvent(): ApiTilkommenInntektFjernetEvent =
+        ApiTilkommenInntektFjernetEvent(
+            metadata = tilApiTilkommenInntektEventMetadata(),
+        )
+
+    private fun TilkommenInntektEndretEvent.tilApiTilkommenInntektEndretEvent(): ApiTilkommenInntektEndretEvent =
+        ApiTilkommenInntektEndretEvent(
+            metadata = tilApiTilkommenInntektEventMetadata(),
+            endringer = endringer.tilApiEndringer(),
+        )
+
+    private fun TilkommenInntektOpprettetEvent.tilApiTilkommenInntektOpprettetEvent(): ApiTilkommenInntektOpprettetEvent =
+        ApiTilkommenInntektOpprettetEvent(
+            metadata = tilApiTilkommenInntektEventMetadata(),
+            organisasjonsnummer = organisasjonsnummer,
+            periode = periode.tilApiDatoPeriode(),
+            periodebelop = periodebeløp,
+            ekskluderteUkedager = ekskluderteUkedager.sorted(),
+        )
+
+    private fun TilkommenInntektEvent.tilApiTilkommenInntektEventMetadata(): Metadata =
+        Metadata(
+            sekvensnummer = metadata.sekvensnummer,
+            tidspunkt = metadata.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
+            utfortAvSaksbehandlerIdent = metadata.utførtAvSaksbehandlerIdent.value,
+            notatTilBeslutter = metadata.notatTilBeslutter,
+        )
+
+    private fun TilkommenInntektEvent.Endringer.tilApiEndringer() =
+        ApiTilkommenInntektEvent.Endringer(
+            organisasjonsnummer = organisasjonsnummer?.tilApiStringEndring(),
+            periode = periode?.tilApiDatoPeriodeEndring(),
+            periodebelop = periodebeløp?.tilApiBigDecimalEndring(),
+            ekskluderteUkedager = ekskluderteUkedager?.tilApiListLocalDateEndring(),
+        )
+
+    private fun Endring<String>.tilApiStringEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring = ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
+
+    private fun Endring<Periode>.tilApiDatoPeriodeEndring(): ApiTilkommenInntektEvent.Endringer.DatoPeriodeEndring =
+        ApiTilkommenInntektEvent.Endringer.DatoPeriodeEndring(
+            fra = fra.tilApiDatoPeriode(),
+            til = til.tilApiDatoPeriode(),
+        )
+
+    private fun Endring<BigDecimal>.tilApiBigDecimalEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
+
+    private fun Endring<SortedSet<LocalDate>>.tilApiListLocalDateEndring(): ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring = ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(fra = fra.toList(), til = til.toList())
 
     override fun openApi(config: RouteConfig) {
         with(config) {
