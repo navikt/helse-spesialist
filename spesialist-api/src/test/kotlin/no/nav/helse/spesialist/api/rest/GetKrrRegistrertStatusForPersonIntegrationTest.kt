@@ -110,8 +110,8 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
               {
                 "type" : "about:blank",
                 "status" : 404,
-                "title" : "Person ikke funnet",
-                "code" : "PERSON_IKKE_FUNNET"
+                "title" : "PersonPseudoId har utløpt (eller aldri eksistert)",
+                "code" : "PERSON_PSEUDO_ID_IKKE_FUNNET"
               }
         """.trimIndent(),
             body
