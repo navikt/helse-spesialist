@@ -45,20 +45,5 @@ sealed class TransaksjonellRiver : SpesialistRiver {
 }
 
 data class EventMetadata(
-    val name: EventName,
     val `@id`: UUID,
 )
-
-sealed interface EventName {
-    class Behov(
-        val behovene: List<String>,
-    ) : EventName {
-        override fun toString(): String = "behov: " + behovene.joinToString(", ", prefix = "[", postfix = "]")
-    }
-
-    class Hendelse(
-        val navn: String,
-    ) : EventName {
-        override fun toString(): String = navn
-    }
-}

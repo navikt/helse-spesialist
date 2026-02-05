@@ -1,7 +1,9 @@
 package no.nav.helse.kafka
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
@@ -114,41 +116,56 @@ class DuplikatsjekkendeRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val id = packet.id.toUUID()
-        if (erDuplikat(id)) {
-            loggInfo("Ignorerer melding $id pga duplikatkontroll")
-            return
-        }
-        if (river is TransaksjonellRiver) {
-            val outbox = Outbox(versjonAvKode)
-            packet.interestedIn("@event_name", "@id", "@behov", "vedtaksperiodeId")
-            val vedtaksperiodeId = packet["vedtaksperiodeId"].textValue()
-            val eventName =
-                when (val eventName = packet["@event_name"].asText()) {
-                    "behov" -> EventName.Behov(packet["@behov"].map { behov -> behov.asText() })
-                    else -> EventName.Hendelse(eventName)
-                }
-            val eventMetadata =
-                EventMetadata(
-                    name = eventName,
-                    `@id` = packet["@id"].asUUID(),
-                )
-            medMdc(
-                MdcKey.MELDING_ID to eventMetadata.`@id`.toString(),
-                MdcKey.MELDINGNAVN to eventMetadata.name.toString(),
-                vedtaksperiodeId?.let { MdcKey.VEDTAKSPERIODE_ID to it },
-            ) {
-                loggInfo("Melding ${eventMetadata.name} mottatt", "json:\n${packet.toJson()}")
-                sessionFactory.transactionalSessionScope { transaksjon ->
-                    river.transaksjonellOnPacket(packet, outbox, transaksjon, eventMetadata)
-                }
-                loggInfo("Melding ${eventMetadata.name} lest")
-                outbox.sendAlle(MessageContextMeldingPubliserer(context))
+        medMdc(
+            packet.safelyGetText("@id")?.let { MdcKey.MELDING_ID to it },
+            packet.safelyGetMeldingsnavn()?.let { MdcKey.MELDINGNAVN to it },
+            packet.safelyGetText("behandlingId")?.let { MdcKey.SPLEIS_BEHANDLING_ID to it },
+            packet.safelyGetText("vedtaksperiodeId")?.let { MdcKey.VEDTAKSPERIODE_ID to it },
+            packet.safelyGetText("fødselsnummer")?.let { MdcKey.IDENTITETSNUMMER to it },
+        ) {
+            loggInfo("Melding mottatt", "json:\n${packet.toJson()}")
+            val id = packet.id.toUUID()
+            if (erDuplikat(id)) {
+                loggInfo("Ignorerer melding pga duplikatkontroll")
+                return@medMdc
             }
-        } else {
-            river.onPacket(packet, context, metadata, meterRegistry)
+            if (river is TransaksjonellRiver) {
+                val outbox = Outbox(versjonAvKode)
+                sessionFactory.transactionalSessionScope { transaksjon ->
+                    packet.interestedIn("@id")
+                    river.transaksjonellOnPacket(
+                        packet = packet,
+                        outbox = outbox,
+                        transaksjon = transaksjon,
+                        eventMetadata = EventMetadata(`@id` = packet["@id"].asUUID()),
+                    )
+                }
+                outbox.sendAlle(MessageContextMeldingPubliserer(context))
+            } else {
+                river.onPacket(packet, context, metadata, meterRegistry)
+            }
+            loggInfo("Melding ferdig håndtert i river")
         }
     }
+
+    private fun JsonMessage.safelyGetMeldingsnavn(): String? =
+        safelyGetText("@event_name")?.let {
+            when (it) {
+                "behov" ->
+                    "behov: " +
+                        this["@behov"]
+                            .takeUnless(JsonNode::isMissingOrNull)
+                            ?.joinToString(separator = ", ", prefix = "[", postfix = "]", transform = JsonNode::textValue)
+                            .orEmpty()
+
+                else -> it
+            }
+        }
+
+    private fun JsonMessage.safelyGetText(key: String): String? =
+        also { it.interestedIn(key) }[key]
+            .takeUnless(JsonNode::isMissingOrNull)
+            ?.textValue()
 
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }

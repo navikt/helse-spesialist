@@ -10,7 +10,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.kafka.EventMetadata
-import no.nav.helse.kafka.EventName
 import no.nav.helse.kafka.SpesialistRiver
 import no.nav.helse.kafka.TransaksjonellRiver
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -196,7 +195,7 @@ internal fun TestRapid.medTransaksjonelleRivers(
                             packet,
                             Outbox("versjonAvKode"),
                             sessionContext,
-                            EventMetadata(EventName.Hendelse("<Stubbet verdi i tester>"), UUID.randomUUID()),
+                            EventMetadata(UUID.randomUUID()),
                         )
                     }
                 }
