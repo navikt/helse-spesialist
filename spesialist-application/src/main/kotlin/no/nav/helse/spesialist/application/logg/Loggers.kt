@@ -128,7 +128,6 @@ enum class MdcKey(
     val value: String,
 ) {
     SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
-    HANDLING_ID("handlingId"), // TODO: Denne er antageligvis unødvendig
     PERSON_PSEUDO_ID("personPseudoId"),
     IDENTITETSNUMMER("identitetsnummer"),
     CONTEXT_ID("contextId"),

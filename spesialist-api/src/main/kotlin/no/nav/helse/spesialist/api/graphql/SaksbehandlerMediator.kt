@@ -53,10 +53,8 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
-import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -95,45 +93,39 @@ class SaksbehandlerMediator(
         val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
         saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
         saksbehandlerWrapper.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
-        val handlingId = UUID.randomUUID()
 
-        medMdc(
-            MdcKey.SAKSBEHANDLER_IDENT to saksbehandler.ident.value,
-            MdcKey.HANDLING_ID to handlingId.toString(),
-        ) {
-            loggInfo(
-                "Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler",
-                "saksbehandler: $saksbehandler",
-            )
-            when (modellhandling) {
-                is Overstyring -> {
-                    overstyringUnitOfWork(
-                        loggnavn = modellhandling.loggnavn(),
-                        overstyring = modellhandling,
-                        saksbehandler = saksbehandler,
-                        sessionFactory = sessionFactory,
-                    )
-                    modellhandling.utførAv(saksbehandlerWrapper)
-                }
-
-                is Oppgavehandling -> {
-                    håndter(modellhandling, saksbehandlerWrapper)
-                }
-
-                is PåVent -> {
-                    error("dette burde ikke skje")
-                }
-
-                is Personhandling -> {
-                    håndter(modellhandling, saksbehandlerWrapper)
-                }
-
-                else -> {
-                    modellhandling.utførAv(saksbehandlerWrapper)
-                }
+        loggInfo(
+            "Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler",
+            "saksbehandler: $saksbehandler",
+        )
+        when (modellhandling) {
+            is Overstyring -> {
+                overstyringUnitOfWork(
+                    loggnavn = modellhandling.loggnavn(),
+                    overstyring = modellhandling,
+                    saksbehandler = saksbehandler,
+                    sessionFactory = sessionFactory,
+                )
+                modellhandling.utførAv(saksbehandlerWrapper)
             }
-            loggInfo("Handling ${modellhandling.loggnavn()} utført")
+
+            is Oppgavehandling -> {
+                håndter(modellhandling, saksbehandlerWrapper)
+            }
+
+            is PåVent -> {
+                error("dette burde ikke skje")
+            }
+
+            is Personhandling -> {
+                håndter(modellhandling, saksbehandlerWrapper)
+            }
+
+            else -> {
+                modellhandling.utførAv(saksbehandlerWrapper)
+            }
         }
+        loggInfo("Handling ${modellhandling.loggnavn()} utført")
     }
 
     private fun hentUtfallFraBehandling(
@@ -153,38 +145,32 @@ class SaksbehandlerMediator(
         val modellhandling = handling.tilModellversjon()
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
-        val handlingId = UUID.randomUUID()
 
-        medMdc(
-            MdcKey.SAKSBEHANDLER_IDENT to saksbehandler.ident.value,
-            MdcKey.HANDLING_ID to handlingId.toString(),
-        ) {
-            loggInfo("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler")
-            val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
-            when (modellhandling) {
-                is LeggPåVent -> {
-                    leggPåVent(modellhandling, saksbehandlerWrapper)
-                }
-
-                is FjernPåVent -> {
-                    fjernFraPåVent(modellhandling, saksbehandlerWrapper)
-                }
-
-                is FjernPåVentUtenHistorikkinnslag -> {
-                    fjernFraPåVentUtenHistorikkinnslag(
-                        modellhandling,
-                    )
-                }
-
-                is EndrePåVent -> {
-                    endrePåVent(modellhandling, saksbehandlerWrapper)
-                }
+        loggInfo("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler")
+        val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
+        when (modellhandling) {
+            is LeggPåVent -> {
+                leggPåVent(modellhandling, saksbehandlerWrapper)
             }
-            loggInfo(
-                "Handling ${modellhandling.loggnavn()} utført på oppgave på vegne av saksbehandler",
-                "oppgaveId: ${modellhandling.oppgaveId}, saksbehandler: $saksbehandler",
-            )
+
+            is FjernPåVent -> {
+                fjernFraPåVent(modellhandling, saksbehandlerWrapper)
+            }
+
+            is FjernPåVentUtenHistorikkinnslag -> {
+                fjernFraPåVentUtenHistorikkinnslag(
+                    modellhandling,
+                )
+            }
+
+            is EndrePåVent -> {
+                endrePåVent(modellhandling, saksbehandlerWrapper)
+            }
         }
+        loggInfo(
+            "Handling ${modellhandling.loggnavn()} utført på oppgave på vegne av saksbehandler",
+            "oppgaveId: ${modellhandling.oppgaveId}, saksbehandler: $saksbehandler",
+        )
     }
 
     private fun håndter(
