@@ -24,6 +24,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.random.Random
@@ -48,10 +49,10 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         }
 
         assertEquals(
-            opprettedeOppgaver.map { it.opprettet.somInstantIOslo() }.sorted(),
+            opprettedeOppgaver.map { it.opprettet.somInstantISystemetsTidssone().roundToMicroseconds() }.sorted(),
             hentOppgaverTiOgTi(OPPRETTET, STIGENDE).map { it.opprettetTidspunkt })
         assertEquals(
-            opprettedeOppgaver.map { it.opprettet.somInstantIOslo() }.sorted().reversed(),
+            opprettedeOppgaver.map { it.opprettet.somInstantISystemetsTidssone() }.sorted().reversed(),
             hentOppgaverTiOgTi(OPPRETTET, SYNKENDE).map { it.opprettetTidspunkt })
 
         assertEquals(
@@ -156,7 +157,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         select opprettet_tidspunkt from behandling where spleis_behandling_id = any(:ider::uuid[])
         """.trimIndent(), "ider" to utbetalingIds.somDbArray()
     ) {
-        it.localDateTime("opprettet_tidspunkt").somInstantIOslo()
+        it.localDateTime("opprettet_tidspunkt").somInstantISystemetsTidssone()
     }
 
     fun finnTildeltTilNavn(oppgaveIds: List<Long>) = dbQuery.list(
@@ -187,8 +188,9 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             it.string("navn")
         }
 
-    private fun LocalDateTime.somInstantIOslo(): Instant = atZone(ZoneId.of("Europe/Oslo")).toInstant()
 }
+
+private fun LocalDateTime.somInstantISystemetsTidssone(): Instant = atZone(ZoneId.systemDefault()).toInstant()
 
 private fun MutableList<LocalDate>.finnLedigDato(): LocalDate {
     var kandidat: LocalDate
@@ -197,3 +199,5 @@ private fun MutableList<LocalDate>.finnLedigDato(): LocalDate {
     } while (contains(kandidat))
     return kandidat
 }
+
+private fun Instant.roundToMicroseconds(): Instant = truncatedTo(ChronoUnit.MICROS)
