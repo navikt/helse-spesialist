@@ -4,7 +4,6 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.util.AttributeKey
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.coMedMdc
-import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.medMdc
 
 private val MDC_MAP_ATTRIBUTE = AttributeKey<MutableMap<MdcKey, String>>("mdc")
@@ -21,7 +20,6 @@ fun <T> ApplicationCall.medMdcOgAttribute(
 ): T =
     medMdc(pair) {
         mutableMdcMapAttribute[pair.first] = pair.second
-        loggInfo("La til ${pair.first.value} på MDC")
         block()
     }
 
@@ -31,6 +29,5 @@ suspend fun <T> ApplicationCall.coMedMdcOgAttribute(
 ): T =
     coMedMdc(pair) {
         mutableMdcMapAttribute[pair.first] = pair.second
-        loggInfo("La til ${pair.first.value} på MDC")
         block()
     }

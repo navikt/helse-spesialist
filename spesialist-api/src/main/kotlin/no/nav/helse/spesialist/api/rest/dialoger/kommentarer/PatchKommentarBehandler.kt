@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Dialoger
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.KommentarId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -23,20 +24,19 @@ class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.Komme
         // TODO: Mangler tilgangskontroll / relasjon til person
         if (!request.feilregistrert) return RestResponse.Error(ApiPatchKommentarErrorCode.KAN_IKKE_FJERNE_FEILREGISTRERING)
 
-        val kommentarId = KommentarId(resource.kommentarId)
-        val dialogId = DialogId(resource.parent.parent.dialogId)
         val dialog =
-            kallKontekst.transaksjon.dialogRepository.finn(dialogId) ?: return RestResponse.Error(
-                ApiPatchKommentarErrorCode.DIALOG_IKKE_FUNNET,
-            )
+            kallKontekst.transaksjon.dialogRepository.finn(DialogId(resource.parent.parent.dialogId))
+                ?: return RestResponse.Error(ApiPatchKommentarErrorCode.DIALOG_IKKE_FUNNET)
 
         val kommentar =
-            dialog.finnKommentar(kommentarId)
+            dialog.finnKommentar(KommentarId(resource.kommentarId))
                 ?: return RestResponse.Error(ApiPatchKommentarErrorCode.KOMMENTAR_IKKE_FUNNET)
 
         if (kommentar.feilregistrertTidspunkt == null) {
-            dialog.feilregistrerKommentar(kommentarId)
+            dialog.feilregistrerKommentar(kommentar.id())
             kallKontekst.transaksjon.dialogRepository.lagre(dialog)
+
+            loggInfo("Markerte kommentar som feilregistrert", "${dialog.id()}, ${kommentar.id()}")
         }
 
         return RestResponse.OK(Unit)

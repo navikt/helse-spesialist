@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.TOTRINNSVURDERING_SENDT_TIL_BESLUTTER
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
@@ -115,6 +116,9 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
             begrunnelser = request.begrunnelser,
             kommentar = request.kommentar,
         )
+
+        loggInfo("Forkastet behandling")
+
         return RestResponse.NoContent()
     }
 

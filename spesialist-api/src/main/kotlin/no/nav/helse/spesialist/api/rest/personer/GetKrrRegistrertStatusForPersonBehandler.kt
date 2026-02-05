@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -39,13 +40,16 @@ class GetKrrRegistrertStatusForPersonBehandler(
                 return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)
             }
 
-        return RestResponse.OK(
+        val apiRegistrertStatus =
             when (registrertStatus) {
                 KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING -> ApiKrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
                 KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING -> ApiKrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
                 KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR -> ApiKrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
-            },
-        )
+            }
+
+        loggInfo("Hentet KRR-status for person", "$apiRegistrertStatus")
+
+        return RestResponse.OK(apiRegistrertStatus)
     }
 
     override fun openApi(config: RouteConfig) {

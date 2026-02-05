@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_FUNNET
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -74,6 +75,8 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
                         )
                     },
             )
+
+        loggInfo("Hentet varsel", "${varsel.id}")
 
         return RestResponse.OK(apiVarsel)
     }

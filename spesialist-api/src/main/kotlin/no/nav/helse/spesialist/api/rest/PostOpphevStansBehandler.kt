@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.rest
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.resources.Opphevstans
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
@@ -39,6 +40,8 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
             notatType = NotatType.OpphevStans,
             dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
         )
+
+        loggInfo("Lagret stans av automatisk behandling for person")
 
         return RestResponse.NoContent()
     }

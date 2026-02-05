@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_HAR_FEIL_STATUS
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.ResultatAvSletting
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varsel.Status.AKTIV
@@ -55,6 +56,7 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
                 if (resultat is ResultatAvSletting.Slettet) {
                     kallKontekst.transaksjon.varselRepository.lagre(varsel)
                 }
+                loggInfo("Fjernet vurdering av varsel", varsel.kode)
                 RestResponse.NoContent()
             }
         }

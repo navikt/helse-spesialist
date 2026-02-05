@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -51,7 +52,11 @@ class GetSoknadBehandler(
             return RestResponse.Error(ApiGetSoknadErrorCode.FANT_IKKE_DOKUMENT)
         }
 
-        return RestResponse.OK(dokument.tilSøknad())
+        val søknad = dokument.tilSøknad()
+
+        loggInfo("Hentet søknadsdokument")
+
+        return RestResponse.OK(søknad)
     }
 
     override fun openApi(config: RouteConfig) {

@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.mapping.tilApiNotat
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -48,6 +49,8 @@ class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.Vedtak
                     dialog = dialog,
                 )
             }
+
+        loggInfo("Hentet ${apiNotater.size} notater for vedtaksperioden")
 
         return RestResponse.OK(apiNotater)
     }

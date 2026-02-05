@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.mapping.tilApiNotat
 import no.nav.helse.spesialist.api.rest.resources.Notater
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -42,7 +43,11 @@ class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorC
             kallKontekst.transaksjon.dialogRepository.finn(notat.dialogRef)
                 ?: error("Kunne ikke finne dialog med id ${notat.dialogRef}")
 
-        return RestResponse.OK(notat.tilApiNotat(kallKontekst.saksbehandler, dialog))
+        val apiNotat = notat.tilApiNotat(kallKontekst.saksbehandler, dialog)
+
+        loggInfo("Hentet notat")
+
+        return RestResponse.OK(apiNotat)
     }
 
     override fun openApi(config: RouteConfig) {

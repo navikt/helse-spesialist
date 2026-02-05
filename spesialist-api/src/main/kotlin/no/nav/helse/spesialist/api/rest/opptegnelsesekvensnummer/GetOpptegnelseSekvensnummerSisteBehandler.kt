@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.OpptegnelseSekvensnummer
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekvensnummer.Siste, Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> {
@@ -15,12 +16,16 @@ class GetOpptegnelseSekvensnummerSisteBehandler : GetBehandler<OpptegnelseSekven
     override fun behandle(
         resource: OpptegnelseSekvensnummer.Siste,
         kallKontekst: KallKontekst,
-    ): RestResponse<Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> =
-        RestResponse.OK(
+    ): RestResponse<Int, ApiGetOpptegnelseSekvensnummerSisteErrorCode> {
+        val sekvensnummer =
             kallKontekst.transaksjon.opptegnelseRepository
                 .finnNyesteSekvensnummer()
-                .value,
-        )
+                .value
+
+        loggInfo("Hentet siste sekvensnummer for opptegnelser ($sekvensnummer)")
+
+        return RestResponse.OK(sekvensnummer)
+    }
 
     override fun openApi(config: RouteConfig) {
         with(config) {

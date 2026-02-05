@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Person
@@ -74,6 +75,8 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
                 ),
             årsak = "tilkommen inntekt lagt til",
         )
+
+        loggInfo("La til tilkommen inntekt", "${tilkommenInntekt.id}")
 
         return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
     }

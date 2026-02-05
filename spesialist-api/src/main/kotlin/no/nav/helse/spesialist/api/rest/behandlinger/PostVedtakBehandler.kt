@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
@@ -146,6 +147,8 @@ class PostVedtakBehandler(
         } catch (e: FattVedtakException) {
             return RestResponse.Error(e.code)
         }
+
+        loggInfo("Fattet vedtak for behandling")
 
         return RestResponse.NoContent()
     }

@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -74,6 +75,8 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
                 ),
             årsak = "annullering av utbetaling",
         )
+
+        loggInfo("Annullerte utbetaling for vedtaksperiode")
 
         return RestResponse.NoContent()
     }

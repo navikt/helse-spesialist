@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.rest.resources.Bruker
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -11,8 +12,8 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
     override fun behandle(
         resource: Bruker,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiBruker, GetBrukerErrorCode> =
-        RestResponse.OK(
+    ): RestResponse<ApiBruker, GetBrukerErrorCode> {
+        val apiBruker =
             ApiBruker(
                 brukerroller =
                     kallKontekst.brukerroller
@@ -34,8 +35,12 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
                                 Tilgang.Skriv -> ApiTilgang.SKRIV
                             }
                         }.toSet(),
-            ),
-        )
+            )
+
+        loggInfo("Hentet informasjon om innlogget bruker")
+
+        return RestResponse.OK(apiBruker)
+    }
 
     override fun openApi(config: RouteConfig) {
         with(config) {

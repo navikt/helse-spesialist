@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
@@ -19,7 +20,6 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
-import java.time.LocalDate
 import kotlin.reflect.KProperty0
 
 class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiTilkommenInntektPatch, Unit, ApiPatchTilkommenInntektErrorCode> {
@@ -59,7 +59,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                 fraVerdiValidering(
                     endringer::ekskluderteUkedager,
                     tilkommenInntekt.ekskluderteUkedager,
-                ) { it.toSortedSet<LocalDate>() },
+                ) { it.toSortedSet() },
                 fraVerdiValidering(endringer::fjernet, tilkommenInntekt.fjernet),
             ).fold(true) { valid, validering -> valid && validering.valider() }
         if (!harGyldigeFraVerdier) return RestResponse.Error(ApiPatchTilkommenInntektErrorCode.FEIL_UTGANGSPUNKT)
@@ -108,6 +108,8 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                 årsak = "endring av tilkommen inntekt",
             )
         }
+
+        loggInfo("Endret tilkommen inntekt", "${tilkommenInntekt.id}")
 
         return RestResponse.NoContent()
     }

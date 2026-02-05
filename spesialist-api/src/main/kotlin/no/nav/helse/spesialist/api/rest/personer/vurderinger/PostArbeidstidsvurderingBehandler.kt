@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -119,6 +120,8 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
         }
 
         kallKontekst.outbox.leggTil(person.id, event, "vurdering av minimum sykdomsgrad")
+
+        loggInfo("Utførte arbeidstidsvurdering for person")
 
         return RestResponse.NoContent()
     }

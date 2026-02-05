@@ -4,7 +4,6 @@ import com.auth0.jwk.JwkProviderBuilder
 import com.expediagroup.graphql.server.ktor.GraphQL
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.ktor.server.application.Application
-import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.install
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.jwt
@@ -32,7 +31,6 @@ import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
-import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import java.net.URI
@@ -59,11 +57,6 @@ fun configureKtorApplication(
             install(OpenApi) { configureOpenApiPlugin() }
         }
         install(Resources) { configureResourcesPlugin() }
-        install(
-            createApplicationPlugin(name = "RequestLoggingPlugin") {
-                onCall { _ -> teamLogs.info("Mottok kall") }
-            },
-        )
         val graphQLPlugin = install(GraphQL.Plugin) { configureGraphQLPlugin(spesialistSchema) }
 
         authentication {

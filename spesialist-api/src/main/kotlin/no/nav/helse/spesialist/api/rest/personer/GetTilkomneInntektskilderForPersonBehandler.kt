@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -51,8 +52,8 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
     private fun behandleForPerson(
         person: Person,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
-        RestResponse.OK(
+    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+        val tilkomneInntektskilder =
             kallKontekst.transaksjon.tilkommenInntektRepository
                 .finnAlleForIdentitetsnummer(identitetsnummer = person.id)
                 .groupBy { it.organisasjonsnummer }
@@ -62,8 +63,12 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
                         inntekter = inntekter,
                         kallKontekst = kallKontekst,
                     )
-                }.sortedBy { it.organisasjonsnummer },
-        )
+                }.sortedBy { it.organisasjonsnummer }
+
+        loggInfo("Hentet ${tilkomneInntektskilder.size} tilkomne inntektskilder")
+
+        return RestResponse.OK(tilkomneInntektskilder)
+    }
 
     private fun tilApiTilkommenInntektskilde(
         organisasjonsnummer: String,

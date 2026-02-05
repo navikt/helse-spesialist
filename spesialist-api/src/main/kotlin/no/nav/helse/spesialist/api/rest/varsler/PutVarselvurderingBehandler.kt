@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARS
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_KAN_IKKE_VURDERES
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_MED_ANNEN_DEFINISJON
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
@@ -65,6 +66,8 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
 
         varsel.vurder(kallKontekst.saksbehandler.id, varseldefinisjonId)
         kallKontekst.transaksjon.varselRepository.lagre(varsel)
+
+        loggInfo("Lagret vurdering av varsel", varsel.kode)
 
         return RestResponse.OK(Unit)
     }

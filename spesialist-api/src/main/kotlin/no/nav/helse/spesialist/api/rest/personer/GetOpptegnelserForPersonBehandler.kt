@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Sekvensnummer
@@ -31,8 +32,8 @@ class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.O
         resource: Personer.PersonPseudoId.Opptegnelser,
         person: Person,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> =
-        RestResponse.OK(
+    ): RestResponse<List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> {
+        val opptegnelser =
             kallKontekst.transaksjon.opptegnelseRepository
                 .finnAlleForPersonEtter(
                     opptegnelseId = Sekvensnummer(resource.etterSekvensnummer),
@@ -54,8 +55,15 @@ class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.O
                                 }
                             },
                     )
-                }.sortedByDescending { it.sekvensnummer },
+                }.sortedByDescending { it.sekvensnummer }
+
+        loggInfo(
+            "Hentet ${opptegnelser.size} opptegnelser" +
+                opptegnelser.maxOfOrNull { it.sekvensnummer }?.let { " (siste sekvensnummer: $it)" }.orEmpty(),
         )
+
+        return RestResponse.OK(opptegnelser)
+    }
 
     override fun openApi(config: RouteConfig) {
         with(config) {

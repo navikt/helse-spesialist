@@ -32,7 +32,7 @@ class KallKontekst(
         manglerTilgangTilPerson: () -> ERROR,
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
-        ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
+        medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
             val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
 
             if (behandling == null) {
@@ -40,7 +40,7 @@ class KallKontekst(
                 return@medMdcOgAttribute RestResponse.Error(behandlingIkkeFunnet())
             }
 
-            ktorCall.medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandling.id.value.toString()) {
+            medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandling.id.value.toString()) {
                 medVedtaksperiode(
                     vedtaksperiodeId = behandling.vedtaksperiodeId,
                     vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
@@ -55,7 +55,7 @@ class KallKontekst(
         manglerTilgangTilPerson: () -> ERROR,
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
-        ktorCall.medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandlingUnikId.value.toString()) {
+        medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandlingUnikId.value.toString()) {
             val behandling = transaksjon.behandlingRepository.finn(behandlingUnikId)
 
             if (behandling == null) {
@@ -71,7 +71,7 @@ class KallKontekst(
                     manglerTilgangTilPerson = manglerTilgangTilPerson,
                 ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
             } else {
-                ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
+                medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
                     medVedtaksperiode(
                         vedtaksperiodeId = behandling.vedtaksperiodeId,
                         vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
@@ -87,7 +87,7 @@ class KallKontekst(
         manglerTilgangTilPerson: () -> ERROR,
         block: (Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
-        ktorCall.medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
+        medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
             val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
 
             if (vedtaksperiode == null) {
@@ -108,7 +108,7 @@ class KallKontekst(
         manglerTilgangTilPerson: () -> ERROR,
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
-        ktorCall.medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
+        medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
             val identitetsnummer = transaksjon.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
 
             if (identitetsnummer == null) {
@@ -130,7 +130,7 @@ class KallKontekst(
         manglerTilgangTilPerson: () -> ERROR,
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
-        ktorCall.medMdcOgAttribute(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
+        medMdcOgAttribute(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
             val person = transaksjon.personRepository.finn(identitetsnummer)
 
             if (person == null) {
@@ -161,4 +161,9 @@ class KallKontekst(
 
             block(person)
         }
+
+    fun <T> medMdcOgAttribute(
+        pair: Pair<MdcKey, String>,
+        block: () -> T,
+    ): T = ktorCall.medMdcOgAttribute(pair, block)
 }

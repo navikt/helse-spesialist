@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Dialoger
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -32,6 +33,8 @@ class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKom
                 saksbehandlerident = kallKontekst.saksbehandler.ident,
             )
         kallKontekst.transaksjon.dialogRepository.lagre(dialog)
+
+        loggInfo("Opprettet kommentar", "${dialog.id()}, ${kommentar.id()}")
 
         return RestResponse.Created(ApiKommentarResponse(id = kommentar.id().value))
     }

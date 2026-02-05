@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Notater
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
@@ -50,7 +51,11 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
             )
         kallKontekst.transaksjon.notatRepository.lagre(notat)
 
-        return RestResponse.Created(ApiNotatResponse(id = notat.id().value))
+        val notatResponse = ApiNotatResponse(id = notat.id().value)
+
+        loggInfo("Opprettet notat", "${notat.id()}")
+
+        return RestResponse.Created(notatResponse)
     }
 
     override fun openApi(config: RouteConfig) {

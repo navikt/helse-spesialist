@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Notater
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -43,6 +44,8 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
         if (!notat.feilregistrert) {
             notat.feilregistrer()
             kallKontekst.transaksjon.notatRepository.lagre(notat)
+
+            loggInfo("Markerte notat som feilregistrert", "${notat.id()}")
         }
 
         return RestResponse.OK(Unit)

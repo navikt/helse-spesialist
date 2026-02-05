@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefølge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.rest.resources.Oppgaver
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
@@ -31,48 +32,46 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
         resource: Oppgaver,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
-        val (finnOppgaveProjeksjoner, tidsbruk) =
-            measureTimedValue {
-                kallKontekst.transaksjon.oppgaveRepository
-                    .finnOppgaveProjeksjoner(
-                        minstEnAvEgenskapene = resource.minstEnAvEgenskapene.map { it.tilEgenskaper() },
-                        ingenAvEgenskapene =
-                            Egenskap.entries
-                                .filterNot { it.skalDukkeOppFor(kallKontekst.brukerroller) }
-                                .plus(resource.ingenAvEgenskapene.tilEgenskaper())
-                                .toSet(),
-                        erTildelt = resource.erTildelt,
-                        tildeltTilOid = resource.tildeltTilOid?.let(::SaksbehandlerOid),
-                        erPåVent = resource.erPaaVent,
-                        ikkeSendtTilBeslutterAvOid = kallKontekst.saksbehandler.id,
-                        sorterPå =
-                            when (resource.sorteringsfelt) {
-                                null,
-                                ApiOppgaveSorteringsfelt.opprettetTidspunkt,
-                                -> SorteringsnøkkelForDatabase.OPPRETTET
+        val oppgaver =
+            kallKontekst.transaksjon.oppgaveRepository
+                .finnOppgaveProjeksjoner(
+                    minstEnAvEgenskapene = resource.minstEnAvEgenskapene.map { it.tilEgenskaper() },
+                    ingenAvEgenskapene =
+                        Egenskap.entries
+                            .filterNot { it.skalDukkeOppFor(kallKontekst.brukerroller) }
+                            .plus(resource.ingenAvEgenskapene.tilEgenskaper())
+                            .toSet(),
+                    erTildelt = resource.erTildelt,
+                    tildeltTilOid = resource.tildeltTilOid?.let(::SaksbehandlerOid),
+                    erPåVent = resource.erPaaVent,
+                    ikkeSendtTilBeslutterAvOid = kallKontekst.saksbehandler.id,
+                    sorterPå =
+                        when (resource.sorteringsfelt) {
+                            null,
+                            ApiOppgaveSorteringsfelt.opprettetTidspunkt,
+                            -> SorteringsnøkkelForDatabase.OPPRETTET
 
-                                ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
+                            ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
 
-                                ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
+                            ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
 
-                                ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt -> SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
-                            },
-                        sorteringsrekkefølge =
-                            when (resource.sorteringsrekkefoelge) {
-                                null,
-                                ApiSorteringsrekkefølge.STIGENDE,
-                                -> Sorteringsrekkefølge.STIGENDE
+                            ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt -> SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
+                        },
+                    sorteringsrekkefølge =
+                        when (resource.sorteringsrekkefoelge) {
+                            null,
+                            ApiSorteringsrekkefølge.STIGENDE,
+                            -> Sorteringsrekkefølge.STIGENDE
 
-                                ApiSorteringsrekkefølge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
-                            },
-                        sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
-                        sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
-                    )
-            }
-        logg.info("Hentet oppgaver på ${tidsbruk.inWholeMilliseconds} ms.\nParametere: $resource")
-        return RestResponse.OK(
-            finnOppgaveProjeksjoner.tilApiType(kallKontekst.transaksjon),
-        )
+                            ApiSorteringsrekkefølge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
+                        },
+                    sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
+                    sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
+                ).tilApiType(kallKontekst.transaksjon)
+
+        loggInfo("Hentet ${oppgaver.elementer.size} oppgaver (av totalt ${oppgaver.totaltAntall}")
+
+        return RestResponse.OK(oppgaver)
     }
 
     private fun String?.tilEgenskaper(): Set<Egenskap> =
