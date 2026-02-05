@@ -22,8 +22,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     private val arbeidsgiver = opprettArbeidsgiver()
     private val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
     private val utbetalingId: UUID = UUID.randomUUID()
-    private val behandling =
-        opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
+    private val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
     private val repository = PgOppgaveRepository(session)
     private val vedtaksperiodeId = vedtaksperiode.id.value
     private val behandlingId = behandling.id.value
@@ -33,17 +32,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre og finn oppgave`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
@@ -53,17 +42,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre og finn aktiv oppgave for person`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finnAktivForPerson(person.id)
@@ -73,17 +52,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre og finn oppgave for spleisBehandlingId`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(SpleisBehandlingId(behandlingId))
@@ -93,18 +62,8 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `tildel oppgave`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
-        oppgave.forsøkTildeling(saksbehandler,  emptySet())
+        val oppgave = lagOppgave()
+        oppgave.forsøkTildeling(saksbehandler, emptySet())
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
@@ -114,17 +73,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `avmeld oppgave`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         oppgave.forsøkTildeling(saksbehandler, emptySet())
         repository.lagre(oppgave)
 
@@ -138,17 +87,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `endre egenskaper`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD, PÅ_VENT),
-            )
+        val oppgave = lagOppgave(egenskaper = setOf(SØKNAD, PÅ_VENT))
         repository.lagre(oppgave)
         oppgave.leggTilEgenAnsatt()
         oppgave.fjernFraPåVent()
@@ -161,17 +100,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `endre tilstand`() {
         val saksbehandler = opprettSaksbehandler()
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         repository.lagre(oppgave)
         oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         repository.lagre(oppgave)
@@ -183,17 +112,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun ferdigstill() {
         val saksbehandler = opprettSaksbehandler()
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         repository.lagre(oppgave)
         oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         oppgave.ferdigstill()
@@ -208,27 +127,9 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `exception om det finnes en annen aktiv oppgave for personen ved lagring`() {
         val oppgave1 =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+            lagOppgave()
         val oppgave2 =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+            lagOppgave()
         repository.lagre(oppgave1)
         assertThrows<IllegalStateException> {
             repository.lagre(oppgave2)
@@ -239,29 +140,11 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     fun `skal lagre ny oppgave dersom eksisterende oppgave på samme person ikke avventer saksbehandler`() {
         val saksbehandler = opprettSaksbehandler()
         val oppgave1 =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+            lagOppgave()
         oppgave1.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         oppgave1.ferdigstill()
         val oppgave2 =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+            lagOppgave()
         repository.lagre(oppgave1)
         assertDoesNotThrow {
             repository.lagre(oppgave2)
@@ -270,17 +153,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner tilstand på oppgave som avventer saksbehandler`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         repository.lagre(oppgave)
 
         val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
@@ -289,17 +162,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner tilstand på oppgave som avventer system`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         repository.lagre(oppgave)
 
@@ -309,17 +172,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner tilstand på ferdigstilt oppgave`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
@@ -330,17 +183,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner tilstand på invalidert oppgave`() {
-        val oppgave =
-            Oppgave.ny(
-                id = nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave()
         oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.avbryt()
         repository.lagre(oppgave)
@@ -352,32 +195,12 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `finner tilstand på ferdigstilt oppgave når det finnes en tidligere invalidert oppgave`() {
         val oppgaveId = nextLong()
-        val gammelOppgave =
-            Oppgave.ny(
-                id = oppgaveId,
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val gammelOppgave = lagOppgave(oppgaveId)
         gammelOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         gammelOppgave.avbryt()
         repository.lagre(gammelOppgave)
 
-        val oppgave =
-            Oppgave.ny(
-                id = oppgaveId + 1,
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val oppgave = lagOppgave(oppgaveId + 1)
         oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
@@ -389,17 +212,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagrer første opprettet-kolonnen på en oppgave når det ligger to fra før på behandlingen`() {
         val oppgaveId = nextLong()
-        val førsteOppgave =
-            Oppgave.ny(
-                id = oppgaveId,
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val førsteOppgave = lagOppgave(oppgaveId)
         førsteOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         førsteOppgave.avbryt()
         repository.lagre(førsteOppgave)
@@ -409,17 +222,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
         Thread.sleep(100L)
 
-        val andreOppgave =
-            Oppgave.ny(
-                id = oppgaveId + 1,
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val andreOppgave = lagOppgave(oppgaveId + 1)
         andreOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         andreOppgave.avbryt()
         repository.lagre(andreOppgave)
@@ -430,17 +233,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
         Thread.sleep(100L)
 
-        val tredjeOppgave =
-            Oppgave.ny(
-                id = oppgaveId + 2,
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-            )
+        val tredjeOppgave = lagOppgave(oppgaveId + 2)
         repository.lagre(tredjeOppgave)
         val lagretTredjeOppgave = repository.finn(tredjeOppgave.id)
         assertNotNull(lagretTredjeOppgave)
@@ -453,6 +246,17 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)
         assertEquals(null, oppgaveTilstand?.let { it::class })
     }
+
+    private fun lagOppgave(oppgaveId: Long = nextLong(), egenskaper: Set<Egenskap> = setOf(SØKNAD)) = Oppgave.ny(
+        id = oppgaveId,
+        førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+        vedtaksperiodeId = vedtaksperiodeId,
+        behandlingId = behandlingId,
+        utbetalingId = utbetalingId,
+        hendelseId = godkjenningsbehovId,
+        kanAvvises = true,
+        egenskaper = egenskaper,
+    )
 
     private fun assertEquals(
         expected: Oppgave,
