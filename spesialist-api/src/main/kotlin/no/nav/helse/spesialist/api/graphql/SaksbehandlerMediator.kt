@@ -53,8 +53,10 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -77,6 +79,25 @@ class SaksbehandlerMediator(
     private val periodehistorikkDao = daos.periodehistorikkDao
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
     private val dialogDao = daos.dialogDao
+
+    fun finnMdcParametreForOppgaveId(oppgaveId: String): List<Pair<MdcKey, String?>> =
+        sessionFactory.transactionalSessionScope { transaction ->
+            val oppgave = transaction.oppgaveRepository.finn(oppgaveId.toLong())
+
+            val spleisBehandlingId = oppgave?.behandlingId?.let(::SpleisBehandlingId)
+            val vedtaksperiodeId = spleisBehandlingId?.let(transaction.behandlingRepository::finn)?.vedtaksperiodeId
+            val identitetsnummer =
+                vedtaksperiodeId
+                    ?.let(transaction.vedtaksperiodeRepository::finn)
+                    ?.fødselsnummer
+                    ?.let(Identitetsnummer::fraString)
+
+            listOf(
+                MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId?.value?.toString(),
+                MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId?.value?.toString(),
+                MdcKey.IDENTITETSNUMMER to identitetsnummer?.value,
+            )
+        }
 
     fun håndter(
         handlingFraApi: HandlingFraApi,

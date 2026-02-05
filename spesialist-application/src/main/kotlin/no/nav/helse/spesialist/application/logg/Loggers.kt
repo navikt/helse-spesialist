@@ -141,6 +141,21 @@ enum class MdcKey(
     VEDTAKSPERIODE_ID("vedtaksperiodeId"),
 }
 
+fun <T> kanskjeMedMdc(
+    pairs: Collection<Pair<MdcKey, String?>>,
+    block: () -> T,
+): T {
+    val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+    try {
+        MDC.setContextMap(
+            contextMap + pairs.filterNot { it.second == null }.map { it.first.value to it.second!! },
+        )
+        return block()
+    } finally {
+        MDC.setContextMap(contextMap)
+    }
+}
+
 fun <T> medMdc(
     vararg pairs: Pair<MdcKey, String>?,
     block: () -> T,
