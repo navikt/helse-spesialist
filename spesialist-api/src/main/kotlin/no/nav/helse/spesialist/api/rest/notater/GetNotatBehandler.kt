@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.mapping.tilApiNotat
 import no.nav.helse.spesialist.api.rest.resources.Notater
+import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -29,12 +30,19 @@ class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorC
             vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
             manglerTilgangTilPerson = { GetNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { _, _ ->
-            val dialog =
-                kallKontekst.transaksjon.dialogRepository.finn(notat.dialogRef)
-                    ?: error("Kunne ikke finne dialog med id ${notat.dialogRef}")
-
-            RestResponse.OK(notat.tilApiNotat(kallKontekst.saksbehandler, dialog))
+            behandleForVedtaksperiode(notat, kallKontekst)
         }
+    }
+
+    private fun behandleForVedtaksperiode(
+        notat: Notat,
+        kallKontekst: KallKontekst,
+    ): RestResponse<ApiNotat, GetNotatErrorCode> {
+        val dialog =
+            kallKontekst.transaksjon.dialogRepository.finn(notat.dialogRef)
+                ?: error("Kunne ikke finne dialog med id ${notat.dialogRef}")
+
+        return RestResponse.OK(notat.tilApiNotat(kallKontekst.saksbehandler, dialog))
     }
 
     override fun openApi(config: RouteConfig) {

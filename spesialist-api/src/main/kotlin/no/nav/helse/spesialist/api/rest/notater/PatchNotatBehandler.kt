@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Notater
+import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -22,24 +23,29 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
     ): RestResponse<Unit, ApiPatchNotatErrorCode> {
         if (!request.feilregistrert) return RestResponse.Error(ApiPatchNotatErrorCode.KAN_IKKE_FJERNE_FEILREGISTRERING)
 
-        val notatId = resource.notatId
         val notat =
-            kallKontekst.transaksjon.notatRepository.finn(NotatId(notatId)) ?: return RestResponse.Error(
-                ApiPatchNotatErrorCode.NOTAT_IKKE_FUNNET,
-            )
+            kallKontekst.transaksjon.notatRepository.finn(NotatId(resource.notatId))
+                ?: return RestResponse.Error(ApiPatchNotatErrorCode.NOTAT_IKKE_FUNNET)
 
         return kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(notat.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
             manglerTilgangTilPerson = { ApiPatchNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { _, _ ->
-            if (!notat.feilregistrert) {
-                notat.feilregistrer()
-                kallKontekst.transaksjon.notatRepository.lagre(notat)
-            }
-
-            RestResponse.OK(Unit)
+            behandleForVedtaksperiode(notat, kallKontekst)
         }
+    }
+
+    private fun behandleForVedtaksperiode(
+        notat: Notat,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, ApiPatchNotatErrorCode> {
+        if (!notat.feilregistrert) {
+            notat.feilregistrer()
+            kallKontekst.transaksjon.notatRepository.lagre(notat)
+        }
+
+        return RestResponse.OK(Unit)
     }
 
     override fun openApi(config: RouteConfig) {

@@ -27,7 +27,9 @@ class GetSoknadBehandler(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetSoknadErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { person -> behandleForPerson(resource, person, kallKontekst) }
+        ) { person ->
+            behandleForPerson(resource, person, kallKontekst)
+        }
 
     private fun behandleForPerson(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,

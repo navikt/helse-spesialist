@@ -10,8 +10,6 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.NAVIdent
@@ -34,20 +32,22 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
     ): RestResponse<Unit, ApiPatchTilkommenInntektErrorCode> {
         val tilkommenInntekt =
             kallKontekst.transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.tilkommenInntektId))
-                ?: return RestResponse.Error(
-                    errorCode = ApiPatchTilkommenInntektErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT,
-                    detail = "Tilkommen inntekt med id ${resource.tilkommenInntektId} ble ikke funnet",
-                )
+                ?: return RestResponse.Error(ApiPatchTilkommenInntektErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT)
 
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = tilkommenInntekt.identitetsnummer,
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
+        return kallKontekst.medPerson(
+            identitetsnummer = tilkommenInntekt.identitetsnummer,
+            personIkkeFunnet = { error("Personen ble ikke funnet") },
+            manglerTilgangTilPerson = { ApiPatchTilkommenInntektErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
-            return RestResponse.Error(ApiPatchTilkommenInntektErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            behandleForPerson(request, tilkommenInntekt, kallKontekst)
         }
+    }
 
+    private fun behandleForPerson(
+        request: ApiTilkommenInntektPatch,
+        tilkommenInntekt: TilkommenInntekt,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, ApiPatchTilkommenInntektErrorCode> {
         val endringer = request.endringer
 
         // Valider at alle fra-verdier stemmer med nåværende tilstand
@@ -81,7 +81,10 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                 kallKontekst.transaksjon.tilkommenInntektRepository
                     .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
                     .minus(tilkommenInntekt),
-            vedtaksperioder = kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.identitetsnummer.value),
+            vedtaksperioder =
+                kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(
+                    tilkommenInntekt.identitetsnummer.value,
+                ),
         )
 
         if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {

@@ -9,9 +9,9 @@ import no.nav.helse.spesialist.api.rest.ApiVedtaksperiodeAnnullerRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -22,23 +22,21 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
         resource: Vedtaksperioder.VedtaksperiodeId.Annuller,
         request: ApiVedtaksperiodeAnnullerRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
-        val vedtaksperiodeId = resource.parent.vedtaksperiodeId
-
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(vedtaksperiodeId))
-                ?: return RestResponse.Error(ApiPostVedtaksperiodeAnnullerErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
-
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = vedtaksperiode.fødselsnummer),
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(ApiPostVedtaksperiodeAnnullerErrorCode.MANGLER_TILGANG_TIL_PERSON)
+    ): RestResponse<Unit, ApiPostVedtaksperiodeAnnullerErrorCode> =
+        kallKontekst.medVedtaksperiode(
+            vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
+            vedtaksperiodeIkkeFunnet = { ApiPostVedtaksperiodeAnnullerErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiPostVedtaksperiodeAnnullerErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { vedtaksperiode, _ ->
+            behandleForVedtaksperiode(request, vedtaksperiode, kallKontekst)
         }
 
-        if (kallKontekst.transaksjon.annulleringRepository.finnAnnullering(vedtaksperiodeId = vedtaksperiodeId) != null) {
+    private fun behandleForVedtaksperiode(
+        request: ApiVedtaksperiodeAnnullerRequest,
+        vedtaksperiode: Vedtaksperiode,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
+        if (kallKontekst.transaksjon.annulleringRepository.finnAnnullering(vedtaksperiodeId = vedtaksperiode.id.value) != null) {
             return RestResponse.Error(ApiPostVedtaksperiodeAnnullerErrorCode.ALLEREDE_ANNULLERT)
         }
 
@@ -48,7 +46,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
                     arbeidsgiverFagsystemId = request.arbeidsgiverFagsystemId,
                     personFagsystemId = request.personFagsystemId,
                     saksbehandlerOid = kallKontekst.saksbehandler.id,
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiode.id.value,
                     årsaker = request.årsaker.map { it.årsak },
                     kommentar = request.kommentar,
                 ),
@@ -63,7 +61,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
                     saksbehandlerOid = kallKontekst.saksbehandler.id.value,
                     saksbehandlerIdent = kallKontekst.saksbehandler.ident.value,
                     saksbehandlerEpost = kallKontekst.saksbehandler.epost,
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiode.id.value,
                     begrunnelser = request.årsaker.map { arsak -> arsak.årsak },
                     arsaker =
                         request.årsaker.map { arsak ->

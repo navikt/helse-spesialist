@@ -7,10 +7,9 @@ import no.nav.helse.spesialist.api.rest.ApiNotat
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.mapping.tilApiNotat
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
-import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -18,20 +17,19 @@ class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.Vedtak
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.Notater,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiNotat>, GetNotaterForVedtaksperiodeErrorCode> {
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(resource.parent.vedtaksperiodeId))
-                ?: return RestResponse.Error(GetNotaterForVedtaksperiodeErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
-
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = vedtaksperiode.fødselsnummer),
-                brukerroller = kallKontekst.brukerroller,
-                transaksjon = kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(GetNotaterForVedtaksperiodeErrorCode.MANGLER_TILGANG_TIL_PERSON)
+    ): RestResponse<List<ApiNotat>, GetNotaterForVedtaksperiodeErrorCode> =
+        kallKontekst.medVedtaksperiode(
+            vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
+            vedtaksperiodeIkkeFunnet = { GetNotaterForVedtaksperiodeErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
+            manglerTilgangTilPerson = { GetNotaterForVedtaksperiodeErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { vedtaksperiode, _ ->
+            behandleForVedtaksperiode(vedtaksperiode, kallKontekst)
         }
 
+    private fun behandleForVedtaksperiode(
+        vedtaksperiode: Vedtaksperiode,
+        kallKontekst: KallKontekst,
+    ): RestResponse<List<ApiNotat>, GetNotaterForVedtaksperiodeErrorCode> {
         val notater = kallKontekst.transaksjon.notatRepository.finnAlleForVedtaksperiode(vedtaksperiode.id.value)
         val saksbehandlere =
             kallKontekst.transaksjon.saksbehandlerRepository.finnAlle(notater.map { it.saksbehandlerOid }.toSet())

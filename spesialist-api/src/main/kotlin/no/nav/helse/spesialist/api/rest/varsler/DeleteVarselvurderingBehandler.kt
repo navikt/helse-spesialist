@@ -6,13 +6,12 @@ import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.DeleteBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_HAR_FEIL_STATUS
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.ResultatAvSletting
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varsel.Status.AKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIKLET
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIST
@@ -29,31 +28,24 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
         resource: Varsler.VarselId.Vurdering,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, DeleteVarselvurderingErrorCode> {
-        val varselId = VarselId(resource.parent.varselId)
         val varsel =
-            kallKontekst.transaksjon.varselRepository.finn(varselId)
+            kallKontekst.transaksjon.varselRepository.finn(VarselId(resource.parent.varselId))
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
-        val behandling =
-            kallKontekst.transaksjon.behandlingRepository.finn(varsel.behandlingUnikId)
-                ?: error("Fant ikke behandling")
-
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                ?: error("Fant ikke vedtaksperiode")
-
-        val identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer)
-
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer,
-                kallKontekst.brukerroller,
-                kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
+        return kallKontekst.medBehandling(
+            behandlingUnikId = varsel.behandlingUnikId,
+            behandlingIkkeFunnet = { error("Fant ikke behandling") },
+            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
+        ) { _, _, _ ->
+            behandleForBehandling(varsel, kallKontekst)
         }
+    }
 
-        return when (varsel.status) {
+    private fun behandleForBehandling(
+        varsel: Varsel,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, DeleteVarselvurderingErrorCode> =
+        when (varsel.status) {
             GODKJENT, INAKTIV, AVVIST, AVVIKLET -> {
                 RestResponse.Error(VARSEL_HAR_FEIL_STATUS)
             }
@@ -66,7 +58,6 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
                 RestResponse.NoContent()
             }
         }
-    }
 
     override fun openApi(config: RouteConfig) {
         config.tags("varsler")

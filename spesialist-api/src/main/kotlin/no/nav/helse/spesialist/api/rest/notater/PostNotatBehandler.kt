@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.rest.resources.Notater
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -28,21 +29,29 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
             vedtaksperiodeIkkeFunnet = { ApiPostNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { vedtaksperiode, _ ->
-            val dialog = Dialog.Factory.ny()
-            kallKontekst.transaksjon.dialogRepository.lagre(dialog)
-
-            val notat =
-                Notat.Factory.ny(
-                    type = NotatType.Generelt,
-                    tekst = request.tekst,
-                    dialogRef = dialog.id(),
-                    vedtaksperiodeId = vedtaksperiode.id.value,
-                    saksbehandlerOid = kallKontekst.saksbehandler.id,
-                )
-            kallKontekst.transaksjon.notatRepository.lagre(notat)
-
-            RestResponse.Created(ApiNotatResponse(id = notat.id().value))
+            behandleForVedtaksperiode(request, vedtaksperiode, kallKontekst)
         }
+
+    private fun behandleForVedtaksperiode(
+        request: ApiNotatRequest,
+        vedtaksperiode: Vedtaksperiode,
+        kallKontekst: KallKontekst,
+    ): RestResponse<ApiNotatResponse, ApiPostNotatErrorCode> {
+        val dialog = Dialog.Factory.ny()
+        kallKontekst.transaksjon.dialogRepository.lagre(dialog)
+
+        val notat =
+            Notat.Factory.ny(
+                type = NotatType.Generelt,
+                tekst = request.tekst,
+                dialogRef = dialog.id(),
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                saksbehandlerOid = kallKontekst.saksbehandler.id,
+            )
+        kallKontekst.transaksjon.notatRepository.lagre(notat)
+
+        return RestResponse.Created(ApiNotatResponse(id = notat.id().value))
+    }
 
     override fun openApi(config: RouteConfig) {
         with(config) {

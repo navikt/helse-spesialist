@@ -7,14 +7,12 @@ import no.nav.helse.spesialist.api.rest.ApiVarselvurdering
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_KAN_IKKE_VURDERES
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_MED_ANNEN_DEFINISJON
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
@@ -28,29 +26,25 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         request: ApiVarselvurdering,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, PutVarselvurderingErrorCode> {
-        val varselId = VarselId(resource.parent.varselId)
-        val varseldefinisjonId = VarseldefinisjonId(request.definisjonId)
         val varsel =
-            kallKontekst.transaksjon.varselRepository.finn(varselId)
+            kallKontekst.transaksjon.varselRepository.finn(VarselId(resource.parent.varselId))
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
-        val behandling =
-            kallKontekst.transaksjon.behandlingRepository.finn(varsel.behandlingUnikId)
-                ?: error("Fant ikke behandling")
-
-        val vedtaksperiode =
-            kallKontekst.transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                ?: error("Fant ikke vedtaksperiode")
-
-        val identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer)
-        if (!kallKontekst.saksbehandler.harTilgangTilPerson(
-                identitetsnummer,
-                kallKontekst.brukerroller,
-                kallKontekst.transaksjon,
-            )
-        ) {
-            return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
+        return kallKontekst.medBehandling(
+            behandlingUnikId = varsel.behandlingUnikId,
+            behandlingIkkeFunnet = { error("Fant ikke behandling") },
+            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
+        ) { _, _, _ ->
+            behandleForBehandling(request, varsel, kallKontekst)
         }
+    }
+
+    private fun behandleForBehandling(
+        request: ApiVarselvurdering,
+        varsel: Varsel,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, PutVarselvurderingErrorCode> {
+        val varseldefinisjonId = VarseldefinisjonId(request.definisjonId)
 
         if (varsel.status == Varsel.Status.VURDERT) {
             val eksisterendeVurdering =
@@ -71,6 +65,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
 
         varsel.vurder(kallKontekst.saksbehandler.id, varseldefinisjonId)
         kallKontekst.transaksjon.varselRepository.lagre(varsel)
+
         return RestResponse.OK(Unit)
     }
 
@@ -85,7 +80,13 @@ enum class PutVarselvurderingErrorCode(
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Varsel ikke funnet"),
-    VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER(HttpStatusCode.Conflict, "Varsel har blitt vurdert av en annen saksbehandler"),
-    VARSEL_VURDERT_MED_ANNEN_DEFINISJON(HttpStatusCode.Conflict, "Varsel har blitt vurdert basert på en annen definisjon"),
+    VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER(
+        HttpStatusCode.Conflict,
+        "Varsel har blitt vurdert av en annen saksbehandler",
+    ),
+    VARSEL_VURDERT_MED_ANNEN_DEFINISJON(
+        HttpStatusCode.Conflict,
+        "Varsel har blitt vurdert basert på en annen definisjon",
+    ),
     VARSEL_KAN_IKKE_VURDERES(HttpStatusCode.Conflict, "Varsel har en status som ikke tillater at det kan vurderes"),
 }

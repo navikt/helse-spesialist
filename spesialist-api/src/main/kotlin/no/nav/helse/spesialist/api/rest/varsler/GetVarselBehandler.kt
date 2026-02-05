@@ -30,44 +30,52 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
             behandlingIkkeFunnet = { error("Fant ikke behandling") },
             manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { _, _, _ ->
-            val varselvurdering = varsel.vurdering
-            val varseldefinisjon =
-                if (varselvurdering != null) {
-                    kallKontekst.transaksjon.varseldefinisjonRepository.finn(varselvurdering.vurdertDefinisjonId)
-                        ?: error("Fant ikke varseldefinisjon brukt i vurdering av varsel")
-                } else {
-                    kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(varsel.kode)
-                        ?: error("Fant ikke gjeldende varseldefinisjon for aktuell varselkode")
-                }
-
-            val apiVarsel =
-                ApiVarsel(
-                    id = varsel.id.value,
-                    definisjonId = varseldefinisjon.id.value,
-                    opprettet = varsel.opprettetTidspunkt,
-                    tittel = varseldefinisjon.tittel,
-                    forklaring = varseldefinisjon.forklaring,
-                    handling = varseldefinisjon.handling,
-                    status =
-                        when (varsel.status) {
-                            Varsel.Status.AKTIV -> ApiVarsel.ApiVarselstatus.AKTIV
-                            Varsel.Status.VURDERT -> ApiVarsel.ApiVarselstatus.VURDERT
-                            Varsel.Status.GODKJENT -> ApiVarsel.ApiVarselstatus.GODKJENT
-                            else -> error("Varselet har en status som ikke er ment å vise til saksbehandler")
-                        },
-                    vurdering =
-                        varsel.vurdering?.let { vurdering ->
-                            val saksbehandler =
-                                kallKontekst.transaksjon.saksbehandlerRepository.finn(vurdering.saksbehandlerId)
-                                    ?: error("Finner ikke saksbehandler som vurderte varselet")
-                            ApiVarsel.ApiVarselvurdering(
-                                ident = saksbehandler.ident.value,
-                                tidsstempel = vurdering.tidspunkt,
-                            )
-                        },
-                )
-            RestResponse.OK(apiVarsel)
+            behandleForBehandling(varsel, kallKontekst)
         }
+    }
+
+    private fun behandleForBehandling(
+        varsel: Varsel,
+        kallKontekst: KallKontekst,
+    ): RestResponse<ApiVarsel, GetVarselErrorCode> {
+        val varselvurdering = varsel.vurdering
+        val varseldefinisjon =
+            if (varselvurdering != null) {
+                kallKontekst.transaksjon.varseldefinisjonRepository.finn(varselvurdering.vurdertDefinisjonId)
+                    ?: error("Fant ikke varseldefinisjon brukt i vurdering av varsel")
+            } else {
+                kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(varsel.kode)
+                    ?: error("Fant ikke gjeldende varseldefinisjon for aktuell varselkode")
+            }
+
+        val apiVarsel =
+            ApiVarsel(
+                id = varsel.id.value,
+                definisjonId = varseldefinisjon.id.value,
+                opprettet = varsel.opprettetTidspunkt,
+                tittel = varseldefinisjon.tittel,
+                forklaring = varseldefinisjon.forklaring,
+                handling = varseldefinisjon.handling,
+                status =
+                    when (varsel.status) {
+                        Varsel.Status.AKTIV -> ApiVarsel.ApiVarselstatus.AKTIV
+                        Varsel.Status.VURDERT -> ApiVarsel.ApiVarselstatus.VURDERT
+                        Varsel.Status.GODKJENT -> ApiVarsel.ApiVarselstatus.GODKJENT
+                        else -> error("Varselet har en status som ikke er ment å vise til saksbehandler")
+                    },
+                vurdering =
+                    varsel.vurdering?.let { vurdering ->
+                        val saksbehandler =
+                            kallKontekst.transaksjon.saksbehandlerRepository.finn(vurdering.saksbehandlerId)
+                                ?: error("Finner ikke saksbehandler som vurderte varselet")
+                        ApiVarsel.ApiVarselvurdering(
+                            ident = saksbehandler.ident.value,
+                            tidsstempel = vurdering.tidspunkt,
+                        )
+                    },
+            )
+
+        return RestResponse.OK(apiVarsel)
     }
 
     override fun openApi(config: RouteConfig) {
