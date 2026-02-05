@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -161,7 +162,11 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                     }
                 }
 
-            outbox.leggTil(fødselsnummer, meldingOmVedtak, eventName)
+            outbox.leggTil(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                hendelse = meldingOmVedtak,
+                årsak = eventName,
+            )
         }
     }
 

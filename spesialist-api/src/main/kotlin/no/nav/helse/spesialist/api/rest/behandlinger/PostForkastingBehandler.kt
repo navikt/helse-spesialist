@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -52,7 +53,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
 
             oppgave.avventerSystem(kallKontekst.saksbehandler.ident, kallKontekst.saksbehandler.id.value)
             oppgave.fjernFraPåVent()
-            kallKontekst.outbox.leggTil(person.id.value, OppgaveOppdatert(oppgave), "oppgave avventer system")
+            kallKontekst.outbox.leggTil(person.id, OppgaveOppdatert(oppgave), "oppgave avventer system")
             kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id)
             kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
 
@@ -83,14 +84,14 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
                         varsel = it,
                         vedtaksperiodeId = vedtaksperiode.id,
                         spleisBehandlingId = behandling.spleisBehandlingId!!,
-                        fødselsnummer = person.id.value,
+                        identitetsnummer = person.id,
                         varseldefinisjon = varseldefinisjon,
                     )
                 }.let { avvisteVarsler ->
                     kallKontekst.transaksjon.varselRepository.lagre(avvisteVarsler)
                 }
             byttTilstandOgPubliserMeldinger(
-                fødselsnummer = person.id.value,
+                identitetsnummer = person.id,
                 behandling = behandling,
                 oppgave = oppgave,
                 totrinnsvurdering = totrinnsvurdering,
@@ -113,11 +114,11 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         varsel: Varsel,
         vedtaksperiodeId: VedtaksperiodeId,
         spleisBehandlingId: SpleisBehandlingId,
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         varseldefinisjon: Varseldefinisjon,
     ) {
-        this.leggTil(
-            fødselsnummer = fødselsnummer,
+        leggTil(
+            identitetsnummer = identitetsnummer,
             hendelse =
                 VarselEndret(
                     vedtaksperiodeId = vedtaksperiodeId.value,
@@ -133,7 +134,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
     }
 
     private fun byttTilstandOgPubliserMeldinger(
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         behandling: Behandling,
         oppgave: Oppgave,
         totrinnsvurdering: Totrinnsvurdering?,
@@ -165,13 +166,13 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         )
 
         outbox.leggTil(
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             hendelse = behov.medLøsning(),
             årsak = "saksbehandlerforkasting",
         )
 
         outbox.leggTil(
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             hendelse =
                 VedtaksperiodeAvvistManuelt(
                     vedtaksperiodeId = behov.vedtaksperiodeId,

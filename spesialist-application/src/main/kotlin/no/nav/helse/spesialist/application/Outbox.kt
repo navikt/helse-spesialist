@@ -5,6 +5,7 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.util.UUID
 
 class Outbox(
@@ -17,40 +18,40 @@ class Outbox(
     private data class OutboxBehovListe(
         val hendelseId: UUID,
         val commandContextId: UUID,
-        val fødselsnummer: String,
+        val identitetsnummer: Identitetsnummer,
         val behov: List<Behov>,
     ) : OutboxMelding
 
     fun leggTil(
         hendelseId: UUID,
         commandContextId: UUID,
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         behov: List<Behov>,
     ) {
         outbox.add(
             OutboxBehovListe(
                 hendelseId = hendelseId,
                 commandContextId = commandContextId,
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
                 behov = behov,
             ),
         )
     }
 
     private data class OutboxKommandokjedeEndretEvent(
-        val fødselsnummer: String,
+        val identitetsnummer: Identitetsnummer,
         val event: KommandokjedeEndretEvent,
         val hendelseNavn: String,
     ) : OutboxMelding
 
     fun leggTil(
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         event: KommandokjedeEndretEvent,
         hendelseNavn: String,
     ) {
         outbox.add(
             OutboxKommandokjedeEndretEvent(
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
                 event = event,
                 hendelseNavn = hendelseNavn,
             ),
@@ -58,18 +59,18 @@ class Outbox(
     }
 
     private data class OutboxSubsumsjon(
-        val fødselsnummer: String,
+        val identitetsnummer: Identitetsnummer,
         val subsumsjonEvent: SubsumsjonEvent,
         val versjonAvKode: String,
     ) : OutboxMelding
 
     fun leggTil(
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         subsumsjonEvent: SubsumsjonEvent,
     ) {
         outbox.add(
             OutboxSubsumsjon(
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
                 subsumsjonEvent = subsumsjonEvent,
                 versjonAvKode = versjonAvKode,
             ),
@@ -77,19 +78,19 @@ class Outbox(
     }
 
     private data class OutboxUtgåendeHendelse(
-        val fødselsnummer: String,
+        val identitetsnummer: Identitetsnummer,
         val hendelse: UtgåendeHendelse,
         val årsak: String,
     ) : OutboxMelding
 
     fun leggTil(
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         hendelse: UtgåendeHendelse,
         årsak: String,
     ) {
         outbox.add(
             OutboxUtgåendeHendelse(
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
                 hendelse = hendelse,
                 årsak = årsak,
             ),
@@ -103,27 +104,27 @@ class Outbox(
                     meldingPubliserer.publiser(
                         hendelseId = it.hendelseId,
                         commandContextId = it.commandContextId,
-                        fødselsnummer = it.fødselsnummer,
+                        fødselsnummer = it.identitetsnummer.value,
                         behov = it.behov,
                     )
 
                 is OutboxKommandokjedeEndretEvent ->
                     meldingPubliserer.publiser(
-                        fødselsnummer = it.fødselsnummer,
+                        fødselsnummer = it.identitetsnummer.value,
                         event = it.event,
                         hendelseNavn = it.hendelseNavn,
                     )
 
                 is OutboxSubsumsjon ->
                     meldingPubliserer.publiser(
-                        fødselsnummer = it.fødselsnummer,
+                        fødselsnummer = it.identitetsnummer.value,
                         subsumsjonEvent = it.subsumsjonEvent,
                         versjonAvKode = it.versjonAvKode,
                     )
 
                 is OutboxUtgåendeHendelse ->
                     meldingPubliserer.publiser(
-                        fødselsnummer = it.fødselsnummer,
+                        fødselsnummer = it.identitetsnummer.value,
                         hendelse = it.hendelse,
                         årsak = it.årsak,
                     )

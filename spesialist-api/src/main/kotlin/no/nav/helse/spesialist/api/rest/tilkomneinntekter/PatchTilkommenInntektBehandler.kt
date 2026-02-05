@@ -101,7 +101,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         event?.let {
             kallKontekst.outbox.leggTil(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                identitetsnummer = Identitetsnummer.fraString(tilkommenInntekt.fødselsnummer),
                 hendelse = it,
                 årsak = "endring av tilkommen inntekt",
             )

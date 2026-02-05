@@ -51,9 +51,8 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
 
         val klarForVisning = person.harDataNødvendigForVisning()
         if (!klarForVisning) {
-            val fødselsnummer = person.id.value
-            if (!kallKontekst.transaksjon.personKlargjoresDao.klargjøringPågår(fødselsnummer)) {
-                kallKontekst.outbox.leggTil(person.id.value, KlargjørPersonForVisning, "klargjørPersonForVisning")
+            if (!kallKontekst.transaksjon.personKlargjoresDao.klargjøringPågår(person.id.value)) {
+                kallKontekst.outbox.leggTil(person.id, KlargjørPersonForVisning, "klargjørPersonForVisning")
                 kallKontekst.transaksjon.personKlargjoresDao.personKlargjøres(person.id.value)
             }
         }

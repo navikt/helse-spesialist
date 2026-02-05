@@ -55,7 +55,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
         )
 
         kallKontekst.outbox.leggTil(
-            fødselsnummer = vedtaksperiode.fødselsnummer,
+            identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
             hendelse =
                 AnnullertUtbetalingEvent(
                     fødselsnummer = vedtaksperiode.fødselsnummer,

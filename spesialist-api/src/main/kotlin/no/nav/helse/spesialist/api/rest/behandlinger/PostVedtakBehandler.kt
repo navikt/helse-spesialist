@@ -33,6 +33,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -112,7 +113,7 @@ class PostVedtakBehandler(
                 )
                 behandling.fattVedtak(
                     transaksjon = kallKontekst.transaksjon,
-                    fødselsnummer = person.id.value,
+                    identitetsnummer = person.id,
                     saksbehandler = saksbehandlerSomFattetVedtaket,
                     oppgave = oppgave,
                     spleisBehandlingId = spleisBehandlingId,
@@ -121,7 +122,7 @@ class PostVedtakBehandler(
                 )
 
                 byttTilstandOgPubliserMeldinger(
-                    fødselsnummer = person.id.value,
+                    identitetsnummer = person.id,
                     behandling = behandling,
                     oppgave = oppgave,
                     totrinnsvurdering = totrinnsvurdering,
@@ -139,7 +140,7 @@ class PostVedtakBehandler(
 
     private fun Behandling.fattVedtak(
         transaksjon: SessionContext,
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         saksbehandler: Saksbehandler,
         oppgave: Oppgave,
         spleisBehandlingId: SpleisBehandlingId,
@@ -152,7 +153,7 @@ class PostVedtakBehandler(
             behandlingRepository = transaksjon.behandlingRepository,
             varselRepository = transaksjon.varselRepository,
             varseldefinisjonRepository = transaksjon.varseldefinisjonRepository,
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             spleisBehandlingId = spleisBehandlingId,
             outbox = outbox,
         )
@@ -160,7 +161,7 @@ class PostVedtakBehandler(
         oppgave.fjernFraPåVent()
         transaksjon.påVentDao.slettPåVent(oppgave.id)
         transaksjon.oppgaveRepository.lagre(oppgave)
-        outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
+        outbox.leggTil(identitetsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
         oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid, spleisBehandlingId)
     }
 
@@ -186,11 +187,11 @@ class PostVedtakBehandler(
         varseldefinisjonRepository: VarseldefinisjonRepository,
         behandlingRepository: BehandlingRepository,
         varselRepository: VarselRepository,
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         spleisBehandlingId: SpleisBehandlingId,
         outbox: Outbox,
     ) {
-        val behandlingspakke = behandlingRepository.finnBehandlingspakke(this, fødselsnummer)
+        val behandlingspakke = behandlingRepository.finnBehandlingspakke(this, identitetsnummer.value)
         val behandlingUnikIder = behandlingspakke.map { behandling -> behandling.id }
         val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
         if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(VARSLER_MANGLER_VURDERING)
@@ -202,7 +203,7 @@ class PostVedtakBehandler(
                     spleisBehandlingId = spleisBehandlingId,
                     varseldefinisjonRepository = varseldefinisjonRepository,
                     outbox = outbox,
-                    fødselsnummer = fødselsnummer,
+                    identitetsnummer = identitetsnummer,
                 )
             }
         varselRepository.lagre(varsler)
@@ -213,7 +214,7 @@ class PostVedtakBehandler(
         spleisBehandlingId: SpleisBehandlingId,
         varseldefinisjonRepository: VarseldefinisjonRepository,
         outbox: Outbox,
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
     ) {
         val gammelStatus = status
         godkjenn()
@@ -221,7 +222,7 @@ class PostVedtakBehandler(
             varseldefinisjonRepository.finnGjeldendeFor(kode)
                 ?: throw FattVedtakException(VARSEL_MANGLER_VARSELDEFINISJON)
         outbox.leggTil(
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             hendelse =
                 VarselEndret(
                     vedtaksperiodeId = vedtaksperiodeId.value,
@@ -251,7 +252,7 @@ class PostVedtakBehandler(
     }
 
     private fun byttTilstandOgPubliserMeldinger(
-        fødselsnummer: String,
+        identitetsnummer: Identitetsnummer,
         behandling: Behandling,
         oppgave: Oppgave,
         totrinnsvurdering: Totrinnsvurdering?,
@@ -269,7 +270,7 @@ class PostVedtakBehandler(
 
         val godkjenningsbehov = transaksjon.meldingDao.finnGodkjenningsbehov(oppgave.godkjenningsbehovId)
 
-        val behandlingspakke = transaksjon.behandlingRepository.finnBehandlingspakke(behandling, fødselsnummer)
+        val behandlingspakke = transaksjon.behandlingRepository.finnBehandlingspakke(behandling, identitetsnummer.value)
         behandlingspakke.forEach(Behandling::håndterGodkjentAvSaksbehandler)
         transaksjon.behandlingRepository.lagreAlle(behandlingspakke)
 
@@ -282,13 +283,13 @@ class PostVedtakBehandler(
         )
 
         outbox.leggTil(
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             hendelse = behov.medLøsning(),
             årsak = "saksbehandlergodkjenning",
         )
 
         outbox.leggTil(
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             hendelse =
                 VedtaksperiodeGodkjentManuelt(
                     vedtaksperiodeId = behov.vedtaksperiodeId,

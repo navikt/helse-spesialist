@@ -74,14 +74,12 @@ class PostArbeidstidsvurderingBehandler :
                 vedtaksperiodeId = request.initierendeVedtaksperiodeId,
             )
 
-        val fødselsnummer = person.id.value
-
-        teamLogs.info("Reserverer person $fødselsnummer til saksbehandler ${kallKontekst.saksbehandler}")
-        kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, fødselsnummer)
+        teamLogs.info("Reserverer person ${person.id.value} til saksbehandler ${kallKontekst.saksbehandler}")
+        kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, person.id.value)
 
         val totrinnsvurdering =
-            kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-                ?: Totrinnsvurdering.ny(fødselsnummer)
+            kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+                ?: Totrinnsvurdering.ny(person.id.value)
         totrinnsvurdering.nyOverstyring(overstyring = overstyring)
         kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
@@ -111,10 +109,10 @@ class PostArbeidstidsvurderingBehandler :
                     },
                 )
         subsumsjoner.forEach { subsumsjonEvent ->
-            kallKontekst.outbox.leggTil(fødselsnummer, subsumsjonEvent)
+            kallKontekst.outbox.leggTil(person.id, subsumsjonEvent)
         }
 
-        kallKontekst.outbox.leggTil(fødselsnummer, event, "vurdering av minimum sykdomsgrad")
+        kallKontekst.outbox.leggTil(person.id, event, "vurdering av minimum sykdomsgrad")
 
         return RestResponse.NoContent()
     }

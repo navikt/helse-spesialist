@@ -61,7 +61,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             kallKontekst.transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             kallKontekst.outbox.leggTil(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                identitetsnummer = Identitetsnummer.fraString(tilkommenInntekt.fødselsnummer),
                 hendelse =
                     InntektsendringerEventBygger.forNy(
                         inntektskilde = tilkommenInntekt.organisasjonsnummer,
