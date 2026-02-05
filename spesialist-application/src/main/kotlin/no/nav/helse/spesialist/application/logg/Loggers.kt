@@ -127,18 +127,18 @@ inline fun <reified T> T.loggWarnThrowable(
 enum class MdcKey(
     val value: String,
 ) {
-    SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
-    PERSON_PSEUDO_ID("personPseudoId"),
-    IDENTITETSNUMMER("identitetsnummer"),
+    BEHANDLING_UNIK_ID("behandlingUnikId"),
     CONTEXT_ID("contextId"),
+    IDENTITETSNUMMER("identitetsnummer"),
     MELDING_ID("meldingId"),
     MELDINGNAVN("meldingnavn"),
-    VEDTAKSPERIODE_ID("vedtaksperiodeId"),
-    BEHANDLING_UNIK_ID("behandlingUnikId"),
-    SPLEIS_BEHANDLING_ID("spleisBehandlingId"),
     OPPRINNELIG_MELDING_ID("opprinneligMeldingId"),
+    PERSON_PSEUDO_ID("personPseudoId"),
     REQUEST_METHOD("request.method"),
     REQUEST_URI("request.uri"),
+    SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
+    SPLEIS_BEHANDLING_ID("spleisBehandlingId"),
+    VEDTAKSPERIODE_ID("vedtaksperiodeId"),
 }
 
 fun <T> medMdc(
