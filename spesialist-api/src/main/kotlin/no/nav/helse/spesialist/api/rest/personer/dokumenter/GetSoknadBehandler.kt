@@ -5,24 +5,31 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiSoknad
 import no.nav.helse.spesialist.api.rest.DokumentMediator
-import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
+import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
-) : GetForPersonBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode>(
-        personPseudoId = { resource -> resource.parent.parent.parent },
-        personPseudoIdIkkeFunnet = ApiGetSoknadErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
-        manglerTilgangTilPerson = ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON,
-    ) {
+) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
+        resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
+        kallKontekst: KallKontekst,
+    ): RestResponse<ApiSoknad, ApiGetSoknadErrorCode> =
+        kallKontekst.medPerson(
+            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
+            personPseudoIdIkkeFunnet = { ApiGetSoknadErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { person -> behandleForPerson(resource, person, kallKontekst) }
+
+    private fun behandleForPerson(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
         person: Person,
         kallKontekst: KallKontekst,

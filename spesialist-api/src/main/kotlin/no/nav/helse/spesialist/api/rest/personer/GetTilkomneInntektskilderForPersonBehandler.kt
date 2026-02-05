@@ -13,10 +13,11 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
-import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
+import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -29,16 +30,20 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettet
 import java.math.BigDecimal
 import java.time.ZoneId
 
-class GetTilkomneInntektskilderForPersonBehandler :
-    GetForPersonBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode>(
-        personPseudoId = { resource -> resource.parent },
-        personPseudoIdIkkeFunnet = ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
-        manglerTilgangTilPerson = ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
-    ) {
+class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,
+        kallKontekst: KallKontekst,
+    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
+        kallKontekst.medPerson(
+            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoIdIkkeFunnet = { ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { person -> behandleForPerson(person, kallKontekst) }
+
+    private fun behandleForPerson(
         person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =

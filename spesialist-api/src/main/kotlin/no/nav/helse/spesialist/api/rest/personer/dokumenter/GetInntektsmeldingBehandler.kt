@@ -5,23 +5,30 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.DokumentMediator
-import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
+import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
-) : GetForPersonBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode>(
-        personPseudoId = { resource -> resource.parent.parent.parent },
-        personPseudoIdIkkeFunnet = ApiGetInntektsmeldingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
-        manglerTilgangTilPerson = ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON,
-    ) {
+) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
+        resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding,
+        kallKontekst: KallKontekst,
+    ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> =
+        kallKontekst.medPerson(
+            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
+            personPseudoIdIkkeFunnet = { ApiGetInntektsmeldingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { person -> behandleForPerson(resource, person, kallKontekst) }
+
+    private fun behandleForPerson(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding,
         person: Person,
         kallKontekst: KallKontekst,

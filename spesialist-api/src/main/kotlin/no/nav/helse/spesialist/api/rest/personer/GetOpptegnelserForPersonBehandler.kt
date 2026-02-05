@@ -4,34 +4,39 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiOpptegnelse
-import no.nav.helse.spesialist.api.rest.GetForPersonBehandler
+import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Sekvensnummer
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
-class GetOpptegnelserForPersonBehandler :
-    GetForPersonBehandler<Personer.PersonPseudoId.Opptegnelser, List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode>(
-        personPseudoId = { resource -> resource.parent },
-        personPseudoIdIkkeFunnet = ApiGetOpptegnelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
-        manglerTilgangTilPerson = ApiGetOpptegnelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON,
-    ) {
+class GetOpptegnelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.Opptegnelser, List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Opptegnelser,
+        kallKontekst: KallKontekst,
+    ): RestResponse<List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> =
+        kallKontekst.medPerson(
+            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoIdIkkeFunnet = { ApiGetOpptegnelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiGetOpptegnelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { person -> behandleForPerson(resource, person, kallKontekst) }
+
+    private fun behandleForPerson(
+        resource: Personer.PersonPseudoId.Opptegnelser,
         person: Person,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> {
-        val identitetsnummer = person.id
-        return RestResponse.OK(
+    ): RestResponse<List<ApiOpptegnelse>, ApiGetOpptegnelserForPersonErrorCode> =
+        RestResponse.OK(
             kallKontekst.transaksjon.opptegnelseRepository
                 .finnAlleForPersonEtter(
                     opptegnelseId = Sekvensnummer(resource.etterSekvensnummer),
-                    personIdentitetsnummer = identitetsnummer,
+                    personIdentitetsnummer = person.id,
                 ).map { opptegnelse ->
                     ApiOpptegnelse(
                         sekvensnummer = opptegnelse.id().value,
@@ -51,7 +56,6 @@ class GetOpptegnelserForPersonBehandler :
                     )
                 }.sortedByDescending { it.sekvensnummer },
         )
-    }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
