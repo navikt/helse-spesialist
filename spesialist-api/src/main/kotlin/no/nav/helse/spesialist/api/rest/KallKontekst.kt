@@ -29,8 +29,6 @@ class KallKontekst(
     fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
         spleisBehandlingId: SpleisBehandlingId,
         behandlingIkkeFunnet: () -> ERROR,
-        vedtaksperiodeIkkeFunnet: () -> ERROR = { error("Vedtaksperioden ble ikke funnet") },
-        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
         manglerTilgangTilPerson: () -> ERROR,
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
@@ -45,8 +43,7 @@ class KallKontekst(
             ktorCall.medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandling.id.value.toString()) {
                 medVedtaksperiode(
                     vedtaksperiodeId = behandling.vedtaksperiodeId,
-                    vedtaksperiodeIkkeFunnet = vedtaksperiodeIkkeFunnet,
-                    personIkkeFunnet = personIkkeFunnet,
+                    vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
                     manglerTilgangTilPerson = manglerTilgangTilPerson,
                 ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
             }
@@ -55,8 +52,6 @@ class KallKontekst(
     fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
         behandlingUnikId: BehandlingUnikId,
         behandlingIkkeFunnet: () -> ERROR,
-        vedtaksperiodeIkkeFunnet: () -> ERROR = { error("Vedtaksperioden ble ikke funnet") },
-        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
         manglerTilgangTilPerson: () -> ERROR,
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
@@ -72,16 +67,14 @@ class KallKontekst(
             if (spleisBehandlingId == null) {
                 medVedtaksperiode(
                     vedtaksperiodeId = behandling.vedtaksperiodeId,
-                    vedtaksperiodeIkkeFunnet = vedtaksperiodeIkkeFunnet,
-                    personIkkeFunnet = personIkkeFunnet,
+                    vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
                     manglerTilgangTilPerson = manglerTilgangTilPerson,
                 ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
             } else {
                 ktorCall.medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
                     medVedtaksperiode(
                         vedtaksperiodeId = behandling.vedtaksperiodeId,
-                        vedtaksperiodeIkkeFunnet = vedtaksperiodeIkkeFunnet,
-                        personIkkeFunnet = personIkkeFunnet,
+                        vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
                         manglerTilgangTilPerson = manglerTilgangTilPerson,
                     ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
                 }
@@ -91,7 +84,6 @@ class KallKontekst(
     fun <RESPONSE, ERROR : ApiErrorCode> medVedtaksperiode(
         vedtaksperiodeId: VedtaksperiodeId,
         vedtaksperiodeIkkeFunnet: () -> ERROR,
-        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
         manglerTilgangTilPerson: () -> ERROR,
         block: (Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
@@ -104,16 +96,15 @@ class KallKontekst(
             }
 
             medPerson(
-                Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-                personIkkeFunnet,
-                manglerTilgangTilPerson,
+                identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
+                personIkkeFunnet = { error("Personen ble ikke funnet") },
+                manglerTilgangTilPerson = manglerTilgangTilPerson,
             ) { person -> block(vedtaksperiode, person) }
         }
 
     fun <RESPONSE, ERROR : ApiErrorCode> medPerson(
         personPseudoId: PersonPseudoId,
         personPseudoIdIkkeFunnet: () -> ERROR,
-        personIkkeFunnet: () -> ERROR = { error("Personen ble ikke funnet") },
         manglerTilgangTilPerson: () -> ERROR,
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
@@ -127,7 +118,7 @@ class KallKontekst(
 
             medPerson(
                 identitetsnummer = identitetsnummer,
-                personIkkeFunnet = personIkkeFunnet,
+                personIkkeFunnet = { error("Personen ble ikke funnet") },
                 manglerTilgangTilPerson = manglerTilgangTilPerson,
                 block = block,
             )
