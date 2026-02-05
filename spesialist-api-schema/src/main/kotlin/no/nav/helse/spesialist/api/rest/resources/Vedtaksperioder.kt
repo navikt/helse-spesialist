@@ -17,34 +17,7 @@ class Vedtaksperioder {
         @Resource("notater")
         class Notater(
             val parent: VedtaksperiodeId,
-        ) {
-            @Resource("{notatId}")
-            class NotatId(
-                val parent: Notater,
-                val notatId: Int,
-            ) {
-                @Resource("feilregistrer")
-                class Feilregistrer(
-                    val parent: NotatId,
-                )
-
-                @Resource("kommentarer")
-                class Kommentarer(
-                    val parent: NotatId,
-                ) {
-                    @Resource("{kommentarId}")
-                    class KommentarId(
-                        val parent: Kommentarer,
-                        val kommentarId: Int,
-                    ) {
-                        @Resource("feilregistrer")
-                        class Feilregistrer(
-                            val parent: KommentarId,
-                        )
-                    }
-                }
-            }
-        }
+        )
 
         @Resource("annuller")
         class Annuller(

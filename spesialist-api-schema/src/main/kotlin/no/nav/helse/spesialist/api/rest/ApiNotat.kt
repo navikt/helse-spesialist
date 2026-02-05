@@ -45,10 +45,9 @@ data class ApiNotat(
     val kommentarer: List<ApiKommentar>,
 )
 
+@Serializable
 enum class ApiNotatType {
-    Retur,
     Generelt,
-    PaaVent,
     OpphevStans,
 }
 

@@ -33,6 +33,7 @@ import no.nav.helse.spesialist.api.rest.tilkomneinntekter.PostTilkomneInntekterB
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetNotaterForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
@@ -82,6 +83,7 @@ fun Routing.restRoutes(
             patch(PatchKommentarBehandler(), restAdapter)
 
             get(GetNotatBehandler(), restAdapter)
+            get(GetNotaterForVedtaksperiodeBehandler(), restAdapter)
             post(PostNotatBehandler(), restAdapter)
             patch(PatchNotatBehandler(), restAdapter)
 
