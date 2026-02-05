@@ -19,7 +19,7 @@ class GetBrukerIntegrationTest {
         // Then:
         val bruker = response.body<ApiBruker>()
         assertEquals(setOf(ApiTilgang.LES, ApiTilgang.SKRIV),bruker.tilganger )
-        assertEquals((ApiBrukerrolle.entries.toSet() - setOf(ApiBrukerrolle.LESETILGANG, ApiBrukerrolle.SAKSBEHANDLER)),bruker.brukerroller )
+        assertEquals(ApiBrukerrolle.entries.toSet(),bruker.brukerroller )
     }
 
     @Test
