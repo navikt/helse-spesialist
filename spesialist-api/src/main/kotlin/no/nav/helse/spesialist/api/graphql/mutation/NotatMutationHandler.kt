@@ -9,6 +9,9 @@ import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
+import no.nav.helse.spesialist.application.logg.MdcKey
+import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Kommentar
@@ -19,55 +22,76 @@ import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDateTime
 import java.util.UUID
 
 class NotatMutationHandler(
     private val sessionFactory: SessionFactory,
 ) : NotatMutationSchema {
-    private val logger = LoggerFactory.getLogger(javaClass)
-
     override fun leggTilNotat(
         tekst: String,
         type: ApiNotatType,
         vedtaksperiodeId: String,
         saksbehandlerOid: String,
     ): DataFetcherResult<ApiNotat?> =
-        håndterITransaksjon(
-            feilmeldingSupplier = {
-                "Kunne ikke opprette notat for vedtaksperiode med id ${UUID.fromString(vedtaksperiodeId)}"
-            },
-        ) { session ->
-            val dialog = Dialog.Factory.ny()
-            session.dialogRepository.lagre(dialog)
+        medMdc(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId) {
+            sessionFactory.transactionalSessionScope { session ->
+                val vedtaksperiode =
+                    session.vedtaksperiodeRepository.finn(
+                        VedtaksperiodeId(UUID.fromString(vedtaksperiodeId)),
+                    )
+                medMdc(MdcKey.IDENTITETSNUMMER to vedtaksperiode!!.fødselsnummer) {
+                    try {
+                        val dialog = Dialog.Factory.ny()
+                        session.dialogRepository.lagre(dialog)
 
-            val notat =
-                Notat.Factory.ny(
-                    type = type.tilNotatType(),
-                    tekst = tekst,
-                    dialogRef = dialog.id(),
-                    vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
-                    saksbehandlerOid = SaksbehandlerOid(UUID.fromString(saksbehandlerOid)),
-                )
-            session.notatRepository.lagre(notat)
+                        val notat =
+                            Notat.Factory.ny(
+                                type = type.tilNotatType(),
+                                tekst = tekst,
+                                dialogRef = dialog.id(),
+                                vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
+                                saksbehandlerOid = SaksbehandlerOid(UUID.fromString(saksbehandlerOid)),
+                            )
+                        session.notatRepository.lagre(notat)
 
-            notat.utfyllTilApiNotat(session)
+                        notat.utfyllTilApiNotat(session).let(::byggRespons)
+                    } catch (exception: Exception) {
+                        val feilmelding = "Kunne ikke opprette notat for vedtaksperiode"
+                        loggThrowable(feilmelding, exception)
+                        byggFeilrespons(graphqlErrorException(500, feilmelding))
+                    }
+                }
+            }
         }
 
     override fun feilregistrerNotat(id: Int): DataFetcherResult<ApiNotat?> =
-        håndterITransaksjon(
-            feilmeldingSupplier = { "Kunne ikke feilregistrere notat med id $id" },
-        ) { session ->
-            val notat =
-                session.notatRepository.finn(NotatId(id))
-                    ?: error("Kunne ikke finne notat med id $id")
+        sessionFactory.transactionalSessionScope { session ->
+            try {
+                val notat =
+                    session.notatRepository.finn(NotatId(id))
+                        ?: error("Kunne ikke finne notat med id $id")
 
-            notat.feilregistrer()
+                medMdc(MdcKey.VEDTAKSPERIODE_ID to notat.vedtaksperiodeId.toString()) {
+                    val vedtaksperiode =
+                        session.vedtaksperiodeRepository.finn(
+                            VedtaksperiodeId(notat.vedtaksperiodeId),
+                        )
 
-            session.notatRepository.lagre(notat)
+                    medMdc(MdcKey.IDENTITETSNUMMER to vedtaksperiode!!.fødselsnummer) {
+                        notat.feilregistrer()
 
-            notat.utfyllTilApiNotat(session)
+                        session.notatRepository.lagre(notat)
+
+                        notat.utfyllTilApiNotat(session)
+                    }
+                }.let(::byggRespons)
+            } catch (exception: Exception) {
+                val feilmelding = "Kunne ikke feilregistrere notat med id $id"
+                loggThrowable(feilmelding, exception)
+                byggFeilrespons(graphqlErrorException(500, feilmelding))
+            }
         }
 
     override fun leggTilKommentar(
@@ -75,55 +99,50 @@ class NotatMutationHandler(
         tekst: String,
         saksbehandlerident: String,
     ): DataFetcherResult<ApiKommentar?> =
-        håndterITransaksjon(
-            feilmeldingSupplier = { "Kunne ikke legge til kommentar med dialog-ref: $dialogRef" },
-        ) { session ->
-            val dialog =
-                session.dialogRepository.finn(DialogId(dialogRef.toLong()))
-                    ?: error("Kunne ikke finne dialog med id $dialogRef")
+        sessionFactory.transactionalSessionScope { session ->
+            try {
+                val dialog =
+                    session.dialogRepository.finn(DialogId(dialogRef.toLong()))
+                        ?: error("Kunne ikke finne dialog med id $dialogRef")
 
-            val kommentar =
-                dialog.leggTilKommentar(
-                    tekst = tekst,
-                    saksbehandlerident = NAVIdent(saksbehandlerident),
-                )
+                val kommentar =
+                    dialog.leggTilKommentar(
+                        tekst = tekst,
+                        saksbehandlerident = NAVIdent(saksbehandlerident),
+                    )
 
-            session.dialogRepository.lagre(dialog)
+                session.dialogRepository.lagre(dialog)
 
-            dialog.tilApiKommentar(kommentar.id())
+                dialog.tilApiKommentar(kommentar.id()).let(::byggRespons)
+            } catch (exception: Exception) {
+                val feilmelding = "Kunne ikke legge til kommentar med dialog-ref: $dialogRef"
+                loggThrowable(feilmelding, exception)
+                byggFeilrespons(graphqlErrorException(500, feilmelding))
+            }
         }
 
     override fun feilregistrerKommentar(id: Int): DataFetcherResult<ApiKommentar?> =
-        håndterITransaksjon(
-            feilmeldingSupplier = { "Kunne ikke feilregistrere kommentar med id $id" },
-        ) { session ->
-            val kommentarId = KommentarId(id)
-            val dialog =
-                session.dialogRepository.finnForKommentar(kommentarId)
-                    ?: error("Kunne ikke finne dialog for kommentar med id $id")
+        sessionFactory.transactionalSessionScope { session ->
+            try {
+                val kommentarId = KommentarId(id)
 
-            dialog.feilregistrerKommentar(kommentarId)
+                val dialog =
+                    session.dialogRepository.finnForKommentar(kommentarId)
+                        ?: error("Kunne ikke finne dialog for kommentar med id $id")
 
-            session.dialogRepository.lagre(dialog)
+                dialog.feilregistrerKommentar(kommentarId)
 
-            dialog.tilApiKommentar(kommentarId)
+                session.dialogRepository.lagre(dialog)
+
+                dialog.tilApiKommentar(kommentarId).let(::byggRespons)
+            } catch (exception: Exception) {
+                val feilmelding = "Kunne ikke feilregistrere kommentar med id $id"
+                loggThrowable(feilmelding, exception)
+                byggFeilrespons(graphqlErrorException(500, feilmelding))
+            }
         }
 
     override fun feilregistrerKommentarV2(id: Int): DataFetcherResult<ApiKommentar?> = feilregistrerKommentar(id)
-
-    private fun <T> håndterITransaksjon(
-        feilmeldingSupplier: () -> String,
-        transactionalBlock: (SessionContext) -> T,
-    ): DataFetcherResult<T> =
-        try {
-            sessionFactory.transactionalSessionScope { session ->
-                transactionalBlock(session).let(::byggRespons)
-            }
-        } catch (exception: Exception) {
-            val feilmelding = feilmeldingSupplier()
-            logger.error(feilmelding, exception)
-            byggFeilrespons(graphqlErrorException(500, feilmelding))
-        }
 
     private fun Notat.utfyllTilApiNotat(session: SessionContext) =
         tilApiNotat(

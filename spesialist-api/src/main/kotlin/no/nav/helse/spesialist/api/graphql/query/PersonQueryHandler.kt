@@ -17,7 +17,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.`StansAutomatiskBehandlinghåndterer`
+import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
@@ -107,10 +107,13 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.logg.MdcKey
+import no.nav.helse.spesialist.application.logg.coMedMdc
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
@@ -145,18 +148,21 @@ class PersonQueryHandler(
     override suspend fun person(
         personPseudoId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<ApiPerson?> =
-        sessionFactory.transactionalSessionScope { transaction ->
-            hentPerson(
-                personPseudoId =
-                    runCatching {
-                        PersonPseudoId.fraString(personPseudoId)
-                    }.getOrElse { badRequest("Ugyldig format på personPseudoId") },
-                transaction = transaction,
-                saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
-                brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
-            )
+    ): DataFetcherResult<ApiPerson?> {
+        val personPseudoId =
+            runCatching { PersonPseudoId.fraString(personPseudoId) }
+                .getOrElse { badRequest("Ugyldig format på personPseudoId") }
+        return coMedMdc(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
+            sessionFactory.transactionalSessionScope { transaction ->
+                hentPerson(
+                    personPseudoId = personPseudoId,
+                    transaction = transaction,
+                    saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+                    brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
+                )
+            }
         }
+    }
 
     private fun hentPerson(
         personPseudoId: PersonPseudoId,
@@ -177,6 +183,17 @@ class PersonQueryHandler(
                 }
         )
 
+        return medMdc(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
+            hentPerson(identitetsnummer, transaction, saksbehandler, brukerroller)
+        }
+    }
+
+    private fun hentPerson(
+        identitetsnummer: Identitetsnummer,
+        transaction: SessionContext,
+        saksbehandler: Saksbehandler,
+        brukerroller: Set<Brukerrolle>,
+    ): DataFetcherResult<ApiPerson?> {
         loggInfo("Personoppslag på person", "identitetsnummer: $identitetsnummer")
 
         val personEntity =

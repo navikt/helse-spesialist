@@ -275,7 +275,7 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `leggTilNotat har feilhåndtering`() {
+    fun `leggTilNotat feiler om vedtaksperioden notatet er lagret på ikke eksisterer`() {
         opprettSaksbehandler()
 
         val body =
@@ -288,6 +288,6 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
                 ),
             )
 
-        assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
+        assertEquals("Exception while fetching data (/leggTilNotat) : null", body["errors"][0]["message"].asText())
     }
 }
