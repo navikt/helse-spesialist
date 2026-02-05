@@ -95,30 +95,6 @@ abstract class ForPersonBehandlerUtenBody<RESOURCE, RESPONSE, ERROR : ApiErrorCo
         ) { person: Person -> behandle(resource, person, kallKontekst) }
 }
 
-abstract class ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
-    private val personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
-    private val personPseudoIdIkkeFunnet: ERROR,
-    private val manglerTilgangTilPerson: ERROR,
-) : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR> {
-    abstract fun behandle(
-        resource: RESOURCE,
-        request: REQUEST,
-        person: Person,
-        kallKontekst: KallKontekst,
-    ): RestResponse<RESPONSE, ERROR>
-
-    final override fun behandle(
-        resource: RESOURCE,
-        request: REQUEST,
-        kallKontekst: KallKontekst,
-    ): RestResponse<RESPONSE, ERROR> =
-        kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(personPseudoId(resource).pseudoId),
-            personPseudoIdIkkeFunnet = { personPseudoIdIkkeFunnet },
-            manglerTilgangTilPerson = { manglerTilgangTilPerson },
-        ) { person -> behandle(resource, request, person, kallKontekst) }
-}
-
 abstract class GetForPersonBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode>(
     personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
     personPseudoIdIkkeFunnet: ERROR,
@@ -129,47 +105,3 @@ abstract class GetForPersonBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode>(
         manglerTilgangTilPerson = manglerTilgangTilPerson,
     ),
     GetBehandler<RESOURCE, RESPONSE, ERROR>
-
-abstract class DeleteForPersonBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode>(
-    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
-    personPseudoIdIkkeFunnet: ERROR,
-    manglerTilgangTilPerson: ERROR,
-) : ForPersonBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>(
-        personPseudoId = personPseudoId,
-        personPseudoIdIkkeFunnet = personPseudoIdIkkeFunnet,
-        manglerTilgangTilPerson = manglerTilgangTilPerson,
-    ),
-    DeleteBehandler<RESOURCE, RESPONSE, ERROR>
-
-abstract class PatchForPersonBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
-    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
-    personPseudoIdIkkeFunnet: ERROR,
-    manglerTilgangTilPerson: ERROR,
-) : ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>(
-        personPseudoId = personPseudoId,
-        personPseudoIdIkkeFunnet = personPseudoIdIkkeFunnet,
-        manglerTilgangTilPerson = manglerTilgangTilPerson,
-    ),
-    PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>
-
-abstract class PostForPersonBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
-    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
-    personPseudoIdIkkeFunnet: ERROR,
-    manglerTilgangTilPerson: ERROR,
-) : ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>(
-        personPseudoId = personPseudoId,
-        personPseudoIdIkkeFunnet = personPseudoIdIkkeFunnet,
-        manglerTilgangTilPerson = manglerTilgangTilPerson,
-    ),
-    PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>
-
-abstract class PutForPersonBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode>(
-    personPseudoId: (RESOURCE) -> Personer.PersonPseudoId,
-    personPseudoIdIkkeFunnet: ERROR,
-    manglerTilgangTilPerson: ERROR,
-) : ForPersonBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>(
-        personPseudoId = personPseudoId,
-        personPseudoIdIkkeFunnet = personPseudoIdIkkeFunnet,
-        manglerTilgangTilPerson = manglerTilgangTilPerson,
-    ),
-    PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>

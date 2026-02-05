@@ -11,9 +11,10 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykd
 import no.nav.helse.spesialist.api.rest.ApiArbeidstidsvurderingRequest
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PostForPersonBehandler
+import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -21,16 +22,21 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 import java.util.UUID
 
-class PostArbeidstidsvurderingBehandler :
-    PostForPersonBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode>(
-        personPseudoId = { it.parent.parent },
-        personPseudoIdIkkeFunnet = ApiArbeidstidsvurderingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET,
-        manglerTilgangTilPerson = ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON,
-    ) {
+class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
     override val påkrevdTilgang = Tilgang.Skriv
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,
+        request: ApiArbeidstidsvurderingRequest,
+        kallKontekst: KallKontekst,
+    ): RestResponse<Unit, ApiArbeidstidsvurderingErrorCode> =
+        kallKontekst.medPerson(
+            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
+            personPseudoIdIkkeFunnet = { ApiArbeidstidsvurderingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON },
+        ) { person -> behandleForPerson(request, person, kallKontekst) }
+
+    private fun behandleForPerson(
         request: ApiArbeidstidsvurderingRequest,
         person: Person,
         kallKontekst: KallKontekst,
@@ -162,6 +168,9 @@ enum class ApiArbeidstidsvurderingErrorCode(
 ) : ApiErrorCode {
     PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    MISMATCH_I_IDENTITETSNUMRE("Person referert til i URL matcher ikke person referert til i request", HttpStatusCode.BadRequest),
+    MISMATCH_I_IDENTITETSNUMRE(
+        "Person referert til i URL matcher ikke person referert til i request",
+        HttpStatusCode.BadRequest,
+    ),
     MANGLER_VURDERTE_PERIODER("Mangler vurderte perioder", HttpStatusCode.BadRequest),
 }
