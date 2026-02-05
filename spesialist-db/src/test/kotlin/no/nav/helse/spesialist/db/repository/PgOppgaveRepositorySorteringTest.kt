@@ -188,16 +188,15 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             it.string("navn")
         }
 
+    private fun MutableList<LocalDate>.finnLedigDato(): LocalDate {
+        var kandidat: LocalDate
+        do {
+            kandidat = LocalDate.now().plusDays(Random.nextLong().absoluteValue % 365)
+        } while (contains(kandidat))
+        return kandidat
+    }
 }
 
 private fun LocalDateTime.somInstantISystemetsTidssone(): Instant = atZone(ZoneId.systemDefault()).toInstant()
 
-private fun MutableList<LocalDate>.finnLedigDato(): LocalDate {
-    var kandidat: LocalDate
-    do {
-        kandidat = LocalDate.now().plusDays(Random.nextLong().absoluteValue % 365)
-    } while (contains(kandidat))
-    return kandidat
-}
-
-private fun Instant.roundToMicroseconds(): Instant = truncatedTo(ChronoUnit.MICROS)
+private fun Instant.roundToMicroseconds() = plus(500, ChronoUnit.NANOS).truncatedTo(ChronoUnit.MICROS)
