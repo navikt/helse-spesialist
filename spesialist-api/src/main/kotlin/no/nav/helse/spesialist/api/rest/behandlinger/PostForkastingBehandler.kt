@@ -47,7 +47,6 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
             personIkkeFunnet = PERSON_IKKE_FUNNET,
             manglerTilgangTilPerson = MANGLER_TILGANG_TIL_PERSON,
         ) { behandling, vedtaksperiode, person ->
-            val fødselsnummer = person.id.value
             val oppgave =
                 kallKontekst.transaksjon.oppgaveRepository.finn(behandling.spleisBehandlingId!!)
                     ?: return@medBehandling RestResponse.Error(OPPGAVE_IKKE_FUNNET)
@@ -57,12 +56,12 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
 
             oppgave.avventerSystem(kallKontekst.saksbehandler.ident, kallKontekst.saksbehandler.id.value)
             oppgave.fjernFraPåVent()
-            kallKontekst.outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
+            kallKontekst.outbox.leggTil(person.id.value, OppgaveOppdatert(oppgave), "oppgave avventer system")
             kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id)
             kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
 
             val totrinnsvurdering =
-                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
+                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
             if (totrinnsvurdering != null) {
                 if (totrinnsvurdering.tilstand == TotrinnsvurderingTilstand.AVVENTER_BESLUTTER) {
                     return@medBehandling RestResponse.Error(TOTRINNSVURDERING_SENDT_TIL_BESLUTTER)
@@ -71,7 +70,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
                 kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
 
-            kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, fødselsnummer)
+            kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, person.id.value)
 
             val varsler = kallKontekst.transaksjon.varselRepository.finnVarslerFor(listOf(behandling.id))
             varsler
@@ -88,14 +87,14 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
                         varsel = it,
                         vedtaksperiodeId = vedtaksperiode.id,
                         spleisBehandlingId = behandling.spleisBehandlingId!!,
-                        fødselsnummer = fødselsnummer,
+                        fødselsnummer = person.id.value,
                         varseldefinisjon = varseldefinisjon,
                     )
                 }.let { avvisteVarsler ->
                     kallKontekst.transaksjon.varselRepository.lagre(avvisteVarsler)
                 }
             byttTilstandOgPubliserMeldinger(
-                fødselsnummer = fødselsnummer,
+                fødselsnummer = person.id.value,
                 behandling = behandling,
                 oppgave = oppgave,
                 totrinnsvurdering = totrinnsvurdering,
