@@ -56,7 +56,6 @@ import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -89,8 +88,7 @@ class SaksbehandlerMediator(
             val identitetsnummer =
                 vedtaksperiodeId
                     ?.let(transaction.vedtaksperiodeRepository::finn)
-                    ?.fødselsnummer
-                    ?.let(Identitetsnummer::fraString)
+                    ?.identitetsnummer
 
             listOf(
                 MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId?.value?.toString(),

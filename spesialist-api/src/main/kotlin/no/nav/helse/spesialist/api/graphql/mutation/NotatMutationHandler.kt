@@ -41,7 +41,7 @@ class NotatMutationHandler(
                     session.vedtaksperiodeRepository.finn(
                         VedtaksperiodeId(UUID.fromString(vedtaksperiodeId)),
                     )
-                medMdc(MdcKey.IDENTITETSNUMMER to vedtaksperiode!!.fødselsnummer) {
+                medMdc(MdcKey.IDENTITETSNUMMER to vedtaksperiode!!.identitetsnummer.value) {
                     try {
                         val dialog = Dialog.Factory.ny()
                         session.dialogRepository.lagre(dialog)
@@ -79,7 +79,7 @@ class NotatMutationHandler(
                             VedtaksperiodeId(notat.vedtaksperiodeId),
                         )
 
-                    medMdc(MdcKey.IDENTITETSNUMMER to vedtaksperiode!!.fødselsnummer) {
+                    medMdc(MdcKey.IDENTITETSNUMMER to vedtaksperiode!!.identitetsnummer.value) {
                         notat.feilregistrer()
 
                         session.notatRepository.lagre(notat)

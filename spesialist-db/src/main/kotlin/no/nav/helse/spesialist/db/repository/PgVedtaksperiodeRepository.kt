@@ -4,6 +4,7 @@ import kotliquery.Session
 import no.nav.helse.spesialist.application.VedtaksperiodeRepository
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
@@ -20,7 +21,7 @@ class PgVedtaksperiodeRepository private constructor(
                  ON CONFLICT(vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
             """,
             "vedtaksperiodeId" to vedtaksperiode.id.value,
-            "fodselsnummer" to vedtaksperiode.fødselsnummer,
+            "fodselsnummer" to vedtaksperiode.identitetsnummer.value,
             "forkastet" to vedtaksperiode.forkastet,
             "organisasjonsnummer" to vedtaksperiode.organisasjonsnummer,
         )
@@ -38,7 +39,7 @@ class PgVedtaksperiodeRepository private constructor(
         ) {
             Vedtaksperiode(
                 id = VedtaksperiodeId(it.uuid("vedtaksperiode_id")),
-                fødselsnummer = it.string("fødselsnummer"),
+                identitetsnummer = Identitetsnummer.fraString(it.string("fødselsnummer")),
                 organisasjonsnummer = it.string("arbeidsgiver_identifikator"),
                 forkastet = it.boolean("forkastet"),
             )

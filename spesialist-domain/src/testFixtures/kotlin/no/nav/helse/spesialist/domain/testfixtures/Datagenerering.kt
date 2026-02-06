@@ -213,7 +213,7 @@ fun lagVedtaksperiode(
 ): Vedtaksperiode =
     Vedtaksperiode(
         id = id,
-        fødselsnummer = identitetsnummer.value,
+        identitetsnummer = identitetsnummer,
         organisasjonsnummer = organisasjonsnummer,
         forkastet = forkastet,
     )

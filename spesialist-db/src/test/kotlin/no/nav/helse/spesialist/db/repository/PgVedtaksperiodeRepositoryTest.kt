@@ -25,7 +25,7 @@ class PgVedtaksperiodeRepositoryTest : AbstractDBIntegrationTest() {
         // then
         assertNotNull(funnet)
         assertEquals(vedtaksperiode.id, funnet.id)
-        assertEquals(person.id.value, funnet.fødselsnummer)
+        assertEquals(person.id, funnet.identitetsnummer)
     }
 
     @Test
@@ -44,7 +44,7 @@ class PgVedtaksperiodeRepositoryTest : AbstractDBIntegrationTest() {
         // then
         assertNotNull(funnet)
         assertEquals(vedtaksperiode.id, funnet.id)
-        assertEquals(person.id.value, funnet.fødselsnummer)
+        assertEquals(person.id, funnet.identitetsnummer)
         assertTrue(funnet.forkastet)
     }
 }

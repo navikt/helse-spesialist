@@ -11,7 +11,7 @@ value class VedtaksperiodeId(
 
 class Vedtaksperiode(
     id: VedtaksperiodeId,
-    val fødselsnummer: String,
+    val identitetsnummer: Identitetsnummer,
     val organisasjonsnummer: String,
     val forkastet: Boolean,
 ) : AggregateRoot<VedtaksperiodeId>(id) {
@@ -22,7 +22,7 @@ class Vedtaksperiode(
             organisasjonsnummer: String,
         ) = Vedtaksperiode(
             id = id,
-            fødselsnummer = identitetsnummer.value,
+            identitetsnummer = identitetsnummer,
             organisasjonsnummer = organisasjonsnummer,
             forkastet = false,
         )

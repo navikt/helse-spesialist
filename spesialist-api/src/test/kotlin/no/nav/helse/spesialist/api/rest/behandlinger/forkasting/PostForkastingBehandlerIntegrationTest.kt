@@ -379,7 +379,7 @@ class PostForkastingBehandlerIntegrationTest {
         Godkjenningsbehov(
             id = UUID.randomUUID(),
             opprettet = LocalDateTime.now(),
-            fødselsnummer = vedtaksperiode.fødselsnummer,
+            fødselsnummer = vedtaksperiode.identitetsnummer.value,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
             yrkesaktivitetstype = behandling.yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiode.id.value,

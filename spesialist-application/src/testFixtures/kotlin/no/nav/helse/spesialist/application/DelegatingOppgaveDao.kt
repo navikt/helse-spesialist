@@ -12,7 +12,7 @@ class DelegatingOppgaveDao(
 ) : PartialOppgaveDao {
     override fun finnOppgaveId(fødselsnummer: String): Long? {
         val vedtaksperiodeIder =
-            vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.map { it.id.value }
+            vedtaksperiodeRepository.alle().filter { it.identitetsnummer.value == fødselsnummer }.map { it.id.value }
         return oppgaveRepository.alle()
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
             .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
@@ -27,7 +27,7 @@ class DelegatingOppgaveDao(
 
     override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
         val vedtaksperiodeIder =
-            vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.map { it.id.value }
+            vedtaksperiodeRepository.alle().filter { it.identitetsnummer.value == fødselsnummer }.map { it.id.value }
         return oppgaveRepository.alle()
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
             .maxOf { it.id }

@@ -235,7 +235,7 @@ abstract class AbstractDBIntegrationTest {
             }
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val vedtaksperiode =
-            Vedtaksperiode(vedtaksperiodeId, person.id.value, organisasjonsnummer, forkastet)
+            Vedtaksperiode(vedtaksperiodeId, person.id, organisasjonsnummer, forkastet)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         opprettVedtakstype(vedtaksperiodeId.value, periodetype, inntektskilde)
         return vedtaksperiode

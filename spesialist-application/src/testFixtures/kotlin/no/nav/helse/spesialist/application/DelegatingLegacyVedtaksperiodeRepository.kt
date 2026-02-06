@@ -9,6 +9,7 @@ import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -24,14 +25,15 @@ class DelegatingLegacyVedtaksperiodeRepository(
     override fun finnVedtaksperioder(fødselsnummer: String) =
         vedtaksperiodeRepository
             .alle()
-            .filter { it.fødselsnummer == fødselsnummer }
+            .filter { it.identitetsnummer.value == fødselsnummer }
             .map { vedtaksperiode -> vedtaksperiode.toVedtaksperiodeDto() }
 
     override fun lagreVedtaksperioder(
         fødselsnummer: String,
         vedtaksperioder: List<VedtaksperiodeDto>,
     ) {
-        vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.forEach { vedtaksperiode ->
+        val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        vedtaksperiodeRepository.alle().filter { it.identitetsnummer == identitetsnummer }.forEach { vedtaksperiode ->
             behandlingRepository.alle().filter { it.vedtaksperiodeId == vedtaksperiode.id }.forEach { behandling ->
                 behandlingRepository.slett(behandling.id)
             }
@@ -42,7 +44,7 @@ class DelegatingLegacyVedtaksperiodeRepository(
             vedtaksperiodeRepository.lagre(
                 Vedtaksperiode(
                     id = vedtaksperiodeId,
-                    fødselsnummer = fødselsnummer,
+                    identitetsnummer = identitetsnummer,
                     organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     forkastet = vedtaksperiode.forkastet,
                 ),

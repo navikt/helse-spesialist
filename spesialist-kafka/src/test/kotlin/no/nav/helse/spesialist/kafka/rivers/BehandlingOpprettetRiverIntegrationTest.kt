@@ -60,7 +60,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         // Then:
         val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
         assertEquals(vedtaksperiodeId, vedtaksperiode.id)
-        assertEquals(person.id.value, vedtaksperiode.fødselsnummer)
+        assertEquals(person.id, vedtaksperiode.identitetsnummer)
         assertEquals(organisasjonsnummer, vedtaksperiode.organisasjonsnummer)
         assertEquals(false, vedtaksperiode.forkastet)
 
@@ -378,7 +378,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         // Then:
         val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
         assertEquals(vedtaksperiodeId, vedtaksperiode.id)
-        assertEquals(person.id.value, vedtaksperiode.fødselsnummer)
+        assertEquals(person.id, vedtaksperiode.identitetsnummer)
         assertEquals("SELVSTENDIG", vedtaksperiode.organisasjonsnummer)
         assertEquals(false, vedtaksperiode.forkastet)
 

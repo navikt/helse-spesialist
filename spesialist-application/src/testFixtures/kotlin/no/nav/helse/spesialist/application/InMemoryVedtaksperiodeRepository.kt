@@ -9,7 +9,7 @@ class InMemoryVedtaksperiodeRepository :
     override fun deepCopy(original: Vedtaksperiode): Vedtaksperiode =
         Vedtaksperiode(
             id = original.id,
-            fødselsnummer = original.fødselsnummer,
+            identitetsnummer = original.identitetsnummer,
             organisasjonsnummer = original.organisasjonsnummer,
             forkastet = original.forkastet,
         )

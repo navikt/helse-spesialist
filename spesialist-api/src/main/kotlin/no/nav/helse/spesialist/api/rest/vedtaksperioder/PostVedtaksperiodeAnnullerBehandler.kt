@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -54,10 +53,10 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
         )
 
         kallKontekst.outbox.leggTil(
-            identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
+            identitetsnummer = vedtaksperiode.identitetsnummer,
             hendelse =
                 AnnullertUtbetalingEvent(
-                    fødselsnummer = vedtaksperiode.fødselsnummer,
+                    fødselsnummer = vedtaksperiode.identitetsnummer.value,
                     organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     saksbehandlerOid = kallKontekst.saksbehandler.id.value,
                     saksbehandlerIdent = kallKontekst.saksbehandler.ident.value,

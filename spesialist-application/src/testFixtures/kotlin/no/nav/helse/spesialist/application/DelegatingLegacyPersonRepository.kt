@@ -36,7 +36,7 @@ class DelegatingLegacyPersonRepository(
             aktørId = person.aktørId,
             fødselsnummer = person.id.value,
             vedtaksperioder = vedtaksperiodeRepository.alle()
-                .filter { it.fødselsnummer == person.id.value }.map { vedtaksperiode ->
+                .filter { it.identitetsnummer == person.id }.map { vedtaksperiode ->
                     LegacyVedtaksperiode(
                         vedtaksperiodeId = vedtaksperiode.id.value,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,

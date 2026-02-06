@@ -96,7 +96,7 @@ class KallKontekst(
             }
 
             medPerson(
-                identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
+                identitetsnummer = vedtaksperiode.identitetsnummer,
                 personIkkeFunnet = { error("Personen ble ikke funnet") },
                 manglerTilgangTilPerson = manglerTilgangTilPerson,
             ) { person -> block(vedtaksperiode, person) }
