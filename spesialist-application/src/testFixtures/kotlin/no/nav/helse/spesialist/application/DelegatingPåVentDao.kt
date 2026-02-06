@@ -5,6 +5,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
 import java.util.UUID
 
@@ -13,7 +14,7 @@ class DelegatingPåVentDao(
     private val oppgaveRepository: InMemoryOppgaveRepository,
 ) : PåVentDao {
     override fun erPåVent(vedtaksperiodeId: UUID): Boolean =
-        påVentRepository.alle().any { it.vedtaksperiodeId == vedtaksperiodeId }
+        påVentRepository.alle().any { it.vedtaksperiodeId.value == vedtaksperiodeId }
 
     override fun lagrePåVent(
         oppgaveId: Long,
@@ -25,7 +26,7 @@ class DelegatingPåVentDao(
     ) {
         påVentRepository.lagre(
             PåVent.Factory.ny(
-                vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId,
+                vedtaksperiodeId = VedtaksperiodeId(oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId),
                 saksbehandlerOid = SaksbehandlerOid(saksbehandlerOid),
                 frist = frist!!,
                 dialogRef = DialogId(dialogRef),
@@ -38,7 +39,7 @@ class DelegatingPåVentDao(
     override fun slettPåVent(oppgaveId: Long): Int {
         val vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId
         val påVenter = påVentRepository.alle()
-            .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+            .filter { it.vedtaksperiodeId.value == vedtaksperiodeId }
             .onEach { påVentRepository.slett(it.id()) }
         return påVenter.size
     }

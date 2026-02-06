@@ -4,7 +4,6 @@ import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
 
 @JvmInline
 value class PåVentId(
@@ -13,7 +12,7 @@ value class PåVentId(
 
 class PåVent private constructor(
     id: PåVentId?,
-    val vedtaksperiodeId: UUID,
+    val vedtaksperiodeId: VedtaksperiodeId,
     val saksbehandlerOid: SaksbehandlerOid,
     val frist: LocalDate,
     val opprettetTidspunkt: Instant,
@@ -23,7 +22,7 @@ class PåVent private constructor(
 ) : LateIdAggregateRoot<PåVentId>(id) {
     object Factory {
         fun ny(
-            vedtaksperiodeId: UUID,
+            vedtaksperiodeId: VedtaksperiodeId,
             saksbehandlerOid: SaksbehandlerOid,
             frist: LocalDate,
             dialogRef: DialogId?,
@@ -42,7 +41,7 @@ class PåVent private constructor(
 
         fun fraLagring(
             id: PåVentId,
-            vedtaksperiodeId: UUID,
+            vedtaksperiodeId: VedtaksperiodeId,
             saksbehandlerOid: SaksbehandlerOid,
             frist: LocalDate,
             opprettetTidspunkt: Instant,

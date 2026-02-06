@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 internal class PgPåVentRepository(
     session: Session,
@@ -28,7 +29,7 @@ internal class PgPåVentRepository(
     private fun Row.toPåVent(): PåVent =
         PåVent.Factory.fraLagring(
             id = PåVentId(int("id")),
-            vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            vedtaksperiodeId = VedtaksperiodeId(uuid("vedtaksperiode_id")),
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             frist = localDate("frist"),
             opprettetTidspunkt = instant("opprettet"),
