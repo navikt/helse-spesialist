@@ -58,6 +58,11 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -331,6 +336,11 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 behandlingId = behandlingId,
                 utbetalingId = utbetalingId,
                 kanAvvises = kanAvvises,
+                mottaker = egenskaper.finnMottaker(),
+                oppgavetype = egenskaper.finnOppgavetype(),
+                inntektskilde = egenskaper.finnInntektskilde(),
+                inntektsforhold = egenskaper.finnInntektsforhold(),
+                periodetype = egenskaper.finnPeriodetype(),
             ),
         )
     }
@@ -388,7 +398,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            brukerrollehenter = { Either.Success( emptySet()) },
+            brukerrollehenter = { Either.Success(emptySet()) },
         )
     private val apiOppgaveService =
         ApiOppgaveService(
@@ -535,7 +545,11 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             }
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
         opprettSaksbehandler()
-        opprettVedtaksperiode(fødselsnummer = person.fødselsnummer, vedtaksperiodeId = UUID.randomUUID(), utbetalingId = UUID.randomUUID())
+        opprettVedtaksperiode(
+            fødselsnummer = person.fødselsnummer,
+            vedtaksperiodeId = UUID.randomUUID(),
+            utbetalingId = UUID.randomUUID(),
+        )
         val saksbehandler =
             Saksbehandler(
                 id = SaksbehandlerOid(SAKSBEHANDLER_OID),
@@ -586,7 +600,11 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             }
         nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
         opprettSaksbehandler()
-        opprettVedtaksperiode(fødselsnummer = person.fødselsnummer, vedtaksperiodeId = UUID.randomUUID(), utbetalingId = UUID.randomUUID())
+        opprettVedtaksperiode(
+            fødselsnummer = person.fødselsnummer,
+            vedtaksperiodeId = UUID.randomUUID(),
+            utbetalingId = UUID.randomUUID(),
+        )
         val saksbehandler2Oid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandler2Oid)
         opprettTotrinnsvurdering(

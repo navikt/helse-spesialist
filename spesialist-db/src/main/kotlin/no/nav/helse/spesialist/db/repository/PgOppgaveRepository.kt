@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.db.repository
 
+import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.db.EgenskapForDatabase
@@ -9,7 +10,16 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
+import no.nav.helse.modell.oppgave.Mottaker.DelvisRefusjon
+import no.nav.helse.modell.oppgave.Mottaker.IngenUtbetaling
+import no.nav.helse.modell.oppgave.Mottaker.UtbetalingTilArbeidsgiver
+import no.nav.helse.modell.oppgave.Mottaker.UtbetalingTilSykmeldt
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
@@ -62,7 +72,12 @@ class PgOppgaveRepository private constructor(
                 o.ferdigstilt_av_oid, 
                 o.utbetaling_id,
                 t.saksbehandler_ref, 
-                o.kan_avvises
+                o.kan_avvises,
+                o.mottaker,
+                o.oppgavetype,
+                o.inntektskilde,
+                o.inntektsforhold,
+                o.periodetype
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             INNER JOIN person p on p.id = v.person_ref
@@ -73,21 +88,7 @@ class PgOppgaveRepository private constructor(
             """,
             "fodselsnummer" to identitetsnummer.value,
         ).singleOrNull { row ->
-            Oppgave.fraLagring(
-                id = row.long("id"),
-                opprettet = row.localDateTime("opprettet"),
-                førsteOpprettet = row.localDateTimeOrNull("første_opprettet"),
-                egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
-                tilstand = tilstand(row.string("status")),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                behandlingId = row.uuid("behandling_id"),
-                utbetalingId = row.uuid("utbetaling_id"),
-                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
-                kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av")?.let { NAVIdent(it) },
-                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
-            )
+            row.rowTilOppgave()
         }
 
     override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
@@ -125,7 +126,11 @@ class PgOppgaveRepository private constructor(
                 utbetaling_id, 
                 mottaker, 
                 egenskaper, 
-                kan_avvises
+                kan_avvises,
+                oppgavetype,
+                inntektskilde,
+                inntektsforhold,
+                periodetype
             ) 
             SELECT
                 :id,
@@ -140,9 +145,13 @@ class PgOppgaveRepository private constructor(
                 :behandling_id,
                 :godkjenningsbehov_id,
                 :utbetaling_id,
-                null,
+                :mottaker,
                 CAST(:egenskaper as varchar[]),
-                :kan_avvises
+                :kan_avvises,
+                :oppgavetype,
+                :inntektskilde,
+                :inntektsforhold,
+                :periodetype
             ON CONFLICT(id) DO UPDATE SET 
                 oppdatert = excluded.oppdatert,
                 status = excluded.status,
@@ -150,7 +159,12 @@ class PgOppgaveRepository private constructor(
                 ferdigstilt_av_oid = excluded.ferdigstilt_av_oid,
                 egenskaper = excluded.egenskaper,
                 kan_avvises = excluded.kan_avvises,
-                hendelse_id_godkjenningsbehov = excluded.hendelse_id_godkjenningsbehov
+                hendelse_id_godkjenningsbehov = excluded.hendelse_id_godkjenningsbehov,
+                mottaker = excluded.mottaker,
+                oppgavetype = excluded.oppgavetype,
+                inntektskilde = excluded.inntektskilde,
+                inntektsforhold = excluded.inntektsforhold,
+                periodetype = excluded.periodetype
             """,
             "id" to oppgave.id,
             "opprettet" to oppgave.opprettet,
@@ -165,6 +179,11 @@ class PgOppgaveRepository private constructor(
             "utbetaling_id" to oppgave.utbetalingId,
             "egenskaper" to oppgave.egenskaper.somDbArray { it.toDb() },
             "kan_avvises" to oppgave.kanAvvises,
+            "mottaker" to oppgave.mottaker.dbVerdi(),
+            "oppgavetype" to oppgave.type.dbVerdi(),
+            "inntektskilde" to oppgave.inntektskilde.dbVerdi(),
+            "inntektsforhold" to oppgave.inntektsforhold.dbVerdi(),
+            "periodetype" to oppgave.periodetype.dbVerdi(),
         ).update()
     }
 
@@ -425,7 +444,8 @@ class PgOppgaveRepository private constructor(
     private fun finnOppgave(id: Long): Oppgave? =
         asSQL(
             """
-            SELECT 
+            SELECT
+                o.id,
                 o.egenskaper, 
                 o.opprettet, 
                 o.første_opprettet, 
@@ -437,7 +457,12 @@ class PgOppgaveRepository private constructor(
                 o.ferdigstilt_av_oid, 
                 o.utbetaling_id,
                 t.saksbehandler_ref, 
-                o.kan_avvises
+                o.kan_avvises,
+                o.mottaker,
+                o.oppgavetype,
+                o.inntektskilde,
+                o.inntektsforhold,
+                o.periodetype
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -446,21 +471,7 @@ class PgOppgaveRepository private constructor(
             """,
             "oppgaveId" to id,
         ).singleOrNull { row ->
-            Oppgave.fraLagring(
-                id = id,
-                opprettet = row.localDateTime("opprettet"),
-                førsteOpprettet = row.localDateTimeOrNull("første_opprettet"),
-                egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
-                tilstand = tilstand(row.string("status")),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                behandlingId = row.uuid("behandling_id"),
-                utbetalingId = row.uuid("utbetaling_id"),
-                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
-                kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av")?.let { NAVIdent(it) },
-                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
-            )
+            row.rowTilOppgave()
         }
 
     private fun finnOppgave(id: SpleisBehandlingId): Oppgave? =
@@ -477,8 +488,14 @@ class PgOppgaveRepository private constructor(
                 o.ferdigstilt_av, 
                 o.ferdigstilt_av_oid, 
                 o.utbetaling_id,
+                o.behandling_id,
                 t.saksbehandler_ref, 
-                o.kan_avvises
+                o.kan_avvises,
+                o.mottaker,
+                o.oppgavetype,
+                o.inntektskilde,
+                o.inntektsforhold,
+                o.periodetype
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
@@ -487,22 +504,42 @@ class PgOppgaveRepository private constructor(
             """,
             "spleisBehandlingId" to id.value,
         ).singleOrNull { row ->
-            Oppgave.fraLagring(
-                id = row.long("id"),
-                opprettet = row.localDateTime("opprettet"),
-                førsteOpprettet = row.localDateTimeOrNull("første_opprettet"),
-                egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
-                tilstand = tilstand(row.string("status")),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                behandlingId = id.value,
-                utbetalingId = row.uuid("utbetaling_id"),
-                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
-                kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av")?.let { NAVIdent(it) },
-                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
-            )
+            row.rowTilOppgave()
         }
+
+    private fun Row.rowTilOppgave(): Oppgave {
+        val egenskaper = array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet()
+        return Oppgave.fraLagring(
+            id = long("id"),
+            opprettet = localDateTime("opprettet"),
+            førsteOpprettet = localDateTimeOrNull("første_opprettet"),
+            egenskaper = egenskaper,
+            tilstand = tilstand(string("status")),
+            vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            behandlingId = uuid("behandling_id"),
+            utbetalingId = uuid("utbetaling_id"),
+            godkjenningsbehovId = uuid("hendelse_id_godkjenningsbehov"),
+            kanAvvises = boolean("kan_avvises"),
+            ferdigstiltAvIdent = stringOrNull("ferdigstilt_av")?.let { NAVIdent(it) },
+            ferdigstiltAvOid = uuidOrNull("ferdigstilt_av_oid"),
+            tildeltTil = uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
+            oppgavetype = tilOppgavetype(egenskaper),
+            mottaker = tilMottaker(egenskaper),
+            inntektskilde = tilInntektskilde(egenskaper),
+            inntektsforhold = tilInntektsforhold(egenskaper),
+            periodetype = tilPeriodetype(egenskaper),
+        )
+    }
+
+    private fun Row.tilOppgavetype(egenskaper: Set<Egenskap>) = stringOrNull("oppgavetype")?.tilOppgavetype() ?: egenskaper.egenskapTilOppgavetype()
+
+    private fun Row.tilMottaker(egenskaper: Set<Egenskap>) = stringOrNull("mottaker")?.tilMottaker() ?: egenskaper.egenskapTilMottaker()
+
+    private fun Row.tilInntektskilde(egenskaper: Set<Egenskap>) = stringOrNull("inntektskilde")?.tilInntektskilde() ?: egenskaper.egenskapTilInntektskilde()
+
+    private fun Row.tilInntektsforhold(egenskaper: Set<Egenskap>) = stringOrNull("inntektsforhold")?.tilInntektsforhold() ?: egenskaper.egenskapTilInntektsforhold()
+
+    private fun Row.tilPeriodetype(egenskaper: Set<Egenskap>) = stringOrNull("periodetype")?.tilPeriodetype() ?: egenskaper.egenskapTilPeriodetype()
 
     private fun tilstand(oppgavestatus: String): Oppgave.Tilstand =
         when (oppgavestatus) {
@@ -632,3 +669,135 @@ class PgOppgaveRepository private constructor(
             else -> error("Ukjent oppgaveegenskap")
         }
 }
+
+private fun Mottaker.dbVerdi() =
+    when (this) {
+        UtbetalingTilSykmeldt -> "UtbetalingTilArbeidsgiver"
+        UtbetalingTilArbeidsgiver -> "UtbetalingTilArbeidsgiver"
+        IngenUtbetaling -> "IngenUtbetaling"
+        DelvisRefusjon -> "DelvisRefusjon"
+    }
+
+private fun Oppgavetype.dbVerdi() =
+    when (this) {
+        Oppgavetype.Revurdering -> "Revurdering"
+        Oppgavetype.Søknad -> "Søknad"
+    }
+
+private fun Inntektskilde.dbVerdi() =
+    when (this) {
+        Inntektskilde.EN_ARBEIDSGIVER -> "EnArbeidsgiver"
+        Inntektskilde.FLERE_ARBEIDSGIVERE -> "FlereArbeidsgivere"
+    }
+
+private fun Inntektsforhold.dbVerdi() =
+    when (this) {
+        Inntektsforhold.SelvstendigNæringsdrivende -> "SelvstendigNæringsdrivende"
+        Inntektsforhold.Arbeidstaker -> "Arbeidstaker"
+    }
+
+private fun Periodetype.dbVerdi() =
+    when (this) {
+        Periodetype.FØRSTEGANGSBEHANDLING -> "Førstegangsbehandling"
+        Periodetype.FORLENGELSE -> "Forlengelse"
+        Periodetype.INFOTRYGDFORLENGELSE -> "Infotrygdforlengelse"
+        Periodetype.OVERGANG_FRA_IT -> "OvergangFraIt"
+    }
+
+private fun String.tilMottaker(): Mottaker =
+    when (this) {
+        "UtbetalingTilSykmeldt" -> UtbetalingTilSykmeldt
+        "UtbetalingTilArbeidsgiver" -> UtbetalingTilArbeidsgiver
+        "IngenUtbetaling" -> IngenUtbetaling
+        "DelvisRefusjon" -> DelvisRefusjon
+        else -> error("Ukjent mottaker: $this")
+    }
+
+private fun String.tilOppgavetype(): Oppgavetype =
+    when (this) {
+        "Revurdering" -> Oppgavetype.Revurdering
+        "Søknad" -> Oppgavetype.Søknad
+        else -> error("Ukjent oppgavetype: $this")
+    }
+
+private fun String.tilInntektskilde(): Inntektskilde =
+    when (this) {
+        "EnArbeidsgiver" -> Inntektskilde.EN_ARBEIDSGIVER
+        "FlereArbeidsgivere" -> Inntektskilde.FLERE_ARBEIDSGIVERE
+        else -> error("Ukjent inntektskilde: $this")
+    }
+
+private fun String.tilInntektsforhold(): Inntektsforhold =
+    when (this) {
+        "SelvstendigNæringsdrivende" -> Inntektsforhold.SelvstendigNæringsdrivende
+        "Arbeidstaker" -> Inntektsforhold.Arbeidstaker
+        else -> error("Ukjent inntektsforhold: $this")
+    }
+
+private fun String.tilPeriodetype(): Periodetype =
+    when (this) {
+        "Førstegangsbehandling" -> Periodetype.FØRSTEGANGSBEHANDLING
+        "Forlengelse" -> Periodetype.FORLENGELSE
+        "Infotrygdforlengelse" -> Periodetype.INFOTRYGDFORLENGELSE
+        "OvergangFraIt" -> Periodetype.OVERGANG_FRA_IT
+        else -> error("Ukjent periodetype: $this")
+    }
+
+private fun Set<Egenskap>.egenskapTilMottaker(): Mottaker =
+    this
+        .single { it.kategori == Egenskap.Kategori.Mottaker }
+        .let { egenskap ->
+            when (egenskap) {
+                Egenskap.UTBETALING_TIL_SYKMELDT -> UtbetalingTilSykmeldt
+                Egenskap.DELVIS_REFUSJON -> DelvisRefusjon
+                Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> UtbetalingTilArbeidsgiver
+                Egenskap.INGEN_UTBETALING -> IngenUtbetaling
+                else -> throw IllegalStateException("Uventet egenskap med kategori Mottaker: $egenskap")
+            }
+        }
+
+private fun Set<Egenskap>.egenskapTilOppgavetype(): Oppgavetype =
+    this
+        .single { it.kategori == Egenskap.Kategori.Oppgavetype }
+        .let { egenskap ->
+            when (egenskap) {
+                Egenskap.REVURDERING -> Oppgavetype.Revurdering
+                Egenskap.SØKNAD -> Oppgavetype.Søknad
+                else -> throw IllegalStateException("Uventet egenskap med kategori Oppgavetype: $egenskap")
+            }
+        }
+
+private fun Set<Egenskap>.egenskapTilInntektskilde(): Inntektskilde =
+    this
+        .single { it.kategori == Egenskap.Kategori.Inntektskilde }
+        .let { egenskap ->
+            when (egenskap) {
+                Egenskap.EN_ARBEIDSGIVER -> Inntektskilde.EN_ARBEIDSGIVER
+                Egenskap.FLERE_ARBEIDSGIVERE -> Inntektskilde.FLERE_ARBEIDSGIVERE
+                else -> throw IllegalStateException("Uventet egenskap med kategori Inntektskilde: $egenskap")
+            }
+        }
+
+private fun Set<Egenskap>.egenskapTilInntektsforhold(): Inntektsforhold =
+    this
+        .single { it.kategori == Egenskap.Kategori.Inntektsforhold }
+        .let { egenskap ->
+            when (egenskap) {
+                Egenskap.ARBEIDSTAKER -> Inntektsforhold.Arbeidstaker
+                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> Inntektsforhold.SelvstendigNæringsdrivende
+                else -> throw IllegalStateException("Uventet egenskap med kategori Inntektsforhold: $egenskap")
+            }
+        }
+
+private fun Set<Egenskap>.egenskapTilPeriodetype(): Periodetype =
+    this
+        .single { it.kategori == Egenskap.Kategori.Periodetype }
+        .let { egenskap ->
+            when (egenskap) {
+                Egenskap.FORSTEGANGSBEHANDLING -> Periodetype.FØRSTEGANGSBEHANDLING
+                Egenskap.FORLENGELSE -> Periodetype.FORLENGELSE
+                Egenskap.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
+                Egenskap.OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
+                else -> throw IllegalStateException("Uventet egenskap med kategori Inntektsforhold: $egenskap")
+            }
+        }

@@ -3,13 +3,18 @@ package no.nav.helse.spesialist.application.modell
 import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.application.modell.OppgaveInspector.Companion.oppgaveinspektør
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,6 +40,11 @@ internal class OppdaterOppgavestatusCommandTest {
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
                 egenskaper = setOf(SØKNAD),
+                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                oppgavetype = Oppgavetype.Søknad,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                inntektsforhold = Inntektsforhold.Arbeidstaker,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
             )
     }
 

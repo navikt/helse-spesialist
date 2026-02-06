@@ -24,7 +24,6 @@ import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
 import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
-import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
@@ -49,6 +48,11 @@ import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
@@ -92,7 +96,6 @@ abstract class AbstractDBIntegrationTest {
     fun tearDown() = session.close()
 
     internal val personDao = PgPersonDao(session)
-    protected val personApiDao = PgPersonApiDao(dataSource)
     internal val oppgaveDao = daos.oppgaveDao
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
@@ -322,6 +325,11 @@ abstract class AbstractDBIntegrationTest {
                 hendelseId = godkjenningsbehovId,
                 kanAvvises = kanAvvises,
                 egenskaper = egenskaper,
+                mottaker = egenskaper.finnMottaker(),
+                oppgavetype = egenskaper.finnOppgavetype(),
+                inntektskilde = egenskaper.finnInntektskilde(),
+                inntektsforhold = egenskaper.finnInntektsforhold(),
+                periodetype = egenskaper.finnPeriodetype(),
             )
         sessionContext.oppgaveRepository.lagre(oppgave)
         return oppgave
@@ -345,6 +353,11 @@ abstract class AbstractDBIntegrationTest {
                 hendelseId = godkjenningsbehovId,
                 kanAvvises = kanAvvises,
                 egenskaper = egenskaper,
+                mottaker = egenskaper.finnMottaker(),
+                oppgavetype = egenskaper.finnOppgavetype(),
+                inntektskilde = egenskaper.finnInntektskilde(),
+                inntektsforhold = egenskaper.finnInntektsforhold(),
+                periodetype = egenskaper.finnPeriodetype(),
             )
         sessionContext.oppgaveRepository.lagre(oppgave)
         return oppgave
@@ -460,11 +473,12 @@ abstract class AbstractDBIntegrationTest {
             )
         val arbeidsgiver = opprettArbeidsgiver(identifikator = organisasjonsnummer)
         val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
-        val behandling = opprettBehandling(
-            vedtaksperiode,
-            yrkesaktivitetstype = yrkesaktivitetstype,
-            utbetalingId = UtbetalingId(utbetalingId)
-        )
+        val behandling =
+            opprettBehandling(
+                vedtaksperiode,
+                yrkesaktivitetstype = yrkesaktivitetstype,
+                utbetalingId = UtbetalingId(utbetalingId),
+            )
         utbetalingsopplegg(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -492,7 +506,7 @@ abstract class AbstractDBIntegrationTest {
             epost = saksbehandlerWrapper.saksbehandler.epost,
             ident = saksbehandlerWrapper.saksbehandler.ident,
         )
-        this.forsøkTildeling(saksbehandlerWrapper,  brukerroller)
+        this.forsøkTildeling(saksbehandlerWrapper, brukerroller)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }

@@ -1,6 +1,11 @@
 package no.nav.helse.spesialist.api.rest
 
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
@@ -45,6 +50,11 @@ class PostOpphevStansIntegrationTest {
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,
                 egenskaper = emptySet(),
+                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                oppgavetype = Oppgavetype.Søknad,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                inntektsforhold = Inntektsforhold.Arbeidstaker,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
             ),
         )
         val begrunnelse = "begrunnelse"

@@ -13,7 +13,12 @@ import no.nav.helse.modell.melding.OppgaveOpprettet
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -54,7 +59,7 @@ internal class MessageContextMeldingPublisererTest {
             hendelseId = hendelseId,
             commandContextId = contextId,
             fødselsnummer = fødselsnummer,
-            behov = listOf(behov)
+            behov = listOf(behov),
         )
 
         assertTrue(!testRapid.inspektør.field(0, "@behov").isMissingOrNull())
@@ -71,13 +76,14 @@ internal class MessageContextMeldingPublisererTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()
         val periodetype = "FORLENGELSE"
-        val utgåendeHendelse = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = periodetype
-        )
+        val utgåendeHendelse =
+            VedtaksperiodeGodkjentAutomatisk(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = periodetype,
+            )
 
         meldingPubliserer.publiser(
             fødselsnummer = fødselsnummer,
@@ -96,10 +102,11 @@ internal class MessageContextMeldingPublisererTest {
 
     @Test
     fun `publiserer KommandokjedeEndretEvent med forventet format`() {
-        val event = KommandokjedeEndretEvent.Avbrutt(
-            commandContextId = contextId,
-            hendelseId = hendelseId,
-        )
+        val event =
+            KommandokjedeEndretEvent.Avbrutt(
+                commandContextId = contextId,
+                hendelseId = hendelseId,
+            )
 
         meldingPubliserer.publiser(
             fødselsnummer = fødselsnummer,
@@ -141,16 +148,22 @@ internal class MessageContextMeldingPublisererTest {
         val hendelseId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val oppgave = Oppgave.ny(
-            id = oppgaveId,
-            førsteOpprettet = null,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = hendelseId,
-            kanAvvises = true,
-            egenskaper = setOf(Egenskap.SØKNAD),
-        )
+        val oppgave =
+            Oppgave.ny(
+                id = oppgaveId,
+                førsteOpprettet = null,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = UUID.randomUUID(),
+                hendelseId = hendelseId,
+                kanAvvises = true,
+                egenskaper = setOf(Egenskap.SØKNAD),
+                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                oppgavetype = Oppgavetype.Søknad,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                inntektsforhold = Inntektsforhold.Arbeidstaker,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            )
 
         // When:
         meldingPubliserer.publiser(
@@ -187,22 +200,28 @@ internal class MessageContextMeldingPublisererTest {
         val hendelseId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val oppgave = Oppgave.ny(
-            id = oppgaveId,
-            førsteOpprettet = null,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = hendelseId,
-            kanAvvises = true,
-            egenskaper = setOf(Egenskap.SØKNAD)
-        )
+        val oppgave =
+            Oppgave.ny(
+                id = oppgaveId,
+                førsteOpprettet = null,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = UUID.randomUUID(),
+                hendelseId = hendelseId,
+                kanAvvises = true,
+                egenskaper = setOf(Egenskap.SØKNAD),
+                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                oppgavetype = Oppgavetype.Søknad,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                inntektsforhold = Inntektsforhold.Arbeidstaker,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            )
 
         val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
         val beslutter = SaksbehandlerWrapper(lagSaksbehandler())
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandler,
-            brukerroller = emptySet()
+            brukerroller = emptySet(),
         )
         oppgave.sendTilBeslutter(beslutter)
 
@@ -239,21 +258,22 @@ internal class MessageContextMeldingPublisererTest {
         val id = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
 
-        val subsumsjonEvent = SubsumsjonEvent(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            paragraf = "EN PARAGRAF",
-            ledd = "ET LEDD",
-            bokstav = "EN BOKSTAV",
-            lovverk = "folketrygdloven",
-            lovverksversjon = "1970-01-01",
-            utfall = "VILKAR_BEREGNET",
-            input = mapOf("foo" to "bar"),
-            output = mapOf("foo" to "bar"),
-            sporing = mapOf("identifikator" to listOf("EN ID")),
-            tidsstempel = tidsstempel,
-            kilde = "KILDE",
-        )
+        val subsumsjonEvent =
+            SubsumsjonEvent(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                paragraf = "EN PARAGRAF",
+                ledd = "ET LEDD",
+                bokstav = "EN BOKSTAV",
+                lovverk = "folketrygdloven",
+                lovverksversjon = "1970-01-01",
+                utfall = "VILKAR_BEREGNET",
+                input = mapOf("foo" to "bar"),
+                output = mapOf("foo" to "bar"),
+                sporing = mapOf("identifikator" to listOf("EN ID")),
+                tidsstempel = tidsstempel,
+                kilde = "KILDE",
+            )
 
         meldingPubliserer.publiser(fødselsnummer, subsumsjonEvent, "versjonAvKode")
 
@@ -286,21 +306,22 @@ internal class MessageContextMeldingPublisererTest {
         val id = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
 
-        val subsumsjonEvent = SubsumsjonEvent(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            paragraf = "EN PARAGRAF",
-            ledd = null,
-            bokstav = null,
-            lovverk = "folketrygdloven",
-            lovverksversjon = "1970-01-01",
-            utfall = "VILKAR_BEREGNET",
-            input = mapOf("foo" to "bar"),
-            output = mapOf("foo" to "bar"),
-            sporing = mapOf("identifikator" to listOf("EN ID")),
-            tidsstempel = tidsstempel,
-            kilde = "KILDE",
-        )
+        val subsumsjonEvent =
+            SubsumsjonEvent(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                paragraf = "EN PARAGRAF",
+                ledd = null,
+                bokstav = null,
+                lovverk = "folketrygdloven",
+                lovverksversjon = "1970-01-01",
+                utfall = "VILKAR_BEREGNET",
+                input = mapOf("foo" to "bar"),
+                output = mapOf("foo" to "bar"),
+                sporing = mapOf("identifikator" to listOf("EN ID")),
+                tidsstempel = tidsstempel,
+                kilde = "KILDE",
+            )
 
         meldingPubliserer.publiser(fødselsnummer, subsumsjonEvent, "versjonAvKode")
 
@@ -327,5 +348,4 @@ internal class MessageContextMeldingPublisererTest {
         assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
         assertEquals("KILDE", subsumsjon["kilde"].asText())
     }
-
 }

@@ -7,11 +7,16 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
+import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
@@ -55,6 +60,11 @@ class OppgaveService(
         hendelseId: UUID,
         kanAvvises: Boolean,
         egenskaper: Set<Egenskap>,
+        mottaker: Mottaker,
+        type: Oppgavetype,
+        inntektskilde: Inntektskilde,
+        inntektsforhold: Inntektsforhold,
+        periodetype: Periodetype,
     ) {
         logg.info("Oppretter saksbehandleroppgave")
         teamLogs.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
@@ -70,6 +80,11 @@ class OppgaveService(
                 hendelseId = hendelseId,
                 kanAvvises = kanAvvises,
                 egenskaper = egenskaper,
+                mottaker = mottaker,
+                oppgavetype = type,
+                inntektskilde = inntektskilde,
+                inntektsforhold = inntektsforhold,
+                periodetype = periodetype,
             )
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)

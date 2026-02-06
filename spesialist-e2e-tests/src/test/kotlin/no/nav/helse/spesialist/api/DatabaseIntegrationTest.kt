@@ -3,7 +3,10 @@ package no.nav.helse.spesialist.api
 import io.mockk.mockk
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Inntektsforhold
+import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -486,6 +489,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                 Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
                                 Egenskap.EN_ARBEIDSGIVER,
                             ),
+                        mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                        oppgavetype = Oppgavetype.Søknad,
+                        inntektskilde = no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER,
+                        inntektsforhold = Inntektsforhold.Arbeidstaker,
+                        periodetype = no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING,
                     ),
                 )
             }
