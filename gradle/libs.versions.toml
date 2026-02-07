@@ -19,9 +19,7 @@ caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 
-graphqlKotlin-client = { module = "com.expediagroup:graphql-kotlin-client", version.ref = "graphqlKotlin" }
 graphqlKotlin-client-jackson = { module = "com.expediagroup:graphql-kotlin-client-jackson", version.ref = "graphqlKotlin" }
-graphqlKotlin-client-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphqlKotlin" }
 graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphqlKotlin" }
 
 hikari = "com.zaxxer:HikariCP:7.0.2"
@@ -83,11 +81,6 @@ wiremock = "org.wiremock:wiremock-jetty12:3.13.2"
 flyway-postgres = [
     "flyway-core",
     "flyway-postgres"
-]
-graphql-ktor-client = [
-    "graphqlKotlin-client",
-    "graphqlKotlin-client-jackson",
-    "graphqlKotlin-client-ktor"
 ]
 jackson = [
     "jackson-jsr310",
