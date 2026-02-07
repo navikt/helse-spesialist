@@ -139,7 +139,7 @@ class RestAdapter(
                                     append(" (pga. ${cause::class.simpleName})")
                                 }
                             }
-                        if (statusCode in 400..<500) {
+                        if (statusCode in 400..499 || statusCode == 504) {
                             loggWarnThrowable(loggmelding, cause)
                         } else {
                             loggThrowable(

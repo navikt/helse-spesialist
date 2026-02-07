@@ -11,9 +11,10 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggWarnThrowable
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
+import java.net.SocketTimeoutException
 
 class GetKrrRegistrertStatusForPersonBehandler(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
@@ -34,9 +35,9 @@ class GetKrrRegistrertStatusForPersonBehandler(
         val registrertStatus =
             try {
                 krrRegistrertStatusHenter.hentForPerson(person.id.value)
-            } catch (e: Exception) {
-                loggThrowable("Feil ved kall til KRR", e)
-                return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)
+            } catch (e: SocketTimeoutException) {
+                loggWarnThrowable("Timet ut ved kall til KRR", e)
+                return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.TIMEOUT_VED_VIDERE_KALL)
             }
 
         val apiRegistrertStatus =
@@ -64,8 +65,8 @@ enum class ApiGetKrrRegistrertStatusForPersonErrorCode(
 ) : ApiErrorCode {
     PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    FEIL_VED_VIDERE_KALL(
-        "Klarte ikke hente status fra Kontakt- og Reservasjonsregisteret",
-        HttpStatusCode.InternalServerError,
+    TIMEOUT_VED_VIDERE_KALL(
+        "Kontakt- og Reservasjonsregisteret brukte for lang tid på å svare (timeout)",
+        HttpStatusCode.GatewayTimeout,
     ),
 }
