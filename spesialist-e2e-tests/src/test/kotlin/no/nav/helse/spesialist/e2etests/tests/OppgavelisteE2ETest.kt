@@ -166,7 +166,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                             add("sorteringsfelt=$sorteringsfelt")
                         }
                     }.joinToString(prefix = "?", separator = "&"),
-            )
+            )!!
 
         // Then:
         if (forventetDukketOpp) {

@@ -13,6 +13,7 @@ dependencies {
     testImplementation(libs.graphqlKotlin.server.ktor)
 
     testImplementation(libs.bundles.ktor.client)
+    testImplementation(libs.apache.httpclient5.fluent)
 
     testImplementation(libs.bundles.jackson)
     testImplementation(libs.mockOauth2Server)
