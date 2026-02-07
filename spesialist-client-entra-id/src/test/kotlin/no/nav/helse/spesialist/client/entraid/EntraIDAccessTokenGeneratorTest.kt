@@ -21,7 +21,7 @@ class EntraIDAccessTokenGeneratorTest {
 
         // Then:
         assertNotNull(token)
-        assertFalse(token.isBlank(), "Token var uten blankt: \"$token\"")
+        assertFalse(token.isBlank(), "Token var blankt: \"$token\"")
     }
 
     @Test
