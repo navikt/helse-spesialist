@@ -38,8 +38,8 @@ class KRRClientKrrRegistrertStatusHenter(
                     .setHeader("Authorization", "Bearer $accessToken")
                     .setHeader("Nav-Call-Id", callId)
                     .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-                    .connectTimeout(Timeout.of(Duration.ofSeconds(5)))
-                    .responseTimeout(Timeout.of(Duration.ofSeconds(5)))
+                    .connectTimeout(Timeout.of(Duration.ofSeconds(10)))
+                    .responseTimeout(Timeout.of(Duration.ofSeconds(10)))
                     .bodyString(""" { "personidenter": [ "$fødselsnummer" ] } """, ContentType.APPLICATION_JSON)
                     .execute()
                     .handleResponse { response ->
