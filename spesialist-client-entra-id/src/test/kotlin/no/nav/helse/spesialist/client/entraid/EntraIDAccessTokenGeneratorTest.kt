@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.client.entraid
 import com.ethlo.time.Duration
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -72,6 +73,24 @@ class EntraIDAccessTokenGeneratorTest {
 
         // Then:
         assertNotEquals(token1, token2)
+    }
+
+    @Test
+    fun `kaster exception ved HTTP 500 fra token-endepunktet`() {
+        // Given:
+        integrationTestFixture.mockOAuth2Server.enqueueCallback(
+            object : DefaultOAuth2TokenCallback() {
+                override fun issuerId() = error("Simulert feil i OAuth2-serveren")
+            }
+        )
+
+        // Then:
+        assertThrows<IllegalStateException> {
+            // When:
+            accessTokenGenerator.hentAccessToken("etscope")
+        }.also {
+            assertEquals("Fikk HTTP 500 fra Entra ID", it.message)
+        }
     }
 
     private fun settTokenExpiry(expiry: Duration) {
