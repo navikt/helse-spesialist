@@ -11,8 +11,8 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
@@ -46,9 +46,10 @@ class KRRClientKrrRegistrertStatusHenter(
             val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
             val callId = UUID.randomUUID().toString()
 
-            logg.debug("Henter reservasjon fra ${configuration.apiUrl}/rest/v1/person, callId=$callId")
+            val uri = "${configuration.apiUrl}/rest/v1/personer"
+            loggInfo("Utfører HTTP POST $uri med header Nav-Call-Id: $callId")
             Request
-                .post("${configuration.apiUrl}/rest/v1/personer")
+                .post(uri)
                 .setHeader("Authorization", "Bearer $accessToken")
                 .setHeader("Nav-Call-Id", callId)
                 .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
