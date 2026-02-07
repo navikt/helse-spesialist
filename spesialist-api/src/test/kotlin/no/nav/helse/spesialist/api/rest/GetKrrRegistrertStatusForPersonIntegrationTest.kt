@@ -182,8 +182,7 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
               {
                 "type" : "about:blank",
                 "status" : 500,
-                "title" : "Klarte ikke hente status fra Kontakt- og Reservasjonsregisteret",
-                "code" : "FEIL_VED_VIDERE_KALL"
+                "title" : "Internal Server Error"
               }
         """.trimIndent(),
             body

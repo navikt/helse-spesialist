@@ -4,6 +4,7 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.server.auth.AuthenticationContext
+import io.ktor.server.request.receive
 import io.ktor.server.routing.RoutingCall
 import io.ktor.util.AttributeKey
 import io.ktor.util.Attributes
@@ -29,21 +30,22 @@ class RestAdapterTest {
         val responseTextSlot = slot<TextContent>()
         val call =
             mockk<RoutingCall>(relaxed = true) {
-                coEvery { respond(capture(responseTextSlot), any()) } returns Unit
                 every { attributes } returns
-                    Attributes().apply {
-                        put(
-                            AttributeKey<AuthenticationContext>("AuthContext"),
-                            mockk<AuthenticationContext> {
-                                every { principal<SaksbehandlerPrincipal>() } returns
-                                    SaksbehandlerPrincipal(
-                                        saksbehandler = lagSaksbehandler(),
-                                        brukerroller = Brukerrolle.entries.toSet(),
-                                        tilganger = Tilgang.entries.toSet(),
-                                    )
-                            },
-                        )
-                    }
+                        Attributes().apply {
+                            put(
+                                AttributeKey<AuthenticationContext>("AuthContext"),
+                                mockk<AuthenticationContext> {
+                                    every { principal<SaksbehandlerPrincipal>() } returns
+                                            SaksbehandlerPrincipal(
+                                                saksbehandler = lagSaksbehandler(),
+                                                brukerroller = Brukerrolle.entries.toSet(),
+                                                tilganger = Tilgang.entries.toSet(),
+                                            )
+                                },
+                            )
+                        }
+                coEvery { receive<String>() } returns ""
+                coEvery { respond(capture(responseTextSlot), any()) } returns Unit
             }
 
         val adapter =
