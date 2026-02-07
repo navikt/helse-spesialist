@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -196,7 +195,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
         }.value.toString()
 
         val snapshot: ApiPerson =
-            runBlocking { personQuery.person(personPseudoId, env = dataFetchingEnvironment).data!! }
+            personQuery.person(personPseudoId, env = dataFetchingEnvironment).data!!
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere.first().overstyringer

@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import java.time.LocalDate
 
 interface OppgaverQuerySchema : Query {
-    suspend fun behandledeOppgaverFeed(
+    fun behandledeOppgaverFeed(
         offset: Int,
         limit: Int,
         fom: LocalDate,
@@ -16,7 +16,7 @@ interface OppgaverQuerySchema : Query {
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiBehandledeOppgaver>
 
-    suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver>
+    fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver>
 }
 
 class OppgaverQuery(

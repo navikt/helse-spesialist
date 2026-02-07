@@ -16,7 +16,7 @@ import kotlin.time.measureTimedValue
 class OppgaverQueryHandler(
     private val apiOppgaveService: ApiOppgaveService,
 ) : OppgaverQuerySchema {
-    override suspend fun behandledeOppgaverFeed(
+    override fun behandledeOppgaverFeed(
         offset: Int,
         limit: Int,
         fom: LocalDate,
@@ -36,7 +36,7 @@ class OppgaverQueryHandler(
         return byggRespons(behandledeOppgaver)
     }
 
-    override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
+    override fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
         val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         loggInfo("Henter antall oppgaver for saksbehandler", "saksbehandler: $saksbehandler")
         val (antallOppgaver, tid) =

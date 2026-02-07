@@ -6,7 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 
 interface PersonQuerySchema : Query {
-    suspend fun person(
+    fun person(
         personPseudoId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?>

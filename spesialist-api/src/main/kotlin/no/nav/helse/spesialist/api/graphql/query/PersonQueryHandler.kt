@@ -108,7 +108,6 @@ import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.MdcKey
-import no.nav.helse.spesialist.application.logg.coMedMdc
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
@@ -145,14 +144,14 @@ class PersonQueryHandler(
 ) : PersonQuerySchema {
     private val auditLog = LoggerFactory.getLogger("auditLogger")
 
-    override suspend fun person(
+    override fun person(
         personPseudoId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?> {
         val personPseudoId =
             runCatching { PersonPseudoId.fraString(personPseudoId) }
                 .getOrElse { badRequest("Ugyldig format på personPseudoId") }
-        return coMedMdc(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
+        return medMdc(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
             sessionFactory.transactionalSessionScope { transaction ->
                 hentPerson(
                     personPseudoId = personPseudoId,
