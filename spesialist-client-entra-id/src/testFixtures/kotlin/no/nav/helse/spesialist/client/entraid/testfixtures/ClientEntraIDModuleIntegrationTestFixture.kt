@@ -9,11 +9,20 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.KeyProvider
+import java.util.UUID
 
 class ClientEntraIDModuleIntegrationTestFixture(
-    val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
+    val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
+    val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(
+        næringsdrivendeBeta = (1..2).map { UUID.randomUUID() },
+        beslutter = (1..2).map { UUID.randomUUID() },
+        egenAnsatt = (1..2).map { UUID.randomUUID() },
+        kode7 = (1..2).map { UUID.randomUUID() },
+        stikkprøve = (1..2).map { UUID.randomUUID() },
+        utvikler = (1..2).map { UUID.randomUUID() }
+    )
 ) {
-    private val msGraphWireMockServer: WireMockServer =
+    val msGraphWireMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
             WireMockServer::start
         ).also {
@@ -33,13 +42,6 @@ class ClientEntraIDModuleIntegrationTestFixture(
 
     val module = ClientEntraIDModule(
         configuration = moduleConfiguration,
-        tilgangsgrupperTilBrukerroller = TilgangsgrupperTilBrukerroller(
-            næringsdrivendeBeta = emptyList(),
-            beslutter = emptyList(),
-            egenAnsatt = emptyList(),
-            kode7 = emptyList(),
-            `stikkprøve` = emptyList(),
-            utvikler = emptyList()
-        ),
+        tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
     )
 }
