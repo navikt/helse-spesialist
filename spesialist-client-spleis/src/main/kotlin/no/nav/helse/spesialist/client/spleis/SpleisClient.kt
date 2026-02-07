@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spleis.graphql.HENT_SNAPSHOT
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.apache.hc.client5.http.fluent.Request
@@ -34,16 +33,8 @@ class SpleisClient(
             .post(spleisUrl.resolve("/graphql").toURL().toURI())
             .setHeader("Authorization", "Bearer ${accessTokenGenerator.hentAccessToken(spleisClientId)}")
             .setHeader("callId", UUID.randomUUID().toString())
-            .bodyString(
-                jacksonObjectMapper().writeValueAsString(
-                    GraphQLRequestBody(
-                        query = HENT_SNAPSHOT,
-                        variables = HentSnapshot.Variables(fnr = fødselsnummer),
-                        operationName = "HentSnapshot",
-                    ),
-                ),
-                ContentType.APPLICATION_JSON,
-            ).execute()
+            .bodyString("""{ "variables": { "fnr": "$fødselsnummer" } }""", ContentType.APPLICATION_JSON)
+            .execute()
             .handleResponse { response ->
                 val responseBody = EntityUtils.toString(response.entity)
                 if (loggRespons) {
@@ -65,10 +56,4 @@ class SpleisClient(
 
                 graphQLResponse.data?.person
             }
-
-    private data class GraphQLRequestBody(
-        val query: String,
-        val variables: HentSnapshot.Variables,
-        val operationName: String,
-    )
 }
