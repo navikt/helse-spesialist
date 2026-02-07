@@ -1,5 +1,5 @@
 package no.nav.helse.spesialist.application
 
-interface AccessTokenGenerator {
-    suspend fun hentAccessToken(scope: String): String
+fun interface AccessTokenGenerator {
+    fun hentAccessToken(scope: String): String
 }

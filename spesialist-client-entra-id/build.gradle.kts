@@ -5,6 +5,7 @@ plugins {
 dependencies {
     api(project(":spesialist-application"))
 
+    implementation(libs.apache.httpclient5.fluent)
     implementation(libs.caffeine)
 
     implementation(libs.bundles.ktor.client)

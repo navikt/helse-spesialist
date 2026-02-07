@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -227,9 +226,7 @@ class KRRClientKrrRegistrertStatusHenterTest {
                 apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                 scope = "scoap"
             ),
-            accessTokenGenerator = object : AccessTokenGenerator {
-                override suspend fun hentAccessToken(scope: String) = "gief axess plz"
-            }
+            accessTokenGenerator = { "gief axess plz" }
         )
     }
 

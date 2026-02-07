@@ -10,26 +10,13 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.Expiry
 import com.github.benmanes.caffeine.cache.LoadingCache
 import com.nimbusds.jose.jwk.RSAKey
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.apache5.Apache5
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.accept
-import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.Parameters
-import io.ktor.serialization.jackson.JacksonConverter
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.teamLogs
-import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner
-import java.net.ProxySelector
+import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.http.message.BasicNameValuePair
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -41,8 +28,6 @@ class EntraIDAccessTokenGenerator(
     private val tokenEndpoint: String,
     private val privateJwk: String,
 ) : AccessTokenGenerator {
-    private val httpClient = createHttpClient()
-
     private val loadingCache: LoadingCache<String, TokenEndpointResponse> =
         Caffeine
             .newBuilder()
@@ -54,35 +39,33 @@ class EntraIDAccessTokenGenerator(
                 },
             ).build(CacheLoader { scope -> hentToken(scope) })
 
-    override suspend fun hentAccessToken(scope: String): String = loadingCache.get(scope).access_token
+    override fun hentAccessToken(scope: String): String = loadingCache.get(scope).access_token
 
-    private fun hentToken(scope: String): TokenEndpointResponse =
-        runBlocking {
-            logg.info("Henter token fra Azure AD for $scope")
-            val response =
-                httpClient.post(tokenEndpoint) {
-                    accept(ContentType.Application.Json)
-                    method = HttpMethod.Post
-                    setBody(
-                        FormDataContent(
-                            Parameters.build {
-                                append("client_id", clientId)
-                                append("scope", scope)
-                                append("grant_type", "client_credentials")
-                                append(
-                                    "client_assertion_type",
-                                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-                                )
-                                append("client_assertion", lagAssertion())
-                            },
-                        ),
+    private fun hentToken(scope: String): TokenEndpointResponse {
+        logg.info("Henter token fra Entra ID for scope $scope")
+
+        return Request
+            .post(tokenEndpoint)
+            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+            .bodyForm(
+                BasicNameValuePair("client_id", clientId),
+                BasicNameValuePair("scope", scope),
+                BasicNameValuePair("grant_type", "client_credentials"),
+                BasicNameValuePair("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
+                BasicNameValuePair("client_assertion", lagAssertion()),
+            ).execute()
+            .handleResponse { response ->
+                val responseBody = EntityUtils.toString(response.entity)
+                if (response.code !in 200..299) {
+                    loggErrorWithNoThrowable(
+                        message = "Fikk HTTP ${response.code} fra Entra ID",
+                        teamLogsDetails = "Full response: $responseBody",
                     )
+                    error("Fikk HTTP ${response.code} fra Entra ID")
                 }
-            if (response.status != HttpStatusCode.OK) {
-                teamLogs.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
+                objectMapper.readValue(responseBody, TokenEndpointResponse::class.java)
             }
-            response.body()
-        }
+    }
 
     private fun lagAssertion(): String {
         val privateKey = RSAKey.parse(privateJwk)
@@ -101,43 +84,11 @@ class EntraIDAccessTokenGenerator(
             }.sign(Algorithm.RSA256(null, privateKey.toRSAPrivateKey()))
     }
 
+    private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class TokenEndpointResponse(
         val access_token: String,
         val expires_in: Duration,
     )
-
-    private fun createHttpClient() =
-        HttpClient(Apache5) {
-            install(HttpRequestRetry) {
-                retryOnExceptionIf(3) { request, throwable ->
-                    logg.warn("Caught exception ${throwable.message}, for url ${request.url}")
-                    true
-                }
-                retryIf(maxRetries) { request, response ->
-                    if (response.status.value.let { it in 500..599 }) {
-                        logg.warn(
-                            "Retrying for statuscode ${response.status.value}, for url ${request.url}",
-                        )
-                        true
-                    } else {
-                        false
-                    }
-                }
-            }
-            engine {
-                customizeClient {
-                    setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
-                }
-            }
-            install(ContentNegotiation) {
-                register(
-                    ContentType.Application.Json,
-                    JacksonConverter(
-                        jacksonObjectMapper()
-                            .registerModule(JavaTimeModule()),
-                    ),
-                )
-            }
-        }
 }
