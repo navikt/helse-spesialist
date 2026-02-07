@@ -101,8 +101,8 @@ object REST {
                         )
                     }"
                 )
-                .connectTimeout(Timeout.ofSeconds(1))
-                .responseTimeout(Timeout.ofSeconds(1))
+                .connectTimeout(Timeout.ofSeconds(10))
+                .responseTimeout(Timeout.ofSeconds(10))
                 .apply { requestBodyAsString?.let { bodyString(it, ContentType.APPLICATION_JSON) } }
                 .execute()
                 .handleResponse { response -> response.code to response.entity?.let(EntityUtils::toString) }
