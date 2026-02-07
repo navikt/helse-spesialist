@@ -54,37 +54,6 @@ export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 colima start
 ```
 
-## Oppdatere GraphQL schema mot spleis
-
-- Kjør tasken `graphqlIntrospectSchema` i spesialist-client-spleis, enten i IntelliJ eller fra kommandolinja
-    - Fra kommandolinja: `./gradlew :spesialist-client-spleis:graphqlIntrospectSchema`
-- Gjør eventuelt endringer i hva som skal hentes fra spleis i filen `hentSnapshot.graphql`
-- Kjør tasken `graphqlGenerateClient` for å få generert klassene, disse genereres basert på hva som er definert i `hentSnapshot.graphql`.
-  - Fra kommandolinja: `./gradlew :spesialist-client-spleis:graphqlGenerateClient`
-
-> ℹ️ `graphqlGenerateClient` vil også kjøres som en del av et vanlig bygg, i motsetning til `graphqlIntrospectSchema`.
-
-## Oppdatere GraphQL schema for tester
-
-Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -subscriptions og ønsker å teste disse
-endringene, er det lurt å først oppdatere lokalt testskjema, slik at du får syntax highlighting, code completion og et
-bedre liv. Da gjør du følgende:
-
-- Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/spesialist/bootstrap/LocalApp.kt) sin main-metode, det starter en
-  lokal GraphQL-server.
-- Kopier OAuth-tokenet fra outputen.
-- Finn filen [graphql.config.yml](spesialist-api/src/testFixtures/kotlin/no/nav/helse/spesialist/api/testfixtures/graphql.config.yml), legg inn tokenet og kjør `spesialist-local`, som vil
-  oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/testFixtures/kotlin/no/nav/helse/spesialist/api/testfixtures/schema_til_bruk_fra_tester.graphql).
-- Eller trykk på oppdater-ikonet i `schema_til_bruk_fra_tester.grapqhl`, ser ut til å gjøre det samme.
-- Commit endringene i `schema_til_bruk_fra_tester.graphql`, ikke commit tokenet i graphql.config.yml.
-
-## Kjøre lokal GraphQL Playground
-
-- kjør main-funksjonen i LocalApp.kt
-- gå til http://localhost:4321/graphql/playground i en nettleser
-- TODO: finn ut hvordan man veksler inn tokenet som skrives ut under oppstart av LocalApp til et bearer token, og sett
-  det som header i playgrounden
-
 ## Kjøre lokal Swagger UI
 
 - Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/spesialist/bootstrap/LocalApp.kt) sin main-metode, det starter en lokal server.
