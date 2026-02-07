@@ -5,6 +5,10 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.benmanes.caffeine.cache.CacheLoader
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.Expiry
+import com.github.benmanes.caffeine.cache.LoadingCache
 import com.nimbusds.jose.jwk.RSAKey
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -20,8 +24,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.JacksonConverter
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
@@ -39,55 +42,47 @@ class EntraIDAccessTokenGenerator(
     private val privateJwk: String,
 ) : AccessTokenGenerator {
     private val httpClient = createHttpClient()
-    private val mutex = Mutex()
 
-    @Volatile
-    private var tokenMap = HashMap<String, TokenEndpointResponse>()
+    private val loadingCache: LoadingCache<String, TokenEndpointResponse> =
+        Caffeine
+            .newBuilder()
+            .expireAfter(
+                Expiry.creating { _: String, token: TokenEndpointResponse ->
+                    // Behold tokenet i cachen like lenge som expires_in i tokenet, minus to minutter,
+                    // så det alltid varer minst to minutter når vi fisker det frem
+                    token.expires_in.minusMinutes(2L)
+                },
+            ).build(CacheLoader { scope -> hentToken(scope) })
 
-    override suspend fun hentAccessToken(scope: String): String {
-        val omToMinutter = Instant.now().plusSeconds(120L)
-        return mutex.withLock {
-            (
-                tokenMap[scope]
-                    ?.takeUnless { it.expiry.isBefore(omToMinutter) }
-                    ?: run {
-                        logg.info("Henter token fra Azure AD for $scope")
+    override suspend fun hentAccessToken(scope: String): String = loadingCache.get(scope).access_token
 
-                        val response: TokenEndpointResponse =
-                            try {
-                                val response =
-                                    httpClient.post(tokenEndpoint) {
-                                        accept(ContentType.Application.Json)
-                                        method = HttpMethod.Post
-                                        setBody(
-                                            FormDataContent(
-                                                Parameters.build {
-                                                    append("client_id", clientId)
-                                                    append("scope", scope)
-                                                    append("grant_type", "client_credentials")
-                                                    append(
-                                                        "client_assertion_type",
-                                                        "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-                                                    )
-                                                    append("client_assertion", lagAssertion())
-                                                },
-                                            ),
-                                        )
-                                    }
-                                if (response.status != HttpStatusCode.OK) {
-                                    teamLogs.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
-                                }
-                                response.body()
-                            } catch (e: Exception) {
-                                logg.warn("Klarte ikke hente nytt token fra Azure AD")
-                                throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
-                            }
-                        tokenMap[scope] = response
-                        response
-                    }
-            ).access_token
+    private fun hentToken(scope: String): TokenEndpointResponse =
+        runBlocking {
+            logg.info("Henter token fra Azure AD for $scope")
+            val response =
+                httpClient.post(tokenEndpoint) {
+                    accept(ContentType.Application.Json)
+                    method = HttpMethod.Post
+                    setBody(
+                        FormDataContent(
+                            Parameters.build {
+                                append("client_id", clientId)
+                                append("scope", scope)
+                                append("grant_type", "client_credentials")
+                                append(
+                                    "client_assertion_type",
+                                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                                )
+                                append("client_assertion", lagAssertion())
+                            },
+                        ),
+                    )
+                }
+            if (response.status != HttpStatusCode.OK) {
+                teamLogs.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
+            }
+            response.body()
         }
-    }
 
     private fun lagAssertion(): String {
         val privateKey = RSAKey.parse(privateJwk)
@@ -110,9 +105,7 @@ class EntraIDAccessTokenGenerator(
     private data class TokenEndpointResponse(
         val access_token: String,
         val expires_in: Duration,
-    ) {
-        val expiry: Instant = Instant.now().plus(expires_in)
-    }
+    )
 
     private fun createHttpClient() =
         HttpClient(Apache5) {

@@ -22,7 +22,7 @@ fun main() {
         configuration =
             Configuration(
                 api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
-                clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
+                clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
                 clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                 clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,
