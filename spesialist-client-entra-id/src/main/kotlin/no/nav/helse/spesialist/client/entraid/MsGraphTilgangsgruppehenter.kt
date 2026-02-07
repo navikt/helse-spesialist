@@ -5,29 +5,18 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache5.Apache5
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.accept
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
-import io.ktor.http.path
-import io.ktor.serialization.jackson.JacksonConverter
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
@@ -35,17 +24,6 @@ class MsGraphTilgangsgruppehenter(
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val msGraphUrl: String,
 ) : Brukerrollehenter {
-    private val httpClient: HttpClient =
-        HttpClient(Apache5) {
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter())
-            }
-            engine {
-                socketTimeout = 120_000
-                connectTimeout = 1_000
-                connectionRequestTimeout = 40_000
-            }
-        }
     private val objectMapper =
         jacksonObjectMapper()
             .registerModule(JavaTimeModule())
@@ -53,49 +31,42 @@ class MsGraphTilgangsgruppehenter(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     override fun hentBrukerroller(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Brukerrollehenter.Feil> {
-        teamLogs.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
-        val (responseStatus, responseBody) =
-            runBlocking {
-                val response =
-                    httpClient
-                        .post(msGraphUrl) {
-                            url {
-                                path("v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
-                            }
-                            bearerAuth(accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default"))
-                            accept(ContentType.Application.Json)
-                            contentType(ContentType.Application.Json)
-                            setBody(
-                                mapOf(
-                                    "groupIds" to
-                                        tilgangsgrupperTilBrukerroller
-                                            .alleUuider()
-                                            .map { it.toString() },
-                                ),
-                            )
+        loggInfo("Henter tilgangsgrupper for saksbehandler", saksbehandlerOid.toString())
+        return Request
+            .post(msGraphUrl + "/v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
+            .setHeader(
+                "Authorization",
+                "Bearer ${accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")}",
+            ).setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+            .bodyString(
+                objectMapper.writeValueAsString(
+                    mapOf("groupIds" to tilgangsgrupperTilBrukerroller.alleUuider().map(UUID::toString)),
+                ),
+                ContentType.APPLICATION_JSON,
+            ).execute()
+            .handleResponse { response ->
+                val responseStatus = response.code
+                val responseBody = EntityUtils.toString(response.entity)
+                if (responseStatus !in 200..299) {
+                    teamLogs.warn("Fikk kode $responseStatus fra MS Graph: $responseBody")
+                    if (responseStatus == 404) {
+                        val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
+                        if (errorCode == "Request_ResourceNotFound") {
+                            return@handleResponse Either.Failure(Brukerrollehenter.Feil.SaksbehandlerFinnesIkke)
                         }
-                response.status to response.bodyAsText()
-            }
-
-        if (!responseStatus.isSuccess()) {
-            teamLogs.warn("Fikk kode ${responseStatus.value} fra MS Graph: $responseBody")
-            if (responseStatus == HttpStatusCode.NotFound) {
-                val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
-                if (errorCode == "Request_ResourceNotFound") {
-                    return Either.Failure(Brukerrollehenter.Feil.SaksbehandlerFinnesIkke)
+                    }
+                    error("Fikk HTTP-kode $responseStatus fra MS Graph. Se sikkerlogg for detaljer.")
                 }
-            }
-            error("Fikk HTTP-kode ${responseStatus.value} fra MS Graph. Se sikkerlogg for detaljer.")
-        }
 
-        val grupper =
-            objectMapper
-                .readTree(responseBody)["value"]
-                .map(JsonNode::asText)
-                .map(UUID::fromString)
-        logg.debug("Hentet ${grupper.size} grupper fra MS")
-        val uuider = grupper.toSet()
-        val brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(uuider)
-        return Either.Success(brukerroller)
+                val grupper =
+                    objectMapper
+                        .readTree(responseBody)["value"]
+                        .map(JsonNode::asText)
+                        .map(UUID::fromString)
+                logg.debug("Hentet ${grupper.size} grupper fra MS")
+                val uuider = grupper.toSet()
+                val brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(uuider)
+                Either.Success(brukerroller)
+            }
     }
 }

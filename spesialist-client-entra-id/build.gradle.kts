@@ -7,8 +7,6 @@ dependencies {
 
     implementation(libs.apache.httpclient5.fluent)
     implementation(libs.caffeine)
-
-    implementation(libs.bundles.ktor.client)
     implementation(libs.bundles.jackson)
 
     // TODO: Trenger vi kanskje bare én av disse?
