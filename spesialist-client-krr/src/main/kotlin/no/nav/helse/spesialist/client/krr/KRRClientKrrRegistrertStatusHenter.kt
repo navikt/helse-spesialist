@@ -1,19 +1,7 @@
 package no.nav.helse.spesialist.client.krr
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.apache5.Apache5
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
-import io.ktor.serialization.jackson.JacksonConverter
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Tag
@@ -25,6 +13,11 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.util.Timeout
+import java.time.Duration
 import java.util.UUID
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
@@ -45,64 +38,57 @@ class KRRClientKrrRegistrertStatusHenter(
     private val configuration: ClientKrrModule.Configuration.Client,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : KrrRegistrertStatusHenter {
-    private val httpClient: HttpClient =
-        HttpClient(Apache5) {
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter())
-            }
-            engine {
-                socketTimeout = 5_000
-                connectTimeout = 5_000
-                connectionRequestTimeout = 5_000
-            }
-        }
+    private val objectMapper = jacksonObjectMapper()
 
-    override suspend fun hentForPerson(fødselsnummer: String): KrrRegistrertStatus {
+    override fun hentForPerson(fødselsnummer: String): KrrRegistrertStatus {
         val sample = Timer.start(registry)
         return try {
             val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
             val callId = UUID.randomUUID().toString()
 
             logg.debug("Henter reservasjon fra ${configuration.apiUrl}/rest/v1/person, callId=$callId")
-            val response =
-                httpClient
-                    .post("${configuration.apiUrl}/rest/v1/personer") {
-                        header("Authorization", "Bearer $accessToken")
-                        header("Nav-Call-Id", callId)
-                        accept(ContentType.Application.Json)
-                        contentType(ContentType.Application.Json)
-                        setBody(""" { "personidenter": [ "$fødselsnummer" ] } """)
+            Request
+                .post("${configuration.apiUrl}/rest/v1/personer")
+                .setHeader("Authorization", "Bearer $accessToken")
+                .setHeader("Nav-Call-Id", callId)
+                .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                .connectTimeout(Timeout.of(Duration.ofSeconds(5)))
+                .responseTimeout(Timeout.of(Duration.ofSeconds(5)))
+                .bodyString(""" { "personidenter": [ "$fødselsnummer" ] } """, ContentType.APPLICATION_JSON)
+                .execute()
+                .handleResponse { response ->
+                    val responseBody = EntityUtils.toString(response.entity)
+                    if (response.code !in 200..299) {
+                        responseError("Fikk HTTP ${response.code} tilbake fra KRR", responseBody)
                     }
-            if (!response.status.isSuccess()) {
-                responseError("Fikk HTTP ${response.status.value} tilbake fra KRR", response.bodyAsText())
-            }
 
-            val responseJson = response.body<JsonNode>()
+                    val responseJson = objectMapper.readTree(responseBody)
 
-            statusEtterKallReservasjonsstatusBuilder
-                .withRegistry(registry)
-                .withTag("status", "success")
+                    statusEtterKallReservasjonsstatusBuilder
+                        .withRegistry(registry)
+                        .withTag("status", "success")
 
-            if (responseJson["feil"]?.isEmpty == false) {
-                responseError("Fikk feil tilbake fra KRR", responseJson.toString())
-            } else {
-                responseJson["personer"][fødselsnummer].let {
-                    if (it == null) {
-                        responseError("Fant ikke igjen personen i responsen fra KRR", responseJson.toString())
-                    }
-                    if (it.getIfBoolean("aktiv") == false) {
-                        KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+                    if (responseJson["feil"]?.isEmpty == false) {
+                        responseError("Fikk feil tilbake fra KRR", responseJson.toString())
                     } else {
-                        val reservert = it.getRequiredBoolean("reservert", responseJson)
-                        val kanVarsles = it.getRequiredBoolean("kanVarsles", responseJson)
-                        if (reservert || !kanVarsles) {
-                            KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
-                        } else {
-                            KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                        responseJson["personer"][fødselsnummer].let {
+                            if (it == null) {
+                                responseError("Fant ikke igjen personen i responsen fra KRR", responseJson.toString())
+                            }
+                            if (it.getIfBoolean("aktiv") == false) {
+                                KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+                            } else {
+                                val reservert = it.getRequiredBoolean("reservert", responseJson)
+                                val kanVarsles = it.getRequiredBoolean("kanVarsles", responseJson)
+                                if (reservert || !kanVarsles) {
+                                    KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                                } else {
+                                    KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                                }
+                            }
                         }
                     }
                 }
-            }
         } catch (e: Exception) {
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)

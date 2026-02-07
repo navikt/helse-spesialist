@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.rest.personer
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiKrrRegistrertStatus
 import no.nav.helse.spesialist.api.rest.GetBehandler
@@ -34,7 +33,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
     private fun behandleForPerson(person: Person): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
         val registrertStatus =
             try {
-                runBlocking { krrRegistrertStatusHenter.hentForPerson(person.id.value) }
+                krrRegistrertStatusHenter.hentForPerson(person.id.value)
             } catch (e: Exception) {
                 loggThrowable("Feil ved kall til KRR", e)
                 return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.FEIL_VED_VIDERE_KALL)

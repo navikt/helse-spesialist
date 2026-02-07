@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -190,9 +189,7 @@ class KRRClientKrrRegistrertStatusHenterTest {
         val client = setupStubAndClient(stubResponse)
 
         // When:
-        val actualReservasjon: KrrRegistrertStatusHenter.KrrRegistrertStatus = runBlocking {
-            client.hentForPerson(identitetsnummer)
-        }
+        val actualReservasjon = client.hentForPerson(identitetsnummer)
 
         // Then:
         assertEquals(expectedRegistrertStatus, actualReservasjon)
@@ -207,9 +204,7 @@ class KRRClientKrrRegistrertStatusHenterTest {
 
         // When:
         val actualException = runCatching {
-            runBlocking {
-                client.hentForPerson(identitetsnummer)
-            }
+            client.hentForPerson(identitetsnummer)
         }.exceptionOrNull()
 
         // Then:
