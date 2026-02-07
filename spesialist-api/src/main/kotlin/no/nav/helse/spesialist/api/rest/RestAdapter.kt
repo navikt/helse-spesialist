@@ -36,7 +36,11 @@ class RestAdapter(
         call: RoutingCall,
         behandler: RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>,
     ) {
-        wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdTilgang) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
+        wrapOgDeleger(
+            call,
+            behandler.påkrevdeBrukerroller,
+            behandler.påkrevdTilgang,
+        ) { kallKontekst -> behandler.behandle(resource, kallKontekst) }
     }
 
     suspend inline fun <RESOURCE, reified REQUEST, RESPONSE, ERROR : ApiErrorCode> behandle(
@@ -72,7 +76,8 @@ class RestAdapter(
                 return@withSaksbehandlerIdentMdc
             }
 
-            val harPåkrevdeBrukerroller = principal.brukerroller.any { it in påkrevdeBrukerroller } || påkrevdeBrukerroller.isEmpty()
+            val harPåkrevdeBrukerroller =
+                principal.brukerroller.any { it in påkrevdeBrukerroller } || påkrevdeBrukerroller.isEmpty()
             if (!harPåkrevdeBrukerroller) {
                 call.respondWithProblem(genericProblemDetails(HttpStatusCode.Forbidden))
                 return@withSaksbehandlerIdentMdc
@@ -137,8 +142,16 @@ class RestAdapter(
                         if (statusCode in 400..<500) {
                             loggWarnThrowable(loggmelding, cause)
                         } else {
-                            val teamLogsDetails = "Request body: ${call.receive<String>()}"
-                            loggThrowable(loggmelding, teamLogsDetails, cause)
+                            loggThrowable(
+                                message = loggmelding,
+                                teamLogsDetails =
+                                    call
+                                        .receive<String>()
+                                        .takeUnless(String::isBlank)
+                                        ?.let { "Request body: $it" }
+                                        .orEmpty(),
+                                throwable = cause,
+                            )
                         }
                         call.respondWithProblem(problemDetails)
                     }.onSuccess { result ->
