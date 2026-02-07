@@ -40,5 +40,6 @@ public enum class GraphQLUtbetalingstatus {
      * This is a default enum value that will be used when attempting to deserialize unknown value.
      */
     @JsonEnumDefaultValue
+    @Suppress("ktlint:standard:enum-entry-name-case")
     __UNKNOWN_VALUE,
 }
