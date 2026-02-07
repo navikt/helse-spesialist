@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.client.spleis
 
 import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
-import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -63,11 +62,11 @@ class SpleisClient(
         }
     }
 
-    private suspend fun <T : Any> execute(
-        request: GraphQLClientRequest<T>,
+    private suspend fun execute(
+        request: HentSnapshot,
         fnr: String,
         retries: Int,
-    ): GraphQLClientResponse<T> =
+    ): GraphQLClientResponse<HentSnapshot.Result> =
         try {
             teamLogs.info(
                 "Henter nytt graphql-snapshot for {}",
@@ -98,7 +97,7 @@ class SpleisClient(
             }
         }
 
-    private suspend fun <T : Any> execute(request: GraphQLClientRequest<T>): GraphQLClientResponse<T> {
+    private suspend fun execute(request: HentSnapshot): GraphQLClientResponse<HentSnapshot.Result> {
         val accessToken = accessTokenGenerator.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
