@@ -11,8 +11,8 @@ import com.github.benmanes.caffeine.cache.Expiry
 import com.github.benmanes.caffeine.cache.LoadingCache
 import com.nimbusds.jose.jwk.RSAKey
 import no.nav.helse.spesialist.application.AccessTokenGenerator
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
@@ -42,7 +42,7 @@ class EntraIDAccessTokenGenerator(
     override fun hentAccessToken(scope: String): String = loadingCache.get(scope).access_token
 
     private fun hentToken(scope: String): TokenEndpointResponse {
-        logg.info("Henter token fra Entra ID for scope $scope")
+        loggInfo("Henter token fra Entra ID for scope $scope")
 
         return Request
             .post(tokenEndpoint)
