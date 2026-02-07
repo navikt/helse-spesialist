@@ -2,13 +2,11 @@ package no.nav.helse.spesialist.client.spleis
 
 import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.apache5.Apache5
-import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -17,17 +15,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.jackson.JacksonConverter
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import java.io.IOException
 import java.net.URI
-import java.util.UUID
+import java.util.UUID.randomUUID
 
 class SpleisClient(
     private val accessTokenGenerator: AccessTokenGenerator,
@@ -56,101 +51,49 @@ class SpleisClient(
 
     fun hentPerson(fødselsnummer: String): GraphQLPerson? {
         val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fødselsnummer))
+        val accessToken = accessTokenGenerator.hentAccessToken(spleisClientId)
+        val callId = randomUUID().toString()
 
         return runBlocking {
-            execute(request, fødselsnummer, RETRIES).data?.person
-        }
-    }
-
-    private suspend fun execute(
-        request: HentSnapshot,
-        fnr: String,
-        retries: Int,
-    ): GraphQLClientResponse<HentSnapshot.Result> =
-        try {
-            teamLogs.info(
-                "Henter nytt graphql-snapshot for {}",
-                StructuredArguments.keyValue("fødselsnummer", fnr),
-            )
-            execute(request)
-        } catch (e: Exception) {
-            when (e) {
-                is ServerResponseException,
-                is IOException,
-                -> {
-                    if (retries > 0) {
-                        delay(RETRY_INTERVAL)
-                        execute(request, fnr, retries - 1)
-                    } else {
-                        teamLogs.error(
-                            "Gir opp etter $RETRIES forsøk på å hente graphql-snapshot for fødselsnummer: $fnr",
-                            e,
-                        )
-                        throw e
-                    }
-                }
-
-                else -> {
-                    teamLogs.error("Kunne ikke hente graphql-snapshot for $fnr", e)
-                    throw e
-                }
-            }
-        }
-
-    private suspend fun execute(request: HentSnapshot): GraphQLClientResponse<HentSnapshot.Result> {
-        val accessToken = accessTokenGenerator.hentAccessToken(spleisClientId)
-        val callId = UUID.randomUUID().toString()
-
-        val response =
-            httpClient
-                .post(spleisUrl.resolve("/graphql").toURL()) {
-                    header("Authorization", "Bearer $accessToken")
-                    header("callId", callId)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        request.query?.let {
+            val response =
+                httpClient
+                    .post(spleisUrl.resolve("/graphql").toURL()) {
+                        header("Authorization", "Bearer $accessToken")
+                        header("callId", callId)
+                        contentType(ContentType.Application.Json)
+                        setBody(
                             GraphQLRequestBody(
-                                query = it,
+                                query = request.query,
                                 variables = request.variables,
                                 operationName = request.operationName,
-                            )
-                        },
-                    )
-                }
-        val responseBody = response.body<String>()
+                            ),
+                        )
+                    }
+            val responseBody = response.body<String>()
+            if (loggRespons) {
+                teamLogs.trace("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+            }
+            if (!response.status.isSuccess()) {
+                logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
+                teamLogs.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+            }
+            val graphQLResponse = serializer.deserialize(responseBody, request.responseType())
+            if (graphQLResponse.data == null && graphQLResponse.errors == null) {
+                logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
+                teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
+            }
+            if (graphQLResponse.errors !== null) {
+                logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
+                teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
+            }
 
-        if (loggRespons) {
-            teamLogs.trace("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+            graphQLResponse.data?.person
         }
-
-        if (!response.status.isSuccess()) {
-            logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
-            teamLogs.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
-        }
-
-        val graphQLResponse = serializer.deserialize(responseBody, request.responseType())
-
-        if (graphQLResponse.data == null && graphQLResponse.errors == null) {
-            logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
-            teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
-        }
-
-        if (graphQLResponse.errors !== null) {
-            logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
-            teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
-        }
-
-        return graphQLResponse
     }
 
     private data class GraphQLRequestBody(
         val query: String,
-        val variables: Any?,
-        val operationName: String?,
+        val variables: HentSnapshot.Variables,
+        val operationName: String,
     )
-
-    private companion object {
-        private const val RETRIES = 5
-        private const val RETRY_INTERVAL = 5000L
-    }
 }
