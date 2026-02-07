@@ -9,8 +9,8 @@ plugins {
 dependencies {
     api(project(":spesialist-application"))
 
-    implementation(libs.bundles.graphql.ktor.client)
-    implementation(libs.bundles.ktor.client)
+    implementation(libs.graphqlKotlin.client.jackson)
+    implementation(libs.apache.httpclient5.fluent)
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logback)
 

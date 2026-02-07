@@ -4,25 +4,17 @@ import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.apache5.Apache5
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
-import io.ktor.serialization.jackson.JacksonConverter
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spleis.graphql.HENT_SNAPSHOT
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.net.URI
-import java.util.UUID.randomUUID
+import java.util.UUID
 
 class SpleisClient(
     private val accessTokenGenerator: AccessTokenGenerator,
@@ -37,59 +29,42 @@ class SpleisClient(
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES),
         )
 
-    private val httpClient =
-        HttpClient(Apache5) {
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter())
-            }
-            engine {
-                socketTimeout = 120_000
-                connectTimeout = 1_000
-                connectionRequestTimeout = 40_000
-            }
-        }
+    fun hentPerson(fødselsnummer: String): GraphQLPerson? =
+        Request
+            .post(spleisUrl.resolve("/graphql").toURL().toURI())
+            .setHeader("Authorization", "Bearer ${accessTokenGenerator.hentAccessToken(spleisClientId)}")
+            .setHeader("callId", UUID.randomUUID().toString())
+            .bodyString(
+                jacksonObjectMapper().writeValueAsString(
+                    GraphQLRequestBody(
+                        query = HENT_SNAPSHOT,
+                        variables = HentSnapshot.Variables(fnr = fødselsnummer),
+                        operationName = "HentSnapshot",
+                    ),
+                ),
+                ContentType.APPLICATION_JSON,
+            ).execute()
+            .handleResponse { response ->
+                val responseBody = EntityUtils.toString(response.entity)
+                if (loggRespons) {
+                    teamLogs.trace("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
+                }
+                if (response.code !in 200..299) {
+                    logg.error("Fikk HTTP ${response.code} i svar fra Spleis. Se sikkerlogg for mer info.")
+                    teamLogs.error("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
+                }
+                val graphQLResponse = serializer.deserialize(responseBody, HentSnapshot.Result::class)
+                if (graphQLResponse.data == null && graphQLResponse.errors == null) {
+                    logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
+                    teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
+                }
+                if (graphQLResponse.errors !== null) {
+                    logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
+                    teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
+                }
 
-    fun hentPerson(fødselsnummer: String): GraphQLPerson? {
-        val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fødselsnummer))
-        val accessToken = accessTokenGenerator.hentAccessToken(spleisClientId)
-        val callId = randomUUID().toString()
-
-        return runBlocking {
-            val response =
-                httpClient
-                    .post(spleisUrl.resolve("/graphql").toURL()) {
-                        header("Authorization", "Bearer $accessToken")
-                        header("callId", callId)
-                        contentType(ContentType.Application.Json)
-                        setBody(
-                            GraphQLRequestBody(
-                                query = request.query,
-                                variables = request.variables,
-                                operationName = request.operationName,
-                            ),
-                        )
-                    }
-            val responseBody = response.body<String>()
-            if (loggRespons) {
-                teamLogs.trace("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+                graphQLResponse.data?.person
             }
-            if (!response.status.isSuccess()) {
-                logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
-                teamLogs.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
-            }
-            val graphQLResponse = serializer.deserialize(responseBody, request.responseType())
-            if (graphQLResponse.data == null && graphQLResponse.errors == null) {
-                logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
-                teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
-            }
-            if (graphQLResponse.errors !== null) {
-                logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
-                teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
-            }
-
-            graphQLResponse.data?.person
-        }
-    }
 
     private data class GraphQLRequestBody(
         val query: String,
