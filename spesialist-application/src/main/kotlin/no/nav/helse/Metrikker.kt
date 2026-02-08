@@ -7,11 +7,10 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
-import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
-import no.nav.helse.spesialist.domain.overstyringer.`SkjønnsfastsattSykepengegrunnlag`
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -44,8 +43,21 @@ private val godkjenningsbehovUtfallMetrikkBuilder =
     DistributionSummary
         .builder("godkjenningsbehov_utfall")
         .description("Måler hvor raskt godkjenningsbehov behandles, fordelt på utfallet")
-        .serviceLevelObjectives(500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0, 6000.0, 10_000.0, 30_000.0)
-        .withRegistry(registry)
+        .serviceLevelObjectives(
+            500.0,
+            1000.0,
+            1500.0,
+            2000.0,
+            2500.0,
+            3000.0,
+            3500.0,
+            4000.0,
+            4500.0,
+            5000.0,
+            6000.0,
+            10_000.0,
+            30_000.0,
+        ).withRegistry(registry)
 
 private val tidsbrukForBehovMetrikkBuilder =
     DistributionSummary
@@ -134,11 +146,5 @@ fun tell(handling: Handling) =
         is OverstyrtInntektOgRefusjon -> tellOverstyrInntektOgRefusjon()
         is OverstyrtArbeidsforhold -> tellOverstyrArbeidsforhold()
         is SkjønnsfastsattSykepengegrunnlag -> tellSkjønnsfastsettingSykepengegrunnlag()
-        else -> {}
-    }
-
-fun tell(handlingType: HandlingType) =
-    when (handlingType) {
-        HandlingType.ANNULLER_UTBETALING -> tellAnnullering()
         else -> {}
     }
