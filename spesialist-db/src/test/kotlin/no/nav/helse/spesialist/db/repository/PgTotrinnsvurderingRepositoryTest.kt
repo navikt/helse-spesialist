@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.db.repository
 
-import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import no.nav.helse.spesialist.domain.overstyringer.Overstyring
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

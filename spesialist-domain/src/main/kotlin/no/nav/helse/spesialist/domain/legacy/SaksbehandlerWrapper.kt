@@ -3,11 +3,11 @@ package no.nav.helse.spesialist.domain.legacy
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 
 class SaksbehandlerWrapper(
     val saksbehandler: Saksbehandler,

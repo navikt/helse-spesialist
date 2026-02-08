@@ -5,10 +5,10 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,

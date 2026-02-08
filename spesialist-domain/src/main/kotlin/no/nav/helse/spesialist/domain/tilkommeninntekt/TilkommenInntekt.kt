@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.math.BigDecimal

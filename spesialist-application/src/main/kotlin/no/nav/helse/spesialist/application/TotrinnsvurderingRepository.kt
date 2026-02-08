@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 
 interface TotrinnsvurderingRepository {
     fun lagre(totrinnsvurdering: Totrinnsvurdering)

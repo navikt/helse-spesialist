@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.db.repository
 
-import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.testfixtures.lagVarselId
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler

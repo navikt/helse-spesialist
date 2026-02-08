@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest.varsler
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.Varselvurdering
 import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
+import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon

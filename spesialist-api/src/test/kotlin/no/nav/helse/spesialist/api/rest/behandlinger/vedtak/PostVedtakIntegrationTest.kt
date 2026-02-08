@@ -1,12 +1,10 @@
 package no.nav.helse.spesialist.api.rest.behandlinger.vedtak
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.Varselvurdering
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -17,8 +15,10 @@ import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varseldefinisjon
+import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling

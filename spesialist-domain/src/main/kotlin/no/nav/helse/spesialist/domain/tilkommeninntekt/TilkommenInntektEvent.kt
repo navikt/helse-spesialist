@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent.Metadata
 import java.math.BigDecimal
 import java.time.Instant

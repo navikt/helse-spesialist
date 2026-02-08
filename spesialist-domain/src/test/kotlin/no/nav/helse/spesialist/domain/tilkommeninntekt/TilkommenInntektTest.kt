@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer

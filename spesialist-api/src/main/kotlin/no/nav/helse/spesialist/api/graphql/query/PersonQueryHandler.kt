@@ -11,8 +11,6 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
@@ -128,6 +126,8 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level

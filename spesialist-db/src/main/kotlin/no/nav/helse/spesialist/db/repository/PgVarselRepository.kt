@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.repository
 
 import kotliquery.Row
 import kotliquery.Session
-import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
+import no.nav.helse.spesialist.domain.Varselvurdering
 
 class PgVarselRepository private constructor(
     private val dbQuery: DbQuery,

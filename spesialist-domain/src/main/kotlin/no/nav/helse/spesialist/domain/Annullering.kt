@@ -1,6 +1,5 @@
-package no.nav.helse.modell
+package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime

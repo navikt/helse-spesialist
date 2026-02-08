@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.overstyringer.Overstyring
 
 class InMemoryOverstyringRepository : OverstyringRepository {
     val data = mutableMapOf<TotrinnsvurderingId, MutableList<Overstyring>>()

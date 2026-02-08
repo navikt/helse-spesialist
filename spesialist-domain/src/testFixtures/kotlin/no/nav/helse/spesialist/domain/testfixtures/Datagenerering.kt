@@ -1,12 +1,9 @@
 package no.nav.helse.spesialist.domain.testfixtures
 
-import no.nav.helse.Varselvurdering
 import no.nav.helse.modell.oppgave.Inntektsforhold
 import no.nav.helse.modell.oppgave.Mottaker
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgavetype
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -31,9 +28,12 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
+import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.math.BigDecimal

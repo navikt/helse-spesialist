@@ -1,15 +1,14 @@
-package no.nav.helse.modell.totrinnsvurdering
+package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
+import no.nav.helse.spesialist.domain.overstyringer.Overstyring
 import java.time.LocalDateTime
 import java.util.UUID
 

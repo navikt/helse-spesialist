@@ -12,6 +12,10 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.domain.Varsel.Status
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandlingUnikId
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId

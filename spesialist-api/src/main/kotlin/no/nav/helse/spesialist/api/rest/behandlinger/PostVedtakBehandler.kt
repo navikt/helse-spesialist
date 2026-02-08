@@ -10,7 +10,6 @@ import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -39,6 +38,7 @@ import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse

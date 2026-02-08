@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.db.repository
 
 import kotliquery.Row
 import kotliquery.Session
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 
 class PgTotrinnsvurderingRepository(
     session: Session,

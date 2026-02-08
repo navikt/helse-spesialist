@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.AnnulleringRepository
-import no.nav.helse.modell.Annullering
-import no.nav.helse.modell.AnnulleringId
+import no.nav.helse.spesialist.domain.Annullering
+import no.nav.helse.spesialist.domain.AnnulleringId
 import java.util.UUID
 
 class InMemoryAnnulleringRepository : AnnulleringRepository, AbstractLateIdInMemoryRepository<AnnulleringId, Annullering>() {

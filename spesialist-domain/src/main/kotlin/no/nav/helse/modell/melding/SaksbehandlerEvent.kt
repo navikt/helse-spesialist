@@ -1,7 +1,7 @@
 package no.nav.helse.modell.melding
 
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradPeriode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID

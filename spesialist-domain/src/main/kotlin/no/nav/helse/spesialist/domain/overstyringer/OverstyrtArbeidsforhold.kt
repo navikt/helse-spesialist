@@ -1,12 +1,15 @@
-package no.nav.helse.modell.saksbehandler.handlinger
+package no.nav.helse.spesialist.domain.overstyringer
 
-import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
+import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
+import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-class MinimumSykdomsgrad private constructor(
+class OverstyrtArbeidsforhold private constructor(
     id: OverstyringId?,
     override val eksternHendelseId: UUID,
     override val saksbehandlerOid: SaksbehandlerOid,
@@ -15,22 +18,25 @@ class MinimumSykdomsgrad private constructor(
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
     ferdigstilt: Boolean,
-    val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
-    val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
-    val begrunnelse: String,
-    val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-) : Overstyring(id, ferdigstilt) {
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<Arbeidsforhold>,
+) : Overstyring(id, ferdigstilt),
+    Personhandling {
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        saksbehandlerWrapper.håndter(this)
+    }
+
+    override fun loggnavn(): String = "overstyr_arbeidsforhold"
+
     companion object {
         fun ny(
             saksbehandlerOid: SaksbehandlerOid,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
-            perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
-            perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
-            begrunnelse: String,
-            arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-        ) = MinimumSykdomsgrad(
+            skjæringstidspunkt: LocalDate,
+            overstyrteArbeidsforhold: List<Arbeidsforhold>,
+        ) = OverstyrtArbeidsforhold(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
             opprettet = LocalDateTime.now(),
@@ -39,10 +45,8 @@ class MinimumSykdomsgrad private constructor(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
-            perioderVurdertOk = perioderVurdertOk,
-            perioderVurdertIkkeOk = perioderVurdertIkkeOk,
-            begrunnelse = begrunnelse,
-            arbeidsgivere = arbeidsgivere,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold,
         )
 
         fun fraLagring(
@@ -54,11 +58,9 @@ class MinimumSykdomsgrad private constructor(
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
-            perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
-            perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
-            begrunnelse: String,
-            arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-        ) = MinimumSykdomsgrad(
+            skjæringstidspunkt: LocalDate,
+            overstyrteArbeidsforhold: List<Arbeidsforhold>,
+        ) = OverstyrtArbeidsforhold(
             id = id,
             eksternHendelseId = eksternHendelseId,
             opprettet = opprettet,
@@ -67,10 +69,8 @@ class MinimumSykdomsgrad private constructor(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
-            perioderVurdertOk = perioderVurdertOk,
-            perioderVurdertIkkeOk = perioderVurdertIkkeOk,
-            begrunnelse = begrunnelse,
-            arbeidsgivere = arbeidsgivere,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold,
         )
     }
 
@@ -79,8 +79,8 @@ class MinimumSykdomsgrad private constructor(
         navn: String,
         epost: String,
         ident: String,
-    ): MinimumSykdomsgradVurdertEvent =
-        MinimumSykdomsgradVurdertEvent(
+    ): OverstyrtArbeidsforholdEvent =
+        OverstyrtArbeidsforholdEvent(
             eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -88,17 +88,23 @@ class MinimumSykdomsgrad private constructor(
             saksbehandlerNavn = navn,
             saksbehandlerIdent = ident,
             saksbehandlerEpost = epost,
-            perioderMedMinimumSykdomsgradVurdertOk = perioderVurdertOk,
-            perioderMedMinimumSykdomsgradVurdertIkkeOk = perioderVurdertIkkeOk,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { it.byggEvent() },
         )
 }
 
-data class MinimumSykdomsgradArbeidsgiver(
+data class Arbeidsforhold(
     val organisasjonsnummer: String,
-    val berørtVedtaksperiodeId: UUID,
-)
-
-data class MinimumSykdomsgradPeriode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-)
+    val deaktivert: Boolean,
+    val begrunnelse: String,
+    val forklaring: String,
+    val lovhjemmel: Lovhjemmel?,
+) {
+    fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold =
+        OverstyrtArbeidsforholdEvent.Arbeidsforhold(
+            orgnummer = organisasjonsnummer,
+            deaktivert = deaktivert,
+            begrunnelse = begrunnelse,
+            forklaring = forklaring,
+        )
+}

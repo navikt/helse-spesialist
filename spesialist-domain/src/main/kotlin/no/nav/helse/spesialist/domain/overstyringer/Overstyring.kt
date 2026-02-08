@@ -1,4 +1,4 @@
-package no.nav.helse.modell.saksbehandler.handlinger
+package no.nav.helse.spesialist.domain.overstyringer
 
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.LateIdEntity

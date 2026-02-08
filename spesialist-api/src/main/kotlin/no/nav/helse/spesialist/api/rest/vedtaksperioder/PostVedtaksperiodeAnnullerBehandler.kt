@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiVedtaksperiodeAnnullerRequest
@@ -11,6 +10,7 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Annullering
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang

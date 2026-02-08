@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
 
 internal fun finnEllerOpprettTotrinnsvurdering(
     identitetsnummer: Identitetsnummer,

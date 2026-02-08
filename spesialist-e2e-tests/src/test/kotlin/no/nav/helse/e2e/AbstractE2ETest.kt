@@ -13,7 +13,6 @@ import no.nav.helse.Testdata.snapshot
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
@@ -38,6 +37,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser

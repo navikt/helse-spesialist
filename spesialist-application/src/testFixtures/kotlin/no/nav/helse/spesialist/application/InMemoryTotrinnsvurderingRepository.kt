@@ -1,13 +1,13 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyringId
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgrad
+import no.nav.helse.spesialist.domain.overstyringer.OverstyringId
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 
 class InMemoryTotrinnsvurderingRepository : TotrinnsvurderingRepository,
     AbstractLateIdInMemoryRepository<TotrinnsvurderingId, Totrinnsvurdering>() {

@@ -8,10 +8,10 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
+import no.nav.helse.spesialist.domain.overstyringer.`SkjønnsfastsattSykepengegrunnlag`
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 

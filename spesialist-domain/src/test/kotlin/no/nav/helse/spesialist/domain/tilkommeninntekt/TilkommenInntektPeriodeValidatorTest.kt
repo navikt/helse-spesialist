@@ -3,10 +3,10 @@ package no.nav.helse.spesialist.domain.tilkommeninntekt
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.aug
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.feb

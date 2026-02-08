@@ -1,11 +1,9 @@
-package no.nav.helse
+package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
 
-class Varselvurdering(
+data class Varselvurdering(
     val saksbehandlerId: SaksbehandlerOid,
     val tidspunkt: LocalDateTime,
     val vurdertDefinisjonId: VarseldefinisjonId,

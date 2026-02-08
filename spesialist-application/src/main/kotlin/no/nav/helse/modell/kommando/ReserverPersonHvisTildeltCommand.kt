@@ -2,9 +2,9 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import java.util.UUID
 
 internal class ReserverPersonHvisTildeltCommand(

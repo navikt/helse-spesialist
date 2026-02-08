@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
+import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgrad
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer

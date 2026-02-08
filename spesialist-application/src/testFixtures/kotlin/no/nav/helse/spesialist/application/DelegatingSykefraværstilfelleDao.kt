@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.SykefraværstilfelleDao
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 
 class DelegatingSykefraværstilfelleDao(
     private val overstyringRepository: InMemoryOverstyringRepository,

@@ -20,7 +20,6 @@ import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -31,6 +30,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

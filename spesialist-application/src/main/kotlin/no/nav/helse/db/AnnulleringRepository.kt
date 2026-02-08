@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.Annullering
-import no.nav.helse.modell.AnnulleringId
+import no.nav.helse.spesialist.domain.Annullering
+import no.nav.helse.spesialist.domain.AnnulleringId
 import java.util.UUID
 
 interface AnnulleringRepository {

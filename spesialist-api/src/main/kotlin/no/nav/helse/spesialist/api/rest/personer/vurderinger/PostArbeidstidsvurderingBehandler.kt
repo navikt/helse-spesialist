@@ -3,10 +3,6 @@ package no.nav.helse.spesialist.api.rest.personer.vurderinger
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.SubsumsjonEvent
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.ApiArbeidstidsvurderingRequest
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -19,6 +15,10 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgrad
+import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradArbeidsgiver
+import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradPeriode
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 import java.util.UUID

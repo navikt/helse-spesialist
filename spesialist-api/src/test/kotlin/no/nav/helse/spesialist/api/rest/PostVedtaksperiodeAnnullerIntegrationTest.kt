@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.rest
 
-import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.domain.Annullering
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer

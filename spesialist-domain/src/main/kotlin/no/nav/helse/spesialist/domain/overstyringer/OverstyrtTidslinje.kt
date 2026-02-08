@@ -1,13 +1,14 @@
-package no.nav.helse.modell.saksbehandler.handlinger
+package no.nav.helse.spesialist.domain.overstyringer
 
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
+import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingOverstyrtTidslinje
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.Annullering
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Annullering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

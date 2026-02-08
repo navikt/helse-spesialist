@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.api.rest.varsler.vurdering
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandlingUnikId
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId

@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
-import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
@@ -11,6 +9,8 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
