@@ -38,10 +38,10 @@
     <logger name="tjenestekall" level="TRACE" additivity="false">
         <appender-ref ref="team-logs" />
     </logger>
-    <logger name="io.ktor.auth.jwt" level="trace" />
     <logger name="no.nav.helse" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
+        <appender-ref ref="team-logs" />
     </root>
 </configuration>
