@@ -83,8 +83,10 @@ class RestAdapter(
                 return@withSaksbehandlerIdentMdc
             }
 
-            sessionFactory.transactionalSessionScope {
-                it.saksbehandlerRepository.lagre(saksbehandler = principal.saksbehandler)
+            if (Tilgang.Skriv in principal.tilganger) {
+                sessionFactory.transactionalSessionScope {
+                    it.saksbehandlerRepository.lagre(saksbehandler = principal.saksbehandler)
+                }
             }
 
             val result =
