@@ -72,6 +72,7 @@ fun loggMedDetaljer(
     logger
         .atLevel(level)
         .setMessage(melding)
+        .addMarker(SKIP_TEAM_LOGS_MARKER)
         .log()
     teamLogs
         .atLevel(level)

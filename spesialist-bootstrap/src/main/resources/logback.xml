@@ -12,7 +12,9 @@
 
     <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d{MMM dd yyyy HH:mm:ss.SSS zzz} %level CEF:0|Vedtaksløsning for sykepenger|Spesialist|1.0|audit:access|personoppslag|%level|%msg%n</pattern>
+            <pattern>%d{MMM dd yyyy HH:mm:ss.SSS zzz} %level CEF:0|Vedtaksløsning for
+                sykepenger|Spesialist|1.0|audit:access|personoppslag|%level|%msg%n
+            </pattern>
         </layout>
 
         <syslogConfig class="org.productivity.java.syslog4j.impl.net.tcp.TCPNetSyslogConfig">
@@ -24,24 +26,27 @@
     </appender>
 
     <logger level="INFO" name="auditLogger" additivity="false">
-        <appender-ref ref="auditLogger" />
+        <appender-ref ref="auditLogger"/>
     </logger>
 
     <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <filter class="no.nav.helse.spesialist.application.logg.SkipTeamLogsMarkerFilter"/>
         <destination>team-logs.nais-system:5170</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
+            <customFields>
+                {"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}
+            </customFields>
             <includeContext>false</includeContext>
         </encoder>
     </appender>
 
     <logger name="tjenestekall" level="TRACE" additivity="false">
-        <appender-ref ref="team-logs" />
+        <appender-ref ref="team-logs"/>
     </logger>
-    <logger name="no.nav.helse" level="DEBUG" />
+    <logger name="no.nav.helse" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
-        <appender-ref ref="team-logs" />
+        <appender-ref ref="team-logs"/>
     </root>
 </configuration>
