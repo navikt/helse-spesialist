@@ -7,7 +7,7 @@ dependencies {
 
     implementation(libs.rapidsAndRivers)
     implementation(libs.bundles.jackson)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.3")
+    implementation(libs.caffeine)
 
     testImplementation(libs.tbdLibs.rapidsAndRiversTest)
     testImplementation("io.github.optimumcode:json-schema-validator:0.5.3")
