@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
-import no.nav.helse.spleis.graphql.HentSnapshot
+import no.nav.helse.spleis.graphql.HentSnapshotResult
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
@@ -44,7 +44,7 @@ class SpleisClient(
                     logg.error("Fikk HTTP ${response.code} i svar fra Spleis. Se sikkerlogg for mer info.")
                     teamLogs.error("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
                 }
-                val graphQLResponse = serializer.deserialize(responseBody, HentSnapshot.Result::class)
+                val graphQLResponse = serializer.deserialize(responseBody, HentSnapshotResult::class)
                 if (graphQLResponse.data == null && graphQLResponse.errors == null) {
                     logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
                     teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
