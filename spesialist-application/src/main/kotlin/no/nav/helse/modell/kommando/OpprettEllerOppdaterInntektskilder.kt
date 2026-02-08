@@ -50,13 +50,13 @@ internal class OpprettEllerOppdaterInntektskilder(
         if (nyeArbeidsgiverIdentifikatorer.isNotEmpty()) {
             loggInfo(
                 "Trenger navn på nye arbeidsgivere",
-                "arbeidsgivere: ${nyeArbeidsgiverIdentifikatorer.joinToString()}",
+                "arbeidsgivere" to nyeArbeidsgiverIdentifikatorer.joinToString(),
             )
         }
         if (utdaterteArbeidsgivere.isNotEmpty()) {
             loggInfo(
                 "Trenger oppdatert navn på kjente arbeidsgivere",
-                "arbeidsgivere: ${utdaterteArbeidsgivere.joinToString { it.toLogString() }}",
+                "arbeidsgivere" to utdaterteArbeidsgivere.joinToString { it.toLogString() },
             )
         }
 
@@ -77,7 +77,7 @@ internal class OpprettEllerOppdaterInntektskilder(
                         id = identifikator,
                         navnString = navnFraLøsning,
                     )
-                loggInfo("Lagrer ny arbeidsgiver", "arbeidsgiver: ${arbeidsgiver.toLogString()}")
+                loggInfo("Lagrer ny arbeidsgiver", "arbeidsgiver" to arbeidsgiver.toLogString())
                 arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
@@ -87,7 +87,7 @@ internal class OpprettEllerOppdaterInntektskilder(
             val navnFraLøsning = finnNavnILøsninger(identifikator, context)
             if (navnFraLøsning != null) {
                 arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
-                loggInfo("Lagrer oppdatert arbeidsgiver", "arbeidsgiver: ${arbeidsgiver.toLogString()}")
+                loggInfo("Lagrer oppdatert arbeidsgiver", "arbeidsgiver" to arbeidsgiver.toLogString())
                 arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }

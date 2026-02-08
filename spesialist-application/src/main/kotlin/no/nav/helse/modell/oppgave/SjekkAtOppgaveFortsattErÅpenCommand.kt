@@ -15,7 +15,7 @@ internal class SjekkAtOppgaveFortsattErÅpenCommand(
         if (åpenOppgave == null) {
             loggInfo(
                 "Ingen åpne oppgaver for personen, kommandokjeden ferdigstilles/avsluttes",
-                "fødselsnummer: $fødselsnummer",
+                "fødselsnummer" to fødselsnummer,
             )
             ferdigstill(context)
         }

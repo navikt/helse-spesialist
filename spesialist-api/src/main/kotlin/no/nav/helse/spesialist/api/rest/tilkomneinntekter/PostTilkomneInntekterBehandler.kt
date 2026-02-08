@@ -76,7 +76,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             årsak = "tilkommen inntekt lagt til",
         )
 
-        loggInfo("La til tilkommen inntekt", "${tilkommenInntekt.id}")
+        loggInfo("La til tilkommen inntekt", "tilkommenInntektId" to tilkommenInntekt.id)
 
         return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
     }

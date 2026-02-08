@@ -38,7 +38,7 @@ class OppgaverQueryHandler(
 
     override fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
         val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
-        loggInfo("Henter antall oppgaver for saksbehandler", "saksbehandler: $saksbehandler")
+        loggInfo("Henter antall oppgaver for saksbehandler", "saksbehandlerIdent" to saksbehandler.ident.value)
         val (antallOppgaver, tid) =
             measureTimedValue {
                 apiOppgaveService.antallOppgaver(saksbehandler = saksbehandler)

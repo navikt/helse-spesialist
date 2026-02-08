@@ -10,7 +10,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.MdcKey
-import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.kafka.objectMapper
 
@@ -52,7 +52,7 @@ internal class DelegatedRapid(
     ) {
         val jsonNode =
             runCatching { objectMapper.readTree(message) }.getOrElse { e ->
-                loggThrowable("Klarte ikke tolke melding som JSON for å sette MDC", e)
+                loggError("Klarte ikke tolke melding som JSON for å sette MDC", e)
                 return block()
             }
         medMdc(

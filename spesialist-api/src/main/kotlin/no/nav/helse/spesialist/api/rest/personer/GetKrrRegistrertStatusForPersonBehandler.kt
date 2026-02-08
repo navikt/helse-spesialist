@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggWarnThrowable
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.net.SocketTimeoutException
@@ -36,7 +36,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
             try {
                 krrRegistrertStatusHenter.hentForPerson(person.id.value)
             } catch (e: SocketTimeoutException) {
-                loggWarnThrowable("Timet ut ved kall til KRR", e)
+                loggWarn("Timet ut ved kall til KRR", e)
                 return RestResponse.Error(ApiGetKrrRegistrertStatusForPersonErrorCode.TIMEOUT_VED_VIDERE_KALL)
             }
 
@@ -47,7 +47,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
                 KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR -> ApiKrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
             }
 
-        loggInfo("Hentet KRR-status for person", "$apiRegistrertStatus")
+        loggInfo("Hentet KRR-status for person", "status" to apiRegistrertStatus)
 
         return RestResponse.OK(apiRegistrertStatus)
     }

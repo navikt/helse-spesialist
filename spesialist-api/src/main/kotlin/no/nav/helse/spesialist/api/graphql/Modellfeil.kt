@@ -28,7 +28,7 @@ class OppgaveIkkeTildelt(
     override fun logger() {
         loggInfo(
             "Returnerer ${httpkode.value} for $feilkode for oppgave",
-            "oppgaveId: $oppgaveId",
+            "oppgaveId" to oppgaveId,
         )
     }
 }
@@ -43,7 +43,7 @@ class OppgaveTildeltNoenAndre(
     override fun logger() {
         loggInfo(
             "Returnerer ${httpkode.value} for $feilkode for tildeling",
-            "tildelingsinfo: $eksternKontekst",
+            "tildelingsinfo" to eksternKontekst,
         )
     }
 }
@@ -58,7 +58,7 @@ class ManglerVurderingAvVarsler(
     override fun logger() {
         loggInfo(
             "Returnerer ${httpkode.value} for $feilkode for tildeling",
-            "oppgaveId: $oppgaveId",
+            "oppgaveId" to oppgaveId,
         )
     }
 }
@@ -73,7 +73,7 @@ class FinnerIkkeLagtPåVent(
     override fun logger() {
         loggInfo(
             "Finner ikke påvent-innslag for oppgave",
-            "oppgaveId: $oppgaveId",
+            "oppgaveId" to oppgaveId,
         )
     }
 }
@@ -89,7 +89,8 @@ class IkkeTilgang(
     override fun logger() {
         loggInfo(
             "Saksbehandler har ikke tilgang til å behandle oppgaven",
-            "oppgaveId: $oppgaveId, saksbehandlerOid: $oid",
+            "oppgaveId" to oppgaveId,
+            "saksbehandlerOid" to oid,
         )
     }
 }
@@ -104,7 +105,7 @@ class OppgaveAlleredeSendtBeslutter(
     override fun logger() {
         loggInfo(
             "Oppgave er allerede sendt til beslutter for totrinnsvurdering",
-            "oppgaveId: $oppgaveId",
+            "oppgaveId" to oppgaveId,
         )
     }
 }
@@ -119,7 +120,7 @@ class OppgaveAlleredeSendtIRetur(
     override fun logger() {
         loggInfo(
             "Oppgave er allerede sendt i retur av beslutter til opprinnelig saksbehandler",
-            "oppgaveId: $oppgaveId",
+            "oppgaveId" to oppgaveId,
         )
     }
 }
@@ -134,7 +135,7 @@ class OppgaveKreverVurderingAvToSaksbehandlere(
     override fun logger() {
         loggInfo(
             "Oppgave må behandles og besluttes av to forskjellige saksbehandlere",
-            "oppgaveId: $oppgaveId",
+            "oppgaveId" to oppgaveId,
         )
     }
 }

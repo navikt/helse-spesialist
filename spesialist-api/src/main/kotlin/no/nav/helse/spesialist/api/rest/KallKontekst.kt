@@ -36,7 +36,7 @@ class KallKontekst(
             val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
 
             if (behandling == null) {
-                loggWarn("Behandlingen ble ikke funnet", spleisBehandlingId.toString())
+                loggWarn("Behandlingen ble ikke funnet", "spleisBehandlingId" to spleisBehandlingId)
                 return@medMdcOgAttribute RestResponse.Error(behandlingIkkeFunnet())
             }
 
@@ -59,7 +59,7 @@ class KallKontekst(
             val behandling = transaksjon.behandlingRepository.finn(behandlingUnikId)
 
             if (behandling == null) {
-                loggWarn("Behandlingen ble ikke funnet", behandlingUnikId.toString())
+                loggWarn("Behandlingen ble ikke funnet", "behandlingUnikId" to behandlingUnikId)
                 return@medMdcOgAttribute RestResponse.Error(behandlingIkkeFunnet())
             }
 
@@ -91,7 +91,7 @@ class KallKontekst(
             val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
 
             if (vedtaksperiode == null) {
-                loggWarn("Vedtaksperioden ble ikke funnet", vedtaksperiodeId.toString())
+                loggWarn("Vedtaksperioden ble ikke funnet", "vedtaksperiodeId" to vedtaksperiodeId)
                 return@medMdcOgAttribute RestResponse.Error(vedtaksperiodeIkkeFunnet())
             }
 
@@ -112,7 +112,7 @@ class KallKontekst(
             val identitetsnummer = transaksjon.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
 
             if (identitetsnummer == null) {
-                loggWarn("Identitetsnummeret ble ikke funnet", personPseudoId.toString())
+                loggWarn("Identitetsnummeret ble ikke funnet", "personPseudoId" to personPseudoId)
                 return@medMdcOgAttribute RestResponse.Error(personPseudoIdIkkeFunnet())
             }
 
@@ -134,12 +134,12 @@ class KallKontekst(
             val person = transaksjon.personRepository.finn(identitetsnummer)
 
             if (person == null) {
-                loggWarn("Personen ble ikke funnet", identitetsnummer.toString())
+                loggWarn("Personen ble ikke funnet", "identitetsnummer" to identitetsnummer)
                 return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
             }
 
             if (!person.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
-                loggWarn("Saksbehandler har ikke tilgang til personen", identitetsnummer.toString())
+                loggWarn("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer)
                 return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
             }
 
@@ -155,7 +155,7 @@ class KallKontekst(
                 } ?: true
 
             if (!harTilgangTilOppgave) {
-                loggWarn("Saksbehandler har ikke tilgang til aktiv oppgave på personen", identitetsnummer.toString())
+                loggWarn("Saksbehandler har ikke tilgang til aktiv oppgave på personen", "identitetsnummer" to identitetsnummer)
                 return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
             }
 

@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.application.logg.MdcKey
-import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
@@ -59,7 +59,7 @@ class NotatMutationHandler(
                         notat.utfyllTilApiNotat(session).let(::byggRespons)
                     } catch (exception: Exception) {
                         val feilmelding = "Kunne ikke opprette notat for vedtaksperiode"
-                        loggThrowable(feilmelding, exception)
+                        loggError(feilmelding, exception)
                         byggFeilrespons(graphqlErrorException(500, feilmelding))
                     }
                 }
@@ -89,7 +89,7 @@ class NotatMutationHandler(
                 }.let(::byggRespons)
             } catch (exception: Exception) {
                 val feilmelding = "Kunne ikke feilregistrere notat med id $id"
-                loggThrowable(feilmelding, exception)
+                loggError(feilmelding, exception)
                 byggFeilrespons(graphqlErrorException(500, feilmelding))
             }
         }
@@ -116,7 +116,7 @@ class NotatMutationHandler(
                 dialog.tilApiKommentar(kommentar.id()).let(::byggRespons)
             } catch (exception: Exception) {
                 val feilmelding = "Kunne ikke legge til kommentar med dialog-ref: $dialogRef"
-                loggThrowable(feilmelding, exception)
+                loggError(feilmelding, exception)
                 byggFeilrespons(graphqlErrorException(500, feilmelding))
             }
         }
@@ -137,7 +137,7 @@ class NotatMutationHandler(
                 dialog.tilApiKommentar(kommentarId).let(::byggRespons)
             } catch (exception: Exception) {
                 val feilmelding = "Kunne ikke feilregistrere kommentar med id $id"
-                loggThrowable(feilmelding, exception)
+                loggError(feilmelding, exception)
                 byggFeilrespons(graphqlErrorException(500, feilmelding))
             }
         }

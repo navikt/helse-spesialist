@@ -109,7 +109,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
             )
         }
 
-        loggInfo("Endret tilkommen inntekt", "${tilkommenInntekt.id}")
+        loggInfo("Endret tilkommen inntekt", "tilkommenInntektId" to tilkommenInntekt.id)
 
         return RestResponse.NoContent()
     }

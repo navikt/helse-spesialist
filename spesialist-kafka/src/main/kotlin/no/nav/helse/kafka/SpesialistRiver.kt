@@ -8,7 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 import java.util.UUID
 
 sealed interface SpesialistRiver : River.PacketListener {
@@ -21,7 +21,7 @@ sealed interface SpesialistRiver : River.PacketListener {
         context: MessageContext,
         metadata: MessageMetadata,
     ) {
-        loggErrorWithNoThrowable("Melding passerte ikke validering i river ${this::class.simpleName}", "problems:\n${problems.toExtendedReport()}")
+        loggError("Melding passerte ikke validering i river ${this::class.simpleName}", "problems" to problems.toExtendedReport())
         error("Melding passerte ikke validering i river ${this::class.simpleName}, ${problems.toExtendedReport()}")
     }
 }

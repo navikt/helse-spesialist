@@ -53,7 +53,7 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
 
         val notatResponse = ApiNotatResponse(id = notat.id().value)
 
-        loggInfo("Opprettet notat", "${notat.id()}")
+        loggInfo("Opprettet notat", "notatId" to notat.id())
 
         return RestResponse.Created(notatResponse)
     }

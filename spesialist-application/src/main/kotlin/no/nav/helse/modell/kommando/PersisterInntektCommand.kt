@@ -17,7 +17,7 @@ internal class PersisterInntektCommand(
 
         loggInfo(
             "Inntekter er ikke tidligere lagret for person, sender behov",
-            "fødselsnummer: $fødselsnummer",
+            "fødselsnummer" to fødselsnummer,
         )
         return trengerInntekt(context)
     }
@@ -28,7 +28,7 @@ internal class PersisterInntektCommand(
 
         loggInfo(
             "Lagrer inntekter for person",
-            "fødselsnummer: $fødselsnummer",
+            "fødselsnummer" to fødselsnummer,
         )
         løsning.lagre(personDao, fødselsnummer, skjæringstidspunkt)
         return true

@@ -35,7 +35,7 @@ class DokumentRiver(
 
         loggInfo(
             "Mottok hendelse hent-dokument og lagrer dokumentet",
-            "fødselsnummer: $fødselsnummer, dokumentId: $dokumentId",
+            "dokumentId" to dokumentId,
         )
 
         meldingMediator.mottaDokument(fødselsnummer, dokumentId, dokument)

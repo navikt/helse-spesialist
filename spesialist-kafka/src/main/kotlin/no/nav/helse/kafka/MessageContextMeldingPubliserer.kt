@@ -21,7 +21,7 @@ class MessageContextMeldingPubliserer(
         årsak: String,
     ) {
         val packet = hendelse.somJsonMessage(fødselsnummer).toJson()
-        loggInfo("Publiserer hendelse på grunn av $årsak", "json:\n$packet")
+        loggInfo("Publiserer hendelse på grunn av $årsak", "json" to packet)
         context.publish(fødselsnummer, packet)
     }
 
@@ -31,7 +31,7 @@ class MessageContextMeldingPubliserer(
         versjonAvKode: String,
     ) {
         val packet = subsumsjonEvent.somJsonMessage(fødselsnummer, versjonAvKode).toJson()
-        loggInfo("Publiserer subsumsjon", "json:\n$packet")
+        loggInfo("Publiserer subsumsjon", "json" to packet)
         context.publish(fødselsnummer, packet)
     }
 
@@ -43,7 +43,7 @@ class MessageContextMeldingPubliserer(
     ) {
         val packet = behov.somJsonMessage(commandContextId, fødselsnummer, hendelseId).toJson()
         val behovNames = behov.map(Behov::behovName)
-        loggInfo("Publiserer behov for $behovNames", "json:\n$packet")
+        loggInfo("Publiserer behov for $behovNames", "json" to packet)
         context.publish(fødselsnummer, packet)
     }
 
@@ -53,7 +53,7 @@ class MessageContextMeldingPubliserer(
         hendelseNavn: String,
     ) {
         val message = JsonMessage.newMessage(event.eventName, event.detaljer()).toJson()
-        loggInfo("Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}", "json:\n$message")
+        loggInfo("Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}", "json" to message)
         context.publish(fødselsnummer, message)
     }
 }

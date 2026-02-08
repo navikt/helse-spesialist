@@ -36,7 +36,7 @@ class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.Komme
             dialog.feilregistrerKommentar(kommentar.id())
             kallKontekst.transaksjon.dialogRepository.lagre(dialog)
 
-            loggInfo("Markerte kommentar som feilregistrert", "${dialog.id()}, ${kommentar.id()}")
+            loggInfo("Markerte kommentar som feilregistrert", "dialogId" to dialog.id(), "kommentarId" to kommentar.id())
         }
 
         return RestResponse.OK(Unit)

@@ -109,8 +109,8 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.application.logg.teamLogs
@@ -193,7 +193,7 @@ class PersonQueryHandler(
         saksbehandler: Saksbehandler,
         brukerroller: Set<Brukerrolle>,
     ): DataFetcherResult<ApiPerson?> {
-        loggInfo("Personoppslag på person", "identitetsnummer: $identitetsnummer")
+        loggInfo("Personoppslag på person", "identitetsnummer" to identitetsnummer)
 
         val personEntity =
             transaction.personRepository.finn(identitetsnummer)
@@ -230,15 +230,11 @@ class PersonQueryHandler(
 
         val snapshot =
             try {
-                loggInfo("Henter snapshot for person", "fødselsnummer: ${identitetsnummer.value}")
+                loggInfo("Henter snapshot for person", "identitetsnummer" to identitetsnummer)
                 snapshothenter.hentPerson(identitetsnummer.value)
                     ?: null.also { loggWarn("Fikk ikke personsnapshot fra Spleis") }
             } catch (e: Exception) {
-                loggThrowable(
-                    message = "Klarte ikke hente snapshot fra Spleis",
-                    teamLogsDetails = "identitetsnummer=${identitetsnummer.value}",
-                    throwable = e,
-                )
+                loggError("Klarte ikke hente snapshot fra Spleis", e, "identitetsnummer" to identitetsnummer)
                 klarteIkkeHentePerson(saksbehandler, identitetsnummer)
             }
 

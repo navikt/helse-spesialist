@@ -20,8 +20,8 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.application.logg.MdcKey
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -53,7 +53,7 @@ class MeldingMediator(
         if (poisonPillsCache.get(Unit).erPoisonPill(jsonNode)) {
             loggInfo(
                 "Hopper over melding med @id: ${jsonNode["@id"].asText()}",
-                "json: \n$jsonNode",
+                "json" to jsonNode,
             )
 
             return false
@@ -82,7 +82,7 @@ class MeldingMediator(
         if (!harPerson) {
             loggWarn(
                 "Ignorerer melding med event_name: $eventName, person finnes ikke i databasen",
-                "fødselsnummer: $fødselsnummer",
+                "fødselsnummer" to fødselsnummer,
             )
         }
         return harPerson
@@ -219,11 +219,7 @@ class MeldingMediator(
     ) {
         val meldingId = runCatching { objectMapper.readTree(message)["@id"]?.asUUID() }.getOrNull()
         medMdc(meldingId?.let { MdcKey.MELDING_ID to it.toString() }) {
-            loggThrowable(
-                "alvorlig feil: ${err.message}",
-                "json:\n$message",
-                err,
-            )
+            loggError("alvorlig feil ved behandling av melding", err, "json" to message)
         }
     }
 
@@ -237,7 +233,7 @@ class MeldingMediator(
             MdcKey.MELDINGNAVN to meldingnavn,
             (melding as? Vedtaksperiodemelding)?.let { MdcKey.VEDTAKSPERIODE_ID to it.vedtaksperiodeId().toString() },
         ) {
-            loggInfo("Melding $meldingnavn mottatt", "json: \n${melding.toJson()}")
+            loggInfo("Melding $meldingnavn mottatt", "json" to melding.toJson())
             meldingDao.lagre(melding)
             behandleMelding(melding, kontekstbasertPubliserer)
         }
@@ -253,7 +249,7 @@ class MeldingMediator(
             MdcKey.MELDING_ID to melding.id.toString(),
             MdcKey.MELDINGNAVN to meldingnavn,
         ) {
-            loggInfo("Melding $meldingnavn gjenopptatt", "json: \n${melding.toJson()}")
+            loggInfo("Melding $meldingnavn gjenopptatt", "json" to melding.toJson())
             behandleMelding(melding, kontekstbasertPubliserer) { commandContext }
         }
     }
@@ -278,7 +274,7 @@ class MeldingMediator(
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
                 sessionContext.legacyPersonRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                    loggInfo("Personen finnes i databasen, behandler melding $meldingnavn", "fødselsnummer: ${melding.fødselsnummer()}")
+                    loggInfo("Personen finnes i databasen, behandler melding $meldingnavn", "fødselsnummer" to melding.fødselsnummer())
                     val kommandostarter =
                         kommandofabrikk.lagKommandostarter(
                             setOf(utgåendeMeldingerMediator),
@@ -317,7 +313,7 @@ class MeldingMediator(
             jsonNode: JsonNode,
         ) {
             val behov = jsonNode["@behov"].map(JsonNode::asText)
-            loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger på $behov", "løsning-json: \n$jsonNode")
+            loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger på $behov", "løsning-json" to jsonNode)
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
@@ -328,7 +324,7 @@ class MeldingMediator(
         private val commandContext: CommandContext,
     ) {
         fun fortsett(mediator: MeldingMediator) {
-            loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av påminnelse", "melding-json: \n${melding.toJson()}")
+            loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av påminnelse", "melding-json" to melding.toJson())
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }

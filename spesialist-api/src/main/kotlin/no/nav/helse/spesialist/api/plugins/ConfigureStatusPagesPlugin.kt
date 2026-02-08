@@ -8,7 +8,7 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import no.nav.helse.spesialist.api.graphql.Modellfeil
-import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 
 fun StatusPagesConfig.configureStatusPagesPlugin() {
     exception<Modellfeil> { call: ApplicationCall, modellfeil: Modellfeil ->
@@ -18,7 +18,7 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
     exception<Throwable> { call, cause ->
         val uri = call.request.uri
         val verb = call.request.httpMethod.value
-        loggThrowable("Unhandled: $verb", uri, cause)
+        loggError("Unhandled: $verb $uri", cause)
         call.respondText(
             text = "Det skjedde en uventet feil",
             status = HttpStatusCode.InternalServerError,

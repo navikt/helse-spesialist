@@ -12,7 +12,7 @@ internal class AvbrytTotrinnsvurderingCommand(
     override fun execute(context: CommandContext): Boolean {
         loggInfo(
             "setter vedtaksperiode_forkastet i totrinnsvurdering for person",
-            "fødselsnummer: $fødselsnummer",
+            "fødselsnummer" to fødselsnummer,
         )
 
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer) ?: return true

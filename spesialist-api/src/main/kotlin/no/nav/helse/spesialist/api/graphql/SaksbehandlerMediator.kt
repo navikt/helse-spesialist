@@ -54,8 +54,8 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.logg.MdcKey
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -115,7 +115,7 @@ class SaksbehandlerMediator(
 
         loggInfo(
             "Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler",
-            "saksbehandler: $saksbehandler",
+            "saksbehandlerIdent" to saksbehandler.ident.value,
         )
         when (modellhandling) {
             is Overstyring -> {
@@ -188,7 +188,8 @@ class SaksbehandlerMediator(
         }
         loggInfo(
             "Handling ${modellhandling.loggnavn()} utført på oppgave på vegne av saksbehandler",
-            "oppgaveId: ${modellhandling.oppgaveId}, saksbehandler: $saksbehandler",
+            "oppgaveId" to modellhandling.oppgaveId,
+            "saksbehandlerIdent" to saksbehandler.ident.value,
         )
     }
 
@@ -266,7 +267,7 @@ class SaksbehandlerMediator(
         if (!påVentDao.erPåVent(handling.oppgaveId)) {
             loggInfo(
                 "Oppgave er ikke på vent",
-                "oppgaveId: ${handling.oppgaveId}",
+                "oppgaveId" to handling.oppgaveId,
             )
             return
         }
@@ -284,7 +285,7 @@ class SaksbehandlerMediator(
         if (!påVentDao.erPåVent(handling.oppgaveId)) {
             loggInfo(
                 "Oppgave er ikke på vent",
-                "oppgaveId: ${handling.oppgaveId}",
+                "oppgaveId" to handling.oppgaveId,
             )
             return
         }
@@ -329,7 +330,8 @@ class SaksbehandlerMediator(
     ): SendIReturResult {
         loggInfo(
             "Oppgave med sendes i retur av beslutter",
-            "oppgaveId: $oppgavereferanse, beslutter: $besluttendeSaksbehandler",
+            "oppgaveId" to oppgavereferanse,
+            "beslutterIdent" to besluttendeSaksbehandler.ident.value,
         )
 
         try {
@@ -380,7 +382,8 @@ class SaksbehandlerMediator(
 
         loggInfo(
             "Oppgave sendes i retur",
-            "oppgaveId: $oppgavereferanse, beslutter: $besluttendeSaksbehandler",
+            "oppgaveId" to oppgavereferanse,
+            "beslutterIdent" to besluttendeSaksbehandler.ident.value,
         )
 
         return SendIReturResult.Ok
@@ -434,16 +437,10 @@ class SaksbehandlerMediator(
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
                 }
             } catch (modellfeil: Modellfeil) {
-                loggThrowable(
-                    "Feil ved sending til beslutter",
-                    modellfeil,
-                )
+                loggError("Feil ved sending til beslutter", modellfeil)
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
             } catch (e: Exception) {
-                loggThrowable(
-                    "Feil ved sending til beslutter",
-                    e,
-                )
+                loggError("Feil ved sending til beslutter", e)
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter(e)
             }
 
@@ -457,7 +454,8 @@ class SaksbehandlerMediator(
 
             loggInfo(
                 "Oppgave sendes til godkjenning av saksbehandler",
-                "oppgaveId: $oppgavereferanse, saksbehandler: $saksbehandler",
+                "oppgaveId" to oppgavereferanse,
+                "saksbehandlerIdent" to saksbehandler.ident.value,
             )
 
             try {
@@ -471,7 +469,8 @@ class SaksbehandlerMediator(
 
             loggInfo(
                 "Oppgave sendes til godkjenning av saksbehandler",
-                "oppgaveId: $oppgavereferanse, saksbehandler: $saksbehandler",
+                "oppgaveId" to oppgavereferanse,
+                "saksbehandlerIdent" to saksbehandler.ident.value,
             )
 
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
@@ -719,14 +718,15 @@ private fun overstyringUnitOfWork(
     sessionFactory.transactionalSessionScope { session ->
         overstyring.loggInfo(
             "Utfører overstyring $loggnavn på vegne av saksbehandler",
-            "saksbehandler: $saksbehandler",
+            "saksbehandlerIdent" to saksbehandler.ident.value,
         )
         session.saksbehandlerRepository.lagre(saksbehandler)
 
         val fødselsnummer = overstyring.fødselsnummer
         overstyring.loggInfo(
             "Reserverer person til saksbehandler",
-            "fødselsnummer: $fødselsnummer, saksbehandler: $saksbehandler",
+            "fødselsnummer" to fødselsnummer,
+            "saksbehandlerIdent" to saksbehandler.ident.value,
         )
         session.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
 

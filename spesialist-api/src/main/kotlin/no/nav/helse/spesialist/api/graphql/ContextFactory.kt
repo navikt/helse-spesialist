@@ -8,7 +8,7 @@ import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.graphql.ContextValues.BRUKERROLLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 
 enum class ContextValues {
     BRUKERROLLER,
@@ -19,7 +19,7 @@ class ContextFactory : KtorGraphQLContextFactory() {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
         val principal =
             request.call.principal<SaksbehandlerPrincipal>() ?: run {
-                loggErrorWithNoThrowable("Ingen access_token for graphql-kall")
+                loggError("Ingen access_token for graphql-kall")
                 return emptyMap<Any, Any>().toGraphQLContext()
             }
 

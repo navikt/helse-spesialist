@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.api.graphql
 import graphql.ExceptionWhileDataFetching
 import graphql.GraphqlErrorException
 import graphql.execution.SimpleDataFetcherExceptionHandler
-import no.nav.helse.spesialist.application.logg.loggThrowable
-import no.nav.helse.spesialist.application.logg.loggWarnThrowable
+import no.nav.helse.spesialist.application.logg.loggError
+import no.nav.helse.spesialist.application.logg.loggWarn
 
 class SpesialistDataFetcherExceptionHandler : SimpleDataFetcherExceptionHandler() {
     override fun logException(
@@ -13,9 +13,9 @@ class SpesialistDataFetcherExceptionHandler : SimpleDataFetcherExceptionHandler(
     ) {
         val httpCode = (exception as? GraphqlErrorException)?.extensions?.get("code") as? Int
         if (httpCode != null && (httpCode in 400..499)) {
-            loggWarnThrowable("Returnerer klientfeil (kode $httpCode) for GraphQL-kall til ${error.path}", exception)
+            loggWarn("Returnerer klientfeil (kode $httpCode) for GraphQL-kall til ${error.path}", exception)
         } else {
-            loggThrowable("Uhåndtert feil ved GraphQL-kall til ${error.path}", exception)
+            loggError("Uhåndtert feil ved GraphQL-kall til ${error.path}", exception)
         }
     }
 }

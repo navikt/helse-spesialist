@@ -56,7 +56,7 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
                 if (resultat is ResultatAvSletting.Slettet) {
                     kallKontekst.transaksjon.varselRepository.lagre(varsel)
                 }
-                loggInfo("Fjernet vurdering av varsel", varsel.kode)
+                loggInfo("Fjernet vurdering av varsel", "varselKode" to varsel.kode)
                 RestResponse.NoContent()
             }
         }

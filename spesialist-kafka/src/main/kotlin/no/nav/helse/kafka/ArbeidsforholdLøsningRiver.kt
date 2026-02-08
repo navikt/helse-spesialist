@@ -54,7 +54,7 @@ class ArbeidsforholdLøsningRiver(
         val løsninger = this["@løsning.Arbeidsforhold"].map(::toArbeidsforholdløsning)
 
         if (løsninger.isEmpty()) {
-            loggInfo("Ingen arbeidsforhold i løsningen", "json:\n${this.toJson()}")
+            loggInfo("Ingen arbeidsforhold i løsningen")
         }
         return Arbeidsforholdløsning(løsninger)
     }

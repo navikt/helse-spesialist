@@ -45,7 +45,7 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
             notat.feilregistrer()
             kallKontekst.transaksjon.notatRepository.lagre(notat)
 
-            loggInfo("Markerte notat som feilregistrert", "${notat.id()}")
+            loggInfo("Markerte notat som feilregistrert", "notatId" to notat.id())
         }
 
         return RestResponse.OK(Unit)

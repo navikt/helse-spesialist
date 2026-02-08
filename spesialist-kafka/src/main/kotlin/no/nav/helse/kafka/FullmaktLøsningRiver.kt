@@ -42,7 +42,7 @@ class FullmaktLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        loggInfo("Mottok løsning på fullmakt-behov", "json:\n${packet.toJson()}")
+        loggInfo("Mottok løsning på fullmakt-behov")
         val contextId = packet["contextId"].asUUID()
         val hendelseId = packet["hendelseId"].asUUID()
 

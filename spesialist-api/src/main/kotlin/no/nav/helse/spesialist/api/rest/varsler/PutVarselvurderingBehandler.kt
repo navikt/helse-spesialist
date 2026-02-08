@@ -67,7 +67,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         varsel.vurder(kallKontekst.saksbehandler.id, varseldefinisjonId)
         kallKontekst.transaksjon.varselRepository.lagre(varsel)
 
-        loggInfo("Lagret vurdering av varsel", varsel.kode)
+        loggInfo("Lagret vurdering av varsel", "varselKode" to varsel.kode)
 
         return RestResponse.OK(Unit)
     }

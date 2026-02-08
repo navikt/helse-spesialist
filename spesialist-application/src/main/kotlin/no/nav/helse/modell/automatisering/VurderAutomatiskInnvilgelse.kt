@@ -28,14 +28,6 @@ internal class VurderAutomatiskInnvilgelse(
     private val utbetalingId = godkjenningsbehov.utbetalingId
     private val hendelseId = godkjenningsbehov.id
 
-    private fun utfallslogger(
-        tekst: String,
-        problemer: List<String> = emptyList(),
-    ) = loggInfo(
-        tekst,
-        "vedtaksperiodeId: $vedtaksperiodeId, utbetalingId: $utbetalingId, problemer: ${problemer.joinToString()}",
-    )
-
     override fun execute(context: CommandContext): Boolean {
         val resultat =
             automatisering.utfør(
@@ -52,23 +44,31 @@ internal class VurderAutomatiskInnvilgelse(
 
         when (resultat) {
             is Automatiseringsresultat.KanIkkeAutomatiseres -> {
-                utfallslogger("Behandler ikke perioden ferdig automatisk fordi: {}", resultat.problemer)
+                loggInfo(
+                    "Behandler ikke perioden ferdig automatisk, den kan ikke automatiseres",
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "utbetalingId" to utbetalingId,
+                    "problemer" to resultat.problemer.joinToString(),
+                )
                 manuellSaksbehandling(resultat.problemer)
             }
 
             is Automatiseringsresultat.Stikkprøve -> {
-                utfallslogger("Behandler ikke perioden ferdig automatisk, plukket ut til stikkprøve for ${resultat.årsak}")
                 loggInfo(
-                    "Automatisk godkjenning avbrutt, sendes til manuell behandling",
-                    "vedtaksperiodeId: $vedtaksperiodeId, utbetalingId: $utbetalingId",
+                    "Behandler ikke perioden ferdig automatisk, plukket ut til stikkprøve for ${resultat.årsak}",
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "utbetalingId" to utbetalingId,
                 )
                 stikkprøve()
             }
 
             is Automatiseringsresultat.KanAutomatiseres -> {
-                utfallslogger("Behandler perioden ferdig automatisk")
+                loggInfo(
+                    "Behandler perioden ferdig automatisk",
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "utbetalingId" to utbetalingId,
+                )
                 automatiserSaksbehandling(context)
-                loggInfo("Automatisk godkjenning for vedtaksperiode", "vedtaksperiodeId: $vedtaksperiodeId")
                 return ferdigstill(context)
             }
         }

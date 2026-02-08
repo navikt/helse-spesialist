@@ -37,10 +37,7 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
         }
 
     fun behandlerIkke(yrkesaktivitetstype: String) {
-        loggInfo(
-            "Tar ikke imot behandling_opprettet på grunn av manglende støtte for yrkesaktivitetstype",
-            "organisasjonsnummer: $yrkesaktivitetstype",
-        )
+        loggInfo("Tar ikke imot behandling_opprettet på grunn av manglende støtte for yrkesaktivitetstype ($yrkesaktivitetstype)")
     }
 
     override fun transaksjonellOnPacket(

@@ -76,7 +76,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
                 reservasjonDao.reserverPerson(tildeltSaksbehandler.oid, fødselsnummer)
                 loggInfo(
                     "Reserverer person til ${tildeltSaksbehandler.oid} pga eksisterende tildeling",
-                    "fødselsnummer: $fødselsnummer",
+                    "fødselsnummer" to fødselsnummer,
                 )
             }
             loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")

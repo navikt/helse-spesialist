@@ -112,7 +112,7 @@ class DuplikatsjekkendeRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        loggInfo("Melding mottatt", "json:\n${packet.toJson()}")
+        loggInfo("Melding mottatt", "json" to packet.toJson())
         val id = packet.id.toUUID()
         if (erDuplikat(id)) {
             loggInfo("Ignorerer melding pga duplikatkontroll")

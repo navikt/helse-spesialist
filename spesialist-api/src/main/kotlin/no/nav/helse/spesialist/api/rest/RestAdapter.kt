@@ -18,8 +18,8 @@ import no.nav.helse.spesialist.api.mdcMapAttribute
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.MdcKey
-import no.nav.helse.spesialist.application.logg.loggThrowable
-import no.nav.helse.spesialist.application.logg.loggWarnThrowable
+import no.nav.helse.spesialist.application.logg.loggError
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.slf4j.MDC
@@ -142,18 +142,9 @@ class RestAdapter(
                                 }
                             }
                         if (statusCode in 400..499 || statusCode == 504) {
-                            loggWarnThrowable(loggmelding, cause)
+                            loggWarn(loggmelding, cause, "request" to call.receive<String>())
                         } else {
-                            loggThrowable(
-                                message = loggmelding,
-                                teamLogsDetails =
-                                    call
-                                        .receive<String>()
-                                        .takeUnless(String::isBlank)
-                                        ?.let { "Request body: $it" }
-                                        .orEmpty(),
-                                throwable = cause,
-                            )
+                            loggError(loggmelding, cause, "request" to call.receive<String>())
                         }
                         call.respondWithProblem(problemDetails)
                     }.onSuccess { result ->

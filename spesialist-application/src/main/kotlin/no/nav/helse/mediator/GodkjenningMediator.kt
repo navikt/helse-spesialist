@@ -28,7 +28,7 @@ class GodkjenningMediator(
         tellAutomatisering()
         loggInfo(
             "Automatisk godkjenning av vedtaksperiode ${behov.vedtaksperiodeId}",
-            "fødselsnummer: ${behov.fødselsnummer}",
+            "fødselsnummer" to behov.fødselsnummer,
         )
     }
 
@@ -52,11 +52,8 @@ class GodkjenningMediator(
         tellAutomatisering()
         loggInfo(
             "Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId}",
-            "fødselsnummer: ${behov.fødselsnummer}",
-        )
-        loggInfo(
-            "Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId}",
-            "fødselsnummer: ${behov.fødselsnummer}, begrunnelser: $begrunnelser",
+            "fødselsnummer" to behov.fødselsnummer,
+            "begrunnelser" to begrunnelser,
         )
     }
 }

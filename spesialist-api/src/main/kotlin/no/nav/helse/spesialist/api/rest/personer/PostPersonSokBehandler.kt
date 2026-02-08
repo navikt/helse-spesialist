@@ -32,14 +32,14 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
                 }
 
                 aktørId != null -> {
-                    loggInfo("Søker etter person med aktørId", aktørId)
+                    loggInfo("Søker etter person med aktørId", "aktørId" to aktørId)
                     kallKontekst.transaksjon.personRepository
                         .finnAlleMedAktørId(aktørId)
                         .firstOrNull()
                 }
 
                 identitetsnummer != null -> {
-                    loggInfo("Søker etter person med identitetsnummer", identitetsnummer)
+                    loggInfo("Søker etter person med identitetsnummer", "identitetsnummer" to identitetsnummer)
                     kallKontekst.transaksjon.personRepository.finn(Identitetsnummer.fraString(identitetsnummer))
                 }
 

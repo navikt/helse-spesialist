@@ -25,7 +25,7 @@ import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -77,7 +77,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
             vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         )
         transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
-            loggInfo("Personen finnes i databasen, behandler melding $eventName", "fødselsnummer: $fødselsnummer")
+            loggInfo("Personen finnes i databasen, behandler melding $eventName")
 
             val vedtaksperiode =
                 vedtaksperioder().finnBehandling(spleisBehandlingId)
@@ -85,9 +85,10 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
             val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
 
             if (behandling.tags.isEmpty()) {
-                loggErrorWithNoThrowable(
+                loggError(
                     "Ingen tags funnet for behandling",
-                    "vedtaksperiodeId: ${behandling.vedtaksperiodeId}, spleisBehandlingId: ${behandling.spleisBehandlingId}",
+                    "vedtaksperiodeId" to behandling.vedtaksperiodeId,
+                    "spleisBehandlingId" to behandling.spleisBehandlingId,
                 )
             }
 
@@ -96,7 +97,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
             if (sisteGodkjenningsbehov == null) {
                 loggWarn(
                     "Finner ikke godkjenningsbehov tilhørende behandling",
-                    "spleisBehandlingId: $spleisBehandlingId",
+                    "spleisBehandlingId" to spleisBehandlingId,
                 )
             }
 

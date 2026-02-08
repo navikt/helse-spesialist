@@ -31,7 +31,7 @@ class MsGraphTilgangsgruppehenter(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     override fun hentBrukerroller(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Brukerrollehenter.Feil> {
-        loggInfo("Henter tilgangsgrupper for saksbehandler", saksbehandlerOid.toString())
+        loggInfo("Henter tilgangsgrupper for saksbehandler", "saksbehandlerOid" to saksbehandlerOid)
         return Request
             .post(msGraphUrl + "/v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
             .setHeader(

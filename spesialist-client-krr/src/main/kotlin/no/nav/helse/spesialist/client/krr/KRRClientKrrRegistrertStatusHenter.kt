@@ -10,7 +10,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus
-import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
@@ -95,7 +95,7 @@ class KRRClientKrrRegistrertStatusHenter(
         melding: String,
         response: String,
     ): Nothing {
-        loggErrorWithNoThrowable(melding, "Full respons: $response")
+        loggError(melding, "response" to response)
         error(melding)
     }
 

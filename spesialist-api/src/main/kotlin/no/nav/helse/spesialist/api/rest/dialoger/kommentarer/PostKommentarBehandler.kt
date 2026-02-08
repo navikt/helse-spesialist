@@ -34,7 +34,7 @@ class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKom
             )
         kallKontekst.transaksjon.dialogRepository.lagre(dialog)
 
-        loggInfo("Opprettet kommentar", "${dialog.id()}, ${kommentar.id()}")
+        loggInfo("Opprettet kommentar", "dialogId" to dialog.id(), "kommentarId" to kommentar.id())
 
         return RestResponse.Created(ApiKommentarResponse(id = kommentar.id().value))
     }

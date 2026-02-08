@@ -11,7 +11,7 @@ import com.github.benmanes.caffeine.cache.Expiry
 import com.github.benmanes.caffeine.cache.LoadingCache
 import com.nimbusds.jose.jwk.RSAKey
 import no.nav.helse.spesialist.application.AccessTokenGenerator
-import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
@@ -57,10 +57,7 @@ class EntraIDAccessTokenGenerator(
             .handleResponse { response ->
                 val responseBody = EntityUtils.toString(response.entity)
                 if (response.code !in 200..299) {
-                    loggErrorWithNoThrowable(
-                        message = "Fikk HTTP ${response.code} fra Entra ID",
-                        teamLogsDetails = "Full response: $responseBody",
-                    )
+                    loggError("Fikk HTTP ${response.code} fra Entra ID", "response" to responseBody)
                     error("Fikk HTTP ${response.code} fra Entra ID")
                 }
                 objectMapper.readValue(responseBody, TokenEndpointResponse::class.java)

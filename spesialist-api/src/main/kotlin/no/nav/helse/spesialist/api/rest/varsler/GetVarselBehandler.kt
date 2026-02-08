@@ -76,7 +76,7 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
                     },
             )
 
-        loggInfo("Hentet varsel", "${varsel.id}")
+        loggInfo("Hentet varsel", "varselId" to varsel.id)
 
         return RestResponse.OK(apiVarsel)
     }
