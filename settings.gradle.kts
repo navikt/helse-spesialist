@@ -13,7 +13,6 @@ include(
     "spesialist-opprydding-dev",
     "spesialist-bootstrap",
     "spesialist-e2e-tests",
-    "spesialist-sidegig",
 )
 
 // Sett opp repositories basert på om vi kjører i CI eller ikke

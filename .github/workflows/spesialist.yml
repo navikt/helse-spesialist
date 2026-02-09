@@ -11,7 +11,6 @@ on:
             - 'spesialist-sidegig/**'
             - '.github/workflows/spesialist-db-migrations.yml'
             - '.github/workflows/spesialist-opprydding-dev.yml'
-            - '.github/workflows/spesialist-sidegig.yml'
             - '.github/workflows/deploy_specific_commit_to_dev.yml'
             - '.github/workflows/alerts.yml'
             - '.github/workflows/codeql.yml'
@@ -19,7 +18,6 @@ on:
             - 'deploy/dev-db-migrations.yml'
             - 'deploy/dev-opprydding.yml'
             - 'deploy/prod-db-migrations.yml'
-            - 'deploy/prod-sidegig.yml'
             - 'deploy/alerts/**'
         branches:
             - main
