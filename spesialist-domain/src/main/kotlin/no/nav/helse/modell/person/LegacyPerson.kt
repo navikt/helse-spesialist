@@ -63,8 +63,6 @@ class LegacyPerson(
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
-    fun behandlinger() = vedtaksperioder.flatMap { it.behandlinger() }
-
     fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
         vedtaksperioder
             .find { it.vedtaksperiodeId() == vedtaksperiodeId }

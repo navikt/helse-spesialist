@@ -27,8 +27,6 @@ class LegacyVedtaksperiode(
 
     fun organisasjonsnummer() = organisasjonsnummer
 
-    fun behandlinger() = behandlinger.map { BehandlingData(it.vedtaksperiodeId(), it.spleisBehandlingId()) }
-
     internal fun toDto(): VedtaksperiodeDto =
         VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,
@@ -163,9 +161,4 @@ class LegacyVedtaksperiode(
                 yrkesaktivitetstype = yrkesaktivitetstype,
             )
     }
-
-    data class BehandlingData(
-        val vedtaksperiodeId: UUID,
-        val spleisBehandlingId: UUID?,
-    )
 }

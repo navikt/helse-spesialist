@@ -16,7 +16,6 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.application.logg.MdcKey
@@ -141,16 +140,6 @@ class MeldingMediator(
         dokument: JsonNode,
     ) {
         dokumentDao.lagre(fødselsnummer, dokumentId, dokument)
-    }
-
-    fun finnBehandlingerFor(fødselsnummer: String): List<LegacyVedtaksperiode.BehandlingData> {
-        var behandlinger: List<LegacyVedtaksperiode.BehandlingData> = emptyList()
-        sessionFactory.transactionalSessionScope { sessionContext ->
-            sessionContext.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-                behandlinger = behandlinger()
-            }
-        }
-        return behandlinger
     }
 
     fun nullstillTilstand() {
