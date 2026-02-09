@@ -102,10 +102,6 @@ internal abstract class AbstractDatabaseTest {
             
             INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type)
             VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
-            INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id)
-            VALUES ('${saksbehandler_oid}', ${sequence_number});
-            INSERT INTO saksbehandler_opptegnelse_sekvensnummer (saksbehandler_id, siste_sekvensnummer)
-            VALUES ('${saksbehandler_oid}', 1);
             INSERT INTO dokumenter(dokument_id, person_ref, dokument, opprettet)
             VALUES (gen_random_uuid(), ${sequence_number}, '{}'::json, now());
             
@@ -208,6 +204,7 @@ internal abstract class AbstractDatabaseTest {
                 "saksbehandler",
                 "arbeidsgiver",
                 "api_varseldefinisjon",
+                "abonnement_for_opptegnelse",
                 "saksbehandler_opptegnelse_sekvensnummer",
                 "inntekt",
                 "temp_manglende_varsler",
@@ -226,7 +223,7 @@ internal abstract class AbstractDatabaseTest {
                 "tilkommen_inntekt_events",
                 "ukoblede_annulleringer",
                 "midlertidig_behandling_vedtak_fattet",
-                "tmp_slettede_varsler"
+                "tmp_slettede_varsler",
             ),
         )
         tabeller.forEach { tabellnavn ->

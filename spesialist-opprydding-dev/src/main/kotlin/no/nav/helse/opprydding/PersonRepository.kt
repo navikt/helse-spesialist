@@ -143,13 +143,6 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = "DELETE FROM opptegnelse WHERE person_id = ?"
         run(queryOf(query, personRef).asExecute)
-        slettAbonnementForOpptegnelse(personRef)
-    }
-
-    private fun TransactionalSession.slettAbonnementForOpptegnelse(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM abonnement_for_opptegnelse WHERE person_id = ?"
-        run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettArbeidsforhold(personRef: Int) {
