@@ -10,8 +10,12 @@ import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spleis.graphql.HentSnapshotResult
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.core5.http.ContentType
+import org.apache.hc.core5.http.HttpRequest
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import org.apache.hc.core5.util.TimeValue
 import java.net.URI
 import java.util.UUID
 
@@ -28,32 +32,40 @@ class SpleisClient(
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES),
         )
 
-    fun hentPerson(fødselsnummer: String): GraphQLPerson? =
-        Request
-            .post(spleisUrl.resolve("/graphql").toURL().toURI())
-            .setHeader("Authorization", "Bearer ${accessTokenGenerator.hentAccessToken(spleisClientId)}")
-            .setHeader("callId", UUID.randomUUID().toString())
-            .bodyString("""{ "variables": { "fnr": "$fødselsnummer" } }""", ContentType.APPLICATION_JSON)
-            .execute()
-            .handleResponse { response ->
-                val responseBody = EntityUtils.toString(response.entity)
-                if (loggRespons) {
-                    teamLogs.trace("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
-                }
-                if (response.code !in 200..299) {
-                    logg.error("Fikk HTTP ${response.code} i svar fra Spleis. Se sikkerlogg for mer info.")
-                    teamLogs.error("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
-                }
-                val graphQLResponse = serializer.deserialize(responseBody, HentSnapshotResult::class)
-                if (graphQLResponse.data == null && graphQLResponse.errors == null) {
-                    logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
-                    teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
-                }
-                if (graphQLResponse.errors !== null) {
-                    logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
-                    teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
-                }
+    class SpleisRetryStrategy : DefaultHttpRequestRetryStrategy(5, TimeValue.ofSeconds(1L)) {
+        override fun handleAsIdempotent(request: HttpRequest) = true // Retry selv om det er POST
+    }
 
-                graphQLResponse.data?.person
-            }
+    private val retryStrategy = SpleisRetryStrategy()
+
+    fun hentPerson(fødselsnummer: String): GraphQLPerson? =
+        HttpClientBuilder.create().setRetryStrategy(retryStrategy).build().use { client ->
+            Request
+                .post(spleisUrl.resolve("/graphql").toURL().toURI())
+                .setHeader("Authorization", "Bearer ${accessTokenGenerator.hentAccessToken(spleisClientId)}")
+                .setHeader("callId", UUID.randomUUID().toString())
+                .bodyString("""{ "variables": { "fnr": "$fødselsnummer" } }""", ContentType.APPLICATION_JSON)
+                .execute(client)
+                .handleResponse { response ->
+                    val responseBody = EntityUtils.toString(response.entity)
+                    if (loggRespons) {
+                        teamLogs.trace("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
+                    }
+                    if (response.code !in 200..299) {
+                        logg.error("Fikk HTTP ${response.code} i svar fra Spleis. Se sikkerlogg for mer info.")
+                        teamLogs.error("Fikk HTTP ${response.code}-svar fra Spleis: $responseBody")
+                    }
+                    val graphQLResponse = serializer.deserialize(responseBody, HentSnapshotResult::class)
+                    if (graphQLResponse.data == null && graphQLResponse.errors == null) {
+                        logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
+                        teamLogs.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
+                    }
+                    if (graphQLResponse.errors !== null) {
+                        logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
+                        teamLogs.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
+                    }
+
+                    graphQLResponse.data?.person
+                }
+        }
 }
