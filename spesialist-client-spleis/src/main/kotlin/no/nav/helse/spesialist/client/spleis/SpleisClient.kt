@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spleis.graphql.HentSnapshotResult
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
@@ -40,11 +41,15 @@ class SpleisClient(
 
     fun hentPerson(fødselsnummer: String): GraphQLPerson? =
         HttpClientBuilder.create().setRetryStrategy(retryStrategy).build().use { client ->
+            val callId = UUID.randomUUID().toString()
+            val uri = spleisUrl.resolve("/graphql")
+            val requestBody = """{ "variables": { "fnr": "$fødselsnummer" } }"""
+            loggInfo("Kaller HTTP POST $uri med callId $callId", "requestBody" to requestBody)
             Request
-                .post(spleisUrl.resolve("/graphql").toURL().toURI())
+                .post(uri)
                 .setHeader("Authorization", "Bearer ${accessTokenGenerator.hentAccessToken(spleisClientId)}")
-                .setHeader("callId", UUID.randomUUID().toString())
-                .bodyString("""{ "variables": { "fnr": "$fødselsnummer" } }""", ContentType.APPLICATION_JSON)
+                .setHeader("callId", callId)
+                .bodyString(requestBody, ContentType.APPLICATION_JSON)
                 .execute(client)
                 .handleResponse { response ->
                     val responseBody = EntityUtils.toString(response.entity)
