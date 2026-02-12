@@ -5,5 +5,6 @@ ENV JDK_JAVA_OPTIONS='-XX:MaxRAMPercentage=90'
 
 WORKDIR /app
 
-COPY spesialist-opprydding-dev/build/libs/*.jar .
-CMD ["app.jar"]
+COPY spesialist-opprydding-dev/build/install/app/ /app/
+ENTRYPOINT ["java", "-cp", "/app/lib/*", "no.nav.helse.opprydding.AppKt"]
+CMD []

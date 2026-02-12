@@ -1,4 +1,11 @@
-val mainClass = "no.nav.helse.opprydding.AppKt"
+plugins {
+    id("application")
+}
+
+application {
+    mainClass.set("no.nav.helse.opprydding.AppKt")
+    applicationName = "app"
+}
 
 dependencies {
     implementation(libs.postgresSocketFactory)
@@ -13,23 +20,4 @@ dependencies {
     testImplementation(libs.tbdLibs.rapidsAndRiversTest)
 
     testImplementation(testFixtures(project(":spesialist-db")))
-}
-
-tasks {
-    val copyDeps by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        into("build/libs")
-    }
-    named<Jar>("jar") {
-        dependsOn(copyDeps)
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
-        }
-    }
 }
