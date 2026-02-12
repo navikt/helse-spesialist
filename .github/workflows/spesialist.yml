@@ -7,7 +7,6 @@ on:
             - 'Dockerfile-opprydding-dev'
             - 'spesialist-db-migrations/**'
             - 'spesialist-opprydding-dev/**'
-            - 'spesialist-sidegig/**'
             - '.github/workflows/spesialist-db-migrations.yml'
             - '.github/workflows/spesialist-opprydding-dev.yml'
             - '.github/workflows/deploy_specific_commit_to_dev.yml'

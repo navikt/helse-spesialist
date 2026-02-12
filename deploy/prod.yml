@@ -108,7 +108,6 @@ spec:
             users:
               - name: bigquery_connection_user
               - name: spesialist-db-migrations
-              - name: spesialist-sidegig
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
