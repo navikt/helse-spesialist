@@ -50,6 +50,7 @@ ktor-server-doubleReceive = { module = "io.ktor:ktor-server-double-receive", ver
 ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor" }
 ktor-server-statusPages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 ktor-server-testHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+ktor-server-sse = { module = "io.ktor:ktor-server-sse", version.ref = "ktor" }
 
 logback-classic = "ch.qos.logback:logback-classic:1.5.27"
 logback-logstashEncoder = "net.logstash.logback:logstash-logback-encoder:9.0"
@@ -109,7 +110,8 @@ ktor-server = [
     "ktor-server-core",
     "ktor-server-doubleReceive",
     "ktor-server-resources",
-    "ktor-server-statusPages"
+    "ktor-server-statusPages",
+    "ktor-server-sse"
 ]
 ktor-server-test = [
     "ktor-server-testHost"

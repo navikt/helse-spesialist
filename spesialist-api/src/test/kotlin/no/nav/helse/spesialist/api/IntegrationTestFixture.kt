@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.api
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.sse.SSE
+import io.ktor.client.plugins.sse.sse
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
@@ -17,6 +19,12 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
@@ -33,6 +41,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.seconds
 
 class IntegrationTestFixture {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
@@ -84,6 +93,55 @@ class IntegrationTestFixture {
         val bodyAsJsonNode = bodyAsText.takeUnless(String::isEmpty)?.let(objectMapper::readTree)
 
         inline fun <reified T> body(): T = objectMapper.readValue<T>(bodyAsText)
+    }
+
+    fun sse(
+        url: String,
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
+        tilganger: Set<Tilgang> = setOf(Tilgang.Les),
+        brukerroller: Set<Brukerrolle> = emptySet(),
+        nyeOpptegnelserEtterEtablertForbindelse: () -> Unit,
+    ): JsonNode {
+        lateinit var result: JsonNode
+        testApplication {
+            val received = CompletableDeferred<JsonNode>()
+            application {
+                apiModule.setUpApi(this)
+            }
+
+            client =
+                createClient {
+                    install(SSE)
+                }
+
+            logg.info("Starter SSE $url")
+            val job =
+                this.application.launch {
+                    client.sse(urlString = url, request = {
+                        accept(ContentType.Application.Json)
+                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
+                    }, deserialize = { typeInfo, it ->
+                        val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
+                        Json.decodeFromString(serializer, it)!!
+                    }) {
+                        incoming.collect { event ->
+                            val jsonNode = objectMapper.readTree(event.data)
+                            received.complete(jsonNode)
+                        }
+                    }
+                }
+            this.application.launch {
+                delay(2000)
+                nyeOpptegnelserEtterEtablertForbindelse()
+            }
+            result =
+                withTimeout(5.seconds) {
+                    received.await()
+                }
+            job.cancel()
+            logg.info("Avslutter SSE $url")
+        }
+        return result
     }
 
     fun get(

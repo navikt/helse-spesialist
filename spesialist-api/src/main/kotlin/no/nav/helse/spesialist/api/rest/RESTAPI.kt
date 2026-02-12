@@ -12,6 +12,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
@@ -43,6 +44,7 @@ fun Routing.restRoutes(
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+    sessionFactory: SessionFactory,
 ) {
     route("/api") {
         if (configuration.eksponerOpenApi) {
@@ -54,6 +56,7 @@ fun Routing.restRoutes(
             }
         }
         authenticate("oidc") {
+            sse(sessionFactory)
             get(GetAktiveSaksbehandlereBehandler(), restAdapter)
             get(GetBrukerBehandler(), restAdapter)
 

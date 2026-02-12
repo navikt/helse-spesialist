@@ -14,6 +14,7 @@ import io.ktor.server.plugins.doublereceive.DoubleReceive
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.resources.Resources
 import io.ktor.server.routing.routing
+import io.ktor.server.sse.SSE
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
@@ -56,6 +57,7 @@ fun configureKtorApplication(
         if (apiModuleConfiguration.eksponerOpenApi) {
             install(OpenApi) { configureOpenApiPlugin() }
         }
+        install(SSE)
         install(Resources) { configureResourcesPlugin() }
         val graphQLPlugin = install(GraphQL.Plugin) { configureGraphQLPlugin(spesialistSchema) }
 
@@ -80,6 +82,7 @@ fun configureKtorApplication(
                         meldingPubliserer = meldingPubliserer,
                         versjonAvKode = apiModuleConfiguration.versjonAvKode,
                     ),
+                sessionFactory = sessionFactory,
                 configuration = apiModuleConfiguration,
                 dokumentMediator = dokumentMediator,
                 environmentToggles = environmentToggles,
