@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
+import no.nav.helse.spesialist.api.rest.ApiKommentarRequest
+import no.nav.helse.spesialist.api.rest.ApiPatchKommentarRequest
 import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Periode
@@ -113,47 +115,47 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerKommentererLagtPåVent(tekst: String = "") {
-        callGraphQL(
-            operationName = "LeggTilKommentar",
-            variables =
-                mapOf(
-                    "tekst" to tekst,
-                    "dialogRef" to (
-                            person["arbeidsgivere"]
-                                .flatMap { it["behandlinger"] }
-                                .flatMap { it["perioder"] }
-                                .flatMap { it["historikkinnslag"] }
-                                .find { it["__typename"].asText() == "LagtPaVent" }
-                                ?.get("dialogRef")
-                                ?.asInt()
-                                ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
-                            ),
-                    "saksbehandlerident" to saksbehandler.ident.value,
-                ),
-        )
-        hentOppdatertPerson()
+    fun saksbehandlerKommentererLagtPåVent(tekst: String): JsonNode? {
+        val dialogRef =                             person["arbeidsgivere"]
+            .flatMap { it["behandlinger"] }
+            .flatMap { it["perioder"] }
+            .flatMap { it["historikkinnslag"] }
+            .find { it["__typename"].asText() == "LagtPaVent" }
+            ?.get("dialogRef")
+            ?.asInt()
+            ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
+
+        return callHttpPost(
+            relativeUrl = "api/dialoger/${dialogRef}/kommentarer",
+            request = ApiKommentarRequest(tekst)
+        ).also {
+            hentOppdatertPerson()
+        }
     }
 
-    fun saksbehandlerFeilregistrererFørsteKommentarPåHistorikkinnslag() {
-        callGraphQL(
-            operationName = "FeilregistrerKommentar",
-            variables =
-                mapOf(
-                    "id" to (
-                            person["arbeidsgivere"]
-                                .flatMap { it["behandlinger"] }
-                                .flatMap { it["perioder"] }
-                                .flatMap { it["historikkinnslag"] }
-                                .flatMap { it["kommentarer"] }
-                                .firstOrNull()
-                                ?.get("id")
-                                ?.asInt()
-                                ?: error("Fant ikke noen kommentar på noe historikkinnslag på personen")
-                            ),
-                ),
-        )
-        hentOppdatertPerson()
+    fun saksbehandlerFeilregistrererFørsteKommentarPåHistorikkinnslag(): JsonNode? {
+        val historikkinnslag = person["arbeidsgivere"]
+            .flatMap { it["behandlinger"] }
+            .flatMap { it["perioder"] }
+            .flatMap { it["historikkinnslag"] }
+        val dialogRef = historikkinnslag
+            .find { it["__typename"].asText() == "LagtPaVent" }
+            ?.get("dialogRef")
+            ?.asInt()
+            ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
+        val id = historikkinnslag
+            .flatMap { it["kommentarer"] }
+            .firstOrNull()
+            ?.get("id")
+            ?.asInt()
+            ?: error("Fant ikke noen kommentar på noe historikkinnslag på personen")
+
+        return callHttpPatch(
+            relativeUrl = "api/dialoger/${dialogRef}/kommentarer/$id",
+            request = ApiPatchKommentarRequest(true)
+        ).also {
+            hentOppdatertPerson()
+        }
     }
 
     fun saksbehandlerLeggerTilTilkommenInntekt(

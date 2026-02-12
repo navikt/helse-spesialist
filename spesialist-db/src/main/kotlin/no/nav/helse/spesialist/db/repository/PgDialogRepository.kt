@@ -50,11 +50,6 @@ internal class PgDialogRepository(
         ).list { it.tilDialog(kommentarerMap[DialogId(it.long("id"))].orEmpty()) }
     }
 
-    override fun finnForKommentar(id: KommentarId): Dialog? =
-        asSQL("SELECT dialog_ref FROM kommentarer WHERE id = :kommentarId", "kommentarId" to id.value)
-            .singleOrNull { DialogId(it.long("dialog_ref")) }
-            ?.let { finn(it) }
-
     private fun insertDialog(dialog: Dialog) =
         asSQL(
             """

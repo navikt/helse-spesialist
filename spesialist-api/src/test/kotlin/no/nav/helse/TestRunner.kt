@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
@@ -139,7 +138,6 @@ object TestRunner {
                             ),
                         mutationHandlers =
                             MutationHandlers(
-                                notat = NotatMutationHandler(sessionFactory = avhengigheter.sessionFactory),
                                 tildeling = TildelingMutationHandler(saksbehandlerMediator = avhengigheter.saksbehandlerMediator),
                                 overstyring =
                                     OverstyringMutationHandler(

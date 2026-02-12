@@ -263,7 +263,6 @@ type EndrePaVent implements Historikkinnslag {
 
 type Enhet {
     id: String!
-    navn: String!
 }
 
 type Faresignal {
@@ -368,14 +367,9 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 
 type Mutation {
     endrePaVent(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
-    feilregistrerKommentar(id: Int!): Kommentar
-    feilregistrerKommentarV2(id: Int!): Kommentar
-    feilregistrerNotat(id: Int!): Notat
     fjernPaVent(oppgaveId: String!): Boolean
     fjernTildeling(oppgaveId: String!): Boolean!
     leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
-    leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
-    leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
@@ -491,7 +485,6 @@ type Person {
     enhet: Enhet!
     fodselsnummer: String!
     infotrygdutbetalinger: [Infotrygdutbetaling!]
-    personPseudoId: UUID!
     personinfo: Personinfo!
     selvstendigNaering: SelvstendigNaering
     tildeling: Tildeling
@@ -509,7 +502,6 @@ type Personinfo {
     fullmakt: Boolean
     kjonn: Kjonn!
     mellomnavn: String
-    reservasjon: Reservasjon
     unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning
 }
 
@@ -523,7 +515,7 @@ type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(fom: LocalDate!, limit: Int!, offset: Int!, tom: LocalDate!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
-    person(aktorId: String, fnr: String, personPseudoId: String): Person
+    person(personPseudoId: String!): Person
 }
 
 type Refusjonselement {
@@ -537,11 +529,6 @@ type Refusjonsopplysning {
     belop: Float!
     fom: LocalDate!
     tom: LocalDate
-}
-
-type Reservasjon {
-    kanVarsles: Boolean!
-    reservert: Boolean!
 }
 
 type Risikovurdering {

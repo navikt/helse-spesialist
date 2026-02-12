@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.ktor.GraphQLConfiguration
-import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
-import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutation
@@ -35,7 +33,6 @@ class SpesialistSchema(
     )
 
     class MutationHandlers(
-        val notat: NotatMutationSchema,
         val tildeling: TildelingMutationSchema,
         val overstyring: OverstyringMutationSchema,
         val skjonnsfastsettelse: SkjonnsfastsettelseMutationSchema,
@@ -57,7 +54,6 @@ class SpesialistSchema(
 
         schemaConfiguration.mutations =
             listOf(
-                NotatMutation(handler = mutationHandlers.notat),
                 TildelingMutation(handler = mutationHandlers.tildeling),
                 OverstyringMutation(handler = mutationHandlers.overstyring),
                 SkjonnsfastsettelseMutation(handler = mutationHandlers.skjonnsfastsettelse),

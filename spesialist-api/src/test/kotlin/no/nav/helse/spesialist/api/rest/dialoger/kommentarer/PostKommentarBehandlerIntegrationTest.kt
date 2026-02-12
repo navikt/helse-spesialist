@@ -43,7 +43,7 @@ class PostKommentarBehandlerIntegrationTest {
         assertNotNull(kommentarId, "Fikk ikke noen ID på opprettet kommentar i svaret: $body")
 
         // Bekreft persistert resultat
-        val lagretDialog = sessionContext.dialogRepository.finnForKommentar(kommentarId)
+        val lagretDialog = sessionContext.dialogRepository.finn(dialogId)
         assertNotNull(lagretDialog, "Lagret dialog for kommentar med ID $kommentarId ble ikke gjenfunnet i databasen")
 
         val kommentar = lagretDialog.finnKommentar(kommentarId)
