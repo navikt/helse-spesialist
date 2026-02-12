@@ -5,5 +5,5 @@
 !spesialist-bootstrap/build/deps/**
 !spesialist-bootstrap/build/libs/**
 !spesialist-db-migrations/build/install/app
-!spesialist-opprydding-dev/build/libs/**
+!spesialist-opprydding-dev/build/install/app
 !spesialist-sidegig/build/libs/**
