@@ -161,7 +161,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
               "begrunnelse" : null,
               "__typename" : "Handling"
             } ],
-            "notater" : [ ],
             "historikkinnslag" : [ ],
             "maksdato" : "2025-11-27",
             "periodevilkar" : {

@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mapping
 
 import no.nav.helse.db.AvviksvurderingRepository
-import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
@@ -16,8 +15,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektsmelding
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiKilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiKildetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
-import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiOmregnetArsinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
@@ -327,32 +324,6 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteBehandling: Boolean) =
         SnapshotPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
         SnapshotPeriodetilstand.UNKNOWN_VALUE -> ApiPeriodetilstand.Ukjent
     }
-
-fun NotatApiDao.NotatDto.tilApiNotat() =
-    ApiNotat(
-        id = id,
-        dialogRef = dialogRef,
-        tekst = tekst,
-        opprettet = opprettet,
-        saksbehandlerOid = saksbehandlerOid,
-        saksbehandlerNavn = saksbehandlerNavn,
-        saksbehandlerEpost = saksbehandlerEpost,
-        saksbehandlerIdent = saksbehandlerIdent,
-        vedtaksperiodeId = vedtaksperiodeId,
-        feilregistrert = feilregistrert,
-        feilregistrert_tidspunkt = feilregistrert_tidspunkt,
-        type = type.tilSkjematype(),
-        kommentarer =
-            kommentarer.map { kommentar ->
-                ApiKommentar(
-                    id = kommentar.id,
-                    tekst = kommentar.tekst,
-                    opprettet = kommentar.opprettet,
-                    saksbehandlerident = kommentar.saksbehandlerident,
-                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                )
-            },
-    )
 
 fun SnapshotTidslinjeperiode.tilApiPeriodetype() =
     when (periodetype) {

@@ -72,7 +72,6 @@ class InMemoryRepositoriesAndDaos {
     private val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
     private val legacyVarselDao = UnimplementedLegacyVarselDao()
     private val metrikkDao = UnimplementedMetrikkDao()
-    private val notatApiDao = UnimplementedNotatApiDao()
     private val overstyringApiDao = UnimplementedOverstyringApiDao()
     private val periodehistorikkDao = InMemoryDoNothingPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
@@ -108,7 +107,6 @@ class InMemoryRepositoriesAndDaos {
             meldingDao = meldingDao,
             meldingDuplikatkontrollDao = meldingDuplikatkontrollDao,
             notatDao = notatDao,
-            notatApiDao = notatApiDao,
             oppgaveDao = oppgaveDao,
             oppgaveApiDao = oppgaveApiDao,
             oppgaveRepository = oppgaveRepository,

@@ -336,7 +336,6 @@ data class ApiUberegnetPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val varsler: List<ApiVarselDTO>,
     override val hendelser: List<ApiHendelse>,
-    val notater: List<ApiNotat>,
 ) : ApiPeriode
 
 @GraphQLName("Periodehandling")
@@ -371,7 +370,6 @@ class ApiBeregnetPeriode(
     val oppgave: ApiOppgaveForPeriodevisning?,
     val handlinger: List<ApiHandling>,
     val egenskaper: List<ApiOppgaveegenskap>,
-    val notater: List<ApiNotat>,
     val historikkinnslag: List<ApiHistorikkinnslag>,
     val beregningId: UUID,
     val forbrukteSykedager: Int?,

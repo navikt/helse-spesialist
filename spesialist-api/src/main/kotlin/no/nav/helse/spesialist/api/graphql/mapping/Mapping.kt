@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mapping
 
-import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.VarselDbDto
-import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehistorikkType
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO.ApiVarselvurderingDTO
@@ -45,14 +43,6 @@ fun VarselDbDto.toVarselDto(): ApiVarselDTO {
             },
     )
 }
-
-internal fun NotatApiDao.NotatType.tilSkjematype() =
-    when (this) {
-        NotatApiDao.NotatType.Retur -> ApiNotatType.Retur
-        NotatApiDao.NotatType.Generelt -> ApiNotatType.Generelt
-        NotatApiDao.NotatType.PaaVent -> ApiNotatType.PaaVent
-        NotatApiDao.NotatType.OpphevStans -> ApiNotatType.OpphevStans
-    }
 
 fun PeriodehistorikkType.tilApiPeriodehistorikkType() =
     when (this) {

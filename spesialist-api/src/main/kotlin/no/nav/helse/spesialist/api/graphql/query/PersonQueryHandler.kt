@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiNotat
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodehistorikkType
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
@@ -103,6 +102,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.MdcKey
@@ -122,6 +122,7 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
 import no.nav.helse.spesialist.application.snapshot.SnapshotVurdering
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
@@ -344,6 +345,28 @@ class PersonQueryHandler(
                                                                 tidslinje = periode.tidslinje.map { it.tilApiDag() },
                                                                 vedtaksperiodeId = periode.vedtaksperiodeId,
                                                                 periodetilstand = periodetilstand,
+                                                                skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                                varsler =
+                                                                    if (behandlingIndex == 0) {
+                                                                        daos.varselApiRepository
+                                                                            .finnVarslerSomIkkeErInaktiveForSisteBehandling(
+                                                                                periode.vedtaksperiodeId,
+                                                                                periode.utbetaling.id,
+                                                                            ).map { it.toVarselDto() }
+                                                                    } else {
+                                                                        daos.varselApiRepository
+                                                                            .finnVarslerSomIkkeErInaktiveFor(
+                                                                                periode.vedtaksperiodeId,
+                                                                                periode.utbetaling.id,
+                                                                            ).map { it.toVarselDto() }
+                                                                    },
+                                                                hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                                oppgave =
+                                                                    oppgaveDto?.let { oppgaveDto ->
+                                                                        ApiOppgaveForPeriodevisning(
+                                                                            id = oppgaveDto.id,
+                                                                        )
+                                                                    },
                                                                 handlinger =
                                                                     if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
                                                                         listOf(
@@ -382,15 +405,10 @@ class PersonQueryHandler(
                                                                         periode.vedtaksperiodeId,
                                                                         periode.utbetaling.id,
                                                                     ),
-                                                                hendelser = periode.hendelser.map { it.tilApiHendelse() },
-                                                                notater =
-                                                                    daos.notatApiDao
-                                                                        .finnNotater(periode.vedtaksperiodeId)
-                                                                        .map { it.tilApiNotat() },
                                                                 historikkinnslag =
                                                                     daos.periodehistorikkApiDao
                                                                         .finn(periode.utbetaling.id)
-                                                                        .map { it.toApiHistorikkinnslag() },
+                                                                        .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
                                                                 beregningId = periode.beregningId,
                                                                 forbrukteSykedager = periode.forbrukteSykedager,
                                                                 gjenstaendeSykedager = periode.gjenstaendeSykedager,
@@ -415,30 +433,9 @@ class PersonQueryHandler(
                                                                                 )
                                                                             },
                                                                     ),
-                                                                skjaeringstidspunkt = periode.skjaeringstidspunkt,
                                                                 utbetaling = periode.utbetaling.tilApiUtbetaling(),
                                                                 vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                                 risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                                varsler =
-                                                                    if (behandlingIndex == 0) {
-                                                                        daos.varselApiRepository
-                                                                            .finnVarslerSomIkkeErInaktiveForSisteBehandling(
-                                                                                periode.vedtaksperiodeId,
-                                                                                periode.utbetaling.id,
-                                                                            ).map { it.toVarselDto() }
-                                                                    } else {
-                                                                        daos.varselApiRepository
-                                                                            .finnVarslerSomIkkeErInaktiveFor(
-                                                                                periode.vedtaksperiodeId,
-                                                                                periode.utbetaling.id,
-                                                                            ).map { it.toVarselDto() }
-                                                                    },
-                                                                oppgave =
-                                                                    oppgaveDto?.let { oppgaveDto ->
-                                                                        ApiOppgaveForPeriodevisning(
-                                                                            id = oppgaveDto.id,
-                                                                        )
-                                                                    },
                                                                 totrinnsvurdering =
                                                                     if (oppgaveDto == null) {
                                                                         null
@@ -675,21 +672,38 @@ class PersonQueryHandler(
                                                             tidslinje = periode.tidslinje.map { it.tilApiDag() },
                                                             vedtaksperiodeId = periode.vedtaksperiodeId,
                                                             periodetilstand = periodetilstand,
+                                                            skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                            varsler =
+                                                                if (behandlingIndex == 0) {
+                                                                    daos.varselApiRepository
+                                                                        .finnVarslerSomIkkeErInaktiveForSisteBehandling(
+                                                                            periode.vedtaksperiodeId,
+                                                                            periode.utbetaling.id,
+                                                                        ).map { it.toVarselDto() }
+                                                                } else {
+                                                                    daos.varselApiRepository
+                                                                        .finnVarslerSomIkkeErInaktiveFor(
+                                                                            periode.vedtaksperiodeId,
+                                                                            periode.utbetaling.id,
+                                                                        ).map { it.toVarselDto() }
+                                                                },
+                                                            hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                            oppgave =
+                                                                oppgaveDto?.let { oppgaveDto ->
+                                                                    ApiOppgaveForPeriodevisning(
+                                                                        id = oppgaveDto.id,
+                                                                    )
+                                                                },
                                                             handlinger = byggHandlinger(),
                                                             egenskaper =
                                                                 apiOppgaveService.hentEgenskaper(
                                                                     periode.vedtaksperiodeId,
                                                                     periode.utbetaling.id,
                                                                 ),
-                                                            hendelser = periode.hendelser.map { it.tilApiHendelse() },
-                                                            notater =
-                                                                daos.notatApiDao
-                                                                    .finnNotater(periode.vedtaksperiodeId)
-                                                                    .map { it.tilApiNotat() },
                                                             historikkinnslag =
                                                                 daos.periodehistorikkApiDao
                                                                     .finn(periode.utbetaling.id)
-                                                                    .map { it.toApiHistorikkinnslag() },
+                                                                    .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
                                                             beregningId = periode.beregningId,
                                                             forbrukteSykedager = periode.forbrukteSykedager,
                                                             gjenstaendeSykedager = periode.gjenstaendeSykedager,
@@ -714,30 +728,9 @@ class PersonQueryHandler(
                                                                             )
                                                                         },
                                                                 ),
-                                                            skjaeringstidspunkt = periode.skjaeringstidspunkt,
                                                             utbetaling = periode.utbetaling.tilApiUtbetaling(),
                                                             vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                             risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                            varsler =
-                                                                if (behandlingIndex == 0) {
-                                                                    daos.varselApiRepository
-                                                                        .finnVarslerSomIkkeErInaktiveForSisteBehandling(
-                                                                            periode.vedtaksperiodeId,
-                                                                            periode.utbetaling.id,
-                                                                        ).map { it.toVarselDto() }
-                                                                } else {
-                                                                    daos.varselApiRepository
-                                                                        .finnVarslerSomIkkeErInaktiveFor(
-                                                                            periode.vedtaksperiodeId,
-                                                                            periode.utbetaling.id,
-                                                                        ).map { it.toVarselDto() }
-                                                                },
-                                                            oppgave =
-                                                                oppgaveDto?.let { oppgaveDto ->
-                                                                    ApiOppgaveForPeriodevisning(
-                                                                        id = oppgaveDto.id,
-                                                                    )
-                                                                },
                                                             totrinnsvurdering =
                                                                 run {
                                                                     if (oppgaveDto == null) {
@@ -875,7 +868,7 @@ class PersonQueryHandler(
         }
     }
 
-    private fun PeriodehistorikkDto.toApiHistorikkinnslag(): ApiHistorikkinnslag =
+    private fun PeriodehistorikkDto.toApiHistorikkinnslag(dialogRepository: DialogRepository): ApiHistorikkinnslag =
         when (type) {
             PeriodehistorikkType.LEGG_PA_VENT -> {
                 val (påVentÅrsaker, frist, notattekst) =
@@ -889,18 +882,7 @@ class PersonQueryHandler(
                     arsaker = påVentÅrsaker,
                     frist = frist,
                     notattekst = notattekst,
-                    kommentarer =
-                        daos.notatApiDao
-                            .finnKommentarer(dialogRef!!.toLong())
-                            .map { kommentar ->
-                                ApiKommentar(
-                                    id = kommentar.id,
-                                    tekst = kommentar.tekst,
-                                    opprettet = kommentar.opprettet,
-                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                )
-                            },
+                    kommentarer = hentKommentarer(dialogRepository),
                 )
             }
 
@@ -916,18 +898,7 @@ class PersonQueryHandler(
                     arsaker = påVentÅrsaker,
                     frist = frist,
                     notattekst = notattekst,
-                    kommentarer =
-                        daos.notatApiDao
-                            .finnKommentarer(dialogRef!!.toLong())
-                            .map { kommentar ->
-                                ApiKommentar(
-                                    id = kommentar.id,
-                                    tekst = kommentar.tekst,
-                                    opprettet = kommentar.opprettet,
-                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                )
-                            },
+                    kommentarer = hentKommentarer(dialogRepository),
                 )
             }
 
@@ -951,21 +922,7 @@ class PersonQueryHandler(
                     timestamp = timestamp,
                     dialogRef = dialogRef,
                     notattekst = notattekst,
-                    kommentarer =
-                        dialogRef?.let { dialogRef ->
-                            daos.notatApiDao
-                                .finnKommentarer(
-                                    dialogRef.toLong(),
-                                ).map { kommentar ->
-                                    ApiKommentar(
-                                        id = kommentar.id,
-                                        tekst = kommentar.tekst,
-                                        opprettet = kommentar.opprettet,
-                                        saksbehandlerident = kommentar.saksbehandlerident,
-                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                    )
-                                }
-                        } ?: emptyList(),
+                    kommentarer = hentKommentarer(dialogRepository),
                 )
             }
 
@@ -979,18 +936,7 @@ class PersonQueryHandler(
                     timestamp = timestamp,
                     dialogRef = dialogRef,
                     notattekst = notattekst,
-                    kommentarer =
-                        daos.notatApiDao
-                            .finnKommentarer(dialogRef!!.toLong())
-                            .map { kommentar ->
-                                ApiKommentar(
-                                    id = kommentar.id,
-                                    tekst = kommentar.tekst,
-                                    opprettet = kommentar.opprettet,
-                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                )
-                            },
+                    kommentarer = hentKommentarer(dialogRepository),
                 )
             }
 
@@ -1004,18 +950,7 @@ class PersonQueryHandler(
                     timestamp = timestamp,
                     dialogRef = dialogRef,
                     notattekst = notattekst,
-                    kommentarer =
-                        daos.notatApiDao
-                            .finnKommentarer(dialogRef!!.toLong())
-                            .map { kommentar ->
-                                ApiKommentar(
-                                    id = kommentar.id,
-                                    tekst = kommentar.tekst,
-                                    opprettet = kommentar.opprettet,
-                                    saksbehandlerident = kommentar.saksbehandlerident,
-                                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
-                                )
-                            },
+                    kommentarer = hentKommentarer(dialogRepository),
                 )
             }
 
@@ -1029,6 +964,23 @@ class PersonQueryHandler(
                 )
             }
         }
+
+    private fun PeriodehistorikkDto.hentKommentarer(dialogRepository: DialogRepository): List<ApiKommentar> =
+        dialogRef
+            ?.toLong()
+            ?.let(::DialogId)
+            ?.let(dialogRepository::finn)
+            ?.kommentarer
+            .orEmpty()
+            .map { kommentar ->
+                ApiKommentar(
+                    id = kommentar.id().value,
+                    tekst = kommentar.tekst,
+                    opprettet = kommentar.opprettetTidspunkt,
+                    saksbehandlerident = kommentar.saksbehandlerident.value,
+                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                )
+            }
 
     private fun genererPeriodeid(
         vedtaksperiodeId: UUID,
@@ -1052,7 +1004,6 @@ class PersonQueryHandler(
             vedtaksperiodeId = vedtaksperiodeId,
             periodetilstand = periodetilstand.tilApiPeriodetilstand(true),
             skjaeringstidspunkt = skjaeringstidspunkt,
-            hendelser = hendelser.map { it.tilApiHendelse() },
             varsler =
                 if (behandlingIndex == 0 && vedtaksperiodeId in perioderSomSkalViseAktiveVarsler) {
                     daos.varselApiRepository
@@ -1063,10 +1014,7 @@ class PersonQueryHandler(
                         .finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
                         .map { it.toVarselDto() }
                 },
-            notater =
-                daos.notatApiDao
-                    .finnNotater(vedtaksperiodeId)
-                    .map { it.tilApiNotat() },
+            hendelser = hendelser.map { it.tilApiHendelse() },
         )
 
     private fun finnArbeidsgivernavn(

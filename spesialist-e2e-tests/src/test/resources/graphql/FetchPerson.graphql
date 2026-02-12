@@ -103,25 +103,6 @@ fragment kommentar on Kommentar {
     __typename
 }
 
-fragment notat on Notat {
-    id
-    dialogRef
-    tekst
-    opprettet
-    saksbehandlerOid
-    saksbehandlerNavn
-    saksbehandlerEpost
-    saksbehandlerIdent
-    vedtaksperiodeId
-    feilregistrert
-    type
-    kommentarer {
-        ...kommentar
-        __typename
-    }
-    __typename
-}
-
 fragment periode on Periode {
     behandlingId
     fom
@@ -230,10 +211,6 @@ fragment periode on Periode {
 
 fragment uberegnetPeriode on UberegnetPeriode {
     id
-    notater {
-        ...notat
-        __typename
-    }
     ...periode
     __typename
 }
@@ -290,10 +267,6 @@ fragment beregnetPeriode on BeregnetPeriode {
         type
         tillatt
         begrunnelse
-        __typename
-    }
-    notater {
-        ...notat
         __typename
     }
     historikkinnslag {

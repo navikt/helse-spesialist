@@ -18,7 +18,6 @@ class InMemoryDaos(
     override val meldingDao: InMemoryMeldingDao,
     override val meldingDuplikatkontrollDao: NoopMeldingDuplikatkontrollDao,
     override val notatDao: DelegatingNotatDao,
-    override val notatApiDao: UnimplementedNotatApiDao,
     override val oppgaveDao: DelegatingOppgaveDao,
     override val oppgaveApiDao: DelegatingOppgaveApiDao,
     override val oppgaveRepository: InMemoryOppgaveRepository,
