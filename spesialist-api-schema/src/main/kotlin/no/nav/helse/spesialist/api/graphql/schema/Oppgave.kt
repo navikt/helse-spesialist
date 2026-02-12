@@ -10,7 +10,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -131,7 +130,6 @@ data class ApiTotrinnsvurdering(
     val erBeslutteroppgave: Boolean,
 )
 
-@Serializable
 @GraphQLName("Personnavn")
 data class ApiPersonnavn(
     val fornavn: String,

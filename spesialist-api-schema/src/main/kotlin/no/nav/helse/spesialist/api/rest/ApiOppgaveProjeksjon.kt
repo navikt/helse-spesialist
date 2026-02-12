@@ -11,7 +11,6 @@ package no.nav.helse.spesialist.api.rest
 
 import kotlinx.serialization.Serializable
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import java.math.BigDecimal
 import java.time.Instant

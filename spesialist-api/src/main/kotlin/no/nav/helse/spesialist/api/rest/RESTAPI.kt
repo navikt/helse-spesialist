@@ -58,6 +58,7 @@ fun Routing.restRoutes(
             get(GetBrukerBehandler(), restAdapter)
 
             get(GetOppgaverBehandler(), restAdapter)
+            get(GetBehandledeOppgaverBehandler(), restAdapter)
 
             post(PostOpphevStansBehandler(), restAdapter)
 

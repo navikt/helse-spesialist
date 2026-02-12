@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.modell.oppgave.Egenskap
@@ -9,6 +10,7 @@ import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -39,6 +41,14 @@ interface OppgaveRepository {
         sidestørrelse: Int,
     ): Side<OppgaveProjeksjon>
 
+    fun finnBehandledeOppgaveProjeksjoner(
+        fom: LocalDate,
+        tom: LocalDate,
+        sidetall: Int,
+        sidestørrelse: Int,
+        behandletAvOid: UUID,
+    ): Side<BehandletOppgaveProjeksjon>
+
     data class Side<T>(
         val totaltAntall: Long,
         val sidetall: Int,
@@ -54,6 +64,15 @@ interface OppgaveRepository {
         val opprettetTidspunkt: Instant,
         val behandlingOpprettetTidspunkt: Instant,
         val påVentId: PåVentId?,
+    )
+
+    data class BehandletOppgaveProjeksjon(
+        val id: Long,
+        val fødselsnummer: String,
+        val ferdigstiltTidspunkt: LocalDateTime,
+        val saksbehandler: String,
+        val beslutter: String?,
+        val personnavn: PersonnavnFraDatabase,
     )
 
     data class OppgaveTilstandStatusOgGodkjenningsbehov(

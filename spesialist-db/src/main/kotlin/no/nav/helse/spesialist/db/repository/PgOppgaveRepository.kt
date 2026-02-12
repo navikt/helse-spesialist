@@ -4,9 +4,11 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
@@ -31,6 +33,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -309,6 +312,69 @@ class PgOppgaveRepository private constructor(
                 )
             }
     }
+
+    override fun finnBehandledeOppgaveProjeksjoner(
+        fom: LocalDate,
+        tom: LocalDate,
+        sidetall: Int,
+        sidestørrelse: Int,
+        behandletAvOid: UUID,
+    ): Side<BehandletOppgaveProjeksjon> =
+        asSQL(
+            """
+            SELECT
+                o.id as oppgave_id,
+                p.fødselsnummer,
+                o.oppdatert as ferdigstilt_tidspunkt,
+                COALESCE(ttv.saksbehandler, o.ferdigstilt_av) AS saksbehandler,
+                ttv.beslutter,
+                pi.fornavn, pi.mellomnavn, pi.etternavn,
+                count(1) OVER() AS filtered_count
+            FROM oppgave o
+                INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+                INNER JOIN person p ON v.person_ref = p.id
+                INNER JOIN person_info pi ON p.info_ref = pi.id
+                LEFT JOIN (SELECT tv.person_ref, tv.tilstand, beslutter.ident as beslutter, saksbehandler.ident as saksbehandler
+                         FROM totrinnsvurdering tv
+                         INNER JOIN saksbehandler beslutter on tv.beslutter = beslutter.oid
+                         INNER JOIN saksbehandler saksbehandler on tv.saksbehandler = saksbehandler.oid
+                         WHERE (saksbehandler = :oid OR beslutter = :oid) AND (tv.oppdatert::date >= :fom::date AND tv.oppdatert::date <= :tom::date)
+                     ) ttv ON ttv.person_ref = p.id
+            WHERE (ttv.tilstand = 'GODKJENT' OR o.ferdigstilt_av_oid = :oid)
+                AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
+                AND (o.oppdatert::date >= :fom::date AND o.oppdatert::date <= :tom::date)
+            ORDER BY o.oppdatert
+            OFFSET :offset
+            LIMIT :limit;
+            """,
+            "oid" to behandletAvOid,
+            "fom" to fom,
+            "tom" to tom,
+            "offset" to sidetall,
+            "limit" to sidestørrelse,
+        ).list { row ->
+            row.long("filtered_count") to
+                BehandletOppgaveProjeksjon(
+                    id = row.long("oppgave_id"),
+                    fødselsnummer = row.string("fødselsnummer"),
+                    ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
+                    saksbehandler = row.string("saksbehandler"),
+                    beslutter = row.stringOrNull("beslutter"),
+                    personnavn =
+                        PersonnavnFraDatabase(
+                            row.string("fornavn"),
+                            row.stringOrNull("mellomnavn"),
+                            row.string("etternavn"),
+                        ),
+                )
+        }.let { liste ->
+            Side(
+                totaltAntall = liste.firstOrNull()?.first ?: 0L,
+                sidetall = sidetall,
+                sidestørrelse = sidestørrelse,
+                elementer = liste.map { it.second },
+            )
+        }
 
     private fun Collection<Enum<*>>.tilDatabaseArray(): String = joinToString(prefix = "{", postfix = "}") { it.name }
 

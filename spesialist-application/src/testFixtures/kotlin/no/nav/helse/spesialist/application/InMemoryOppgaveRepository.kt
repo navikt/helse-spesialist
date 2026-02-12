@@ -1,8 +1,10 @@
 package no.nav.helse.spesialist.application
 
+import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
@@ -10,6 +12,7 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -56,4 +59,33 @@ class InMemoryOppgaveRepository : OppgaveRepository {
     ): Side<OppgaveProjeksjon> {
         error("Not implemented for this test")
     }
+
+    override fun finnBehandledeOppgaveProjeksjoner(
+        fom: LocalDate,
+        tom: LocalDate,
+        sidetall: Int,
+        sidestørrelse: Int,
+        behandletAvOid: UUID
+    ) = Side(
+        totaltAntall = oppgaver.keys.first(),
+        sidetall = sidetall,
+        sidestørrelse = sidestørrelse,
+        elementer = oppgaver.values.map { it.toBehandletOppgaveProjeksjon() }
+    )
+}
+
+private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
+    // Denne skal egentlig hente data fra oppgave, men det blir for knotete siden oppgave ikke er skrevet om til DDD ennå.
+    return BehandletOppgaveProjeksjon(
+        id = id,
+        fødselsnummer = "42",
+        ferdigstiltTidspunkt = LocalDateTime.of(2020, 2, 2, 12, 30),
+        saksbehandler = "her skal saksbehandlers navn stå",
+        beslutter = "her skal beslutters navn eventuelt stå",
+        personnavn = PersonnavnFraDatabase(
+            fornavn = "navnet",
+            mellomnavn = "til",
+            etternavn = "personen",
+        ),
+    )
 }
