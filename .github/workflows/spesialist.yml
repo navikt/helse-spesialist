@@ -5,7 +5,6 @@ on:
         paths-ignore:
             - 'Dockerfile-db-migrations'
             - 'Dockerfile-opprydding-dev'
-            - 'Dockerfile-sidegig'
             - 'spesialist-db-migrations/**'
             - 'spesialist-opprydding-dev/**'
             - 'spesialist-sidegig/**'
