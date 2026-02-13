@@ -3,7 +3,8 @@ package no.nav.helse.spesialist.domain
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 
-data class Sekvensnummer(
+@JvmInline
+value class Sekvensnummer(
     val value: Int,
 ) : ValueObject
 

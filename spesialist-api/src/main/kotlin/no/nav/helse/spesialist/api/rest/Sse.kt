@@ -11,9 +11,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
-import no.nav.helse.spesialist.domain.Sekvensnummer
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(sessionFactory: SessionFactory) {
@@ -29,14 +27,15 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                 ?.let { PersonPseudoId.fraString(it) }
                 ?: throw BadRequestException("Missing required query param: personPseudoId")
 
-        lateinit var identitetsnummer: Identitetsnummer
-        lateinit var sisteSekvensnummer: Sekvensnummer
-
-        sessionFactory.transactionalSessionScope {
-            identitetsnummer = it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                ?: throw NotFoundException("Fant ikke person med personPseudoId: $personPseudoId")
-            sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
-        }
+        val (identitetsnummer, sisteSekvensnummerVedInitiering) =
+            sessionFactory.transactionalSessionScope {
+                val identitetsnummer =
+                    it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+                        ?: throw NotFoundException("No person found for pseudoId: $personPseudoId")
+                val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
+                identitetsnummer to sisteSekvensnummer
+            }
+        var sisteSekvensnummer = sisteSekvensnummerVedInitiering
 
         while (true) {
             val opptegnelser =
