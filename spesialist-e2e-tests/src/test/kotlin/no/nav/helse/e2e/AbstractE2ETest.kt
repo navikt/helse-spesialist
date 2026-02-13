@@ -145,33 +145,24 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun spesialistInnvilgerAutomatisk(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = fom,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        avviksvurderingTestdata: AvviksvurderingTestdata = AvviksvurderingTestdata(skjæringstidspunkt = skjæringstidspunkt),
+        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
+        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
     ) {
         spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
             avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata =
-                godkjenningsbehovTestdata.copy(
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                ),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
-        assertSaksbehandleroppgaveBleIkkeOpprettet(vedtaksperiodeId)
+        håndterRisikovurderingløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+        assertSaksbehandleroppgaveBleIkkeOpprettet(godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak(
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             spleisBehandlingId =
-                behandlinger[vedtaksperiodeId]?.last()
-                    ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId"),
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
+                behandlinger[godkjenningsbehovTestdata.vedtaksperiodeId]?.last()
+                    ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=${godkjenningsbehovTestdata.vedtaksperiodeId}"),
+            fom = godkjenningsbehovTestdata.periodeFom,
+            tom = godkjenningsbehovTestdata.periodeTom,
+            skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt,
         )
     }
 

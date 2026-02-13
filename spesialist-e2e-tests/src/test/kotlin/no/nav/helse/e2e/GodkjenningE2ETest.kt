@@ -260,7 +260,11 @@ class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avviser ikke godkjenningsbehov når kanAvvises-flagget er false`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(fom = 11.januar, tom = 31.januar)
-        spesialistInnvilgerAutomatisk(11.januar, 31.januar)
+        spesialistInnvilgerAutomatisk(
+            godkjenningsbehovTestdata.copy(
+                periodeFom = 11.januar, periodeTom = 31.januar, skjæringstidspunkt = 11.januar
+            ),
+        )
 
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
