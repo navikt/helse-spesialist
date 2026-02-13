@@ -114,7 +114,11 @@ interface DbQuery {
         @Language("PostgreSQL") sql: String,
         vararg params: Pair<String, Any?>,
         mapper: (Row) -> T?,
-    ) = requireNotNull(run { asSQL(sql, *params).map(mapper).asSingle })
+    ) = requireNotNull(
+        run {
+            asSQL(sql, *params).map(mapper).asSingle
+        },
+    ) { "Forventet å finne en rad i basen med spørringen '$sql' og parameterne ${params.joinToString()}" }
 
     fun <T> singleOrNull(
         @Language("PostgreSQL") sql: String,

@@ -129,8 +129,12 @@ data class GodkjenningsbehovTestdata(
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),
-    val foreløpigBeregnetSluttPåSykepenger: LocalDate = 1.desember()
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate = 1.desember(),
+    val perioderMedSammeSkjæringstidspunkt : List<VedtaksperiodeInfo> = emptyList(),
 )
+
+// Det er fritt fram å bytte til et bedre navn på denne :-D
+data class VedtaksperiodeInfo(val fom: LocalDate, val tom: LocalDate, val vedtaksperiodeId: UUID, val spleisBehandlingId: UUID)
 
 data class AvviksvurderingTestdata(
     val avviksprosent: Double = 10.0,

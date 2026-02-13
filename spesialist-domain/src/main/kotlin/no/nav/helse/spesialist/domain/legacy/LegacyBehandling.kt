@@ -239,6 +239,7 @@ class LegacyBehandling private constructor(
             legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
+            legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
         }
 
         fun nyUtbetaling(
@@ -296,14 +297,6 @@ class LegacyBehandling private constructor(
             legacyBehandling.nyUtbetaling(utbetalingId)
             legacyBehandling.nyTilstand(KlarTilBehandling)
         }
-
-        override fun spleisVedtaksperiode(
-            vedtaksperiode: LegacyVedtaksperiode,
-            legacyBehandling: LegacyBehandling,
-            spleisVedtaksperiode: SpleisVedtaksperiode,
-        ) {
-            legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
-        }
     }
 
     data object KlarTilBehandling : Tilstand {
@@ -332,18 +325,35 @@ class LegacyBehandling private constructor(
             legacyBehandling.utbetalingId = null
             legacyBehandling.nyTilstand(VidereBehandlingAvklares)
         }
+    }
+
+    data object VedtakFattet : Tilstand {
+        override fun navn(): String = "VedtakFattet"
 
         override fun spleisVedtaksperiode(
             vedtaksperiode: LegacyVedtaksperiode,
             legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
-            legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
-        }
-    }
+            legacyBehandling.run {
+                if (
+                    periode != Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom) ||
+                    skjæringstidspunkt != spleisVedtaksperiode.skjæringstidspunkt ||
+                    spleisBehandlingId != spleisVedtaksperiode.spleisBehandlingId
+                ) {
+                    logg.warn(
+                        """
+                        Mottar spleis-info som avviker fra lagret info. Det betyr kanskje at noe uforutsett har skjedd? Kanskje spesialist har gått glipp av noe spleis har gjort?
 
-    data object VedtakFattet : Tilstand {
-        override fun navn(): String = "VedtakFattet"
+                        Ignorerer informasjonen.
+
+                        Mottatt info: $spleisVedtaksperiode
+                        Lagret info: $legacyBehandling
+                        """.trimIndent(),
+                    )
+                }
+            }
+        }
     }
 
     data object AvsluttetUtenVedtak : Tilstand {
@@ -363,7 +373,7 @@ class LegacyBehandling private constructor(
         override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
 
-    override fun toString(): String = "spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId"
+    override fun toString(): String = "spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId, spleisBehandlingId=$spleisBehandlingId, fom=${periode.fom}, tom=${periode.tom}, skjæringstidspunkt=$skjæringstidspunkt"
 
     override fun equals(other: Any?): Boolean =
         this === other ||

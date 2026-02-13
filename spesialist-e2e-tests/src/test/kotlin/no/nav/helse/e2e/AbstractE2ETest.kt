@@ -158,9 +158,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     periodeFom = fom,
                     periodeTom = tom,
                     skjæringstidspunkt = skjæringstidspunkt,
+                    vedtaksperiodeId = vedtaksperiodeId,
                 ),
         )
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
+        assertSaksbehandleroppgaveBleIkkeOpprettet(vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -1145,7 +1147,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 """.trimIndent(),
                 "vedtaksperiodeId" to vedtaksperiodeId,
             ) { it.int(1) }
-        assertEquals(0, antallOppgaver.size)
+        assertEquals(0, antallOppgaver.size) { "Det ble mot formodning opprettet en saksbehandleroppgave"}
     }
 
     protected fun assertVarsler(
@@ -1170,7 +1172,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "varselkode" to varselkode,
             ) { it.int(1) }
-        assertEquals(1, antall)
+        assertEquals(1, antall) { "Fant ikke varsel $varselkode for vedtaksperiodeId $vedtaksperiodeId i selve_varsel" }
     }
 
     protected fun assertSkjermet(

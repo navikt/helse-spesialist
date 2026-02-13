@@ -246,6 +246,14 @@ class Meldingssender(private val testRapid: TestRapid) {
                 id = id,
                 vilkårsgrunnlagId = godkjenningsbehovTestdata.vilkårsgrunnlagId,
                 spleisBehandlingId = godkjenningsbehovTestdata.spleisBehandlingId,
+                perioderMedSammeSkjæringstidspunkt = godkjenningsbehovTestdata.perioderMedSammeSkjæringstidspunkt.map { periode ->
+                    mapOf(
+                        "fom" to periode.fom,
+                        "tom" to periode.tom,
+                        "vedtaksperiodeId" to periode.vedtaksperiodeId,
+                        "behandlingId" to periode.spleisBehandlingId,
+                    )
+                },
                 tags = godkjenningsbehovTestdata.tags
             )
         )

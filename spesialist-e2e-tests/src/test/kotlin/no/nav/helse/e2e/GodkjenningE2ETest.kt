@@ -1,6 +1,8 @@
 package no.nav.helse.e2e
 
+import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
+import no.nav.helse.VedtaksperiodeInfo
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
@@ -8,11 +10,13 @@ import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.VergemålType.mindreaarig
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
+import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -255,7 +259,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `avviser ikke godkjenningsbehov når kanAvvises-flagget er false`() {
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        spleisOppretterNyBehandling(fom = 11.januar, tom = 31.januar)
         spesialistInnvilgerAutomatisk(11.januar, 31.januar)
 
         val revurdertUtbetaling = UUID.randomUUID()
@@ -371,6 +375,112 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         assertEquals(setOf(nyTag), oppdaterteGodkjenningsbehovData["tags"].map { it.asText() }.toSet())
     }
 
+    @Test
+    fun `oppdaterer skjæringstidspunkt på AUU-behandlinger når senere periode går til godkjenning`() {
+        vedtaksløsningenMottarNySøknad()
+        val spleisBehandlingId1 = UUID.randomUUID()
+        val periode1 = Periode(10.januar, 19.januar)
+        spleisOppretterNyBehandling(fom = periode1.fom, tom = periode1.tom, spleisBehandlingId = spleisBehandlingId1)
+        håndterAvsluttetUtenVedtak(fom = periode1.fom, tom = periode1.tom, spleisBehandlingId = spleisBehandlingId1)
+
+        val periode2 = Periode(20.januar, 29.januar)
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        spleisOppretterNyBehandling(
+            fom = periode2.fom,
+            tom = periode2.tom,
+            spleisBehandlingId = spleisBehandlingId2,
+            vedtaksperiodeId = vedtaksperiodeId2
+        )
+        håndterGodkjenningsbehovUtenValidering(
+                godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
+                periodeFom = periode2.fom,
+                periodeTom = periode2.tom,
+                skjæringstidspunkt = 15.januar,
+                vedtaksperiodeId = vedtaksperiodeId2,
+                spleisBehandlingId = spleisBehandlingId2,
+                perioderMedSammeSkjæringstidspunkt = listOf(
+                    VedtaksperiodeInfo(periode1.fom, periode1.tom, testperson.vedtaksperiodeId1, spleisBehandlingId1),
+                    VedtaksperiodeInfo(periode2.fom, periode2.tom, vedtaksperiodeId2, spleisBehandlingId2)
+                )
+            )
+        )
+
+        assertSkjæringstidspunkt(15.januar, spleisBehandlingId = spleisBehandlingId1)
+    }
+
+    @Test
+    fun `flytter varsel fra en AUVMV, AKA AUU, også når skjæringstidspunktet er flyttet`() {
+        vedtaksløsningenMottarNySøknad()
+        val spleisBehandlingId1 = UUID.randomUUID()
+        val periode1 = Periode(10.januar, 19.januar)
+        spleisOppretterNyBehandling(fom = periode1.fom, tom = periode1.tom, spleisBehandlingId = spleisBehandlingId1)
+        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_YS_1")) // Yrkesskade
+        assertVarsel(VEDTAKSPERIODE_ID, "RV_YS_1")
+        håndterAvsluttetUtenVedtak(fom = periode1.fom, tom = periode1.tom, spleisBehandlingId = spleisBehandlingId1, skjæringstidspunkt = 10.januar)
+
+        val periode2 = Periode(20.januar, 29.januar)
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+
+        spleisOppretterNyBehandling(
+            fom = periode2.fom,
+            tom = periode2.tom,
+            spleisBehandlingId = spleisBehandlingId2,
+            vedtaksperiodeId = vedtaksperiodeId2
+        )
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            kanGodkjennesAutomatisk = true,
+            avviksvurderingTestdata = AvviksvurderingTestdata(vedtaksperiodeId = vedtaksperiodeId2),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
+                skjæringstidspunkt = 15.januar,
+                vedtaksperiodeId = vedtaksperiodeId2,
+                spleisBehandlingId = spleisBehandlingId2,
+                perioderMedSammeSkjæringstidspunkt = listOf(
+                    VedtaksperiodeInfo(periode1.fom, periode1.tom, testperson.vedtaksperiodeId1, spleisBehandlingId1),
+                    VedtaksperiodeInfo(periode2.fom, periode2.tom, vedtaksperiodeId2, spleisBehandlingId2)
+                )
+            )
+        )
+
+        assertSaksbehandleroppgave(vedtaksperiodeId2, AvventerSaksbehandler)
+    }
+
+    @Test
+    fun `en test som utløser logging fordi det kommer info som ikke matcher med hva en behandling i VedtakFattet har - bør kunne ses i output fra testen`() {
+        vedtaksløsningenMottarNySøknad()
+        val periode1 = Periode(1.januar, 31.januar)
+        val spleisBehandlingId1 = UUID.randomUUID()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId1)
+        spesialistInnvilgerAutomatisk()
+
+        val periode2 = Periode(20.januar, 29.januar)
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        spleisOppretterNyBehandling(
+            fom = periode2.fom,
+            tom = periode2.tom,
+            spleisBehandlingId = spleisBehandlingId2,
+            vedtaksperiodeId = vedtaksperiodeId2
+        )
+        spleisOppretterNyBehandling(fom = 1.februar, tom = 10.februar, vedtaksperiodeId = testperson.vedtaksperiodeId2)
+        håndterGodkjenningsbehovUtenValidering(
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(
+                periodeFom = periode2.fom,
+                periodeTom = periode2.tom,
+                skjæringstidspunkt = 15.januar, // Dette skjer ikke under normale omstendigheter 🙈 Men alt kan gå galt
+                vedtaksperiodeId = vedtaksperiodeId2,
+                spleisBehandlingId = spleisBehandlingId2,
+                perioderMedSammeSkjæringstidspunkt = listOf(
+                    VedtaksperiodeInfo(periode1.fom, periode1.tom, testperson.vedtaksperiodeId1, spleisBehandlingId1),
+                    VedtaksperiodeInfo(periode2.fom, periode2.tom, vedtaksperiodeId2, spleisBehandlingId2)
+                )
+            )
+        )
+
+        assertSkjæringstidspunkt(1.januar, spleisBehandlingId = spleisBehandlingId1)
+    }
+
     private fun finnGodkjenningsbehovJson(oppgaveId: Long) = dbQuery.single(
         """
         select h.data from hendelse h
@@ -392,5 +502,17 @@ class GodkjenningE2ETest : AbstractE2ETest() {
 
         assertEquals(forventedeTags, tags)
         assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)
+    }
+
+    private fun assertSkjæringstidspunkt(
+        forventetSkjæringstidspunkt: LocalDate,
+        spleisBehandlingId: UUID,
+    ) {
+        val `lagretSkjæringstidspunkt` = dbQuery.single(
+            "SELECT skjæringstidspunkt FROM behandling WHERE spleis_behandling_id = :spleisBehandlingId",
+            "spleisBehandlingId" to spleisBehandlingId
+        ) { it.localDate("skjæringstidspunkt") }
+
+        assertEquals(forventetSkjæringstidspunkt, `lagretSkjæringstidspunkt`)
     }
 }
