@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.kafka.InfotrygdutbetalingerLøsningRiver
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.person.HentPersoninfoløsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
 import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach
@@ -31,12 +31,12 @@ internal class InfotrygdutbetalingerLøsningRiverTest {
     @Test
     fun `leser selvstendig HentInfotrygdutbetalinger-melding`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagInfotrygdutbetalingerløsning(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentInfotrygdutbetalingerløsning>(), any()) }
     }
 
     @Test
     fun `leser HentInfotrygdutbetalinger i et behov med flere ting`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagPersoninfoløsningComposite(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentInfotrygdutbetalingerløsning>(), any()) }
     }
 }
