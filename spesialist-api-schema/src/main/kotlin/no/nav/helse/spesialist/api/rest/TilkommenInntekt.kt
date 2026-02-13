@@ -14,7 +14,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
-import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate

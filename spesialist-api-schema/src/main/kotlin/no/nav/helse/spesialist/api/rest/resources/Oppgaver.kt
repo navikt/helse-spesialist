@@ -10,8 +10,8 @@
 package no.nav.helse.spesialist.api.rest.resources
 
 import io.ktor.resources.Resource
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
-import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefølge
+import no.nav.helse.spesialist.api.rest.ApiOppgaveSorteringsfelt
+import no.nav.helse.spesialist.api.rest.ApiSorteringsrekkefølge
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate

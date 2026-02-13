@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
-import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
+import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiPatchEndring
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch

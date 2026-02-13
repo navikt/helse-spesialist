@@ -7,9 +7,8 @@
     UUID::class,
 )
 
-package no.nav.helse.spesialist.api.graphql.schema
+package no.nav.helse.spesialist.api.rest
 
-import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.time.Instant
@@ -17,9 +16,16 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Suppress("ktlint:standard:enum-entry-name-case")
+enum class ApiOppgaveSorteringsfelt {
+    tildeling,
+    opprettetTidspunkt,
+    paVentInfo_tidsfrist,
+    behandlingOpprettetTidspunkt,
+}
+
 @Serializable
-@GraphQLName("DatoPeriode")
-data class ApiDatoPeriode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-)
+enum class ApiSorteringsrekkefølge {
+    STIGENDE,
+    SYNKENDE,
+}

@@ -1,18 +1,6 @@
-@file:kotlinx.serialization.UseContextualSerialization(
-    BigDecimal::class,
-    Boolean::class,
-    Instant::class,
-    LocalDate::class,
-    LocalDateTime::class,
-    UUID::class,
-)
-
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import java.math.BigDecimal
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -82,21 +70,6 @@ enum class ApiKategori {
     Ukategorisert,
     Periodetype,
     Status,
-}
-
-@GraphQLName("OppgaveSorteringsfelt")
-@Suppress("ktlint:standard:enum-entry-name-case")
-enum class ApiOppgaveSorteringsfelt {
-    tildeling,
-    opprettetTidspunkt,
-    paVentInfo_tidsfrist,
-    behandlingOpprettetTidspunkt,
-}
-
-@GraphQLName("Sorteringsrekkefolge")
-enum class ApiSorteringsrekkefølge {
-    STIGENDE,
-    SYNKENDE,
 }
 
 @GraphQLName("BehandledeOppgaver")

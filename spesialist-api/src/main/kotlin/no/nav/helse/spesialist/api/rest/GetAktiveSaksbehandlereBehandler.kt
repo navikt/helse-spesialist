@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
-import no.nav.helse.spesialist.api.graphql.schema.ApiAktivSaksbehandler
 import no.nav.helse.spesialist.api.rest.resources.AktiveSaksbehandlere
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang

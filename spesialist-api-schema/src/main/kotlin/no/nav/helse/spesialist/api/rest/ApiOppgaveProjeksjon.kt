@@ -11,7 +11,6 @@ package no.nav.helse.spesialist.api.rest
 
 import kotlinx.serialization.Serializable
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -58,6 +57,6 @@ data class ApiOppgaveProjeksjonSide(
     val sidestoerrelse: Int,
     val elementer: List<ApiOppgaveProjeksjon>,
 ) {
-    val totaltAntallSider: Long
+    val πtotaltAntallSider: Long
         get() = (totaltAntall + (sidestoerrelse - 1)) / sidestoerrelse
 }
