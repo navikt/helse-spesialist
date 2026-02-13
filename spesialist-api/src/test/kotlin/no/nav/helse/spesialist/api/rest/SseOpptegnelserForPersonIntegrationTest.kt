@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.api.rest
 
+import kotlinx.coroutines.delay
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
+import kotlin.test.assertEquals
 
 @Isolated
 class SseOpptegnelserForPersonIntegrationTest {
@@ -18,9 +19,8 @@ class SseOpptegnelserForPersonIntegrationTest {
     @Test
     fun `mottar opptegnelser som forventet`() {
         // Given:
-        val person = lagPerson()
-        personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val identitetsnummer = lagPerson().also(personRepository::lagre).id
+        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
 
         opptegnelseRepository.lagre(
             Opptegnelse.ny(
@@ -30,31 +30,27 @@ class SseOpptegnelserForPersonIntegrationTest {
         )
         opptegnelseRepository.lagre(
             Opptegnelse.ny(
-                identitetsnummer = person.id,
+                identitetsnummer = identitetsnummer,
                 type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
             ),
         )
 
-        val result =
-            integrationTestFixture.sse(
-                url = "/api/personer/${personPseudoId.value}/opptegnelser-stream",
-                nyeOpptegnelserEtterEtablertForbindelse = {
-                    opptegnelseRepository.lagre(
-                        Opptegnelse.ny(
-                            identitetsnummer = person.id,
-                            type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
-                        ),
-                    )
-                },
+        integrationTestFixture.sse("/api/personer/${personPseudoId.value}/opptegnelser-stream") { events ->
+            delay(200)
+            assertEquals(0, events.size)
+
+            // When:
+            opptegnelseRepository.lagre(
+                Opptegnelse.ny(
+                    identitetsnummer = identitetsnummer,
+                    type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
+                ),
             )
-        assertJsonEquals(
-            """
-            {
-              "sekvensnummer": 3,
-              "type": "UTBETALING_ANNULLERING_OK"
-            }
-            """.trimIndent(),
-            result,
-        )
+            delay(200)
+
+            // Then:
+            assertEquals(1, events.size)
+            assertEquals("""{"sekvensnummer":3,"type":"UTBETALING_ANNULLERING_OK"}""", events.first().data)
+        }
     }
 }

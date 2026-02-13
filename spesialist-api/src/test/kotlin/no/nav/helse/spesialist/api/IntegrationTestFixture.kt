@@ -18,11 +18,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
+import io.ktor.sse.ServerSentEvent
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
@@ -38,8 +39,8 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
+import java.util.Collections
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 
 class IntegrationTestFixture {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
@@ -98,45 +99,39 @@ class IntegrationTestFixture {
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         tilganger: Set<Tilgang> = setOf(Tilgang.Les),
         brukerroller: Set<Brukerrolle> = emptySet(),
-        nyeOpptegnelserEtterEtablertForbindelse: () -> Unit,
-    ): JsonNode {
-        lateinit var result: JsonNode
+        block: suspend (List<ServerSentEvent>) -> Unit,
+    ) {
         testApplication {
-            val received = CompletableDeferred<JsonNode>()
-            application {
-                apiModule.setUpApi(this)
-            }
+            application { apiModule.setUpApi(this) }
+            client = createClient { install(SSE) }
 
-            client =
-                createClient {
-                    install(SSE)
-                }
-
-            logg.info("Starter SSE $url")
-            val job =
-                this.application.launch {
+            logg.info("Starter SSE-tilkobling til $url")
+            val events = Collections.synchronizedList(mutableListOf<ServerSentEvent>())
+            coroutineScope {
+                val started = CompletableDeferred<Unit>()
+                val sseJob = launch {
                     client.sse(urlString = url, request = {
                         accept(ContentType.Application.Json)
                         bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
                     }) {
+                        started.complete(Unit)
                         incoming.collect { event ->
-                            val jsonNode = objectMapper.readTree(event.data)
-                            received.complete(jsonNode)
+                            logg.info("Mottok server sent event: $event")
+                            events.add(event)
                         }
                     }
                 }
-            this.application.launch {
-                delay(2000)
-                nyeOpptegnelserEtterEtablertForbindelse()
-            }
-            result =
-                withTimeout(5.seconds) {
-                    received.await()
+                // Vent til tilkoblingen er aktiv
+                started.await()
+
+                try {
+                    block(events)
+                } finally {
+                    sseJob.cancelAndJoin()
+                    logg.info("Avsluttet SSE-tilkobling til $url")
                 }
-            job.cancel()
-            logg.info("Avslutter SSE $url")
+            }
         }
-        return result
     }
 
     fun get(
