@@ -209,7 +209,6 @@ type BeregnetPeriode implements Periode {
     id: UUID!
     inntektstype: Inntektstype!
     maksdato: LocalDate!
-    notater: [Notat!]!
     oppgave: OppgaveForPeriodevisning
     opprettet: LocalDateTime!
     paVent: PaVent
@@ -380,22 +379,6 @@ type Mutation {
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean
     stansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
-}
-
-type Notat {
-    dialogRef: Int!
-    feilregistrert: Boolean!
-    feilregistrert_tidspunkt: LocalDateTime
-    id: Int!
-    kommentarer: [Kommentar!]!
-    opprettet: LocalDateTime!
-    saksbehandlerEpost: String!
-    saksbehandlerIdent: String!
-    saksbehandlerNavn: String!
-    saksbehandlerOid: UUID!
-    tekst: String!
-    type: NotatType!
-    vedtaksperiodeId: UUID!
 }
 
 type OmregnetArsinntekt {
@@ -734,7 +717,6 @@ type UberegnetPeriode implements Periode {
     hendelser: [Hendelse!]!
     id: UUID!
     inntektstype: Inntektstype!
-    notater: [Notat!]!
     opprettet: LocalDateTime!
     periodetilstand: Periodetilstand!
     periodetype: Periodetype!
@@ -976,13 +958,6 @@ enum Kjonn {
     Kvinne
     Mann
     Ukjent
-}
-
-enum NotatType {
-    Generelt
-    OpphevStans
-    PaaVent
-    Retur
 }
 
 enum Oppgavetype {

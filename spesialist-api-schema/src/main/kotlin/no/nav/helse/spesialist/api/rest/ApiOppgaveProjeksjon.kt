@@ -56,7 +56,4 @@ data class ApiOppgaveProjeksjonSide(
     val sidetall: Int,
     val sidestoerrelse: Int,
     val elementer: List<ApiOppgaveProjeksjon>,
-) {
-    val totaltAntallSider: Long
-        get() = (totaltAntall + (sidestoerrelse - 1)) / sidestoerrelse
-}
+)
