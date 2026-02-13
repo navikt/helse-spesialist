@@ -25,13 +25,13 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
         val personPseudoId =
             call.parameters["personPseudoId"]
                 ?.let { PersonPseudoId.fraString(it) }
-                ?: throw BadRequestException("Missing required query param: personPseudoId")
+                ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
 
         val (identitetsnummer, sisteSekvensnummerVedInitiering) =
             sessionFactory.transactionalSessionScope {
                 val identitetsnummer =
                     it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                        ?: throw NotFoundException("No person found for pseudoId: $personPseudoId")
+                        ?: throw NotFoundException("Fant ikke person med pseudoId: $personPseudoId")
                 val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
                 identitetsnummer to sisteSekvensnummer
             }
