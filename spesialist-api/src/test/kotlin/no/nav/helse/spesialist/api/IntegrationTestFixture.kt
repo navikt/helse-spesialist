@@ -23,8 +23,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
@@ -120,9 +118,6 @@ class IntegrationTestFixture {
                     client.sse(urlString = url, request = {
                         accept(ContentType.Application.Json)
                         bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
-                    }, deserialize = { typeInfo, it ->
-                        val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
-                        Json.decodeFromString(serializer, it)!!
                     }) {
                         incoming.collect { event ->
                             val jsonNode = objectMapper.readTree(event.data)

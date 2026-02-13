@@ -7,17 +7,15 @@ import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.send
 import io.ktor.server.sse.sse
 import kotlinx.coroutines.delay
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Opptegnelse
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(sessionFactory: SessionFactory) {
-    sse("/personer/{personPseudoId}/opptegnelser-stream", serialize = { typeInfo, it ->
-        val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
-        Json.encodeToString(serializer, it)
+    sse("/personer/{personPseudoId}/opptegnelser-stream", serialize = { _, it ->
+        objectMapper.writeValueAsString(it)
     }) {
         heartbeat {
             period = 10.seconds
