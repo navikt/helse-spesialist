@@ -37,7 +37,7 @@ class SseOpptegnelserForPersonIntegrationTest {
 
         val result =
             integrationTestFixture.sse(
-                url = "/api/personer/${personPseudoId.value}/opptegnelser",
+                url = "/api/personer/${personPseudoId.value}/opptegnelser-stream",
                 nyeOpptegnelserEtterEtablertForbindelse = {
                     opptegnelseRepository.lagre(
                         Opptegnelse.ny(

@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.domain.Sekvensnummer
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(sessionFactory: SessionFactory) {
-    sse("/personer/{personPseudoId}/opptegnelser", serialize = { typeInfo, it ->
+    sse("/personer/{personPseudoId}/opptegnelser-stream", serialize = { typeInfo, it ->
         val serializer = Json.serializersModule.serializer(typeInfo.kotlinType!!)
         Json.encodeToString(serializer, it)
     }) {
@@ -28,14 +28,16 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
             call.parameters["personPseudoId"]
                 ?.let { PersonPseudoId.fraString(it) }
                 ?: throw BadRequestException("Missing required query param: personPseudoId")
+
         lateinit var identitetsnummer: Identitetsnummer
         lateinit var sisteSekvensnummer: Sekvensnummer
 
         sessionFactory.transactionalSessionScope {
             identitetsnummer = it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                ?: throw NotFoundException("No person found for pseudoId: $personPseudoId")
+                ?: throw NotFoundException("Fant ikke person med personPseudoId: $personPseudoId")
             sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
         }
+
         while (true) {
             val opptegnelser =
                 sessionFactory.transactionalSessionScope {
