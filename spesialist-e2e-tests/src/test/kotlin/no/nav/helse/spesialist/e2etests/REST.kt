@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.ktor.http.encodeURLQueryComponent
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -85,7 +86,7 @@ object REST {
         tilganger: Set<Tilgang>,
         brukerroller: Set<Brukerrolle>
     ): JsonNode? {
-        val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
+        val url = "http://localhost:${E2ETestApplikasjon.port}/${relativeUrl.encodeURLQueryComponent()}"
         val requestBodyAsString = request?.let(objectMapper.writerWithDefaultPrettyPrinter()::writeValueAsString)
         logg.info("Gjør HTTP $method $url" + requestBodyAsString?.let { " med body:\n$it" }.orEmpty())
         val (statusCode, responseBodyAsString) =

@@ -20,7 +20,7 @@ import java.util.UUID
 enum class ApiOppgaveSorteringsfelt {
     tildeling,
     opprettetTidspunkt,
-    paVentInfo_tidsfrist,
+    påVentInfo_tidsfrist,
     behandlingOpprettetTidspunkt,
 }
 
