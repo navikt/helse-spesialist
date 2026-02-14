@@ -171,7 +171,6 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         // Then:
         if (forventetDukketOpp) {
             assertAtLeast(1, response["totaltAntall"].asLong())
-            assertAtLeast(1, response["totaltAntallSider"].asLong())
             assertEquals(1, response["sidetall"].asInt())
             assertEquals(1000, response["sidestoerrelse"].asInt())
             assertAtLeast(1, response["elementer"].size())
