@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.plugins
 
+import io.ktor.http.decodeURLQueryComponent
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.calllogging.CallLoggingConfig
 import io.ktor.server.request.httpMethod
@@ -16,7 +17,7 @@ fun CallLoggingConfig.configureCallLoggingPlugin() {
     level = Level.INFO
     callIdMdc("callId")
     mdc(MdcKey.REQUEST_METHOD.value) { it.request.httpMethod.value }
-    mdc(MdcKey.REQUEST_URI.value) { it.request.uri }
+    mdc(MdcKey.REQUEST_URI.value) { it.request.uri.decodeURLQueryComponent() }
     MdcKey.entries
         .filterNot { it in setOf(MdcKey.REQUEST_METHOD, MdcKey.REQUEST_URI) }
         .forEach { mdcKey ->
