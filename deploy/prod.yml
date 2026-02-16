@@ -62,6 +62,7 @@ spec:
           - id: {{ENTRAID_UUID_STIKKPROVE}}
           - id: {{ENTRAID_UUID_SPESIALSAKER}}
           - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}}
+          - id: {{ENTRAID_UUID_SPEIL_RIKSREVISJONEN}}
   accessPolicy:
     inbound:
       rules:
@@ -118,7 +119,7 @@ spec:
     - name: TILGANG_SKRIV
       value: {{ENTRAID_UUID_SAKSBEHANDLER}}
     - name: TILGANG_LES
-      value: {{ENTRAID_UUID_TBD}}
+      value: {{ENTRAID_UUID_TBD}},{{ENTRAID_UUID_SPEIL_RIKSREVISJONEN}}
     - name: ROLLE_BESLUTTER
       value: {{ENTRAID_UUID_BESLUTTER}}
     - name: ROLLE_EGEN_ANSATT
