@@ -10,7 +10,7 @@ import io.swagger.v3.oas.models.media.Schema
 import java.math.BigDecimal
 
 fun OpenApiPluginConfig.configureOpenApiPlugin() {
-    pathFilter = { _, url -> url.firstOrNull() == "api" }
+    pathFilter = { _, url -> url.firstOrNull() == "api" && "opptegnelser-stream" !in url }
     autoDocumentResourcesRoutes = true
     schemas {
         generator =
