@@ -41,9 +41,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                     ikkeSendtTilBeslutterAvOid = kallKontekst.saksbehandler.id,
                     sorterPå =
                         when (resource.sorteringsfelt) {
-                            null,
-                            ApiOppgaveSorteringsfelt.opprettetTidspunkt,
-                            -> SorteringsnøkkelForDatabase.OPPRETTET
+                            null, ApiOppgaveSorteringsfelt.opprettetTidspunkt -> SorteringsnøkkelForDatabase.OPPRETTET
 
                             ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
 
@@ -53,9 +51,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                         },
                     sorteringsrekkefølge =
                         when (resource.sorteringsrekkefoelge) {
-                            null,
-                            ApiSorteringsrekkefølge.STIGENDE,
-                            -> Sorteringsrekkefølge.STIGENDE
+                            null, ApiSorteringsrekkefølge.STIGENDE -> Sorteringsrekkefølge.STIGENDE
 
                             ApiSorteringsrekkefølge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
                         },
