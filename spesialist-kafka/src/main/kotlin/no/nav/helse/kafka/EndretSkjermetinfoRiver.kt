@@ -30,18 +30,18 @@ class EndretSkjermetinfoRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val fødselsnummer = packet["fødselsnummer"].asText()
-        try {
-            fødselsnummer.toLong()
-        } catch (_: Exception) {
-            teamLogs.warn("Mottok ugyldig fødselsnummer $fødselsnummer, skipper videre håndtering")
-            return
-        }
+        val fødselsnummer =
+            packet["fødselsnummer"].asText().also {
+                if (it.toLongOrNull() == null) {
+                    teamLogs.warn("Mottok ugyldig fødselsnummer $it, skipper videre håndtering")
+                    return
+                }
+            }
 
         meldingMediator.mottaMelding(
             EndretEgenAnsattStatus(
                 id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
+                fødselsnummer = fødselsnummer,
                 erEgenAnsatt = packet["skjermet"].asBoolean(),
                 opprettet = packet["@opprettet"].asLocalDateTime(),
                 json = packet.toJson(),
