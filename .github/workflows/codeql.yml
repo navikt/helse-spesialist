@@ -30,6 +30,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          tools: linked
 
       - name: Setup Java
         uses: actions/setup-java@v5
