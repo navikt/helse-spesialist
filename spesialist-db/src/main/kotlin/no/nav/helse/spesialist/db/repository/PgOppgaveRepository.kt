@@ -350,7 +350,7 @@ class PgOppgaveRepository private constructor(
             "oid" to behandletAvOid,
             "fom" to fom,
             "tom" to tom,
-            "offset" to sidetall,
+            "offset" to (sidetall - 1) * sidestørrelse,
             "limit" to sidestørrelse,
         ).list { row ->
             row.long("filtered_count") to
