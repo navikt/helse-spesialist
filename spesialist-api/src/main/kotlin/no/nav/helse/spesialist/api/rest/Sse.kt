@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.rest
 
+import io.github.smiley4.ktoropenapi.documentation
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.routing.Route
@@ -14,37 +15,53 @@ import no.nav.helse.spesialist.domain.Opptegnelse
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(sessionFactory: SessionFactory) {
-    sse("/personer/{personPseudoId}/opptegnelser-stream", serialize = { _, it ->
-        objectMapper.writeValueAsString(it)
-    }) {
-        heartbeat {
-            period = 10.seconds
+    documentation({
+        description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
+            " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
+        tags = setOf("Opptegnelser")
+        request {
+            pathParameter<String>("personPseudoId")
         }
-        val personPseudoId =
-            call.parameters["personPseudoId"]
-                ?.let { PersonPseudoId.fraString(it) }
-                ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
-
-        val (identitetsnummer, sisteSekvensnummerVedInitiering) =
-            sessionFactory.transactionalSessionScope {
-                val identitetsnummer =
-                    it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                        ?: throw NotFoundException("Fant ikke person med pseudoId: $personPseudoId")
-                val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
-                identitetsnummer to sisteSekvensnummer
+        response {
+            default {
+                description = "En strøm med Server Sent Events." +
+                    " Hver event sin data er et JSON-objekt på formatet beskrevet her."
+                body<ApiOpptegnelse>()
             }
-        var sisteSekvensnummer = sisteSekvensnummerVedInitiering
+        }
+    }) {
+        sse("/personer/{personPseudoId}/opptegnelser-stream", serialize = { _, it ->
+            objectMapper.writeValueAsString(it)
+        }) {
+            heartbeat {
+                period = 10.seconds
+            }
+            val personPseudoId =
+                call.parameters["personPseudoId"]
+                    ?.let { PersonPseudoId.fraString(it) }
+                    ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
 
-        while (true) {
-            val opptegnelser =
+            val (identitetsnummer, sisteSekvensnummerVedInitiering) =
                 sessionFactory.transactionalSessionScope {
-                    it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
+                    val identitetsnummer =
+                        it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+                            ?: throw NotFoundException("Fant ikke person med pseudoId: $personPseudoId")
+                    val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
+                    identitetsnummer to sisteSekvensnummer
                 }
-            if (opptegnelser.isNotEmpty()) {
-                sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
+            var sisteSekvensnummer = sisteSekvensnummerVedInitiering
+
+            while (true) {
+                val opptegnelser =
+                    sessionFactory.transactionalSessionScope {
+                        it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
+                    }
+                if (opptegnelser.isNotEmpty()) {
+                    sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
+                }
+                opptegnelser.forEach { send(it.tilApiOpptegnelse()) }
+                delay(100)
             }
-            opptegnelser.forEach { send(it.tilApiOpptegnelse()) }
-            delay(100)
         }
     }
 }
