@@ -19,6 +19,7 @@ on:
             - 'deploy/alerts/**'
         branches:
             - main
+            - 'dev-**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -42,6 +43,7 @@ jobs:
         name: Deploy to dev
         needs: [build]
         runs-on: ubuntu-latest
+        if: ${{github.ref_name == 'main' || startsWith(github.ref_name, 'dev-')}}
         steps:
             - uses: actions/checkout@v6
             - uses: nais/deploy/actions/deploy@v2
@@ -55,6 +57,7 @@ jobs:
         name: Deploy to prod
         needs: [build]
         runs-on: ubuntu-latest
+        if: ${{ github.ref_name == 'main' }}
         steps:
             - uses: actions/checkout@v6
             - uses: nais/deploy/actions/deploy@v2
