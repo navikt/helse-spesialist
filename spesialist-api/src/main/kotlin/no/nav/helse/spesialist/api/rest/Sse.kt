@@ -7,10 +7,12 @@ import io.ktor.server.routing.Route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.send
 import io.ktor.server.sse.sse
+import io.ktor.utils.io.ClosedWriteChannelException
 import kotlinx.coroutines.delay
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.domain.Opptegnelse
 import kotlin.time.Duration.Companion.seconds
 
@@ -49,18 +51,25 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                     val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
                     identitetsnummer to sisteSekvensnummer
                 }
+            loggDebug("SSE-tilkobling startet", "identitetsnummer" to identitetsnummer)
             var sisteSekvensnummer = sisteSekvensnummerVedInitiering
 
-            while (true) {
-                val opptegnelser =
-                    sessionFactory.transactionalSessionScope {
-                        it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
+            try {
+                while (true) {
+                    val opptegnelser =
+                        sessionFactory.transactionalSessionScope {
+                            it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
+                        }
+                    if (opptegnelser.isNotEmpty()) {
+                        sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
                     }
-                if (opptegnelser.isNotEmpty()) {
-                    sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
+                    opptegnelser.forEach { send(it.tilApiOpptegnelse()) }
+                    delay(100)
                 }
-                opptegnelser.forEach { send(it.tilApiOpptegnelse()) }
-                delay(100)
+            } catch (exception: ClosedWriteChannelException) {
+                loggDebug("SSE-tilkobling lukket på grunn av exception", "identitetsnummer" to identitetsnummer, "exception" to exception)
+            } finally {
+                loggDebug("SSE-tilkobling lukket", "identitetsnummer" to identitetsnummer)
             }
         }
     }
