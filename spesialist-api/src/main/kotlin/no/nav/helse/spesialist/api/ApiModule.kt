@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.DokumentMediator
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
@@ -40,6 +41,7 @@ class ApiModule(
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+    private val forsikringHenter: ForsikringHenter,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
@@ -139,6 +141,7 @@ class ApiModule(
             sessionFactory = sessionFactory,
             meldingPubliserer = meldingPubliserer,
             krrRegistrertStatusHenter = krrRegistrertStatusHenter,
+            forsikringHenter = forsikringHenter,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         )

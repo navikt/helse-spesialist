@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -108,6 +109,7 @@ object TestRunner {
                 behandlingstatistikk = mockk(relaxed = true),
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
+                forsikringHenter = mockk(relaxed = true),
                 meldingPubliserer = mockk(relaxed = true),
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
@@ -164,10 +166,12 @@ object TestRunner {
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker: Boolean = false
                             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+                            override val kanSeForsikring: Boolean = false
                         },
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
+                    forsikringHenter = avhengigheter.forsikringHenter,
                 )
             }
 
@@ -203,6 +207,7 @@ object TestRunner {
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+        val forsikringHenter: ForsikringHenter,
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,

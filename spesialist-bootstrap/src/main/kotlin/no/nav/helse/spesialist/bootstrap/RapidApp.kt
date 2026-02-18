@@ -179,6 +179,7 @@ class RapidApp {
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
                 tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
                 tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
+                forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
             )
 
         kafkaModule.kobleOppRivers()

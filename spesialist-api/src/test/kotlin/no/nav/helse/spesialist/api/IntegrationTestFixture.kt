@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -70,6 +71,7 @@ class IntegrationTestFixture {
     }
 
     val krrRegistrertStatusHenterMock: KrrRegistrertStatusHenter = mockk(relaxed = true)
+    val spiskammersetForsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
 
     private val apiModule =
         ApiModule(
@@ -83,6 +85,7 @@ class IntegrationTestFixture {
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+            forsikringHenter = spiskammersetForsikringHenterMock,
         )
 
     class Response(

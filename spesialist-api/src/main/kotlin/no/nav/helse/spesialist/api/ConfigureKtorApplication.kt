@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.plugins.configureStatusPagesPlugin
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
@@ -43,6 +44,7 @@ fun configureKtorApplication(
     sessionFactory: SessionFactory,
     meldingPubliserer: MeldingPubliserer,
     dokumentMediator: DokumentMediator,
+    forsikringHenter: ForsikringHenter,
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
@@ -87,6 +89,7 @@ fun configureKtorApplication(
                 dokumentMediator = dokumentMediator,
                 environmentToggles = environmentToggles,
                 krrRegistrertStatusHenter = krrRegistrertStatusHenter,
+                forsikringHenter = forsikringHenter,
             )
         }
     }

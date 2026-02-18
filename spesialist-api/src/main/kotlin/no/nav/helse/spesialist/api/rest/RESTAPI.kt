@@ -14,6 +14,7 @@ import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.ApiModule
+import no.nav.helse.spesialist.api.rest.behandlinger.GetForsikringForPersonBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.dialoger.kommentarer.PatchKommentarBehandler
@@ -36,6 +37,7 @@ import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetNotaterForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun Routing.restRoutes(
@@ -44,6 +46,7 @@ fun Routing.restRoutes(
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+    forsikringHenter: ForsikringHenter,
     sessionFactory: SessionFactory,
 ) {
     route("/api") {
@@ -97,6 +100,8 @@ fun Routing.restRoutes(
             post(PostPersonSokBehandler(), restAdapter)
 
             get(GetKrrRegistrertStatusForPersonBehandler(krrRegistrertStatusHenter), restAdapter)
+
+            get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
         }
     }
 }
