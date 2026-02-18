@@ -163,6 +163,8 @@ class RapidApp {
                 daos = dbModule.daos,
                 stikkprøver = configuration.stikkprøver,
                 brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
+                forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
+                environmentToggles = configuration.environmentToggles,
             )
 
         val apiModule =

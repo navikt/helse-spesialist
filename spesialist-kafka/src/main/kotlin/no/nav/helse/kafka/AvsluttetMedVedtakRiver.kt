@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
@@ -24,18 +25,24 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.ResultatAvForsikring
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.math.BigDecimal
 import java.util.UUID
 
-class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
+class AvsluttetMedVedtakRiver(
+    private val forsikringHenter: ForsikringHenter,
+    private val environmentToggles: EnvironmentToggles,
+) : TransaksjonellRiver() {
     private val eventName = "avsluttet_med_vedtak"
 
     override fun preconditions(): River.PacketValidation =
@@ -65,6 +72,21 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
         eventMetadata: EventMetadata,
     ) {
         val spleisBehandlingId = packet["behandlingId"].asUUID()
+        val erSelvstendig = packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
+        val forsikring =
+            if (erSelvstendig && environmentToggles.kanSeForsikring) {
+                forsikringHenter.hentForsikringsinformasjon(SpleisBehandlingId(spleisBehandlingId)).let {
+                    when (it) {
+                        is ResultatAvForsikring.MottattForsikring ->
+                            it.forsikring
+
+                        is ResultatAvForsikring.IngenForsikring ->
+                            null
+                    }
+                }
+            } else {
+                null
+            }
 
         val vedtak =
             transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
@@ -114,6 +136,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                             saksbehandlerIdentOgNavn = null,
                             beslutterIdentOgNavn = null,
                             automatiskFattet = true,
+                            forsikring = forsikring,
                         )
                     }
 
@@ -140,6 +163,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                                     beslutter.navn,
                                 ),
                             automatiskFattet = false,
+                            forsikring = forsikring,
                         )
                     }
 
@@ -159,6 +183,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                                 ),
                             beslutterIdentOgNavn = null,
                             automatiskFattet = false,
+                            forsikring = forsikring,
                         )
                     }
                 }
@@ -179,6 +204,7 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
         saksbehandlerIdentOgNavn: SaksbehandlerIdentOgNavn?,
         beslutterIdentOgNavn: SaksbehandlerIdentOgNavn?,
         automatiskFattet: Boolean,
+        forsikring: Forsikring?,
     ): UtgåendeHendelse {
         val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
 
@@ -275,7 +301,12 @@ class AvsluttetMedVedtakRiver : TransaksjonellRiver() {
                     }
                 },
             dekning =
-                if (erSelvstendig) {
+                if (erSelvstendig && forsikring != null && environmentToggles.kanSeForsikring) {
+                    VedtakFattetMelding.Dekning(
+                        dekningsgrad = forsikring.dekningsgrad,
+                        gjelderFraDag = forsikring.gjelderFraDag,
+                    )
+                } else if (erSelvstendig && forsikring == null) {
                     VedtakFattetMelding.Dekning(
                         dekningsgrad = if (godkjenningsbehov?.arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) 100 else 80,
                         gjelderFraDag = 17,

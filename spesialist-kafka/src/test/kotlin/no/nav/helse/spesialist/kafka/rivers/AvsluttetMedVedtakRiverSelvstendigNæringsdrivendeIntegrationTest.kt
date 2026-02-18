@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Vedtak
@@ -45,6 +46,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         // Given:
         this.beregningsgrunnlag = BigDecimal("600000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        integrationTestFixture.forsikringHenter.forsikring = Forsikring(17, 80)
 
         setup()
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
@@ -126,6 +128,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         // Given:
         this.beregningsgrunnlag = BigDecimal("600000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        integrationTestFixture.forsikringHenter.forsikring = Forsikring(17, 100)
 
         setup()
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
@@ -203,10 +206,93 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
     }
 
     @Test
+    fun `midlertidlig test pga toggle for å se forsikring i dev`() {
+        // Given:
+        this.beregningsgrunnlag = BigDecimal("600000.00")
+        this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        integrationTestFixture.forsikringToggle = true
+
+        setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
+
+        initGodkjenningsbehov()
+
+        // When:
+        testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = beregningsgrunnlag))
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(person.id.value, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson =
+            """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "${person.id.value}",
+              "aktørId": "${person.aktørId}",
+              "yrkesaktivitetstype": "SELVSTENDIG",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
+              "behandlingId": "${behandling.spleisBehandlingId?.value}",
+              "organisasjonsnummer" : "SELVSTENDIG",
+              "fom": "${behandling.fom}",
+              "tom": "${behandling.tom}",
+              "skjæringstidspunkt": "${behandling.skjæringstidspunkt}",
+              "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlag": $beregningsgrunnlag,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+              "utbetalingId": "${behandling.utbetalingId?.value}",
+              "tags": [ ${behandling.tags.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlagsfakta": {
+                "fastsatt": "EtterHovedregel",
+                "6G": $seksG,
+                "tags" : [ ],
+                "selvstendig": {
+                  "beregningsgrunnlag": $beregningsgrunnlag,
+                  "pensjonsgivendeInntekter" : [ 
+                      {
+                        "årstall" : 2022,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2023,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2024,
+                        "beløp" : 200000
+                      } 
+                  ]
+                }
+              },
+              "begrunnelser": [
+                {
+                  "type" : "Innvilgelse",
+                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "perioder" : [
+                    {
+                      "fom" : "${behandling.fom}",
+                      "tom" : "${behandling.tom}"
+                    }
+                  ]
+                }
+              ],
+              "automatiskFattet": true,
+              "dekning" : {
+                "dekningsgrad" : 100,
+                "gjelderFraDag" : 17
+              }
+            }
+            """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
     fun `fastsatt etter hovedregel begrenset til 6G`() {
         // Given:
         this.beregningsgrunnlag = BigDecimal("800000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2", "6GBegrenset")
+        integrationTestFixture.forsikringHenter.forsikring = Forsikring(17, 80)
 
         setup()
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))

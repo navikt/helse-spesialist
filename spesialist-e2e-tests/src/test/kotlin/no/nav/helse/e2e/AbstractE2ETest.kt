@@ -10,6 +10,7 @@ import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestMediator
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
@@ -29,6 +30,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
+import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
@@ -91,7 +95,21 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val meldingssender = Meldingssender(testRapid)
     protected lateinit var sisteMeldingId: UUID
     protected lateinit var sisteGodkjenningsbehovId: UUID
-    private val testMediator = TestMediator(testRapid, dataSource)
+    private val testMediator = TestMediator(
+        testRapid = testRapid,
+        dataSource = dataSource,
+        forsikringHenter = ClientSpiskammersetModule(
+            configuration = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
+            accessTokenGenerator = object : AccessTokenGenerator {
+                override fun hentAccessToken(scope: String): String = "tull"
+            }
+        ).spiskammersetClientForsikringHenter,
+        environmentToggles = object : EnvironmentToggles {
+            override val kanBeslutteEgneSaker: Boolean = false
+            override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+            override val kanSeForsikring: Boolean = false
+        },
+    )
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"

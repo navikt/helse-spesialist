@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.Kommandofabrikk
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.Either
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -21,6 +23,8 @@ import javax.sql.DataSource
 class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
+    forsikringHenter: ForsikringHenter,
+    environmentToggles: EnvironmentToggles
 ) {
     private val daos = DBDaos(dataSource)
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
@@ -100,6 +104,8 @@ class TestMediator(
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
             versjonAvKode = "en_versjon",
+            forsikringHenter = forsikringHenter,
+            environmentToggles = environmentToggles,
         ).registrerRivers(testRapid)
     }
 
