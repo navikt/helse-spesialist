@@ -155,5 +155,9 @@ spec:
       value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
+    - name: SPISKAMMERSET_API_URL
+      value: "http://spiskammerset"
+    - name: SPISKAMMERSET_SCOPE
+      value: "api://dev-gcp.tbd.spiskammerset/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd
