@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
@@ -41,12 +42,15 @@ object E2ETestApplikasjon {
                     clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
                     clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                     clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
-                    db = DBTestFixture.database.dbModuleConfiguration,
-                    kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
+                    clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
+            db = DBTestFixture.database.dbModuleConfiguration,
+            kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
+
                     environmentToggles =
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker = false
                             override val kanGodkjenneUtenBesluttertilgang = false
+                            override val kanSeForsikring = false
                         },
                     stikkprøver =
                         object : Stikkprøver {

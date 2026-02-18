@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
@@ -17,7 +18,8 @@ fun main() {
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
+    val apiModuleIntegrationTestFixture =
+        ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
     rapidApp.start(
         configuration =
             Configuration(
@@ -25,12 +27,14 @@ fun main() {
                 clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
                 clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                 clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
+                clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,
                 kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
                 environmentToggles =
                     object : EnvironmentToggles {
                         override val kanBeslutteEgneSaker = false
                         override val kanGodkjenneUtenBesluttertilgang = false
+                        override val kanSeForsikring = false
                     },
                 stikkprøver =
                     object : Stikkprøver {

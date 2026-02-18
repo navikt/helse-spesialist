@@ -26,5 +26,6 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-domain")))
     testImplementation(testFixtures(project(":spesialist-client-entra-id")))
     testImplementation(testFixtures(project(":spesialist-client-krr")))
+    testImplementation(testFixtures(project(":spesialist-client-spiskammerset")))
     testImplementation(testFixtures(project(":spesialist-client-spleis")))
 }
