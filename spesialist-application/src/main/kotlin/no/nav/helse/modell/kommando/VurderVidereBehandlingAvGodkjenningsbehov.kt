@@ -70,7 +70,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             error("Endringer i godkjenningsbehov der oppgaven med oppgaveId=${oppgave.id} er ferdigstilt")
         }
 
-        return if (harEndringerIGodkjenningsbehov) {
+        if (harEndringerIGodkjenningsbehov) {
             val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer)
             if (tildeltSaksbehandler != null) {
                 reservasjonDao.reserverPerson(tildeltSaksbehandler.oid, fødselsnummer)
@@ -81,11 +81,11 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             }
             loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")
             oppgaveDao.invaliderOppgave(oppgave.id)
-            true
         } else {
             loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId")
             ferdigstill(context)
         }
+        return true
     }
 
     private fun harEndringerIGodkjenningsbehov(godkjenningsbehovId: UUID): Boolean {
