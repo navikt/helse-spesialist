@@ -6,6 +6,7 @@ include(
     "spesialist-api",
     "spesialist-client-entra-id",
     "spesialist-client-krr",
+    "spesialist-client-spiskammerset",
     "spesialist-client-spleis",
     "spesialist-db-migrations",
     "spesialist-db",
