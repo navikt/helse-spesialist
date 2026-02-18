@@ -6,7 +6,7 @@ kotlinx-coroutines = "1.10.2"
 ktor = "3.4.0"
 tbdLibs = "2025.11.04-10.54-c831038e"
 testcontainers = "2.0.3"
-smiley4KtorOpenapiTools = "5.4.0"
+smiley4KtorOpenapiTools = "5.5.0"
 smiley4SchemaKenerator = "2.6.0"
 
 [libraries]
