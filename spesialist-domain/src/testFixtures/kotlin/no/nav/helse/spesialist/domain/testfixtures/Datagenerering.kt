@@ -18,6 +18,7 @@ import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
@@ -231,6 +232,15 @@ fun lagNotat(
         dialogRef = dialogRef,
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandlerOid = saksbehandlerOid,
+    )
+
+fun lagForsikring(
+    dekningsgrad: Int = 100,
+    gjelderFraDag: Int = 17
+): Forsikring =
+    Forsikring.Factory.ny(
+        dekningsgrad = dekningsgrad,
+        gjelderFraDag = gjelderFraDag,
     )
 
 fun lagVarselId() = VarselId(UUID.randomUUID())
