@@ -3,8 +3,10 @@ package no.nav.helse.spesialist.client.spiskammerset
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.noContent
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.domain.Forsikring
@@ -18,7 +20,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 
-class ClientSpiskammersetForsikringHenterTest {
+class SpiskammersetClientForsikringHenterTest {
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
@@ -61,6 +63,46 @@ class ClientSpiskammersetForsikringHenterTest {
         )
     }
 
+    @Test
+    fun `får forsikring etter retry ved feil første kall`() {
+        // Given:
+        val scenario = "Feiler først, så ok"
+        wireMock.stubFor(
+            get("/behandling/${spleisBehandlingId.value}/forsikring").inScenario(scenario).willReturn(
+                WireMock.serverError().withBody("Her står det en feilmelding som ikke engang er JSON")
+            ).willSetStateTo("har feilet")
+        )
+        wireMock.stubFor(
+            get("/behandling/${spleisBehandlingId.value}/forsikring").inScenario(scenario)
+                .whenScenarioStateIs("har feilet")
+                .willReturn(
+                    okJson(
+                        """
+                    {
+                      "dag1Eller17": "17",
+                      "dekningsgrad": "100"
+                    }
+                """.trimIndent()
+                    )
+                )
+        )
+        val client = SpiskammersetClientForsikringHenter(
+            configuration = ClientSpiskammersetModule.Configuration(
+                apiUrl = wireMock.runtimeInfo.httpBaseUrl,
+                scope = "scoap"
+            ),
+            accessTokenGenerator = { "gief axess plz" }
+        )
+
+        // When:
+        val result = client.hentForsikringsinformasjon(spleisBehandlingId)
+
+        // Then:
+        wireMock.verify(2, getRequestedFor(urlEqualTo("/behandling/${spleisBehandlingId.value}/forsikring")))
+        assertIs<ResultatAvForsikring.MottattForsikring>(result)
+        assertEquals(17, result.forsikring.gjelderFraDag)
+        assertEquals(100, result.forsikring.dekningsgrad)
+    }
 
 
     private fun testMedForventningOmMottattForsikring(
@@ -106,7 +148,10 @@ class ClientSpiskammersetForsikringHenterTest {
         assertEquals(expectedException.message, actualException.message)
     }
 
-    private fun setupStubAndClient(forsikringProxyResponse: ResponseDefinitionBuilder?, spleisBehandlingId: SpleisBehandlingId): SpiskammersetClientForsikringHenter {
+    private fun setupStubAndClient(
+        forsikringProxyResponse: ResponseDefinitionBuilder?,
+        spleisBehandlingId: SpleisBehandlingId
+    ): SpiskammersetClientForsikringHenter {
         wireMock.stubFor(get("/behandling/${spleisBehandlingId.value}/forsikring").willReturn(forsikringProxyResponse))
 
         return SpiskammersetClientForsikringHenter(
