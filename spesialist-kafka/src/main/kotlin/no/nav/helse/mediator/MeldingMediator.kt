@@ -76,12 +76,12 @@ class MeldingMediator(
             return true
         }
         val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
-        if (fødselsnummer.toDoubleOrNull() == null) return true
+        if (fødselsnummer.toLongOrNull() == null) return true
         val harPerson = personDao.finnPersonMedFødselsnummer(fødselsnummer) != null
         if (!harPerson) {
             loggWarn(
                 "Ignorerer melding med event_name: $eventName, person finnes ikke i databasen",
-                "fødselsnummer" to fødselsnummer,
+                "fødselsnummer" to fødselsnummer.maskert(),
             )
         }
         return harPerson
@@ -318,3 +318,5 @@ class MeldingMediator(
         }
     }
 }
+
+private fun String.maskert(): String = take(4) + "#".repeat(6) + last()
