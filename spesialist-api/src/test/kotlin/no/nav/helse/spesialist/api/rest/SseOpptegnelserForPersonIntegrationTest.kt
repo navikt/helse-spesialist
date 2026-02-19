@@ -53,4 +53,43 @@ class SseOpptegnelserForPersonIntegrationTest {
             assertEquals("""{"sekvensnummer":3,"type":"UTBETALING_ANNULLERING_OK"}""", events.first().data)
         }
     }
+
+    @Test
+    fun `mottar server sent events som forventet`() {
+        // Given:
+        val identitetsnummer = lagPerson().also(personRepository::lagre).id
+        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
+
+        opptegnelseRepository.lagre(
+            Opptegnelse.ny(
+                identitetsnummer = lagIdentitetsnummer(),
+                type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
+            ),
+        )
+        opptegnelseRepository.lagre(
+            Opptegnelse.ny(
+                identitetsnummer = identitetsnummer,
+                type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
+            ),
+        )
+
+        integrationTestFixture.sse("/api/personer/${personPseudoId.value}/sse") { events ->
+            delay(200)
+            assertEquals(0, events.size)
+
+            // When:
+            opptegnelseRepository.lagre(
+                Opptegnelse.ny(
+                    identitetsnummer = identitetsnummer,
+                    type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
+                ),
+            )
+            delay(200)
+
+            // Then:
+            assertEquals(1, events.size)
+            assertEquals("UTBETALING_ANNULLERING_OK", events.first().event)
+            assertEquals(null, events.first().data)
+        }
+    }
 }

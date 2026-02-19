@@ -112,18 +112,18 @@ class IntegrationTestFixture {
             val events = Collections.synchronizedList(mutableListOf<ServerSentEvent>())
             coroutineScope {
                 val started = CompletableDeferred<Unit>()
-                val sseJob = launch {
-                    client.sse(urlString = url, request = {
-                        accept(ContentType.Application.Json)
-                        bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
-                    }) {
-                        started.complete(Unit)
-                        incoming.collect { event ->
-                            logg.info("Mottok server sent event: $event")
-                            events.add(event)
+                val sseJob =
+                    launch {
+                        client.sse(urlString = url, request = {
+                            bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
+                        }) {
+                            started.complete(Unit)
+                            incoming.collect { event ->
+                                logg.info("Mottok server sent event: $event")
+                                events.add(event)
+                            }
                         }
                     }
-                }
                 // Vent til tilkoblingen er aktiv
                 started.await()
 
