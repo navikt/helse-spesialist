@@ -89,7 +89,7 @@ class SseOpptegnelserForPersonIntegrationTest {
             // Then:
             assertEquals(1, events.size)
             assertEquals("UTBETALING_ANNULLERING_OK", events.first().event)
-            assertEquals(null, events.first().data)
+            assertEquals("{}", events.first().data)
         }
     }
 }

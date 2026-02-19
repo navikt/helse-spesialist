@@ -118,7 +118,7 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                 if (opptegnelser.isNotEmpty()) {
                     sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
                 }
-                opptegnelser.forEach { send(event = it.type.tilEvent(), data = null) }
+                opptegnelser.forEach { send(event = it.type.tilEvent(), data = "{}") }
                 delay(100)
             }
         }
