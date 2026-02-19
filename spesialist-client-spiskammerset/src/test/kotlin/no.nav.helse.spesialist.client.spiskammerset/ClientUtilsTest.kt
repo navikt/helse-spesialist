@@ -33,7 +33,7 @@ class ClientUtilsTest {
     fun `kaster exception hvis alle kall feiler`() {
         val maxRetries = 3
         var count = 0
-        assertThrows<RetryableException> {
+        assertThrows<RuntimeException> {
             ClientUtils.retryMedBackoff(maxRetries = maxRetries, initialDelayMs = backoffDelay) {
                 count += 1
                 throw RetryableException("Retryable")

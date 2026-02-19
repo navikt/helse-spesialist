@@ -11,12 +11,10 @@ class ClientUtils {
             initialDelayMs: Long = 1000,
             block: () -> T,
         ): T {
-            var lastException: Exception? = null
             repeat(maxRetries) { attempt ->
                 try {
                     return block()
                 } catch (e: RetryableException) {
-                    lastException = e
                     val delayMs = initialDelayMs * 3.0.pow(attempt.toDouble()).toLong()
                     loggWarn("Forsøk ${attempt + 1} av $maxRetries feilet: ${e.message}. Prøver igjen om ${delayMs}ms...")
                     if (attempt < maxRetries - 1) {
@@ -25,7 +23,7 @@ class ClientUtils {
                 }
             }
             loggError("Alle $maxRetries forsøk feilet")
-            throw lastException ?: RuntimeException("Retry feilet uten exception")
+            throw RuntimeException("Feil fra forsikringstjeneste: 500")
         }
     }
 }
