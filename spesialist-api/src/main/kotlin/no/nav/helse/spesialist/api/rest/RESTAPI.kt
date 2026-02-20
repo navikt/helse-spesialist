@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetNotaterForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun Routing.restRoutes(
@@ -48,6 +49,7 @@ fun Routing.restRoutes(
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     forsikringHenter: ForsikringHenter,
+    inngangsvilkårHenter: InngangsvilkårHenter,
     sessionFactory: SessionFactory,
 ) {
     route("/api") {
@@ -73,7 +75,7 @@ fun Routing.restRoutes(
             get(GetInntektsmeldingBehandler(dokumentMediator = dokumentMediator), restAdapter)
 
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
-            get(GetVurderteInngangsvilkårForPersonBehandler(), restAdapter)
+            get(GetVurderteInngangsvilkårForPersonBehandler(inngangsvilkårHenter), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)
             patch(PatchTilkommenInntektBehandler(), restAdapter)
 

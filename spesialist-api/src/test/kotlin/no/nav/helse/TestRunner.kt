@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -110,6 +111,7 @@ object TestRunner {
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
                 forsikringHenter = mockk(relaxed = true),
+                inngangsvilkårHenter = mockk(relaxed = true),
                 meldingPubliserer = mockk(relaxed = true),
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
@@ -172,6 +174,7 @@ object TestRunner {
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
                     forsikringHenter = avhengigheter.forsikringHenter,
+                    inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
                 )
             }
 
@@ -208,6 +211,7 @@ object TestRunner {
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
         val forsikringHenter: ForsikringHenter,
+        val inngangsvilkårHenter: InngangsvilkårHenter,
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,
