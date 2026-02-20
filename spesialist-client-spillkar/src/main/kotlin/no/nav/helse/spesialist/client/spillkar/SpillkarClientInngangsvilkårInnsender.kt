@@ -25,9 +25,9 @@ class SpillkarClientInngangsvilkårInnsender(
             objectMapper.writeValueAsString(
                 ManueltVurderteInngangsvilkårRequest(
                     personidentifikator = vurderinger.personidentifikator,
-                    skjaeringstidspunkt = vurderinger.skjæringstidspunkt,
+                    skjæringstidspunkt = vurderinger.skjæringstidspunkt,
                     versjon = vurderinger.versjon,
-                    vurderteInngangsvilkar =
+                    vurderteInngangsvilkår =
                         vurderinger.vurderinger.map {
                             ManueltVurdertInngangsvilkårDto(
                                 vilkårskode = it.vilkårskode,

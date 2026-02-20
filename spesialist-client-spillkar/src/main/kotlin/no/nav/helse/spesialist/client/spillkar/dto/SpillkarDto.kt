@@ -1,33 +1,27 @@
 package no.nav.helse.spesialist.client.spillkar.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal data class HentInngangsvilkårRequest(
     val personidentifikatorer: List<String>,
-    @JsonProperty("skjæringstidspunkt")
-    val skjaeringstidspunkt: LocalDate,
+    val skjæringstidspunkt: LocalDate,
 )
 
 internal data class SamlingAvVurderteInngangsvilkårResponse(
-    @JsonProperty("samlingAvVurderteInngangsvilkår")
-    val samlingAvVurderteInngangsvilkar: List<SamlingAvVurderteInngangsvilkårDto>,
+    val samlingAvVurderteInngangsvilkår: List<SamlingAvVurderteInngangsvilkårDto>,
 )
 
 internal data class SamlingAvVurderteInngangsvilkårDto(
     val samlingAvVurderteInngangsvilkårId: UUID,
     val versjon: Int,
-    @JsonProperty("skjæringstidspunkt")
-    val skjaeringstidspunkt: LocalDate,
-    @JsonProperty("vurderteInngangsvilkår")
-    val vurderteInngangsvilkar: List<VurdertInngangsvilkårDto>,
+    val skjæringstidspunkt: LocalDate,
+    val vurderteInngangsvilkår: List<VurdertInngangsvilkårDto>,
 )
 
 internal data class VurdertInngangsvilkårDto(
     val vilkårskode: String,
-    @JsonProperty("vurderingskode")
     val vurderingskode: String?,
     val tidspunkt: LocalDateTime,
     val manuellVurdering: ManuellVurderingDto?,
@@ -46,11 +40,9 @@ internal data class AutomatiskVurderingDto(
 
 internal data class ManueltVurderteInngangsvilkårRequest(
     val personidentifikator: String,
-    @JsonProperty("skjæringstidspunkt")
-    val skjaeringstidspunkt: LocalDate,
+    val skjæringstidspunkt: LocalDate,
     val versjon: Int,
-    @JsonProperty("vurderteInngangsvilkår")
-    val vurderteInngangsvilkar: List<ManueltVurdertInngangsvilkårDto>,
+    val vurderteInngangsvilkår: List<ManueltVurdertInngangsvilkårDto>,
 )
 
 internal data class ManueltVurdertInngangsvilkårDto(

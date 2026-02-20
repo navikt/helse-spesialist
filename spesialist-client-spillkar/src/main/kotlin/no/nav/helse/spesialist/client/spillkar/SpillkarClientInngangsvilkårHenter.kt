@@ -33,7 +33,7 @@ class SpillkarClientInngangsvilkårHenter(
             objectMapper.writeValueAsString(
                 HentInngangsvilkårRequest(
                     personidentifikatorer = personidentifikatorer,
-                    skjaeringstidspunkt = skjæringstidspunkt,
+                    skjæringstidspunkt = skjæringstidspunkt,
                 ),
             )
 
@@ -49,7 +49,7 @@ class SpillkarClientInngangsvilkårHenter(
                         val responseBody = EntityUtils.toString(response.entity)
                         val dto =
                             objectMapper.readValue(responseBody, SamlingAvVurderteInngangsvilkårResponse::class.java)
-                        dto.samlingAvVurderteInngangsvilkar.map { it.tilDomene() }
+                        dto.samlingAvVurderteInngangsvilkår.map { it.tilDomene() }
                     }
 
                     in 500..599 -> {
@@ -71,8 +71,8 @@ private fun SamlingAvVurderteInngangsvilkårDto.tilDomene() =
     SamlingAvVurderteInngangsvilkår(
         samlingAvVurderteInngangsvilkårId = samlingAvVurderteInngangsvilkårId,
         versjon = versjon,
-        skjæringstidspunkt = skjaeringstidspunkt,
-        vurderteInngangsvilkår = vurderteInngangsvilkar.map { it.tilDomene() },
+        skjæringstidspunkt = skjæringstidspunkt,
+        vurderteInngangsvilkår = vurderteInngangsvilkår.map { it.tilDomene() },
     )
 
 private fun VurdertInngangsvilkårDto.tilDomene(): VurdertInngangsvilkår =
