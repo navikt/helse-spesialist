@@ -49,6 +49,17 @@ class Personer {
             )
         }
 
+        @Resource("vurderte-inngangsvilkar")
+        class VurderteInngangsvilkår(
+            val parent: PersonPseudoId,
+        ) {
+            @Resource("{skjæringstidspunkt}")
+            class Skjæringstidspunkt(
+                val parent: VurderteInngangsvilkår,
+                val skjæringstidspunkt: LocalDate,
+            )
+        }
+
         @Resource("dokumenter")
         class Dokumenter(
             val parent: PersonPseudoId,
