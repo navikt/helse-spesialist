@@ -98,6 +98,7 @@ private fun VurdertInngangsvilkårDto.tilDomene(): VurdertInngangsvilkår =
                     AutomatiskVurdering(
                         system = automatiskVurdering.system,
                         versjon = automatiskVurdering.versjon,
+                        grunnlagsdata = automatiskVurdering.grunnlagsdata,
                     ),
             )
 

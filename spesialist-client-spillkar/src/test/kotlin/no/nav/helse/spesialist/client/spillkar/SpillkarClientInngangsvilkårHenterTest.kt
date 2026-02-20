@@ -80,6 +80,7 @@ class SpillkarClientInngangsvilkårHenterTest {
     fun `mapper svar med automatisk vurdering korrekt`() {
         val samlingId = UUID.randomUUID()
         val tidspunkt = "2024-01-15T10:00:00"
+        val grunnlagsdataId = UUID.randomUUID()
         setupStub(
             okJson(
                 """
@@ -96,7 +97,10 @@ class SpillkarClientInngangsvilkårHenterTest {
                           "tidspunkt": "$tidspunkt",
                           "automatiskVurdering": {
                             "system": "Spleis",
-                            "versjon": "2026.02.19-10.07-793bcfe"
+                            "versjon": "2026.02.19-10.07-793bcfe",
+                            "grunnlagsdata": {
+                              "hei": "$grunnlagsdataId"
+                             }
                           }
                         }
                       ]
@@ -112,7 +116,7 @@ class SpillkarClientInngangsvilkårHenterTest {
         val vurdering = assertIs<VurdertInngangsvilkår.AutomatiskVurdertInngangsvilkår>(result[0].vurderteInngangsvilkår[0])
         assertEquals("ALDER", vurdering.vilkårskode)
         assertEquals("ALDER_OK", vurdering.vurderingskode)
-        assertEquals(AutomatiskVurdering(system = "Spleis", versjon = "2026.02.19-10.07-793bcfe"), vurdering.automatiskVurdering)
+        assertEquals(AutomatiskVurdering(system = "Spleis", versjon = "2026.02.19-10.07-793bcfe", grunnlagsdata = mapOf("hei" to grunnlagsdataId.toString())), vurdering.automatiskVurdering)
     }
 
     @Test

@@ -33,6 +33,7 @@ sealed class VurdertInngangsvilkår {
 }
 
 data class AutomatiskVurdering(
-    val system: String?,
-    val versjon: String?,
+    val system: String,
+    val versjon: String,
+    val grunnlagsdata: Map<String, String>,
 )

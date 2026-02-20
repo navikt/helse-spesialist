@@ -34,8 +34,9 @@ internal data class ManuellVurderingDto(
 )
 
 internal data class AutomatiskVurderingDto(
-    val system: String?,
-    val versjon: String?,
+    val system: String,
+    val versjon: String,
+    val grunnlagsdata: Map<String, String>,
 )
 
 internal data class ManueltVurderteInngangsvilkårRequest(
