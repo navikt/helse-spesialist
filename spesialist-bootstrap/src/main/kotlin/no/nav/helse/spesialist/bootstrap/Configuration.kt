@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
+import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
@@ -16,6 +17,7 @@ data class Configuration(
     val api: ApiModule.Configuration,
     val clientEntraID: ClientEntraIDModule.Configuration,
     val clientKrr: ClientKrrModule.Configuration,
+    val clientSpillkar: ClientSpillkarModule.Configuration,
     val clientSpiskammerset: ClientSpiskammersetModule.Configuration,
     val clientSpleis: ClientSpleisModule.Configuration,
     val db: DBModule.Configuration,

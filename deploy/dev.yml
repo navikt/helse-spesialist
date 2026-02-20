@@ -136,6 +136,10 @@ spec:
       value: "http://spiskammerset"
     - name: SPISKAMMERSET_SCOPE
       value: "api://dev-gcp.tbd.spiskammerset/.default"
+    - name: SPILLKAR_API_URL
+      value: "http://spillkar"
+    - name: SPILLKAR_SCOPE
+      value: "api://dev-gcp.tbd.spillkar/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK

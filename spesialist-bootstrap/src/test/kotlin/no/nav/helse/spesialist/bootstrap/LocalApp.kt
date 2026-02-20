@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
@@ -27,6 +28,7 @@ fun main() {
                 clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
                 clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                 clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
+                clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,
                 kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,

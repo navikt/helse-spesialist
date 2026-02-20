@@ -28,4 +28,5 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-client-krr")))
     testImplementation(testFixtures(project(":spesialist-client-spiskammerset")))
     testImplementation(testFixtures(project(":spesialist-client-spleis")))
+    testImplementation(testFixtures(project(":spesialist-client-spillkar")))
 }
