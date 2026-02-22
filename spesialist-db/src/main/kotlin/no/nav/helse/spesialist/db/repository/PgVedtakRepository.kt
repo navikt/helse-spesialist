@@ -15,53 +15,37 @@ class PgVedtakRepository private constructor(
 
     override fun lagre(vedtak: Vedtak) {
         when (vedtak) {
-            is Vedtak.Automatisk -> lagreAutomatisk(vedtak)
-            is Vedtak.ManueltMedTotrinnskontroll -> lagreManueltMedTotrinnskontroll(vedtak)
-            is Vedtak.ManueltUtenTotrinnskontroll -> lagreManueltUtenTotrinnskontroll(vedtak)
+            is Vedtak.Automatisk -> lagre(vedtak, true)
+            is Vedtak.ManueltMedTotrinnskontroll -> lagre(vedtak, false)
+            is Vedtak.ManueltUtenTotrinnskontroll -> lagre(vedtak, false)
         }
     }
 
-    private fun lagreAutomatisk(vedtak: Vedtak.Automatisk) {
+    private fun lagre(
+        vedtak: Vedtak,
+        fattetAutomatisk: Boolean,
+    ) {
         dbQuery.update(
             """
-                 INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
-                 VALUES(:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
+            INSERT INTO vedtak (behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
+            VALUES (:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
             """,
             "behandlingId" to vedtak.id.value,
-            "fattetAutomatisk" to true,
-            "saksbehandlerIdent" to null,
-            "beslutterIdent" to null,
+            "fattetAutomatisk" to fattetAutomatisk,
+            "saksbehandlerIdent" to vedtak.saksbehandlerIdent(),
+            "beslutterIdent" to vedtak.beslutterIdent(),
             "tidspunkt" to vedtak.tidspunkt,
         )
     }
 
-    private fun lagreManueltMedTotrinnskontroll(vedtak: Vedtak.ManueltMedTotrinnskontroll) {
-        dbQuery.update(
-            """
-                 INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
-                 VALUES(:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
-            """,
-            "behandlingId" to vedtak.id.value,
-            "fattetAutomatisk" to false,
-            "saksbehandlerIdent" to vedtak.saksbehandlerIdent.value,
-            "beslutterIdent" to vedtak.beslutterIdent.value,
-            "tidspunkt" to vedtak.tidspunkt,
-        )
-    }
+    private fun Vedtak.saksbehandlerIdent() =
+        when (this) {
+            is Vedtak.Automatisk -> null
+            is Vedtak.ManueltUtenTotrinnskontroll -> saksbehandlerIdent.value
+            is Vedtak.ManueltMedTotrinnskontroll -> saksbehandlerIdent.value
+        }
 
-    private fun lagreManueltUtenTotrinnskontroll(vedtak: Vedtak.ManueltUtenTotrinnskontroll) {
-        dbQuery.update(
-            """
-                 INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
-                 VALUES(:behandlingId, :fattetAutomatisk, :saksbehandlerIdent, :beslutterIdent, :tidspunkt)
-            """,
-            "behandlingId" to vedtak.id.value,
-            "fattetAutomatisk" to false,
-            "saksbehandlerIdent" to vedtak.saksbehandlerIdent.value,
-            "beslutterIdent" to null,
-            "tidspunkt" to vedtak.tidspunkt,
-        )
-    }
+    private fun Vedtak.beslutterIdent(): String? = (this as? Vedtak.ManueltMedTotrinnskontroll)?.beslutterIdent?.value
 
     override fun finn(spleisBehandlingId: SpleisBehandlingId): Vedtak? =
         dbQuery.singleOrNull(
