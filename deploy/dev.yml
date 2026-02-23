@@ -73,7 +73,7 @@ spec:
         - application: spiskammerset
           namespace: tbd
           cluster: dev-gcp
-        - application: speed-api
+        - application: speed-api-dev-proxy
           namespace: tbd
           cluster: dev-gcp
         - application: digdir-krr-proxy
@@ -145,9 +145,9 @@ spec:
     - name: SPILLKAR_SCOPE
       value: "api://dev-gcp.tbd.spillkar/.default"
     - name: SPEED_API_URL
-      value: "http://speed-api"
+      value: "http://speed-api-dev-proxy"
     - name: SPEED_SCOPE
-      value: "api://dev-gcp.tbd.speed-api/.default"
+      value: "api://dev-gcp.tbd.speed-api-dev-proxy/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK
