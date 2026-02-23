@@ -19,6 +19,8 @@ import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 class GetVurderteInngangsvilkårForPersonBehandler(
     private val inngangsvilkårHenter: InngangsvilkårHenter,
@@ -51,11 +53,26 @@ class GetVurderteInngangsvilkårForPersonBehandler(
         val historiskeIdenter = historiskeIdenterHenter.hentHistoriskeIdenter(person.id.value)
 
         val hentedeVurderinger: List<ApiSamlingAvVurderteInngangsvilkår> =
-            inngangsvilkårHenter
-                .hentInngangsvilkår(
-                    personidentifikatorer = historiskeIdenter,
+            listOf(
+                ApiSamlingAvVurderteInngangsvilkår(
+                    samlingAvVurderteInngangsvilkårId = UUID.randomUUID(),
+                    versjon = 1,
                     skjæringstidspunkt = skjæringstidspunkt,
-                ).map { it.tilApiSamlingAvVurderteInngangsvilkår() }
+                    vurderteInngangsvilkår =
+                        listOf(
+                            ApiVurdertInngangsvilkår.Manuell(
+                                vilkårskode = "KODE",
+                                vurderingskode = "sddsfsdf",
+                                tidspunkt = LocalDateTime.now(),
+                                manuellVurdering =
+                                    ApiManuellVurdering(
+                                        navident = "Z123456",
+                                        begrunnelse = "Identer: " + historiskeIdenter.joinToString { "-" },
+                                    ),
+                            ),
+                        ),
+                ),
+            )
         return RestResponse.OK(hentedeVurderinger)
     }
 }
