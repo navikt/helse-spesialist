@@ -64,6 +64,15 @@ class SpiskammersetClientForsikringHenterTest {
     }
 
     @Test
+    fun `feiler om spiskammerset gir tilbake HTTP 404`() {
+        testMedForventningOmFeiletKall(
+            stubResponse = WireMock.notFound().withBody("Her står det en feilmelding som ikke engang er JSON"),
+            expectedException = RuntimeException("Feil fra forsikringstjeneste: 404"),
+            spleisBehandlingId = spleisBehandlingId
+        )
+    }
+
+    @Test
     fun `får forsikring etter retry ved feil første kall`() {
         // Given:
         val scenario = "Feiler først, så ok"
