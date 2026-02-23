@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -80,35 +81,37 @@ class PostVedtakBehandler(
                 return RestResponse.Error(KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
             }
 
-            val oppgave =
-                kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
-                    ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
-            if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
-                return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
-            }
-
             val totrinnsvurdering =
                 kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
             val saksbehandlerSomFattetVedtaket: Saksbehandler
             val beslutter: Saksbehandler?
 
-            if (kallKontekst.transaksjon.vedtakRepository.finn(spleisBehandlingId) != null) {
-                return RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
+            var vedtak: Vedtak? =
+                kallKontekst.transaksjon.vedtakRepository.finn(spleisBehandlingId)?.also {
+                    if (it.behandletAvSpleis) {
+                        logg.info("Det er allerede fattet vedtak for behandlingen, og spleis har behandlet det")
+                        return RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
+                    } else {
+                        logg.info("Det er tidligere forsøkt å fatte vedtak for behandlingen, men spesialist har ikke sett at spleis har behandlet svar på godkjenningsbehovet")
+                    }
+                }
+            val oppgave =
+                kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
+                    ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
+            if (oppgave.tilstand !in setOf(Oppgave.AvventerSaksbehandler, Oppgave.AvventerSystem)) {
+                return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
             }
-
-            val vedtak: Vedtak
 
             if (totrinnsvurdering != null) {
                 beslutter = kallKontekst.saksbehandler
                 saksbehandlerSomFattetVedtaket =
                     totrinnsvurdering.saksbehandler?.let { kallKontekst.transaksjon.saksbehandlerRepository.finn(it) }
                         ?: return RestResponse.Error(TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
-                vedtak =
-                    Vedtak.manueltMedTotrinnskontroll(
-                        id = spleisBehandlingId,
-                        saksbehandlerIdent = saksbehandlerSomFattetVedtaket.ident,
-                        beslutterIdent = beslutter.ident,
-                    )
+                vedtak = vedtak ?: Vedtak.manueltMedTotrinnskontroll(
+                    id = spleisBehandlingId,
+                    saksbehandlerIdent = saksbehandlerSomFattetVedtaket.ident,
+                    beslutterIdent = beslutter.ident,
+                )
                 totrinnsvurdering.godkjenn(beslutter, kallKontekst.brukerroller)
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
@@ -116,8 +119,10 @@ class PostVedtakBehandler(
             } else {
                 beslutter = null
                 saksbehandlerSomFattetVedtaket = kallKontekst.saksbehandler
-                vedtak =
-                    Vedtak.manueltUtenTotrinnskontroll(spleisBehandlingId, saksbehandlerSomFattetVedtaket.ident)
+                vedtak = vedtak ?: Vedtak.manueltUtenTotrinnskontroll(
+                    spleisBehandlingId,
+                    saksbehandlerSomFattetVedtaket.ident,
+                )
             }
             kallKontekst.transaksjon.vedtakRepository.lagre(vedtak)
             kallKontekst.transaksjon.reservasjonDao.reserverPerson(

@@ -37,6 +37,16 @@ object Meldingsbygger {
         tom = vedtaksperiode.tom,
     )
 
+    fun byggBehandlingLukket(
+        person: Person,
+        vedtaksperiode: Vedtaksperiode,
+    ) = Testmeldingfabrikk.lagBehandlingLukket(
+        fødselsnummer = person.fødselsnummer,
+        vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+        spleisBehandlingId = vedtaksperiode.spleisBehandlingIdForÅByggeMelding("behandling_opprettet"),
+        id = UUID.randomUUID(),
+    )
+
     fun byggVedtaksperiodeNyUtbetaling(
         vedtaksperiode: Vedtaksperiode,
         person: Person,

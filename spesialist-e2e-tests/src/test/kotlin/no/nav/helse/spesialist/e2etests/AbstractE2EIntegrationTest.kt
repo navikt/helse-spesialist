@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
@@ -46,6 +47,12 @@ abstract class AbstractE2EIntegrationTest {
         E2ETestApplikasjon.spleisStub.also {
             it.init(testContext)
         }
+    protected fun spleisIngorererMeldinger() {
+        spleisStub.ikkeSvarPåMeldingerFor(testContext.person)
+    }
+    protected fun spleisLeserMeldinger() {
+        spleisStub.svarPåMeldingerFor(testContext.person)
+    }
     private val testRapid = E2ETestApplikasjon.testRapid
 
     protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
@@ -64,6 +71,10 @@ abstract class AbstractE2EIntegrationTest {
     protected fun organisasjonsnummer() = testContext.arbeidsgiver.organisasjonsnummer
 
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
+
+    protected fun vedtakFattetMelding(): JsonNode =
+        meldinger().find { it["@event_name"].asText() == "vedtak_fattet" }
+            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
     protected fun søknadOgGodkjenningbehovKommerInn(
         tags: List<String> = listOf("Innvilget"),
@@ -164,11 +175,7 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertVedtakFattetEtterHovedregel(utfall: VedtakFattetMelding.BegrunnelseType = VedtakFattetMelding.BegrunnelseType.Innvilgelse) {
-        val vedtakFattet =
-            testRapid
-                .meldingslogg(testContext.person.fødselsnummer)
-                .find { it["@event_name"].asText() == "vedtak_fattet" }
-                ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+        val vedtakFattet = vedtakFattetMelding()
 
         assertEquals(1, vedtakFattet["begrunnelser"].size())
         assertEquals(utfall.name, vedtakFattet["begrunnelser"][0]["type"].asText())
@@ -176,11 +183,7 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertVedtakFattetEtterSkjønn(begrunnelseFritekst: String = "skjønnsfastsetter tredje avsnitt") {
-        val vedtakFattet =
-            testRapid
-                .meldingslogg(testContext.person.fødselsnummer)
-                .find { it["@event_name"].asText() == "vedtak_fattet" }
-                ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+        val vedtakFattet = vedtakFattetMelding()
 
         assertEquals(4, vedtakFattet["begrunnelser"].size())
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", vedtakFattet["begrunnelser"][0]["type"].asText())
@@ -264,11 +267,7 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertSykepengegrunnlagfakta() {
-        val vedtakFattet =
-            testRapid
-                .meldingslogg(testContext.person.fødselsnummer)
-                .find { it["@event_name"].asText() == "vedtak_fattet" }
-                ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+        val vedtakFattet = vedtakFattetMelding()
 
         assertEquals(
             AvviksvurderingBehovLøser.AVVIKSPROSENT,

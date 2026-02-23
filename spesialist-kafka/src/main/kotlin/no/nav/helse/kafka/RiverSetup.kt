@@ -67,6 +67,7 @@ class RiverSetup(
             AvsluttetUtenVedtakRiver(),
             MidnattRiver(sessionFactory),
             BehandlingOpprettetRiver(),
+            BehandlingLukketRiver(),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
