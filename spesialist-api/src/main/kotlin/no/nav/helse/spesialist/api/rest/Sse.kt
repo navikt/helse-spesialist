@@ -5,12 +5,9 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.routing.Route
 import io.ktor.server.sse.heartbeat
-import io.ktor.server.sse.send
 import io.ktor.server.sse.sse
-import io.ktor.utils.io.ClosedWriteChannelException
 import kotlinx.coroutines.delay
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.sse.ApiServerSentEvent
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggDebug
@@ -18,63 +15,6 @@ import no.nav.helse.spesialist.domain.Opptegnelse
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(sessionFactory: SessionFactory) {
-    documentation({
-        description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
-            " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
-        tags = setOf("Opptegnelser")
-        request {
-            pathParameter<String>("personPseudoId")
-        }
-        response {
-            default {
-                description = "En strøm med Server Sent Events." +
-                    " Hver event sin data er et JSON-objekt på formatet beskrevet her."
-                body<ApiOpptegnelse>()
-            }
-        }
-    }) {
-        sse("/personer/{personPseudoId}/opptegnelser-stream", serialize = { _, it ->
-            objectMapper.writeValueAsString(it)
-        }) {
-            heartbeat {
-                period = 10.seconds
-            }
-            val personPseudoId =
-                call.parameters["personPseudoId"]
-                    ?.let { PersonPseudoId.fraString(it) }
-                    ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
-
-            val (identitetsnummer, sisteSekvensnummerVedInitiering) =
-                sessionFactory.transactionalSessionScope {
-                    val identitetsnummer =
-                        it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                            ?: throw NotFoundException("Fant ikke person med pseudoId: $personPseudoId")
-                    val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
-                    identitetsnummer to sisteSekvensnummer
-                }
-            loggDebug("SSE-tilkobling startet", "identitetsnummer" to identitetsnummer)
-            var sisteSekvensnummer = sisteSekvensnummerVedInitiering
-
-            try {
-                while (true) {
-                    val opptegnelser =
-                        sessionFactory.transactionalSessionScope {
-                            it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
-                        }
-                    if (opptegnelser.isNotEmpty()) {
-                        sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
-                    }
-                    opptegnelser.forEach { send(it.tilApiOpptegnelse()) }
-                    delay(100)
-                }
-            } catch (exception: ClosedWriteChannelException) {
-                loggDebug("SSE-tilkobling lukket på grunn av exception", "identitetsnummer" to identitetsnummer, "exception" to exception)
-            } finally {
-                loggDebug("SSE-tilkobling lukket", "identitetsnummer" to identitetsnummer)
-            }
-        }
-    }
-
     documentation({
         description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
             " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
@@ -136,19 +76,3 @@ private fun Opptegnelse.Type.tilEvent(): String =
         Opptegnelse.Type.PERSONDATA_OPPDATERT -> "PERSONDATA_OPPDATERT"
         Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> "PERSON_KLAR_TIL_BEHANDLING"
     }
-
-private fun Opptegnelse.tilApiOpptegnelse() =
-    ApiOpptegnelse(
-        sekvensnummer = id().value,
-        type =
-            when (type) {
-                Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET -> ApiOpptegnelse.Type.UTBETALING_ANNULLERING_FEILET
-                Opptegnelse.Type.UTBETALING_ANNULLERING_OK -> ApiOpptegnelse.Type.UTBETALING_ANNULLERING_OK
-                Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV -> ApiOpptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV
-                Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE -> ApiOpptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE
-                Opptegnelse.Type.REVURDERING_AVVIST -> ApiOpptegnelse.Type.REVURDERING_AVVIST
-                Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET -> ApiOpptegnelse.Type.REVURDERING_FERDIGBEHANDLET
-                Opptegnelse.Type.PERSONDATA_OPPDATERT -> ApiOpptegnelse.Type.PERSONDATA_OPPDATERT
-                Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> ApiOpptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING
-            },
-    )

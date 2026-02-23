@@ -19,46 +19,6 @@ class SseOpptegnelserForPersonIntegrationTest {
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
-    fun `mottar opptegnelser som forventet`() {
-        // Given:
-        val identitetsnummer = lagPerson().also(personRepository::lagre).id
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
-
-        opptegnelseRepository.lagre(
-            Opptegnelse.ny(
-                identitetsnummer = lagIdentitetsnummer(),
-                type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
-            ),
-        )
-        opptegnelseRepository.lagre(
-            Opptegnelse.ny(
-                identitetsnummer = identitetsnummer,
-                type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
-            ),
-        )
-
-        integrationTestFixture.sse("/api/personer/${personPseudoId.value}/opptegnelser-stream") { events ->
-            delay(200)
-            assertEquals(0, events.size)
-
-            // When:
-            opptegnelseRepository.lagre(
-                Opptegnelse.ny(
-                    identitetsnummer = identitetsnummer,
-                    type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
-                ),
-            )
-            withTimeout(10.seconds) {
-                while (events.isEmpty()) delay(100)
-            }
-
-            // Then:
-            assertEquals(1, events.size)
-            assertEquals("""{"sekvensnummer":3,"type":"UTBETALING_ANNULLERING_OK"}""", events.first().data)
-        }
-    }
-
-    @Test
     fun `mottar server sent events som forventet`() {
         // Given:
         val identitetsnummer = lagPerson().also(personRepository::lagre).id
