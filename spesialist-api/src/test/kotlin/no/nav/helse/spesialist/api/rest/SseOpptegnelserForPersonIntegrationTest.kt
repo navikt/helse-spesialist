@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -8,6 +9,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.seconds
 
 @Isolated
 class SseOpptegnelserForPersonIntegrationTest {
@@ -46,7 +48,9 @@ class SseOpptegnelserForPersonIntegrationTest {
                     type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
                 ),
             )
-            delay(200)
+            withTimeout(10.seconds) {
+                while (events.isEmpty()) delay(100)
+            }
 
             // Then:
             assertEquals(1, events.size)
@@ -84,7 +88,9 @@ class SseOpptegnelserForPersonIntegrationTest {
                     type = Opptegnelse.Type.UTBETALING_ANNULLERING_OK,
                 ),
             )
-            delay(200)
+            withTimeout(10.seconds) {
+                while (events.isEmpty()) delay(100)
+            }
 
             // Then:
             assertEquals(1, events.size)
