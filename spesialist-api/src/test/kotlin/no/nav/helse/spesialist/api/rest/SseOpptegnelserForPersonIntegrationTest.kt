@@ -38,7 +38,7 @@ class SseOpptegnelserForPersonIntegrationTest {
         )
 
         integrationTestFixture.sse("/api/personer/${personPseudoId.value}/opptegnelser-stream") { events ->
-            delay(500)
+            delay(200)
             assertEquals(0, events.size)
 
             // When:
@@ -78,7 +78,7 @@ class SseOpptegnelserForPersonIntegrationTest {
         )
 
         integrationTestFixture.sse("/api/personer/${personPseudoId.value}/sse") { events ->
-            delay(500)
+            delay(200)
             assertEquals(0, events.size)
 
             // When:
