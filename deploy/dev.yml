@@ -142,7 +142,7 @@ spec:
       value: "api://dev-gcp.tbd.spillkar/.default"
     - name: SPEED_API_URL
       value: "http://speed"
-    - name: SPILLKAR_SCOPE
+    - name: SPEED_SCOPE
       value: "api://dev-gcp.tbd.speed/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
