@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
 @Isolated
-class SseOpptegnelserForPersonIntegrationTest {
+class ServerSentEventsIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val opptegnelseRepository = integrationTestFixture.sessionFactory.sessionContext.opptegnelseRepository
     private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
