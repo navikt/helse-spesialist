@@ -158,10 +158,6 @@ public data class GraphQLBeregnetPeriode(
     @JsonDeserialize(converter = AnyToUUIDConverter::class)
     @get:JsonProperty(value = "vedtaksperiodeId")
     override val vedtaksperiodeId: UUID,
-    @JsonSerialize(converter = UUIDToAnyConverter::class)
-    @JsonDeserialize(converter = AnyToUUIDConverter::class)
-    @get:JsonProperty(value = "beregningId")
-    public val beregningId: UUID,
     @get:JsonProperty(value = "forbrukteSykedager")
     public val forbrukteSykedager: Int?,
     @get:JsonProperty(value = "gjenstaendeSykedager")

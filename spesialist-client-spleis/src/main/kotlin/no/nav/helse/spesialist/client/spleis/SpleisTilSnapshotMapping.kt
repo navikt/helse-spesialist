@@ -398,7 +398,6 @@ fun GraphQLBeregnetPeriode.tilSnapshotBeregnetPeriode() =
         tidslinje = tidslinje.map { it.tilSnapshotDag() },
         hendelser = hendelser.map { it.tilSnapshotHendelse() },
         vedtaksperiodeId = vedtaksperiodeId,
-        beregningId = beregningId,
         forbrukteSykedager = forbrukteSykedager,
         gjenstaendeSykedager = gjenstaendeSykedager,
         maksdato = maksdato,

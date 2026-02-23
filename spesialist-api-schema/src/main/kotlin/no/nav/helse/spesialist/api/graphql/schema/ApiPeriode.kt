@@ -371,7 +371,6 @@ class ApiBeregnetPeriode(
     val handlinger: List<ApiHandling>,
     val egenskaper: List<ApiOppgaveegenskap>,
     val historikkinnslag: List<ApiHistorikkinnslag>,
-    val beregningId: UUID,
     val forbrukteSykedager: Int?,
     val gjenstaendeSykedager: Int?,
     val maksdato: LocalDate,

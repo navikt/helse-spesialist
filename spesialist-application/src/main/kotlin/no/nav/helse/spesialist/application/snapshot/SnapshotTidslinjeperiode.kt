@@ -47,7 +47,6 @@ data class SnapshotBeregnetPeriode(
     override val tidslinje: List<SnapshotDag>,
     override val hendelser: List<SnapshotHendelse>,
     override val vedtaksperiodeId: UUID,
-    val beregningId: UUID,
     val forbrukteSykedager: Int?,
     val gjenstaendeSykedager: Int?,
     val maksdato: LocalDate,

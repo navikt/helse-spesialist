@@ -197,7 +197,6 @@ query HentSnapshot($fnr: String!) {
                     }
                     ... on GraphQLBeregnetPeriode {
                         __typename
-                        beregningId
                         forbrukteSykedager
                         gjenstaendeSykedager
                         maksdato

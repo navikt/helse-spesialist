@@ -74,7 +74,6 @@ object Testdata {
                                                 opprettet = 31.januar(2020).atStartOfDay(),
                                                 periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                                 tidslinje = emptyList(),
-                                                beregningId = UUID.randomUUID(),
                                                 forbrukteSykedager = null,
                                                 gjenstaendeSykedager = null,
                                                 hendelser = emptyList(),
@@ -130,11 +129,16 @@ data class GodkjenningsbehovTestdata(
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),
     val foreløpigBeregnetSluttPåSykepenger: LocalDate = 1.desember(),
-    val perioderMedSammeSkjæringstidspunkt : List<VedtaksperiodeInfo> = emptyList(),
+    val perioderMedSammeSkjæringstidspunkt: List<VedtaksperiodeInfo> = emptyList(),
 )
 
 // Det er fritt fram å bytte til et bedre navn på denne :-D
-data class VedtaksperiodeInfo(val fom: LocalDate, val tom: LocalDate, val vedtaksperiodeId: UUID, val spleisBehandlingId: UUID)
+data class VedtaksperiodeInfo(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vedtaksperiodeId: UUID,
+    val spleisBehandlingId: UUID,
+)
 
 data class AvviksvurderingTestdata(
     val avviksprosent: Double = 10.0,

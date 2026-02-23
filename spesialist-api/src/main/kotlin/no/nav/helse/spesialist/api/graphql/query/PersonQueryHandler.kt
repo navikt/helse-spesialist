@@ -308,11 +308,12 @@ class PersonQueryHandler(
                                             perioder =
                                                 behandling.perioder.map { periode ->
                                                     when (periode) {
-                                                        is SnapshotUberegnetPeriode ->
+                                                        is SnapshotUberegnetPeriode -> {
                                                             periode.tilUberegnetPeriode(
                                                                 behandlingIndex = behandlingIndex,
                                                                 perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
                                                             )
+                                                        }
 
                                                         is SnapshotBeregnetPeriode -> {
                                                             val periodetilstand =
@@ -386,18 +387,20 @@ class PersonQueryHandler(
                                                                             )
                                                                         handlinger +
                                                                             when (oppgaveDto?.kanAvvises) {
-                                                                                true ->
+                                                                                true -> {
                                                                                     ApiHandling(
                                                                                         ApiPeriodehandling.AVVISE,
                                                                                         true,
                                                                                     )
+                                                                                }
 
-                                                                                else ->
+                                                                                else -> {
                                                                                     ApiHandling(
                                                                                         ApiPeriodehandling.AVVISE,
                                                                                         false,
                                                                                         "Spleis støtter ikke å avvise perioden",
                                                                                     )
+                                                                                }
                                                                             }
                                                                     },
                                                                 egenskaper =
@@ -409,7 +412,6 @@ class PersonQueryHandler(
                                                                     daos.periodehistorikkApiDao
                                                                         .finn(periode.utbetaling.id)
                                                                         .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
-                                                                beregningId = periode.beregningId,
                                                                 forbrukteSykedager = periode.forbrukteSykedager,
                                                                 gjenstaendeSykedager = periode.gjenstaendeSykedager,
                                                                 maksdato = periode.maksdato,
@@ -541,7 +543,9 @@ class PersonQueryHandler(
                                                             )
                                                         }
 
-                                                        else -> throw Exception("Ukjent tidslinjeperiode")
+                                                        else -> {
+                                                            throw Exception("Ukjent tidslinjeperiode")
+                                                        }
                                                     }
                                                 },
                                         )
@@ -603,11 +607,12 @@ class PersonQueryHandler(
                                         perioder =
                                             behandling.perioder.map { periode ->
                                                 when (periode) {
-                                                    is SnapshotUberegnetPeriode ->
+                                                    is SnapshotUberegnetPeriode -> {
                                                         periode.tilUberegnetPeriode(
                                                             behandlingIndex = behandlingIndex,
                                                             perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
                                                         )
+                                                    }
 
                                                     is SnapshotBeregnetPeriode -> {
                                                         val periodetilstand =
@@ -641,18 +646,20 @@ class PersonQueryHandler(
                                                                     )
                                                                 handlinger +
                                                                     when (oppgaveDto?.kanAvvises) {
-                                                                        true ->
+                                                                        true -> {
                                                                             ApiHandling(
                                                                                 ApiPeriodehandling.AVVISE,
                                                                                 true,
                                                                             )
+                                                                        }
 
-                                                                        else ->
+                                                                        else -> {
                                                                             ApiHandling(
                                                                                 ApiPeriodehandling.AVVISE,
                                                                                 false,
                                                                                 "Spleis støtter ikke å avvise perioden",
                                                                             )
+                                                                        }
                                                                     }
                                                             }
 
@@ -704,7 +711,6 @@ class PersonQueryHandler(
                                                                 daos.periodehistorikkApiDao
                                                                     .finn(periode.utbetaling.id)
                                                                     .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
-                                                            beregningId = periode.beregningId,
                                                             forbrukteSykedager = periode.forbrukteSykedager,
                                                             gjenstaendeSykedager = periode.gjenstaendeSykedager,
                                                             maksdato = periode.maksdato,
@@ -838,7 +844,9 @@ class PersonQueryHandler(
                                                         )
                                                     }
 
-                                                    else -> throw Exception("Ukjent tidslinjeperiode")
+                                                    else -> {
+                                                        throw Exception("Ukjent tidslinjeperiode")
+                                                    }
                                                 }
                                             },
                                     )
