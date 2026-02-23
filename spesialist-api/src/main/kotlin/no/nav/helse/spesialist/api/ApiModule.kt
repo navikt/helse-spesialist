@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -46,6 +47,7 @@ class ApiModule(
     private val forsikringHenter: ForsikringHenter,
     private val inngangsvilkårHenter: InngangsvilkårHenter,
     private val inngangsvilkårInnsender: InngangsvilkårInnsender,
+    private val historiskeIdenterHenter: HistoriskeIdenterHenter,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
@@ -150,6 +152,7 @@ class ApiModule(
             inngangsvilkårInnsender = inngangsvilkårInnsender,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+            historiskeIdenterHenter = historiskeIdenterHenter,
         )
     }
 }

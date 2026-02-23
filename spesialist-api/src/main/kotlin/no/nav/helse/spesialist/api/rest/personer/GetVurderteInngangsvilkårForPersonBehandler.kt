@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.spillkar.SamlingAvVurderteInngangsvilkår
@@ -21,6 +22,7 @@ import java.time.LocalDate
 
 class GetVurderteInngangsvilkårForPersonBehandler(
     private val inngangsvilkårHenter: InngangsvilkårHenter,
+    private val historiskeIdenterHenter: HistoriskeIdenterHenter,
 ) : GetBehandler<Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt, List<ApiSamlingAvVurderteInngangsvilkår>, ApiGetVurderteInngangsvilkårErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
@@ -39,18 +41,19 @@ class GetVurderteInngangsvilkårForPersonBehandler(
             personPseudoIdIkkeFunnet = { ApiGetVurderteInngangsvilkårErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetVurderteInngangsvilkårErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
-            behandleForPerson(person, kallKontekst, resource.skjæringstidspunkt)
+            behandleForPerson(person, resource.skjæringstidspunkt)
         }
 
     private fun behandleForPerson(
         person: Person,
-        kallKontekst: KallKontekst,
         skjæringstidspunkt: LocalDate,
     ): RestResponse<List<ApiSamlingAvVurderteInngangsvilkår>, ApiGetVurderteInngangsvilkårErrorCode> {
+        val historiskeIdenter = historiskeIdenterHenter.hentHistoriskeIdenter(person.id.value)
+
         val hentedeVurderinger: List<ApiSamlingAvVurderteInngangsvilkår> =
             inngangsvilkårHenter
                 .hentInngangsvilkår(
-                    personidentifikatorer = listOf(person.id.value),
+                    personidentifikatorer = historiskeIdenter,
                     skjæringstidspunkt = skjæringstidspunkt,
                 ).map { it.tilApiSamlingAvVurderteInngangsvilkår() }
         return RestResponse.OK(hentedeVurderinger)

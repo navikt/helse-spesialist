@@ -28,6 +28,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
 
+
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(any(), skjæringstidspunkt)
         } returns emptyList()
@@ -51,7 +52,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0)
 
         every {
-            integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(any(), skjæringstidspunkt)
+            integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(listOf(person.id.value, person.id.value.reversed()), skjæringstidspunkt)
         } returns listOf(
             SamlingAvVurderteInngangsvilkår(
                 samlingAvVurderteInngangsvilkårId = samlingId,

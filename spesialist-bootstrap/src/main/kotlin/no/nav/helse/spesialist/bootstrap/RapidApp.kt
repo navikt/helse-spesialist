@@ -206,6 +206,7 @@ class RapidApp {
                 forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
+                historiskeIdenterHenter = clientSpeedModule.historiskeIdenterHenter,
             )
 
         kafkaModule.kobleOppRivers()
