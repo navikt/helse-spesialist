@@ -259,7 +259,6 @@ fragment simulering on Simulering {
 
 fragment beregnetPeriode on BeregnetPeriode {
     id
-    beregningId
     forbrukteSykedager
     gjenstaendeSykedager
     vedtaksperiodeId

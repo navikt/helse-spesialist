@@ -32,13 +32,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object GraphQLTestdata {
-
-    fun opprettSnapshotArbeidsgiver(organisasjonsnummer: String, generasjoner: List<GraphQLGenerasjon>) =
-        GraphQLArbeidsgiver(
-            organisasjonsnummer = organisasjonsnummer,
-            ghostPerioder = emptyList(),
-            generasjoner = generasjoner,
-        )
+    fun opprettSnapshotArbeidsgiver(
+        organisasjonsnummer: String,
+        generasjoner: List<GraphQLGenerasjon>,
+    ) = GraphQLArbeidsgiver(
+        organisasjonsnummer = organisasjonsnummer,
+        ghostPerioder = emptyList(),
+        generasjoner = generasjoner,
+    )
 
     fun opprettSnapshotHendelse(eksternDokumentId: UUID) =
         GraphQLSoknadArbeidsledig(
@@ -74,7 +75,6 @@ object GraphQLTestdata {
         skjaeringstidspunkt = LocalDate.now(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId,
-        beregningId = UUID.randomUUID(),
         forbrukteSykedager = null,
         gjenstaendeSykedager = null,
         hendelser = hendelser,
@@ -125,66 +125,67 @@ object GraphQLTestdata {
         hendelser = emptyList(),
     )
 
-    fun graphQLSpleisVilkarsgrunnlag(organisasjonsnummer: String, id: UUID = UUID.randomUUID()) =
-        GraphQLSpleisVilkarsgrunnlag(
-            id = id,
-            inntekter =
-                listOf(
-                    GraphQLArbeidsgiverinntekt(
-                        arbeidsgiver = organisasjonsnummer,
-                        omregnetArsinntekt =
-                            GraphQLOmregnetArsinntekt(
-                                belop = 500_000.0,
-                                manedsbelop = 55_000.0,
-                                kilde = GraphQLInntektskilde.INNTEKTSMELDING,
-                            ),
-                        fom = 1 jan 2020,
-                        tom = null,
-                    ),
-                    GraphQLArbeidsgiverinntekt(
-                        arbeidsgiver = "987656789",
-                        omregnetArsinntekt =
-                            GraphQLOmregnetArsinntekt(
-                                belop = 500_000.0,
-                                manedsbelop = 55_000.0,
-                                kilde = GraphQLInntektskilde.INNTEKTSMELDING,
-                            ),
-                        fom = 1 jan 2020,
-                        tom = null,
-                    ),
+    fun graphQLSpleisVilkarsgrunnlag(
+        organisasjonsnummer: String,
+        id: UUID = UUID.randomUUID(),
+    ) = GraphQLSpleisVilkarsgrunnlag(
+        id = id,
+        inntekter =
+            listOf(
+                GraphQLArbeidsgiverinntekt(
+                    arbeidsgiver = organisasjonsnummer,
+                    omregnetArsinntekt =
+                        GraphQLOmregnetArsinntekt(
+                            belop = 500_000.0,
+                            manedsbelop = 55_000.0,
+                            kilde = GraphQLInntektskilde.INNTEKTSMELDING,
+                        ),
+                    fom = 1 jan 2020,
+                    tom = null,
                 ),
-            omregnetArsinntekt = 1_000_000.0,
-            skjonnsmessigFastsattAarlig = 0.0,
-            skjaeringstidspunkt = 1 jan 2020,
-            sykepengegrunnlag = 1_000_000.0,
-            antallOpptjeningsdagerErMinst = 123,
-            grunnbelop = 100_000,
-            sykepengegrunnlagsgrense =
-                GraphQLSykepengegrunnlagsgrense(
-                    grunnbelop = 100_000,
-                    grense = 600_000,
-                    virkningstidspunkt = 1 jan 2020,
+                GraphQLArbeidsgiverinntekt(
+                    arbeidsgiver = "987656789",
+                    omregnetArsinntekt =
+                        GraphQLOmregnetArsinntekt(
+                            belop = 500_000.0,
+                            manedsbelop = 55_000.0,
+                            kilde = GraphQLInntektskilde.INNTEKTSMELDING,
+                        ),
+                    fom = 1 jan 2020,
+                    tom = null,
                 ),
-            oppfyllerKravOmMedlemskap = true,
-            oppfyllerKravOmMinstelonn = true,
-            oppfyllerKravOmOpptjening = true,
-            opptjeningFra = 1 jan 2000,
-            arbeidsgiverrefusjoner =
-                listOf(
-                    GraphQLArbeidsgiverrefusjon(
-                        arbeidsgiver = organisasjonsnummer,
-                        refusjonsopplysninger =
-                            listOf(
-                                GraphQLRefusjonselement(
-                                    fom = 1 jan 2020,
-                                    tom = null,
-                                    belop = 30000.0,
-                                    meldingsreferanseId = UUID.randomUUID(),
-                                ),
+            ),
+        omregnetArsinntekt = 1_000_000.0,
+        skjonnsmessigFastsattAarlig = 0.0,
+        skjaeringstidspunkt = 1 jan 2020,
+        sykepengegrunnlag = 1_000_000.0,
+        antallOpptjeningsdagerErMinst = 123,
+        grunnbelop = 100_000,
+        sykepengegrunnlagsgrense =
+            GraphQLSykepengegrunnlagsgrense(
+                grunnbelop = 100_000,
+                grense = 600_000,
+                virkningstidspunkt = 1 jan 2020,
+            ),
+        oppfyllerKravOmMedlemskap = true,
+        oppfyllerKravOmMinstelonn = true,
+        oppfyllerKravOmOpptjening = true,
+        opptjeningFra = 1 jan 2000,
+        arbeidsgiverrefusjoner =
+            listOf(
+                GraphQLArbeidsgiverrefusjon(
+                    arbeidsgiver = organisasjonsnummer,
+                    refusjonsopplysninger =
+                        listOf(
+                            GraphQLRefusjonselement(
+                                fom = 1 jan 2020,
+                                tom = null,
+                                belop = 30000.0,
+                                meldingsreferanseId = UUID.randomUUID(),
                             ),
-                    ),
+                        ),
                 ),
-            beregningsgrunnlag = 25.0
-        )
-
+            ),
+        beregningsgrunnlag = 25.0,
+    )
 }

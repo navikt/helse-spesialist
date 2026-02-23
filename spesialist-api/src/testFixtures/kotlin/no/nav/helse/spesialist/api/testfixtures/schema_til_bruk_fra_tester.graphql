@@ -197,7 +197,6 @@ type BeregnetPeriode implements Periode {
     annulleringskandidater: [Annulleringskandidat!]!
     avslag: [Avslag!]!
     behandlingId: UUID!
-    beregningId: UUID!
     egenskaper: [Oppgaveegenskap!]!
     erForkastet: Boolean!
     fom: LocalDate!
