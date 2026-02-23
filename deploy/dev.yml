@@ -65,8 +65,6 @@ spec:
       rules:
         - application: speil
           cluster: dev-gcp
-        - application: speil-next
-          cluster: dev-gcp
     outbound:
       rules:
         - application: spleis-api
