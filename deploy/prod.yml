@@ -108,6 +108,9 @@ spec:
             users:
               - name: bigquery_connection_user
               - name: spesialist-db-migrations
+  valkey:
+    - instance: spesialist-cache
+      access: readwrite
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
