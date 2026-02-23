@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.rest.personer.GetOpptegnelserForPersonBehandl
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
+import no.nav.helse.spesialist.api.rest.personer.PostVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.dokumenter.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.personer.dokumenter.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.personer.vurderinger.PostArbeidstidsvurderingBehandler
@@ -40,6 +41,7 @@ import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetNotaterForVedtaksperi
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
+import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 
 fun Routing.restRoutes(
@@ -50,6 +52,7 @@ fun Routing.restRoutes(
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     forsikringHenter: ForsikringHenter,
     inngangsvilkårHenter: InngangsvilkårHenter,
+    inngangsvilkårInnsender: InngangsvilkårInnsender,
     sessionFactory: SessionFactory,
 ) {
     route("/api") {
@@ -76,6 +79,7 @@ fun Routing.restRoutes(
 
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
             get(GetVurderteInngangsvilkårForPersonBehandler(inngangsvilkårHenter), restAdapter)
+            post(PostVurderteInngangsvilkårForPersonBehandler(inngangsvilkårInnsender), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)
             patch(PatchTilkommenInntektBehandler(), restAdapter)
 

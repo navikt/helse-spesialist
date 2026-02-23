@@ -67,3 +67,17 @@ data class ApiManuellVurdering(
     val navident: String,
     val begrunnelse: String,
 )
+
+@Serializable
+data class ApiPostManuelleInngangsvilkårVurderingerRequest(
+    val versjon: Int,
+    val vurderinger: List<ApiManuellInngangsvilkårVurdering>,
+)
+
+@Serializable
+data class ApiManuellInngangsvilkårVurdering(
+    val vilkårskode: String,
+    val vurderingskode: String,
+    val tidspunkt: LocalDateTime,
+    val begrunnelse: String,
+)

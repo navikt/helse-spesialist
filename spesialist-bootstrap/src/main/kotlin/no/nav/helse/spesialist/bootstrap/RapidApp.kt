@@ -193,6 +193,7 @@ class RapidApp {
                 tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
                 forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
+                inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
             )
 
         kafkaModule.kobleOppRivers()

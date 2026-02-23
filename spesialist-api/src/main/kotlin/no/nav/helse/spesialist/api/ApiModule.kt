@@ -27,6 +27,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
+import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
@@ -44,6 +45,7 @@ class ApiModule(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     private val forsikringHenter: ForsikringHenter,
     private val inngangsvilkårHenter: InngangsvilkårHenter,
+    private val inngangsvilkårInnsender: InngangsvilkårInnsender,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
@@ -145,6 +147,7 @@ class ApiModule(
             krrRegistrertStatusHenter = krrRegistrertStatusHenter,
             forsikringHenter = forsikringHenter,
             inngangsvilkårHenter = inngangsvilkårHenter,
+            inngangsvilkårInnsender = inngangsvilkårInnsender,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         )
