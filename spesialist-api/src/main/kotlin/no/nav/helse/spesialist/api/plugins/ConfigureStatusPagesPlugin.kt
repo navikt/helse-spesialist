@@ -7,6 +7,7 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
+import io.ktor.util.cio.ChannelWriteException
 import io.ktor.utils.io.ClosedWriteChannelException
 import no.nav.helse.spesialist.api.graphql.Modellfeil
 import no.nav.helse.spesialist.application.logg.loggError
@@ -18,13 +19,23 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
         call.respond(status = modellfeil.httpkode, message = modellfeil.tilFeilDto())
     }
     exception<ClosedWriteChannelException> { call, exception ->
-        val uri = call.request.uri
-        if (!uri.endsWith("/sse")) return@exception onThrowable(call, exception)
-        loggInfo("SSE-tilkobling lukket")
+        onSseException(call, exception)
+    }
+    exception<ChannelWriteException> { call, exception ->
+        onSseException(call, exception)
     }
     exception<Throwable> { call, cause ->
         onThrowable(call, cause)
     }
+}
+
+private suspend fun StatusPagesConfig.onSseException(
+    call: ApplicationCall,
+    exception: Exception,
+) {
+    val uri = call.request.uri
+    if (!uri.endsWith("/sse")) return onThrowable(call, exception)
+    loggInfo("SSE-tilkobling lukket")
 }
 
 private suspend fun StatusPagesConfig.onThrowable(
