@@ -16,4 +16,10 @@ class ClientSpeedModule(
             configuration = configuration,
             accessTokenGenerator = accessTokenGenerator,
         )
+
+    val personinfoHenter =
+        SpeedClientPersoninfoHenter(
+            configuration = configuration,
+            accessTokenGenerator = accessTokenGenerator,
+        )
 }

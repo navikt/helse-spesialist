@@ -19,6 +19,13 @@ object ClientSpeedModuleIntegrationTestFixture {
                     ),
                 ),
             )
+            server.stubFor(
+                post(urlEqualTo("/api/person")).willReturn(
+                    okJson(
+                        """{ "fødselsdato": "1990-01-01", "dødsdato": null, "fornavn": "Test", "mellomnavn": null, "etternavn": "Testesen", "adressebeskyttelse": "UGRADERT", "kjønn": "UKJENT", "kilde": "PDL" }""",
+                    ),
+                ),
+            )
         }
 
     val moduleConfiguration =
