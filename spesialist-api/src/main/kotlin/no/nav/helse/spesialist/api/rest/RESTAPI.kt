@@ -22,9 +22,7 @@ import no.nav.helse.spesialist.api.rest.dialoger.kommentarer.PostKommentarBehand
 import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
-import no.nav.helse.spesialist.api.rest.opptegnelsesekvensnummer.GetOpptegnelseSekvensnummerSisteBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetOpptegnelserForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
@@ -103,9 +101,6 @@ fun Routing.restRoutes(
             get(GetNotaterForVedtaksperiodeBehandler(), restAdapter)
             post(PostNotatBehandler(), restAdapter)
             patch(PatchNotatBehandler(), restAdapter)
-
-            get(GetOpptegnelseSekvensnummerSisteBehandler(), restAdapter)
-            get(GetOpptegnelserForPersonBehandler(), restAdapter)
 
             post(PostPersonSokBehandler(), restAdapter)
 
