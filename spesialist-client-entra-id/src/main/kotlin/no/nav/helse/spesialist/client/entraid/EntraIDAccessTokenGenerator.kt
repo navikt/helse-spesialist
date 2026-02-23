@@ -11,6 +11,7 @@ import com.github.benmanes.caffeine.cache.Expiry
 import com.github.benmanes.caffeine.cache.LoadingCache
 import com.nimbusds.jose.jwk.RSAKey
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.OboAccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
@@ -27,7 +28,9 @@ class EntraIDAccessTokenGenerator(
     private val clientId: String,
     private val tokenEndpoint: String,
     private val privateJwk: String,
-) : AccessTokenGenerator {
+    private val oboTokenEndpoint: String,
+) : AccessTokenGenerator,
+    OboAccessTokenGenerator {
     private val loadingCache: LoadingCache<String, TokenEndpointResponse> =
         Caffeine
             .newBuilder()
@@ -40,6 +43,36 @@ class EntraIDAccessTokenGenerator(
             ).build(CacheLoader { scope -> hentToken(scope) })
 
     override fun hentAccessToken(scope: String): String = loadingCache.get(scope).access_token
+
+    override fun hentOboAccessToken(
+        scope: String,
+        userToken: String,
+    ): String {
+        loggInfo("Henter OBO-token fra NAIS token exchange for scope $scope")
+
+        val requestBody =
+            objectMapper.writeValueAsString(
+                OboTokenRequest(
+                    identity_provider = "entra_id",
+                    target = scope,
+                    user_token = userToken,
+                ),
+            )
+
+        return Request
+            .post(oboTokenEndpoint)
+            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+            .bodyString(requestBody, ContentType.APPLICATION_JSON)
+            .execute()
+            .handleResponse { response ->
+                val responseBody = EntityUtils.toString(response.entity)
+                if (response.code !in 200..299) {
+                    loggError("Fikk HTTP ${response.code} fra NAIS token exchange", "response" to responseBody)
+                    error("Fikk HTTP ${response.code} fra NAIS token exchange")
+                }
+                objectMapper.readValue(responseBody, OboTokenResponse::class.java).access_token
+            }
+    }
 
     private fun hentToken(scope: String): TokenEndpointResponse {
         loggInfo("Henter token fra Entra ID for scope $scope")
@@ -87,5 +120,16 @@ class EntraIDAccessTokenGenerator(
     private data class TokenEndpointResponse(
         val access_token: String,
         val expires_in: Duration,
+    )
+
+    private data class OboTokenRequest(
+        val identity_provider: String,
+        val target: String,
+        val user_token: String,
+    )
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private data class OboTokenResponse(
+        val access_token: String,
     )
 }

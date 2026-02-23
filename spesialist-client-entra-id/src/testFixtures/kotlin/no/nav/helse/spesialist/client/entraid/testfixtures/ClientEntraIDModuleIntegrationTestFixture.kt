@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.client.entraid.testfixtures
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -33,11 +34,23 @@ class ClientEntraIDModuleIntegrationTestFixture(
             )
         }
 
+    val oboTokenWireMockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
+            WireMockServer::start
+        ).also {
+            it.stubFor(
+                post(urlPathEqualTo("/")).willReturn(
+                    okJson("""{ "access_token": "obo-test-token", "expires_in": 3599, "token_type": "Bearer" }""")
+                )
+            )
+        }
+
     val moduleConfiguration = ClientEntraIDModule.Configuration(
         clientId = "123abc",
         tokenEndpoint = mockOAuth2Server.tokenEndpointUrl("default").toString(),
         privateJwk = KeyProvider().signingKey("blabla").toJSONString().also { println("JWK: $it") },
         msGraphUrl = msGraphWireMockServer.baseUrl(),
+        oboTokenEndpoint = "${oboTokenWireMockServer.baseUrl()}/",
     )
 
     val module = ClientEntraIDModule(

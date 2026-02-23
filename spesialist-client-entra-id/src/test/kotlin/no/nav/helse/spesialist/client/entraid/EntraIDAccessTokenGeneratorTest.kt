@@ -13,6 +13,7 @@ import kotlin.test.assertNotNull
 class EntraIDAccessTokenGeneratorTest {
     private val integrationTestFixture = ClientEntraIDModuleIntegrationTestFixture()
     private val accessTokenGenerator = integrationTestFixture.module.accessTokenGenerator
+    private val oboAccessTokenGenerator = integrationTestFixture.module.oboAccessTokenGenerator
 
     @Test
     fun `klarer å hente access token`() {
@@ -91,6 +92,16 @@ class EntraIDAccessTokenGeneratorTest {
         }.also {
             assertEquals("Fikk HTTP 500 fra Entra ID", it.message)
         }
+    }
+
+    @Test
+    fun `klarer å hente OBO access token`() {
+        // When:
+        val token = oboAccessTokenGenerator.hentOboAccessToken("etscope", "etbrukertoken")
+
+        // Then:
+        assertNotNull(token)
+        assertFalse(token.isBlank(), "OBO-token var blankt: \"$token\"")
     }
 
     private fun settTokenExpiry(expiry: Duration) {

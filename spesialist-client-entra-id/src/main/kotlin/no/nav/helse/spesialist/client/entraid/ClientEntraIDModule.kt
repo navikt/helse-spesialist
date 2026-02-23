@@ -11,6 +11,7 @@ class ClientEntraIDModule(
         val tokenEndpoint: String,
         val privateJwk: String,
         val msGraphUrl: String,
+        val oboTokenEndpoint: String,
     )
 
     val accessTokenGenerator =
@@ -18,7 +19,10 @@ class ClientEntraIDModule(
             clientId = configuration.clientId,
             tokenEndpoint = configuration.tokenEndpoint,
             privateJwk = configuration.privateJwk,
+            oboTokenEndpoint = configuration.oboTokenEndpoint,
         )
+
+    val oboAccessTokenGenerator = accessTokenGenerator
 
     val tilgangsgruppehenter =
         MsGraphTilgangsgruppehenter(

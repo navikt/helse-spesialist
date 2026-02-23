@@ -44,6 +44,7 @@ fun main() {
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                         privateJwk = env.getValue("AZURE_APP_JWK"),
                         msGraphUrl = "https://graph.microsoft.com",
+                        oboTokenEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
                     ),
                 clientKrr =
                     ClientKrrModule.Configuration(
