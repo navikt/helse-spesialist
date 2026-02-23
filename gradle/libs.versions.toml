@@ -12,7 +12,7 @@ smiley4SchemaKenerator = "2.6.0"
 [libraries]
 apache-httpclient5-fluent = "org.apache.httpcomponents.client5:httpclient5-fluent:5.6"
 
-auth0-jwt = "com.auth0:java-jwt:4.5.0"
+auth0-jwt = "com.auth0:java-jwt:4.5.1"
 
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
 
