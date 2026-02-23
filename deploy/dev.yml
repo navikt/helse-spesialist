@@ -75,6 +75,9 @@ spec:
         - application: spiskammerset
           namespace: tbd
           cluster: dev-gcp
+        - application: speed-api
+          namespace: tbd
+          cluster: dev-gcp
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: dev-gcp
@@ -144,9 +147,9 @@ spec:
     - name: SPILLKAR_SCOPE
       value: "api://dev-gcp.tbd.spillkar/.default"
     - name: SPEED_API_URL
-      value: "http://speed"
+      value: "http://speed-api"
     - name: SPEED_SCOPE
-      value: "api://dev-gcp.tbd.speed/.default"
+      value: "api://dev-gcp.tbd.speed-api/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK

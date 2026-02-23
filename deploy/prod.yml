@@ -73,6 +73,9 @@ spec:
         - application: spleis-api
           namespace: tbd
           cluster: prod-gcp
+        - application: speed-api
+          namespace: tbd
+          cluster: prod-gcp
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: prod-gcp
@@ -167,8 +170,8 @@ spec:
     - name: SPILLKAR_SCOPE
       value: "api://prod-gcp.tbd.spillkar/.default"
     - name: SPEED_API_URL
-      value: "http://speed"
+      value: "http://speed-api"
     - name: SPEED_SCOPE
-      value: "api://prod-gcp.tbd.speed/.default"
+      value: "api://prod-gcp.tbd.speed-api/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd
