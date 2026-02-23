@@ -8,8 +8,8 @@ class InMemoryVedtakRepository :
     VedtakRepository {
     override fun deepCopy(original: Vedtak): Vedtak =
         when (original) {
-            is Vedtak.Automatisk -> Vedtak.Automatisk(original.id, original.tidspunkt)
-            is Vedtak.ManueltMedTotrinnskontroll -> Vedtak.ManueltMedTotrinnskontroll(original.id, original.tidspunkt, original.saksbehandlerIdent, original.beslutterIdent)
-            is Vedtak.ManueltUtenTotrinnskontroll -> Vedtak.ManueltUtenTotrinnskontroll(original.id, original.tidspunkt, original.saksbehandlerIdent)
+            is Vedtak.Automatisk -> Vedtak.Automatisk(original.id, original.tidspunkt, original.behandletAvSpleis)
+            is Vedtak.ManueltMedTotrinnskontroll -> Vedtak.ManueltMedTotrinnskontroll(original.id, original.tidspunkt, original.saksbehandlerIdent, original.beslutterIdent, original.behandletAvSpleis)
+            is Vedtak.ManueltUtenTotrinnskontroll -> Vedtak.ManueltUtenTotrinnskontroll(original.id, original.tidspunkt, original.saksbehandlerIdent, original.behandletAvSpleis)
         }
 }

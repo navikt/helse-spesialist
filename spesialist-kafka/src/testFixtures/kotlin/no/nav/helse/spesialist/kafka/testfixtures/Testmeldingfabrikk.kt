@@ -1085,6 +1085,23 @@ object Testmeldingfabrikk {
             },
         )
 
+    fun lagBehandlingLukket(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        spleisBehandlingId: UUID,
+        id: UUID,
+    ): String =
+        nyHendelse(
+            id,
+            "behandling_lukket",
+            mutableMapOf(
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "behandlingId" to spleisBehandlingId,
+                "fødselsnummer" to fødselsnummer,
+            ),
+        )
+
     fun lagAvsluttetUtenVedtak(
         aktørId: String,
         fødselsnummer: String,
