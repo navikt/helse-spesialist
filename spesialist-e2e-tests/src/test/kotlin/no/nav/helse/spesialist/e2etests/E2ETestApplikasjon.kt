@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
@@ -73,6 +74,7 @@ object E2ETestApplikasjon {
                         },
                     tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
+                    clientSpeed = ClientSpeedModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
                 ),
             rapidsConnection = testRapid,

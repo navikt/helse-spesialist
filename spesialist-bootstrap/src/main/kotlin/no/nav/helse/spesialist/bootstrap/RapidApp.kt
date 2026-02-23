@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
+import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
@@ -54,6 +55,11 @@ fun main() {
                                 scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
                             )
                         },
+                    ),
+                clientSpeed =
+                    ClientSpeedModule.Configuration(
+                        apiUrl = env.getValue("SPEED_API_URL"),
+                        scope = env.getValue("SPEED_SCOPE"),
                     ),
                 clientSpillkar =
                     ClientSpillkarModule.Configuration(
@@ -144,6 +150,12 @@ class RapidApp {
         val clientKrrModule =
             ClientKrrModule(
                 configuration = configuration.clientKrr,
+                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+            )
+
+        val clientSpeedModule =
+            ClientSpeedModule(
+                configuration = configuration.clientSpeed,
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
             )
 

@@ -158,10 +158,14 @@ spec:
     - name: SPISKAMMERSET_API_URL
       value: "http://spiskammerset"
     - name: SPISKAMMERSET_SCOPE
-      value: "api://dev-gcp.tbd.spiskammerset/.default"
+      value: "api://prod-gcp.tbd.spiskammerset/.default"
     - name: SPILLKAR_API_URL
       value: "http://spillkar"
     - name: SPILLKAR_SCOPE
-      value: "api://dev-gcp.tbd.spillkar/.default"
+      value: "api://prod-gcp.tbd.spillkar/.default"
+    - name: SPEED_API_URL
+      value: "http://speed"
+    - name: SPILLKAR_SCOPE
+      value: "api://prod-gcp.tbd.speed/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd
