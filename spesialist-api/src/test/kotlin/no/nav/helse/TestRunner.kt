@@ -173,6 +173,7 @@ object TestRunner {
                             override val kanBeslutteEgneSaker: Boolean = false
                             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
                             override val kanSeForsikring: Boolean = false
+                            override val devGcp: Boolean = false
                         },
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.speed
 
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
@@ -15,9 +16,15 @@ import java.util.UUID
 class SpeedClientHistoriskeIdenterHenter(
     private val configuration: ClientSpeedModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
+    private val environmentToggles: EnvironmentToggles,
 ) : HistoriskeIdenterHenter {
     override fun hentHistoriskeIdenter(ident: String): List<String> {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+        val accessToken =
+            if (environmentToggles.devGcp) {
+                "whatever-token"
+            } else {
+                accessTokenGenerator.hentAccessToken(configuration.scope)
+            }
         val uri = "${configuration.apiUrl}/api/historiske_identer"
         loggDebug("Utfører HTTP POST $uri")
 

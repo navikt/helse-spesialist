@@ -18,6 +18,7 @@ class IntegrationTestFixture(val testRapid: TestRapid) {
         override val kanBeslutteEgneSaker: Boolean = false
         override val kanGodkjenneUtenBesluttertilgang: Boolean = false
         override val kanSeForsikring: Boolean get() = forsikringToggle
+        override val devGcp: Boolean = false
     }
 
     init {

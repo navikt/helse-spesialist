@@ -108,6 +108,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             override val kanBeslutteEgneSaker: Boolean = false
             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
             override val kanSeForsikring: Boolean = false
+            override val devGcp: Boolean = false
         },
     )
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
