@@ -42,6 +42,7 @@ class SpeedClientHistoriskeIdenterHenter(
                 when (response.code) {
                     200 -> {
                         val responseBody = EntityUtils.toString(response.entity)
+                        loggDebug("Response fra Speed: status=${response.code}, body=$responseBody")
                         val dto = objectMapper.readValue(responseBody, HistoriskeIdenterResponse::class.java)
                         dto.fødselsnumre
                     }
