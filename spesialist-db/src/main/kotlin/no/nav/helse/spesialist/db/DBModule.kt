@@ -13,10 +13,12 @@ class DBModule(
         val password: String,
     )
 
-    private val _dataSource: HikariDataSource = DataSourceBuilder(configuration).build()
+    private val dataSourceBuilder = DataSourceBuilder(configuration)
+    private val _dataSource: HikariDataSource = dataSourceBuilder.build()
     val dataSource: DataSource = _dataSource
     val daos = DBDaos(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
+    val listenerFactory = PgListenerFactory(dataSourceBuilder.rawConnection)
 
     fun shutdown() {
         loggInfo("Forsøker å lukke datasource...")

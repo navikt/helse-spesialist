@@ -5,14 +5,17 @@ import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.routing.Route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
-import kotlinx.coroutines.delay
+import no.nav.helse.db.ListenerFactory
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.domain.Opptegnelse
 import kotlin.time.Duration.Companion.seconds
 
-internal fun Route.sse(sessionFactory: SessionFactory) {
+internal fun Route.sse(
+    sessionFactory: SessionFactory,
+    listenerFactory: ListenerFactory,
+) {
     documentation({
         description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
             " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
@@ -48,7 +51,7 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
             loggDebug("SSE-tilkobling startet", "identitetsnummer" to identitetsnummer.value)
             var sisteSekvensnummer = sisteSekvensnummerVedInitiering
 
-            while (true) {
+            listenerFactory.opptegnelseListener().notifications(identitetsnummer).collect {
                 val opptegnelser =
                     sessionFactory.transactionalSessionScope {
                         it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
@@ -57,7 +60,6 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                     sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
                 }
                 opptegnelser.forEach { send(event = it.type.tilEvent(), data = "{}") }
-                delay(300)
             }
         }
     }

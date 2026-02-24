@@ -6,10 +6,12 @@ import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
+import java.sql.Connection
+import java.sql.DriverManager
 import java.time.Duration
 
 internal class DataSourceBuilder(
-    configuration: DBModule.Configuration,
+    private val configuration: DBModule.Configuration,
 ) {
     private val hikariConfig =
         HikariConfig().apply {
@@ -30,6 +32,8 @@ internal class DataSourceBuilder(
                     Clock.SYSTEM,
                 )
         }
+
+    internal val rawConnection: Connection get() = DriverManager.getConnection(configuration.jdbcUrl.replace("jdbc:postgresql://", "jdbc:pgsql://"), configuration.username, configuration.password)
 
     fun build(): HikariDataSource = HikariDataSource(hikariConfig)
 }

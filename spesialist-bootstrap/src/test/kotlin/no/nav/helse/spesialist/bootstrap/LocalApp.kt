@@ -1,5 +1,8 @@
 package no.nav.helse.spesialist.bootstrap
 
+import io.ktor.server.application.ApplicationStarted
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
@@ -14,6 +17,7 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.intellij.lang.annotations.Language
 
 fun main() {
     val rapidApp = RapidApp()

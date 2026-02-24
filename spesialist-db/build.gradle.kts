@@ -7,9 +7,9 @@ dependencies {
     api(project(":spesialist-application"))
 
     implementation(libs.kotliquery)
-    implementation(libs.postgresJdbcDriver)
     implementation(libs.hikari)
 
+    implementation("com.impossibl.pgjdbc-ng:pgjdbc-ng:0.8.9")
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)
 

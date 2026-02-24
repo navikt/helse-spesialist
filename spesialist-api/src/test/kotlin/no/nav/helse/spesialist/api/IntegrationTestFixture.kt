@@ -23,20 +23,25 @@ import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
+import no.nav.helse.db.ListenerFactory
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
-import no.nav.helse.spesialist.application.InngangsvilkårHenter
-import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
+import no.nav.helse.spesialist.application.InngangsvilkårHenter
+import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -86,15 +91,25 @@ class IntegrationTestFixture {
             meldingPubliserer = meldingPubliserer,
             brukerrollehenter = { Either.Success(emptySet()) },
             sessionFactory = sessionFactory,
+            listenerFactory =
+                object : ListenerFactory {
+                    override fun opptegnelseListener(): OpptegnelseListener =
+                        object : OpptegnelseListener {
+                            override fun notifications(identitetsnummer: Identitetsnummer): Flow<Unit> = emptyFlow()
+
+                            override fun close() {
+                            }
+                        }
+                },
             environmentToggles = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
-            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
-            tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             forsikringHenter = spiskammersetForsikringHenterMock,
             inngangsvilkårHenter = inngangsvilkårHenterMock,
             inngangsvilkårInnsender = inngangsvilkårInnsenderMock,
             historiskeIdenterHenter = historiskeIdenterHenterMock,
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+            tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         )
 
     class Response(

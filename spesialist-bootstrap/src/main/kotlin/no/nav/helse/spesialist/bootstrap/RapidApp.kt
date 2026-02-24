@@ -200,15 +200,16 @@ class RapidApp {
                 meldingPubliserer = kafkaModule.meldingPubliserer,
                 brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
                 sessionFactory = dbModule.sessionFactory,
+                listenerFactory = dbModule.listenerFactory,
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
-                tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
-                tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
                 forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 historiskeIdenterHenter = clientSpeedModule.historiskeIdenterHenter,
+                tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
+                tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
             )
 
         kafkaModule.kobleOppRivers()

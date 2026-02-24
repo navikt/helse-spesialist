@@ -41,9 +41,9 @@ import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
+import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
-import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -165,9 +165,14 @@ object TestRunner {
                     ktorApplication = this,
                     apiModuleConfiguration = configuration,
                     spesialistSchema = spesialistSchema,
-                    dokumentMediator = avhengigheter.dokumentMediator,
                     sessionFactory = avhengigheter.sessionFactory,
+                    listenerFactory = mockk(relaxed = true),
                     meldingPubliserer = avhengigheter.meldingPubliserer,
+                    dokumentMediator = avhengigheter.dokumentMediator,
+                    forsikringHenter = avhengigheter.forsikringHenter,
+                    inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
+                    inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
+                    historiskeIdenterHenter = avhengigheter.historiskeIdenterHenter,
                     environmentToggles =
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker: Boolean = false
@@ -178,10 +183,6 @@ object TestRunner {
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
-                    forsikringHenter = avhengigheter.forsikringHenter,
-                    inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
-                    inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
-                    historiskeIdenterHenter = avhengigheter.historiskeIdenterHenter,
                 )
             }
 

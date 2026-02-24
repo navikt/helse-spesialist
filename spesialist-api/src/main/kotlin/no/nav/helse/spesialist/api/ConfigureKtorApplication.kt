@@ -17,6 +17,7 @@ import io.ktor.server.routing.routing
 import io.ktor.server.sse.SSE
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
+import no.nav.helse.db.ListenerFactory
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.auth.configureJwtAuthentication
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
@@ -45,6 +46,7 @@ fun configureKtorApplication(
     apiModuleConfiguration: ApiModule.Configuration,
     spesialistSchema: SpesialistSchema,
     sessionFactory: SessionFactory,
+    listenerFactory: ListenerFactory,
     meldingPubliserer: MeldingPubliserer,
     dokumentMediator: DokumentMediator,
     forsikringHenter: ForsikringHenter,
@@ -90,6 +92,7 @@ fun configureKtorApplication(
                         meldingPubliserer = meldingPubliserer,
                         versjonAvKode = apiModuleConfiguration.versjonAvKode,
                     ),
+                listenerFactory = listenerFactory,
                 sessionFactory = sessionFactory,
                 configuration = apiModuleConfiguration,
                 dokumentMediator = dokumentMediator,
