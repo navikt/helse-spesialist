@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetNotaterForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
+import no.nav.helse.spesialist.api.sse.sse
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter

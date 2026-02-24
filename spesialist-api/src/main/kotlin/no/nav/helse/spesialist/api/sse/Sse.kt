@@ -1,14 +1,12 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.sse
 
 import io.github.smiley4.ktoropenapi.documentation
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.routing.Route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
 import kotlinx.coroutines.delay
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.spesialist.api.sse.ApiServerSentEvent
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.domain.Opptegnelse
@@ -43,7 +41,7 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                 sessionFactory.transactionalSessionScope {
                     val identitetsnummer =
                         it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                            ?: throw NotFoundException("Fant ikke person med pseudoId: $personPseudoId")
+                            ?: throw SseException.PersonIkkeFunnet("Fant ikke person med pseudoId: $personPseudoId")
                     val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
                     identitetsnummer to sisteSekvensnummer
                 }
