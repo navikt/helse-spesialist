@@ -37,14 +37,15 @@ Docker (or Colima) is required for tests — database tests use Testcontainers w
 Onion architecture with strict dependency direction — outer layers depend inward only, never sideways or outward.
 
 ```
-spesialist-bootstrap          ← App entry point, wires all modules together
-  ├── spesialist-api           ← REST (Ktor + OpenAPI) and GraphQL (graphql-kotlin) endpoints
-  │     └── spesialist-api-schema  ← GraphQL schema definitions, REST resource types
-  ├── spesialist-kafka         ← Rapids & Rivers message handlers (40+ rivers)
-  ├── spesialist-db            ← PostgreSQL DAOs (Kotliquery), Flyway migrations
-  ├── spesialist-client-*      ← HTTP clients for external services (Spleis, KRR, Entra ID)
-  └── spesialist-application   ← Commands, use cases, orchestration
-        └── spesialist-domain  ← Pure domain model, no infrastructure dependencies
+spesialist-bootstrap                 ← App entry point, wires all modules together
+  ├── spesialist-api                 ← REST (Ktor + OpenAPI) and GraphQL (graphql-kotlin) endpoints
+  │     └── spesialist-api-schema    ← GraphQL schema definitions, REST resource types
+  ├── spesialist-kafka               ← Rapids & Rivers message handlers (40+ rivers)
+  ├── spesialist-db                  ← PostgreSQL Repository and DAO implementations (Kotliquery)
+  │     └── spesialist-db-migrations ← Flyway migration scripts (SQL), builds as a self-contained runtime
+  ├── spesialist-client-*            ← HTTP clients for external services (Spleis, KRR, Entra ID)
+  └── spesialist-application         ← Commands, use cases, orchestration
+        └── spesialist-domain        ← Pure domain model, no infrastructure dependencies
 ```
 
 ## Key Conventions
@@ -86,7 +87,7 @@ spesialist-bootstrap          ← App entry point, wires all modules together
 
 ### Testing
 
-- **Domain tests**: Plain JUnit 5, no DB required. Use test fixtures (`lagBehandling()`, etc.)
+- **Domain tests**: Plain JUnit 6, no DB required. Use test fixtures (`lagBehandling()`, etc.)
 - **DB tests**: Extend `AbstractDBIntegrationTest` — provides Testcontainers PostgreSQL, auto-migration, and table truncation between tests
 - **E2E tests**: Two patterns — newer `AbstractE2EIntegrationTest` (full app bootstrap with stubs) and legacy `AbstractE2ETest`
 - Test fixtures are shared via Gradle's `java-test-fixtures` plugin
@@ -94,4 +95,4 @@ spesialist-bootstrap          ← App entry point, wires all modules together
 ### Language & Naming
 
 - Code and comments are in Norwegian (domain terms: `vedtaksperiode`, `saksbehandler`, `godkjenning`, `oppgave`, `utbetaling`)
-- Package structure: `no.nav.helse.spesialist.*` for new code, `no.nav.helse.*` for legacy
+- Package structure: `no.nav.helse.spesialist.<module>.*` for new code, `no.nav.helse.*` for legacy
