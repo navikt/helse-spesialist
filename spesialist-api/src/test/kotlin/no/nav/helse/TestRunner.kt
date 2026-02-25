@@ -40,7 +40,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.ForsikringHenter
-import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
+import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
@@ -115,7 +115,7 @@ object TestRunner {
                 forsikringHenter = mockk(relaxed = true),
                 inngangsvilkårHenter = mockk(relaxed = true),
                 inngangsvilkårInnsender = mockk(relaxed = true),
-                historiskeIdenterHenter = mockk(relaxed = true),
+                alleIdenterHenter = mockk<AlleIdenterHenter>(relaxed = true),
                 meldingPubliserer = mockk(relaxed = true),
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
@@ -181,7 +181,7 @@ object TestRunner {
                     forsikringHenter = avhengigheter.forsikringHenter,
                     inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
                     inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
-                    historiskeIdenterHenter = avhengigheter.historiskeIdenterHenter,
+                    alleIdenterHenter = avhengigheter.alleIdenterHenter,
                 )
             }
 
@@ -220,7 +220,7 @@ object TestRunner {
         val forsikringHenter: ForsikringHenter,
         val inngangsvilkårHenter: InngangsvilkårHenter,
         val inngangsvilkårInnsender: InngangsvilkårInnsender,
-        val historiskeIdenterHenter: HistoriskeIdenterHenter,
+        val alleIdenterHenter: AlleIdenterHenter,
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,

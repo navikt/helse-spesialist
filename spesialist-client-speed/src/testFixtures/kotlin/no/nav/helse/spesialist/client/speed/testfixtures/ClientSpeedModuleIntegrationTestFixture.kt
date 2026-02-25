@@ -13,9 +13,9 @@ object ClientSpeedModuleIntegrationTestFixture {
             WireMockServer::start,
         ).also { server ->
             server.stubFor(
-                post(urlEqualTo("/api/historiske_identer")).willReturn(
+                post(urlEqualTo("/api/alle_identer")).willReturn(
                     okJson(
-                        """{ "fødselsnumre": [], "kilde": "PDL" }""",
+                        """{ "identer": [], "kilde": "PDL" }""",
                     ),
                 ),
             )

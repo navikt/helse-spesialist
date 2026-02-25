@@ -13,8 +13,8 @@ class ClientSpeedModule(
         val scope: String,
     )
 
-    val historiskeIdenterHenter =
-        SpeedClientHistoriskeIdenterHenter(
+    val alleIdenterHenter =
+        SpeedClientAlleIdenterHenter(
             configuration = configuration,
             accessTokenGenerator = accessTokenGenerator,
             environmentToggles = environmentToggles,

@@ -2,14 +2,26 @@ package no.nav.helse.spesialist.client.speed.dto
 
 import java.time.LocalDate
 
-internal data class HistoriskeIdenterRequest(
+internal data class AlleIdenterRequest(
     val ident: String,
 )
 
-internal data class HistoriskeIdenterResponse(
-    val fødselsnumre: List<String>,
+internal data class AlleIdenterResponse(
+    val identer: List<Ident>,
     val kilde: String,
-)
+) {
+    data class Ident(
+        val ident: String,
+        val type: IdentType,
+        val gjeldende: Boolean,
+    )
+
+    enum class IdentType {
+        FOLKEREGISTERIDENT,
+        AKTORID,
+        NPID,
+    }
+}
 
 internal data class PersonRequest(
     val ident: String,

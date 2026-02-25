@@ -28,7 +28,7 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringHenter
-import no.nav.helse.spesialist.application.HistoriskeIdenterHenter
+import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
@@ -77,7 +77,12 @@ class IntegrationTestFixture {
     val spiskammersetForsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
     val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
-    val historiskeIdenterHenterMock = HistoriskeIdenterHenter { ident -> listOf(ident, ident.reversed()) }
+    val alleIdenterHenterMock = AlleIdenterHenter { ident ->
+        listOf(
+            AlleIdenterHenter.Ident(ident, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
+            AlleIdenterHenter.Ident(ident.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
+        )
+    }
 
     private val apiModule =
         ApiModule(
@@ -94,7 +99,7 @@ class IntegrationTestFixture {
             forsikringHenter = spiskammersetForsikringHenterMock,
             inngangsvilkårHenter = inngangsvilkårHenterMock,
             inngangsvilkårInnsender = inngangsvilkårInnsenderMock,
-            historiskeIdenterHenter = historiskeIdenterHenterMock,
+            alleIdenterHenter = alleIdenterHenterMock,
         )
 
     class Response(
