@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -20,19 +21,11 @@ class ApiModuleIntegrationTestFixture(
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
-    val token: String =
-        mockOAuth2Server
-            .issueToken(
-                issuerId = ISSUER_ID,
-                audience = CLIENT_ID,
-                claims =
-                    mapOf(
-                        "preferred_username" to "saksbehandler@nav.no",
-                        "oid" to "${UUID.randomUUID()}",
-                        "name" to "En Saksbehandler",
-                        "NAVident" to "X123456",
-                    ),
-            ).serialize()
+    val token: String = token(
+        lagSaksbehandler(navn = "En Saksbehandler", epost = "utvikler@nav.no", navIdent = "X123456"),
+        setOf(Tilgang.Les, Tilgang.Skriv),
+        setOf(Brukerrolle.Utvikler)
+    )
 
     fun token(
         saksbehandler: Saksbehandler,
