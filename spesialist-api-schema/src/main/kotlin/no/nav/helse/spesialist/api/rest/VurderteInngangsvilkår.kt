@@ -34,14 +34,14 @@ data class ApiSamlingAvVurderteInngangsvilkår(
 sealed interface ApiVurdertInngangsvilkår {
     val vilkårskode: String
     val vurderingskode: String?
-    val tidspunkt: LocalDateTime
+    val tidspunkt: Instant
 
     @SerialName("AUTOMATISK")
     @Serializable
     data class Automatisk(
         override val vilkårskode: String,
         override val vurderingskode: String?,
-        override val tidspunkt: LocalDateTime,
+        override val tidspunkt: Instant,
         val automatiskVurdering: ApiAutomatiskVurdering,
     ) : ApiVurdertInngangsvilkår
 
@@ -50,7 +50,7 @@ sealed interface ApiVurdertInngangsvilkår {
     data class Manuell(
         override val vilkårskode: String,
         override val vurderingskode: String?,
-        override val tidspunkt: LocalDateTime,
+        override val tidspunkt: Instant,
         val manuellVurdering: ApiManuellVurdering,
     ) : ApiVurdertInngangsvilkår
 }
@@ -78,6 +78,6 @@ data class ApiPostManuelleInngangsvilkårVurderingerRequest(
 data class ApiManuellInngangsvilkårVurdering(
     val vilkårskode: String,
     val vurderingskode: String,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Instant,
     val begrunnelse: String,
 )

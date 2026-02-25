@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.client.spillkar.dto
 
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal data class HentInngangsvilkårRequest(
@@ -23,7 +23,7 @@ internal data class SamlingAvVurderteInngangsvilkårDto(
 internal data class VurdertInngangsvilkårDto(
     val vilkårskode: String,
     val vurderingskode: String?,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Instant,
     val manuellVurdering: ManuellVurderingDto?,
     val automatiskVurdering: AutomatiskVurderingDto?,
 )
@@ -49,6 +49,6 @@ internal data class ManueltVurderteInngangsvilkårRequest(
 internal data class ManueltVurdertInngangsvilkårDto(
     val vilkårskode: String,
     val vurderingskode: String,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Instant,
     val begrunnelse: String,
 )

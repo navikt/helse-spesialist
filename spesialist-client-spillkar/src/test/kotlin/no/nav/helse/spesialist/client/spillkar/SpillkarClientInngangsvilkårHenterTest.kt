@@ -10,8 +10,8 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering
 import no.nav.helse.spesialist.application.spillkar.`VurdertInngangsvilkår`
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,7 +32,7 @@ class SpillkarClientInngangsvilkårHenterTest {
     @Test
     fun `mapper svar med manuell vurdering korrekt`() {
         val samlingId = UUID.randomUUID()
-        val tidspunkt = "2024-01-15T10:00:00"
+        val tidspunkt = "2024-01-15T10:00:00Z"
         setupStub(
             okJson(
                 """
@@ -71,7 +71,7 @@ class SpillkarClientInngangsvilkårHenterTest {
         val vurdering = assertIs<VurdertInngangsvilkår.ManueltVurdertInngangsvilkår>(samling.vurderteInngangsvilkår[0])
         assertEquals("MEDLEMSKAP", vurdering.vilkårskode)
         assertEquals("MEDLEMSKAP_JA", vurdering.vurderingskode)
-        assertEquals(LocalDateTime.parse(tidspunkt), vurdering.tidspunkt)
+        assertEquals(Instant.parse(tidspunkt), vurdering.tidspunkt)
         assertEquals("P31337", vurdering.navident)
         assertEquals("Dokumentasjon foreligger", vurdering.begrunnelse)
     }
@@ -79,7 +79,7 @@ class SpillkarClientInngangsvilkårHenterTest {
     @Test
     fun `mapper svar med automatisk vurdering korrekt`() {
         val samlingId = UUID.randomUUID()
-        val tidspunkt = "2024-01-15T10:00:00"
+        val tidspunkt = "2024-01-15T10:00:00Z"
         val grunnlagsdataId = UUID.randomUUID()
         setupStub(
             okJson(

@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -49,7 +50,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
         val samlingId = UUID.randomUUID()
-        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0)
+        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(listOf(person.id.value, person.id.value.reversed()), skjæringstidspunkt)
@@ -108,7 +109,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
         val samlingId = UUID.randomUUID()
-        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0)
+        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(any(), skjæringstidspunkt)

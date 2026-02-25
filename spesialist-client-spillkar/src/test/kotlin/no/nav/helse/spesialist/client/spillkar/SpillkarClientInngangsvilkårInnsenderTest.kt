@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.application.spillkar.`ManuelleInngangsvilkårVurd
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import kotlin.test.Test
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -33,7 +34,7 @@ class SpillkarClientInngangsvilkårInnsenderTest {
                     ManuellInngangsvilkårVurdering(
                         vilkårskode = "MEDLEMSKAP",
                         vurderingskode = "MEDLEMSKAP_JA",
-                        tidspunkt = LocalDateTime.of(2024, 1, 15, 10, 0, 0),
+                        tidspunkt = LocalDateTime.of(2024, 1, 15, 10, 0, 0).atOffset(ZoneOffset.UTC).toInstant(),
                         begrunnelse = "Dokumentasjon foreligger",
                     ),
                 ),

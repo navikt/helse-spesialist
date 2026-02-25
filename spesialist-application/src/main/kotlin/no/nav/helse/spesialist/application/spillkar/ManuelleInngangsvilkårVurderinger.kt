@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application.spillkar
 
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class ManuelleInngangsvilkårVurderinger(
     val personidentifikator: String,
@@ -13,6 +13,6 @@ data class ManuelleInngangsvilkårVurderinger(
 data class ManuellInngangsvilkårVurdering(
     val vilkårskode: String,
     val vurderingskode: String,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: Instant,
     val begrunnelse: String,
 )
