@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
+import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
@@ -43,6 +44,7 @@ import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.PersoninfoHenter
 
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
@@ -54,6 +56,7 @@ fun Routing.restRoutes(
     inngangsvilkårHenter: InngangsvilkårHenter,
     inngangsvilkårInnsender: InngangsvilkårInnsender,
     alleIdenterHenter: AlleIdenterHenter,
+    personinfoHenter: PersoninfoHenter,
     sessionFactory: SessionFactory,
 ) {
     route("/api") {
@@ -106,6 +109,8 @@ fun Routing.restRoutes(
             post(PostPersonSokBehandler(), restAdapter)
 
             get(GetKrrRegistrertStatusForPersonBehandler(krrRegistrertStatusHenter), restAdapter)
+
+            get(GetPersonBehandler(personinfoHenter), restAdapter)
 
             get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
         }

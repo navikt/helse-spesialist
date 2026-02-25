@@ -209,6 +209,7 @@ class RapidApp {
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 alleIdenterHenter = clientSpeedModule.alleIdenterHenter,
+                personinfoHenter = clientSpeedModule.personinfoHenter,
             )
 
         kafkaModule.kobleOppRivers()

@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import java.net.URI
@@ -51,6 +52,7 @@ fun configureKtorApplication(
     inngangsvilkårHenter: InngangsvilkårHenter,
     inngangsvilkårInnsender: InngangsvilkårInnsender,
     alleIdenterHenter: AlleIdenterHenter,
+    personinfoHenter: PersoninfoHenter,
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
@@ -99,6 +101,7 @@ fun configureKtorApplication(
                 inngangsvilkårHenter = inngangsvilkårHenter,
                 inngangsvilkårInnsender = inngangsvilkårInnsender,
                 alleIdenterHenter = alleIdenterHenter,
+                personinfoHenter = personinfoHenter,
             )
         }
     }

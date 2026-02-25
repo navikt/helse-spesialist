@@ -13,6 +13,9 @@ import kotlin.random.Random
 fun lagPerson(
     fødselsdato: LocalDate? = lagFødselsdato(),
     kjønn: Kjønn? = Kjønn.entries.random(),
+    fornavn: String = lagFornavn(),
+    mellomnavn: String? = lagMellomnavnOrNull(),
+    etternavn: String = lagEtternavn(),
     id: Identitetsnummer =
         lagIdentitetsnummer(
             fødselsdato = fødselsdato ?: lagFødselsdato(),
@@ -22,13 +25,16 @@ fun lagPerson(
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     info: Personinfo? =
         lagPersoninfo(
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn,
             fødselsdato = fødselsdato,
             kjønn = kjønn,
             adressebeskyttelse = adressebeskyttelse,
         ),
     infoSistOppdatert: LocalDate? = info?.let { LocalDate.now() },
     erEgenAnsatt: Boolean? = false,
-    enhet: Int? = 1000,
+    enhet: Int? = Random.nextInt(from = 1, until = 10000),
     enhetSistOppdatert: LocalDate? = enhet?.let { LocalDate.now() },
 ): Person =
     Person.Factory.fraLagring(
