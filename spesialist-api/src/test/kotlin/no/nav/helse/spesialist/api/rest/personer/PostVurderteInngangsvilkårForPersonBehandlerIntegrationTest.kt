@@ -2,14 +2,10 @@ package no.nav.helse.spesialist.api.rest.personer
 
 import io.mockk.verify
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.application.spillkar.ManuellInngangsvilkårVurdering
-import no.nav.helse.spesialist.application.spillkar.ManuelleInngangsvilkårVurderinger
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,7 +22,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
-        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
         // When:
         val response =
@@ -40,7 +35,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         {
                           "vilkårskode": "8-2",
                           "vurderingskode": "OPPFYLT",
-                          "tidspunkt": "$tidspunkt",
                           "begrunnelse": "Begrunnelse for vurdering"
                         }
                       ]
@@ -52,19 +46,15 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         assertEquals(204, response.status)
         verify(exactly = 1) {
             integrationTestFixture.inngangsvilkårInnsenderMock.sendManuelleVurderinger(
-                ManuelleInngangsvilkårVurderinger(
-                    personidentifikator = person.id.value,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    versjon = 1,
-                    vurderinger = listOf(
-                        ManuellInngangsvilkårVurdering(
-                            vilkårskode = "8-2",
-                            vurderingskode = "OPPFYLT",
-                            tidspunkt = tidspunkt,
-                            begrunnelse = "Begrunnelse for vurdering",
-                        ),
-                    ),
-                ),
+                match { vurderinger ->
+                    vurderinger.personidentifikator == person.id.value &&
+                        vurderinger.skjæringstidspunkt == skjæringstidspunkt &&
+                        vurderinger.versjon == 1 &&
+                        vurderinger.vurderinger.size == 1 &&
+                        vurderinger.vurderinger[0].vilkårskode == "8-2" &&
+                        vurderinger.vurderinger[0].vurderingskode == "OPPFYLT" &&
+                        vurderinger.vurderinger[0].begrunnelse == "Begrunnelse for vurdering"
+                }
             )
         }
     }
@@ -74,7 +64,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         // Given:
         val ukjentPseudoId = UUID.randomUUID()
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
-        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
         // When:
         val response =
@@ -88,7 +77,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         {
                           "vilkårskode": "8-2",
                           "vurderingskode": "OPPFYLT",
-                          "tidspunkt": "$tidspunkt",
                           "begrunnelse": "Begrunnelse"
                         }
                       ]
@@ -119,7 +107,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
-        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
         // When:
         val response =
@@ -133,7 +120,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         {
                           "vilkårskode": "8-2",
                           "vurderingskode": "OPPFYLT",
-                          "tidspunkt": "$tidspunkt",
                           "begrunnelse": "Begrunnelse"
                         }
                       ]
@@ -164,7 +150,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
-        val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
         io.mockk.every {
             integrationTestFixture.inngangsvilkårInnsenderMock.sendManuelleVurderinger(any())
@@ -182,7 +167,6 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         {
                           "vilkårskode": "8-2",
                           "vurderingskode": "OPPFYLT",
-                          "tidspunkt": "$tidspunkt",
                           "begrunnelse": "Begrunnelse"
                         }
                       ]

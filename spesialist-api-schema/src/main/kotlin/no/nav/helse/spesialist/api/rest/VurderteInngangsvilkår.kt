@@ -78,6 +78,5 @@ data class ApiPostManuelleInngangsvilkårVurderingerRequest(
 data class ApiManuellInngangsvilkårVurdering(
     val vilkårskode: String,
     val vurderingskode: String,
-    val tidspunkt: Instant,
     val begrunnelse: String,
 )

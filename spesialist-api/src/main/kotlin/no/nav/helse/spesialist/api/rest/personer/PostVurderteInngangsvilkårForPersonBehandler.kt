@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.application.spillkar.ManuellInngangsvilkårVurder
 import no.nav.helse.spesialist.application.spillkar.ManuelleInngangsvilkårVurderinger
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
+import java.time.Instant
 import java.time.LocalDate
 
 class PostVurderteInngangsvilkårForPersonBehandler(
@@ -62,7 +63,7 @@ private fun ApiManuellInngangsvilkårVurdering.tilManuellInngangsvilkårVurderin
     ManuellInngangsvilkårVurdering(
         vilkårskode = vilkårskode,
         vurderingskode = vurderingskode,
-        tidspunkt = tidspunkt,
+        tidspunkt = Instant.now(),
         begrunnelse = begrunnelse,
     )
 
