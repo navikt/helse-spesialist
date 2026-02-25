@@ -42,6 +42,7 @@ class SpeedClientAlleIdenterHenter(
                 when (response.code) {
                     200 -> {
                         val responseBody = EntityUtils.toString(response.entity)
+                        loggDebug("Fikk 200 OK fra Speed ved henting av alle identer, body=$responseBody")
                         val dto = objectMapper.readValue(responseBody, AlleIdenterResponse::class.java)
                         dto.identer.map { it.tilDomene() }
                     }
