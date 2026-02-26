@@ -5,12 +5,13 @@ import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
-import no.nav.helse.spesialist.application.spillkar.`ManuelleInngangsvilkårVurderinger`
-import no.nav.helse.spesialist.client.spillkar.dto.ManueltVurdertInngangsvilkårDto
-import no.nav.helse.spesialist.client.spillkar.dto.ManueltVurderteInngangsvilkårRequest
+import no.nav.helse.spesialist.application.spillkar.ManuelleInngangsvilkårVurderinger
+import no.nav.helse.spesialist.client.spillkar.generated.ManueltVurdertInngangsvilkår
+import no.nav.helse.spesialist.client.spillkar.generated.ManueltVurderteInngangsvilkår
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import java.time.ZoneOffset
 
 class SpillkarClientInngangsvilkårInnsender(
     private val configuration: ClientSpillkarModule.Configuration,
@@ -23,16 +24,16 @@ class SpillkarClientInngangsvilkårInnsender(
 
         val requestBody =
             objectMapper.writeValueAsString(
-                ManueltVurderteInngangsvilkårRequest(
+                ManueltVurderteInngangsvilkår(
                     personidentifikator = vurderinger.personidentifikator,
                     skjæringstidspunkt = vurderinger.skjæringstidspunkt,
                     versjon = vurderinger.versjon,
                     vurderteInngangsvilkår =
                         vurderinger.vurderinger.map {
-                            ManueltVurdertInngangsvilkårDto(
+                            ManueltVurdertInngangsvilkår(
                                 vilkårskode = it.vilkårskode,
                                 vurderingskode = it.vurderingskode,
-                                tidspunkt = it.tidspunkt,
+                                tidspunkt = it.tidspunkt.atOffset(ZoneOffset.UTC),
                                 begrunnelse = it.begrunnelse,
                             )
                         },

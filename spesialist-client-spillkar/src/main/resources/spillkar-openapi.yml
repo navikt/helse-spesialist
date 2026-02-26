@@ -1,0 +1,326 @@
+openapi: "3.0.0"
+info:
+  title: Spillkar (Spillkår) 🎻
+  description: |-
+    Spillkar gjør noe greier med vilkår.
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit/
+
+servers:
+  - url: https://spillkar.intern.dev.nav.no
+    description: Test
+  - url: http://localhost:8080
+    description: Lokalt
+  
+tags:
+  - name: Hent inngangsvilkår
+  - name: Send inn vurderinger av inngangsvilkår
+
+paths:
+    /vurderte-inngangsvilkar/alle:
+      post:
+        summary: Henter ut alle samlinger av inngangsvilkår gjort på personen på et gitt skjæringstidspunkt
+        tags:
+          - Hent inngangsvilkår
+        description: |-
+          - Speilvendt henter ut alle samlinger av inngangsvilkår for å vise historikk i Speil.
+          - Det må være et on-behalf-of-token fra saksbehandler.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HentInngangsvilkår'
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/SamlingAvVurderteInngangsvilkårResponse'
+
+    /vurderte-inngangsvilkar/gjeldende:
+      post:
+        summary: Henter ut den gjeldende samlingen av inngangsvilkår gjort på personen på et gitt skjæringstidspunkt
+        tags:
+          - Hent inngangsvilkår
+        description: |-
+          - Spleis sender ut et behov om vurderte inngangsvilkår. 
+          - Den asynkrone biten av Spillkar løser dette behovet ved å requeste dette endepunktet.
+          - Dette endepunktet skal kreve en rolle som bare den asynkrone biten av Spillkar har. 
+          - Løsningen på behovet er en-til-en med responsen på dette endepunktet.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HentInngangsvilkår'
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/GjeldendeSamlingAvVurderteInngangsvilkår'
+
+    /vurderte-inngangsvilkar/manuelle-vurderinger:
+      post:
+        summary: Saksbehandler vurderer ett eller flere inngangsvilkår
+        tags:
+          - Send inn vurderinger av inngangsvilkår
+        description: |-
+          - Brukes når saksbehandler manuelt har vurdert ett eller flere inngangsvilkår.
+          - Det må være et on-behalf-of-token hvor vi fisker ut navident.
+          - Spillkar sørger for at det sendes ut en melding på kafka om at det foreligger nye vilkår på skjæringstidspunktet for personen.
+          - Spleis lytter på denne meldingen og reberegner perioder fra og med skjæringstidspunktet.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManueltVurderteInngangsvilkår'
+        responses:
+          '204':
+            description: No content
+
+    /vurderte-inngangsvilkar/automatiske-vurderinger:
+      post:
+        summary: Datamaskinen vurderer ett eller flere inngangsvilkår
+        tags:
+          - Send inn vurderinger av inngangsvilkår
+        description: |-
+          - Brukes av Spleis når automatiske vurderinger av inngangsvilkår har blitt gjort.
+          - Spleis sender ut en melding på rapiden som den asynkrone av Spillkar lytter på, og requester dette endepunktet.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomatiskVurderteInngangsvilkår'
+        responses:
+          '204':
+            description: No content
+
+components:
+  schemas:
+    HentInngangsvilkår:
+      type: object
+      required: ["personidentifikatorer", "skjæringstidspunkt"]
+      properties:
+        personidentifikatorer:
+          type: array
+          items:
+            type: string
+            description: Personidentifikator for personen
+            example: 11111111111
+        skjæringstidspunkt:
+          type: string
+          format: date
+          example: 2021-01-01
+
+    ManueltVurderteInngangsvilkår:
+      type: object
+      required: ["personidentifikator", "skjæringstidspunkt", "versjon", "vurderteInngangsvilkår"]
+      properties:
+        personidentifikator:
+          type: string
+          description: Personidentifikator for personen
+          example: 11111111111
+        skjæringstidspunkt:
+          type: string
+          format: date
+          example: 2021-01-01
+        versjon:
+          type: integer
+          example: 1
+          description: Spillkar skal kun lagre disse nye inngangsvilkårene gitt at dette er den siste versjonen av samling
+        vurderteInngangsvilkår:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManueltVurdertInngangsvilkår'
+
+    AutomatiskVurderteInngangsvilkår:
+      type: object
+      required: ["personidentifikator", "skjæringstidspunkt", "vurderteInngangsvilkår"]
+      properties:
+        personidentifikator:
+          type: string
+          description: Personidentifikator for personen
+          example: 11111111111
+        skjæringstidspunkt:
+          type: string
+          format: date
+          example: 2021-01-01
+          description: Spillkar skal kun lagre disse nye inngangsvilkårene gitt at dette er den siste versjonen av samling
+        vurderteInngangsvilkår:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomatiskVurdertInngangsvilkår'
+
+    VurdertInngangsvilkårFelles:
+      type: object
+      description: Felles felter for et vurdert inngangsvilkår. Har enten automatiskVurdering eller manuellVurdering avhengig av vurderingstype.
+      discriminator:
+        propertyName: vurderingstype
+        mapping:
+          automatisk: '#/components/schemas/AutomatiskVurdertInngangsvilkårDetaljer'
+          manuell: '#/components/schemas/ManueltVurdertInngangsvilkårDetaljer'
+      required: ["vurderingstype", "vilkårskode", "tidspunkt"]
+      properties:
+        vurderingstype:
+          type: string
+          description: Diskriminator som angir om vurderingen er automatisk eller manuell
+          example: automatisk
+        id:
+          type: string
+          format: uuid
+          description: Id for vurderingen. Samme ID kan være i flere samlinger. Da er det samme vurdering
+        tidspunkt:
+          type: string
+          format: date-time
+          description: Når vurderingen ble gjort
+        vilkårskode:
+          type: string
+          description: Koden til det vilkåret som er vurdert
+          example: MEDLEMSKAP
+        vurderingskode:
+          type: string
+          description: Begrunnelse for oppfylt eller ikke oppfylt fra kodeverket. Optional verdi der hvor automatiske vurderinger ikke har klart å komme frem til en vurderingskode.
+          example: MEDLEMSKAP_JA
+
+    AutomatiskVurdertInngangsvilkårDetaljer:
+      allOf:
+        - $ref: '#/components/schemas/VurdertInngangsvilkårFelles'
+        - type: object
+          required: ["automatiskVurdering"]
+          properties:
+            automatiskVurdering:
+              $ref: '#/components/schemas/AutomatiskVurdering'
+
+    ManueltVurdertInngangsvilkårDetaljer:
+      allOf:
+        - $ref: '#/components/schemas/VurdertInngangsvilkårFelles'
+        - type: object
+          required: ["manuellVurdering"]
+          properties:
+            manuellVurdering:
+              $ref: '#/components/schemas/ManuellVurdering'
+
+    ManuellVurdering:
+      type: object
+      required: ["navident", "begrunnelse"]
+      description: Vurdert manuelt av saksbehandler
+      properties:
+        navident:
+          type: string
+          example: P31337
+        begrunnelse:
+          type: string
+          example: Etter brev fra udi journalført med id 1337 fremkommer det at sykmeldte er medlem av folketrygden
+
+    MinimalVurdertInngangsvilkår:
+      type: object
+      required: ["vilkårskode"]
+      properties:
+        vilkårskode:
+          type: string
+          description: Koden til det vilkåret som er vurdert
+          example: MEDLEMSKAP
+        vurderingskode:
+          type: string
+          description: Begrunnelse for oppfylt eller ikke oppfylt fra kodeverket
+          example: MEDLEMSKAP_JA
+
+    ManueltVurdertInngangsvilkår:
+      type: object
+      required: ["vilkårskode", "vurderingskode", "tidspunkt", "begrunnelse"]
+      properties:
+        tidspunkt:
+          type: string
+          format: date-time
+          description: Når vurderingen ble gjort
+        vilkårskode:
+          type: string
+          description: Koden til det vilkåret som er vurdert
+          example: MEDLEMSKAP
+        vurderingskode:
+          type: string
+          description: Begrunnelse for oppfylt eller ikke oppfylt fra kodeverket
+          example: MEDLEMSKAP_JA
+        begrunnelse:
+          type: string
+          example: Etter brev fra udi journalført med id 1337 fremkommer det at sykmeldte er medlem av folketrygden
+
+    AutomatiskVurdertInngangsvilkår:
+      type: object
+      required: ["vilkårskode", "tidspunkt", "automatiskVurdering"]
+      properties:
+        tidspunkt:
+          type: string
+          format: date-time
+          description: Når vurderingen ble gjort
+        vilkårskode:
+          type: string
+          description: Koden til det vilkåret som er vurdert
+          example: MEDLEMSKAP
+        vurderingskode:
+          type: string
+          description: Begrunnelse for oppfylt eller ikke oppfylt fra kodeverket
+          example: MEDLEMSKAP_JA
+        automatiskVurdering:
+          $ref: '#/components/schemas/AutomatiskVurdering'
+
+    SamlingAvVurderteInngangsvilkår:
+      type: object
+      required: [ "versjon", "skjæringstidspunkt", "vurderteInngangsvilkår", "samlingAvVurderteInngangsvilkårId" ]
+      properties:
+        samlingAvVurderteInngangsvilkårId:
+          type: string
+          format: uuid
+        versjon:
+          type: integer
+          description: Versjon av samling av vurderte inngangsvilkår (stigende løpenummer)
+          example: 1
+        skjæringstidspunkt:
+          type: string
+          format: date
+        vurderteInngangsvilkår:
+          type: array
+          items:
+            $ref: '#/components/schemas/VurdertInngangsvilkårFelles'
+
+    GjeldendeSamlingAvVurderteInngangsvilkår:
+      type: object
+      required: [ "vurderteInngangsvilkår", "samlingAvVurderteInngangsvilkårId" ]
+      properties:
+        samlingAvVurderteInngangsvilkårId:
+          type: string
+          format: uuid
+        vurderteInngangsvilkår:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinimalVurdertInngangsvilkår'
+
+    SamlingAvVurderteInngangsvilkårResponse:
+      type: object
+      required: [ "samlingAvVurderteInngangsvilkår" ]
+      properties:
+        samlingAvVurderteInngangsvilkår:
+          type: array
+          items:
+            $ref: '#/components/schemas/SamlingAvVurderteInngangsvilkår'
+
+    AutomatiskVurdering:
+      type: object
+      description: Vurdert automatisk av noen
+      required: ["system", "versjon", "grunnlagsdata"]
+      properties:
+        system:
+          type: string
+          example: Spleis
+        versjon:
+          type: string
+          example: 2026.02.19-10.07-793bcfe
+        grunnlagsdata:
+          type: object
+          description: Pekere til fakta som er lagt til grunn for den automatiske vilkårsvurderingen. Her er keyen 'dynamisk', medlemskapId er bare et eksempel.
+          additionalProperties:
+            type: string

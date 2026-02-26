@@ -5,17 +5,19 @@ import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
-import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering
-import no.nav.helse.spesialist.application.spillkar.`SamlingAvVurderteInngangsvilkår`
-import no.nav.helse.spesialist.application.spillkar.`VurdertInngangsvilkår`
-import no.nav.helse.spesialist.client.spillkar.dto.HentInngangsvilkårRequest
-import no.nav.helse.spesialist.client.spillkar.dto.SamlingAvVurderteInngangsvilkårDto
-import no.nav.helse.spesialist.client.spillkar.dto.SamlingAvVurderteInngangsvilkårResponse
-import no.nav.helse.spesialist.client.spillkar.dto.VurdertInngangsvilkårDto
+import no.nav.helse.spesialist.client.spillkar.generated.AutomatiskVurdertInngangsvilkårDetaljer
+import no.nav.helse.spesialist.client.spillkar.generated.HentInngangsvilkår
+import no.nav.helse.spesialist.client.spillkar.generated.ManueltVurdertInngangsvilkårDetaljer
+import no.nav.helse.spesialist.client.spillkar.generated.SamlingAvVurderteInngangsvilkår
+import no.nav.helse.spesialist.client.spillkar.generated.SamlingAvVurderteInngangsvilkårResponse
+import no.nav.helse.spesialist.client.spillkar.generated.VurdertInngangsvilkårFelles
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.time.LocalDate
+import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering as DomeneAutomatiskVurdering
+import no.nav.helse.spesialist.application.spillkar.SamlingAvVurderteInngangsvilkår as DomeneSamling
+import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår as DomeneVurdertInngangsvilkår
 
 class SpillkarClientInngangsvilkårHenter(
     private val configuration: ClientSpillkarModule.Configuration,
@@ -24,14 +26,14 @@ class SpillkarClientInngangsvilkårHenter(
     override fun hentInngangsvilkår(
         personidentifikatorer: List<String>,
         skjæringstidspunkt: LocalDate,
-    ): List<SamlingAvVurderteInngangsvilkår> {
+    ): List<DomeneSamling> {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
         val uri = "${configuration.apiUrl}/vurderte-inngangsvilkar/alle"
         loggDebug("Utfører HTTP POST $uri")
 
         val requestBody =
             objectMapper.writeValueAsString(
-                HentInngangsvilkårRequest(
+                HentInngangsvilkår(
                     personidentifikatorer = personidentifikatorer,
                     skjæringstidspunkt = skjæringstidspunkt,
                 ),
@@ -67,41 +69,38 @@ class SpillkarClientInngangsvilkårHenter(
     }
 }
 
-private fun SamlingAvVurderteInngangsvilkårDto.tilDomene() =
-    SamlingAvVurderteInngangsvilkår(
+private fun SamlingAvVurderteInngangsvilkår.tilDomene() =
+    DomeneSamling(
         samlingAvVurderteInngangsvilkårId = samlingAvVurderteInngangsvilkårId,
         versjon = versjon,
         skjæringstidspunkt = skjæringstidspunkt,
         vurderteInngangsvilkår = vurderteInngangsvilkår.map { it.tilDomene() },
     )
 
-private fun VurdertInngangsvilkårDto.tilDomene(): VurdertInngangsvilkår =
-    when {
-        manuellVurdering != null && automatiskVurdering != null ->
-            throw IllegalArgumentException("VurdertInngangsvilkår har både manuellVurdering og automatiskVurdering for vilkårskode=$vilkårskode, det skal ikke skje")
-
-        manuellVurdering != null ->
-            VurdertInngangsvilkår.ManueltVurdertInngangsvilkår(
+private fun VurdertInngangsvilkårFelles.tilDomene(): DomeneVurdertInngangsvilkår =
+    when (this) {
+        is AutomatiskVurdertInngangsvilkårDetaljer ->
+            DomeneVurdertInngangsvilkår.AutomatiskVurdertInngangsvilkår(
                 vilkårskode = vilkårskode,
                 vurderingskode = vurderingskode,
-                tidspunkt = tidspunkt,
-                navident = manuellVurdering.navident,
-                begrunnelse = manuellVurdering.begrunnelse,
-            )
-
-        automatiskVurdering != null ->
-            VurdertInngangsvilkår.AutomatiskVurdertInngangsvilkår(
-                vilkårskode = vilkårskode,
-                vurderingskode = vurderingskode,
-                tidspunkt = tidspunkt,
+                tidspunkt = tidspunkt.toInstant(),
                 automatiskVurdering =
-                    AutomatiskVurdering(
+                    DomeneAutomatiskVurdering(
                         system = automatiskVurdering.system,
                         versjon = automatiskVurdering.versjon,
                         grunnlagsdata = automatiskVurdering.grunnlagsdata,
                     ),
             )
 
+        is ManueltVurdertInngangsvilkårDetaljer ->
+            DomeneVurdertInngangsvilkår.ManueltVurdertInngangsvilkår(
+                vilkårskode = vilkårskode,
+                vurderingskode = vurderingskode,
+                tidspunkt = tidspunkt.toInstant(),
+                navident = manuellVurdering.navident,
+                begrunnelse = manuellVurdering.begrunnelse,
+            )
+
         else ->
-            throw IllegalArgumentException("VurdertInngangsvilkår mangler både manuellVurdering og automatiskVurdering for vilkårskode=$vilkårskode")
+            throw IllegalArgumentException("Ukjent VurdertInngangsvilkårFelles-type: ${this::class.simpleName} for vilkårskode=$vilkårskode")
     }

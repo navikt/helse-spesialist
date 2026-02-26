@@ -44,6 +44,7 @@ class SpillkarClientInngangsvilkårHenterTest {
                       "skjæringstidspunkt": "2021-01-01",
                       "vurderteInngangsvilkår": [
                         {
+                          "vurderingstype": "manuell",
                           "vilkårskode": "MEDLEMSKAP",
                           "vurderingskode": "MEDLEMSKAP_JA",
                           "tidspunkt": "$tidspunkt",
@@ -92,6 +93,7 @@ class SpillkarClientInngangsvilkårHenterTest {
                       "skjæringstidspunkt": "2021-01-01",
                       "vurderteInngangsvilkår": [
                         {
+                          "vurderingstype": "automatisk",
                           "vilkårskode": "ALDER",
                           "vurderingskode": "ALDER_OK",
                           "tidspunkt": "$tidspunkt",
