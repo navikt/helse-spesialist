@@ -1,0 +1,14 @@
+package no.nav.helse.spesialist.bootstrap.context
+
+import java.util.UUID
+
+data class TestContext(
+    val person: Person = Person(),
+    val arbeidsgiver: Arbeidsgiver = Arbeidsgiver(),
+    val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+    val vedtaksperioder: MutableList<Vedtaksperiode> = mutableListOf(Vedtaksperiode(arbeidsgiver = arbeidsgiver)),
+) {
+    fun leggTilVedtaksperiode() {
+        vedtaksperioder.add(Vedtaksperiode(arbeidsgiver = arbeidsgiver))
+    }
+}

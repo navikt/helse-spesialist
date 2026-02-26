@@ -1,10 +1,16 @@
 package no.nav.helse.spesialist.bootstrap
 
+import io.ktor.server.application.ApplicationStarted
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.rapids_rivers.NaisEndpoints
+import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
+import no.nav.helse.spesialist.bootstrap.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
@@ -16,6 +22,12 @@ import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixt
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
 fun main() {
+    val testRapid = LoopbackTestRapid()
+    val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
+    val spleisStub =
+        SpleisStub(testRapid, ClientSpleisModuleIntegrationTestFixture.wireMockServer).also {
+            it.registerOn(testRapid)
+        }
     val rapidApp = RapidApp()
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
@@ -62,10 +74,33 @@ fun main() {
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             ),
-        rapidsConnection =
-            KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
-                rapidApp.ktorSetupCallback(ktorApplication)
-                apiModuleIntegrationTestFixture.addAdditionalRoutings(ktorApplication)
+        rapidsConnection = testRapid,
+    )
+
+    ktorApplication(
+        meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+        naisEndpoints = NaisEndpoints.Default,
+        port = 8080,
+        aliveCheck = { true },
+        readyCheck = { true },
+        preStopHook = { },
+        cioConfiguration = { },
+        modules =
+            listOf {
+                rapidApp.ktorSetupCallback(this)
+                apiModuleIntegrationTestFixture.addAdditionalRoutings(this)
+                this.monitor.subscribe(ApplicationStarted) {
+                    val scenario =
+                        Scenario(
+                            spleisStub,
+                            behovLøserStub,
+                            testRapid,
+                            dbModule = DBTestFixture.module,
+                        )
+                    scenario.risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+                    scenario.søknadOgGodkjenningbehovKommerInn()
+                    spleisStub.stubSnapshotForPerson(scenario.testContext)
+                }
                 println(
                     """
                     
@@ -75,5 +110,5 @@ fun main() {
                     """.trimIndent(),
                 )
             },
-    )
+    ).also { it.start() }
 }
