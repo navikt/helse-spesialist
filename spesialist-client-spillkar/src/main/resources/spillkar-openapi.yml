@@ -13,97 +13,97 @@ servers:
     description: Test
   - url: http://localhost:8080
     description: Lokalt
-  
+
 tags:
   - name: Hent inngangsvilkår
   - name: Send inn vurderinger av inngangsvilkår
 
 paths:
-    /vurderte-inngangsvilkar/alle:
-      post:
-        summary: Henter ut alle samlinger av inngangsvilkår gjort på personen på et gitt skjæringstidspunkt
-        tags:
-          - Hent inngangsvilkår
-        description: |-
-          - Speilvendt henter ut alle samlinger av inngangsvilkår for å vise historikk i Speil.
-          - Det må være et on-behalf-of-token fra saksbehandler.
-        requestBody:
+  /vurderte-inngangsvilkar/alle:
+    post:
+      summary: Henter ut alle samlinger av inngangsvilkår gjort på personen på et gitt skjæringstidspunkt
+      tags:
+        - Hent inngangsvilkår
+      description: |-
+        - Speilvendt henter ut alle samlinger av inngangsvilkår for å vise historikk i Speil.
+        - Det må være et on-behalf-of-token fra saksbehandler.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HentInngangsvilkår'
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HentInngangsvilkår'
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/SamlingAvVurderteInngangsvilkårResponse'
+                $ref: '#/components/schemas/SamlingAvVurderteInngangsvilkårResponse'
 
-    /vurderte-inngangsvilkar/gjeldende:
-      post:
-        summary: Henter ut den gjeldende samlingen av inngangsvilkår gjort på personen på et gitt skjæringstidspunkt
-        tags:
-          - Hent inngangsvilkår
-        description: |-
-          - Spleis sender ut et behov om vurderte inngangsvilkår. 
-          - Den asynkrone biten av Spillkar løser dette behovet ved å requeste dette endepunktet.
-          - Dette endepunktet skal kreve en rolle som bare den asynkrone biten av Spillkar har. 
-          - Løsningen på behovet er en-til-en med responsen på dette endepunktet.
-        requestBody:
+  /vurderte-inngangsvilkar/gjeldende:
+    post:
+      summary: Henter ut den gjeldende samlingen av inngangsvilkår gjort på personen på et gitt skjæringstidspunkt
+      tags:
+        - Hent inngangsvilkår
+      description: |-
+        - Spleis sender ut et behov om vurderte inngangsvilkår. 
+        - Den asynkrone biten av Spillkar løser dette behovet ved å requeste dette endepunktet.
+        - Dette endepunktet skal kreve en rolle som bare den asynkrone biten av Spillkar har. 
+        - Løsningen på behovet er en-til-en med responsen på dette endepunktet.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HentInngangsvilkår'
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HentInngangsvilkår'
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/GjeldendeSamlingAvVurderteInngangsvilkår'
+                $ref: '#/components/schemas/GjeldendeSamlingAvVurderteInngangsvilkår'
 
-    /vurderte-inngangsvilkar/manuelle-vurderinger:
-      post:
-        summary: Saksbehandler vurderer ett eller flere inngangsvilkår
-        tags:
-          - Send inn vurderinger av inngangsvilkår
-        description: |-
-          - Brukes når saksbehandler manuelt har vurdert ett eller flere inngangsvilkår.
-          - Det må være et on-behalf-of-token hvor vi fisker ut navident.
-          - Spillkar sørger for at det sendes ut en melding på kafka om at det foreligger nye vilkår på skjæringstidspunktet for personen.
-          - Spleis lytter på denne meldingen og reberegner perioder fra og med skjæringstidspunktet.
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ManueltVurderteInngangsvilkår'
-        responses:
-          '204':
-            description: No content
+  /vurderte-inngangsvilkar/manuelle-vurderinger:
+    post:
+      summary: Saksbehandler vurderer ett eller flere inngangsvilkår
+      tags:
+        - Send inn vurderinger av inngangsvilkår
+      description: |-
+        - Brukes når saksbehandler manuelt har vurdert ett eller flere inngangsvilkår.
+        - Det må være et on-behalf-of-token hvor vi fisker ut navident.
+        - Spillkar sørger for at det sendes ut en melding på kafka om at det foreligger nye vilkår på skjæringstidspunktet for personen.
+        - Spleis lytter på denne meldingen og reberegner perioder fra og med skjæringstidspunktet.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManueltVurderteInngangsvilkår'
+      responses:
+        '204':
+          description: No content
 
-    /vurderte-inngangsvilkar/automatiske-vurderinger:
-      post:
-        summary: Datamaskinen vurderer ett eller flere inngangsvilkår
-        tags:
-          - Send inn vurderinger av inngangsvilkår
-        description: |-
-          - Brukes av Spleis når automatiske vurderinger av inngangsvilkår har blitt gjort.
-          - Spleis sender ut en melding på rapiden som den asynkrone av Spillkar lytter på, og requester dette endepunktet.
-        requestBody:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AutomatiskVurderteInngangsvilkår'
-        responses:
-          '204':
-            description: No content
+  /vurderte-inngangsvilkar/automatiske-vurderinger:
+    post:
+      summary: Datamaskinen vurderer ett eller flere inngangsvilkår
+      tags:
+        - Send inn vurderinger av inngangsvilkår
+      description: |-
+        - Brukes av Spleis når automatiske vurderinger av inngangsvilkår har blitt gjort.
+        - Spleis sender ut en melding på rapiden som den asynkrone av Spillkar lytter på, og requester dette endepunktet.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomatiskVurderteInngangsvilkår'
+      responses:
+        '204':
+          description: No content
 
 components:
   schemas:
     HentInngangsvilkår:
       type: object
-      required: ["personidentifikatorer", "skjæringstidspunkt"]
+      required: [ "personidentifikatorer", "skjæringstidspunkt" ]
       properties:
         personidentifikatorer:
           type: array
@@ -118,7 +118,7 @@ components:
 
     ManueltVurderteInngangsvilkår:
       type: object
-      required: ["personidentifikator", "skjæringstidspunkt", "versjon", "vurderteInngangsvilkår"]
+      required: [ "personidentifikator", "skjæringstidspunkt", "versjon", "vurderteInngangsvilkår" ]
       properties:
         personidentifikator:
           type: string
@@ -139,7 +139,7 @@ components:
 
     AutomatiskVurderteInngangsvilkår:
       type: object
-      required: ["personidentifikator", "skjæringstidspunkt", "vurderteInngangsvilkår"]
+      required: [ "personidentifikator", "skjæringstidspunkt", "vurderteInngangsvilkår" ]
       properties:
         personidentifikator:
           type: string
@@ -163,7 +163,7 @@ components:
         mapping:
           automatisk: '#/components/schemas/AutomatiskVurdertInngangsvilkårDetaljer'
           manuell: '#/components/schemas/ManueltVurdertInngangsvilkårDetaljer'
-      required: ["vurderingstype", "vilkårskode", "tidspunkt"]
+      required: [ "vurderingstype", "vilkårskode", "tidspunkt" ]
       properties:
         vurderingstype:
           type: string
@@ -190,7 +190,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/VurdertInngangsvilkårFelles'
         - type: object
-          required: ["automatiskVurdering"]
+          required: [ "automatiskVurdering" ]
           properties:
             automatiskVurdering:
               $ref: '#/components/schemas/AutomatiskVurdering'
@@ -199,14 +199,14 @@ components:
       allOf:
         - $ref: '#/components/schemas/VurdertInngangsvilkårFelles'
         - type: object
-          required: ["manuellVurdering"]
+          required: [ "manuellVurdering" ]
           properties:
             manuellVurdering:
               $ref: '#/components/schemas/ManuellVurdering'
 
     ManuellVurdering:
       type: object
-      required: ["navident", "begrunnelse"]
+      required: [ "navident", "begrunnelse" ]
       description: Vurdert manuelt av saksbehandler
       properties:
         navident:
@@ -218,7 +218,7 @@ components:
 
     MinimalVurdertInngangsvilkår:
       type: object
-      required: ["vilkårskode"]
+      required: [ "vilkårskode" ]
       properties:
         vilkårskode:
           type: string
@@ -231,7 +231,7 @@ components:
 
     ManueltVurdertInngangsvilkår:
       type: object
-      required: ["vilkårskode", "vurderingskode", "tidspunkt", "begrunnelse"]
+      required: [ "vilkårskode", "vurderingskode", "tidspunkt", "begrunnelse" ]
       properties:
         tidspunkt:
           type: string
@@ -251,7 +251,7 @@ components:
 
     AutomatiskVurdertInngangsvilkår:
       type: object
-      required: ["vilkårskode", "tidspunkt", "automatiskVurdering"]
+      required: [ "vilkårskode", "tidspunkt", "automatiskVurdering" ]
       properties:
         tidspunkt:
           type: string
@@ -311,7 +311,7 @@ components:
     AutomatiskVurdering:
       type: object
       description: Vurdert automatisk av noen
-      required: ["system", "versjon", "grunnlagsdata"]
+      required: [ "system", "versjon", "grunnlagsdata" ]
       properties:
         system:
           type: string
