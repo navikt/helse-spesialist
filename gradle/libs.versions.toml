@@ -134,5 +134,4 @@ smiley4-ktor-openapi-tools = [
 ]
 
 [plugins]
-graphql = { id = "com.expediagroup.graphql", version.ref = "graphqlKotlin" }
 openapi-generator = { id = "org.openapi.generator", version.ref = "openApiGenerator" }
