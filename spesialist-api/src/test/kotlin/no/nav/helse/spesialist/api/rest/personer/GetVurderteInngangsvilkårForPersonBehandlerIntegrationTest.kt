@@ -52,6 +52,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val samlingId = UUID.randomUUID()
         val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
+        val vurderingId = UUID.randomUUID()
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(listOf(person.id.value, person.id.value.reversed()), skjæringstidspunkt)
         } returns listOf(
@@ -66,6 +67,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         tidspunkt = tidspunkt,
                         navident = "A123456",
                         begrunnelse = "Begrunnelse for vurdering",
+                        id = vurderingId,
                     ),
                 ),
             ),
@@ -85,6 +87,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                 "skjæringstidspunkt": "2024-01-01",
                 "vurderteInngangsvilkår": [
                   {
+                    "id": "$vurderingId",           
                     "vilkårskode": "8-2",
                     "vurderingskode": "OPPFYLT",
                     "manuellVurdering": {
@@ -111,6 +114,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val samlingId = UUID.randomUUID()
         val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
 
+        val vurderingId = UUID.randomUUID()
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(any(), skjæringstidspunkt)
         } returns listOf(
@@ -123,6 +127,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         vilkårskode = "8-4",
                         vurderingskode = null,
                         tidspunkt = tidspunkt,
+                        id = vurderingId,
                         automatiskVurdering = AutomatiskVurdering(
                             system = "spleis",
                             versjon = "1.0",
@@ -147,6 +152,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                 "skjæringstidspunkt": "2024-01-01",
                 "vurderteInngangsvilkår": [
                   {
+                    "id": "$vurderingId",
                     "vilkårskode": "8-4",
                     "vurderingskode": null,
                     "automatiskVurdering": {

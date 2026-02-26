@@ -12,11 +12,13 @@ data class SamlingAvVurderteInngangsvilkår(
 )
 
 sealed class VurdertInngangsvilkår {
+    abstract val id: UUID
     abstract val vilkårskode: String
     abstract val vurderingskode: String?
     abstract val tidspunkt: Instant
 
     data class ManueltVurdertInngangsvilkår(
+        override val id: UUID,
         override val vilkårskode: String,
         override val vurderingskode: String?,
         override val tidspunkt: Instant,
@@ -25,6 +27,7 @@ sealed class VurdertInngangsvilkår {
     ) : VurdertInngangsvilkår()
 
     data class AutomatiskVurdertInngangsvilkår(
+        override val id: UUID,
         override val vilkårskode: String,
         override val vurderingskode: String?,
         override val tidspunkt: Instant,

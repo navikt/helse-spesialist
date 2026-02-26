@@ -76,6 +76,7 @@ private fun VurdertInngangsvilkår.tilApiVurdertInngangsvilkår(): ApiVurdertInn
     when (this) {
         is VurdertInngangsvilkår.AutomatiskVurdertInngangsvilkår ->
             ApiVurdertInngangsvilkår.Automatisk(
+                id = id,
                 vilkårskode = vilkårskode,
                 vurderingskode = vurderingskode,
                 tidspunkt = tidspunkt,
@@ -88,6 +89,7 @@ private fun VurdertInngangsvilkår.tilApiVurdertInngangsvilkår(): ApiVurdertInn
             )
         is VurdertInngangsvilkår.ManueltVurdertInngangsvilkår ->
             ApiVurdertInngangsvilkår.Manuell(
+                id = id,
                 vilkårskode = vilkårskode,
                 vurderingskode = vurderingskode,
                 tidspunkt = tidspunkt,

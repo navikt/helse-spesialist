@@ -48,6 +48,7 @@ class SpillkarClientInngangsvilkårHenterTest {
                           "vilkårskode": "MEDLEMSKAP",
                           "vurderingskode": "MEDLEMSKAP_JA",
                           "tidspunkt": "$tidspunkt",
+                          "id": "${UUID.randomUUID()}",
                           "manuellVurdering": {
                             "navident": "P31337",
                             "begrunnelse": "Dokumentasjon foreligger"
@@ -97,6 +98,7 @@ class SpillkarClientInngangsvilkårHenterTest {
                           "vilkårskode": "ALDER",
                           "vurderingskode": "ALDER_OK",
                           "tidspunkt": "$tidspunkt",
+                          "id": "${UUID.randomUUID()}",
                           "automatiskVurdering": {
                             "system": "Spleis",
                             "versjon": "2026.02.19-10.07-793bcfe",

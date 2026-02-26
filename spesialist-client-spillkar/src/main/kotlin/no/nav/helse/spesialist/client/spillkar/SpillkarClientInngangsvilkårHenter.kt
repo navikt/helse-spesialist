@@ -81,6 +81,7 @@ private fun VurdertInngangsvilk책rFelles.tilDomene(): DomeneVurdertInngangsvilk�
     when (this) {
         is AutomatiskVurdertInngangsvilk책rDetaljer ->
             DomeneVurdertInngangsvilk책r.AutomatiskVurdertInngangsvilk책r(
+                id = id,
                 vilk책rskode = vilk책rskode,
                 vurderingskode = vurderingskode,
                 tidspunkt = tidspunkt.toInstant(),
@@ -94,6 +95,7 @@ private fun VurdertInngangsvilk책rFelles.tilDomene(): DomeneVurdertInngangsvilk�
 
         is ManueltVurdertInngangsvilk책rDetaljer ->
             DomeneVurdertInngangsvilk책r.ManueltVurdertInngangsvilk책r(
+                id = id,
                 vilk책rskode = vilk책rskode,
                 vurderingskode = vurderingskode,
                 tidspunkt = tidspunkt.toInstant(),

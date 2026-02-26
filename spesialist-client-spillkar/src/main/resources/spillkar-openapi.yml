@@ -163,7 +163,7 @@ components:
         mapping:
           automatisk: '#/components/schemas/AutomatiskVurdertInngangsvilkårDetaljer'
           manuell: '#/components/schemas/ManueltVurdertInngangsvilkårDetaljer'
-      required: [ "vurderingstype", "vilkårskode", "tidspunkt" ]
+      required: [ "vurderingstype", "vilkårskode", "tidspunkt", "id" ]
       properties:
         vurderingstype:
           type: string

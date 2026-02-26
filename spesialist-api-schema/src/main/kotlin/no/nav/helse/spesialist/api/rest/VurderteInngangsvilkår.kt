@@ -32,6 +32,7 @@ data class ApiSamlingAvVurderteInngangsvilkår(
 @JsonClassDiscriminator("type")
 @Serializable
 sealed interface ApiVurdertInngangsvilkår {
+    val id: UUID
     val vilkårskode: String
     val vurderingskode: String?
     val tidspunkt: Instant
@@ -39,6 +40,7 @@ sealed interface ApiVurdertInngangsvilkår {
     @SerialName("AUTOMATISK")
     @Serializable
     data class Automatisk(
+        override val id: UUID,
         override val vilkårskode: String,
         override val vurderingskode: String?,
         override val tidspunkt: Instant,
@@ -48,6 +50,7 @@ sealed interface ApiVurdertInngangsvilkår {
     @SerialName("MANUELL")
     @Serializable
     data class Manuell(
+        override val id: UUID,
         override val vilkårskode: String,
         override val vurderingskode: String?,
         override val tidspunkt: Instant,
