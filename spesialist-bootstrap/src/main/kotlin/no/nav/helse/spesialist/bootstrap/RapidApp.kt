@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
+import no.nav.helse.spesialist.valkey.ValkeyModule
 import java.net.URI
 import java.util.UUID
 
@@ -96,6 +97,15 @@ fun main() {
                         ignorerMeldingerForUkjentePersoner =
                             env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER"),
                     ),
+                valkey =
+                    ValkeyModule.Configuration(
+                        ValkeyModule.Configuration.Valkey(
+                            host = env.getValue("VALKEY_HOST_SPESIALIST_CACHE"),
+                            port = env.getInt("VALKEY_PORT_SPESIALIST_CACHE"),
+                            username = env.getValue("VALKEY_USERNAME_SPESIALIST_CACHE"),
+                            password = env.getValue("VALKEY_PASSWORD_SPESIALIST_CACHE"),
+                        ),
+                    ),
                 tilgangsgrupperTilBrukerroller =
                     TilgangsgrupperTilBrukerroller(
                         næringsdrivendeBeta = env.getUUIDList("ROLLE_SELVSTENDIG_BETA"),
@@ -130,6 +140,8 @@ fun main() {
 private fun Map<String, String>.getUUIDList(key: String): List<UUID> = this[key]?.split(",")?.map { UUID.fromString(it.trim()) } ?: emptyList()
 
 private fun Map<String, String>.getBoolean(key: String): Boolean = this[key].toBoolean()
+
+private fun Map<String, String>.getInt(key: String): Int = getValue(key).toInt()
 
 class RapidApp {
     class Modules(
@@ -179,6 +191,12 @@ class RapidApp {
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
             )
 
+        val valkeyModule =
+            ValkeyModule(
+                configuration = configuration.valkey,
+                personinfoHenter = clientSpeedModule.personinfoHenter,
+            )
+
         val dbModule = DBModule(configuration.db)
 
         val kafkaModule =
@@ -209,7 +227,7 @@ class RapidApp {
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 alleIdenterHenter = clientSpeedModule.alleIdenterHenter,
-                personinfoHenter = clientSpeedModule.personinfoHenter,
+                personinfoHenter = valkeyModule.cacheEnabledPersoninfoHenter,
             )
 
         kafkaModule.kobleOppRivers()

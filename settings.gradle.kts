@@ -10,6 +10,7 @@ include(
     ":clients:spesialist-client-spillkar",
     ":clients:spesialist-client-spiskammerset",
     ":clients:spesialist-client-spleis",
+    "spesialist-valkey",
     "spesialist-db-migrations",
     "spesialist-db",
     "spesialist-kafka",

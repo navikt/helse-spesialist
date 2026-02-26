@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskamme
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
+import no.nav.helse.spesialist.valkey.ValkeyModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 
 fun main() {
@@ -34,6 +35,7 @@ fun main() {
                 clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,
                 kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
+                valkey = ValkeyModule.Configuration(valkey = null),
                 environmentToggles =
                     object : EnvironmentToggles {
                         override val kanBeslutteEgneSaker = false

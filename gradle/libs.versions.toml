@@ -77,6 +77,8 @@ tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-
 testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
 testcontainers-postgres = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 
+valkey-java = "io.valkey:valkey-java:5.5.0"
+
 wiremock = "org.wiremock:wiremock-jetty12:3.13.2"
 
 [bundles]

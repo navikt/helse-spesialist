@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
+import no.nav.helse.spesialist.valkey.ValkeyModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import kotlin.random.Random
 
@@ -77,6 +78,7 @@ object E2ETestApplikasjon {
                     tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
                     clientSpeed = ClientSpeedModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
+                    valkey = ValkeyModule.Configuration(valkey = null),
                 ),
             rapidsConnection = testRapid,
         )

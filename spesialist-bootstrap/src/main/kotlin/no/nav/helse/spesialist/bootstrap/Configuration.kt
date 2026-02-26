@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
+import no.nav.helse.spesialist.valkey.ValkeyModule
 
 data class Configuration(
     val api: ApiModule.Configuration,
@@ -24,6 +25,7 @@ data class Configuration(
     val clientSpleis: ClientSpleisModule.Configuration,
     val db: DBModule.Configuration,
     val kafka: KafkaModule.Configuration,
+    val valkey: ValkeyModule.Configuration,
     val environmentToggles: EnvironmentToggles,
     val stikkprøver: Stikkprøver,
     val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,

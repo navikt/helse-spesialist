@@ -8,6 +8,7 @@ dependencies {
     api(project(":clients:spesialist-client-spleis"))
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
+    api(project(":spesialist-valkey"))
 
     implementation(libs.rapidsAndRivers)
 
