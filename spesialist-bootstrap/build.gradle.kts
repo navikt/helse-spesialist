@@ -12,6 +12,11 @@ dependencies {
 
     implementation(libs.rapidsAndRivers)
 
+    testImplementation(libs.kotliquery)
+    testImplementation(libs.wiremock)
+    testImplementation(libs.mockOauth2Server)
+
+    testImplementation(testFixtures(project(":spesialist-domain")))
     testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))
@@ -22,7 +27,6 @@ dependencies {
     testImplementation(testFixtures(project(":clients:spesialist-client-spiskammerset")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spleis")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
-    testImplementation(libs.mockOauth2Server)
 }
 
 tasks.withType<AbstractTestTask>().configureEach {
