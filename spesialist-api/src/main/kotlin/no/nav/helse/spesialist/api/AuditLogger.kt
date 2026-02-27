@@ -20,42 +20,21 @@ internal object AuditLogger {
     fun loggOk(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
-        operation: String,
     ) {
-        logg(Level.INFO, saksbehandler, identitetsnummer.value, operation, "")
-    }
-
-    fun loggPersonIkkeFunnet(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-        msg: String,
-        operation: String,
-    ) {
-        loggPersonIkkeFunnet(saksbehandler, identitetsnummer.value, msg, operation)
-    }
-
-    fun loggPersonIkkeFunnet(
-        saksbehandler: Saksbehandler,
-        duid: String,
-        msg: String,
-        operation: String,
-    ) {
-        logg(Level.WARN, saksbehandler, duid, operation, " msg=$msg")
+        logg(Level.INFO, saksbehandler, identitetsnummer.value, "")
     }
 
     fun loggManglendeTilgang(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
-        operation: String,
     ) {
-        logg(Level.WARN, saksbehandler, identitetsnummer.value, operation, " flexString1=Deny")
+        logg(Level.WARN, saksbehandler, identitetsnummer.value, " flexString1=Deny")
     }
 
     private fun logg(
         level: Level,
         saksbehandler: Saksbehandler,
         duid: String,
-        operation: String,
         suffix: String,
     ) {
         teller.increment()
@@ -63,7 +42,6 @@ internal object AuditLogger {
             "end=${System.currentTimeMillis()}" +
                 " suid=${saksbehandler.ident.value}" +
                 " duid=$duid" +
-                " operation=$operation" +
                 suffix
         auditLog.atLevel(level).log(message)
         teamLogs.debug("audit-logget: $level - $message")

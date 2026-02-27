@@ -169,12 +169,6 @@ class PersonQueryHandler(
             transaction.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
                 ?: run {
                     loggInfo("Fant ikke person basert på personPseudoId: ${personPseudoId.value}")
-                    AuditLogger.loggPersonIkkeFunnet(
-                        saksbehandler = saksbehandler,
-                        duid = personPseudoId.value.toString(),
-                        msg = "Finner ikke data for person med identifikator ${personPseudoId.value}",
-                        operation = AUDIT_LOG_OPERATION,
-                    )
                     notFound("PseudoId er ugyldig eller utgått")
                 }
         )
@@ -194,7 +188,7 @@ class PersonQueryHandler(
 
         val personEntity =
             transaction.personRepository.finn(identitetsnummer)
-                ?: personIkkeFunnet(saksbehandler, identitetsnummer)
+                ?: notFound("Fant ikke data for person")
 
         if (!personEntity.harDataNødvendigForVisning()) {
             if (!transaction.personKlargjoresDao.klargjøringPågår(identitetsnummer.value)) {
@@ -232,11 +226,11 @@ class PersonQueryHandler(
                     ?: null.also { loggWarn("Fikk ikke personsnapshot fra Spleis") }
             } catch (e: Exception) {
                 loggError("Klarte ikke hente snapshot fra Spleis", e, "identitetsnummer" to identitetsnummer)
-                klarteIkkeHentePerson(saksbehandler, identitetsnummer)
+                internalServerError("Feil ved henting av snapshot for person")
             }
 
         if (snapshot == null) {
-            personIkkeFunnet(saksbehandler, identitetsnummer)
+            notFound("Fant ikke data for person")
         }
 
         if (snapshot.fodselsnummer != identitetsnummer.value) {
@@ -870,7 +864,6 @@ class PersonQueryHandler(
             AuditLogger.loggOk(
                 saksbehandler = saksbehandler,
                 identitetsnummer = identitetsnummer,
-                operation = AUDIT_LOG_OPERATION,
             )
             byggRespons(it)
         }
@@ -1050,19 +1043,6 @@ class PersonQueryHandler(
         )
     }
 
-    private fun klarteIkkeHentePerson(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-    ): Nothing {
-        AuditLogger.loggPersonIkkeFunnet(
-            saksbehandler = saksbehandler,
-            identitetsnummer = identitetsnummer,
-            msg = "Feil ved henting av snapshot for person",
-            operation = AUDIT_LOG_OPERATION,
-        )
-        internalServerError("Feil ved henting av snapshot for person")
-    }
-
     private fun manglerTilgangTilPerson(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
@@ -1070,7 +1050,6 @@ class PersonQueryHandler(
         AuditLogger.loggManglendeTilgang(
             saksbehandler = saksbehandler,
             identitetsnummer = identitetsnummer,
-            operation = AUDIT_LOG_OPERATION,
         )
         forbidden("Har ikke tilgang til person")
     }
@@ -1082,26 +1061,8 @@ class PersonQueryHandler(
         AuditLogger.loggManglendeTilgang(
             saksbehandler = saksbehandler,
             identitetsnummer = identitetsnummer,
-            operation = AUDIT_LOG_OPERATION,
         )
         conflict("Personen er ikke klar for visning ennå")
-    }
-
-    private fun personIkkeFunnet(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-    ): Nothing {
-        AuditLogger.loggPersonIkkeFunnet(
-            saksbehandler = saksbehandler,
-            identitetsnummer = identitetsnummer,
-            msg = "Finner ikke data for person med identifikator ${identitetsnummer.value}",
-            operation = AUDIT_LOG_OPERATION,
-        )
-        notFound("Fant ikke data for person")
-    }
-
-    private companion object {
-        const val AUDIT_LOG_OPERATION = "PersonQuery"
     }
 }
 

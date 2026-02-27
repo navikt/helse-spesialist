@@ -67,15 +67,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         // Then
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery",
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
             Level.INFO,
         )
     }
 
     @Test
-    @ResourceLock("auditlogg-lytter")
     fun `får 404-feil når personen man søker etter ikke finnes`() {
-        val logglytter = Logglytter()
         val personPseudoId = PersonPseudoId.ny().value
         val body = runQuery("""{ person(personPseudoId: "$personPseudoId") { aktorId } }""")
 
@@ -83,10 +81,6 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(
             "Exception while fetching data (/person) : PseudoId er ugyldig eller utgått",
             body["errors"].first()["message"].asText(),
-        )
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$personPseudoId operation=PersonQuery msg=Finner ikke data for person med identifikator $personPseudoId",
-            Level.WARN,
         )
     }
 
@@ -99,22 +93,6 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(
             "Exception while fetching data (/person) : Ugyldig format på personPseudoId",
             body["errors"].first()["message"].asText(),
-        )
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `får 404-feil når personen ikke har noen arbeidsgivere`() {
-        val logglytter = Logglytter()
-        mockSnapshot(arbeidsgivere = emptyList())
-        val pseudoId = opprettPersonPseudoId()
-
-        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
-
-        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery msg=Finner ikke data for person med identifikator $FØDSELSNUMMER",
-            Level.WARN,
         )
     }
 
@@ -134,7 +112,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(1, body["data"]["person"]["andreFodselsnummer"].size())
         assertEquals(dNummer, body["data"]["person"]["andreFodselsnummer"][0]["fodselsnummer"].asText())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery",
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
             Level.INFO,
         )
     }
@@ -170,7 +148,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER flexString1=Deny",
             Level.WARN,
         )
     }
@@ -192,7 +170,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery",
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
             Level.INFO,
         )
     }
@@ -209,27 +187,21 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery flexString1=Deny",
+            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER flexString1=Deny",
             Level.WARN,
         )
     }
 
     @Test
-    @ResourceLock("auditlogg-lytter")
     fun `får 501-feil når oppdatering av snapshot feiler`() {
         every { spleisClient.hentPerson(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson())
 
-        val logglytter = Logglytter()
         val pseudoId = opprettPersonPseudoId()
 
         val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
 
         assertEquals(500, body["errors"].first()["extensions"]["code"].asInt())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER operation=PersonQuery msg=Feil ved henting av snapshot for person",
-            Level.WARN,
-        )
     }
 
     @Test
