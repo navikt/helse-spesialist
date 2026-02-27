@@ -12,11 +12,11 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.spesialist.api.AuditLogger
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.graphql.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
@@ -111,7 +111,6 @@ import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.medMdc
-import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
@@ -130,8 +129,6 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import org.slf4j.LoggerFactory
-import org.slf4j.event.Level
 import java.time.LocalDate
 import java.util.UUID
 
@@ -143,8 +140,6 @@ class PersonQueryHandler(
     private val snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
 ) : PersonQuerySchema {
-    private val auditLog = LoggerFactory.getLogger("auditLogger")
-
     override fun person(
         personPseudoId: String,
         env: DataFetchingEnvironment,
@@ -174,10 +169,11 @@ class PersonQueryHandler(
             transaction.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
                 ?: run {
                     loggInfo("Fant ikke person basert på personPseudoId: ${personPseudoId.value}")
-                    auditLoggPersonIkkeFunnet(
+                    AuditLogger.loggPersonIkkeFunnet(
                         saksbehandler = saksbehandler,
                         duid = personPseudoId.value.toString(),
                         msg = "Finner ikke data for person med identifikator ${personPseudoId.value}",
+                        operation = AUDIT_LOG_OPERATION,
                     )
                     notFound("PseudoId er ugyldig eller utgått")
                 }
@@ -871,7 +867,11 @@ class PersonQueryHandler(
                     ?.let { jsonString -> tilApiInfotrygdutbetalinger(jsonString) },
             vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },
         ).let {
-            auditLoggOk(saksbehandler, identitetsnummer)
+            AuditLogger.loggOk(
+                saksbehandler = saksbehandler,
+                identitetsnummer = identitetsnummer,
+                operation = AUDIT_LOG_OPERATION,
+            )
             byggRespons(it)
         }
     }
@@ -1054,10 +1054,11 @@ class PersonQueryHandler(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
     ): Nothing {
-        auditLoggPersonIkkeFunnet(
+        AuditLogger.loggPersonIkkeFunnet(
             saksbehandler = saksbehandler,
             identitetsnummer = identitetsnummer,
             msg = "Feil ved henting av snapshot for person",
+            operation = AUDIT_LOG_OPERATION,
         )
         internalServerError("Feil ved henting av snapshot for person")
     }
@@ -1066,7 +1067,11 @@ class PersonQueryHandler(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
     ): Nothing {
-        auditLoggManglendeTilgang(saksbehandler, identitetsnummer)
+        AuditLogger.loggManglendeTilgang(
+            saksbehandler = saksbehandler,
+            identitetsnummer = identitetsnummer,
+            operation = AUDIT_LOG_OPERATION,
+        )
         forbidden("Har ikke tilgang til person")
     }
 
@@ -1074,7 +1079,11 @@ class PersonQueryHandler(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
     ): Nothing {
-        auditLoggManglendeTilgang(saksbehandler, identitetsnummer)
+        AuditLogger.loggManglendeTilgang(
+            saksbehandler = saksbehandler,
+            identitetsnummer = identitetsnummer,
+            operation = AUDIT_LOG_OPERATION,
+        )
         conflict("Personen er ikke klar for visning ennå")
     }
 
@@ -1082,59 +1091,17 @@ class PersonQueryHandler(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
     ): Nothing {
-        auditLoggPersonIkkeFunnet(
+        AuditLogger.loggPersonIkkeFunnet(
             saksbehandler = saksbehandler,
             identitetsnummer = identitetsnummer,
             msg = "Finner ikke data for person med identifikator ${identitetsnummer.value}",
+            operation = AUDIT_LOG_OPERATION,
         )
         notFound("Fant ikke data for person")
     }
 
-    private fun auditLoggOk(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-    ) {
-        auditLogg(saksbehandler, identitetsnummer.value, "", Level.INFO)
-    }
-
-    private fun auditLoggPersonIkkeFunnet(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-        msg: String,
-    ) {
-        auditLoggPersonIkkeFunnet(saksbehandler, identitetsnummer.value, msg)
-    }
-
-    private fun auditLoggPersonIkkeFunnet(
-        saksbehandler: Saksbehandler,
-        duid: String,
-        msg: String,
-    ) {
-        auditLogg(saksbehandler, duid, " msg=$msg", Level.WARN)
-    }
-
-    private fun auditLoggManglendeTilgang(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-    ) {
-        auditLogg(saksbehandler, identitetsnummer.value, " flexString1=Deny", Level.WARN)
-    }
-
-    private fun auditLogg(
-        saksbehandler: Saksbehandler,
-        duid: String,
-        suffix: String,
-        level: Level,
-    ) {
-        auditLogTeller.increment()
-        val message =
-            "end=${System.currentTimeMillis()}" +
-                " suid=${saksbehandler.ident.value}" +
-                " duid=$duid" +
-                " operation=PersonQuery" +
-                suffix
-        auditLog.atLevel(level).log(message)
-        teamLogs.debug("audit-logget: $level - $message")
+    private companion object {
+        const val AUDIT_LOG_OPERATION = "PersonQuery"
     }
 }
 
