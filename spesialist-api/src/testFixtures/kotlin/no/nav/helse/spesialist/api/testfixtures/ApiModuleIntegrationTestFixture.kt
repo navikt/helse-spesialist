@@ -21,11 +21,12 @@ class ApiModuleIntegrationTestFixture(
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
-    val token: String = token(
-        lagSaksbehandler(navn = "En Saksbehandler", epost = "utvikler@nav.no", navIdent = "X123456"),
-        setOf(Tilgang.Les, Tilgang.Skriv),
-        setOf(Brukerrolle.Utvikler)
-    )
+    val token: String get() =
+        token(
+            lagSaksbehandler(navn = "En Saksbehandler", epost = "utvikler@nav.no", navIdent = "X123456"),
+            setOf(Tilgang.Les, Tilgang.Skriv),
+            setOf(Brukerrolle.Utvikler),
+        )
 
     fun token(
         saksbehandler: Saksbehandler,

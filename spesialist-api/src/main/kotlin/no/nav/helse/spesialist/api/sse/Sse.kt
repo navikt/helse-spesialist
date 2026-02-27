@@ -1,18 +1,25 @@
 package no.nav.helse.spesialist.api.sse
 
 import io.github.smiley4.ktoropenapi.documentation
+import io.ktor.server.http.HttpRequestLifecycle
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.routing.Route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggDebug
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Opptegnelse
 import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(sessionFactory: SessionFactory) {
+    install(HttpRequestLifecycle) {
+        cancelCallOnClose = true
+    }
     documentation({
         description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
             " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
@@ -32,6 +39,10 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                 period = 10.seconds
             }
 
+            currentCoroutineContext()[Job]?.invokeOnCompletion {
+                loggDebug("SSE-tilkobling lukket")
+            }
+
             val personPseudoId =
                 call.parameters["personPseudoId"]
                     ?.let { PersonPseudoId.fraString(it) }
@@ -41,10 +52,14 @@ internal fun Route.sse(sessionFactory: SessionFactory) {
                 sessionFactory.transactionalSessionScope {
                     val identitetsnummer =
                         it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                            ?: throw SseException.PersonIkkeFunnet("Fant ikke person med pseudoId: $personPseudoId")
                     val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
                     identitetsnummer to sisteSekvensnummer
                 }
+
+            if (identitetsnummer == null) {
+                loggWarn("SSE-tilkobling forsøkt for personPseudoId uten tilhørende identitetsnummer", "personPseudoId" to personPseudoId.value)
+                return@sse
+            }
             loggDebug("SSE-tilkobling startet", "identitetsnummer" to identitetsnummer.value)
             var sisteSekvensnummer = sisteSekvensnummerVedInitiering
 
