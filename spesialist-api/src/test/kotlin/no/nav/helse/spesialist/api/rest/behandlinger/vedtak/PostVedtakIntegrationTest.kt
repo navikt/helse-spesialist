@@ -236,7 +236,7 @@ class PostVedtakIntegrationTest {
     }
 
     @Test
-    fun `gir bad request hvis oppgaven ikke avventer saksbehandler`() {
+    fun `behandler på nytt hvis oppgaven er i avventer system`() {
         // Given:
         val person = lagPerson().also(sessionContext.personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -250,6 +250,35 @@ class PostVedtakIntegrationTest {
         val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
         sessionContext.oppgaveRepository.lagre(oppgave)
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
+                body = "{}",
+                saksbehandler = saksbehandler,
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+    }
+
+    @Test
+    fun `gir bad request hvis oppgaven er ferdigstilt`() {
+        // Given:
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+        val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
+        oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
+        oppgave.ferdigstill()
+        sessionContext.oppgaveRepository.lagre(oppgave)
+
         // When:
         val response =
             integrationTestFixture.post(
@@ -408,7 +437,7 @@ class PostVedtakIntegrationTest {
     }
 
     @Test
-    fun `gir conflict hvis vedtaket er fattet allerede`() {
+    fun `gir conflict hvis det allerede er fattet vedtak og spleis har behandlet det`() {
         // Given:
         val person = lagPerson().also(sessionContext.personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -424,11 +453,8 @@ class PostVedtakIntegrationTest {
             Vedtak.manueltUtenTotrinnskontroll(
                 behandling.spleisBehandlingId!!,
                 saksbehandler.ident,
-            ),
+            ).also { it.markerSomBehandletAvSpleis() },
         )
-
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
-        sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response =

@@ -14,7 +14,9 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
+import io.ktor.util.collections.ConcurrentSet
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
@@ -28,6 +30,7 @@ class SpleisStub(
     private val wireMockServer: WireMockServer,
 ) {
     private val contextsForFødselsnummer = ConcurrentHashMap<String, TestContext>()
+    private val denylisteForPersoner = ConcurrentSet<String>()
 
     fun init(context: TestContext) {
         contextsForFødselsnummer[context.person.fødselsnummer] = context
@@ -207,6 +210,17 @@ class SpleisStub(
         rapidsConnection.publish(person.fødselsnummer, vedtaksperiodeNyUtbetaling)
     }
 
+    private fun skalSvarePåMeldinger(jsonNode: JsonNode) =
+        !denylisteForPersoner.contains(jsonNode["fødselsnummer"].asText())
+
+    fun ikkeSvarPåMeldingerFor(person: Person) {
+        denylisteForPersoner.add(person.fødselsnummer)
+    }
+
+    fun svarPåMeldingerFor(person: Person) {
+        denylisteForPersoner.remove(person.fødselsnummer)
+    }
+
     private inner class GodkjenningsbehovløsningRiver(
         rapidsConnection: RapidsConnection,
     ) : River.PacketListener {
@@ -223,10 +237,13 @@ class SpleisStub(
             meterRegistry: MeterRegistry,
         ) {
             val jsonNode = objectMapper.readTree(packet.toJson())
+            if (!skalSvarePåMeldinger(jsonNode)) {
+                logg.warn("SpleisStub ignorerer melding:\n${packet.toJson()}")
+                return
+            }
             val fødselsnummer = jsonNode["fødselsnummer"].asText()
             val testContext =
-                contextsForFødselsnummer[fødselsnummer]
-                    ?: error("Ikke initialisert med context for person $fødselsnummer")
+                contextForPerson(fødselsnummer)
             val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
             val vedtaksperiode =
                 testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
@@ -234,6 +251,7 @@ class SpleisStub(
 
             val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
             if (godkjent) {
+                spleisLukkerBehandlingen(vedtaksperiode, testContext.person)
                 utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
                 spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
             } else {
@@ -273,6 +291,16 @@ class SpleisStub(
                 Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode),
             )
         }
+
+        private fun spleisLukkerBehandlingen(
+            vedtaksperiode: Vedtaksperiode,
+            person: Person
+        ) {
+            rapidsConnection.publish(
+                person.fødselsnummer,
+                Meldingsbygger.byggBehandlingLukket(person, vedtaksperiode)
+            )
+        }
     }
 
     private inner class OverstyringRiver(
@@ -295,8 +323,7 @@ class SpleisStub(
             val skjæringstidspunkt = jsonNode["skjæringstidspunkt"].asLocalDate()
             val fødselsnummer = jsonNode["fødselsnummer"].asText()
             val testContext =
-                contextsForFødselsnummer[fødselsnummer]
-                    ?: error("Ikke initialisert med context for person $fødselsnummer")
+                contextForPerson(fødselsnummer)
             val vedtaksperiode =
                 testContext.vedtaksperioder
                     .find { it.skjæringstidspunkt == skjæringstidspunkt }
@@ -346,4 +373,7 @@ class SpleisStub(
             rapidsConnection.publish(person.fødselsnummer, melding)
         }
     }
+
+    private fun contextForPerson(fødselsnummer: String): TestContext = (contextsForFødselsnummer[fødselsnummer]
+        ?: error("Ikke initialisert med context for person $fødselsnummer"))
 }

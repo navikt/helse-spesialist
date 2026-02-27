@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.math.BigDecimal
@@ -422,6 +423,33 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             "system_participating_services",
             "@forårsaket_av",
         )
+    }
+
+    @Test
+    fun `saksbehandler kan forsøke på nytt inntil spleis ser ut til å ha behandlet svar på godkjenningsbehov`() {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        // When:
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerGodkjennerAlleVarsler()
+            val behandlingId = førsteVedtaksperiode().spleisBehandlingId!!
+            spleisIngorererMeldinger()
+            saksbehandlerFatterVedtak(behandlingId, "begrunnelse nummer en")
+            spleisLeserMeldinger()
+            saksbehandlerFatterVedtak(behandlingId, "begrunnelse nummer to")
+            assertThrows<AssertionError> {
+                saksbehandlerFatterVedtak(behandlingId)
+            }.also {
+                assertContains(it.message!!, "Fikk HTTP-kode 409")
+            }
+        }
+
+        // Then:
+        assertEquals(1, meldinger().filter { it["@event_name"].asText() == "vedtak_fattet" }.size)
+        assertEquals("begrunnelse nummer to", vedtakFattetMelding()["begrunnelser"][0]["begrunnelse"].asText())
     }
 
     @ParameterizedTest

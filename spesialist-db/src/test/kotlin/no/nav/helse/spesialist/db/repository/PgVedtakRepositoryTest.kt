@@ -5,10 +5,8 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import org.postgresql.util.PSQLException
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 
 class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
@@ -72,15 +70,23 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `forsøk på å lagre vedtak dobbelt medfører exception`() {
+    fun `oppdaterer vedtak`() {
         // given
         val vedtak = Vedtak.automatisk(lagSpleisBehandlingId())
         repository.lagre(vedtak)
 
+        // when
+        val oppdatertVedtak = Vedtak.manueltUtenTotrinnskontroll(vedtak.id, lagSaksbehandler().ident)
+            .also { it.markerSomBehandletAvSpleis() }
+        repository.lagre(oppdatertVedtak)
+
         // then
-        assertFailsWith<PSQLException> {
-            // when
-            repository.lagre(vedtak)
-        }
+        val funnet = repository.finn(vedtak.id)
+        assertIs<Vedtak.ManueltUtenTotrinnskontroll>(funnet)
+        assertEquals(vedtak.id, funnet.id)
+        assertEqualsByMicrosecond(oppdatertVedtak.tidspunkt, funnet.tidspunkt)
+        assertEquals(true, funnet.behandletAvSpleis)
+        assertEquals(false, vedtak.behandletAvSpleis)
+
     }
 }

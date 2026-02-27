@@ -369,6 +369,15 @@ class Oppgave private constructor(
     }
 
     data object AvventerSystem : Tilstand {
+        override fun avventerSystem(
+            oppgave: Oppgave,
+            ident: NAVIdent,
+            oid: UUID,
+        ) {
+            oppgave.ferdigstiltAvIdent = ident
+            oppgave.ferdigstiltAvOid = oid
+        }
+
         override fun ferdigstill(oppgave: Oppgave) {
             oppgave.nesteTilstand(Ferdigstilt)
         }
