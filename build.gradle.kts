@@ -4,7 +4,7 @@ plugins {
 }
 
 allprojects {
-    group = "no.nav.helse"
+    group = "no.nav.helse.spesialist"
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
