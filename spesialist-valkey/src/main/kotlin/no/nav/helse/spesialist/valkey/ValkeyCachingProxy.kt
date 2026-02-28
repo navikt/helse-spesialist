@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.valkey
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.valkey.DefaultJedisClientConfig
 import io.valkey.HostAndPort
@@ -27,6 +28,7 @@ class ValkeyCachingProxy(
 
     private val objectMapper =
         jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
             .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
@@ -36,7 +38,7 @@ class ValkeyCachingProxy(
         key: String,
         type: TypeReference<T>,
     ): T? =
-        runCatching { objectMapper.readValue(jedisPooled.get(key), type) }
+        runCatching { jedisPooled.get(key)?.let { objectMapper.readValue(it, type) } }
             .getOrElse { throwable ->
                 loggWarn("Feil ved henting / deserialisering av verdi fra Valkey", throwable, "key" to key)
                 null
@@ -59,7 +61,7 @@ class ValkeyCachingProxy(
         timeToLive: Duration,
         loadingFunction: () -> T?,
     ): T? =
-        get(key, type).also { loggDebug("Valkey cache hit", "key" to key) }
+        get(key, type)?.also { loggDebug("Valkey cache hit", "key" to key) }
             ?: run {
                 loggDebug("Valkey cache miss", "key" to key)
                 val value = loadingFunction()
