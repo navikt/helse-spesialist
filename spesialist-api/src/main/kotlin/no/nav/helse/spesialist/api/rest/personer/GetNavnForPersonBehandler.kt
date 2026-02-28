@@ -44,10 +44,13 @@ class GetPersonBehandler(
                     andreIdentitetsnumre =
                         kallKontekst.transaksjon.personRepository
                             .finnAlleMedAktørId(person.aktørId)
+                            .asSequence()
                             .map(Person::id)
                             .filterNot { it == person.id }
                             .map(Identitetsnummer::value)
-                            .toSortedSet(),
+                            .distinct()
+                            .sorted()
+                            .toList(),
                     aktørId = person.aktørId,
                     fornavn = personinfo.fornavn + personinfo.mellomnavn?.let { " $it" }.orEmpty(),
                     etternavn = personinfo.etternavn,

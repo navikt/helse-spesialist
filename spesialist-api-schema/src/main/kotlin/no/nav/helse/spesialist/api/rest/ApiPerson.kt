@@ -14,13 +14,12 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.SortedSet
 import java.util.UUID
 
 @Serializable
 data class ApiPerson(
     val identitetsnummer: String,
-    val andreIdentitetsnumre: SortedSet<String>,
+    val andreIdentitetsnumre: List<String>,
     val aktørId: String,
     val fornavn: String,
     val etternavn: String,
