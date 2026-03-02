@@ -1,26 +1,26 @@
-package no.nav.helse.spesialist.valkey
+package no.nav.helse.spesialist.application
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import java.time.Duration
 
-interface CachingProxy {
-    fun <T : Any> get(
+interface Cache {
+    fun <T : Any> hentGjennomCache(
         key: String,
         type: TypeReference<T>,
         timeToLive: Duration,
-        loadingFunction: () -> T?,
+        hentUtenomCache: () -> T?,
     ): T?
 }
 
-inline fun <reified T : Any> CachingProxy.get(
+inline fun <reified T : Any> Cache.hentGjennomCache(
     key: String,
     timeToLive: Duration,
-    noinline loadFunction: () -> T?,
+    noinline hentUtenomCache: () -> T?,
 ): T? =
-    get(
+    hentGjennomCache(
         key = key,
         type = jacksonTypeRef<T>(),
         timeToLive = timeToLive,
-        loadingFunction = loadFunction,
+        hentUtenomCache = hentUtenomCache,
     )

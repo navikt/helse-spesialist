@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.speed
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -8,6 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import io.mockk.mockk
+import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.domain.Personinfo
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
@@ -77,6 +79,15 @@ class SpeedClientPersoninfoHenterTest {
                     scope = "scoap",
                 ),
             accessTokenGenerator = { "test-token" },
-            environmentToggles = mockk(relaxed = true)
+            environmentToggles = mockk(relaxed = true),
+            cache =
+                object : Cache {
+                    override fun <T : Any> hentGjennomCache(
+                        key: String,
+                        type: TypeReference<T>,
+                        timeToLive: java.time.Duration,
+                        hentUtenomCache: () -> T?,
+                    ) = hentUtenomCache()
+                },
         )
 }

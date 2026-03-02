@@ -3,7 +3,9 @@ package no.nav.helse.spesialist.client.speed
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.application.hentGjennomCache
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.client.speed.dto.PersonRequest
@@ -12,14 +14,22 @@ import no.nav.helse.spesialist.domain.Personinfo
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import java.time.Duration
 import java.util.UUID
 
 class SpeedClientPersoninfoHenter(
     private val configuration: ClientSpeedModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
     private val environmentToggles: EnvironmentToggles,
+    private val cache: Cache,
 ) : PersoninfoHenter {
-    override fun hentPersoninfo(ident: String): Personinfo? {
+    override fun hentPersoninfo(ident: String): Personinfo? =
+        cache
+            .hentGjennomCache<PersonResponse>(key = "personinfo:$ident", timeToLive = Duration.ofHours(24)) {
+                hentFraSpeed(ident)
+            }?.tilPersoninfo()
+
+    private fun hentFraSpeed(ident: String): PersonResponse? {
         val accessToken =
             if (environmentToggles.devGcp) {
                 "whatever-token"
@@ -42,8 +52,7 @@ class SpeedClientPersoninfoHenter(
                 when (response.code) {
                     200 -> {
                         val responseBody = EntityUtils.toString(response.entity)
-                        val dto = objectMapper.readValue(responseBody, PersonResponse::class.java)
-                        dto.tilPersoninfo()
+                        objectMapper.readValue(responseBody, PersonResponse::class.java)
                     }
 
                     404 -> null

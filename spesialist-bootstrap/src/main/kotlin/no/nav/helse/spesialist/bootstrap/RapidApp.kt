@@ -166,11 +166,17 @@ class RapidApp {
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
             )
 
+        val valkeyModule =
+            ValkeyModule(
+                configuration = configuration.valkey,
+            )
+
         val clientSpeedModule =
             ClientSpeedModule(
                 configuration = configuration.clientSpeed,
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
                 environmentToggles = configuration.environmentToggles,
+                cache = valkeyModule.cache,
             )
 
         val clientSpillkarModule =
@@ -189,12 +195,6 @@ class RapidApp {
             ClientSpleisModule(
                 configuration = configuration.clientSpleis,
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
-            )
-
-        val valkeyModule =
-            ValkeyModule(
-                configuration = configuration.valkey,
-                personinfoHenter = clientSpeedModule.personinfoHenter,
             )
 
         val dbModule = DBModule(configuration.db)
@@ -227,7 +227,7 @@ class RapidApp {
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 alleIdenterHenter = clientSpeedModule.alleIdenterHenter,
-                personinfoHenter = valkeyModule.cacheEnabledPersoninfoHenter,
+                personinfoHenter = clientSpeedModule.personinfoHenter,
             )
 
         kafkaModule.kobleOppRivers()

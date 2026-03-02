@@ -1,10 +1,9 @@
 package no.nav.helse.spesialist.valkey
 
-import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.application.Cache
 
 class ValkeyModule(
     configuration: Configuration,
-    personinfoHenter: PersoninfoHenter,
 ) {
     data class Configuration(
         val valkey: Valkey?,
@@ -17,11 +16,5 @@ class ValkeyModule(
         )
     }
 
-    private val cachingProxy = configuration.valkey?.let(::ValkeyCachingProxy) ?: PassthroughCachingProxy()
-
-    val cacheEnabledPersoninfoHenter =
-        CacheEnabledPersoninfoHenter(
-            personinfoHenter = personinfoHenter,
-            cachingProxy = cachingProxy,
-        )
+    val cache: Cache = configuration.valkey?.let(::ValkeyCache) ?: PassthroughCache()
 }

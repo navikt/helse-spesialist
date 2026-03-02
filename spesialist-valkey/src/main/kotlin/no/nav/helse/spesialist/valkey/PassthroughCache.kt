@@ -1,10 +1,11 @@
 package no.nav.helse.spesialist.valkey
 
 import com.fasterxml.jackson.core.type.TypeReference
+import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.logg.loggWarn
 import java.time.Duration
 
-class PassthroughCachingProxy : CachingProxy {
+class PassthroughCache : Cache {
     init {
         loggWarn(
             "Bruker passthrough-variant av CachingProxy (i stedet for Valkey)." +
@@ -12,10 +13,10 @@ class PassthroughCachingProxy : CachingProxy {
         )
     }
 
-    override fun <T : Any> get(
+    override fun <T : Any> hentGjennomCache(
         key: String,
         type: TypeReference<T>,
         timeToLive: Duration,
-        loadingFunction: () -> T?,
-    ): T? = loadingFunction()
+        hentUtenomCache: () -> T?,
+    ): T? = hentUtenomCache()
 }

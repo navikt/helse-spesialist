@@ -8,13 +8,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.valkey.DefaultJedisClientConfig
 import io.valkey.HostAndPort
 import io.valkey.JedisPooled
+import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggWarn
 import java.time.Duration
 
-class ValkeyCachingProxy(
+class ValkeyCache(
     configuration: ValkeyModule.Configuration.Valkey,
-) : CachingProxy {
+) : Cache {
     private val jedisPooled =
         JedisPooled(
             HostAndPort(configuration.host, configuration.port),
@@ -34,7 +35,7 @@ class ValkeyCachingProxy(
             .enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
             .setDefaultPropertyInclusion(JsonInclude.Include.ALWAYS)
 
-    private fun <T> get(
+    private fun <T> hentFraValkey(
         key: String,
         type: TypeReference<T>,
     ): T? =
@@ -44,7 +45,7 @@ class ValkeyCachingProxy(
                 null
             }
 
-    private fun <T> set(
+    private fun <T> lagreTilValkey(
         key: String,
         value: T,
         timeToLive: Duration,
@@ -55,17 +56,17 @@ class ValkeyCachingProxy(
             }
     }
 
-    override fun <T : Any> get(
+    override fun <T : Any> hentGjennomCache(
         key: String,
         type: TypeReference<T>,
         timeToLive: Duration,
-        loadingFunction: () -> T?,
+        hentUtenomCache: () -> T?,
     ): T? =
-        get(key, type)?.also { loggDebug("Valkey cache hit", "key" to key) }
+        hentFraValkey(key, type)?.also { loggDebug("Valkey cache hit", "key" to key) }
             ?: run {
                 loggDebug("Valkey cache miss", "key" to key)
-                val value = loadingFunction()
-                if (value != null) set(key, value, timeToLive)
+                val value = hentUtenomCache()
+                if (value != null) lagreTilValkey(key, value, timeToLive)
                 value
             }
 }
