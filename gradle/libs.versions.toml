@@ -2,7 +2,7 @@
 flyway = "12.0.2"
 openApiGenerator = "7.20.0"
 graphqlKotlin = "8.4.0"
-jackson = "2.21.0"
+jackson = "2.21.1"
 kotlinx-coroutines = "1.10.2"
 ktor = "3.4.0"
 tbdLibs = "2026.02.19-20.58-521cdd3c"
