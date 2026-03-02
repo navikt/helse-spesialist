@@ -82,11 +82,11 @@ class SpeedClientPersoninfoHenterTest {
             environmentToggles = mockk(relaxed = true),
             cache =
                 object : Cache {
-                    override fun <T : Any> hentGjennomCache(
+                    override fun <T> hentGjennomCache(
                         key: String,
                         type: TypeReference<T>,
                         timeToLive: java.time.Duration,
-                        hentUtenomCache: () -> T?,
+                        hentUtenomCache: () -> T,
                     ) = hentUtenomCache()
                 },
         )

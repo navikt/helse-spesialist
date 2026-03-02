@@ -56,12 +56,12 @@ class ValkeyCache(
             }
     }
 
-    override fun <T : Any> hentGjennomCache(
+    override fun <T> hentGjennomCache(
         key: String,
         type: TypeReference<T>,
         timeToLive: Duration,
-        hentUtenomCache: () -> T?,
-    ): T? =
+        hentUtenomCache: () -> T,
+    ): T =
         hentFraValkey(key, type)?.also { loggDebug("Valkey cache hit", "key" to key) }
             ?: run {
                 loggDebug("Valkey cache miss", "key" to key)

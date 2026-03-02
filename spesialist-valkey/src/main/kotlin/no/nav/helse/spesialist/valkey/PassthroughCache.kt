@@ -13,10 +13,10 @@ class PassthroughCache : Cache {
         )
     }
 
-    override fun <T : Any> hentGjennomCache(
+    override fun <T> hentGjennomCache(
         key: String,
         type: TypeReference<T>,
         timeToLive: Duration,
-        hentUtenomCache: () -> T?,
-    ): T? = hentUtenomCache()
+        hentUtenomCache: () -> T,
+    ): T = hentUtenomCache()
 }

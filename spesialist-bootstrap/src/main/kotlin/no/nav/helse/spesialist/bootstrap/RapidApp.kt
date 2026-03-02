@@ -160,15 +160,16 @@ class RapidApp {
                 tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
             )
 
+        val valkeyModule =
+            ValkeyModule(
+                configuration = configuration.valkey,
+            )
+
         val clientKrrModule =
             ClientKrrModule(
                 configuration = configuration.clientKrr,
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
-            )
-
-        val valkeyModule =
-            ValkeyModule(
-                configuration = configuration.valkey,
+                cache = valkeyModule.cache,
             )
 
         val clientSpeedModule =

@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.client.krr
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
+import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -221,7 +223,16 @@ class KRRClientKrrRegistrertStatusHenterTest {
                 apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                 scope = "scoap"
             ),
-            accessTokenGenerator = { "gief axess plz" }
+            accessTokenGenerator = { "gief axess plz" },
+            cache =
+                object : Cache {
+                    override fun <T> hentGjennomCache(
+                        key: String,
+                        type: TypeReference<T>,
+                        timeToLive: java.time.Duration,
+                        hentUtenomCache: () -> T,
+                    ) = hentUtenomCache()
+                },
         )
     }
 

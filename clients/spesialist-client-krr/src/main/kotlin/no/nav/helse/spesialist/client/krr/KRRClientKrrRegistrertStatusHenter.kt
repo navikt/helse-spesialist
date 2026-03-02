@@ -8,8 +8,10 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus
+import no.nav.helse.spesialist.application.hentGjennomCache
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
@@ -22,10 +24,16 @@ import java.util.UUID
 class KRRClientKrrRegistrertStatusHenter(
     private val configuration: ClientKrrModule.Configuration.Client,
     private val accessTokenGenerator: AccessTokenGenerator,
+    private val cache: Cache,
 ) : KrrRegistrertStatusHenter {
     private val objectMapper = jacksonObjectMapper()
 
     override fun hentForPerson(fødselsnummer: String): KrrRegistrertStatus =
+        cache.hentGjennomCache(key = "krr-client:status:$fødselsnummer", timeToLive = Duration.ofHours(24)) {
+            hentFraKrr(fødselsnummer)
+        }
+
+    private fun hentFraKrr(fødselsnummer: String): KrrRegistrertStatus =
         responstidHentReservasjonsstatusTimer.recordCallable {
             try {
                 val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
