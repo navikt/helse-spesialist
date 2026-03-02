@@ -9,14 +9,15 @@ import java.time.LocalDate
 
 class DelegatingPersonDao(
     private val personRepository: InMemoryPersonRepository,
+    private val inntektRepository: InMemoryInntektRepository,
 ) : PersonDao {
-    override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
-        TODO("Not yet implemented")
-    }
+    override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? =
+        personRepository.alle().find { it.id.value == fødselsnummer }?.let {
+            MinimalPersonDto(fødselsnummer = fødselsnummer, aktørId = it.aktørId)
+        }
 
-    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate? {
-        TODO("Not yet implemented")
-    }
+    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate? =
+        personRepository.alle().find { it.id.value == fødselsnummer }?.infotrygdutbetalingerOppdatert
 
     override fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
@@ -26,24 +27,28 @@ class DelegatingPersonDao(
     override fun finnInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
-    ): List<Inntekter>? {
-        TODO("Not yet implemented")
-    }
+    ): List<Inntekter>? = inntektRepository.finn(fødselsnummer, skjæringstidspunkt)
 
     override fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
         inntekter: List<Inntekter>,
     ): Long? {
-        TODO("Not yet implemented")
+        if (personRepository.alle().none { it.id.value == fødselsnummer }) return null
+        inntektRepository.lagre(fødselsnummer, skjæringstidspunkt, inntekter)
+        return fødselsnummer.hashCode().toLong()
     }
 
-    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? {
-        TODO("Not yet implemented")
-    }
+    override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
+        if (personRepository.alle().any { it.id.value == fødselsnummer })
+            fødselsnummer.hashCode().toLong()
+        else
+            null
 
     override fun finnEnhetId(fødselsnummer: String): String {
-        TODO("Not yet implemented")
+        val enhetRef = personRepository.alle().find { it.id.value == fødselsnummer }?.enhetRef
+        checkNotNull(enhetRef) { "Fant ikke enhet for $fødselsnummer" }
+        return if (enhetRef < 1000) "0$enhetRef" else "$enhetRef"
     }
 
     override fun finnAdressebeskyttelse(fødselsnummer: String) =
@@ -57,3 +62,4 @@ class DelegatingPersonDao(
             }
         }
 }
+

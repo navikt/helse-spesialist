@@ -18,11 +18,20 @@ import java.util.UUID
 
 class InMemoryOppgaveRepository : OppgaveRepository {
     private val oppgaver = mutableMapOf<Long, Oppgave>()
+    private val oppdatertTidspunkt = mutableMapOf<Long, LocalDateTime>()
+    private val godkjenningsbehovOverrides = mutableMapOf<UUID, UUID>() // utbetalingId -> godkjenningsbehovId
 
     fun alle(): List<Oppgave> = oppgaver.values.toList()
 
+    fun hentOppdatertTidspunkt(id: Long): LocalDateTime? = oppdatertTidspunkt[id]
+
+    fun oppdaterGodkjenningsbehov(utbetalingId: UUID, godkjenningsbehovId: UUID) {
+        godkjenningsbehovOverrides[utbetalingId] = godkjenningsbehovId
+    }
+
     override fun lagre(oppgave: Oppgave) {
         oppgaver[oppgave.id] = oppgave
+        oppdatertTidspunkt[oppgave.id] = LocalDateTime.now()
     }
 
     override fun finn(id: Long): Oppgave? = oppgaver[id]
