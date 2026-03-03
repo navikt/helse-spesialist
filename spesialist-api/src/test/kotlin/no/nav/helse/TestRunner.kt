@@ -167,9 +167,13 @@ object TestRunner {
                     ktorApplication = this,
                     apiModuleConfiguration = configuration,
                     spesialistSchema = spesialistSchema,
-                    dokumentMediator = avhengigheter.dokumentMediator,
                     sessionFactory = avhengigheter.sessionFactory,
+                    listenerFactory = mockk(relaxed = true),
                     meldingPubliserer = avhengigheter.meldingPubliserer,
+                    dokumentMediator = avhengigheter.dokumentMediator,
+                    forsikringHenter = avhengigheter.forsikringHenter,
+                    inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
+                    inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
                     environmentToggles =
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker: Boolean = false
@@ -180,9 +184,6 @@ object TestRunner {
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
-                    forsikringHenter = avhengigheter.forsikringHenter,
-                    inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
-                    inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
                     alleIdenterHenter = avhengigheter.alleIdenterHenter,
                     personinfoHenter = avhengigheter.personinfoHenter,
                 )

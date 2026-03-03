@@ -23,7 +23,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import no.nav.helse.db.ListenerFactory
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -34,10 +38,12 @@ import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -79,12 +85,13 @@ class IntegrationTestFixture {
     val spiskammersetForsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
     val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
-    val alleIdenterHenterMock = AlleIdenterHenter { ident ->
-        listOf(
-            AlleIdenterHenter.Ident(ident, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
-            AlleIdenterHenter.Ident(ident.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
-        )
-    }
+    val alleIdenterHenterMock =
+        AlleIdenterHenter { ident ->
+            listOf(
+                AlleIdenterHenter.Ident(ident, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
+                AlleIdenterHenter.Ident(ident.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
+            )
+        }
 
     private val apiModule =
         ApiModule(
@@ -93,15 +100,33 @@ class IntegrationTestFixture {
             meldingPubliserer = meldingPubliserer,
             brukerrollehenter = { Either.Success(emptySet()) },
             sessionFactory = sessionFactory,
+            listenerFactory =
+                object : ListenerFactory {
+                    override suspend fun opptegnelseListener(block: suspend OpptegnelseListener.() -> Unit) {
+                        val listener =
+                            object : OpptegnelseListener {
+                                override fun notifications(identitetsnummer: Identitetsnummer): Flow<Unit> =
+                                    flow {
+                                        repeat(10) {
+                                            delay(50)
+                                            emit(Unit)
+                                        }
+                                    }
+
+                                override fun close() {}
+                            }
+                        block(listener)
+                    }
+                },
             environmentToggles = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
-            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
-            tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             forsikringHenter = spiskammersetForsikringHenterMock,
             inngangsvilkårHenter = inngangsvilkårHenterMock,
             inngangsvilkårInnsender = inngangsvilkårInnsenderMock,
             alleIdenterHenter = alleIdenterHenterMock,
+            tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
+            tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             personinfoHenter = personinfoHenterMock,
         )
 

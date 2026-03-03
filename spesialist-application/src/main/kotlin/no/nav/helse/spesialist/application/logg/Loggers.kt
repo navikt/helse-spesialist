@@ -35,7 +35,7 @@ inline fun <reified T> T.loggWarn(
 
 inline fun <reified T> T.loggWarn(
     melding: String,
-    throwable: Throwable,
+    throwable: Throwable?,
     vararg teamLogsDetaljer: Pair<String, Any?>,
 ) {
     loggMedDetaljer(logg, Level.WARN, melding, teamLogsDetaljer.toList(), throwable)
