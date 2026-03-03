@@ -105,7 +105,7 @@ class IntegrationTestFixture {
                     override suspend fun opptegnelseListener(block: suspend OpptegnelseListener.() -> Unit) {
                         val listener =
                             object : OpptegnelseListener {
-                                override fun notifications(identitetsnummer: Identitetsnummer): Flow<Unit> =
+                                override fun endringer(identitetsnummer: Identitetsnummer): Flow<Unit> =
                                     flow {
                                         repeat(10) {
                                             delay(50)

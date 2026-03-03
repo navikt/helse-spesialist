@@ -37,7 +37,7 @@ class PgOpptegnelseListener(
         }
     }
 
-    override fun notifications(identitetsnummer: Identitetsnummer): Flow<Unit> {
+    override fun endringer(identitetsnummer: Identitetsnummer): Flow<Unit> {
         val personId = hentPersonId(identitetsnummer) ?: return emptyFlow()
         return callbackFlow {
             val listener =

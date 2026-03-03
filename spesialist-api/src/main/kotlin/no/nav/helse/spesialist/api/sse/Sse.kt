@@ -74,7 +74,7 @@ internal fun Route.sse(
             ) {
                 listenerFactory.opptegnelseListener {
                     this
-                        .notifications(identitetsnummer)
+                        .endringer(identitetsnummer)
                         .collect {
                             runCatching {
                                 sessionFactory.transactionalSessionScope {
