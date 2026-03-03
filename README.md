@@ -13,6 +13,8 @@ Spesialist er inndelt i moduler etter lag i en onion architecture.
 Alle lag på samme nivå har kun avhengighet og kjennskap til lag på nivå innenfor seg selv. De har ikke kjennskap til lag
 på samme nivå, eller nivåer utenfor.
 
+Tester ny deploy
+
 Modulene og deres avhengigheter:
 
 ![Moduler i Spesialist](docs/moduler_i_spesialist.svg)
