@@ -219,15 +219,16 @@ class RapidApp {
                 meldingPubliserer = kafkaModule.meldingPubliserer,
                 brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
                 sessionFactory = dbModule.sessionFactory,
+                listenerFactory = dbModule.listenerFactory,
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
-                tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
-                tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
                 forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 alleIdenterHenter = clientSpeedModule.alleIdenterHenter,
+                tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
+                tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
                 personinfoHenter = clientSpeedModule.personinfoHenter,
             )
 
