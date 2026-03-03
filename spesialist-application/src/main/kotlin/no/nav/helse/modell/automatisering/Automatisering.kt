@@ -2,7 +2,6 @@ package no.nav.helse.modell.automatisering
 
 import no.nav.helse.AutomatiseringStansetSjekker
 import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
@@ -27,9 +26,11 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,7 +48,7 @@ internal class Automatisering(
     private val stikkprøver: Stikkprøver,
     private val meldingDao: MeldingDao,
     private val legacyBehandlingDao: LegacyBehandlingDao,
-    private val egenAnsattDao: EgenAnsattDao,
+    private val personRepository: PersonRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
 ) {
@@ -72,7 +73,7 @@ internal class Automatisering(
                 stikkprøver = stikkprøver,
                 meldingDao = sessionContext.meldingDao,
                 legacyBehandlingDao = sessionContext.legacyBehandlingDao,
-                egenAnsattDao = sessionContext.egenAnsattDao,
+                personRepository = sessionContext.personRepository,
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao,
             )
@@ -144,7 +145,7 @@ internal class Automatisering(
     }
 
     private fun erEgenAnsattEllerSkjermet(fødselsnummer: String) =
-        egenAnsattDao.erEgenAnsatt(fødselsnummer) == true ||
+        personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus?.erEgenAnsatt == true ||
             personDao.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
 
     private fun finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(

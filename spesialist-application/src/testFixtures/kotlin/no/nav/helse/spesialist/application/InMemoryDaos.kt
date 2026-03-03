@@ -11,8 +11,6 @@ class InMemoryDaos(
     override val definisjonDao: UnimplementedDefinisjonDao,
     override val dialogDao: DelegatingDialogDao,
     override val dokumentDao: InMemoryDokumentDao,
-    override val egenAnsattDao: DelegatingEgenAnsattDao,
-    override val egenAnsattApiDao: DelegatingEgenAnsattApiDao,
     override val legacyBehandlingDao: UnimplementedLegacyBehandlingDao,
     override val legacyVarselDao: UnimplementedLegacyVarselDao,
     override val meldingDao: InMemoryMeldingDao,

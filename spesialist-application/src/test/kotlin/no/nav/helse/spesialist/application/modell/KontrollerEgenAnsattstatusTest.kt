@@ -4,12 +4,13 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -23,9 +24,9 @@ internal class KontrollerEgenAnsattstatusTest {
         private const val FNR = "12345678911"
     }
 
-    private val dao = mockk<EgenAnsattDao>(relaxed = true)
+    private val personRepository = mockk<PersonRepository>(relaxed = true)
 
-    private val command = KontrollerEgenAnsattstatus(FNR, dao)
+    private val command = KontrollerEgenAnsattstatus(FNR, personRepository)
     private lateinit var context: CommandContext
 
     private val observer =
@@ -41,38 +42,38 @@ internal class KontrollerEgenAnsattstatusTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(dao)
+        clearMocks(personRepository)
     }
 
     @Test
     fun `ber om informasjon om egen ansatt`() {
-        every { dao.erEgenAnsatt(any()) } returns null
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
         assertFalse(command.execute(context))
         assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
     }
 
     @Test
     fun `mangler løsning ved resume`() {
-        every { dao.erEgenAnsatt(any()) } returns null
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
         assertFalse(command.resume(context))
-        verify(exactly = 0) { dao.lagre(any(), any(), any()) }
+        verify(exactly = 0) { personRepository.lagre(any()) }
     }
 
     @Test
     fun `lagrer løsning ved resume`() {
-        every { dao.erEgenAnsatt(any()) } returns null
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.lagre(FNR, false, any()) }
+        verify(exactly = 1) { personRepository.lagre(any()) }
     }
 
     @Test
     fun `sender ikke behov om informasjonen finnes`() {
-        every { dao.erEgenAnsatt(any()) } returns false
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = false)
         assertTrue(command.resume(context))
         assertEquals(emptyList<Behov>(), observer.behov.toList())
 
-        every { dao.erEgenAnsatt(any()) } returns true
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
         assertTrue(command.resume(context))
         assertEquals(emptyList<Behov>(), observer.behov.toList())
     }

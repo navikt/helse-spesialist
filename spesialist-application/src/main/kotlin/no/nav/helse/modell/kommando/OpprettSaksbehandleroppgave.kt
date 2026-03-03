@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
@@ -53,6 +52,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import java.util.UUID
@@ -63,7 +63,7 @@ internal class OpprettSaksbehandleroppgave(
     private val automatisering: Automatisering,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
-    private val egenAnsattDao: EgenAnsattDao,
+    private val personRepository: PersonRepository,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
@@ -147,7 +147,7 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.egenAnsatt(fødselsnummer: String) {
-        if (egenAnsattDao.erEgenAnsatt(fødselsnummer) == true) add(EGEN_ANSATT)
+        if (personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus?.erEgenAnsatt == true) add(EGEN_ANSATT)
     }
 
     private fun MutableSet<Egenskap>.adressebeskyttelse(fødselsnummer: String) {

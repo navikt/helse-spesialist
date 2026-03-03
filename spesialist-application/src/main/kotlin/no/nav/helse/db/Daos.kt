@@ -2,7 +2,6 @@ package no.nav.helse.db
 
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.BehandlingApiRepository
-import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.OverstyringApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
@@ -22,7 +21,6 @@ interface Daos {
     val definisjonDao: DefinisjonDao
     val dialogDao: DialogDao
     val dokumentDao: DokumentDao
-    val egenAnsattDao: EgenAnsattDao
     val legacyBehandlingDao: LegacyBehandlingDao
     val meldingDao: MeldingDao
     val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
@@ -42,7 +40,6 @@ interface Daos {
     val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
 
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
-    val egenAnsattApiDao: EgenAnsattApiDao
     val behandlingApiRepository: BehandlingApiRepository
     val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao

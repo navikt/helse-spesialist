@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -22,14 +21,13 @@ internal class VurderAutomatiskAvvisningTest {
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(vergemålDao, personDao, egenAnsattDao, godkjenningMediator, sykefraværstilfelle)
+        clearMocks(vergemålDao, personDao, godkjenningMediator, sykefraværstilfelle)
     }
 
     @Test

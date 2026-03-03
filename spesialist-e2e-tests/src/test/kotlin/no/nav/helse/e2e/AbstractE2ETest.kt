@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -1189,7 +1190,10 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean?,
     ) {
-        assertEquals(skjermet, daos.egenAnsattDao.erEgenAnsatt(fødselsnummer))
+        val erEgenAnsatt = sessionFactory.transactionalSessionScope {
+            it.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus?.erEgenAnsatt
+        }
+        assertEquals(skjermet, erEgenAnsatt)
     }
 
     protected fun assertAdressebeskyttelse(

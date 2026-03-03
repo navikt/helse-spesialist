@@ -25,7 +25,6 @@ interface SessionContext {
     val automatiseringDao: AutomatiseringDao
     val commandContextDao: CommandContextDao
     val dialogDao: DialogDao
-    val egenAnsattDao: EgenAnsattDao
     val legacyBehandlingDao: LegacyBehandlingDao
     val meldingDao: MeldingDao
     val metrikkDao: MetrikkDao

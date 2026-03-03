@@ -6,7 +6,6 @@ import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
@@ -354,7 +353,6 @@ internal class GodkjenningsbehovCommand(
     personDao: PersonDao,
     arbeidsgiverRepository: ArbeidsgiverRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
-    egenAnsattDao: EgenAnsattDao,
     utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
@@ -438,7 +436,7 @@ internal class GodkjenningsbehovCommand(
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
-                egenAnsattDao = egenAnsattDao,
+                personRepository = personRepository,
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = behovData.fødselsnummer,
@@ -499,7 +497,7 @@ internal class GodkjenningsbehovCommand(
                 automatisering = automatisering,
                 personDao = personDao,
                 risikovurderingDao = risikovurderingDao,
-                egenAnsattDao = egenAnsattDao,
+                personRepository = personRepository,
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,

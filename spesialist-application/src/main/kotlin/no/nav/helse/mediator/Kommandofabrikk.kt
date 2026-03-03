@@ -61,7 +61,7 @@ class Kommandofabrikk(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
-            egenAnsattDao = sessionContext.egenAnsattDao,
+            personRepository = sessionContext.personRepository,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
         )
 
@@ -183,7 +183,6 @@ class Kommandofabrikk(
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             personKlargjoresDao = sessionContext.personKlargjoresDao,
-            egenAnsattDao = sessionContext.egenAnsattDao,
             personRepository = sessionContext.personRepository,
             opptegnelseRepository = sessionContext.opptegnelseRepository,
         )
@@ -262,7 +261,6 @@ class Kommandofabrikk(
             personDao = sessionContext.personDao,
             arbeidsgiverRepository = sessionContext.arbeidsgiverRepository,
             arbeidsforholdDao = sessionContext.arbeidsforholdDao,
-            egenAnsattDao = sessionContext.egenAnsattDao,
             utbetalingDao = sessionContext.utbetalingDao,
             vergemålDao = sessionContext.vergemålDao,
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,

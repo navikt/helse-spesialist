@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
@@ -50,6 +49,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
@@ -57,6 +57,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -75,7 +76,10 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
-    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
+    private val personRepository =
+        mockk<PersonRepository>(relaxed = true) {
+            every { finn(any()) } returns lagPerson(erEgenAnsatt = false)
+        }
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val påVentDao = mockk<PåVentDao>(relaxed = true)
@@ -272,7 +276,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen ansatt`() {
-        every { egenAnsattDao.erEgenAnsatt(FNR) } returns true
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -459,7 +463,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         automatisering = automatisering,
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
-        egenAnsattDao = egenAnsattDao,
+        personRepository = personRepository,
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,

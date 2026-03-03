@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application.modell
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
@@ -30,6 +29,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
@@ -38,6 +38,7 @@ import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -63,7 +64,10 @@ internal class AutomatiseringTest {
             every { sjekkOmAutomatiseringErStanset(fødselsnummer, vedtaksperiodeId, orgnummer) } returns false
         }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
-    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
+    private val personRepository =
+        mockk<PersonRepository>(relaxed = true) {
+            every { finn(any()) } returns lagPerson(erEgenAnsatt = false)
+        }
     private val totrinnsvurderingRepositoryMock = mockk<TotrinnsvurderingRepository>(relaxed = true)
     private val stansAutomatiskBehandlingSaksbehandlerDaoMock =
         mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
@@ -110,7 +114,7 @@ internal class AutomatiseringTest {
             stikkprøver = stikkprøver,
             meldingDao = meldingDaoMock,
             legacyBehandlingDao = legacyBehandlingDaoMock,
-            egenAnsattDao = egenAnsattDao,
+            personRepository = personRepository,
             totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
             stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDaoMock,
         )
@@ -294,7 +298,7 @@ internal class AutomatiseringTest {
     fun `egenansatt går ikke til stikkprøve`() {
         stikkprøveFullRefusjonEnArbeidsgiver = true
         blirStikkprøve()
-        every { egenAnsattDao.erEgenAnsatt(any()) } returns true
+        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
         blirAutomatiskBehandlet()
     }
 

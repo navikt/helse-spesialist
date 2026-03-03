@@ -113,7 +113,6 @@ abstract class AbstractDBIntegrationTest {
     internal val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
     internal val automatiseringDao = sessionContext.automatiseringDao
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
-    internal val egenAnsattDao = sessionContext.egenAnsattDao
     internal val utbetalingDao = sessionContext.utbetalingDao
     internal val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
