@@ -8,6 +8,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 
 class VedtaksperiodeReberegnetRiver(
     private val mediator: MeldingMediator,
@@ -25,6 +26,7 @@ class VedtaksperiodeReberegnetRiver(
                 "@id",
                 "fødselsnummer",
                 "vedtaksperiodeId",
+                "behandlingId",
             )
         }
 
@@ -39,6 +41,7 @@ class VedtaksperiodeReberegnetRiver(
                 id = packet["@id"].asUUID(),
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID()),
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
@@ -124,17 +125,20 @@ class Kommandofabrikk(
     internal fun vedtaksperiodeReberegnet(
         hendelse: VedtaksperiodeReberegnet,
         vedtaksperiode: LegacyVedtaksperiode,
+        spleisBehandlingId: SpleisBehandlingId,
         sessionContext: SessionContext,
     ): VedtaksperiodeReberegnetCommand =
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiode = vedtaksperiode,
+            spleisBehandlingId = spleisBehandlingId,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             commandContextDao = sessionContext.commandContextDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+            vedtakRepository = sessionContext.vedtakRepository,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -219,6 +223,7 @@ class Kommandofabrikk(
         VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
+            spleisBehandlingId = hendelse.spleisBehandlingId,
             id = hendelse.id,
             alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
             commandContextDao = sessionContext.commandContextDao,
@@ -226,6 +231,7 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+            vedtakRepository = sessionContext.vedtakRepository,
         )
 
     internal fun stansAutomatiskBehandling(

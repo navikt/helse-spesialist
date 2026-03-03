@@ -14,17 +14,21 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VedtakRepository
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
 class VedtaksperiodeForkastet(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
+    val spleisBehandlingId: SpleisBehandlingId,
     private val fødselsnummer: String,
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
         UUID.fromString(jsonNode["@id"].asText()),
         UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
+        SpleisBehandlingId(UUID.fromString(jsonNode["behandlingId"].asText())),
         jsonNode["fødselsnummer"].asText(),
         json = jsonNode.toString(),
     )
@@ -48,6 +52,7 @@ class VedtaksperiodeForkastet(
 class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
+    val spleisBehandlingId: SpleisBehandlingId,
     val id: UUID,
     val alleForkastedeVedtaksperiodeIder: List<UUID>,
     commandContextDao: CommandContextDao,
@@ -55,17 +60,20 @@ class VedtaksperiodeForkastetCommand(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             AvbrytCommand(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = spleisBehandlingId,
                 commandContextDao = commandContextDao,
                 oppgaveService = oppgaveService,
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
+                vedtakRepository = vedtakRepository,
             ),
             AvbrytTotrinnsvurderingCommand(
                 fødselsnummer = fødselsnummer,

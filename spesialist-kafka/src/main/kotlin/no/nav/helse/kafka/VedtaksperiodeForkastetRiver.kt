@@ -8,6 +8,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 
 class VedtaksperiodeForkastetRiver(
     private val mediator: MeldingMediator,
@@ -21,6 +22,7 @@ class VedtaksperiodeForkastetRiver(
         River.PacketValidation {
             it.requireKey("@id")
             it.requireKey("vedtaksperiodeId")
+            it.requireKey("behandlingId")
             it.requireKey("fødselsnummer")
         }
 
@@ -34,6 +36,7 @@ class VedtaksperiodeForkastetRiver(
             VedtaksperiodeForkastet(
                 packet["@id"].asUUID(),
                 packet["vedtaksperiodeId"].asUUID(),
+                SpleisBehandlingId(packet["behandlingId"].asUUID()),
                 packet["fødselsnummer"].asText(),
                 json = packet.toJson(),
             ),

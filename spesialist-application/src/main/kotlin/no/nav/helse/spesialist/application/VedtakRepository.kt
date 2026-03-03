@@ -7,4 +7,6 @@ interface VedtakRepository {
     fun lagre(vedtak: Vedtak)
 
     fun finn(spleisBehandlingId: SpleisBehandlingId): Vedtak?
+
+    fun slett(spleisBehandlingId: SpleisBehandlingId)
 }

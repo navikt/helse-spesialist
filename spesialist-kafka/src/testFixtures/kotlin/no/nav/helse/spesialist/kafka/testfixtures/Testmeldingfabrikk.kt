@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -198,6 +199,7 @@ object Testmeldingfabrikk {
         fødselsnummer: String,
         organisasjonsnummer: String = "orgnr",
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: SpleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
         forrigeTilstand: String = "FORRIGE_TILSTAND",
         gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
         forårsaketAvId: UUID = UUID.randomUUID(),
@@ -208,6 +210,7 @@ object Testmeldingfabrikk {
         "vedtaksperiode_endret",
         mapOf(
             "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "behandlingId" to "${spleisBehandlingId.value}",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "organisasjonsnummer" to organisasjonsnummer,
@@ -253,6 +256,7 @@ object Testmeldingfabrikk {
         aktørId: String,
         fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: SpleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
         organisasjonsnummer: String = "orgnr",
         id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
@@ -260,6 +264,7 @@ object Testmeldingfabrikk {
         "vedtaksperiode_forkastet",
         mapOf(
             "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "behandlingId" to "${spleisBehandlingId.value}",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "organisasjonsnummer" to organisasjonsnummer,

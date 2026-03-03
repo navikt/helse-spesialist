@@ -31,7 +31,7 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun `vedtaksperiode endret`() {
-        val melding = Testmeldingfabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, AKTØR, FNR, "orgnr", VEDTAKSPERIODE_ID, "START", "SLUTT")
+        val melding = Testmeldingfabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, AKTØR, FNR, "orgnr", VEDTAKSPERIODE_ID, forrigeTilstand = "START", gjeldendeTilstand = "SLUTT")
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)
@@ -43,7 +43,9 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun `vedtaksperiode forkastet`() {
-        val melding = Testmeldingfabrikk.lagVedtaksperiodeForkastet(AKTØR, FNR, VEDTAKSPERIODE_ID, "orgnr", HENDELSE_ID)
+        val melding = Testmeldingfabrikk.lagVedtaksperiodeForkastet(
+            AKTØR, FNR, VEDTAKSPERIODE_ID, organisasjonsnummer = "orgnr", id = HENDELSE_ID
+        )
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)

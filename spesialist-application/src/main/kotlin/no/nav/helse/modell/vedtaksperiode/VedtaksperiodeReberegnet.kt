@@ -16,18 +16,22 @@ import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VedtakRepository
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
 class VedtaksperiodeReberegnet(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: SpleisBehandlingId,
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
+        spleisBehandlingId = SpleisBehandlingId(UUID.fromString(jsonNode["behandlingId"].asText())),
         json = jsonNode.toString(),
     )
 
@@ -44,19 +48,21 @@ class VedtaksperiodeReberegnet(
     ) {
         val vedtaksperiode =
             checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) { "Fant ikke vedtaksperiode med id: $vedtaksperiodeId" }
-        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, sessionContext) }
+        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, spleisBehandlingId, sessionContext) }
     }
 }
 
 internal class VedtaksperiodeReberegnetCommand(
     fødselsnummer: String,
     vedtaksperiode: LegacyVedtaksperiode,
+    spleisBehandlingId: SpleisBehandlingId,
     periodehistorikkDao: PeriodehistorikkDao,
     commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -67,11 +73,13 @@ internal class VedtaksperiodeReberegnetCommand(
             AvbrytCommand(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
+                spleisBehandlingId = spleisBehandlingId,
                 commandContextDao = commandContextDao,
                 oppgaveService = oppgaveService,
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
+                vedtakRepository = vedtakRepository,
             ),
         )
 }

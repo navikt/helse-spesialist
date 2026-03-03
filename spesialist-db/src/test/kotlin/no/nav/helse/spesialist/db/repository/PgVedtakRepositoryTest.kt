@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import org.junit.jupiter.api.Assertions.assertNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -88,5 +89,32 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(true, funnet.behandletAvSpleis)
         assertEquals(false, vedtak.behandletAvSpleis)
 
+    }
+
+    @Test
+    fun `sletter vedtak`() {
+        // given
+        val vedtak = Vedtak.automatisk(lagSpleisBehandlingId())
+        repository.lagre(vedtak)
+
+        // when
+        repository.slett(vedtak.id)
+
+        // then
+        assertNull(repository.finn(vedtak.id))
+    }
+
+    @Test
+    fun `sjekker ikke behandlet_av_spleis ved sletting`() {
+        // given
+        val vedtak = Vedtak.automatisk(lagSpleisBehandlingId())
+        vedtak.markerSomBehandletAvSpleis()
+        repository.lagre(vedtak)
+
+        // when
+        repository.slett(vedtak.id)
+
+        // then
+        assertNull(repository.finn(vedtak.id))
     }
 }

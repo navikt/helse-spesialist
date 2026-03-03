@@ -21,6 +21,13 @@ class PgVedtakRepository private constructor(
         }
     }
 
+    override fun slett(spleisBehandlingId: SpleisBehandlingId) {
+        dbQuery.update(
+            "delete from vedtak where behandling_id = :spleisBehandlingId",
+            "spleisBehandlingId" to spleisBehandlingId.value,
+        )
+    }
+
     private fun lagre(
         vedtak: Vedtak,
         fattetAutomatisk: Boolean,

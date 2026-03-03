@@ -8,6 +8,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -28,6 +29,7 @@ internal class VedtaksperiodeForkastetCommandTest {
         VedtaksperiodeForkastetCommand(
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE,
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             id = HENDELSE,
             alleForkastedeVedtaksperiodeIder = emptyList(),
             commandContextDao = commandContextDao,
@@ -35,6 +37,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             reservasjonDao = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
             totrinnsvurderingRepository = mockk(relaxed = true),
+            vedtakRepository = mockk(relaxed = true),
         )
 
     @Test
