@@ -204,7 +204,6 @@ internal abstract class AbstractDatabaseTest {
                 "saksbehandler",
                 "arbeidsgiver",
                 "api_varseldefinisjon",
-                "abonnement_for_opptegnelse",
                 "saksbehandler_opptegnelse_sekvensnummer",
                 "inntekt",
                 "temp_manglende_varsler",
