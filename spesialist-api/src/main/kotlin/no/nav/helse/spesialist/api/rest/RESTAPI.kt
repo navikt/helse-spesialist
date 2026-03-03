@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPerson
 import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetVurderteInngangsvilkårForPersonBehandler
+import no.nav.helse.spesialist.api.rest.personer.PatchStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.dokumenter.GetInntektsmeldingBehandler
@@ -77,6 +78,7 @@ fun Routing.restRoutes(
             get(GetBehandledeOppgaverBehandler(), restAdapter)
 
             post(PostOpphevStansBehandler(), restAdapter)
+            patch(PatchStansBehandler(), restAdapter)
 
             get(GetSoknadBehandler(dokumentMediator = dokumentMediator), restAdapter)
             get(GetInntektsmeldingBehandler(dokumentMediator = dokumentMediator), restAdapter)

@@ -39,6 +39,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("stans")
+        class Stans(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("vurderinger")
         class Vurderinger(
             val parent: PersonPseudoId,
