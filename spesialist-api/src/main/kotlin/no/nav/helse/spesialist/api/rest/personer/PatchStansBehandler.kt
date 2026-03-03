@@ -23,17 +23,18 @@ class PatchStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans, ApiSta
         request: ApiStansRequest,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchStansErrorCode> {
-        if (request.veilederStans) return RestResponse.Error(ApiPatchStansErrorCode.KAN_IKKE_OPPRETTE_VEILEDER_STANS)
+        if (request.veilederStans == null && request.saksbehandlerStans == null) return RestResponse.Error(ApiPatchStansErrorCode.REQUEST_MANGLER_STANSTYPE)
+        if (request.veilederStans == true) return RestResponse.Error(ApiPatchStansErrorCode.KAN_IKKE_OPPRETTE_VEILEDER_STANS)
 
         return kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiPatchStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPatchStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
-            if (!request.veilederStans) {
+            if (request.veilederStans == false) {
                 opphevVeilederStans(request, person, kallKontekst)
             }
-            if (request.saksbehandlerStans) {
+            if (request.saksbehandlerStans == true) {
                 opprettSaksbehandlerstans(request, person, kallKontekst)
             } else {
                 opphevSaksbehandlerstans(request, person, kallKontekst)
@@ -77,7 +78,6 @@ class PatchStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans, ApiSta
             notatType = NotatType.OpphevStans,
             dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
         )
-
         loggInfo("Opphevet veileder-stans for person")
     }
 
@@ -135,4 +135,5 @@ enum class ApiPatchStansErrorCode(
     PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     KAN_IKKE_OPPRETTE_VEILEDER_STANS("Kan ikke opprette veilederstans", HttpStatusCode.BadRequest),
+    REQUEST_MANGLER_STANSTYPE("Mottok request uten satt saksbehandlerStans eller veilederStans", HttpStatusCode.BadRequest),
 }

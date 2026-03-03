@@ -19,6 +19,6 @@ import java.util.UUID
 @Serializable
 data class ApiStansRequest(
     val begrunnelse: String,
-    val saksbehandlerStans: Boolean,
-    val veilederStans: Boolean,
+    val saksbehandlerStans: Boolean?,
+    val veilederStans: Boolean?,
 )
