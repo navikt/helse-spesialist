@@ -32,24 +32,20 @@ internal class PgPersonRepository(
     ) {
         asSQL(
             """
-                INSERT INTO person(fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, personinfo_oppdatert, enhet_ref_oppdatert, infotrygdutbetalinger_oppdatert) 
-                VALUES(:fodselsnummer, :aktorId, :personinfoRef, :enhetRef, :infotrygdutbetalingerRef, :infoOppdatert, :enhetOppdatert, :infotrygdutbetalingerOppdatert)
+                INSERT INTO person(fødselsnummer, aktør_id, info_ref, enhet_ref, personinfo_oppdatert, enhet_ref_oppdatert) 
+                VALUES(:fodselsnummer, :aktorId, :personinfoRef, :enhetRef, :infoOppdatert, :enhetOppdatert)
                 ON CONFLICT(fødselsnummer) DO UPDATE SET 
                 info_ref = excluded.info_ref,
                 personinfo_oppdatert = excluded.personinfo_oppdatert, 
                 enhet_ref = excluded.enhet_ref,
-                enhet_ref_oppdatert = excluded.enhet_ref_oppdatert,
-                infotrygdutbetalinger_ref = excluded.infotrygdutbetalinger_ref,
-                infotrygdutbetalinger_oppdatert = excluded.infotrygdutbetalinger_oppdatert
+                enhet_ref_oppdatert = excluded.enhet_ref_oppdatert
             """,
             "fodselsnummer" to person.id.value,
             "aktorId" to person.aktørId,
             "personinfoRef" to personinfoRef,
             "enhetRef" to person.enhetRef,
-            "infotrygdutbetalingerRef" to person.infotrygdutbetalingerRef,
             "infoOppdatert" to person.infoOppdatert,
             "enhetOppdatert" to person.enhetRefOppdatert,
-            "infotrygdutbetalingerOppdatert" to person.infotrygdutbetalingerOppdatert,
         ).update()
     }
 
@@ -202,8 +198,6 @@ internal class PgPersonRepository(
             infoOppdatert = localDateOrNull("personinfo_oppdatert"),
             enhetRef = intOrNull("enhet_ref"),
             enhetRefOppdatert = localDateOrNull("enhet_ref_oppdatert"),
-            infotrygdutbetalingerRef = intOrNull("infotrygdutbetalinger_ref"),
-            infotrygdutbetalingerOppdatert = localDateOrNull("infotrygdutbetalinger_oppdatert"),
             egenAnsattStatus =
                 longOrNull("egen_ansatt_person_ref")?.let {
                     EgenAnsattStatus(

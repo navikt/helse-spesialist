@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.db.dao.api.PgBehandlingApiRepository
 import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
 import no.nav.helse.spesialist.db.dao.api.PgOverstyringApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
-import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPåVentApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgTildelingApiDao
@@ -71,7 +70,6 @@ class DBDaos(
     override val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     override val overstyringApiDao = PgOverstyringApiDao(dataSource)
     override val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    override val personApiDao = PgPersonApiDao(dataSource)
     override val påVentApiDao = PgPåVentApiDao(dataSource)
     override val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
     override val tildelingApiDao = PgTildelingApiDao(dataSource)

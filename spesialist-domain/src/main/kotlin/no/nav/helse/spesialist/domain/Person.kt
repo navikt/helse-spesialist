@@ -36,8 +36,6 @@ class Person private constructor(
     infoOppdatert: LocalDate?,
     enhetRef: Int?,
     enhetRefOppdatert: LocalDate?,
-    val infotrygdutbetalingerRef: Int?,
-    val infotrygdutbetalingerOppdatert: LocalDate?,
     egenAnsattStatus: EgenAnsattStatus?,
 ) : AggregateRoot<Identitetsnummer>(id) {
     var info: Personinfo? = info
@@ -106,8 +104,6 @@ class Person private constructor(
             infoOppdatert = info?.let { LocalDate.now() },
             enhetRef = null,
             enhetRefOppdatert = null,
-            infotrygdutbetalingerRef = null,
-            infotrygdutbetalingerOppdatert = null,
             egenAnsattStatus = egenAnsattStatus,
         )
 
@@ -118,8 +114,6 @@ class Person private constructor(
             infoOppdatert: LocalDate?,
             enhetRef: Int?,
             enhetRefOppdatert: LocalDate?,
-            infotrygdutbetalingerRef: Int?,
-            infotrygdutbetalingerOppdatert: LocalDate?,
             egenAnsattStatus: EgenAnsattStatus?,
         ) = Person(
             id = id,
@@ -128,8 +122,6 @@ class Person private constructor(
             infoOppdatert = infoOppdatert,
             enhetRef = enhetRef,
             enhetRefOppdatert = enhetRefOppdatert,
-            infotrygdutbetalingerRef = infotrygdutbetalingerRef,
-            infotrygdutbetalingerOppdatert = infotrygdutbetalingerOppdatert,
             egenAnsattStatus = egenAnsattStatus,
         )
     }

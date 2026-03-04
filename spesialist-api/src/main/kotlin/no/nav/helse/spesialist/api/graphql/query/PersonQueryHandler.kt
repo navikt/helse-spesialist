@@ -856,8 +856,9 @@ class PersonQueryHandler(
                         )
                     },
             infotrygdutbetalinger =
-                daos.personApiDao
-                    .finnInfotrygdutbetalinger(identitetsnummer.value)
+                transaction.infotrygdutbetalingerRepository
+                    .finn(identitetsnummer)
+                    ?.data
                     ?.let { jsonString -> tilApiInfotrygdutbetalinger(jsonString) },
             vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },
         ).let {

@@ -16,6 +16,7 @@ class InMemoryRepositoriesAndDaos {
     private val overstyringRepository = InMemoryOverstyringRepository()
     private val personKlargjoresDao = InMemoryPersonKlargjoresDao()
     private val personRepository = InMemoryPersonRepository()
+    private val infotrygdutbetalingerRepository = InMemoryInfotrygdutbetalingerRepository()
     private val personPseudoIdDao = InMemoryPersonPseudoIdDao()
     private val påVentRepository = InMemoryPåVentRepository()
     private val saksbehandlerRepository = InMemorySaksbehandlerRepository()
@@ -75,7 +76,6 @@ class InMemoryRepositoriesAndDaos {
     private val overstyringApiDao = UnimplementedOverstyringApiDao()
     private val periodehistorikkDao = InMemoryPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
-    private val personApiDao = UnimplementedPersonApiDao()
     private val påVentApiDao = UnimplementedPåVentApiDao()
     private val risikovurderingDao = UnimplementedRisikovurderingDao()
     private val risikovurderingApiDao = UnimplementedRisikovurderingApiDao()
@@ -112,7 +112,6 @@ class InMemoryRepositoriesAndDaos {
             periodehistorikkDao = periodehistorikkDao,
             periodehistorikkApiDao = periodehistorikkApiDao,
             personDao = personDao,
-            personApiDao = personApiDao,
             poisonPillDao = poisonPillDao,
             påVentDao = påVentDao,
             påVentApiDao = påVentApiDao,
@@ -157,6 +156,7 @@ class InMemoryRepositoriesAndDaos {
                     periodehistorikkDao = periodehistorikkDao,
                     personDao = personDao,
                     personRepository = personRepository,
+                    infotrygdutbetalingerRepository = infotrygdutbetalingerRepository,
                     personPseudoIdDao = personPseudoIdDao,
                     påVentDao = påVentDao,
                     påVentRepository = påVentRepository,

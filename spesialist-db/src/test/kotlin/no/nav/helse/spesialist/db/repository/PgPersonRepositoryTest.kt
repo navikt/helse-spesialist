@@ -34,8 +34,6 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(null, funnet.enhetRefOppdatert)
         assertEquals(null, funnet.info)
         assertEquals(null, funnet.infoOppdatert)
-        assertEquals(null, funnet.infotrygdutbetalingerRef)
-        assertEquals(null, funnet.infotrygdutbetalingerOppdatert)
     }
 
     @Test
@@ -69,8 +67,6 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(person.enhetRefOppdatert, funnet.enhetRefOppdatert)
         assertEquals(personinfo, funnet.info)
         assertEquals(person.infoOppdatert, funnet.infoOppdatert)
-        assertEquals(person.infotrygdutbetalingerRef, funnet.infotrygdutbetalingerRef)
-        assertEquals(person.infotrygdutbetalingerOppdatert, funnet.infotrygdutbetalingerOppdatert)
     }
 
     @Test
@@ -105,7 +101,5 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(person.enhetRefOppdatert, funnet.enhetRefOppdatert)
         assertEquals(personinfo, funnet.info)
         assertEquals(person.infoOppdatert, funnet.infoOppdatert)
-        assertEquals(person.infotrygdutbetalingerRef, funnet.infotrygdutbetalingerRef)
-        assertEquals(person.infotrygdutbetalingerOppdatert, funnet.infotrygdutbetalingerOppdatert)
     }
 }

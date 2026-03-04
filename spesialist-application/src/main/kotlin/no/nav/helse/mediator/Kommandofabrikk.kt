@@ -172,7 +172,7 @@ class Kommandofabrikk(
                     hendelse.fødselsnummer(),
                 )
             },
-            personDao = sessionContext.personDao,
+            infotrygdutbetalingerRepository = sessionContext.infotrygdutbetalingerRepository,
             opptegnelseRepository = sessionContext.opptegnelseRepository,
         )
 
@@ -279,6 +279,7 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             vedtakRepository = sessionContext.vedtakRepository,
             personRepository = sessionContext.personRepository,
+            infotrygdutbetalingerRepository = sessionContext.infotrygdutbetalingerRepository,
             opptegnelseRepository = sessionContext.opptegnelseRepository,
         )
     }

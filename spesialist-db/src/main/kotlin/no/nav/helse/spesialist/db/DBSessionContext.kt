@@ -8,6 +8,7 @@ import no.nav.helse.db.VedtakBegrunnelseRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
+import no.nav.helse.spesialist.application.InfotrygdutbetalingerRepository
 import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
@@ -57,6 +58,7 @@ import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
 import no.nav.helse.spesialist.db.repository.PgArbeidsgiverRepository
 import no.nav.helse.spesialist.db.repository.PgBehandlingRepository
 import no.nav.helse.spesialist.db.repository.PgDialogRepository
+import no.nav.helse.spesialist.db.repository.PgInfotrygdutbetalingerRepository
 import no.nav.helse.spesialist.db.repository.PgNotatRepository
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.db.repository.PgOpptegnelseRepository
@@ -117,6 +119,7 @@ class DBSessionContext(
     override val påVentRepository: PåVentRepository = PgPåVentRepository(session)
     override val personRepository: PersonRepository = PgPersonRepository(session)
     override val vedtaksperiodeRepository: VedtaksperiodeRepository = PgVedtaksperiodeRepository(session)
+    override val infotrygdutbetalingerRepository: InfotrygdutbetalingerRepository = PgInfotrygdutbetalingerRepository(session)
     override val varselRepository: VarselRepository = PgVarselRepository(session)
     override val varseldefinisjonRepository: VarseldefinisjonRepository = PgVarseldefinisjonRepository(session)
     override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository = PgVedtakBegrunnelseRepository(session)

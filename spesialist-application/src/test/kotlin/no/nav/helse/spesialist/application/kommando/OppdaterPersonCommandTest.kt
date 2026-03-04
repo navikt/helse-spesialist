@@ -1,17 +1,16 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning
+import no.nav.helse.spesialist.application.InMemoryInfotrygdutbetalingerRepository
 import no.nav.helse.spesialist.application.InMemoryPersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.InfotrygdUtbetalinger
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -22,12 +21,13 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class OppdaterPersonCommandTest {
-    private val personDao = mockk<PersonDao>(relaxed = true)
     private val personRepository = InMemoryPersonRepository()
+    private val infotrygdutbetalingerRepository = InMemoryInfotrygdutbetalingerRepository()
 
     val førsteKjenteDagFinner = { LocalDate.now() }
 
-    private fun command(identitetsnummer: Identitetsnummer) = OppdaterPersonCommand(identitetsnummer.value, førsteKjenteDagFinner, personDao, personRepository)
+    private fun command(identitetsnummer: Identitetsnummer) =
+        OppdaterPersonCommand(identitetsnummer.value, førsteKjenteDagFinner, personRepository, infotrygdutbetalingerRepository)
 
     private lateinit var context: CommandContext
 
@@ -47,22 +47,20 @@ internal class OppdaterPersonCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        clearMocks(personDao)
     }
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
         val person = lagPerson().also(personRepository::lagre)
-        every {  personDao.finnITUtbetalingsperioderSistOppdatert(person.id.value) } returns LocalDate.now()
+        initLagredeInfotrygdUtbetalinger(oppdatert = LocalDate.now(), identitetsnummer = person.id)
         assertTrue(command(person.id).execute(context))
-
-        verify(exactly = 0) { personDao.upsertInfotrygdutbetalinger(any(), any()) }
+        assertTrue(observer.behov.isEmpty())
     }
 
     @Test
     fun `trenger infotrygdutbetalinger`() {
         val person = lagPerson().also(personRepository::lagre)
-        utdatertUtbetalinger(person.id)
+        initLagredeInfotrygdUtbetalinger(oppdatert = LocalDate.now().minusYears(1), identitetsnummer = person.id)
         assertFalse(command(person.id).execute(context))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(
@@ -79,14 +77,16 @@ internal class OppdaterPersonCommandTest {
     @Test
     fun `oppdatere infotrygdutbetalinger`() {
         val person = lagPerson().also(personRepository::lagre)
-        utdatertUtbetalinger(person.id)
+        initLagredeInfotrygdUtbetalinger(oppdatert = LocalDate.now().minusYears(1), identitetsnummer = person.id)
         val løsning = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command(person.id).execute(context))
-        verify(exactly = 1) { løsning.oppdater(personDao, person.id.value) }
+        verify(exactly = 1) { løsning.oppdater(infotrygdutbetalingerRepository, person.id.value) }
     }
 
-    private fun utdatertUtbetalinger(identitetsnummer: Identitetsnummer) {
-        every { personDao.finnITUtbetalingsperioderSistOppdatert(identitetsnummer.value) } returns LocalDate.now().minusYears(1)
+    private fun initLagredeInfotrygdUtbetalinger(oppdatert: LocalDate, identitetsnummer: Identitetsnummer) {
+        infotrygdutbetalingerRepository.lagre(
+            InfotrygdUtbetalinger.Factory.fraLagring(identitetsnummer, "[]", oppdatert),
+        )
     }
 }

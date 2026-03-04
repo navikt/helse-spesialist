@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
@@ -15,14 +14,6 @@ class DelegatingPersonDao(
         personRepository.alle().find { it.id.value == fødselsnummer }?.let {
             MinimalPersonDto(fødselsnummer = fødselsnummer, aktørId = it.aktørId)
         }
-
-    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate? =
-        personRepository.alle().find { it.id.value == fødselsnummer }?.infotrygdutbetalingerOppdatert
-
-    override fun upsertInfotrygdutbetalinger(
-        fødselsnummer: String,
-        utbetalinger: JsonNode,
-    ) = -1L
 
     override fun finnInntekter(
         fødselsnummer: String,

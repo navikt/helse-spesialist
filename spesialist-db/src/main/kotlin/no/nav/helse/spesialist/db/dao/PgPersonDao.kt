@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.db.PersonDao
@@ -48,12 +47,6 @@ class PgPersonDao internal constructor(
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull { row -> Adressebeskyttelse.valueOf(row.string("adressebeskyttelse")) }
 
-    override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
-        asSQL(
-            "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { it.localDateOrNull("infotrygdutbetalinger_oppdatert") }
-
     override fun finnInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
@@ -82,72 +75,6 @@ class PgPersonDao internal constructor(
             "inntekter" to objectMapper.writeValueAsString(inntekter),
         ).update()
     }
-
-    override fun upsertInfotrygdutbetalinger(
-        fødselsnummer: String,
-        utbetalinger: JsonNode,
-    ) = finnInfotrygdutbetalingerRef(fødselsnummer)
-        ?.also {
-            updateInfotrygdutbetalinger(it, fødselsnummer, utbetalinger)
-        }
-        ?: insertInfotrygdubetalinger(utbetalinger, fødselsnummer)
-
-    private fun updateInfotrygdutbetalinger(
-        infotrygdutbetalingerId: Long,
-        fødselsnummer: String,
-        utbetalinger: JsonNode,
-    ) {
-        asSQL(
-            """
-            UPDATE infotrygdutbetalinger SET data = CAST(:utbetalinger as json)
-            WHERE id = :infotrygdutbetalingerId;
-            """.trimIndent(),
-            "utbetalinger" to objectMapper.writeValueAsString(utbetalinger),
-            "infotrygdutbetalingerId" to infotrygdutbetalingerId,
-        ).update()
-
-        updateInfotrygdutbetalingerOppdatert(fødselsnummer)
-    }
-
-    private fun updateInfotrygdutbetalingerOppdatert(fødselsnummer: String) {
-        asSQL(
-            "UPDATE person SET infotrygdutbetalinger_oppdatert = now() WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).update()
-    }
-
-    private fun insertInfotrygdubetalinger(
-        utbetalinger: JsonNode,
-        fødselsnummer: String,
-    ): Long {
-        val infotrygdutbetalingerId =
-            asSQL(
-                "INSERT INTO infotrygdutbetalinger (data) VALUES (CAST(:data as json))",
-                "data" to objectMapper.writeValueAsString(utbetalinger),
-            ).updateAndReturnGeneratedKey()
-        updateInfotrygdutbetalingerRef(infotrygdutbetalingerId, fødselsnummer)
-        return infotrygdutbetalingerId
-    }
-
-    private fun updateInfotrygdutbetalingerRef(
-        infotrygdutbetalingerId: Long,
-        fødselsnummer: String,
-    ) {
-        asSQL(
-            """
-            UPDATE person SET infotrygdutbetalinger_ref = :infotrygdutbetalingerId, infotrygdutbetalinger_oppdatert = now()
-            WHERE fødselsnummer = :foedselsnummer
-            """.trimIndent(),
-            "infotrygdutbetalingerId" to infotrygdutbetalingerId,
-            "foedselsnummer" to fødselsnummer,
-        ).update()
-    }
-
-    private fun finnInfotrygdutbetalingerRef(fødselsnummer: String) =
-        asSQL(
-            "SELECT infotrygdutbetalinger_ref FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { it.longOrNull("infotrygdutbetalinger_ref") }
 
     override fun finnEnhetId(fødselsnummer: String): String =
         asSQL(

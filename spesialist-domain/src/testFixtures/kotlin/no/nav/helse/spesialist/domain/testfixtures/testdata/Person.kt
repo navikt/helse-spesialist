@@ -51,8 +51,6 @@ fun lagPerson(
         infoOppdatert = infoSistOppdatert,
         enhetRef = enhet,
         enhetRefOppdatert = enhetSistOppdatert,
-        infotrygdutbetalingerRef = null,
-        infotrygdutbetalingerOppdatert = null,
     )
 
 fun lagPersoninfo(

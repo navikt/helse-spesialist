@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -8,13 +7,6 @@ import java.time.LocalDate
 
 interface PersonDao {
     fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto?
-
-    fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate?
-
-    fun upsertInfotrygdutbetalinger(
-        fødselsnummer: String,
-        utbetalinger: JsonNode,
-    ): Long
 
     fun finnInntekter(
         fødselsnummer: String,

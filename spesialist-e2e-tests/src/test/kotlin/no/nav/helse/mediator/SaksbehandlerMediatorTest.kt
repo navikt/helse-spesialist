@@ -1,9 +1,5 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.sessionOf
@@ -47,6 +43,7 @@ import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.InfotrygdUtbetalinger
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -123,13 +120,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     private val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
-    private companion object {
-        val objectMapper: ObjectMapper =
-            jacksonObjectMapper()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .registerModule(JavaTimeModule())
-    }
-
     private var vedtakId: Long = -1
     private var oppgaveId = nextLong().absoluteValue
 
@@ -196,7 +186,12 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 null,
             ),
         )
-        sessionContext.personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
+        sessionContext.infotrygdutbetalingerRepository.lagre(
+            InfotrygdUtbetalinger.Factory.ny(
+                id = Identitetsnummer.fraString(fødselsnummer),
+                data = "{}"
+            )
+        )
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettVedtaksperiode(
             fødselsnummer = fødselsnummer,

@@ -23,7 +23,6 @@ class InMemoryDaos(
     override val periodehistorikkDao: InMemoryPeriodehistorikkDao,
     override val periodehistorikkApiDao: UnimplementedPeriodehistorikkApiDao,
     override val personDao: DelegatingPersonDao,
-    override val personApiDao: UnimplementedPersonApiDao,
     override val poisonPillDao: NoopPoisonPillDao,
     override val påVentDao: DelegatingPåVentDao,
     override val påVentApiDao: UnimplementedPåVentApiDao,

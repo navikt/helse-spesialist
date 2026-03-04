@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.db.repository.PgInfotrygdutbetalingerRepository
+import no.nav.helse.spesialist.domain.InfotrygdUtbetalinger
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +18,7 @@ import java.time.YearMonth
 
 @Isolated
 internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
-    private val person = opprettPerson()
+    private val infotrygdutbetalingerRepository = PgInfotrygdutbetalingerRepository(session)
 
     @BeforeEach
     fun tømTabeller() {
@@ -28,7 +29,8 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre infotrygdutbetalinger`() {
-        personDao.upsertInfotrygdutbetalinger(person.id.value, objectMapper.createObjectNode())
+        val person = opprettPerson()
+        infotrygdutbetalingerRepository.lagre(InfotrygdUtbetalinger.Factory.ny(person.id, "{}"))
         assertEquals(1, infotrygdUtbetalinger().size)
     }
 
@@ -36,8 +38,7 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     fun `oppdaterer infotrygdutbetalinger`() {
         val person = opprettPerson()
         assertEquals(null, infotrygdUtbetalinger().firstOrNull())
-        val utbetalinger = objectMapper.createObjectNode().set<JsonNode>("test", objectMapper.createArrayNode())
-        personDao.upsertInfotrygdutbetalinger(person.id.value, utbetalinger)
+        infotrygdutbetalingerRepository.lagre(InfotrygdUtbetalinger.Factory.ny(person.id, """{"test":[]}"""))
         assertEquals("{\"test\":[]}", infotrygdUtbetalinger().first())
     }
 

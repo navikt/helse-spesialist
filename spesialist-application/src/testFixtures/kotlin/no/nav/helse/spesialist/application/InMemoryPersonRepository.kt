@@ -14,8 +14,6 @@ class InMemoryPersonRepository : PersonRepository, AbstractInMemoryRepository<Id
         infoOppdatert = original.infoOppdatert,
         enhetRef = original.enhetRef,
         enhetRefOppdatert = original.enhetRefOppdatert,
-        infotrygdutbetalingerRef = original.infotrygdutbetalingerRef,
-        infotrygdutbetalingerOppdatert = original.infotrygdutbetalingerOppdatert,
         egenAnsattStatus = original.egenAnsattStatus,
     )
 }
