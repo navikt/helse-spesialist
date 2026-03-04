@@ -99,6 +99,8 @@ spec:
         flags:
           - name: cloudsql.enable_pgaudit
             value: "true"
+          - name: max_connections
+            value: "1000"
           - name: pgaudit.log
             value: "write,ddl,role"
           - name: pgaudit.log_parameter
