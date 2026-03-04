@@ -168,7 +168,7 @@ object TestRunner {
                     apiModuleConfiguration = configuration,
                     spesialistSchema = spesialistSchema,
                     sessionFactory = avhengigheter.sessionFactory,
-                    listenerFactory = mockk(relaxed = true),
+                    opptegnelseListener = mockk(relaxed = true),
                     meldingPubliserer = avhengigheter.meldingPubliserer,
                     dokumentMediator = avhengigheter.dokumentMediator,
                     forsikringHenter = avhengigheter.forsikringHenter,

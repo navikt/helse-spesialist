@@ -20,7 +20,7 @@ inline fun <reified T> T.loggError(
 
 inline fun <reified T> T.loggError(
     melding: String,
-    throwable: Throwable,
+    throwable: Throwable?,
     vararg teamLogsDetaljer: Pair<String, Any?>,
 ) {
     loggMedDetaljer(logg, Level.ERROR, melding, teamLogsDetaljer.toList(), throwable)

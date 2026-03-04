@@ -4,7 +4,6 @@ import io.ktor.server.application.Application
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
-import no.nav.helse.db.ListenerFactory
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.PersonhåndtererImpl
@@ -31,6 +30,7 @@ import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
@@ -43,7 +43,7 @@ class ApiModule(
     private val meldingPubliserer: MeldingPubliserer,
     brukerrollehenter: Brukerrollehenter,
     private val sessionFactory: SessionFactory,
-    private val listenerFactory: ListenerFactory,
+    private val opptegnelseListener: OpptegnelseListener,
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
@@ -147,7 +147,7 @@ class ApiModule(
             apiModuleConfiguration = configuration,
             spesialistSchema = spesialistSchema,
             sessionFactory = sessionFactory,
-            listenerFactory = listenerFactory,
+            opptegnelseListener = opptegnelseListener,
             meldingPubliserer = meldingPubliserer,
             dokumentMediator = dokumentMediator,
             forsikringHenter = forsikringHenter,

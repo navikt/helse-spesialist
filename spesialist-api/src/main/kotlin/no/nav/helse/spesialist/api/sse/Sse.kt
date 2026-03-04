@@ -8,8 +8,8 @@ import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
-import no.nav.helse.db.ListenerFactory
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.coMedMdc
@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal fun Route.sse(
     sessionFactory: SessionFactory,
-    listenerFactory: ListenerFactory,
+    opptegnelseListener: OpptegnelseListener,
 ) {
     install(HttpRequestLifecycle) {
         cancelCallOnClose = true
@@ -53,42 +53,44 @@ internal fun Route.sse(
                     ?.let { PersonPseudoId.fraString(it) }
                     ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
 
-            val (identitetsnummer, sisteSekvensnummerVedInitiering) =
-                sessionFactory.transactionalSessionScope {
-                    val identitetsnummer =
-                        it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-                    val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
-                    identitetsnummer to sisteSekvensnummer
+            coMedMdc(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
+                val (identitetsnummer, sisteSekvensnummerVedInitiering) =
+                    sessionFactory.transactionalSessionScope {
+                        val identitetsnummer =
+                            it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+                        val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
+                        identitetsnummer to sisteSekvensnummer
+                    }
+
+                if (identitetsnummer == null) {
+                    loggWarn("SSE-tilkobling forsøkt for personPseudoId uten tilhørende identitetsnummer")
+                    return@coMedMdc
                 }
 
-            if (identitetsnummer == null) {
-                loggWarn("SSE-tilkobling forsøkt for personPseudoId uten tilhørende identitetsnummer", "personPseudoId" to personPseudoId.value)
-                return@sse
-            }
-            loggDebug("SSE-tilkobling startet", "identitetsnummer" to identitetsnummer.value)
-            var sisteSekvensnummer = sisteSekvensnummerVedInitiering
+                coMedMdc(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
+                    loggDebug("SSE-tilkobling startet")
+                    var sisteSekvensnummer = sisteSekvensnummerVedInitiering
 
-            coMedMdc(
-                MdcKey.IDENTITETSNUMMER to identitetsnummer.value,
-                MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString(),
-            ) {
-                listenerFactory.opptegnelseListener {
-                    this
-                        .endringer(identitetsnummer)
-                        .collect {
-                            runCatching {
-                                sessionFactory.transactionalSessionScope {
-                                    it.opptegnelseRepository.finnAlleForPersonEtter(sisteSekvensnummer, identitetsnummer)
-                                }
-                            }.onFailure {
-                                loggWarn("Feil ved henting av opptegnelse for person - hopper over notifikasjon", it)
-                            }.onSuccess { opptegnelser ->
-                                if (opptegnelser.isNotEmpty()) {
-                                    sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
-                                }
-                                opptegnelser.forEach { send(event = it.type.tilEvent(), data = "{}") }
+                    opptegnelseListener.onOpptegnelse(identitetsnummer) {
+                        runCatching {
+                            sessionFactory.transactionalSessionScope {
+                                it.opptegnelseRepository.finnAlleForPersonEtter(
+                                    sisteSekvensnummer,
+                                    identitetsnummer,
+                                )
                             }
+                        }.onFailure {
+                            loggWarn(
+                                "Feil ved henting av opptegnelse for person - hopper over notifikasjon",
+                                it,
+                            )
+                        }.onSuccess { opptegnelser ->
+                            if (opptegnelser.isNotEmpty()) {
+                                sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
+                            }
+                            opptegnelser.forEach { send(event = it.type.tilEvent(), data = "{}") }
                         }
+                    }
                 }
             }
         }

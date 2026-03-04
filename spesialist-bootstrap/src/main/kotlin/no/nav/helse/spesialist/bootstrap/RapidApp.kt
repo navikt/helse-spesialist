@@ -219,7 +219,7 @@ class RapidApp {
                 meldingPubliserer = kafkaModule.meldingPubliserer,
                 brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
                 sessionFactory = dbModule.sessionFactory,
-                listenerFactory = dbModule.listenerFactory,
+                opptegnelseListener = dbModule.opptegnelseListener,
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,

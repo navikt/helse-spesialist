@@ -18,7 +18,7 @@ class DBModule(
     val dataSource: DataSource = _dataSource
     val daos = DBDaos(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
-    val listenerFactory = PgListenerFactory { dataSourceBuilder.listenNotifyConnection }
+    val opptegnelseListener = PgOpptegnelseListener { dataSourceBuilder.listenNotifyConnection }
 
     fun shutdown() {
         loggInfo("Forsøker å lukke datasource...")

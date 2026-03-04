@@ -24,10 +24,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import no.nav.helse.db.ListenerFactory
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -100,22 +98,17 @@ class IntegrationTestFixture {
             meldingPubliserer = meldingPubliserer,
             brukerrollehenter = { Either.Success(emptySet()) },
             sessionFactory = sessionFactory,
-            listenerFactory =
-                object : ListenerFactory {
-                    override suspend fun opptegnelseListener(block: suspend OpptegnelseListener.() -> Unit) {
-                        val listener =
-                            object : OpptegnelseListener {
-                                override fun endringer(identitetsnummer: Identitetsnummer): Flow<Unit> =
-                                    flow {
-                                        repeat(10) {
-                                            delay(50)
-                                            emit(Unit)
-                                        }
-                                    }
-
-                                override fun close() {}
+            opptegnelseListener =
+                object : OpptegnelseListener {
+                    override suspend fun onOpptegnelse(identitetsnummer: Identitetsnummer, block: suspend () -> Unit) {
+                        flow {
+                            repeat(10) {
+                                delay(50)
+                                emit(Unit)
                             }
-                        block(listener)
+                        }.collect {
+                            block()
+                        }
                     }
                 },
             environmentToggles = mockk(relaxed = true),

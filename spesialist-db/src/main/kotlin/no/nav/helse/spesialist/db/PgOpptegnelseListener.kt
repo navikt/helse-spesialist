@@ -9,24 +9,33 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
 import no.nav.helse.spesialist.application.OpptegnelseListener
-import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.intellij.lang.annotations.Language
+import java.sql.Connection
+
+typealias ConnectionProvider = () -> Connection
 
 data class OpptegnelseNotification(
     val personId: Long,
 )
 
 class PgOpptegnelseListener(
-    connectionProvider: ConnectionProvider,
+    private val connectionProvider: ConnectionProvider,
 ) : OpptegnelseListener {
-    private val connection = connectionProvider().unwrap(PGConnection::class.java)
-
-    init {
-        connection.createStatement().use { it.execute("LISTEN opptegnelse") }
+    override suspend fun onOpptegnelse(
+        identitetsnummer: Identitetsnummer,
+        block: suspend () -> Unit,
+    ) {
+        connectionProvider().unwrap(PGConnection::class.java).use { connection ->
+            endringer(identitetsnummer, connection).collect { block() }
+        }
     }
 
-    private fun hentPersonId(identitetsnummer: Identitetsnummer): Long? {
+    private fun hentPersonId(
+        identitetsnummer: Identitetsnummer,
+        connection: Connection,
+    ): Long? {
         @Language("SQL")
         val query = "SELECT id FROM person WHERE fødselsnummer = ?"
         return connection.prepareStatement(query).use { stmt ->
@@ -37,8 +46,11 @@ class PgOpptegnelseListener(
         }
     }
 
-    override fun endringer(identitetsnummer: Identitetsnummer): Flow<Unit> {
-        val personId = hentPersonId(identitetsnummer) ?: return emptyFlow()
+    private fun endringer(
+        identitetsnummer: Identitetsnummer,
+        connection: PGConnection,
+    ): Flow<Unit> {
+        val personId = hentPersonId(identitetsnummer, connection) ?: return emptyFlow()
         return callbackFlow {
             val listener =
                 object : PGNotificationListener {
@@ -50,17 +62,14 @@ class PgOpptegnelseListener(
                         val opptegnelse = payload?.let { objectMapper.readValue<OpptegnelseNotification?>(it) } ?: return
                         if (opptegnelse.personId == personId) {
                             trySend(Unit).onFailure { throwable ->
-                                loggWarn("Kunne ikke sende opptegnelse-notifikasjon til kanal", throwable)
+                                loggError("Kunne ikke sende opptegnelse-notifikasjon til kanal", throwable)
                             }
                         }
                     }
                 }
             connection.addNotificationListener(listener)
+            connection.createStatement().use { it.execute("LISTEN opptegnelse") }
             awaitClose { connection.removeNotificationListener(listener) }
         }
-    }
-
-    override fun close() {
-        connection.close()
     }
 }
