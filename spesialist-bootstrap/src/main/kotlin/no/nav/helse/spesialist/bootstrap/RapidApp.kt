@@ -176,7 +176,6 @@ class RapidApp {
             ClientSpeedModule(
                 configuration = configuration.clientSpeed,
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
-                environmentToggles = configuration.environmentToggles,
                 cache = valkeyModule.cache,
             )
 

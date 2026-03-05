@@ -146,9 +146,9 @@ spec:
     - name: SPILLKAR_SCOPE
       value: "api://dev-gcp.tbd.spillkar/.default"
     - name: SPEED_API_URL
-      value: "http://speed-api-dev-proxy"
+      value: "http://speed-api"
     - name: SPEED_SCOPE
-      value: "api://dev-gcp.tbd.speed-api-dev-proxy/.default"
+      value: "api://dev-gcp.tbd.speed-api/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK

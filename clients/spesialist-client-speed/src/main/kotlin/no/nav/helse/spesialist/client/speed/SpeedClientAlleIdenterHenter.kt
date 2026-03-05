@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.speed
 
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -16,15 +15,10 @@ import java.util.UUID
 class SpeedClientAlleIdenterHenter(
     private val configuration: ClientSpeedModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
-    private val environmentToggles: EnvironmentToggles,
 ) : AlleIdenterHenter {
     override fun hentAlleIdenter(ident: String): List<AlleIdenterHenter.Ident> {
-        val accessToken =
-            if (environmentToggles.devGcp) {
-                "whatever-token"
-            } else {
-                accessTokenGenerator.hentAccessToken(configuration.scope)
-            }
+        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+
         val uri = "${configuration.apiUrl}/api/alle_identer"
         loggDebug("Utfører HTTP POST $uri")
 

@@ -8,7 +8,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.serverError
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
-import io.mockk.mockk
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.domain.Personinfo
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -79,7 +78,6 @@ class SpeedClientPersoninfoHenterTest {
                     scope = "scoap",
                 ),
             accessTokenGenerator = { "test-token" },
-            environmentToggles = mockk(relaxed = true),
             cache =
                 object : Cache {
                     override fun <T> hentGjennomCache(

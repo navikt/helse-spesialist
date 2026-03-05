@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.speed
 
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Cache
@@ -20,7 +19,6 @@ import java.util.UUID
 class SpeedClientPersoninfoHenter(
     private val configuration: ClientSpeedModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
-    private val environmentToggles: EnvironmentToggles,
     private val cache: Cache,
 ) : PersoninfoHenter {
     override fun hentPersoninfo(ident: String): Personinfo? =
@@ -30,12 +28,8 @@ class SpeedClientPersoninfoHenter(
             }?.tilPersoninfo()
 
     private fun hentFraSpeed(ident: String): PersonResponse? {
-        val accessToken =
-            if (environmentToggles.devGcp) {
-                "whatever-token"
-            } else {
-                accessTokenGenerator.hentAccessToken(configuration.scope)
-            }
+        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+
         val uri = "${configuration.apiUrl}/api/person"
         loggDebug("Utfører HTTP POST $uri")
 
