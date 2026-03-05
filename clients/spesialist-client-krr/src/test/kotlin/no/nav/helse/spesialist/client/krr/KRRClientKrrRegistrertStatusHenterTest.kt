@@ -219,7 +219,7 @@ class KRRClientKrrRegistrertStatusHenterTest {
         wireMock.stubFor(post("/rest/v1/personer").willReturn(krrProxyResponse))
 
         return KRRClientKrrRegistrertStatusHenter(
-            configuration = ClientKrrModule.Configuration.Client(
+            configuration = ClientKrrModule.Configuration(
                 apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                 scope = "scoap"
             ),

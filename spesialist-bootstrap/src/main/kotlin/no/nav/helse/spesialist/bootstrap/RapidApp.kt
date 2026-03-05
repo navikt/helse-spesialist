@@ -49,14 +49,8 @@ fun main() {
                     ),
                 clientKrr =
                     ClientKrrModule.Configuration(
-                        if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET")) {
-                            null
-                        } else {
-                            ClientKrrModule.Configuration.Client(
-                                apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-                                scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
-                            )
-                        },
+                        apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+                        scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
                     ),
                 clientSpeed =
                     ClientSpeedModule.Configuration(

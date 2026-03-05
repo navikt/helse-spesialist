@@ -22,7 +22,7 @@ import java.time.Duration
 import java.util.UUID
 
 class KRRClientKrrRegistrertStatusHenter(
-    private val configuration: ClientKrrModule.Configuration.Client,
+    private val configuration: ClientKrrModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
     private val cache: Cache,
 ) : KrrRegistrertStatusHenter {
