@@ -13,7 +13,7 @@ import java.util.UUID
 internal class AvbrytCommand(
     fødselsnummer: String,
     vedtaksperiodeId: UUID,
-    spleisBehandlingId: SpleisBehandlingId,
+    spleisBehandlingId: SpleisBehandlingId?,
     commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
@@ -33,6 +33,7 @@ internal class AvbrytCommand(
             AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextDao = commandContextDao),
             ikkesuspenderendeCommand("fjernVedtak") {
+                if (spleisBehandlingId == null) return@ikkesuspenderendeCommand
                 val vedtak = vedtakRepository.finn(spleisBehandlingId) ?: return@ikkesuspenderendeCommand
                 if (vedtak.behandletAvSpleis) {
                     log.warn("Spleis har behandlet svar på godkjenningsbehov for perioden, det er merkelig at spesialist behandler godkjenningsbehov etterpå")

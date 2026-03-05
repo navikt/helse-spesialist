@@ -22,7 +22,7 @@ class VedtaksperiodeForkastetRiver(
         River.PacketValidation {
             it.requireKey("@id")
             it.requireKey("vedtaksperiodeId")
-            it.requireKey("behandlingId")
+            it.interestedIn("behandlingId")
             it.requireKey("fødselsnummer")
         }
 

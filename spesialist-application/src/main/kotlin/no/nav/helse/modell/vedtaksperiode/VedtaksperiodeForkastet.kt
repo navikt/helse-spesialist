@@ -21,14 +21,14 @@ import java.util.UUID
 class VedtaksperiodeForkastet(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
-    val spleisBehandlingId: SpleisBehandlingId,
+    val spleisBehandlingId: SpleisBehandlingId?,
     private val fødselsnummer: String,
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
         UUID.fromString(jsonNode["@id"].asText()),
         UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
-        SpleisBehandlingId(UUID.fromString(jsonNode["behandlingId"].asText())),
+        UUID.fromString(jsonNode["behandlingId"].asText()).takeUnless { it == null }?.let { SpleisBehandlingId(it) },
         jsonNode["fødselsnummer"].asText(),
         json = jsonNode.toString(),
     )
@@ -52,7 +52,7 @@ class VedtaksperiodeForkastet(
 class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
-    val spleisBehandlingId: SpleisBehandlingId,
+    val spleisBehandlingId: SpleisBehandlingId?,
     val id: UUID,
     val alleForkastedeVedtaksperiodeIder: List<UUID>,
     commandContextDao: CommandContextDao,
