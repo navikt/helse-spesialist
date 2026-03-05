@@ -8,6 +8,7 @@ on:
       - 'Dockerfile-db-migrations'
       - 'spesialist-db-migrations/**'
       - '.github/workflows/spesialist-db-migrations.yml'
+      - '.github/workflows/build-image.yml'
       - 'deploy/dev-db-migrations.yml'
       - 'deploy/prod-db-migrations.yml'
       - '.dockerignore'
