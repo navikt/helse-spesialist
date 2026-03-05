@@ -57,6 +57,8 @@ spec:
           - id: {{ENTRAID_UUID_KODE_7_DEV}}
           - id: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
           - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+          - id: {{ENTRAID_UUID_SPEIL_STIKKPROVE_DEV}}
+          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG_DEV}}
   accessPolicy:
     inbound:
       rules:
@@ -120,7 +122,7 @@ spec:
     - name: ROLLE_KODE_7
       value: {{ENTRAID_UUID_KODE_7_DEV}}
     - name: ROLLE_STIKKPROVE
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: {{ENTRAID_UUID_SPEIL_STIKKPROVE_DEV}}
     - name: ROLLE_SELVSTENDIG_BETA
       value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
     - name: ROLLE_UTVIKLER
