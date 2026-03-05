@@ -79,7 +79,6 @@ fun Routing.restRoutes(
             get(GetOppgaverBehandler(), restAdapter)
             get(GetBehandledeOppgaverBehandler(), restAdapter)
 
-            post(PostOpphevStansBehandler(), restAdapter)
             patch(PatchStansBehandler(), restAdapter)
 
             get(GetSoknadBehandler(dokumentMediator = dokumentMediator), restAdapter)
