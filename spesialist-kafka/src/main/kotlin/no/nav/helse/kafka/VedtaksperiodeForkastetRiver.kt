@@ -1,5 +1,6 @@
 package no.nav.helse.kafka
 
+import com.github.navikt.tbd_libs.jackson.asUUIDOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -36,7 +37,7 @@ class VedtaksperiodeForkastetRiver(
             VedtaksperiodeForkastet(
                 packet["@id"].asUUID(),
                 packet["vedtaksperiodeId"].asUUID(),
-                SpleisBehandlingId(packet["behandlingId"].asUUID()),
+                packet["behandlingId"].asUUIDOrNull()?.let { SpleisBehandlingId(it) },
                 packet["fødselsnummer"].asText(),
                 json = packet.toJson(),
             ),
