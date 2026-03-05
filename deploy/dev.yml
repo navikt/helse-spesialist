@@ -133,8 +133,10 @@ spec:
       value: "http://spleis-api"
     - name: SPLEIS_CLIENT_LOGG_RESPONS
       value: "true"
-    - name: BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET
-      value: "true"
+    - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
+      value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
+    - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
+      value: "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: SPISKAMMERSET_API_URL
       value: "http://spiskammerset"
     - name: SPISKAMMERSET_SCOPE
