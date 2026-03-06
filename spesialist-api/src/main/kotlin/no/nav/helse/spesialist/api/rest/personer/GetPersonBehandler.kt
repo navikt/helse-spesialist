@@ -8,16 +8,16 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetPersonBehandler(
     private val personinfoHenter: PersoninfoHenter,
+    private val alleIdenterHenter: AlleIdenterHenter,
 ) : GetBehandler<Personer.PersonPseudoId, ApiPerson, ApiGetPersonErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
@@ -30,26 +30,40 @@ class GetPersonBehandler(
             personPseudoIdIkkeFunnet = { ApiGetPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
+            val identitetsnummer = person.id
             val personinfo =
-                personinfoHenter.hentPersoninfo(person.id.value)
+                personinfoHenter.hentPersoninfo(identitetsnummer.value)
                     ?: return@medPerson RestResponse.Error(ApiGetPersonErrorCode.PERSON_IKKE_FUNNET)
 
-            loggInfo("Hentet personopplysninger")
+            loggInfo("Hentet personinfo")
+
+            val alleIdenter = alleIdenterHenter.hentAlleIdenter(identitetsnummer.value)
+
+            val aktørId =
+                alleIdenter
+                    .asSequence()
+                    .filter(AlleIdenterHenter.Ident::gjeldende)
+                    .find { it.type == AlleIdenterHenter.IdentType.AKTORID }
+                    ?.ident
+                    ?: return@medPerson RestResponse.Error(ApiGetPersonErrorCode.AKTØRID_IKKE_FUNNET)
+
+            val andreIdentitetsnumre =
+                alleIdenter
+                    .asSequence()
+                    .filter { it.type == AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT }
+                    .map { it.ident }
+                    .filterNot { it == identitetsnummer.value }
+                    .distinct()
+                    .sorted()
+                    .toList()
+
+            loggInfo("Hentet identer")
 
             RestResponse.OK(
                 ApiPerson(
-                    identitetsnummer = person.id.value,
-                    andreIdentitetsnumre =
-                        kallKontekst.transaksjon.personRepository
-                            .finnAlleMedAktørId(person.aktørId)
-                            .asSequence()
-                            .map(Person::id)
-                            .filterNot { it == person.id }
-                            .map(Identitetsnummer::value)
-                            .distinct()
-                            .sorted()
-                            .toList(),
-                    aktørId = person.aktørId,
+                    identitetsnummer = identitetsnummer.value,
+                    andreIdentitetsnumre = andreIdentitetsnumre,
+                    aktørId = aktørId,
                     fornavn = personinfo.fornavn,
                     mellomnavn = personinfo.mellomnavn,
                     etternavn = personinfo.etternavn,
@@ -87,4 +101,5 @@ enum class ApiGetPersonErrorCode(
     PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     PERSON_IKKE_FUNNET("Fant ikke data for person", HttpStatusCode.NotFound),
+    AKTØRID_IKKE_FUNNET("Fant ikke aktørId for person", HttpStatusCode.InternalServerError),
 }

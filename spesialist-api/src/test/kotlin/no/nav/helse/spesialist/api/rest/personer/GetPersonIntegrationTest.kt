@@ -4,6 +4,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
@@ -28,10 +29,14 @@ class GetPersonIntegrationTest {
             mellomnavn = null,
             etternavn = "Nordmann",
             kjønn = Personinfo.Kjønn.Mann,
-            fødselsdato = fødselsdato
+            fødselsdato = fødselsdato,
         ).also(personRepository::lagre)
         val personinfo = person.info!!
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id.value) } returns listOf(
+            AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+            AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+        )
 
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
@@ -70,10 +75,14 @@ class GetPersonIntegrationTest {
             mellomnavn = "Midtre",
             etternavn = "Nordmann",
             kjønn = Personinfo.Kjønn.Kvinne,
-            fødselsdato = fødselsdato
+            fødselsdato = fødselsdato,
         ).also(personRepository::lagre)
         val personinfo = person.info!!
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id.value) } returns listOf(
+            AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+            AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+        )
 
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
@@ -107,15 +116,20 @@ class GetPersonIntegrationTest {
     fun `henter person med andre identitetsnumre`() {
         // Given:
         val aktørId = lagAktørId()
-        val person1 = lagPerson(aktørId = aktørId).also(personRepository::lagre)
-        val personinfo = person1.info!!
+        val person = lagPerson(aktørId = aktørId).also(personRepository::lagre)
+        val personinfo = person.info!!
+        val andreIdent1 = lagPerson().id.value
+        val andreIdent2 = lagPerson().id.value
 
-        val person2 = lagPerson(aktørId = aktørId).also(personRepository::lagre)
-        val person3 = lagPerson(aktørId = aktørId).also(personRepository::lagre)
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id.value) } returns listOf(
+            AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+            AlleIdenterHenter.Ident(andreIdent1, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+            AlleIdenterHenter.Ident(andreIdent2, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+            AlleIdenterHenter.Ident(aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+        )
 
-        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person1.id.value) } returns personinfo
-
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person1.id)
+        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
         // When:
         val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}")
@@ -124,10 +138,10 @@ class GetPersonIntegrationTest {
         assertEquals(200, response.status)
         val body = response.bodyAsJsonNode
         assertNotNull(body)
-        val sorterteIdentitetsnumre = listOf(person2.id.value, person3.id.value).sorted()
+        val sorterteIdentitetsnumre = listOf(andreIdent1, andreIdent2).sorted()
         assertJsonEquals(
             sorterteIdentitetsnumre.joinToString(prefix = "[ ", separator = ", ", postfix = " ]") { "\"$it\"" },
-            body["andreIdentitetsnumre"]
+            body["andreIdentitetsnumre"],
         )
     }
 
@@ -216,3 +230,4 @@ class GetPersonIntegrationTest {
         )
     }
 }
+

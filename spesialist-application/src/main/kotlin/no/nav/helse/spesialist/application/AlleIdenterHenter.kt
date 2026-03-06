@@ -6,6 +6,7 @@ fun interface AlleIdenterHenter {
     data class Ident(
         val ident: String,
         val type: IdentType,
+        val gjeldende: Boolean,
     )
 
     enum class IdentType {

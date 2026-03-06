@@ -118,7 +118,7 @@ fun Routing.restRoutes(
 
             get(GetBehandlendeEnhetForPersonBehandler(behandlendeEnhetHenter), restAdapter)
 
-            get(GetPersonBehandler(personinfoHenter), restAdapter)
+            get(GetPersonBehandler(personinfoHenter, alleIdenterHenter), restAdapter)
 
             get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
         }

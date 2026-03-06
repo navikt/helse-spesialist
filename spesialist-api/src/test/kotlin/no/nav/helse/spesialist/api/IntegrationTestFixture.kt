@@ -85,13 +85,7 @@ class IntegrationTestFixture {
     val spiskammersetForsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
     val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
-    val alleIdenterHenterMock =
-        AlleIdenterHenter { ident ->
-            listOf(
-                AlleIdenterHenter.Ident(ident, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
-                AlleIdenterHenter.Ident(ident.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT),
-            )
-        }
+    val alleIdenterHenterMock: AlleIdenterHenter = mockk(relaxed = true)
 
     private val apiModule =
         ApiModule(

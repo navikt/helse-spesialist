@@ -3,12 +3,14 @@ package no.nav.helse.spesialist.api.rest.personer
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering
 import no.nav.helse.spesialist.application.spillkar.SamlingAvVurderteInngangsvilkår
 import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -20,6 +22,17 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+
+    @BeforeEach
+    fun setup() {
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(any()) } answers { answer ->
+            val ident = answer.invocation.args[0] as String
+            listOf(
+                AlleIdenterHenter.Ident(ident, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(ident.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+            )
+        }
+    }
 
     @Test
     fun `gir OK og tom liste når ingen vurderinger finnes`() {

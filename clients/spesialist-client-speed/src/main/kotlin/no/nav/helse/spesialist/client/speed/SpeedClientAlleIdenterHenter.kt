@@ -66,4 +66,5 @@ private fun AlleIdenterResponse.Ident.tilDomene(): AlleIdenterHenter.Ident =
                 AlleIdenterResponse.IdentType.AKTORID -> AlleIdenterHenter.IdentType.AKTORID
                 AlleIdenterResponse.IdentType.NPID -> AlleIdenterHenter.IdentType.NPID
             },
+        gjeldende = gjeldende,
     )
