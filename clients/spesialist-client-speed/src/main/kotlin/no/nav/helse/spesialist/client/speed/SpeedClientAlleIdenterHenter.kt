@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.client.speed
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
+import no.nav.helse.spesialist.application.Cache
+import no.nav.helse.spesialist.application.hentGjennomCache
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.client.speed.dto.AlleIdenterRequest
@@ -10,13 +12,23 @@ import no.nav.helse.spesialist.client.speed.dto.AlleIdenterResponse
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import java.time.Duration
 import java.util.UUID
 
 class SpeedClientAlleIdenterHenter(
     private val configuration: ClientSpeedModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
+    private val cache: Cache,
 ) : AlleIdenterHenter {
-    override fun hentAlleIdenter(ident: String): List<AlleIdenterHenter.Ident> {
+    override fun hentAlleIdenter(ident: String): List<AlleIdenterHenter.Ident> =
+        cache
+            .hentGjennomCache(key = "speed-client:alle-identer:$ident", timeToLive = Duration.ofHours(1)) {
+                hentFraSpeed(ident)
+            }?.identer
+            .orEmpty()
+            .map { it.tilDomene() }
+
+    private fun hentFraSpeed(ident: String): AlleIdenterResponse? {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
 
         val uri = "${configuration.apiUrl}/api/alle_identer"
@@ -36,11 +48,10 @@ class SpeedClientAlleIdenterHenter(
                 when (response.code) {
                     200 -> {
                         val responseBody = EntityUtils.toString(response.entity)
-                        val dto = objectMapper.readValue(responseBody, AlleIdenterResponse::class.java)
-                        dto.identer.map { it.tilDomene() }
+                        objectMapper.readValue(responseBody, AlleIdenterResponse::class.java)
                     }
 
-                    404 -> emptyList()
+                    404 -> null
 
                     in 500..599 -> {
                         val responseBody = EntityUtils.toString(response.entity).orEmpty()
