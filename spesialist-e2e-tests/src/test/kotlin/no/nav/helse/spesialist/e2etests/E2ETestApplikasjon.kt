@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.sparkel.norg.testfixtures.ClientSparkelNorgModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
@@ -44,6 +45,7 @@ object E2ETestApplikasjon {
                     api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
                     clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
                     clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
+                    clientSparkelNorg = ClientSparkelNorgModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,

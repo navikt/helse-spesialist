@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
+import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
@@ -51,6 +52,11 @@ fun main() {
                     ClientKrrModule.Configuration(
                         apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
                         scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                    ),
+                clientSparkelNorg =
+                    ClientSparkelNorgModule.Configuration(
+                        apiUrl = env.getValue("SPARKEL_NORG_API_URL"),
+                        scope = env.getValue("SPARKEL_NORG_SCOPE"),
                     ),
                 clientSpeed =
                     ClientSpeedModule.Configuration(
@@ -166,6 +172,13 @@ class RapidApp {
                 cache = valkeyModule.cache,
             )
 
+        val clientSparkelNorgModule =
+            ClientSparkelNorgModule(
+                configuration = configuration.clientSparkelNorg,
+                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                cache = valkeyModule.cache,
+            )
+
         val clientSpeedModule =
             ClientSpeedModule(
                 configuration = configuration.clientSpeed,
@@ -216,6 +229,7 @@ class RapidApp {
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
+                behandlendeEnhetHenter = clientSparkelNorgModule.behandlendeEnhetHenter,
                 forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,

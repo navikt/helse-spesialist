@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
+import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
@@ -79,6 +80,7 @@ class IntegrationTestFixture {
     }
 
     val krrRegistrertStatusHenterMock: KrrRegistrertStatusHenter = mockk(relaxed = true)
+    val behandlendeEnhetHenterMock: BehandlendeEnhetHenter = mockk(relaxed = true)
     val personinfoHenterMock: PersoninfoHenter = mockk(relaxed = true)
     val spiskammersetForsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
@@ -114,6 +116,7 @@ class IntegrationTestFixture {
             environmentToggles = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
+            behandlendeEnhetHenter = behandlendeEnhetHenterMock,
             forsikringHenter = spiskammersetForsikringHenterMock,
             inngangsvilkårHenter = inngangsvilkårHenterMock,
             inngangsvilkårInnsender = inngangsvilkårInnsenderMock,

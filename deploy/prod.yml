@@ -79,6 +79,9 @@ spec:
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: prod-gcp
+        - application: sparkel-norg
+          namespace: tbd
+          cluster: prod-gcp
         - application: logging
           namespace: nais-system
   gcp:
@@ -175,5 +178,9 @@ spec:
       value: "http://speed-api"
     - name: SPEED_SCOPE
       value: "api://prod-gcp.tbd.speed-api/.default"
+    - name: SPARKEL_NORG_API_URL
+      value: "http://sparkel-norg"
+    - name: SPARKEL_NORG_SCOPE
+      value: "api://prod-gcp.tbd.sparkel-norg/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd

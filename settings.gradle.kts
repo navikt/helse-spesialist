@@ -6,6 +6,7 @@ include(
     "spesialist-api",
     ":clients:spesialist-client-entra-id",
     ":clients:spesialist-client-krr",
+    ":clients:spesialist-client-sparkel-norg",
     ":clients:spesialist-client-speed",
     ":clients:spesialist-client-spillkar",
     ":clients:spesialist-client-spiskammerset",
