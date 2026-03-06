@@ -50,7 +50,7 @@ class GetVurderteInngangsvilkårForPersonBehandler(
     ): RestResponse<List<ApiSamlingAvVurderteInngangsvilkår>, ApiGetVurderteInngangsvilkårErrorCode> {
         val folkeregisterIdenter =
             alleIdenterHenter
-                .hentAlleIdenter(person.id.value)
+                .hentAlleIdenter(person.id)
                 .filter { it.type == AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT }
                 .map { it.ident }
 

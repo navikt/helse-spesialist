@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering
 import no.nav.helse.spesialist.application.spillkar.SamlingAvVurderteInngangsvilkår
 import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.BeforeEach
@@ -26,10 +27,10 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
     @BeforeEach
     fun setup() {
         every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(any()) } answers { answer ->
-            val ident = answer.invocation.args[0] as String
+            val identitetsnummer = answer.invocation.args[0] as Identitetsnummer
             listOf(
-                AlleIdenterHenter.Ident(ident, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
-                AlleIdenterHenter.Ident(ident.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(identitetsnummer.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(identitetsnummer.value.reversed(), AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
             )
         }
     }

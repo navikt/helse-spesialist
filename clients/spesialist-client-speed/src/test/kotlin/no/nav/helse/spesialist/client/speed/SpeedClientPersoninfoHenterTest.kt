@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.Cache
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
@@ -34,7 +35,7 @@ class SpeedClientPersoninfoHenterTest {
             ),
         )
 
-        val result = lagKlient().hentPersoninfo("11111111111")
+        val result = lagKlient().hentPersoninfo(Identitetsnummer.fraString("11111111111"))
 
         assertNotNull(result)
         assertEquals("Ola", result.fornavn)
@@ -49,7 +50,7 @@ class SpeedClientPersoninfoHenterTest {
     fun `returnerer null ved 404`() {
         setupStub(com.github.tomakehurst.wiremock.client.WireMock.notFound())
 
-        val result = lagKlient().hentPersoninfo("99999999999")
+        val result = lagKlient().hentPersoninfo(Identitetsnummer.fraString("11111111111"))
 
         assertNull(result)
     }
@@ -60,7 +61,7 @@ class SpeedClientPersoninfoHenterTest {
 
         val exception =
             runCatching {
-                lagKlient().hentPersoninfo("11111111111")
+                lagKlient().hentPersoninfo(Identitetsnummer.fraString("11111111111"))
             }.exceptionOrNull()
 
         assertNotNull(exception)

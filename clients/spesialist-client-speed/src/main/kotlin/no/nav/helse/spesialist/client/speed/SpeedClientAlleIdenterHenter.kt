@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.client.speed.dto.AlleIdenterRequest
 import no.nav.helse.spesialist.client.speed.dto.AlleIdenterResponse
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
@@ -20,22 +21,22 @@ class SpeedClientAlleIdenterHenter(
     private val accessTokenGenerator: AccessTokenGenerator,
     private val cache: Cache,
 ) : AlleIdenterHenter {
-    override fun hentAlleIdenter(ident: String): List<AlleIdenterHenter.Ident> =
+    override fun hentAlleIdenter(identitetsnummer: Identitetsnummer): List<AlleIdenterHenter.Ident> =
         cache
-            .hentGjennomCache(key = "speed-client:alle-identer:$ident", timeToLive = Duration.ofHours(1)) {
-                hentFraSpeed(ident)
+            .hentGjennomCache(key = "speed-client:alle-identer:${identitetsnummer.value}", timeToLive = Duration.ofHours(1)) {
+                hentFraSpeed(identitetsnummer)
             }?.identer
             .orEmpty()
             .map { it.tilDomene() }
 
-    private fun hentFraSpeed(ident: String): AlleIdenterResponse? {
+    private fun hentFraSpeed(identitetsnummer: Identitetsnummer): AlleIdenterResponse? {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
 
         val uri = "${configuration.apiUrl}/api/alle_identer"
         loggDebug("Utfører HTTP POST $uri")
 
         val requestBody =
-            objectMapper.writeValueAsString(AlleIdenterRequest(ident = ident))
+            objectMapper.writeValueAsString(AlleIdenterRequest(ident = identitetsnummer.value))
 
         return Request
             .post(uri)

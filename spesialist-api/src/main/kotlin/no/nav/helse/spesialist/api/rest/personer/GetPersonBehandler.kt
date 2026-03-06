@@ -32,12 +32,12 @@ class GetPersonBehandler(
         ) { person ->
             val identitetsnummer = person.id
             val personinfo =
-                personinfoHenter.hentPersoninfo(identitetsnummer.value)
+                personinfoHenter.hentPersoninfo(identitetsnummer)
                     ?: return@medPerson RestResponse.Error(ApiGetPersonErrorCode.PERSON_IKKE_FUNNET)
 
             loggInfo("Hentet personinfo")
 
-            val alleIdenter = alleIdenterHenter.hentAlleIdenter(identitetsnummer.value)
+            val alleIdenter = alleIdenterHenter.hentAlleIdenter(identitetsnummer)
 
             val aktørId =
                 alleIdenter

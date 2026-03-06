@@ -1,7 +1,9 @@
 package no.nav.helse.spesialist.application
 
+import no.nav.helse.spesialist.domain.Identitetsnummer
+
 fun interface AlleIdenterHenter {
-    fun hentAlleIdenter(ident: String): List<Ident>
+    fun hentAlleIdenter(identitetsnummer: Identitetsnummer): List<Ident>
 
     data class Ident(
         val ident: String,

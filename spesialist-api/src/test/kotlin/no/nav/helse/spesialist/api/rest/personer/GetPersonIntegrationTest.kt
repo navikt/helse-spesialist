@@ -32,8 +32,8 @@ class GetPersonIntegrationTest {
             fødselsdato = fødselsdato,
         ).also(personRepository::lagre)
         val personinfo = person.info!!
-        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
-        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id.value) } returns listOf(
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns listOf(
             AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
             AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
         )
@@ -78,8 +78,8 @@ class GetPersonIntegrationTest {
             fødselsdato = fødselsdato,
         ).also(personRepository::lagre)
         val personinfo = person.info!!
-        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
-        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id.value) } returns listOf(
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns listOf(
             AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
             AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
         )
@@ -121,8 +121,8 @@ class GetPersonIntegrationTest {
         val andreIdent1 = lagPerson().id.value
         val andreIdent2 = lagPerson().id.value
 
-        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
-        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id.value) } returns listOf(
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns listOf(
             AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
             AlleIdenterHenter.Ident(andreIdent1, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
             AlleIdenterHenter.Ident(andreIdent2, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
@@ -208,7 +208,7 @@ class GetPersonIntegrationTest {
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
-        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns null
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns null
 
         // When:
         val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}")

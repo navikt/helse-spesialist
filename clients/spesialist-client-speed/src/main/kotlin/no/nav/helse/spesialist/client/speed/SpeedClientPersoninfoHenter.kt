@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.client.speed.dto.PersonRequest
 import no.nav.helse.spesialist.client.speed.dto.PersonResponse
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
@@ -21,19 +22,19 @@ class SpeedClientPersoninfoHenter(
     private val accessTokenGenerator: AccessTokenGenerator,
     private val cache: Cache,
 ) : PersoninfoHenter {
-    override fun hentPersoninfo(ident: String): Personinfo? =
+    override fun hentPersoninfo(identitetsnummer: Identitetsnummer): Personinfo? =
         cache
-            .hentGjennomCache<PersonResponse?>(key = "speed-client:person:$ident", timeToLive = Duration.ofHours(1)) {
-                hentFraSpeed(ident)
+            .hentGjennomCache<PersonResponse?>(key = "speed-client:person:${identitetsnummer.value}", timeToLive = Duration.ofHours(1)) {
+                hentFraSpeed(identitetsnummer)
             }?.tilPersoninfo()
 
-    private fun hentFraSpeed(ident: String): PersonResponse? {
+    private fun hentFraSpeed(identitetsnummer: Identitetsnummer): PersonResponse? {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
 
         val uri = "${configuration.apiUrl}/api/person"
         loggDebug("Utfører HTTP POST $uri")
 
-        val requestBody = objectMapper.writeValueAsString(PersonRequest(ident = ident))
+        val requestBody = objectMapper.writeValueAsString(PersonRequest(ident = identitetsnummer.value))
 
         return Request
             .post(uri)
