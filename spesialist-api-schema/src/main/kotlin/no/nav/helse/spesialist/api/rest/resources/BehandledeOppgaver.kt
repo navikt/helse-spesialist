@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Resource("behandlede-oppgaver")
-data class BehandledeOppgaver(
+class BehandledeOppgaver(
     val fom: LocalDate,
     val tom: LocalDate,
     val sidetall: Int,

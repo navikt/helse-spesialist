@@ -28,36 +28,10 @@ class Personer {
         val parent: Personer = Personer(),
         val pseudoId: String,
     ) {
-        @Resource("tilkomne-inntektskilder")
-        class TilkomneInntektskilder(
+        @Resource("behandlende-enhet")
+        class BehandlendeEnhet(
             val parent: PersonPseudoId,
         )
-
-        @Resource("stans")
-        class Stans(
-            val parent: PersonPseudoId,
-        )
-
-        @Resource("vurderinger")
-        class Vurderinger(
-            val parent: PersonPseudoId,
-        ) {
-            @Resource("arbeidstid")
-            class Arbeidstid(
-                val parent: Vurderinger,
-            )
-        }
-
-        @Resource("vurderte-inngangsvilkar")
-        class VurderteInngangsvilkår(
-            val parent: PersonPseudoId,
-        ) {
-            @Resource("{skjæringstidspunkt}")
-            class Skjæringstidspunkt(
-                val parent: VurderteInngangsvilkår,
-                val skjæringstidspunkt: LocalDate,
-            )
-        }
 
         @Resource("dokumenter")
         class Dokumenter(
@@ -85,9 +59,35 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
-        @Resource("behandlende-enhet")
-        class BehandlendeEnhet(
+        @Resource("stans")
+        class Stans(
             val parent: PersonPseudoId,
         )
+
+        @Resource("tilkomne-inntektskilder")
+        class TilkomneInntektskilder(
+            val parent: PersonPseudoId,
+        )
+
+        @Resource("vurderinger")
+        class Vurderinger(
+            val parent: PersonPseudoId,
+        ) {
+            @Resource("arbeidstid")
+            class Arbeidstid(
+                val parent: Vurderinger,
+            )
+        }
+
+        @Resource("vurderte-inngangsvilkar")
+        class VurderteInngangsvilkår(
+            val parent: PersonPseudoId,
+        ) {
+            @Resource("{skjæringstidspunkt}")
+            class Skjæringstidspunkt(
+                val parent: VurderteInngangsvilkår,
+                val skjæringstidspunkt: LocalDate,
+            )
+        }
     }
 }
