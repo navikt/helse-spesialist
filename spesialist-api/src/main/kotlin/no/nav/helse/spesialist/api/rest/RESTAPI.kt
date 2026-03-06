@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.rest.dialoger.kommentarer.PostKommentarBehand
 import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
+import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
@@ -41,6 +42,7 @@ import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetNotaterForVedtaksperi
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.api.sse.sse
 import no.nav.helse.spesialist.application.AlleIdenterHenter
+import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
@@ -54,6 +56,7 @@ fun Routing.restRoutes(
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+    behandlendeEnhetHenter: BehandlendeEnhetHenter,
     forsikringHenter: ForsikringHenter,
     inngangsvilkårHenter: InngangsvilkårHenter,
     inngangsvilkårInnsender: InngangsvilkårInnsender,
@@ -112,6 +115,8 @@ fun Routing.restRoutes(
             post(PostPersonSokBehandler(), restAdapter)
 
             get(GetKrrRegistrertStatusForPersonBehandler(krrRegistrertStatusHenter), restAdapter)
+
+            get(GetBehandlendeEnhetForPersonBehandler(behandlendeEnhetHenter), restAdapter)
 
             get(GetPersonBehandler(personinfoHenter), restAdapter)
 

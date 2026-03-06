@@ -157,6 +157,7 @@ class ApiModule(
             inngangsvilkårInnsender = inngangsvilkårInnsender,
             environmentToggles = environmentToggles,
             krrRegistrertStatusHenter = krrRegistrertStatusHenter,
+            behandlendeEnhetHenter = behandlendeEnhetHenter,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             alleIdenterHenter = alleIdenterHenter,

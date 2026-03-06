@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.AlleIdenterHenter
+import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
@@ -113,6 +114,7 @@ object TestRunner {
                 behandlingstatistikk = mockk(relaxed = true),
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
+                behandlendeEnhetHenter = mockk(relaxed = true),
                 forsikringHenter = mockk(relaxed = true),
                 inngangsvilkårHenter = mockk(relaxed = true),
                 inngangsvilkårInnsender = mockk(relaxed = true),
@@ -182,6 +184,7 @@ object TestRunner {
                             override val devGcp: Boolean = false
                         },
                     krrRegistrertStatusHenter = avhengigheter.krrRegistrertStatusHenter,
+                    behandlendeEnhetHenter = avhengigheter.behandlendeEnhetHenter,
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
                     alleIdenterHenter = avhengigheter.alleIdenterHenter,
@@ -221,6 +224,7 @@ object TestRunner {
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
+        val behandlendeEnhetHenter: BehandlendeEnhetHenter,
         val forsikringHenter: ForsikringHenter,
         val inngangsvilkårHenter: InngangsvilkårHenter,
         val inngangsvilkårInnsender: InngangsvilkårInnsender,
