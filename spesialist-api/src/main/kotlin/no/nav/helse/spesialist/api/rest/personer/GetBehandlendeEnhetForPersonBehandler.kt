@@ -45,7 +45,7 @@ class GetBehandlendeEnhetForPersonBehandler(
 
     override fun openApi(config: RouteConfig) {
         with(config) {
-            tags = setOf("NORG")
+            tags = setOf("Person")
         }
     }
 }
