@@ -22,10 +22,12 @@ data class ApiPerson(
     val andreIdentitetsnumre: List<String>,
     val aktørId: String,
     val fornavn: String,
+    val mellomnavn: String?,
     val etternavn: String,
+    val fødselsdato: LocalDate,
+    val dødsdato: LocalDate?,
     val kjønn: Kjønn,
-    val alder: Int,
-    val boenhet: Boenhet,
+    val adressebeskyttelse: Adressebeskyttelse,
 ) {
     enum class Kjønn {
         KVINNE,
@@ -33,8 +35,11 @@ data class ApiPerson(
         UKJENT,
     }
 
-    @Serializable
-    data class Boenhet(
-        val enhetNr: String,
-    )
+    enum class Adressebeskyttelse {
+        UGRADERT,
+        FORTROLIG,
+        STRENGT_FORTROLIG,
+        STRENGT_FORTROLIG_UTLAND,
+        UKJENT,
+    }
 }

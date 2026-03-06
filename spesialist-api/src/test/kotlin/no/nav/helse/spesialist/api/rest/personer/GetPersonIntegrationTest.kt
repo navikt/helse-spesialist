@@ -22,13 +22,13 @@ class GetPersonIntegrationTest {
     @Test
     fun `henter person uten mellomnavn som forventet`() {
         // Given:
+        val fødselsdato = LocalDate.now().minusYears(45)
         val person = lagPerson(
             fornavn = "Ola",
             mellomnavn = null,
             etternavn = "Nordmann",
             kjønn = Personinfo.Kjønn.Mann,
-            fødselsdato = LocalDate.now().minusYears(45),
-            enhet = 1234
+            fødselsdato = fødselsdato
         ).also(personRepository::lagre)
         val personinfo = person.info!!
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
@@ -49,10 +49,12 @@ class GetPersonIntegrationTest {
               "andreIdentitetsnumre": [],
               "aktørId": "${person.aktørId}",
               "fornavn": "Ola",
+              "mellomnavn": null,
               "etternavn": "Nordmann",
+              "fødselsdato": "$fødselsdato",
+              "dødsdato": null,
               "kjønn": "MANN",
-              "alder": 45,
-              "boenhet": { "enhetNr": "1234" }
+              "adressebeskyttelse": "UGRADERT"
             }
             """.trimIndent(),
             body,
@@ -60,15 +62,15 @@ class GetPersonIntegrationTest {
     }
 
     @Test
-    fun `henter person med mellomnavn konkatenert i fornavn`() {
+    fun `henter person med mellomnavn som separat felt`() {
         // Given:
+        val fødselsdato = LocalDate.now().minusYears(29).plusDays(1)
         val person = lagPerson(
             fornavn = "Kari",
             mellomnavn = "Midtre",
             etternavn = "Nordmann",
             kjønn = Personinfo.Kjønn.Kvinne,
-            fødselsdato = LocalDate.now().minusYears(29).plusDays(1),
-            enhet = 5678
+            fødselsdato = fødselsdato
         ).also(personRepository::lagre)
         val personinfo = person.info!!
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id.value) } returns personinfo
@@ -88,11 +90,13 @@ class GetPersonIntegrationTest {
               "identitetsnummer": "${person.id.value}",
               "andreIdentitetsnumre": [],
               "aktørId": "${person.aktørId}",
-              "fornavn": "Kari Midtre",
+              "fornavn": "Kari",
+              "mellomnavn": "Midtre",
               "etternavn": "Nordmann",
+              "fødselsdato": "$fødselsdato",
+              "dødsdato": null,
               "kjønn": "KVINNE",
-              "alder": 28,
-              "boenhet": { "enhetNr": "5678" }
+              "adressebeskyttelse": "UGRADERT"
             }
             """.trimIndent(),
             body,

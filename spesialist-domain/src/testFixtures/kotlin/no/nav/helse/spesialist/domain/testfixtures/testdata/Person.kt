@@ -58,6 +58,7 @@ fun lagPersoninfo(
     mellomnavn: String? = lagMellomnavnOrNull(),
     etternavn: String = lagEtternavn(),
     fødselsdato: LocalDate? = lagFødselsdato(),
+    dødsdato: LocalDate? = null,
     kjønn: Kjønn? = Kjønn.entries.random(),
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
 ): Personinfo =
@@ -66,6 +67,7 @@ fun lagPersoninfo(
         mellomnavn = mellomnavn,
         etternavn = etternavn,
         fødselsdato = fødselsdato,
+        dødsdato = dødsdato,
         kjønn = kjønn,
         adressebeskyttelse = adressebeskyttelse,
     )
@@ -142,6 +144,9 @@ fun lagFødselsdato(): LocalDate {
     val randomDayInEpoch = Random.nextLong(start.toEpochDay(), end.toEpochDay())
     return LocalDate.ofEpochDay(randomDayInEpoch)
 }
+
+fun lagDødsdato(fødselsdato: LocalDate): LocalDate =
+    LocalDate.ofEpochDay(Random.nextLong(fødselsdato.toEpochDay(), LocalDate.now().toEpochDay()))
 
 // Generer syntetisk fødselsnummer slik som Skattetaten også gjør - med 8 plusset på måneden i fødselsdatoen
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/

@@ -15,8 +15,6 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
-import java.time.LocalDate
-import java.time.Period
 
 class GetPersonBehandler(
     private val personinfoHenter: PersoninfoHenter,
@@ -52,16 +50,25 @@ class GetPersonBehandler(
                             .sorted()
                             .toList(),
                     aktørId = person.aktørId,
-                    fornavn = personinfo.fornavn + personinfo.mellomnavn?.let { " $it" }.orEmpty(),
+                    fornavn = personinfo.fornavn,
+                    mellomnavn = personinfo.mellomnavn,
                     etternavn = personinfo.etternavn,
+                    fødselsdato = personinfo.fødselsdato!!,
+                    dødsdato = personinfo.dødsdato,
                     kjønn =
                         when (personinfo.kjønn) {
                             Personinfo.Kjønn.Kvinne -> ApiPerson.Kjønn.KVINNE
                             Personinfo.Kjønn.Mann -> ApiPerson.Kjønn.MANN
                             Personinfo.Kjønn.Ukjent, null -> ApiPerson.Kjønn.UKJENT
                         },
-                    alder = Period.between(personinfo.fødselsdato!!, LocalDate.now()).years,
-                    boenhet = ApiPerson.Boenhet(person.enhetRef!!.toString().padStart(4, '0')),
+                    adressebeskyttelse =
+                        when (personinfo.adressebeskyttelse) {
+                            Personinfo.Adressebeskyttelse.Ugradert -> ApiPerson.Adressebeskyttelse.UGRADERT
+                            Personinfo.Adressebeskyttelse.Fortrolig -> ApiPerson.Adressebeskyttelse.FORTROLIG
+                            Personinfo.Adressebeskyttelse.StrengtFortrolig -> ApiPerson.Adressebeskyttelse.STRENGT_FORTROLIG
+                            Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiPerson.Adressebeskyttelse.STRENGT_FORTROLIG_UTLAND
+                            Personinfo.Adressebeskyttelse.Ukjent -> ApiPerson.Adressebeskyttelse.UKJENT
+                        },
                 ),
             )
         }

@@ -71,6 +71,7 @@ class SpeedClientPersoninfoHenter(
             mellomnavn = mellomnavn,
             etternavn = etternavn,
             fødselsdato = fødselsdato,
+            dødsdato = dødsdato,
             kjønn =
                 when (kjønn) {
                     PersonResponse.Kjønn.MANN -> Personinfo.Kjønn.Mann

@@ -450,6 +450,8 @@ abstract class AbstractDBIntegrationTest {
         fornavn: String = lagFornavn(),
         mellomnavn: String? = null,
         etternavn: String = lagEtternavn(),
+        fødselsdato: LocalDate = lagFødselsdato(),
+        dødsdato: LocalDate? = null,
         oppgaveegenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ): Oppgave {
         val person =
@@ -464,7 +466,8 @@ abstract class AbstractDBIntegrationTest {
                                 fornavn = fornavn,
                                 mellomnavn = mellomnavn,
                                 etternavn = etternavn,
-                                fødselsdato = lagFødselsdato(),
+                                fødselsdato = fødselsdato,
+                                dødsdato = dødsdato,
                                 kjønn = Personinfo.Kjønn.Ukjent,
                                 adressebeskyttelse = adressebeskyttelse,
                             ),

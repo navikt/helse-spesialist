@@ -27,6 +27,7 @@ class HentPersoninfoløsning(
             mellomnavn = mellomnavn,
             etternavn = etternavn,
             fødselsdato = fødselsdato,
+            dødsdato = null,
             kjønn =
                 when (kjønn) {
                     Kjønn.Mann -> Personinfo.Kjønn.Mann

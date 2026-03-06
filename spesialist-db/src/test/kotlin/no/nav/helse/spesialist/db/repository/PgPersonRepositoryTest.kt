@@ -42,11 +42,12 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         val person = Person.Factory.ny(lagIdentitetsnummer(), lagAktørId(), null, null)
         val personinfo =
             Personinfo(
-                lagFornavn(),
-                lagMellomnavn(),
-                lagEtternavn(),
-                lagFødselsdato(),
-                Personinfo.Kjønn.Ukjent,
+                fornavn = lagFornavn(),
+                mellomnavn = lagMellomnavn(),
+                etternavn = lagEtternavn(),
+                fødselsdato = lagFødselsdato(),
+                dødsdato = null,
+                kjønn = Personinfo.Kjønn.Ukjent,
                 adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
             )
         person.oppdaterInfo(personinfo)
@@ -78,11 +79,12 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         // when
         val personinfo =
             Personinfo(
-                lagFornavn(),
-                lagMellomnavn(),
-                lagEtternavn(),
-                lagFødselsdato(),
-                Personinfo.Kjønn.Ukjent,
+                fornavn = lagFornavn(),
+                mellomnavn = lagMellomnavn(),
+                etternavn = lagEtternavn(),
+                fødselsdato = lagFødselsdato(),
+                dødsdato = null,
+                kjønn = Personinfo.Kjønn.Ukjent,
                 adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
             )
         person.oppdaterInfo(personinfo)

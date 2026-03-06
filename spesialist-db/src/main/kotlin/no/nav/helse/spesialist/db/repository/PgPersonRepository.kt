@@ -191,6 +191,7 @@ internal class PgPersonRepository(
                         mellomnavn = stringOrNull("mellomnavn"),
                         etternavn = string("etternavn"),
                         fødselsdato = localDateOrNull("fodselsdato"),
+                        dødsdato = null,
                         kjønn = stringOrNull("kjonn")?.let(Kjønn::valueOf) ?: Kjønn.Ukjent,
                         adressebeskyttelse = enumValueOf<Adressebeskyttelse>(string("adressebeskyttelse")),
                     )

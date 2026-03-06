@@ -40,6 +40,7 @@ class SpeedClientPersoninfoHenterTest {
         assertEquals("Ola", result.fornavn)
         assertEquals("Nordmann", result.etternavn)
         assertEquals(LocalDate.of(1990, 1, 15), result.fødselsdato)
+        assertEquals(null, result.dødsdato)
         assertEquals(Personinfo.Kjønn.Mann, result.kjønn)
         assertEquals(Personinfo.Adressebeskyttelse.Ugradert, result.adressebeskyttelse)
     }

@@ -11,6 +11,7 @@ data class Personinfo(
     val mellomnavn: String?,
     val etternavn: String,
     val fødselsdato: LocalDate?,
+    val dødsdato: LocalDate?,
     val kjønn: Kjønn?,
     val adressebeskyttelse: Adressebeskyttelse,
 ) : ValueObject {
