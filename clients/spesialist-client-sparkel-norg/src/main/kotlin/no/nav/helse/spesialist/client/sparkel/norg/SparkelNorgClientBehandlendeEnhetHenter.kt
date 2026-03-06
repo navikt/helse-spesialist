@@ -32,11 +32,11 @@ class SparkelNorgClientBehandlendeEnhetHenter(
             timeToLive = Duration.ofHours(24),
         ) {
             timer.recordCallable {
-                hentFraSparkelNorg(identitetsnummer.value)
+                hentFraSparkelNorg(identitetsnummer)
             }
         }
 
-    private fun hentFraSparkelNorg(fødselsnummer: String): Enhet? {
+    private fun hentFraSparkelNorg(identitetsnummer: Identitetsnummer): Enhet? {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
         val callId = UUID.randomUUID().toString()
 
@@ -47,7 +47,7 @@ class SparkelNorgClientBehandlendeEnhetHenter(
             .setHeader("Authorization", "Bearer $accessToken")
             .setHeader("X-Request-ID", callId)
             .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-            .bodyString("""{ "fødselsnummer": "$fødselsnummer" }""", ContentType.APPLICATION_JSON)
+            .bodyString("""{ "identitetsnummer": "${identitetsnummer.value}" }""", ContentType.APPLICATION_JSON)
             .execute()
             .handleResponse { response ->
                 if (response.code == 404) return@handleResponse null
