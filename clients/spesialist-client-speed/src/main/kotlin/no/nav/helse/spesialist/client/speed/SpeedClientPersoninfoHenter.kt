@@ -23,7 +23,7 @@ class SpeedClientPersoninfoHenter(
 ) : PersoninfoHenter {
     override fun hentPersoninfo(ident: String): Personinfo? =
         cache
-            .hentGjennomCache<PersonResponse?>(key = "speed-client:person:$ident", timeToLive = Duration.ofHours(24)) {
+            .hentGjennomCache<PersonResponse?>(key = "speed-client:person:$ident", timeToLive = Duration.ofHours(1)) {
                 hentFraSpeed(ident)
             }?.tilPersoninfo()
 
