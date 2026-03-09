@@ -93,6 +93,7 @@ class PostVedtakBehandler(
                         return RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
                     } else {
                         logg.info("Det er tidligere forsøkt å fatte vedtak for behandlingen, men spesialist har ikke sett at spleis har behandlet svar på godkjenningsbehovet")
+                        it.oppdaterTidspunkt()
                     }
                 }
             val oppgave =

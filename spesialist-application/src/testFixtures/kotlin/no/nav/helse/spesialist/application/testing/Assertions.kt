@@ -112,6 +112,11 @@ fun assertNotEqualsByMicrosecond(
     assertNotEquals(expected?.roundToMicros(), actual?.roundToMicros())
 }
 
+fun assertNotEqualsByMicrosecond(
+    expected: Instant,
+    actual: Instant,
+) = assertNotEquals(expected.roundToMicros(), actual.roundToMicros())
+
 private fun LocalDateTime.roundToMicros(): LocalDateTime {
     val roundUp = (this.nano % 1000) >= 500
     return truncatedTo(ChronoUnit.MICROS).plus(if (roundUp) 1 else 0, ChronoUnit.MICROS)

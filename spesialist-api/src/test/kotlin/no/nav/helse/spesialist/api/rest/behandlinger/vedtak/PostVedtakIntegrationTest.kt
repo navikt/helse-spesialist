@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
+import no.nav.helse.spesialist.application.testing.assertNotEqualsByMicrosecond
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
@@ -247,19 +248,32 @@ class PostVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.meldingDao.lagre(godkjenningsbehov)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
+        val spleisBehandlingId = checkNotNull(behandling.spleisBehandlingId)
+        val oppgave = lagOppgave(spleisBehandlingId, godkjenningsbehov.id)
+        sessionContext.oppgaveRepository.lagre(oppgave)
+
+        // Simulerer at det blir forsøkt å fatteª vedtak
+        integrationTestFixture.post(
+            url = "/api/behandlinger/${spleisBehandlingId.value}/vedtak",
+            body = "{}",
+            saksbehandler = saksbehandler,
+        )
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
         sessionContext.oppgaveRepository.lagre(oppgave)
+        val førsteTidspunkt = sessionContext.vedtakRepository.finn(spleisBehandlingId)!!.tidspunkt
+
         // When:
         val response =
             integrationTestFixture.post(
-                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
+                url = "/api/behandlinger/${spleisBehandlingId.value}/vedtak",
                 body = "{}",
                 saksbehandler = saksbehandler,
             )
 
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
+        val tidspunkt = sessionContext.vedtakRepository.finn(spleisBehandlingId)!!.tidspunkt
+        assertNotEqualsByMicrosecond(tidspunkt, førsteTidspunkt)
     }
 
     @Test

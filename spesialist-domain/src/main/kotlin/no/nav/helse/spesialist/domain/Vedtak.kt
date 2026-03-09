@@ -5,14 +5,20 @@ import java.time.Instant
 
 sealed class Vedtak private constructor(
     id: SpleisBehandlingId,
-    val tidspunkt: Instant,
+    tidspunkt: Instant,
     behandletAvSpleis: Boolean,
 ) : AggregateRoot<SpleisBehandlingId>(id) {
+    var tidspunkt: Instant = tidspunkt
+        private set
     var behandletAvSpleis = behandletAvSpleis
         private set
 
     fun markerSomBehandletAvSpleis() {
         behandletAvSpleis = true
+    }
+
+    fun oppdaterTidspunkt() {
+        tidspunkt = Instant.now()
     }
 
     class Automatisk(
