@@ -24,9 +24,7 @@ fun assertJsonEquals(
     @Language("JSON") expectedJson: String,
     @Language("JSON") actualJson: String,
     vararg ignorerStier: String,
-) {
-    assertJsonEquals(expectedJson, objectMapper.readTree(actualJson), *ignorerStier)
-}
+) = assertJsonEquals(expectedJson, objectMapper.readTree(actualJson), *ignorerStier)
 
 fun assertJsonEquals(
     @Language("JSON") expectedJson: String,
@@ -94,23 +92,17 @@ fun assertMindreEnnNSekunderSiden(
 fun assertEqualsByMicrosecond(
     expected: LocalDateTime?,
     actual: LocalDateTime?,
-) {
-    assertEquals(expected?.roundToMicros(), actual?.roundToMicros())
-}
+) = assertEquals(expected?.roundToMicros(), actual?.roundToMicros())
 
 fun assertEqualsByMicrosecond(
     expected: Instant?,
     actual: Instant?,
-) {
-    assertEquals(expected?.roundToMicros(), actual?.roundToMicros())
-}
+) = assertEquals(expected?.roundToMicros(), actual?.roundToMicros())
 
 fun assertNotEqualsByMicrosecond(
     expected: LocalDateTime?,
     actual: LocalDateTime?,
-) {
-    assertNotEquals(expected?.roundToMicros(), actual?.roundToMicros())
-}
+) = assertNotEquals(expected?.roundToMicros(), actual?.roundToMicros())
 
 fun assertNotEqualsByMicrosecond(
     expected: Instant,
@@ -134,27 +126,19 @@ fun assertIsNumber(actual: JsonNode?) {
 fun assertAfter(
     expectedAfter: Instant,
     actual: Instant,
-) {
-    assertTrue(actual.isAfter(expectedAfter), "Forventet tidspunkt etter $expectedAfter, men var $actual")
-}
+) = assertTrue(actual.isAfter(expectedAfter), "Forventet tidspunkt etter $expectedAfter, men var $actual")
 
 fun assertAfter(
     expectedAfter: LocalDateTime,
     actual: LocalDateTime,
-) {
-    assertTrue(actual.isAfter(expectedAfter), "Forventet tidspunkt etter $expectedAfter, men var $actual")
-}
+) = assertTrue(actual.isAfter(expectedAfter), "Forventet tidspunkt etter $expectedAfter, men var $actual")
 
 fun assertAtLeast(
     expectedMinimum: Long,
     actual: Long,
-) {
-    assertTrue(actual >= expectedMinimum, "Forventet minst $expectedMinimum, men var $actual")
-}
+) = assertTrue(actual >= expectedMinimum, "Forventet minst $expectedMinimum, men var $actual")
 
 fun assertAtLeast(
     expectedMinimum: Int,
     actual: Int,
-) {
-    assertTrue(actual >= expectedMinimum, "Forventet minst $expectedMinimum, men var $actual")
-}
+) = assertTrue(actual >= expectedMinimum, "Forventet minst $expectedMinimum, men var $actual")
