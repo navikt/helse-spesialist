@@ -3,6 +3,8 @@ package no.nav.helse
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.observation.DefaultMeterObservationHandler
+import io.micrometer.observation.ObservationRegistry
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.db.GodkjenningsbehovUtfall
@@ -15,6 +17,12 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
+
+val observationRegistry: ObservationRegistry by lazy {
+    ObservationRegistry.create().also {
+        it.observationConfig().observationHandler(DefaultMeterObservationHandler(Metrics.globalRegistry))
+    }
+}
 private val automatiseringsteller =
     Counter
         .builder("automatiseringer")

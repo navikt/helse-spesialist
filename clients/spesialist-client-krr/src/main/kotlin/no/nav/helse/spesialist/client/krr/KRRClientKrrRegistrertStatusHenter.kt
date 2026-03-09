@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.helse.observationRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -15,6 +16,9 @@ import no.nav.helse.spesialist.application.hentGjennomCache
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.observation.HttpClientObservationSupport
+import org.apache.hc.client5.http.observation.ObservingOptions
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.util.Timeout
@@ -41,48 +45,54 @@ class KRRClientKrrRegistrertStatusHenter(
 
                 val uri = "${configuration.apiUrl}/rest/v1/personer"
                 loggInfo("Utfører HTTP POST $uri med header Nav-Call-Id: $callId")
-                Request
-                    .post(uri)
-                    .setHeader("Authorization", "Bearer $accessToken")
-                    .setHeader("Nav-Call-Id", callId)
-                    .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-                    .connectTimeout(Timeout.of(Duration.ofSeconds(10)))
-                    .responseTimeout(Timeout.of(Duration.ofSeconds(10)))
-                    .bodyString(""" { "personidenter": [ "$fødselsnummer" ] } """, ContentType.APPLICATION_JSON)
-                    .execute()
-                    .handleResponse { response ->
-                        val responseBody = EntityUtils.toString(response.entity)
-                        if (response.code !in 200..299) {
-                            responseError("Fikk HTTP ${response.code} tilbake fra KRR", responseBody)
-                        }
-
-                        val responseJson = objectMapper.readTree(responseBody)
-
-                        if (responseJson["feil"]?.isEmpty == false) {
-                            responseError("Fikk feil tilbake fra KRR", responseJson.toString())
-                        } else {
-                            responseJson["personer"][fødselsnummer].let {
-                                if (it == null) {
-                                    responseError(
-                                        "Fant ikke igjen personen i responsen fra KRR",
-                                        responseJson.toString(),
-                                    )
+                HttpClientBuilder
+                    .create()
+                    .also { HttpClientObservationSupport.enable(it, observationRegistry, ObservingOptions.builder().tagLevel(ObservingOptions.TagLevel.EXTENDED).build()) }
+                    .build()
+                    .use { httpClient ->
+                        Request
+                            .post(uri)
+                            .setHeader("Authorization", "Bearer $accessToken")
+                            .setHeader("Nav-Call-Id", callId)
+                            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                            .connectTimeout(Timeout.of(Duration.ofSeconds(10)))
+                            .responseTimeout(Timeout.of(Duration.ofSeconds(10)))
+                            .bodyString(""" { "personidenter": [ "$fødselsnummer" ] } """, ContentType.APPLICATION_JSON)
+                            .execute(httpClient)
+                            .handleResponse { response ->
+                                val responseBody = EntityUtils.toString(response.entity)
+                                if (response.code !in 200..299) {
+                                    responseError("Fikk HTTP ${response.code} tilbake fra KRR", responseBody)
                                 }
-                                if (it.getIfBoolean("aktiv") == false) {
-                                    KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+
+                                val responseJson = objectMapper.readTree(responseBody)
+
+                                if (responseJson["feil"]?.isEmpty == false) {
+                                    responseError("Fikk feil tilbake fra KRR", responseJson.toString())
                                 } else {
-                                    val reservert = it.getRequiredBoolean("reservert", responseJson)
-                                    val kanVarsles = it.getRequiredBoolean("kanVarsles", responseJson)
-                                    if (reservert || !kanVarsles) {
-                                        KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
-                                    } else {
-                                        KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                                    responseJson["personer"][fødselsnummer].let {
+                                        if (it == null) {
+                                            responseError(
+                                                "Fant ikke igjen personen i responsen fra KRR",
+                                                responseJson.toString(),
+                                            )
+                                        }
+                                        if (it.getIfBoolean("aktiv") == false) {
+                                            KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+                                        } else {
+                                            val reservert = it.getRequiredBoolean("reservert", responseJson)
+                                            val kanVarsles = it.getRequiredBoolean("kanVarsles", responseJson)
+                                            if (reservert || !kanVarsles) {
+                                                KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                                            } else {
+                                                KrrRegistrertStatus.IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                                            }
+                                        }
                                     }
+                                }.also {
+                                    statusKallHentReservasjonsstatusCounter.withTag("status", "success").increment()
                                 }
                             }
-                        }.also {
-                            statusKallHentReservasjonsstatusCounter.withTag("status", "success").increment()
-                        }
                     }
             } catch (e: Exception) {
                 statusKallHentReservasjonsstatusCounter.withTag("status", "failure").increment()

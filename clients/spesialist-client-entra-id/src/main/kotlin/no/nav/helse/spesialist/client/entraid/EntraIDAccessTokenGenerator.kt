@@ -10,11 +10,15 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.Expiry
 import com.github.benmanes.caffeine.cache.LoadingCache
 import com.nimbusds.jose.jwk.RSAKey
+import no.nav.helse.observationRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.OboAccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.observation.HttpClientObservationSupport
+import org.apache.hc.client5.http.observation.ObservingOptions
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.http.message.BasicNameValuePair
@@ -59,41 +63,53 @@ class EntraIDAccessTokenGenerator(
                 ),
             )
 
-        return Request
-            .post(oboTokenEndpoint)
-            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-            .bodyString(requestBody, ContentType.APPLICATION_JSON)
-            .execute()
-            .handleResponse { response ->
-                val responseBody = EntityUtils.toString(response.entity)
-                if (response.code !in 200..299) {
-                    loggError("Fikk HTTP ${response.code} fra NAIS token exchange", "response" to responseBody)
-                    error("Fikk HTTP ${response.code} fra NAIS token exchange")
-                }
-                objectMapper.readValue(responseBody, OboTokenResponse::class.java).access_token
+        return HttpClientBuilder
+            .create()
+            .also { HttpClientObservationSupport.enable(it, observationRegistry, ObservingOptions.builder().tagLevel(ObservingOptions.TagLevel.EXTENDED).build()) }
+            .build()
+            .use { httpClient ->
+                Request
+                    .post(oboTokenEndpoint)
+                    .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                    .bodyString(requestBody, ContentType.APPLICATION_JSON)
+                    .execute(httpClient)
+                    .handleResponse { response ->
+                        val responseBody = EntityUtils.toString(response.entity)
+                        if (response.code !in 200..299) {
+                            loggError("Fikk HTTP ${response.code} fra NAIS token exchange", "response" to responseBody)
+                            error("Fikk HTTP ${response.code} fra NAIS token exchange")
+                        }
+                        objectMapper.readValue(responseBody, OboTokenResponse::class.java).access_token
+                    }
             }
     }
 
     private fun hentToken(scope: String): TokenEndpointResponse {
         loggInfo("Henter token fra Entra ID for scope $scope")
 
-        return Request
-            .post(tokenEndpoint)
-            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-            .bodyForm(
-                BasicNameValuePair("client_id", clientId),
-                BasicNameValuePair("scope", scope),
-                BasicNameValuePair("grant_type", "client_credentials"),
-                BasicNameValuePair("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
-                BasicNameValuePair("client_assertion", lagAssertion()),
-            ).execute()
-            .handleResponse { response ->
-                val responseBody = EntityUtils.toString(response.entity)
-                if (response.code !in 200..299) {
-                    loggError("Fikk HTTP ${response.code} fra Entra ID", "response" to responseBody)
-                    error("Fikk HTTP ${response.code} fra Entra ID")
-                }
-                objectMapper.readValue(responseBody, TokenEndpointResponse::class.java)
+        return HttpClientBuilder
+            .create()
+            .also { HttpClientObservationSupport.enable(it, observationRegistry, ObservingOptions.builder().tagLevel(ObservingOptions.TagLevel.EXTENDED).build()) }
+            .build()
+            .use { httpClient ->
+                Request
+                    .post(tokenEndpoint)
+                    .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                    .bodyForm(
+                        BasicNameValuePair("client_id", clientId),
+                        BasicNameValuePair("scope", scope),
+                        BasicNameValuePair("grant_type", "client_credentials"),
+                        BasicNameValuePair("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
+                        BasicNameValuePair("client_assertion", lagAssertion()),
+                    ).execute(httpClient)
+                    .handleResponse { response ->
+                        val responseBody = EntityUtils.toString(response.entity)
+                        if (response.code !in 200..299) {
+                            loggError("Fikk HTTP ${response.code} fra Entra ID", "response" to responseBody)
+                            error("Fikk HTTP ${response.code} fra Entra ID")
+                        }
+                        objectMapper.readValue(responseBody, TokenEndpointResponse::class.java)
+                    }
             }
     }
 

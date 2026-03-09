@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":spesialist-application"))
 
-    implementation(libs.apache.httpclient5.fluent)
+    implementation(libs.bundles.apache.httpclient5)
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)
 
