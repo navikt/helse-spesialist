@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics.globalRegistry
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig.DEFAULT
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.observationRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.Cache
@@ -15,9 +14,6 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Enhet
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.observation.HttpClientObservationSupport
-import org.apache.hc.client5.http.observation.ObservingOptions
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.time.Duration
@@ -46,39 +42,33 @@ class SparkelNorgClientBehandlendeEnhetHenter(
 
         val uri = "${configuration.apiUrl}/api/behandlende-enhet"
         loggInfo("Utfører HTTP POST $uri med header Nav-Call-Id: $callId")
-        return HttpClientBuilder
-            .create()
-            .also { HttpClientObservationSupport.enable(it, observationRegistry, ObservingOptions.builder().tagLevel(ObservingOptions.TagLevel.EXTENDED).build()) }
-            .build()
-            .use { httpClient ->
-                Request
-                    .post(uri)
-                    .setHeader("Authorization", "Bearer $accessToken")
-                    .setHeader("X-Request-ID", callId)
-                    .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-                    .bodyString("""{ "identitetsnummer": "${identitetsnummer.value}" }""", ContentType.APPLICATION_JSON)
-                    .execute(httpClient)
-                    .handleResponse { response ->
-                        if (response.code == 404) return@handleResponse null
+        return Request
+            .post(uri)
+            .setHeader("Authorization", "Bearer $accessToken")
+            .setHeader("X-Request-ID", callId)
+            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+            .bodyString("""{ "identitetsnummer": "${identitetsnummer.value}" }""", ContentType.APPLICATION_JSON)
+            .execute()
+            .handleResponse { response ->
+                if (response.code == 404) return@handleResponse null
 
-                        val responseBody = EntityUtils.toString(response.entity)
-                        if (response.code !in 200..299) {
-                            responseError("Fikk HTTP ${response.code} tilbake fra sparkel-norg", responseBody)
-                        }
+                val responseBody = EntityUtils.toString(response.entity)
+                if (response.code !in 200..299) {
+                    responseError("Fikk HTTP ${response.code} tilbake fra sparkel-norg", responseBody)
+                }
 
-                        val responseJson = objectMapper.readTree(responseBody)
-                        Enhet(
-                            enhetNr =
-                                responseJson["enhetNr"]?.asText()
-                                    ?: responseError("Fant ikke feltet enhetNr i responsen fra sparkel-norg", responseBody),
-                            navn =
-                                responseJson["navn"]?.asText()
-                                    ?: responseError("Fant ikke feltet navn i responsen fra sparkel-norg", responseBody),
-                            type =
-                                responseJson["type"]?.asText()
-                                    ?: responseError("Fant ikke feltet type i responsen fra sparkel-norg", responseBody),
-                        )
-                    }
+                val responseJson = objectMapper.readTree(responseBody)
+                Enhet(
+                    enhetNr =
+                        responseJson["enhetNr"]?.asText()
+                            ?: responseError("Fant ikke feltet enhetNr i responsen fra sparkel-norg", responseBody),
+                    navn =
+                        responseJson["navn"]?.asText()
+                            ?: responseError("Fant ikke feltet navn i responsen fra sparkel-norg", responseBody),
+                    type =
+                        responseJson["type"]?.asText()
+                            ?: responseError("Fant ikke feltet type i responsen fra sparkel-norg", responseBody),
+                )
             }
     }
 

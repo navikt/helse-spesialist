@@ -59,7 +59,7 @@ tasks.named("runKtlintFormatOverMainSourceSet") {
 dependencies {
     api(project(":spesialist-application"))
 
-    implementation(libs.bundles.apache.httpclient5)
+    implementation(libs.apache.httpclient5.fluent)
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)
 

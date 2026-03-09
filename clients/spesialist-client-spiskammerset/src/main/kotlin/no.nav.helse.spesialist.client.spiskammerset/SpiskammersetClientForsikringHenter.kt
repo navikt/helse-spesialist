@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.client.spiskammerset
 
 import no.nav.helse.modell.vedtaksperiode.objectMapper
-import no.nav.helse.observationRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.logg.loggError
@@ -11,9 +10,6 @@ import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.ResultatAvForsikring
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.observation.HttpClientObservationSupport
-import org.apache.hc.client5.http.observation.ObservingOptions
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.util.UUID
@@ -29,44 +25,38 @@ class SpiskammersetClientForsikringHenter(
         loggInfo("Utfører HTTP GET $uri med header Call-Id: $callId")
 
         return retryMedBackoff {
-            HttpClientBuilder
-                .create()
-                .also { HttpClientObservationSupport.enable(it, observationRegistry, ObservingOptions.builder().tagLevel(ObservingOptions.TagLevel.EXTENDED).build()) }
-                .build()
-                .use { httpClient ->
-                    Request
-                        .get(uri)
-                        .setHeader("Authorization", "Bearer $accessToken")
-                        .setHeader("callId", callId)
-                        .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-                        .execute(httpClient)
-                        .handleResponse { response ->
-                            when (response.code) {
-                                204 -> ResultatAvForsikring.IngenForsikring
-                                200 -> {
-                                    val responseBody = EntityUtils.toString(response.entity)
-                                    val responseJson = objectMapper.readTree(responseBody)
-                                    ResultatAvForsikring.MottattForsikring(
-                                        forsikring =
-                                            Forsikring.Factory.ny(
-                                                gjelderFraDag = responseJson["dag1Eller17"].asInt(),
-                                                dekningsgrad = responseJson["dekningsgrad"].asInt(),
-                                            ),
-                                    )
-                                }
-
-                                in 500..599 -> {
-                                    val responseBody = EntityUtils.toString(response.entity).orEmpty()
-                                    throw RetryableException("Serverfeil fra forsikringstjeneste: ${response.code}, body=$responseBody")
-                                }
-
-                                else -> {
-                                    val responseBody = EntityUtils.toString(response.entity).orEmpty()
-                                    loggError("Feil ved henting av forsikring: status=${response.code}, body=$responseBody")
-                                    throw RuntimeException("Feil fra forsikringstjeneste: ${response.code}")
-                                }
-                            }
+            Request
+                .get(uri)
+                .setHeader("Authorization", "Bearer $accessToken")
+                .setHeader("callId", callId)
+                .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                .execute()
+                .handleResponse { response ->
+                    when (response.code) {
+                        204 -> ResultatAvForsikring.IngenForsikring
+                        200 -> {
+                            val responseBody = EntityUtils.toString(response.entity)
+                            val responseJson = objectMapper.readTree(responseBody)
+                            ResultatAvForsikring.MottattForsikring(
+                                forsikring =
+                                    Forsikring.Factory.ny(
+                                        gjelderFraDag = responseJson["dag1Eller17"].asInt(),
+                                        dekningsgrad = responseJson["dekningsgrad"].asInt(),
+                                    ),
+                            )
                         }
+
+                        in 500..599 -> {
+                            val responseBody = EntityUtils.toString(response.entity).orEmpty()
+                            throw RetryableException("Serverfeil fra forsikringstjeneste: ${response.code}, body=$responseBody")
+                        }
+
+                        else -> {
+                            val responseBody = EntityUtils.toString(response.entity).orEmpty()
+                            loggError("Feil ved henting av forsikring: status=${response.code}, body=$responseBody")
+                            throw RuntimeException("Feil fra forsikringstjeneste: ${response.code}")
+                        }
+                    }
                 }
         }
     }

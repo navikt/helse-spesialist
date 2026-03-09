@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.client.speed
 
 import no.nav.helse.modell.vedtaksperiode.objectMapper
-import no.nav.helse.observationRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.Cache
@@ -12,9 +11,6 @@ import no.nav.helse.spesialist.client.speed.dto.AlleIdenterRequest
 import no.nav.helse.spesialist.client.speed.dto.AlleIdenterResponse
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.apache.hc.client5.http.fluent.Request
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.observation.HttpClientObservationSupport
-import org.apache.hc.client5.http.observation.ObservingOptions
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.time.Duration
@@ -42,39 +38,33 @@ class SpeedClientAlleIdenterHenter(
         val requestBody =
             objectMapper.writeValueAsString(AlleIdenterRequest(ident = identitetsnummer.value))
 
-        return HttpClientBuilder
-            .create()
-            .also { HttpClientObservationSupport.enable(it, observationRegistry, ObservingOptions.builder().tagLevel(ObservingOptions.TagLevel.EXTENDED).build()) }
-            .build()
-            .use { httpClient ->
-                Request
-                    .post(uri)
-                    .setHeader("Authorization", "Bearer $accessToken")
-                    .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-                    .setHeader("callId", UUID.randomUUID().toString())
-                    .bodyString(requestBody, ContentType.APPLICATION_JSON)
-                    .execute(httpClient)
-                    .handleResponse { response ->
-                        when (response.code) {
-                            200 -> {
-                                val responseBody = EntityUtils.toString(response.entity)
-                                objectMapper.readValue(responseBody, AlleIdenterResponse::class.java)
-                            }
-
-                            404 -> null
-
-                            in 500..599 -> {
-                                val responseBody = EntityUtils.toString(response.entity).orEmpty()
-                                error("Serverfeil fra Speed: ${response.code}, body=$responseBody")
-                            }
-
-                            else -> {
-                                val responseBody = EntityUtils.toString(response.entity).orEmpty()
-                                loggError("Feil ved henting av alle identer: status=${response.code}, body=$responseBody")
-                                error("Feil fra Speed: ${response.code}")
-                            }
-                        }
+        return Request
+            .post(uri)
+            .setHeader("Authorization", "Bearer $accessToken")
+            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+            .setHeader("callId", UUID.randomUUID().toString())
+            .bodyString(requestBody, ContentType.APPLICATION_JSON)
+            .execute()
+            .handleResponse { response ->
+                when (response.code) {
+                    200 -> {
+                        val responseBody = EntityUtils.toString(response.entity)
+                        objectMapper.readValue(responseBody, AlleIdenterResponse::class.java)
                     }
+
+                    404 -> null
+
+                    in 500..599 -> {
+                        val responseBody = EntityUtils.toString(response.entity).orEmpty()
+                        error("Serverfeil fra Speed: ${response.code}, body=$responseBody")
+                    }
+
+                    else -> {
+                        val responseBody = EntityUtils.toString(response.entity).orEmpty()
+                        loggError("Feil ved henting av alle identer: status=${response.code}, body=$responseBody")
+                        error("Feil fra Speed: ${response.code}")
+                    }
+                }
             }
     }
 }

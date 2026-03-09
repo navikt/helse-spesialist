@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":spesialist-application"))
 
-    implementation(libs.bundles.apache.httpclient5)
+    implementation(libs.apache.httpclient5.fluent)
     implementation(libs.caffeine)
     implementation(libs.bundles.jackson)
 
