@@ -313,6 +313,114 @@ class PgOppgaveRepository private constructor(
             }
     }
 
+    override fun finnListeOppgaveProjeksjoner(
+        sidetall: Int,
+        sidestørrelse: Int,
+    ): Side<OppgaveProjeksjon> =
+        asSQL(
+            """
+            WITH aktiv_utildelt_oppgave AS (
+                SELECT o.id
+                FROM oppgave AS o
+                LEFT JOIN tildeling AS t ON o.id = t.oppgave_id_ref
+                WHERE o.status = 'AvventerSaksbehandler'
+                AND t.saksbehandler_ref IS NULL
+            ), varsel AS (
+                SELECT
+                    o.id,
+                    array_agg(sv.kode) AS varsler
+                FROM oppgave AS o
+                LEFT JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
+                LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
+                WHERE o.id IN (SELECT sub.id FROM aktiv_utildelt_oppgave AS sub)
+                AND 'SØKNAD' = ANY(o.egenskaper)
+                AND NOT 'PÅ_VENT' = ANY(o.egenskaper)
+                AND NOT 'BESLUTTER' = ANY(o.egenskaper)
+                AND NOT 'RETUR' = ANY(o.egenskaper)
+                AND ('FORSTEGANGSBEHANDLING' = ANY(o.egenskaper) OR 'FORLENGELSE' = ANY(o.egenskaper))
+                AND 'EN_ARBEIDSGIVER' = ANY(o.egenskaper)
+                AND NOT 'UTBETALING_TIL_SYKMELDT' = ANY(o.egenskaper)
+                AND NOT 'DELVIS_REFUSJON' = ANY(o.egenskaper)
+                AND NOT 'INGEN_UTBETALING' = ANY(o.egenskaper)
+                AND (
+                    NOT 'HASTER' = ANY(o.egenskaper) AND NOT 'VERGEMÅL' = ANY(o.egenskaper) AND
+                    NOT 'UTLAND' = ANY(o.egenskaper) AND NOT 'EGEN_ANSATT' = ANY(o.egenskaper) AND
+                    NOT 'STIKKPRØVE' = ANY(o.egenskaper) AND NOT 'RISK_QA' = ANY(o.egenskaper) AND
+                    NOT 'FORTROLIG_ADRESSE' = ANY(o.egenskaper) AND NOT 'SKJØNNSFASTSETTELSE' = ANY(o.egenskaper) AND
+                    NOT 'TILBAKEDATERT' = ANY(o.egenskaper) AND NOT 'MANGLER_IM' = ANY(o.egenskaper) AND
+                    NOT 'MEDLEMSKAP' = ANY(o.egenskaper)
+                    AND NOT 'TILKOMMEN' = ANY(o.egenskaper) AND NOT 'GRUNNBELØPSREGULERING' = ANY(o.egenskaper)
+                )
+                GROUP BY o.id
+            ), har_ekskludert_varsler AS (
+                SELECT id
+                FROM varsel
+                WHERE NOT 'RV_MV_3' = ANY(varsler)
+                AND NOT 'RV_IM_4' = ANY(varsler)
+                AND NOT 'RV_VV_1' = ANY(varsler)
+                AND NOT 'RV_VV_4' = ANY(varsler)
+                AND NOT 'RV_IV_1' = ANY(varsler)
+                AND NOT 'RV_OV_3' = ANY(varsler)
+                AND NOT 'RV_AY_3' = ANY(varsler)
+                AND NOT 'RV_AY_4' = ANY(varsler)
+                AND NOT 'RV_AY_5' = ANY(varsler)
+                AND NOT 'RV_AY_6' = ANY(varsler)
+                AND NOT 'RV_AY_7' = ANY(varsler)
+                AND NOT 'RV_AY_8' = ANY(varsler)
+                AND NOT 'RV_AY_9' = ANY(varsler)
+                AND NOT 'RV_AY_11' = ANY(varsler)
+                AND NOT 'RV_AY_12' = ANY(varsler)
+                AND NOT 'RV_SØ_10' = ANY(varsler)
+                AND NOT 'RV_SØ_44' = ANY(varsler)
+                AND NOT 'RV_IT_3' = ANY(varsler)
+                AND NOT 'RV_IT_38' = ANY(varsler)
+            )
+            SELECT
+                o.id AS oppgave_id,
+                o.egenskaper,
+                o.første_opprettet,
+                p.fødselsnummer,
+                t.saksbehandler_ref AS tildelt_til_oid,
+                pv.id AS på_vent_id,
+                b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
+                count(1) OVER() AS filtered_count
+            FROM oppgave o
+            INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+            INNER JOIN person p ON v.person_ref = p.id
+            INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
+            LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+            LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
+            WHERE o.id IN (SELECT id FROM har_ekskludert_varsler)
+            ORDER BY o.opprettet
+            OFFSET :offset
+            LIMIT :limit
+            """,
+            "offset" to (sidetall - 1) * sidestørrelse,
+            "limit" to sidestørrelse,
+        ).list { row ->
+            row.long("filtered_count") to
+                OppgaveProjeksjon(
+                    id = row.long("oppgave_id"),
+                    identitetsnummer = Identitetsnummer.fraString(row.string("fødselsnummer")),
+                    egenskaper =
+                        row
+                            .array<String>("egenskaper")
+                            .map { enumValueOf<EgenskapForDatabase>(it) }
+                            .tilModellversjoner(),
+                    tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
+                    opprettetTidspunkt = row.instant("første_opprettet"),
+                    behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
+                    påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
+                )
+        }.let { listeMedTotaltAntallOgElement ->
+            Side(
+                totaltAntall = listeMedTotaltAntallOgElement.firstOrNull()?.first ?: 0L,
+                sidetall = sidetall,
+                sidestørrelse = sidestørrelse,
+                elementer = listeMedTotaltAntallOgElement.map(Pair<Long, OppgaveProjeksjon>::second),
+            )
+        }
+
     override fun finnBehandledeOppgaveProjeksjoner(
         fom: LocalDate,
         tom: LocalDate,

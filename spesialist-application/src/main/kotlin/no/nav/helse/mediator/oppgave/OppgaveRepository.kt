@@ -41,6 +41,11 @@ interface OppgaveRepository {
         sidestørrelse: Int,
     ): Side<OppgaveProjeksjon>
 
+    fun finnListeOppgaveProjeksjoner(
+        sidetall: Int,
+        sidestørrelse: Int,
+    ): Side<OppgaveProjeksjon>
+
     fun finnBehandledeOppgaveProjeksjoner(
         fom: LocalDate,
         tom: LocalDate,

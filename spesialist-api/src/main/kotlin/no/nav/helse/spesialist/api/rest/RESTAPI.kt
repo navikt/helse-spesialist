@@ -81,6 +81,7 @@ fun Routing.restRoutes(
 
             get(GetOppgaverBehandler(), restAdapter)
             get(GetBehandledeOppgaverBehandler(), restAdapter)
+            get(GetListeOppgaverBehandler(), restAdapter)
 
             patch(PatchStansBehandler(), restAdapter)
 
