@@ -1,19 +1,12 @@
 package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.db.AntallOppgaverFraDatabase
-import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
-import no.nav.helse.spesialist.application.PersonPseudoId
 
 internal object OppgaveMapper {
     internal fun Set<EgenskapForDatabase>.tilEgenskaperForVisning() =
@@ -27,58 +20,7 @@ internal object OppgaveMapper {
             antallMineSakerPaVent = this.antallMineSakerPåVent,
         )
 
-    internal fun BehandletOppgaveFraDatabaseForVisning.tilBehandledeOppgaver(personPseudoId: PersonPseudoId): ApiBehandletOppgave {
-        val egenskaper = egenskaper.tilModellversjoner()
-        return ApiBehandletOppgave(
-            id = id.toString(),
-            aktorId = aktørId,
-            personPseudoId = personPseudoId.value,
-            oppgavetype = egenskaper.oppgavetype(),
-            periodetype = egenskaper.periodetype(),
-            antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
-            ferdigstiltTidspunkt = ferdigstiltTidspunkt,
-            ferdigstiltAv = ferdigstiltAv,
-            beslutter = beslutter,
-            saksbehandler = saksbehandler,
-            personnavn =
-                ApiPersonnavn(
-                    fornavn = navn.fornavn,
-                    etternavn = navn.etternavn,
-                    mellomnavn = navn.mellomnavn,
-                ),
-        )
-    }
-
     private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.mapNotNull { it.tilModellversjon() }
-
-    private fun List<Egenskap>.periodetype(): ApiPeriodetype {
-        val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Periodetype }
-        return when (egenskap) {
-            Egenskap.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
-            Egenskap.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
-            Egenskap.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
-            Egenskap.OVERGANG_FRA_IT -> ApiPeriodetype.OVERGANG_FRA_IT
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-    }
-
-    private fun List<Egenskap>.oppgavetype(): ApiOppgavetype {
-        val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Oppgavetype }
-        return when (egenskap) {
-            Egenskap.SØKNAD -> ApiOppgavetype.SOKNAD
-            Egenskap.REVURDERING -> ApiOppgavetype.REVURDERING
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-    }
-
-    private fun List<Egenskap>.antallArbeidsforhold(): ApiAntallArbeidsforhold {
-        val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Inntektskilde }
-        return when (egenskap) {
-            Egenskap.EN_ARBEIDSGIVER -> ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD
-            Egenskap.FLERE_ARBEIDSGIVERE -> ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-    }
 
     fun Egenskap.tilApiversjon(): ApiEgenskap =
         when (this) {

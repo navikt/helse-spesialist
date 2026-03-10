@@ -41,7 +41,6 @@ class TestMediator(
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
             oppgaveService = oppgaveService,
-            sessionFactory = TransactionalSessionFactory(dataSource),
         )
 
     private val saksbehandlerMediator =

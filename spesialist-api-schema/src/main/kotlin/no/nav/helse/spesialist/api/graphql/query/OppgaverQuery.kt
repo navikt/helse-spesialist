@@ -4,18 +4,8 @@ import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
-import java.time.LocalDate
 
 interface OppgaverQuerySchema : Query {
-    fun behandledeOppgaverFeed(
-        offset: Int,
-        limit: Int,
-        fom: LocalDate,
-        tom: LocalDate,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<ApiBehandledeOppgaver>
-
     fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver>
 }
 

@@ -1,27 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import java.time.LocalDateTime
 import java.util.UUID
-
-@GraphQLName("Oppgavetype")
-enum class ApiOppgavetype {
-    SOKNAD,
-    STIKKPROVE,
-    RISK_QA,
-    REVURDERING,
-    FORTROLIG_ADRESSE,
-    UTBETALING_TIL_SYKMELDT,
-    DELVIS_REFUSJON,
-    UTBETALING_TIL_ARBEIDSGIVER,
-    INGEN_UTBETALING,
-}
-
-@GraphQLName("AntallArbeidsforhold")
-enum class ApiAntallArbeidsforhold {
-    ET_ARBEIDSFORHOLD,
-    FLERE_ARBEIDSFORHOLD,
-}
 
 @GraphQLName("Egenskap")
 enum class ApiEgenskap {
@@ -72,12 +52,6 @@ enum class ApiKategori {
     Status,
 }
 
-@GraphQLName("BehandledeOppgaver")
-data class ApiBehandledeOppgaver(
-    val totaltAntallOppgaver: Int,
-    val oppgaver: List<ApiBehandletOppgave>,
-)
-
 @GraphQLName("AntallOppgaver")
 data class ApiAntallOppgaver(
     val antallMineSaker: Int,
@@ -101,26 +75,4 @@ data class ApiTotrinnsvurdering(
     val saksbehandler: UUID?,
     val beslutter: UUID?,
     val erBeslutteroppgave: Boolean,
-)
-
-@GraphQLName("Personnavn")
-data class ApiPersonnavn(
-    val fornavn: String,
-    val etternavn: String,
-    val mellomnavn: String?,
-)
-
-@GraphQLName("BehandletOppgave")
-data class ApiBehandletOppgave(
-    val id: String,
-    val aktorId: String,
-    val personPseudoId: UUID,
-    val oppgavetype: ApiOppgavetype,
-    val periodetype: ApiPeriodetype,
-    val antallArbeidsforhold: ApiAntallArbeidsforhold,
-    val ferdigstiltTidspunkt: LocalDateTime,
-    val ferdigstiltAv: String?,
-    val beslutter: String?,
-    val saksbehandler: String?,
-    val personnavn: ApiPersonnavn,
 )

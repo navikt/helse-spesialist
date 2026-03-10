@@ -84,7 +84,6 @@ class ApiModule(
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
             oppgaveService = oppgaveService,
-            sessionFactory = sessionFactory,
         )
 
     private val stansAutomatiskBehandlinghåndterer =
