@@ -334,7 +334,7 @@ class PgOppgaveRepository private constructor(
                 JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
                 JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
                 WHERE o.egenskaper @> ARRAY['SØKNAD']::varchar[]
-                AND (o.egenskaper @> ARRAY['FORSTEGANGSBEHANDLING']::varchar[] OR o.egenskaper @> ARRAY['FORLENGELSE']::varchar[])
+                AND (o.egenskaper && ARRAY['FORSTEGANGSBEHANDLING', 'FORLENGELSE']::varchar[])
                 AND NOT o.egenskaper && ARRAY[
                     'PÅ_VENT', 'BESLUTTER', 'RETUR','UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON', 'INGEN_UTBETALING', 
                     'HASTER', 'VERGEMÅL', 'UTLAND', 'EGEN_ANSATT', 'STIKKPRØVE', 'RISK_QA', 'FORTROLIG_ADRESSE', 
