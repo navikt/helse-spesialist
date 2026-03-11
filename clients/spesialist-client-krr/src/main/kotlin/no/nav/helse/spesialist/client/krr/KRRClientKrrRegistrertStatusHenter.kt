@@ -25,7 +25,11 @@ class KRRClientKrrRegistrertStatusHenter(
     private val objectMapper = jacksonObjectMapper()
 
     override fun hentForPerson(fødselsnummer: String): KrrRegistrertStatus =
-        cache.hentGjennomCache(key = "krr-client:status:$fødselsnummer", timeToLive = Duration.ofHours(24)) {
+        cache.hentGjennomCache(
+            namespace = "krr-client:status",
+            id = fødselsnummer,
+            timeToLive = Duration.ofHours(24),
+        ) {
             hentFraKrr(fødselsnummer)
         }
 

@@ -6,7 +6,8 @@ import java.time.Duration
 
 interface Cache {
     fun <T> hentGjennomCache(
-        key: String,
+        namespace: String,
+        id: String,
         type: TypeReference<T>,
         timeToLive: Duration,
         hentUtenomCache: () -> T,
@@ -14,12 +15,14 @@ interface Cache {
 }
 
 inline fun <reified T> Cache.hentGjennomCache(
-    key: String,
+    namespace: String,
+    id: String,
     timeToLive: Duration,
     noinline hentUtenomCache: () -> T,
 ): T =
     hentGjennomCache(
-        key = key,
+        namespace = namespace,
+        id = id,
         type = jacksonTypeRef<T>(),
         timeToLive = timeToLive,
         hentUtenomCache = hentUtenomCache,

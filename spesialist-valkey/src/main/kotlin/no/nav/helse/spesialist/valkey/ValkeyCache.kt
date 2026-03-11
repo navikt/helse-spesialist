@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import io.valkey.DefaultJedisClientConfig
 import io.valkey.HostAndPort
 import io.valkey.JedisPooled
@@ -57,16 +59,36 @@ class ValkeyCache(
     }
 
     override fun <T> hentGjennomCache(
-        key: String,
+        namespace: String,
+        id: String,
         type: TypeReference<T>,
         timeToLive: Duration,
         hentUtenomCache: () -> T,
-    ): T =
-        hentFraValkey(key, type)?.also { loggDebug("Valkey cache hit", "key" to key) }
+    ): T {
+        val key = "$namespace:$id"
+        return hentFraValkey(key, type)
+            ?.also {
+                loggDebug("Valkey cache hit for $namespace", "key" to key)
+                hitCounter.withTag("namespace", namespace).increment()
+            }
             ?: run {
-                loggDebug("Valkey cache miss", "key" to key)
+                loggDebug("Valkey cache miss for $namespace", "key" to key)
+                missCounter.withTag("namespace", namespace).increment()
                 val value = hentUtenomCache()
                 if (value != null) lagreTilValkey(key, value, timeToLive)
                 value
             }
+    }
+
+    private val hitCounter =
+        Counter
+            .builder("spesialist.cache.valkey")
+            .tag("result", "hit")
+            .withRegistry(Metrics.globalRegistry)
+
+    private val missCounter =
+        Counter
+            .builder("spesialist.cache.valkey")
+            .tag("result", "miss")
+            .withRegistry(Metrics.globalRegistry)
 }

@@ -25,7 +25,11 @@ class SpeedClientPersoninfoHenter(
 ) : PersoninfoHenter {
     override fun hentPersoninfo(identitetsnummer: Identitetsnummer): Personinfo? =
         cache
-            .hentGjennomCache<PersonResponse?>(key = "speed-client:person:${identitetsnummer.value}", timeToLive = Duration.ofHours(1)) {
+            .hentGjennomCache<PersonResponse?>(
+                namespace = "speed-client:person",
+                id = identitetsnummer.value,
+                timeToLive = Duration.ofHours(1),
+            ) {
                 timer.recordCallable { hentFraSpeed(identitetsnummer) }
             }?.tilPersoninfo()
 

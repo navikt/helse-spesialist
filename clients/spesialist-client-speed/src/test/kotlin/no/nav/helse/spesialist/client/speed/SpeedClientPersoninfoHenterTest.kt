@@ -83,7 +83,8 @@ class SpeedClientPersoninfoHenterTest {
             cache =
                 object : Cache {
                     override fun <T> hentGjennomCache(
-                        key: String,
+                        namespace: String,
+                        id: String,
                         type: TypeReference<T>,
                         timeToLive: java.time.Duration,
                         hentUtenomCache: () -> T,

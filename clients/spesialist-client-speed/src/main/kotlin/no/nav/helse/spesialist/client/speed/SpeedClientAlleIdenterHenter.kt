@@ -24,7 +24,11 @@ class SpeedClientAlleIdenterHenter(
 ) : AlleIdenterHenter {
     override fun hentAlleIdenter(identitetsnummer: Identitetsnummer): List<AlleIdenterHenter.Ident> =
         cache
-            .hentGjennomCache(key = "speed-client:alle-identer:${identitetsnummer.value}", timeToLive = Duration.ofHours(1)) {
+            .hentGjennomCache(
+                namespace = "speed-client:alle-identer",
+                id = identitetsnummer.value,
+                timeToLive = Duration.ofHours(1),
+            ) {
                 timer.recordCallable { hentFraSpeed(identitetsnummer) }
             }?.identer
             .orEmpty()

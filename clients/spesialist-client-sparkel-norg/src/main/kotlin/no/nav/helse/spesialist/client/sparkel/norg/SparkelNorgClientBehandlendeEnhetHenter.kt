@@ -25,7 +25,8 @@ class SparkelNorgClientBehandlendeEnhetHenter(
 
     override fun hentFor(identitetsnummer: Identitetsnummer): Enhet? =
         cache.hentGjennomCache(
-            key = "sparkel-norg-client:behandlende-enhet:${identitetsnummer.value}",
+            namespace = "sparkel-norg-client:behandlende-enhet",
+            id = identitetsnummer.value,
             timeToLive = Duration.ofHours(24),
         ) {
             timer.recordCallable {
