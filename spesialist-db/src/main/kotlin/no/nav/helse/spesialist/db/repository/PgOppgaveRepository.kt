@@ -319,20 +319,12 @@ class PgOppgaveRepository private constructor(
     ): Side<OppgaveProjeksjon> =
         asSQL(
             """
-            WITH aktiv_utildelt_oppgave AS (
+            WITH kandidat AS (
                 SELECT o.id
-                FROM oppgave AS o
-                LEFT JOIN tildeling AS t ON o.id = t.oppgave_id_ref
+                FROM oppgave o
+                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 WHERE o.status = 'AvventerSaksbehandler'
                 AND t.saksbehandler_ref IS NULL
-            ), varsel AS (
-                SELECT
-                    o.id,
-                    array_agg(sv.kode) AS varsler
-                FROM oppgave AS o
-                LEFT JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
-                LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
-                WHERE o.id IN (SELECT sub.id FROM aktiv_utildelt_oppgave AS sub)
                 AND 'SØKNAD' = ANY(o.egenskaper)
                 AND NOT 'PÅ_VENT' = ANY(o.egenskaper)
                 AND NOT 'BESLUTTER' = ANY(o.egenskaper)
@@ -342,38 +334,33 @@ class PgOppgaveRepository private constructor(
                 AND NOT 'UTBETALING_TIL_SYKMELDT' = ANY(o.egenskaper)
                 AND NOT 'DELVIS_REFUSJON' = ANY(o.egenskaper)
                 AND NOT 'INGEN_UTBETALING' = ANY(o.egenskaper)
-                AND (
-                    NOT 'HASTER' = ANY(o.egenskaper) AND NOT 'VERGEMÅL' = ANY(o.egenskaper) AND
-                    NOT 'UTLAND' = ANY(o.egenskaper) AND NOT 'EGEN_ANSATT' = ANY(o.egenskaper) AND
-                    NOT 'STIKKPRØVE' = ANY(o.egenskaper) AND NOT 'RISK_QA' = ANY(o.egenskaper) AND
-                    NOT 'FORTROLIG_ADRESSE' = ANY(o.egenskaper) AND NOT 'SKJØNNSFASTSETTELSE' = ANY(o.egenskaper) AND
-                    NOT 'TILBAKEDATERT' = ANY(o.egenskaper) AND NOT 'MANGLER_IM' = ANY(o.egenskaper) AND
-                    NOT 'MEDLEMSKAP' = ANY(o.egenskaper)
-                    AND NOT 'TILKOMMEN' = ANY(o.egenskaper) AND NOT 'GRUNNBELØPSREGULERING' = ANY(o.egenskaper)
+                AND NOT 'HASTER' = ANY(o.egenskaper)
+                AND NOT 'VERGEMÅL' = ANY(o.egenskaper)
+                AND NOT 'UTLAND' = ANY(o.egenskaper)
+                AND NOT 'EGEN_ANSATT' = ANY(o.egenskaper)
+                AND NOT 'STIKKPRØVE' = ANY(o.egenskaper)
+                AND NOT 'RISK_QA' = ANY(o.egenskaper)
+                AND NOT 'FORTROLIG_ADRESSE' = ANY(o.egenskaper)
+                AND NOT 'SKJØNNSFASTSETTELSE' = ANY(o.egenskaper)
+                AND NOT 'TILBAKEDATERT' = ANY(o.egenskaper)
+                AND NOT 'MANGLER_IM' = ANY(o.egenskaper)
+                AND NOT 'MEDLEMSKAP' = ANY(o.egenskaper)
+                AND NOT 'TILKOMMEN' = ANY(o.egenskaper)
+                AND NOT 'GRUNNBELØPSREGULERING' = ANY(o.egenskaper)
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM behandling b
+                    INNER JOIN selve_varsel sv ON b.id = sv.behandling_ref
+                    WHERE b.spleis_behandling_id = o.behandling_id
+                    AND sv.kode IN (
+                        'RV_MV_3', 'RV_IM_4', 'RV_VV_1', 'RV_VV_4',
+                        'RV_IV_1', 'RV_OV_3',
+                        'RV_AY_3', 'RV_AY_4', 'RV_AY_5', 'RV_AY_6',
+                        'RV_AY_7', 'RV_AY_8', 'RV_AY_9', 'RV_AY_11', 'RV_AY_12',
+                        'RV_SØ_10', 'RV_SØ_44',
+                        'RV_IT_3', 'RV_IT_38'
+                    )
                 )
-                GROUP BY o.id
-            ), har_ekskludert_varsler AS (
-                SELECT id
-                FROM varsel
-                WHERE NOT 'RV_MV_3' = ANY(varsler)
-                AND NOT 'RV_IM_4' = ANY(varsler)
-                AND NOT 'RV_VV_1' = ANY(varsler)
-                AND NOT 'RV_VV_4' = ANY(varsler)
-                AND NOT 'RV_IV_1' = ANY(varsler)
-                AND NOT 'RV_OV_3' = ANY(varsler)
-                AND NOT 'RV_AY_3' = ANY(varsler)
-                AND NOT 'RV_AY_4' = ANY(varsler)
-                AND NOT 'RV_AY_5' = ANY(varsler)
-                AND NOT 'RV_AY_6' = ANY(varsler)
-                AND NOT 'RV_AY_7' = ANY(varsler)
-                AND NOT 'RV_AY_8' = ANY(varsler)
-                AND NOT 'RV_AY_9' = ANY(varsler)
-                AND NOT 'RV_AY_11' = ANY(varsler)
-                AND NOT 'RV_AY_12' = ANY(varsler)
-                AND NOT 'RV_SØ_10' = ANY(varsler)
-                AND NOT 'RV_SØ_44' = ANY(varsler)
-                AND NOT 'RV_IT_3' = ANY(varsler)
-                AND NOT 'RV_IT_38' = ANY(varsler)
             )
             SELECT
                 o.id AS oppgave_id,
@@ -390,7 +377,7 @@ class PgOppgaveRepository private constructor(
             INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
             LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-            WHERE o.id IN (SELECT id FROM har_ekskludert_varsler)
+            WHERE o.id IN (SELECT id FROM kandidat)
             ORDER BY o.opprettet
             OFFSET :offset
             LIMIT :limit
