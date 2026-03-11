@@ -330,10 +330,10 @@ class PgOppgaveRepository private constructor(
                     o.id,
                     array_agg(sv.kode) FILTER (WHERE sv.kode IS NOT NULL) AS varsler
                 FROM oppgave AS o
-                LEFT JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
-                LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
-                WHERE o.id IN (SELECT sub.id FROM aktiv_utildelt_oppgave AS sub)
-                AND o.egenskaper @> ARRAY['SØKNAD']::varchar[]
+                JOIN aktiv_utildelt_oppgave auo ON auo.id = o.id
+                JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
+                JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
+                WHERE o.egenskaper @> ARRAY['SØKNAD']::varchar[]
                 AND (o.egenskaper @> ARRAY['FORSTEGANGSBEHANDLING']::varchar[] OR o.egenskaper @> ARRAY['FORLENGELSE']::varchar[])
                 AND NOT o.egenskaper && ARRAY[
                     'PÅ_VENT', 'BESLUTTER', 'RETUR','UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON', 'INGEN_UTBETALING', 
@@ -360,11 +360,11 @@ class PgOppgaveRepository private constructor(
                 b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
+            INNER JOIN har_ekskludert_varsler hev ON hev.id = o.id
             INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
             INNER JOIN person p ON v.person_ref = p.id
             INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
             LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            WHERE o.id IN (SELECT id FROM har_ekskludert_varsler)
             ORDER BY o.første_opprettet
             OFFSET :offset
             LIMIT :limit
