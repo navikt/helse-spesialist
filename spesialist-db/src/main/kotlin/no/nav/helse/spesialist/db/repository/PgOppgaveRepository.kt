@@ -328,52 +328,28 @@ class PgOppgaveRepository private constructor(
             ), varsel AS (
                 SELECT
                     o.id,
-                    array_agg(sv.kode) AS varsler
+                    array_agg(sv.kode) FILTER (WHERE sv.kode IS NOT NULL) AS varsler
                 FROM oppgave AS o
                 LEFT JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
                 LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
                 WHERE o.id IN (SELECT sub.id FROM aktiv_utildelt_oppgave AS sub)
-                AND 'SØKNAD' = ANY(o.egenskaper)
-                AND NOT 'PÅ_VENT' = ANY(o.egenskaper)
-                AND NOT 'BESLUTTER' = ANY(o.egenskaper)
-                AND NOT 'RETUR' = ANY(o.egenskaper)
-                AND ('FORSTEGANGSBEHANDLING' = ANY(o.egenskaper) OR 'FORLENGELSE' = ANY(o.egenskaper))
-                AND 'EN_ARBEIDSGIVER' = ANY(o.egenskaper)
-                AND NOT 'UTBETALING_TIL_SYKMELDT' = ANY(o.egenskaper)
-                AND NOT 'DELVIS_REFUSJON' = ANY(o.egenskaper)
-                AND NOT 'INGEN_UTBETALING' = ANY(o.egenskaper)
-                AND (
-                    NOT 'HASTER' = ANY(o.egenskaper) AND NOT 'VERGEMÅL' = ANY(o.egenskaper) AND
-                    NOT 'UTLAND' = ANY(o.egenskaper) AND NOT 'EGEN_ANSATT' = ANY(o.egenskaper) AND
-                    NOT 'STIKKPRØVE' = ANY(o.egenskaper) AND NOT 'RISK_QA' = ANY(o.egenskaper) AND
-                    NOT 'FORTROLIG_ADRESSE' = ANY(o.egenskaper) AND NOT 'SKJØNNSFASTSETTELSE' = ANY(o.egenskaper) AND
-                    NOT 'TILBAKEDATERT' = ANY(o.egenskaper) AND NOT 'MANGLER_IM' = ANY(o.egenskaper) AND
-                    NOT 'MEDLEMSKAP' = ANY(o.egenskaper)
-                    AND NOT 'TILKOMMEN' = ANY(o.egenskaper) AND NOT 'GRUNNBELØPSREGULERING' = ANY(o.egenskaper)
-                )
+                AND o.egenskaper @> ARRAY['SØKNAD', 'EN_ARBEIDSGIVER']::varchar[]
+                AND (o.egenskaper @> ARRAY['FORSTEGANGSBEHANDLING']::varchar[] OR o.egenskaper @> ARRAY['FORLENGELSE']::varchar[])
+                AND NOT o.egenskaper && ARRAY[
+                    'PÅ_VENT', 'BESLUTTER', 'RETUR','UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON', 'INGEN_UTBETALING', 
+                    'HASTER', 'VERGEMÅL', 'UTLAND', 'EGEN_ANSATT', 'STIKKPRØVE', 'RISK_QA', 'FORTROLIG_ADRESSE', 
+                    'SKJØNNSFASTSETTELSE', 'TILBAKEDATERT', 'MANGLER_IM', 'MEDLEMSKAP', 'TILKOMMEN', 
+                    'GRUNNBELØPSREGULERING' 
+                ]::varchar[]
                 GROUP BY o.id
             ), har_ekskludert_varsler AS (
                 SELECT id
                 FROM varsel
-                WHERE NOT 'RV_MV_3' = ANY(varsler)
-                AND NOT 'RV_IM_4' = ANY(varsler)
-                AND NOT 'RV_VV_1' = ANY(varsler)
-                AND NOT 'RV_VV_4' = ANY(varsler)
-                AND NOT 'RV_IV_1' = ANY(varsler)
-                AND NOT 'RV_OV_3' = ANY(varsler)
-                AND NOT 'RV_AY_3' = ANY(varsler)
-                AND NOT 'RV_AY_4' = ANY(varsler)
-                AND NOT 'RV_AY_5' = ANY(varsler)
-                AND NOT 'RV_AY_6' = ANY(varsler)
-                AND NOT 'RV_AY_7' = ANY(varsler)
-                AND NOT 'RV_AY_8' = ANY(varsler)
-                AND NOT 'RV_AY_9' = ANY(varsler)
-                AND NOT 'RV_AY_11' = ANY(varsler)
-                AND NOT 'RV_AY_12' = ANY(varsler)
-                AND NOT 'RV_SØ_10' = ANY(varsler)
-                AND NOT 'RV_SØ_44' = ANY(varsler)
-                AND NOT 'RV_IT_3' = ANY(varsler)
-                AND NOT 'RV_IT_38' = ANY(varsler)
+                WHERE NOT varsler && ARRAY[
+                    'RV_MV_3', 'RV_IM_4', 'RV_VV_1', 'RV_VV_4', 'RV_IV_1', 'RV_OV_3', 'RV_AY_3', 'RV_AY_4', 'RV_AY_5', 
+                    'RV_AY_6', 'RV_AY_7', 'RV_AY_8', 'RV_AY_9', 'RV_AY_11', 'RV_AY_12', 'RV_SØ_10', 'RV_SØ_44',
+                    'RV_IT_3', 'RV_IT_38'
+                ]::varchar[]
             )
             SELECT
                 o.id AS oppgave_id,
