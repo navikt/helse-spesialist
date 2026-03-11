@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.speed
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Cache
@@ -25,7 +26,7 @@ class SpeedClientPersoninfoHenter(
     override fun hentPersoninfo(identitetsnummer: Identitetsnummer): Personinfo? =
         cache
             .hentGjennomCache<PersonResponse?>(key = "speed-client:person:${identitetsnummer.value}", timeToLive = Duration.ofHours(1)) {
-                hentFraSpeed(identitetsnummer)
+                timer.recordCallable { hentFraSpeed(identitetsnummer) }
             }?.tilPersoninfo()
 
     private fun hentFraSpeed(identitetsnummer: Identitetsnummer): PersonResponse? {
@@ -65,6 +66,15 @@ class SpeedClientPersoninfoHenter(
                 }
             }
     }
+
+    private val timer =
+        Metrics.timer(
+            "spesialist.client.call.timer",
+            "client",
+            "speed",
+            "operation",
+            "hent-personinfo",
+        )
 
     private fun PersonResponse.tilPersoninfo() =
         Personinfo(

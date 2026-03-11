@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
@@ -32,41 +33,52 @@ class MsGraphTilgangsgruppehenter(
 
     override fun hentBrukerroller(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Brukerrollehenter.Feil> {
         loggInfo("Henter tilgangsgrupper for saksbehandler", "saksbehandlerOid" to saksbehandlerOid)
-        return Request
-            .post(msGraphUrl + "/v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
-            .setHeader(
-                "Authorization",
-                "Bearer ${accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")}",
-            ).setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-            .bodyString(
-                objectMapper.writeValueAsString(
-                    mapOf("groupIds" to tilgangsgrupperTilBrukerroller.alleUuider().map(UUID::toString)),
-                ),
-                ContentType.APPLICATION_JSON,
-            ).execute()
-            .handleResponse { response ->
-                val responseStatus = response.code
-                val responseBody = EntityUtils.toString(response.entity)
-                if (responseStatus !in 200..299) {
-                    teamLogs.warn("Fikk kode $responseStatus fra MS Graph: $responseBody")
-                    if (responseStatus == 404) {
-                        val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
-                        if (errorCode == "Request_ResourceNotFound") {
-                            return@handleResponse Either.Failure(Brukerrollehenter.Feil.SaksbehandlerFinnesIkke)
+        return timer.recordCallable {
+            Request
+                .post(msGraphUrl + "/v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
+                .setHeader(
+                    "Authorization",
+                    "Bearer ${accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")}",
+                ).setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                .bodyString(
+                    objectMapper.writeValueAsString(
+                        mapOf("groupIds" to tilgangsgrupperTilBrukerroller.alleUuider().map(UUID::toString)),
+                    ),
+                    ContentType.APPLICATION_JSON,
+                ).execute()
+                .handleResponse { response ->
+                    val responseStatus = response.code
+                    val responseBody = EntityUtils.toString(response.entity)
+                    if (responseStatus !in 200..299) {
+                        teamLogs.warn("Fikk kode $responseStatus fra MS Graph: $responseBody")
+                        if (responseStatus == 404) {
+                            val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
+                            if (errorCode == "Request_ResourceNotFound") {
+                                return@handleResponse Either.Failure(Brukerrollehenter.Feil.SaksbehandlerFinnesIkke)
+                            }
                         }
+                        error("Fikk HTTP-kode $responseStatus fra MS Graph. Se sikkerlogg for detaljer.")
                     }
-                    error("Fikk HTTP-kode $responseStatus fra MS Graph. Se sikkerlogg for detaljer.")
-                }
 
-                val grupper =
-                    objectMapper
-                        .readTree(responseBody)["value"]
-                        .map(JsonNode::asText)
-                        .map(UUID::fromString)
-                logg.debug("Hentet ${grupper.size} grupper fra MS")
-                val uuider = grupper.toSet()
-                val brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(uuider)
-                Either.Success(brukerroller)
-            }
+                    val grupper =
+                        objectMapper
+                            .readTree(responseBody)["value"]
+                            .map(JsonNode::asText)
+                            .map(UUID::fromString)
+                    logg.debug("Hentet ${grupper.size} grupper fra MS")
+                    val uuider = grupper.toSet()
+                    val brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(uuider)
+                    Either.Success(brukerroller)
+                }
+        }
     }
+
+    private val timer =
+        Metrics.timer(
+            "spesialist.client.call.timer",
+            "client",
+            "ms-graph",
+            "operation",
+            "hent-brukerroller",
+        )
 }

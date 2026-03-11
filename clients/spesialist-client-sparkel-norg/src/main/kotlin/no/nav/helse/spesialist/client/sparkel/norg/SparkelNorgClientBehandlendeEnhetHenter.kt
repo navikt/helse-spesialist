@@ -1,10 +1,7 @@
 package no.nav.helse.spesialist.client.sparkel.norg
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.Metrics.globalRegistry
-import io.micrometer.core.instrument.Timer
-import io.micrometer.prometheusmetrics.PrometheusConfig.DEFAULT
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.Cache
@@ -81,8 +78,11 @@ class SparkelNorgClientBehandlendeEnhetHenter(
     }
 
     private val timer =
-        Timer
-            .builder("client.sparkel.norg.kall")
-            .description("Tidsbruk på kall til sparkel-norg")
-            .register(globalRegistry.add(PrometheusMeterRegistry(DEFAULT)))
+        Metrics.timer(
+            "spesialist.client.call.timer",
+            "client",
+            "sparkel-norg",
+            "operation",
+            "hent-behandlende-enhet",
+        )
 }

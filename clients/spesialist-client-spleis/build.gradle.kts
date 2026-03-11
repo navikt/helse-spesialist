@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.apache.httpclient5.fluent)
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logback)
+    implementation(libs.micrometer.prometheus)
 
     testFixturesImplementation(libs.wiremock)
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.spillkar
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.vedtaksperiode.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
@@ -39,34 +40,45 @@ class SpillkarClientInngangsvilkårHenter(
                 ),
             )
 
-        return Request
-            .post(uri)
-            .setHeader("Authorization", "Bearer $accessToken")
-            .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
-            .bodyString(requestBody, ContentType.APPLICATION_JSON)
-            .execute()
-            .handleResponse { response ->
-                when (response.code) {
-                    200 -> {
-                        val responseBody = EntityUtils.toString(response.entity)
-                        val dto =
-                            objectMapper.readValue(responseBody, SamlingAvVurderteInngangsvilkårResponse::class.java)
-                        dto.samlingAvVurderteInngangsvilkår.map { it.tilDomene() }
-                    }
+        return timer.recordCallable {
+            Request
+                .post(uri)
+                .setHeader("Authorization", "Bearer $accessToken")
+                .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
+                .bodyString(requestBody, ContentType.APPLICATION_JSON)
+                .execute()
+                .handleResponse { response ->
+                    when (response.code) {
+                        200 -> {
+                            val responseBody = EntityUtils.toString(response.entity)
+                            val dto =
+                                objectMapper.readValue(responseBody, SamlingAvVurderteInngangsvilkårResponse::class.java)
+                            dto.samlingAvVurderteInngangsvilkår.map { it.tilDomene() }
+                        }
 
-                    in 500..599 -> {
-                        val responseBody = EntityUtils.toString(response.entity).orEmpty()
-                        error("Serverfeil fra Spillkar: ${response.code}, body=$responseBody")
-                    }
+                        in 500..599 -> {
+                            val responseBody = EntityUtils.toString(response.entity).orEmpty()
+                            error("Serverfeil fra Spillkar: ${response.code}, body=$responseBody")
+                        }
 
-                    else -> {
-                        val responseBody = EntityUtils.toString(response.entity).orEmpty()
-                        loggError("Feil ved henting av inngangsvilkår: status=${response.code}, body=$responseBody")
-                        error("Feil fra Spillkar: ${response.code}")
+                        else -> {
+                            val responseBody = EntityUtils.toString(response.entity).orEmpty()
+                            loggError("Feil ved henting av inngangsvilkår: status=${response.code}, body=$responseBody")
+                            error("Feil fra Spillkar: ${response.code}")
+                        }
                     }
                 }
-            }
+        }
     }
+
+    private val timer =
+        Metrics.timer(
+            "spesialist.client.call.timer",
+            "client",
+            "spillkar",
+            "operation",
+            "hent-inngangsvilkar",
+        )
 }
 
 private fun SamlingAvVurderteInngangsvilkår.tilDomene() =

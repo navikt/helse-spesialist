@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.apache.httpclient5.fluent)
     implementation(libs.caffeine)
     implementation(libs.bundles.jackson)
+    implementation(libs.micrometer.prometheus)
 
     // TODO: Trenger vi kanskje bare én av disse?
     implementation(libs.nimbus.joseJwt)
