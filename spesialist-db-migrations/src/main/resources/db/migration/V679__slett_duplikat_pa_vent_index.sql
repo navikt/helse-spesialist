@@ -1,0 +1,1 @@
+DROP INDEX pa_vent_vedtaksperiode_id_idx1;
