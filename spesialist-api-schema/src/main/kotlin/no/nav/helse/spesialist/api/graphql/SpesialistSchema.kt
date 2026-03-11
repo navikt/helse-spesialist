@@ -9,8 +9,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutation
-import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
@@ -39,7 +37,6 @@ class SpesialistSchema(
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
         val person: PersonMutationSchema,
         val paVent: PaVentMutationSchema,
-        val stansAutomatiskBehandling: StansAutomatiskBehandlingMutationSchema,
     )
 
     fun setup(schemaConfiguration: GraphQLConfiguration.SchemaConfiguration) {
@@ -60,7 +57,6 @@ class SpesialistSchema(
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),
                 PersonMutation(handler = mutationHandlers.person),
                 PaVentMutation(handler = mutationHandlers.paVent),
-                StansAutomatiskBehandlingMutation(handler = mutationHandlers.stansAutomatiskBehandling),
             )
 
         schemaConfiguration.hooks = schemaGeneratorHooks

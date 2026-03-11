@@ -30,7 +30,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
@@ -162,7 +161,6 @@ object TestRunner {
                                     ),
                                 person = PersonMutationHandler(personhåndterer = avhengigheter.personhåndterer),
                                 paVent = PaVentMutationHandler(saksbehandlerMediator = avhengigheter.saksbehandlerMediator),
-                                stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory = avhengigheter.sessionFactory),
                             ),
                     )
                 configureKtorApplication(
