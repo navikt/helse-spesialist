@@ -22,3 +22,9 @@ data class ApiStansRequest(
     val saksbehandlerStans: Boolean?,
     val veilederStans: Boolean?,
 )
+
+@Serializable
+data class ApiStansRequestV2(
+    val begrunnelse: String,
+    val stans: Boolean,
+)

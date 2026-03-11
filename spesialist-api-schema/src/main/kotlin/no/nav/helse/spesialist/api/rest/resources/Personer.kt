@@ -62,7 +62,17 @@ class Personer {
         @Resource("stans")
         class Stans(
             val parent: PersonPseudoId,
-        )
+        ) {
+            @Resource("saksbehandler")
+            class Saksbehandler(
+                val parent: Stans,
+            )
+
+            @Resource("veileder")
+            class Veileder(
+                val parent: Stans,
+            )
+        }
 
         @Resource("tilkomne-inntektskilder")
         class TilkomneInntektskilder(
