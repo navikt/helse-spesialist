@@ -381,7 +381,6 @@ class PgOppgaveRepository private constructor(
                 o.første_opprettet,
                 p.fødselsnummer,
                 t.saksbehandler_ref AS tildelt_til_oid,
-                pv.id AS på_vent_id,
                 b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
@@ -389,7 +388,6 @@ class PgOppgaveRepository private constructor(
             INNER JOIN person p ON v.person_ref = p.id
             INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
             LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
             WHERE o.id IN (SELECT id FROM har_ekskludert_varsler)
             ORDER BY o.opprettet
             OFFSET :offset
@@ -410,7 +408,7 @@ class PgOppgaveRepository private constructor(
                     tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
                     opprettetTidspunkt = row.instant("første_opprettet"),
                     behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
-                    påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
+                    påVentId = null,
                 )
         }.let { listeMedTotaltAntallOgElement ->
             Side(
