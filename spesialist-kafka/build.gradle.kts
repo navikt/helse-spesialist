@@ -10,7 +10,7 @@ dependencies {
     implementation(libs.caffeine)
 
     testImplementation(libs.tbdLibs.rapidsAndRiversTest)
-    testImplementation("io.github.optimumcode:json-schema-validator:0.5.3")
+    testImplementation("io.github.optimumcode:json-schema-validator:0.5.4")
     testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
     testImplementation(testFixtures(project(":spesialist-domain")))
