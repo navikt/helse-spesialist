@@ -83,7 +83,7 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
     @Test
     fun `returnerer ett element per vedtaksperiode som har notater`() {
         val (person, pseudoId) = lagPersonOgPseudoId()
-        val (vedtaksperiodeMedNotat, vedtaksperiodeUtenNotat) =
+        val (vedtaksperiodeMedNotat, _) =
             listOf(
                 lagVedtaksperiode(identitetsnummer = person.id).also(sessionContext.vedtaksperiodeRepository::lagre),
                 lagVedtaksperiode(identitetsnummer = person.id).also(sessionContext.vedtaksperiodeRepository::lagre),
