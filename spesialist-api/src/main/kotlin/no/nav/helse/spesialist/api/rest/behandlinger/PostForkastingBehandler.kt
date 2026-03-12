@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.behandlinger
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.OppgaveOppdatert
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.BEHANDLING_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_FEIL_TILSTAND
@@ -122,9 +122,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         return RestResponse.NoContent()
     }
 
-    override fun openApi(config: RouteConfig) {
-        config.tags("Behandlinger")
-    }
+    override val tag = Tags.BEHANDLINGER
 
     private fun Outbox.leggTilAvvistVarsel(
         gammelStatus: Varsel.Status,

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.personer.dokumenter
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -8,6 +7,7 @@ import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -77,11 +77,7 @@ class GetInntektsmeldingBehandler(
         return RestResponse.OK(inntektsmelding)
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Dokumenter")
-        }
-    }
+    override val tag = Tags.DOKUMENTER
 }
 
 enum class ApiGetInntektsmeldingErrorCode(

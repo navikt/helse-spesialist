@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.server.auth.AuthenticationContext
@@ -73,7 +72,7 @@ class RestAdapterTest {
 
         override val påkrevdTilgang = Tilgang.Les
 
-        override fun openApi(config: RouteConfig) {}
+        override val tag = Tags.PERSONER
     }
 
     private class Error : ApiErrorCode {

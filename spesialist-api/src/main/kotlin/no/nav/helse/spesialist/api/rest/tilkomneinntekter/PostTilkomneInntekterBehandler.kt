@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektRequest
@@ -8,6 +7,7 @@ import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -81,11 +81,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
         return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Tilkommen inntekt")
-        }
-    }
+    override val tag = Tags.TILKOMMEN_INNTEKT
 }
 
 enum class ApiPostTilkomneInntekterErrorCode(

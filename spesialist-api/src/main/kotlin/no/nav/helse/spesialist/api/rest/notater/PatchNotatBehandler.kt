@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.rest.notater
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiPatchNotatRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Notater
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Notat
@@ -51,11 +51,7 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
         return RestResponse.OK(Unit)
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Notater")
-        }
-    }
+    override val tag = Tags.NOTATER
 }
 
 enum class ApiPatchNotatErrorCode(

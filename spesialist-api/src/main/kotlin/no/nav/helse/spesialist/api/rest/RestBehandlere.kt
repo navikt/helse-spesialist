@@ -5,8 +5,33 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
+enum class Tags(
+    val value: String,
+) {
+    NOTATER("Notater"),
+    VEDTAKSPERIODER("Vedtaksperiode"),
+    TILKOMMEN_INNTEKT("Tilkommen inntekt"),
+    SAKSBEHANDLERE("Saksbehandlere"),
+    DIALOGER("Dialoger"),
+    VARSLER("varsler"),
+    BEHANDLEDE_OPPGAVER("Behandlede oppgaver"),
+    BEHANDLINGER("Behandlinger"),
+    FORSIKRINGER("Forsikringer"),
+    OPPGAVER("Oppgaver"),
+    DOKUMENTER("Dokumenter"),
+    PERSONER("Person"),
+    KRR("KRR"),
+    VURDERINGER("Vurderinger"),
+    VILKÅRSVURDERINGER("Vilkårsvurderinger"),
+    STANS_AV_AUTOMATISERING("Stans av automatisering"),
+    PERSONSØK("Personsøk"),
+    LISTE_OPPGAVER("ListeOppgaver"),
+}
+
 interface RestBehandler {
-    fun openApi(config: RouteConfig)
+    val tag: Tags
+
+    fun openApi(config: RouteConfig) {}
 
     val påkrevdTilgang: Tilgang
     val påkrevdeBrukerroller: Set<Brukerrolle> get() = emptySet()
@@ -42,6 +67,7 @@ inline fun <reified RESPONSE, reified ERROR : ApiErrorCode> RestBehandler.openAp
             }
         }
     }
+    config.tags = setOf(tag.value)
     openApi(config)
 }
 

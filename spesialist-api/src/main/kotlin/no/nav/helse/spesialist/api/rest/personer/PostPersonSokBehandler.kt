@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -9,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.ApiPersonSokResponse
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -71,11 +71,7 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
         }
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Personsøk")
-        }
-    }
+    override val tag = Tags.PERSONSØK
 }
 
 enum class ApiPostPersonSokErrorCode(

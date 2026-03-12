@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiBehandlendeEnhet
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -43,11 +43,7 @@ class GetBehandlendeEnhetForPersonBehandler(
         return RestResponse.OK(ApiBehandlendeEnhet(enhetNr = enhet.enhetNr, navn = enhet.navn, type = enhet.type))
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Person")
-        }
-    }
+    override val tag = Tags.PERSONER
 }
 
 enum class ApiGetBehandlendeEnhetForPersonErrorCode(

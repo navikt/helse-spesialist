@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -166,11 +166,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
 
     private fun Endring<SortedSet<LocalDate>>.tilApiListLocalDateEndring(): ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring = ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(fra = fra.toList(), til = til.toList())
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Tilkommen inntekt")
-        }
-    }
+    override val tag = Tags.TILKOMMEN_INNTEKT
 }
 
 enum class ApiGetTilkomneInntektskilderForPersonErrorCode(

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.personer.vurderinger
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykdomsgrad
@@ -9,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -126,11 +126,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
         return RestResponse.NoContent()
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Vurderinger")
-        }
-    }
+    override val tag = Tags.VURDERINGER
 
     private fun MinimumSykdomsgrad.byggSubsumsjonEvent(
         avslag: Boolean,

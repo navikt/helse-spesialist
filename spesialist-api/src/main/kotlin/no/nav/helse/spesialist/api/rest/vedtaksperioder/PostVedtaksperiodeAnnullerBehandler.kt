@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -8,6 +7,7 @@ import no.nav.helse.spesialist.api.rest.ApiVedtaksperiodeAnnullerRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Annullering
@@ -80,11 +80,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
         return RestResponse.NoContent()
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Vedtaksperiode")
-        }
-    }
+    override val tag = Tags.VEDTAKSPERIODER
 }
 
 enum class ApiPostVedtaksperiodeAnnullerErrorCode(

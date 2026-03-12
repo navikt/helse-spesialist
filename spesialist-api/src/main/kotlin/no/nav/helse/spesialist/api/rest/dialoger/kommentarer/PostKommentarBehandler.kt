@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.dialoger.kommentarer
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiKommentarRequest
@@ -8,6 +7,7 @@ import no.nav.helse.spesialist.api.rest.ApiKommentarResponse
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Dialoger
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.DialogId
@@ -39,11 +39,7 @@ class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKom
         return RestResponse.Created(ApiKommentarResponse(id = kommentar.id().value))
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Dialoger")
-        }
-    }
+    override val tag = Tags.DIALOGER
 }
 
 enum class ApiPostKommentarErrorCode(

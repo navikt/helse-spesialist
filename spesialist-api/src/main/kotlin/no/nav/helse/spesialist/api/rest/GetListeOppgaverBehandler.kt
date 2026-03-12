@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.rest.resources.ListeOppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -24,9 +23,5 @@ class GetListeOppgaverBehandler : GetBehandler<ListeOppgaver, ApiOppgaveProjeksj
         return RestResponse.OK(oppgaver)
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("ListeOppgaver")
-        }
-    }
+    override val tag = Tags.LISTE_OPPGAVER
 }

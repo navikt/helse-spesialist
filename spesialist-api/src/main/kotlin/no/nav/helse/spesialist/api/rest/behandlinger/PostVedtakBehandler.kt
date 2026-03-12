@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.behandlinger
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.BehandlingRepository
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.BEHANDLING_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON
@@ -339,11 +339,7 @@ class PostVedtakBehandler(
             .filter { it.fom <= behandling.tom }
             .plus(behandling)
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = listOf("Behandlinger")
-        }
-    }
+    override val tag = Tags.BEHANDLINGER
 
     class FattVedtakException(
         val code: ApiPostVedtakErrorCode,

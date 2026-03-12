@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
@@ -10,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
@@ -228,11 +228,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
     private fun ApiDatoPeriode.tilPeriode(): Periode = fom tilOgMed tom
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Tilkommen inntekt")
-        }
-    }
+    override val tag = Tags.TILKOMMEN_INNTEKT
 }
 
 enum class ApiPatchTilkommenInntektErrorCode(

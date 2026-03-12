@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.rest.varsler
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiVarselvurdering
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
@@ -72,9 +72,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         return RestResponse.OK(Unit)
     }
 
-    override fun openApi(config: RouteConfig) {
-        config.tags("varsler")
-    }
+    override val tag = Tags.VARSLER
 }
 
 enum class PutVarselvurderingErrorCode(

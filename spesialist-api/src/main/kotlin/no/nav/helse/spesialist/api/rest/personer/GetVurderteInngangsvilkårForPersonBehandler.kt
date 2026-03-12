@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiAutomatiskVurdering
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -10,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.ApiVurdertInngangsvilkår
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
@@ -26,11 +26,7 @@ class GetVurderteInngangsvilkårForPersonBehandler(
 ) : GetBehandler<Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt, List<ApiSamlingAvVurderteInngangsvilkår>, ApiGetVurderteInngangsvilkårErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Vilkårsvurderinger")
-        }
-    }
+    override val tag = Tags.VILKÅRSVURDERINGER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt,

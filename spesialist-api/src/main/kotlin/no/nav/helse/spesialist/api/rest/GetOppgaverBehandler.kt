@@ -101,13 +101,12 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             ApiEgenskap.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
         }
 
+    override val tag = Tags.OPPGAVER
+
     override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Oppgaver")
-            request {
-                queryParameter<List<String>?>(Oppgaver::minstEnAvEgenskapene.name) {
-                    explode = true
-                }
+        config.request {
+            queryParameter<List<String>?>(Oppgaver::minstEnAvEgenskapene.name) {
+                explode = true
             }
         }
     }

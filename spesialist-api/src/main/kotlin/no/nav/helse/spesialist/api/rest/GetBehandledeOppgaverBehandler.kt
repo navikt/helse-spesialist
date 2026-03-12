@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
@@ -67,11 +66,7 @@ class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehan
         )
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Behandlede oppgaver")
-        }
-    }
+    override val tag = Tags.BEHANDLEDE_OPPGAVER
 }
 
 enum class ApiGetBehandletOppgaverErrorCode : ApiErrorCode

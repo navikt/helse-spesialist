@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.rest.resources.Bruker
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -42,11 +41,7 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
         return RestResponse.OK(apiBruker)
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Saksbehandlere")
-        }
-    }
+    override val tag = Tags.SAKSBEHANDLERE
 }
 
 enum class GetBrukerErrorCode : ApiErrorCode

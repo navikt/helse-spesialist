@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiKrrRegistrertStatus
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -52,11 +52,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
         return RestResponse.OK(apiRegistrertStatus)
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("KRR")
-        }
-    }
+    override val tag = Tags.KRR
 }
 
 enum class ApiGetKrrRegistrertStatusForPersonErrorCode(

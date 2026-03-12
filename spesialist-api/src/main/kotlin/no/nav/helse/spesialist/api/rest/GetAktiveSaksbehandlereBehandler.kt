@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.spesialist.api.rest.resources.AktiveSaksbehandlere
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -22,11 +21,7 @@ class GetAktiveSaksbehandlereBehandler : GetBehandler<AktiveSaksbehandlere, List
         return RestResponse.OK(saksbehandlere)
     }
 
-    override fun openApi(config: RouteConfig) {
-        with(config) {
-            tags = setOf("Saksbehandlere")
-        }
-    }
+    override val tag = Tags.SAKSBEHANDLERE
 }
 
 enum class ApiGetAktiveSaksbehandlereErrorCode : ApiErrorCode
