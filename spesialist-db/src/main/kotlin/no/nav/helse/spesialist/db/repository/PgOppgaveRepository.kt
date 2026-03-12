@@ -333,7 +333,7 @@ class PgOppgaveRepository private constructor(
                 LEFT JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
                 LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
                 WHERE o.id IN (SELECT sub.id FROM aktiv_utildelt_oppgave AS sub)
-                AND o.egenskaper @> ARRAY['SØKNAD', 'EN_ARBEIDSGIVER']::varchar[]
+                AND o.egenskaper @> ARRAY['SØKNAD']::varchar[]
                 AND (o.egenskaper @> ARRAY['FORSTEGANGSBEHANDLING']::varchar[] OR o.egenskaper @> ARRAY['FORLENGELSE']::varchar[])
                 AND NOT o.egenskaper && ARRAY[
                     'PÅ_VENT', 'BESLUTTER', 'RETUR','UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON', 'INGEN_UTBETALING', 
