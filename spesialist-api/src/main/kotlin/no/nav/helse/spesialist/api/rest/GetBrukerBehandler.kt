@@ -6,6 +6,8 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
+    override val tag = Tags.SAKSBEHANDLERE
+
     override fun behandle(
         resource: Bruker,
         kallKontekst: KallKontekst,
@@ -38,8 +40,6 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
 
         return RestResponse.OK(apiBruker)
     }
-
-    override val tag = Tags.SAKSBEHANDLERE
 }
 
 enum class GetBrukerErrorCode : ApiErrorCode

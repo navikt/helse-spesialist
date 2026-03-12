@@ -23,6 +23,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
+    override val tag = Tags.VURDERINGER
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,
         request: ApiArbeidstidsvurderingRequest,
@@ -122,8 +124,6 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
 
         return RestResponse.NoContent()
     }
-
-    override val tag = Tags.VURDERINGER
 
     private fun MinimumSykdomsgrad.byggSubsumsjonEvent(
         avslag: Boolean,

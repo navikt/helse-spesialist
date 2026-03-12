@@ -13,6 +13,8 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.KommentarId
 
 class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.KommentarId, ApiPatchKommentarRequest, Unit, ApiPatchKommentarErrorCode> {
+    override val tag = Tags.DIALOGER
+
     override fun behandle(
         resource: Dialoger.DialogId.Kommentar.KommentarId,
         request: ApiPatchKommentarRequest,
@@ -38,8 +40,6 @@ class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.Komme
 
         return RestResponse.OK(Unit)
     }
-
-    override val tag = Tags.DIALOGER
 }
 
 enum class ApiPatchKommentarErrorCode(

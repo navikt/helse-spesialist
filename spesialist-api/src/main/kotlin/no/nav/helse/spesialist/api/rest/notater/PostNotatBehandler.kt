@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatResponse, ApiPostNotatErrorCode> {
+    override val tag = Tags.NOTATER
+
     override fun behandle(
         resource: Notater,
         request: ApiNotatRequest,
@@ -54,8 +56,6 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
 
         return RestResponse.Created(notatResponse)
     }
-
-    override val tag = Tags.NOTATER
 }
 
 enum class ApiPostNotatErrorCode(

@@ -16,6 +16,8 @@ import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Person
 
 class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchStansSaksbehandlerErrorCode> {
+    override val tag = Tags.STANS_AV_AUTOMATISERING
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Saksbehandler,
         request: ApiStansRequest,
@@ -91,8 +93,6 @@ class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.
     }
 
     private fun OppgaveDao.oppgaveId(fødselsnummer: String) = this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
-
-    override val tag = Tags.STANS_AV_AUTOMATISERING
 }
 
 enum class ApiPatchStansSaksbehandlerErrorCode(

@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
 class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
+    override val tag = Tags.TILKOMMEN_INNTEKT
+
     override fun behandle(
         resource: TilkomneInntekter,
         request: ApiLeggTilTilkommenInntektRequest,
@@ -77,8 +79,6 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
 
         return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
     }
-
-    override val tag = Tags.TILKOMMEN_INNTEKT
 }
 
 enum class ApiPostTilkomneInntekterErrorCode(

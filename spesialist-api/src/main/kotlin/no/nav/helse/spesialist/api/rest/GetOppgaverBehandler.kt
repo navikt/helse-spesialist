@@ -10,6 +10,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
+    override val tag = Tags.OPPGAVER
+
     override fun behandle(
         resource: Oppgaver,
         kallKontekst: KallKontekst,
@@ -97,8 +99,6 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             ApiEgenskap.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
             ApiEgenskap.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
         }
-
-    override val tag = Tags.OPPGAVER
 
     override fun openApi(config: RouteConfig) {
         config.request {

@@ -22,6 +22,8 @@ import no.nav.helse.spesialist.domain.Varsel.Status.VURDERT
 import no.nav.helse.spesialist.domain.VarselId
 
 class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurdering, Unit, DeleteVarselvurderingErrorCode> {
+    override val tag = Tags.VARSLER
+
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
         kallKontekst: KallKontekst,
@@ -57,8 +59,6 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
                 RestResponse.NoContent()
             }
         }
-
-    override val tag = Tags.VARSLER
 }
 
 enum class DeleteVarselvurderingErrorCode(

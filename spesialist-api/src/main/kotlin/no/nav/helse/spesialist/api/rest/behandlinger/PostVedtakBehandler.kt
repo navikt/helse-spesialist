@@ -51,6 +51,8 @@ import java.time.LocalDateTime
 class PostVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
 ) : PostBehandler<Behandlinger.BehandlingId.Vedtak, ApiVedtakRequest, Unit, ApiPostVedtakErrorCode> {
+    override val tag = Tags.BEHANDLINGER
+
     override fun behandle(
         resource: Behandlinger.BehandlingId.Vedtak,
         request: ApiVedtakRequest,
@@ -335,8 +337,6 @@ class PostVedtakBehandler(
             .sortedByDescending { it.tom }
             .filter { it.fom <= behandling.tom }
             .plus(behandling)
-
-    override val tag = Tags.BEHANDLINGER
 
     class FattVedtakException(
         val code: ApiPostVedtakErrorCode,

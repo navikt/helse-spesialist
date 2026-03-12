@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, ApiPersonSokResponse, ApiPostPersonSokErrorCode> {
     override val påkrevdTilgang = Tilgang.Les
+    override val tag = Tags.PERSONSØK
 
     override fun behandle(
         resource: Personer.Sok,
@@ -70,8 +71,6 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
             }
         }
     }
-
-    override val tag = Tags.PERSONSØK
 }
 
 enum class ApiPostPersonSokErrorCode(

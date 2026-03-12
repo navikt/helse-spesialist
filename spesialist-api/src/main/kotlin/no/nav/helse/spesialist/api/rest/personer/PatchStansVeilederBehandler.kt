@@ -14,6 +14,8 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
 
 class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequest, Unit, ApiPatchVeilederStansErrorCode> {
+    override val tag = Tags.STANS_AV_AUTOMATISERING
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Veileder,
         request: ApiStansRequest,
@@ -50,8 +52,6 @@ class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
         )
         loggInfo("Opphevet veileder-stans for person")
     }
-
-    override val tag = Tags.STANS_AV_AUTOMATISERING
 }
 
 enum class ApiPatchVeilederStansErrorCode(

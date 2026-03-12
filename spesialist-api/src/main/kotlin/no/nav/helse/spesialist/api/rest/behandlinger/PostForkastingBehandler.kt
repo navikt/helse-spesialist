@@ -34,6 +34,8 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDateTime
 
 class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasting, ApiForkastingRequest, Unit, ApiPostForkastingErrorCode> {
+    override val tag = Tags.BEHANDLINGER
+
     override fun behandle(
         resource: Behandlinger.BehandlingId.Forkasting,
         request: ApiForkastingRequest,
@@ -118,8 +120,6 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
 
         return RestResponse.NoContent()
     }
-
-    override val tag = Tags.BEHANDLINGER
 
     private fun Outbox.leggTilAvvistVarsel(
         gammelStatus: Varsel.Status,

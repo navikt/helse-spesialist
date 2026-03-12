@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.domain.Person
 class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
 ) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode> {
+    override val tag = Tags.DOKUMENTER
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
         kallKontekst: KallKontekst,
@@ -55,8 +57,6 @@ class GetSoknadBehandler(
 
         return RestResponse.OK(søknad)
     }
-
-    override val tag = Tags.DOKUMENTER
 }
 
 enum class ApiGetSoknadErrorCode(

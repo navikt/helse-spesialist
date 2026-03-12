@@ -16,6 +16,8 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
 
 class GetNotatVedtaksperiodeIderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.NotatVedtaksperiodeIder, List<ApiNotatVedtaksperiodeId>, ApiGetNotatVedtaksperiodeIderErrorCode> {
+    override val tag = Tags.NOTATER
+
     override fun behandle(
         resource: Personer.PersonPseudoId.NotatVedtaksperiodeIder,
         kallKontekst: KallKontekst,
@@ -52,8 +54,6 @@ class GetNotatVedtaksperiodeIderForPersonBehandler : GetBehandler<Personer.Perso
 
         return RestResponse.OK(resultat)
     }
-
-    override val tag = Tags.NOTATER
 }
 
 private fun NotatType.tilApiNotatType() =

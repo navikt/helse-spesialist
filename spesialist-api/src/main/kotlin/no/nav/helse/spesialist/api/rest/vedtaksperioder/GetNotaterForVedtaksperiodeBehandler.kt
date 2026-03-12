@@ -14,6 +14,8 @@ import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.VedtaksperiodeId.Notater, List<ApiNotat>, GetNotaterForVedtaksperiodeErrorCode> {
+    override val tag = Tags.NOTATER
+
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.Notater,
         kallKontekst: KallKontekst,
@@ -53,8 +55,6 @@ class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.Vedtak
 
         return RestResponse.OK(apiNotater)
     }
-
-    override val tag = Tags.NOTATER
 }
 
 enum class GetNotaterForVedtaksperiodeErrorCode(

@@ -22,6 +22,8 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeVa
 import kotlin.reflect.KProperty0
 
 class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiTilkommenInntektPatch, Unit, ApiPatchTilkommenInntektErrorCode> {
+    override val tag = Tags.TILKOMMEN_INNTEKT
+
     override fun behandle(
         resource: TilkomneInntekter.Id,
         request: ApiTilkommenInntektPatch,
@@ -224,8 +226,6 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
         )
 
     private fun ApiDatoPeriode.tilPeriode(): Periode = fom tilOgMed tom
-
-    override val tag = Tags.TILKOMMEN_INNTEKT
 }
 
 enum class ApiPatchTilkommenInntektErrorCode(

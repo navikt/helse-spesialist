@@ -15,6 +15,8 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 
 class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselErrorCode> {
+    override val tag = Tags.VARSLER
+
     override fun behandle(
         resource: Varsler.VarselId,
         kallKontekst: KallKontekst,
@@ -77,8 +79,6 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
 
         return RestResponse.OK(apiVarsel)
     }
-
-    override val tag = Tags.VARSLER
 }
 
 enum class GetVarselErrorCode(

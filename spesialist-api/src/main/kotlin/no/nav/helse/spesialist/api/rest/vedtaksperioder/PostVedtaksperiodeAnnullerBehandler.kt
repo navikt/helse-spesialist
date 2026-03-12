@@ -15,6 +15,8 @@ import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Annuller, ApiVedtaksperiodeAnnullerRequest, Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
+    override val tag = Tags.VEDTAKSPERIODER
+
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.Annuller,
         request: ApiVedtaksperiodeAnnullerRequest,
@@ -76,8 +78,6 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
 
         return RestResponse.NoContent()
     }
-
-    override val tag = Tags.VEDTAKSPERIODER
 }
 
 enum class ApiPostVedtaksperiodeAnnullerErrorCode(

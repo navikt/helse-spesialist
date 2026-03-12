@@ -14,6 +14,8 @@ import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest, Unit, ApiPatchNotatErrorCode> {
+    override val tag = Tags.NOTATER
+
     override fun behandle(
         resource: Notater.NotatId,
         request: ApiPatchNotatRequest,
@@ -47,8 +49,6 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
 
         return RestResponse.OK(Unit)
     }
-
-    override val tag = Tags.NOTATER
 }
 
 enum class ApiPatchNotatErrorCode(

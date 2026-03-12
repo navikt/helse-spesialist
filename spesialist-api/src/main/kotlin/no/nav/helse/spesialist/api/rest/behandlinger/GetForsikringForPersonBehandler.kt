@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 class GetForsikringForPersonBehandler(
     private val forsikringHenter: ForsikringHenter,
 ) : GetBehandler<Behandlinger.BehandlingId.Forsikring, ApiForsikring, ApiForsikringErrorCode> {
+    override val tag = Tags.FORSIKRINGER
+
     override fun behandle(
         resource: Behandlinger.BehandlingId.Forsikring,
         kallKontekst: KallKontekst,
@@ -50,8 +52,6 @@ class GetForsikringForPersonBehandler(
                 RestResponse.OK(ApiForsikring(false, null))
         }
     }
-
-    override val tag = Tags.FORSIKRINGER
 }
 
 private fun Forsikring.tilApiForsikring(): ApiForsikring =

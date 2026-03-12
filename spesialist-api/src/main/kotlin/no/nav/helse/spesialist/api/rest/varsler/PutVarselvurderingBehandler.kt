@@ -19,6 +19,8 @@ import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 
 class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, ApiVarselvurdering, Unit, PutVarselvurderingErrorCode> {
+    override val tag = Tags.VARSLER
+
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
         request: ApiVarselvurdering,
@@ -68,8 +70,6 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
 
         return RestResponse.OK(Unit)
     }
-
-    override val tag = Tags.VARSLER
 }
 
 enum class PutVarselvurderingErrorCode(

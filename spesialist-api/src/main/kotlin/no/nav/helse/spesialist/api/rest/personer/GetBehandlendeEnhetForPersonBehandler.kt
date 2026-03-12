@@ -17,6 +17,8 @@ import no.nav.helse.spesialist.domain.Person
 class GetBehandlendeEnhetForPersonBehandler(
     private val behandlendeEnhetHenter: BehandlendeEnhetHenter,
 ) : GetBehandler<Personer.PersonPseudoId.BehandlendeEnhet, ApiBehandlendeEnhet, ApiGetBehandlendeEnhetForPersonErrorCode> {
+    override val tag = Tags.PERSONER
+
     override fun behandle(
         resource: Personer.PersonPseudoId.BehandlendeEnhet,
         kallKontekst: KallKontekst,
@@ -39,8 +41,6 @@ class GetBehandlendeEnhetForPersonBehandler(
 
         return RestResponse.OK(ApiBehandlendeEnhet(enhetNr = enhet.enhetNr, navn = enhet.navn, type = enhet.type))
     }
-
-    override val tag = Tags.PERSONER
 }
 
 enum class ApiGetBehandlendeEnhetForPersonErrorCode(

@@ -8,6 +8,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 
 class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehandletOppgaveProjeksjonSide, ApiGetBehandletOppgaverErrorCode> {
+    override val tag = Tags.BEHANDLEDE_OPPGAVER
+
     override fun behandle(
         resource: BehandledeOppgaver,
         kallKontekst: KallKontekst,
@@ -62,8 +64,6 @@ class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehan
             saksbehandler = saksbehandler,
         )
     }
-
-    override val tag = Tags.BEHANDLEDE_OPPGAVER
 }
 
 enum class ApiGetBehandletOppgaverErrorCode : ApiErrorCode

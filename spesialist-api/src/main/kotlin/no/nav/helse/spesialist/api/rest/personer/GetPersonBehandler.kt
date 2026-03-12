@@ -18,6 +18,8 @@ class GetPersonBehandler(
     private val personinfoHenter: PersoninfoHenter,
     private val alleIdenterHenter: AlleIdenterHenter,
 ) : GetBehandler<Personer.PersonPseudoId, ApiPerson, ApiGetPersonErrorCode> {
+    override val tag = Tags.PERSONER
+
     override fun behandle(
         resource: Personer.PersonPseudoId,
         kallKontekst: KallKontekst,
@@ -83,8 +85,6 @@ class GetPersonBehandler(
                 ),
             )
         }
-
-    override val tag = Tags.PERSONER
 }
 
 enum class ApiGetPersonErrorCode(

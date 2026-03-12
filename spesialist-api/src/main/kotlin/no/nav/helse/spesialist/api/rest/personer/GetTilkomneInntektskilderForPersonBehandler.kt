@@ -34,6 +34,8 @@ import java.time.ZoneId
 import java.util.SortedSet
 
 class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+    override val tag = Tags.TILKOMMEN_INNTEKT
+
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,
         kallKontekst: KallKontekst,
@@ -162,8 +164,6 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
     private fun Endring<BigDecimal>.tilApiBigDecimalEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
 
     private fun Endring<SortedSet<LocalDate>>.tilApiListLocalDateEndring(): ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring = ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(fra = fra.toList(), til = til.toList())
-
-    override val tag = Tags.TILKOMMEN_INNTEKT
 }
 
 enum class ApiGetTilkomneInntektskilderForPersonErrorCode(

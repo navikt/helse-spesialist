@@ -13,6 +13,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.DialogId
 
 class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKommentarRequest, ApiKommentarResponse, ApiPostKommentarErrorCode> {
+    override val tag = Tags.DIALOGER
+
     override fun behandle(
         resource: Dialoger.DialogId.Kommentar,
         request: ApiKommentarRequest,
@@ -35,8 +37,6 @@ class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKom
 
         return RestResponse.Created(ApiKommentarResponse(id = kommentar.id().value))
     }
-
-    override val tag = Tags.DIALOGER
 }
 
 enum class ApiPostKommentarErrorCode(

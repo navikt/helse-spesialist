@@ -18,6 +18,8 @@ import java.net.SocketTimeoutException
 class GetKrrRegistrertStatusForPersonBehandler(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
 ) : GetBehandler<Personer.PersonPseudoId.KrrRegistrertStatus, ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
+    override val tag = Tags.KRR
+
     override fun behandle(
         resource: Personer.PersonPseudoId.KrrRegistrertStatus,
         kallKontekst: KallKontekst,
@@ -48,8 +50,6 @@ class GetKrrRegistrertStatusForPersonBehandler(
 
         return RestResponse.OK(apiRegistrertStatus)
     }
-
-    override val tag = Tags.KRR
 }
 
 enum class ApiGetKrrRegistrertStatusForPersonErrorCode(

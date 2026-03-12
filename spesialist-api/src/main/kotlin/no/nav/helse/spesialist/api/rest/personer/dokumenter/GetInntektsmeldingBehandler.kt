@@ -16,6 +16,8 @@ import no.nav.helse.spesialist.domain.Person
 class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
 ) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
+    override val tag = Tags.DOKUMENTER
+
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding,
         kallKontekst: KallKontekst,
@@ -73,8 +75,6 @@ class GetInntektsmeldingBehandler(
 
         return RestResponse.OK(inntektsmelding)
     }
-
-    override val tag = Tags.DOKUMENTER
 }
 
 enum class ApiGetInntektsmeldingErrorCode(
