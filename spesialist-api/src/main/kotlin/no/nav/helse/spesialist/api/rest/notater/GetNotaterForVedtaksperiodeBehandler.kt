@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.vedtaksperioder
+package no.nav.helse.spesialist.api.rest.notater
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
-import no.nav.helse.spesialist.api.rest.mapping.tilApiNotat
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Vedtaksperiode

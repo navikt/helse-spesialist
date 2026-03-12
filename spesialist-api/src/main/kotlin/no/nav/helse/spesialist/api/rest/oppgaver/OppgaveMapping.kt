@@ -1,10 +1,14 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.oppgaver
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
+import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjon
+import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
+import no.nav.helse.spesialist.api.rest.ApiPersonnavn
+import no.nav.helse.spesialist.api.rest.ApiTildeling
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent

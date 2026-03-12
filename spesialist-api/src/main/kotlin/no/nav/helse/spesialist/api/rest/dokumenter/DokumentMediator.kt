@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.dokumenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.MeldingPubliserer

@@ -28,8 +28,8 @@ import no.nav.helse.spesialist.api.plugins.configureContentNegotiationPlugin
 import no.nav.helse.spesialist.api.plugins.configureOpenApiPlugin
 import no.nav.helse.spesialist.api.plugins.configureResourcesPlugin
 import no.nav.helse.spesialist.api.plugins.configureStatusPagesPlugin
-import no.nav.helse.spesialist.api.rest.DokumentMediator
 import no.nav.helse.spesialist.api.rest.RestAdapter
+import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter

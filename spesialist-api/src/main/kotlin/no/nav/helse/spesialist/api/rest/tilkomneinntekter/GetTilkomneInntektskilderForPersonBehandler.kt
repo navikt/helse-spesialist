@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.personer
+package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiDatoPeriode

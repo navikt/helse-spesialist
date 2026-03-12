@@ -1,8 +1,16 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.oppgaver
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
+import no.nav.helse.spesialist.api.rest.ApiBehandletOppgaveProjeksjon
+import no.nav.helse.spesialist.api.rest.ApiBehandletOppgaveProjeksjonSide
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiPersonnavn
+import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
+import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.BehandledeOppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer

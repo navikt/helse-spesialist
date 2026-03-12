@@ -1,10 +1,18 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.oppgaver
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
+import no.nav.helse.spesialist.api.rest.ApiOppgaveSorteringsfelt
+import no.nav.helse.spesialist.api.rest.ApiSorteringsrekkefølge
+import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
+import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Oppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid

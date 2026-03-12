@@ -1,8 +1,7 @@
-package no.nav.helse.spesialist.api.rest.personer
+package no.nav.helse.spesialist.api.rest.notater
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiNotatType
 import no.nav.helse.spesialist.api.rest.ApiNotatVedtaksperiodeId
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -55,12 +54,6 @@ class GetNotatVedtaksperiodeIderForPersonBehandler : GetBehandler<Personer.Perso
         return RestResponse.OK(resultat)
     }
 }
-
-private fun NotatType.tilApiNotatType() =
-    when (this) {
-        NotatType.Generelt -> ApiNotatType.Generelt
-        NotatType.OpphevStans -> ApiNotatType.OpphevStans
-    }
 
 enum class ApiGetNotatVedtaksperiodeIderErrorCode(
     override val statusCode: HttpStatusCode,

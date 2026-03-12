@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.personer.vurderinger
+package no.nav.helse.spesialist.api.rest.vurderinger
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.SubsumsjonEvent

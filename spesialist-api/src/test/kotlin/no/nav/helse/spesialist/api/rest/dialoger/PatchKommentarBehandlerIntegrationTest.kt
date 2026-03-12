@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.dialoger.kommentarer
+package no.nav.helse.spesialist.api.rest.dialoger
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture

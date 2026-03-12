@@ -1,5 +1,10 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.oppgaver
 
+import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
+import no.nav.helse.spesialist.api.rest.GetBehandler
+import no.nav.helse.spesialist.api.rest.KallKontekst
+import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.ListeOppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 

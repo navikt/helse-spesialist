@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.personer.dokumenter
+package no.nav.helse.spesialist.api.rest.dokumenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
@@ -112,8 +112,8 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
             },
     )
 
-private fun String.tilNaturalytelse(): ApiNaturalytelse {
-    return when (this) {
+private fun String.tilNaturalytelse(): ApiNaturalytelse =
+    when (this) {
         "KOSTDOEGN" -> ApiNaturalytelse.KOSTDOEGN
         "LOSJI" -> ApiNaturalytelse.LOSJI
         "ANNET" -> ApiNaturalytelse.ANNET
@@ -138,10 +138,9 @@ private fun String.tilNaturalytelse(): ApiNaturalytelse {
                 "Inntektsmelding har ny Naturalytelse som må støttes: {}, returnerer UKJENT enn så lenge",
                 this,
             )
-            return ApiNaturalytelse.UKJENT
+            ApiNaturalytelse.UKJENT
         }
     }
-}
 
 fun JsonNode.tilSøknad() =
     ApiSoknad(
@@ -154,8 +153,8 @@ fun JsonNode.tilSøknad() =
         selvstendigNaringsdrivende = getIfNotNull("selvstendigNaringsdrivende")?.tilSelvstendigNæringsdrivende(),
     )
 
-private fun String.tilSoknadstype(): ApiSoknadstype {
-    return when (this) {
+private fun String.tilSoknadstype(): ApiSoknadstype =
+    when (this) {
         "SELVSTENDIGE_OG_FRILANSERE" -> ApiSoknadstype.Selvstendig_og_frilanser
         "OPPHOLD_UTLAND" -> ApiSoknadstype.Opphold_utland
         "ARBEIDSTAKERE" -> ApiSoknadstype.Arbeidstaker
@@ -169,10 +168,9 @@ private fun String.tilSoknadstype(): ApiSoknadstype {
                 "Søknad har ny Soknadstype som må støttes: {}, returnerer UKJENT enn så lenge",
                 this,
             )
-            return ApiSoknadstype.UKJENT
+            ApiSoknadstype.UKJENT
         }
     }
-}
 
 private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder =
     ApiSoknadsperioder(
@@ -237,8 +235,8 @@ private fun ApiSporsmal.skalVises(rotnivå: Boolean = true): Boolean {
     return harTagSomSkalVises && (kriterieForVisningAvUndersporsmalOppfylt || (førsteSvar != null && !svartNeiPåRotnivå))
 }
 
-private fun String.tilSvartype(): ApiSvartype {
-    return when (this) {
+private fun String.tilSvartype(): ApiSvartype =
+    when (this) {
         "JA_NEI" -> ApiSvartype.JA_NEI
         "CHECKBOX" -> ApiSvartype.CHECKBOX
         "CHECKBOX_GRUPPE" -> ApiSvartype.CHECKBOX_GRUPPE
@@ -271,13 +269,12 @@ private fun String.tilSvartype(): ApiSvartype {
         -> ApiSvartype.AAR_MAANED
         else -> {
             teamLogs.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
-            return ApiSvartype.UKJENT
+            ApiSvartype.UKJENT
         }
     }
-}
 
-private fun String.tilVisningskriterium(): ApiVisningskriterium {
-    return when (this) {
+private fun String.tilVisningskriterium(): ApiVisningskriterium =
+    when (this) {
         "NEI" -> ApiVisningskriterium.NEI
         "JA" -> ApiVisningskriterium.JA
         "CHECKED" -> ApiVisningskriterium.CHECKED
@@ -286,9 +283,8 @@ private fun String.tilVisningskriterium(): ApiVisningskriterium {
                 "Søknad har nytt Visningskriterium som må støttes: {}, returnerer UKJENT enn så lenge",
                 this,
             )
-            return ApiVisningskriterium.UKJENT
+            ApiVisningskriterium.UKJENT
         }
     }
-}
 
 private fun JsonNode.getIfNotNull(key: String) = get(key).takeUnless { it.isMissingOrNull() }

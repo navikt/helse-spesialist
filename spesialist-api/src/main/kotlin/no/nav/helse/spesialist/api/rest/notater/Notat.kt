@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.mapping
+package no.nav.helse.spesialist.api.rest.notater
 
 import no.nav.helse.spesialist.api.rest.ApiKommentar
 import no.nav.helse.spesialist.api.rest.ApiNotat
