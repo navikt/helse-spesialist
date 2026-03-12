@@ -4,6 +4,7 @@ import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.DialogId
@@ -11,6 +12,7 @@ import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.util.UUID
 
 internal class PgNotatRepository(
@@ -44,6 +46,18 @@ internal class PgNotatRepository(
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { it.toNotat() }
+
+    override fun finnAlleForVedtaksperioder(vedtaksperiodeIds: Set<VedtaksperiodeId>): List<Notat> {
+        if (vedtaksperiodeIds.isEmpty()) return emptyList()
+        return asSQL(
+            """
+            SELECT * FROM notat
+            WHERE vedtaksperiode_id = ANY(:vedtaksperiode_ider::uuid[])
+            AND type NOT IN ('PaaVent', 'Retur')
+            """.trimIndent(),
+            "vedtaksperiode_ider" to vedtaksperiodeIds.somDbArray { it.value.toString() },
+        ).list { it.toNotat() }
+    }
 
     private fun insertNotat(notat: Notat): Int =
         asSQL(

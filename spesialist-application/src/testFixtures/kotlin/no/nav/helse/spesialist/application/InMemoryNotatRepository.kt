@@ -2,11 +2,15 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.util.UUID
 
 class InMemoryNotatRepository : NotatRepository, AbstractLateIdInMemoryRepository<NotatId, Notat>() {
     override fun finnAlleForVedtaksperiode(vedtaksperiodeId: UUID): List<Notat> =
         alle().filter { it.vedtaksperiodeId == vedtaksperiodeId }
+
+    override fun finnAlleForVedtaksperioder(vedtaksperiodeIds: Set<VedtaksperiodeId>): List<Notat> =
+        alle().filter { VedtaksperiodeId(it.vedtaksperiodeId) in vedtaksperiodeIds }
 
     override fun tildelIderSomMangler(root: Notat) {
         if (!root.harFåttTildeltId())

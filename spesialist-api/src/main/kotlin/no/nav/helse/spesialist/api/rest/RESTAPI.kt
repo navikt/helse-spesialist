@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
+import no.nav.helse.spesialist.api.rest.personer.GetNotatVedtaksperiodeIderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetVurderteInngangsvilkårForPersonBehandler
@@ -122,6 +123,8 @@ fun Routing.restRoutes(
             get(GetBehandlendeEnhetForPersonBehandler(behandlendeEnhetHenter), restAdapter)
 
             get(GetPersonBehandler(personinfoHenter, alleIdenterHenter), restAdapter)
+
+            get(GetNotatVedtaksperiodeIderForPersonBehandler(), restAdapter)
 
             get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
         }

@@ -99,5 +99,10 @@ class Personer {
                 val skjæringstidspunkt: LocalDate,
             )
         }
+
+        @Resource("notat-vedtaksperiode-ider")
+        class NotatVedtaksperiodeIder(
+            val parent: PersonPseudoId,
+        )
     }
 }

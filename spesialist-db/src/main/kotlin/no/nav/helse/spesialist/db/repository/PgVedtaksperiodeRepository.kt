@@ -44,4 +44,17 @@ class PgVedtaksperiodeRepository private constructor(
                 forkastet = it.boolean("forkastet"),
             )
         }
+
+    override fun finnAlleIderForPerson(identitetsnummer: Identitetsnummer): Set<VedtaksperiodeId> =
+        dbQuery
+            .list(
+                """
+                SELECT vedtaksperiode_id
+                FROM vedtaksperiode v
+                         JOIN person p ON v.person_ref = p.id
+                WHERE p.fødselsnummer = :fodselsnummer
+            """,
+                "fodselsnummer" to identitetsnummer.value,
+            ) { VedtaksperiodeId(it.uuid("vedtaksperiode_id")) }
+            .toSet()
 }

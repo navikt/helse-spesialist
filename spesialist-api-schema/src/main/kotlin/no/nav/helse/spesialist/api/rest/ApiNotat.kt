@@ -52,6 +52,12 @@ enum class ApiNotatType {
 }
 
 @Serializable
+data class ApiNotatVedtaksperiodeId(
+    val vedtaksperiodeId: UUID,
+    val notattyper: List<ApiNotatType>,
+)
+
+@Serializable
 data class ApiKommentar(
     val id: Int,
     val tekst: String,
