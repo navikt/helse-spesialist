@@ -5,7 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiStansRequestV2
+import no.nav.helse.spesialist.api.rest.ApiStansRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
@@ -16,10 +16,10 @@ import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
-class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequestV2, Unit, ApiPatchStansSaksbehandlerErrorCode> {
+class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchStansSaksbehandlerErrorCode> {
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Saksbehandler,
-        request: ApiStansRequestV2,
+        request: ApiStansRequest,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchStansSaksbehandlerErrorCode> =
         kallKontekst.medPerson(

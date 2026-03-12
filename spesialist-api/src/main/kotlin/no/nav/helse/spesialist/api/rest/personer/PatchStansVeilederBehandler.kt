@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.rest.personer
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiStansRequestV2
+import no.nav.helse.spesialist.api.rest.ApiStansRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
@@ -14,10 +14,10 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
-class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequestV2, Unit, ApiPatchVeilederStansErrorCode> {
+class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequest, Unit, ApiPatchVeilederStansErrorCode> {
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Veileder,
-        request: ApiStansRequestV2,
+        request: ApiStansRequest,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchVeilederStansErrorCode> {
         if (request.stans) return RestResponse.Error(ApiPatchVeilederStansErrorCode.KAN_IKKE_OPPRETTE_VEILEDER_STANS)
