@@ -13,13 +13,10 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
 ) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
         kallKontekst: KallKontekst,

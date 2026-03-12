@@ -6,8 +6,6 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Bruker,
         kallKontekst: KallKontekst,

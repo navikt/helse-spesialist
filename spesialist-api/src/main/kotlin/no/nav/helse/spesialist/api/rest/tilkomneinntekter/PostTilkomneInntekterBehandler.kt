@@ -13,13 +13,10 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
 class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: TilkomneInntekter,
         request: ApiLeggTilTilkommenInntektRequest,

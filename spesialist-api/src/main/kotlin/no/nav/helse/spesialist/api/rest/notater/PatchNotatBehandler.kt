@@ -12,11 +12,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest, Unit, ApiPatchNotatErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Notater.NotatId,
         request: ApiPatchNotatRequest,

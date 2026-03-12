@@ -65,14 +65,12 @@ class RestAdapterTest {
     }
 
     private class UnitUnitErrorGetBehandler : GetBehandler<Unit, Unit, Error> {
+        override val tag = Tags.PERSONER
+
         override fun behandle(
             resource: Unit,
             kallKontekst: KallKontekst,
         ): RestResponse<Unit, Error> = error("Intern feil oppstod")
-
-        override val påkrevdTilgang = Tilgang.Les
-
-        override val tag = Tags.PERSONER
     }
 
     private class Error : ApiErrorCode {

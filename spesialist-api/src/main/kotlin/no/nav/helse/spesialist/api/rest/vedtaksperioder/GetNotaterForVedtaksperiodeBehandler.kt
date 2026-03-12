@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.VedtaksperiodeId.Notater, List<ApiNotat>, GetNotaterForVedtaksperiodeErrorCode> {
     override fun behandle(
@@ -56,9 +55,6 @@ class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.Vedtak
     }
 
     override val tag = Tags.NOTATER
-
-    override val påkrevdTilgang: Tilgang
-        get() = Tilgang.Les
 }
 
 enum class GetNotaterForVedtaksperiodeErrorCode(

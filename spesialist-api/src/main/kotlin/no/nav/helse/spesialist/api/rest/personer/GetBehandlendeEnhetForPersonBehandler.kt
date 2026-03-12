@@ -13,13 +13,10 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetBehandlendeEnhetForPersonBehandler(
     private val behandlendeEnhetHenter: BehandlendeEnhetHenter,
 ) : GetBehandler<Personer.PersonPseudoId.BehandlendeEnhet, ApiBehandlendeEnhet, ApiGetBehandlendeEnhetForPersonErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Personer.PersonPseudoId.BehandlendeEnhet,
         kallKontekst: KallKontekst,

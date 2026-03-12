@@ -15,11 +15,8 @@ import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatResponse, ApiPostNotatErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Notater,
         request: ApiNotatRequest,

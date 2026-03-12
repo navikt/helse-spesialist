@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequest, Unit, ApiPatchVeilederStansErrorCode> {
     override fun behandle(
@@ -53,8 +52,6 @@ class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
     }
 
     override val tag = Tags.STANS_AV_AUTOMATISERING
-
-    override val påkrevdTilgang: Tilgang = Tilgang.Skriv
 }
 
 enum class ApiPatchVeilederStansErrorCode(

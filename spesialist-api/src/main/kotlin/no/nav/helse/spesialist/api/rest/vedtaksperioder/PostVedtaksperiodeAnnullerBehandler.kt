@@ -13,11 +13,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Annullering
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.Annuller, ApiVedtaksperiodeAnnullerRequest, Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.Annuller,
         request: ApiVedtaksperiodeAnnullerRequest,

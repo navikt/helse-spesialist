@@ -31,12 +31,9 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 
 class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasting, ApiForkastingRequest, Unit, ApiPostForkastingErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Behandlinger.BehandlingId.Forkasting,
         request: ApiForkastingRequest,

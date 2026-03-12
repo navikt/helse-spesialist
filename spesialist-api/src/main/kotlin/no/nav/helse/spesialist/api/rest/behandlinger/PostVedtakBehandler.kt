@@ -46,14 +46,11 @@ import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 
 class PostVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
 ) : PostBehandler<Behandlinger.BehandlingId.Vedtak, ApiVedtakRequest, Unit, ApiPostVedtakErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Behandlinger.BehandlingId.Vedtak,
         request: ApiVedtakRequest,

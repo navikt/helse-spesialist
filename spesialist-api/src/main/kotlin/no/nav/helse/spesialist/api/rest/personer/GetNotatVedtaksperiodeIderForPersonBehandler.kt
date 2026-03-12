@@ -14,11 +14,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetNotatVedtaksperiodeIderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.NotatVedtaksperiodeIder, List<ApiNotatVedtaksperiodeId>, ApiGetNotatVedtaksperiodeIderErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Personer.PersonPseudoId.NotatVedtaksperiodeIder,
         kallKontekst: KallKontekst,

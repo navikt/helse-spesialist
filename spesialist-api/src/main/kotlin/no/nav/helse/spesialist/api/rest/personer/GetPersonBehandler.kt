@@ -13,14 +13,11 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Personinfo
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetPersonBehandler(
     private val personinfoHenter: PersoninfoHenter,
     private val alleIdenterHenter: AlleIdenterHenter,
 ) : GetBehandler<Personer.PersonPseudoId, ApiPerson, ApiGetPersonErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Personer.PersonPseudoId,
         kallKontekst: KallKontekst,

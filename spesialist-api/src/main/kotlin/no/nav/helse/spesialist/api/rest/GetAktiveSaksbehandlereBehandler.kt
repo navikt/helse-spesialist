@@ -2,11 +2,8 @@ package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.spesialist.api.rest.resources.AktiveSaksbehandlere
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetAktiveSaksbehandlereBehandler : GetBehandler<AktiveSaksbehandlere, List<ApiAktivSaksbehandler>, ApiGetAktiveSaksbehandlereErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: AktiveSaksbehandlere,
         kallKontekst: KallKontekst,

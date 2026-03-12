@@ -6,11 +6,8 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.spesialist.api.rest.resources.BehandledeOppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehandletOppgaveProjeksjonSide, ApiGetBehandletOppgaverErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: BehandledeOppgaver,
         kallKontekst: KallKontekst,

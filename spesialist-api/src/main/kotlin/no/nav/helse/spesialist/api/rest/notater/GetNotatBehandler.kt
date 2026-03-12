@@ -13,11 +13,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Notater.NotatId,
         kallKontekst: KallKontekst,

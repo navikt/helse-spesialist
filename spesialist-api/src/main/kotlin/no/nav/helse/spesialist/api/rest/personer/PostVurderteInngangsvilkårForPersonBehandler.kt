@@ -14,15 +14,12 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.spillkar.ManuellInngangsvilkårVurdering
 import no.nav.helse.spesialist.application.spillkar.ManuelleInngangsvilkårVurderinger
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.Instant
 import java.time.LocalDate
 
 class PostVurderteInngangsvilkårForPersonBehandler(
     private val inngangsvilkårInnsender: InngangsvilkårInnsender,
 ) : PostBehandler<Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt, ApiPostManuelleInngangsvilkårVurderingerRequest, Unit, ApiPostVurderteInngangsvilkårErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override val tag = Tags.VILKÅRSVURDERINGER
 
     override fun behandle(

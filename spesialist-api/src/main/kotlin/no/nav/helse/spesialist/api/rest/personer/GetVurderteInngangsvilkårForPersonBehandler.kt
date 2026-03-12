@@ -4,7 +4,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiAutomatiskVurdering
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiManuellVurdering
-import no.nav.helse.spesialist.api.rest.`ApiSamlingAvVurderteInngangsvilkår`
+import no.nav.helse.spesialist.api.rest.ApiSamlingAvVurderteInngangsvilkår
 import no.nav.helse.spesialist.api.rest.ApiVurdertInngangsvilkår
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -17,15 +17,12 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.spillkar.SamlingAvVurderteInngangsvilkår
 import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDate
 
 class GetVurderteInngangsvilkårForPersonBehandler(
     private val inngangsvilkårHenter: InngangsvilkårHenter,
     private val alleIdenterHenter: AlleIdenterHenter,
 ) : GetBehandler<Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt, List<ApiSamlingAvVurderteInngangsvilkår>, ApiGetVurderteInngangsvilkårErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override val tag = Tags.VILKÅRSVURDERINGER
 
     override fun behandle(

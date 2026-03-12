@@ -13,13 +13,10 @@ import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.ResultatAvForsikring
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetForsikringForPersonBehandler(
     private val forsikringHenter: ForsikringHenter,
 ) : GetBehandler<Behandlinger.BehandlingId.Forsikring, ApiForsikring, ApiForsikringErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Behandlinger.BehandlingId.Forsikring,
         kallKontekst: KallKontekst,

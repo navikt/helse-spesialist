@@ -17,11 +17,8 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, ApiVarselvurdering, Unit, PutVarselvurderingErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
         request: ApiVarselvurdering,

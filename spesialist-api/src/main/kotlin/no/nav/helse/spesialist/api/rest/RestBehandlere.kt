@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -63,7 +64,7 @@ inline fun <reified RESPONSE, reified ERROR : ApiErrorCode> RestBehandler.openAp
         default {
             description = "Svar ved feil"
             body<ApiHttpProblemDetails<ERROR>> {
-                mediaTypes = setOf(io.ktor.http.ContentType.Application.ProblemJson)
+                mediaTypes = setOf(ContentType.Application.ProblemJson)
             }
         }
     }
@@ -86,12 +87,22 @@ interface RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode
     ): RestResponse<RESPONSE, ERROR>
 }
 
-interface GetBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>
+interface GetBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR> {
+    override val påkrevdTilgang: Tilgang get() = Tilgang.Les
+}
 
-interface DeleteBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR>
+interface DeleteBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerUtenBody<RESOURCE, RESPONSE, ERROR> {
+    override val påkrevdTilgang: Tilgang get() = Tilgang.Skriv
+}
 
-interface PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
+interface PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR> {
+    override val påkrevdTilgang: Tilgang get() = Tilgang.Skriv
+}
 
-interface PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
+interface PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR> {
+    override val påkrevdTilgang: Tilgang get() = Tilgang.Skriv
+}
 
-interface PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
+interface PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR> {
+    override val påkrevdTilgang: Tilgang get() = Tilgang.Skriv
+}

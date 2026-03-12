@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
@@ -35,8 +34,6 @@ import java.time.ZoneId
 import java.util.SortedSet
 
 class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,
         kallKontekst: KallKontekst,

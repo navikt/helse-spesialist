@@ -2,11 +2,8 @@ package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.spesialist.api.rest.resources.ListeOppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class GetListeOppgaverBehandler : GetBehandler<ListeOppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: ListeOppgaver,
         kallKontekst: KallKontekst,

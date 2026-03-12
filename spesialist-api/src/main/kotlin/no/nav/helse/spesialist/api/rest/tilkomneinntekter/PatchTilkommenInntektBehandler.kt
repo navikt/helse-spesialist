@@ -16,15 +16,12 @@ import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import kotlin.reflect.KProperty0
 
 class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiTilkommenInntektPatch, Unit, ApiPatchTilkommenInntektErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: TilkomneInntekter.Id,
         request: ApiTilkommenInntektPatch,

@@ -13,14 +13,11 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.net.SocketTimeoutException
 
 class GetKrrRegistrertStatusForPersonBehandler(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
 ) : GetBehandler<Personer.PersonPseudoId.KrrRegistrertStatus, ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
-    override val påkrevdTilgang = Tilgang.Les
-
     override fun behandle(
         resource: Personer.PersonPseudoId.KrrRegistrertStatus,
         kallKontekst: KallKontekst,

@@ -19,13 +19,10 @@ import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgrad
 import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradPeriode
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import java.time.LocalDateTime
 import java.util.UUID
 
 class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
-    override val påkrevdTilgang = Tilgang.Skriv
-
     override fun behandle(
         resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,
         request: ApiArbeidstidsvurderingRequest,
