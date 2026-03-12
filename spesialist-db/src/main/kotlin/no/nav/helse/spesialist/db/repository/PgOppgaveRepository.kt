@@ -365,7 +365,7 @@ class PgOppgaveRepository private constructor(
             INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
             LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             WHERE o.id IN (SELECT id FROM har_ekskludert_varsler)
-            ORDER BY o.opprettet
+            ORDER BY o.første_opprettet
             OFFSET :offset
             LIMIT :limit
             """,
