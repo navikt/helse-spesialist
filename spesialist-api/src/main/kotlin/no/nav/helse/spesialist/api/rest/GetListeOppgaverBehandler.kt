@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.rest.resources.ListeOppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 
 class GetListeOppgaverBehandler : GetBehandler<ListeOppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
-    override val tag = Tags.LISTE_OPPGAVER
+    override val tag = Tags.OPPGAVER
 
     override fun behandle(
         resource: ListeOppgaver,

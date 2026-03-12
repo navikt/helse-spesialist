@@ -34,7 +34,7 @@ import java.time.ZoneId
 import java.util.SortedSet
 
 class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
-    override val tag = Tags.TILKOMMEN_INNTEKT
+    override val tag = Tags.TILKOMNE_INNTEKTER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,

@@ -23,7 +23,7 @@ class GetVurderteInngangsvilkårForPersonBehandler(
     private val inngangsvilkårHenter: InngangsvilkårHenter,
     private val alleIdenterHenter: AlleIdenterHenter,
 ) : GetBehandler<Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt, List<ApiSamlingAvVurderteInngangsvilkår>, ApiGetVurderteInngangsvilkårErrorCode> {
-    override val tag = Tags.VILKÅRSVURDERINGER
+    override val tag = Tags.VURDERINGER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt,

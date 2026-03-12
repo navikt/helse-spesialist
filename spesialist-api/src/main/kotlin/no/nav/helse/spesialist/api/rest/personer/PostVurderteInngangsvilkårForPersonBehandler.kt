@@ -20,7 +20,7 @@ import java.time.LocalDate
 class PostVurderteInngangsvilkårForPersonBehandler(
     private val inngangsvilkårInnsender: InngangsvilkårInnsender,
 ) : PostBehandler<Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt, ApiPostManuelleInngangsvilkårVurderingerRequest, Unit, ApiPostVurderteInngangsvilkårErrorCode> {
-    override val tag = Tags.VILKÅRSVURDERINGER
+    override val tag = Tags.VURDERINGER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.VurderteInngangsvilkår.Skjæringstidspunkt,

@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 
 class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehandletOppgaveProjeksjonSide, ApiGetBehandletOppgaverErrorCode> {
-    override val tag = Tags.BEHANDLEDE_OPPGAVER
+    override val tag = Tags.OPPGAVER
 
     override fun behandle(
         resource: BehandledeOppgaver,

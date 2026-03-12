@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Person
 
 class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchStansSaksbehandlerErrorCode> {
-    override val tag = Tags.STANS_AV_AUTOMATISERING
+    override val tag = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Saksbehandler,

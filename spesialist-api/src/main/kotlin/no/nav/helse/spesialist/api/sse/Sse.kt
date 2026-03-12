@@ -9,6 +9,7 @@ import io.ktor.server.sse.sse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.MdcKey
@@ -28,7 +29,7 @@ internal fun Route.sse(
     documentation({
         description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
             " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
-        tags = setOf("Events")
+        tags = setOf(Tags.PERSONER.value)
         request {
             pathParameter<String>("personPseudoId")
         }

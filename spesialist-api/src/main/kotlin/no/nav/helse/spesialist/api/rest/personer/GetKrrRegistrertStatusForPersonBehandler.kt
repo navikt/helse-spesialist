@@ -18,7 +18,7 @@ import java.net.SocketTimeoutException
 class GetKrrRegistrertStatusForPersonBehandler(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
 ) : GetBehandler<Personer.PersonPseudoId.KrrRegistrertStatus, ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
-    override val tag = Tags.KRR
+    override val tag = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.KrrRegistrertStatus,
