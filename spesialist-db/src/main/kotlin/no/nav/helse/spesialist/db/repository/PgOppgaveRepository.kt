@@ -346,9 +346,9 @@ class PgOppgaveRepository private constructor(
                 SELECT id
                 FROM varsel
                 WHERE NOT varsler && ARRAY[
-                    'RV_MV_3', 'RV_IM_4', 'RV_VV_1', 'RV_VV_4', 'RV_IV_1', 'RV_OV_3', 'RV_AY_3', 'RV_AY_4', 'RV_AY_5', 
-                    'RV_AY_6', 'RV_AY_7', 'RV_AY_8', 'RV_AY_9', 'RV_AY_11', 'RV_AY_12', 'RV_SØ_10', 'RV_SØ_44',
-                    'RV_IT_3', 'RV_IT_38'
+                    'RV_MV_3', 'RV_IM_4', 'RV_VV_1', 'RV_VV_4', 'RV_VV_8', 'RV_IV_1', 'RV_IV_3', 'RV_OV_3', 'RV_OV_5',
+                    'RV_AY_3', 'RV_AY_4', 'RV_AY_5', 'RV_AY_6', 'RV_AY_7', 'RV_AY_8', 'RV_AY_9', 'RV_AY_11', 'RV_AY_12',
+                    'RV_SØ_2', 'RV_SØ_10', 'RV_SØ_44', 'RV_IT_3', 'RV_IT_38'
                 ]::varchar[]
             )
             SELECT
