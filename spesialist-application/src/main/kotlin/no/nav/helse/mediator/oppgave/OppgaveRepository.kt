@@ -54,6 +54,8 @@ interface OppgaveRepository {
         behandletAvOid: UUID,
     ): Side<BehandletOppgaveProjeksjon>
 
+    fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): AntallOppgaverProjeksjon
+
     data class Side<T>(
         val totaltAntall: Long,
         val sidetall: Int,
@@ -78,6 +80,11 @@ interface OppgaveRepository {
         val saksbehandler: String,
         val beslutter: String?,
         val personnavn: PersonnavnFraDatabase,
+    )
+
+    data class AntallOppgaverProjeksjon(
+        val antallMineSaker: Int,
+        val antallMineSakerPåVent: Int,
     )
 
     data class OppgaveTilstandStatusOgGodkjenningsbehov(

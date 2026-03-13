@@ -26,7 +26,10 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 
     fun hentOppdatertTidspunkt(id: Long): LocalDateTime? = oppdatertTidspunkt[id]
 
-    fun oppdaterGodkjenningsbehov(utbetalingId: UUID, godkjenningsbehovId: UUID) {
+    fun oppdaterGodkjenningsbehov(
+        utbetalingId: UUID,
+        godkjenningsbehovId: UUID,
+    ) {
         godkjenningsbehovOverrides[utbetalingId] = godkjenningsbehovId
     }
 
@@ -72,13 +75,13 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 
     override fun finnListeOppgaveProjeksjoner(
         sidetall: Int,
-        sidestørrelse: Int
+        sidestørrelse: Int,
     ): Side<OppgaveProjeksjon> =
         Side(
             totaltAntall = oppgaver.size.toLong(),
             sidetall = sidetall,
             sidestørrelse = sidestørrelse,
-            elementer = oppgaver.values.map { it.toOppgaveProjeksjon() }
+            elementer = oppgaver.values.map { it.toOppgaveProjeksjon() },
         )
 
     override fun finnBehandledeOppgaveProjeksjoner(
@@ -86,13 +89,19 @@ class InMemoryOppgaveRepository : OppgaveRepository {
         tom: LocalDate,
         sidetall: Int,
         sidestørrelse: Int,
-        behandletAvOid: UUID
+        behandletAvOid: UUID,
     ) = Side(
         totaltAntall = oppgaver.keys.first(),
         sidetall = sidetall,
         sidestørrelse = sidestørrelse,
-        elementer = oppgaver.values.map { it.toBehandletOppgaveProjeksjon() }
+        elementer = oppgaver.values.map { it.toBehandletOppgaveProjeksjon() },
     )
+
+    override fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): OppgaveRepository.AntallOppgaverProjeksjon =
+        OppgaveRepository.AntallOppgaverProjeksjon(
+            antallMineSaker = oppgaver.values.count { it.tildeltTil == saksbehandlersOid && Egenskap.PÅ_VENT !in it.egenskaper },
+            antallMineSakerPåVent = oppgaver.values.count { it.tildeltTil == saksbehandlersOid && Egenskap.PÅ_VENT in it.egenskaper },
+        )
 }
 
 private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
@@ -103,11 +112,12 @@ private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
         ferdigstiltTidspunkt = LocalDateTime.of(2020, 2, 2, 12, 30),
         saksbehandler = "her skal saksbehandlers navn stå",
         beslutter = "her skal beslutters navn eventuelt stå",
-        personnavn = PersonnavnFraDatabase(
-            fornavn = "navnet",
-            mellomnavn = "til",
-            etternavn = "personen",
-        ),
+        personnavn =
+            PersonnavnFraDatabase(
+                fornavn = "navnet",
+                mellomnavn = "til",
+                etternavn = "personen",
+            ),
     )
 }
 

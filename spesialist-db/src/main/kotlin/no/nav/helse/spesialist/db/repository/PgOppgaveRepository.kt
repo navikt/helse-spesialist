@@ -8,6 +8,7 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.mediator.oppgave.OppgaveRepository.AntallOppgaverProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
@@ -455,6 +456,25 @@ class PgOppgaveRepository private constructor(
                 elementer = liste.map { it.second },
             )
         }
+
+    override fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): AntallOppgaverProjeksjon =
+        asSQL(
+            """
+            SELECT
+                count(*) FILTER ( WHERE NOT 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker,
+                count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker_på_vent
+            from oppgave o
+                INNER JOIN tildeling t ON o.id = t.oppgave_id_ref
+            WHERE o.status = 'AvventerSaksbehandler'
+                AND t.saksbehandler_ref = :oid 
+            """,
+            "oid" to saksbehandlersOid.value,
+        ).singleOrNull { row ->
+            AntallOppgaverProjeksjon(
+                antallMineSaker = row.int("antall_mine_saker"),
+                antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
+            )
+        } ?: AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0)
 
     private fun Collection<Enum<*>>.tilDatabaseArray(): String = joinToString(prefix = "{", postfix = "}") { it.name }
 
