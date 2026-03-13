@@ -33,7 +33,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationH
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
@@ -137,10 +136,6 @@ object TestRunner {
                                         personhåndterer = avhengigheter.personhåndterer,
                                         snapshothenter = avhengigheter.snapshothenter,
                                         sessionFactory = avhengigheter.sessionFactory,
-                                    ),
-                                oppgaver =
-                                    OppgaverQueryHandler(
-                                        apiOppgaveService = avhengigheter.apiOppgaveService,
                                     ),
                                 behandlingsstatistikk =
                                     BehandlingsstatistikkQueryHandler(

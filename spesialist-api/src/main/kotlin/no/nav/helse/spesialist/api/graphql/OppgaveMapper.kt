@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.api.graphql
 
-import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
@@ -13,12 +11,6 @@ internal object OppgaveMapper {
         tilModellversjoner().map { egenskap ->
             ApiOppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
         }
-
-    internal fun AntallOppgaverFraDatabase.tilApiversjon(): ApiAntallOppgaver =
-        ApiAntallOppgaver(
-            antallMineSaker = this.antallMineSaker,
-            antallMineSakerPaVent = this.antallMineSakerPåVent,
-        )
 
     private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.mapNotNull { it.tilModellversjon() }
 
@@ -74,38 +66,71 @@ internal object OppgaveMapper {
     private fun EgenskapForDatabase.tilModellversjon(): Egenskap? =
         when (this) {
             EgenskapForDatabase.RISK_QA -> Egenskap.RISK_QA
+
             EgenskapForDatabase.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
+
             EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> Egenskap.STRENGT_FORTROLIG_ADRESSE
+
             EgenskapForDatabase.EGEN_ANSATT -> Egenskap.EGEN_ANSATT
+
             EgenskapForDatabase.BESLUTTER -> Egenskap.BESLUTTER
+
             EgenskapForDatabase.SPESIALSAK -> Egenskap.SPESIALSAK
+
             EgenskapForDatabase.REVURDERING -> Egenskap.REVURDERING
+
             EgenskapForDatabase.SØKNAD -> Egenskap.SØKNAD
+
             EgenskapForDatabase.STIKKPRØVE -> Egenskap.STIKKPRØVE
+
             EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> Egenskap.UTBETALING_TIL_SYKMELDT
+
             EgenskapForDatabase.DELVIS_REFUSJON -> Egenskap.DELVIS_REFUSJON
+
             EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+
             EgenskapForDatabase.INGEN_UTBETALING -> Egenskap.INGEN_UTBETALING
+
             EgenskapForDatabase.HASTER -> Egenskap.HASTER
+
             EgenskapForDatabase.RETUR -> Egenskap.RETUR
+
             EgenskapForDatabase.VERGEMÅL -> Egenskap.VERGEMÅL
+
             EgenskapForDatabase.EN_ARBEIDSGIVER -> Egenskap.EN_ARBEIDSGIVER
+
             EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> Egenskap.FLERE_ARBEIDSGIVERE
+
             EgenskapForDatabase.UTLAND -> Egenskap.UTLAND
+
             EgenskapForDatabase.FORLENGELSE -> Egenskap.FORLENGELSE
+
             EgenskapForDatabase.FORSTEGANGSBEHANDLING -> Egenskap.FORSTEGANGSBEHANDLING
+
             EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
+
             EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
+
             EgenskapForDatabase.SKJØNNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
+
             EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
+
             EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
+
             EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
+
             EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
+
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
+
             EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
+
             EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+
             EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+
             EgenskapForDatabase.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
+
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             EgenskapForDatabase.TILKOMMEN -> null
         }

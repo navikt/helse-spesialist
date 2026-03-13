@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
@@ -108,25 +107,6 @@ class PgOppgaveDao internal constructor(
         ).single {
             it.uuid("spleis_behandling_id")
         }
-
-    override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase =
-        asSQL(
-            """
-            SELECT
-                count(*) FILTER ( WHERE NOT 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker,
-                count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker_på_vent
-            from oppgave o
-                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            WHERE o.status = 'AvventerSaksbehandler'
-                AND t.saksbehandler_ref = :oid 
-            """,
-            "oid" to saksbehandlerOid,
-        ).singleOrNull { row ->
-            AntallOppgaverFraDatabase(
-                antallMineSaker = row.int("antall_mine_saker"),
-                antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
-            )
-        } ?: AntallOppgaverFraDatabase(antallMineSaker = 0, antallMineSakerPåVent = 0)
 
     override fun finnFødselsnummer(oppgaveId: Long): String =
         asSQL(

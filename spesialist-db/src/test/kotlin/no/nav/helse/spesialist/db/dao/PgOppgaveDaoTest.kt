@@ -218,39 +218,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
     }
 
-    @Test
-    fun `Teller mine saker og mine saker på vent riktig`() {
-        val annenSaksbehandler = nyLegacySaksbehandler()
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(legacySaksbehandler)
-
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(legacySaksbehandler)
-
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(legacySaksbehandler)
-            .leggPåVentOgLagre(legacySaksbehandler)
-
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(annenSaksbehandler)
-            .leggPåVentOgLagre(annenSaksbehandler)
-
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.saksbehandler.id.value)
-
-        assertEquals(2, antallOppgaver.antallMineSaker)
-        assertEquals(1, antallOppgaver.antallMineSakerPåVent)
-    }
-
-    @Test
-    fun `Antall mine saker og mine saker på vent er 0 hvis det ikke finnes tildeling for saksbehandler`() {
-        nyOppgaveForNyPerson()
-
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.saksbehandler.id.value)
-
-        assertEquals(0, antallOppgaver.antallMineSaker)
-        assertEquals(0, antallOppgaver.antallMineSakerPåVent)
-    }
-
     private fun List<BehandletOppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {
         assertEquals(oppgaver.map { it.id }.toSet(), map { it.id }.toSet())
     }

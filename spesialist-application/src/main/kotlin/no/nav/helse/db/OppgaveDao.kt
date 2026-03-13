@@ -20,8 +20,6 @@ interface OppgaveDao {
 
     fun finnSpleisBehandlingId(oppgaveId: Long): UUID
 
-    fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase
-
     fun finnBehandledeOppgaver(
         behandletAvOid: UUID,
         offset: Int = 0,

@@ -38,7 +38,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationH
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
@@ -111,10 +110,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 personhåndterer = personhåndterer,
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
-                            ),
-                        oppgaver =
-                            OppgaverQueryHandler(
-                                apiOppgaveService = apiOppgaveService,
                             ),
                         behandlingsstatistikk =
                             BehandlingsstatistikkQueryHandler(

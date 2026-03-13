@@ -2,11 +2,6 @@ package no.nav.helse.db
 
 import java.time.LocalDateTime
 
-data class AntallOppgaverFraDatabase(
-    val antallMineSaker: Int,
-    val antallMineSakerPåVent: Int,
-)
-
 data class BehandletOppgaveFraDatabaseForVisning(
     val id: Long,
     val aktørId: String,

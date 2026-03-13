@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationH
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -112,10 +111,6 @@ class ApiModule(
                                 personhåndterer = personhåndterer,
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
-                            ),
-                        oppgaver =
-                            OppgaverQueryHandler(
-                                apiOppgaveService = apiOppgaveService,
                             ),
                         behandlingsstatistikk =
                             BehandlingsstatistikkQueryHandler(
