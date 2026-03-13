@@ -356,7 +356,6 @@ class PgOppgaveRepository private constructor(
                 o.egenskaper,
                 o.første_opprettet,
                 p.fødselsnummer,
-                t.saksbehandler_ref AS tildelt_til_oid,
                 b.opprettet_tidspunkt AS behandling_opprettet_tidspunkt,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
@@ -364,7 +363,6 @@ class PgOppgaveRepository private constructor(
             INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
             INNER JOIN person p ON v.person_ref = p.id
             INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
-            LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             ORDER BY o.første_opprettet
             OFFSET :offset
             LIMIT :limit
@@ -381,7 +379,7 @@ class PgOppgaveRepository private constructor(
                             .array<String>("egenskaper")
                             .map { enumValueOf<EgenskapForDatabase>(it) }
                             .tilModellversjoner(),
-                    tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
+                    tildeltTilOid = null,
                     opprettetTidspunkt = row.instant("første_opprettet"),
                     behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
                     påVentId = null,
