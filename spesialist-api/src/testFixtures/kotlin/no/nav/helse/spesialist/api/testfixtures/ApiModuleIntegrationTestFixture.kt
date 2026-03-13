@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -21,9 +22,10 @@ class ApiModuleIntegrationTestFixture(
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
+    private val saksbehandlersOid = SaksbehandlerOid(UUID.randomUUID())
     val token: String get() =
         token(
-            lagSaksbehandler(navn = "En Saksbehandler", epost = "utvikler@nav.no", navIdent = "X123456"),
+            lagSaksbehandler(id = saksbehandlersOid, navn = "En Saksbehandler", epost = "utvikler@nav.no", navIdent = "X123456"),
             setOf(Tilgang.Les, Tilgang.Skriv),
             setOf(Brukerrolle.Utvikler),
         )
