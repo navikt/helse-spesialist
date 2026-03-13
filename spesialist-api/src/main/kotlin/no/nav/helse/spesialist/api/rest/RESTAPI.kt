@@ -27,6 +27,7 @@ import no.nav.helse.spesialist.api.rest.notater.GetNotatVedtaksperiodeIderForPer
 import no.nav.helse.spesialist.api.rest.notater.GetNotaterForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
+import no.nav.helse.spesialist.api.rest.oppgaver.GetAntallOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetBehandledeOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetListeOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
@@ -88,6 +89,7 @@ fun Routing.restRoutes(
             get(GetBrukerBehandler(), restAdapter)
 
             get(GetOppgaverBehandler(), restAdapter)
+            get(GetAntallOppgaverBehandler(), restAdapter)
             get(GetBehandledeOppgaverBehandler(), restAdapter)
             get(GetListeOppgaverBehandler(), restAdapter)
 
