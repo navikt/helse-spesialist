@@ -122,7 +122,7 @@ class DuplikatsjekkendeRiver(
         loggInfo("Melding mottatt", "json" to packet.toJson())
         val id = packet.id.toUUID()
         if (erDuplikat(id)) {
-            loggInfo("Ignorerer melding pga duplikatkontroll")
+            loggInfo("Ignorerer melding pga. duplikatkontroll")
             return
         }
 
@@ -141,7 +141,7 @@ class DuplikatsjekkendeRiver(
         } else {
             river.onPacket(packet, context, metadata, meterRegistry)
         }
-        loggInfo("Melding ferdig håndtert i river")
+        loggInfo("Melding ferdig håndtert i ${river.name()}")
     }
 
     private fun erDuplikat(id: UUID): Boolean {
