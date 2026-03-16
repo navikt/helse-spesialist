@@ -7,11 +7,9 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
-import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -85,7 +83,6 @@ internal class UtbetalingEndretCommand(
     utbetalingDao: UtbetalingDao,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
-    oppgaveService: OppgaveService,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     opptegnelseRepository: OpptegnelseRepository,
     json: String,
@@ -113,6 +110,5 @@ internal class UtbetalingEndretCommand(
                 tildelingDao = tildelingDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
-            OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveService),
         )
 }

@@ -5,8 +5,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
@@ -22,6 +24,7 @@ class BehandlingLukketRiver : TransaksjonellRiver() {
                 "@id",
                 "vedtaksperiodeId",
                 "behandlingId",
+                "fødselsnummer",
             )
         }
 
@@ -33,6 +36,7 @@ class BehandlingLukketRiver : TransaksjonellRiver() {
     ) {
         val vedtaksperiodeId = VedtaksperiodeId(packet["vedtaksperiodeId"].asUUID())
         val spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID())
+        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText())
 
         transaksjon.meldingDao.lagre(
             id = packet["@id"].asUUID(),
@@ -40,6 +44,14 @@ class BehandlingLukketRiver : TransaksjonellRiver() {
             meldingtype = MeldingDao.Meldingtype.BEHANDLING_LUKKET,
             vedtaksperiodeId = vedtaksperiodeId.value,
         )
+
+        transaksjon.oppgaveRepository
+            .finn(spleisBehandlingId)
+            ?.let {
+                it.ferdigstill()
+                outbox.leggTil(identitetsnummer, OppgaveOppdatert(it), "behandling_lukket")
+                transaksjon.oppgaveRepository.lagre(it)
+            }
 
         val vedtak =
             transaksjon.vedtakRepository.finn(spleisBehandlingId) ?: run {
