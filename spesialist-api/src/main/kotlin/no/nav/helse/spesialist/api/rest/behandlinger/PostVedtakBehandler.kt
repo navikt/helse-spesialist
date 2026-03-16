@@ -114,7 +114,7 @@ class PostVedtakBehandler(
                 )
                 totrinnsvurdering.godkjenn(beslutter, kallKontekst.brukerroller)
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
-                kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
+                kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id.value)
                 kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             } else {
                 beslutter = null
@@ -179,7 +179,7 @@ class PostVedtakBehandler(
         )
         oppgave.avventerSystem(saksbehandler.ident, saksbehandlerOid.value)
         oppgave.fjernFraPåVent()
-        transaksjon.påVentDao.slettPåVent(oppgave.id)
+        transaksjon.påVentDao.slettPåVent(oppgave.id.value)
         transaksjon.oppgaveRepository.lagre(oppgave)
         outbox.leggTil(identitetsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
         oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid, spleisBehandlingId)

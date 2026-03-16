@@ -13,7 +13,7 @@ class PgPeriodehistorikkDaoTest : AbstractDBIntegrationTest() {
 
         val historikkinnslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler)
 
-        periodehistorikkDao.lagreMedOppgaveId(historikkinnslag, oppgave.id)
+        periodehistorikkDao.lagreMedOppgaveId(historikkinnslag, oppgave.id.value)
         val result = periodehistorikkApiDao.finn(oppgave.utbetalingId)
 
         assertEquals(1, result.size)

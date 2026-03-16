@@ -12,14 +12,17 @@ class DelegatingOppgaveApiDao(
     override fun finnOppgaveId(fødselsnummer: String): Long? {
         val vedtaksperiodeIder =
             vedtaksperiodeRepository.alle().filter { it.identitetsnummer.value == fødselsnummer }.map { it.id.value }
-        return oppgaveRepository.alle()
+        return oppgaveRepository
+            .alle()
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
             .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
             ?.id
+            ?.value
     }
 
     override fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? =
-        oppgaveRepository.alle()
+        oppgaveRepository
+            .alle()
             .firstOrNull { it.vedtaksperiodeId == vedtaksperiodeId && it.tilstand is Oppgave.AvventerSaksbehandler }
-            ?.let { OppgaveForPeriodevisningDto(id = it.id.toString(), kanAvvises = it.kanAvvises) }
+            ?.let { OppgaveForPeriodevisningDto(id = it.id.value.toString(), kanAvvises = it.kanAvvises) }
 }

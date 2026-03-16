@@ -20,6 +20,7 @@ import no.nav.helse.modell.oppgave.Mottaker.IngenUtbetaling
 import no.nav.helse.modell.oppgave.Mottaker.UtbetalingTilArbeidsgiver
 import no.nav.helse.modell.oppgave.Mottaker.UtbetalingTilSykmeldt
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveId
 import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -170,7 +171,7 @@ class PgOppgaveRepository private constructor(
                 inntektsforhold = excluded.inntektsforhold,
                 periodetype = excluded.periodetype
             """,
-            "id" to oppgave.id,
+            "id" to oppgave.id.value,
             "opprettet" to oppgave.opprettet,
             "foerste_opprettet" to oppgave.førsteOpprettet,
             "oppdatert" to LocalDateTime.now(),
@@ -580,14 +581,14 @@ class PgOppgaveRepository private constructor(
     private fun lagreTildeling(oppgave: Oppgave) {
         val tildeltTil = oppgave.tildeltTil
         if (tildeltTil != null) {
-            tildelingDao.tildel(oppgave.id, tildeltTil)
+            tildelingDao.tildel(oppgave.id.value, tildeltTil)
         } else {
-            tildelingDao.avmeld(oppgave.id)
+            tildelingDao.avmeld(oppgave.id.value)
         }
     }
 
     private fun finnesAnnenAktivOppgavePåPerson(
-        oppgaveId: Long,
+        oppgaveId: OppgaveId,
         vedtaksperiodeId: UUID,
     ): Boolean =
         asSQL(
@@ -603,7 +604,7 @@ class PgOppgaveRepository private constructor(
             AND o.id != :oppgave_id 
             AND o.status = 'AvventerSaksbehandler'
             """.trimIndent(),
-            "oppgave_id" to oppgaveId,
+            "oppgave_id" to oppgaveId.value,
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull { it.boolean(1) } ?: false
 

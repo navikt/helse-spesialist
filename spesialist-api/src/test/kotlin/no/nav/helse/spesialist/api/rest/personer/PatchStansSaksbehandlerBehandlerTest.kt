@@ -46,21 +46,22 @@ class PatchStansSaksbehandlerBehandlerTest {
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        val oppgave = Oppgave.ny(
-            id = 1,
-            førsteOpprettet = null,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = UUID.randomUUID(),
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = emptySet(),
-            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-            oppgavetype = Oppgavetype.Søknad,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-            inntektsforhold = Inntektsforhold.Arbeidstaker,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        )
+        val oppgave =
+            Oppgave.ny(
+                id = 1,
+                førsteOpprettet = null,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = UUID.randomUUID(),
+                utbetalingId = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = emptySet(),
+                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                oppgavetype = Oppgavetype.Søknad,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                inntektsforhold = Inntektsforhold.Arbeidstaker,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            )
         sessionContext.oppgaveRepository.lagre(
             oppgave,
         )
@@ -83,7 +84,7 @@ class PatchStansSaksbehandlerBehandlerTest {
         val erStanset = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
         assertFalse(erStanset)
 
-        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id)
+        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
         assertEquals(1, historikk.size)
         val historikkinnslag = historikk.first()
         assertInstanceOf<OpphevStansAvSaksbehandler>(historikkinnslag)
@@ -110,21 +111,22 @@ class PatchStansSaksbehandlerBehandlerTest {
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        val oppgave = Oppgave.ny(
-            id = 1,
-            førsteOpprettet = null,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = UUID.randomUUID(),
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = emptySet(),
-            mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-            oppgavetype = Oppgavetype.Søknad,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-            inntektsforhold = Inntektsforhold.Arbeidstaker,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        )
+        val oppgave =
+            Oppgave.ny(
+                id = 1,
+                førsteOpprettet = null,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = UUID.randomUUID(),
+                utbetalingId = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = emptySet(),
+                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
+                oppgavetype = Oppgavetype.Søknad,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                inntektsforhold = Inntektsforhold.Arbeidstaker,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            )
         sessionContext.oppgaveRepository.lagre(
             oppgave,
         )
@@ -145,7 +147,7 @@ class PatchStansSaksbehandlerBehandlerTest {
         val erStanset = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
         assertTrue(erStanset)
 
-        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id)
+        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
         assertEquals(1, historikk.size)
         val historikkinnslag = historikk.first()
         assertInstanceOf<AutomatiskBehandlingStansetAvSaksbehandler>(historikkinnslag)

@@ -69,7 +69,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling = opprettBehandling(vedtaksperiode2, fom = 4 jan 2023, tom = 5 jan 2023, skjæringstidspunkt = 2 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
         val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
 
         assertEquals(setOf(vedtaksperiode2.id.value, vedtaksperiode1.id.value), perioderSomSkalViseVarsler)
     }
@@ -82,7 +82,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling = opprettBehandling(vedtaksperiode2, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = 5 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
         val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
 
         assertFalse(perioderSomSkalViseVarsler.contains(vedtaksperiode1.id.value))
     }
@@ -95,7 +95,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling = opprettBehandling(vedtaksperiode2, fom = 9 jan 2023, tom = 13 jan 2023, skjæringstidspunkt = 2 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
         val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
         assertEquals(setOf(vedtaksperiode2.id.value, vedtaksperiode1.id.value), perioderSomSkalViseVarsler)
     }
 
@@ -109,7 +109,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling3 = opprettBehandling(vedtaksperiode3, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling1.skjæringstidspunkt, utbetalingId = UtbetalingId(UUID.randomUUID()))
         val oppgave = opprettOppgave(vedtaksperiode3, behandling3)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
         assertEquals(setOf(vedtaksperiode3.id.value, vedtaksperiode2.id.value, vedtaksperiode1.id.value), perioderSomSkalViseVarsler)
     }
 
@@ -123,7 +123,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling3 = opprettBehandling(periodeMedOppgave, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling1.skjæringstidspunkt)
         val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
         assertEquals(setOf(periodeMedOppgave.id.value, uberegnetPeriode1.id.value, uberegnetPeriode2.id.value), perioderSomSkalViseVarsler)
     }
 
@@ -137,7 +137,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling3 = opprettBehandling(periodeMedOppgave, fom = 6 jan 2023, tom = 7 jan 2023)
         val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
         assertFalse(perioderSomSkalViseVarsler.any(setOf(uberegnetPeriode1.id.value, uberegnetPeriode2.id.value)::contains))
     }
 
@@ -151,7 +151,7 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
         val behandling3 = opprettBehandling(periodeMedOppgave, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling2.skjæringstidspunkt)
         val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
-        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id)
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
 
         assertEquals(setOf(periodeMedOppgave.id.value, uberegnetPeriode2.id.value), perioderSomSkalViseVarsler)
     }

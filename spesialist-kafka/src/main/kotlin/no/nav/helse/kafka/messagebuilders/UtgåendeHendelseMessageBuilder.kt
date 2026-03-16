@@ -232,7 +232,7 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
     listOfNotNull(
         "@forårsaket_av" to mapOf("id" to godkjenningsbehovId),
         "hendelseId" to godkjenningsbehovId,
-        "oppgaveId" to id,
+        "oppgaveId" to id.value,
         "tilstand" to
             when (tilstand) {
                 AvventerSaksbehandler -> "AvventerSaksbehandler"

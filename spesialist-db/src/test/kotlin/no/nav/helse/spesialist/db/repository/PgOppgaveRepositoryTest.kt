@@ -44,7 +44,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         val oppgave = lagOppgave()
 
         repository.lagre(oppgave)
-        val funnetOppgave = repository.finn(oppgave.id)
+        val funnetOppgave = repository.finn(oppgave.id.value)
         assertNotNull(funnetOppgave)
         assertEquals(oppgave, funnetOppgave)
     }
@@ -75,7 +75,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         oppgave.forsøkTildeling(saksbehandler, emptySet())
 
         repository.lagre(oppgave)
-        val funnetOppgave = repository.finn(oppgave.id)
+        val funnetOppgave = repository.finn(oppgave.id.value)
         assertNotNull(funnetOppgave)
         assertEquals(saksbehandler.id, funnetOppgave.tildeltTil)
     }
@@ -89,7 +89,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         oppgave.forsøkAvmelding(saksbehandler)
         repository.lagre(oppgave)
 
-        val funnetOppgave = repository.finn(oppgave.id)
+        val funnetOppgave = repository.finn(oppgave.id.value)
         assertNotNull(funnetOppgave)
         assertEquals(null, funnetOppgave.tildeltTil)
     }
@@ -101,7 +101,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         oppgave.leggTilEgenAnsatt()
         oppgave.fjernFraPåVent()
         repository.lagre(oppgave)
-        val funnetOppgave = repository.finn(oppgave.id)
+        val funnetOppgave = repository.finn(oppgave.id.value)
         assertNotNull(funnetOppgave)
         assertEquals(setOf(Egenskap.EGEN_ANSATT, SØKNAD), funnetOppgave.egenskaper)
     }
@@ -113,7 +113,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(oppgave)
         oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         repository.lagre(oppgave)
-        val funnetOppgave = repository.finn(oppgave.id)
+        val funnetOppgave = repository.finn(oppgave.id.value)
         assertNotNull(funnetOppgave)
         assertEquals(Oppgave.AvventerSystem, funnetOppgave.tilstand)
     }
@@ -126,7 +126,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
-        val funnetOppgave = repository.finn(oppgave.id)
+        val funnetOppgave = repository.finn(oppgave.id.value)
         assertNotNull(funnetOppgave)
         assertEquals(Oppgave.Ferdigstilt, funnetOppgave.tilstand)
         assertEquals(saksbehandler.ident, funnetOppgave.ferdigstiltAvIdent)
@@ -225,7 +225,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         førsteOppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         førsteOppgave.avbryt()
         repository.lagre(førsteOppgave)
-        val lagretFørsteOppgave = repository.finn(førsteOppgave.id)
+        val lagretFørsteOppgave = repository.finn(førsteOppgave.id.value)
         assertNotNull(lagretFørsteOppgave)
         assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretFørsteOppgave.førsteOpprettet)
 
@@ -235,7 +235,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         andreOppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         andreOppgave.avbryt()
         repository.lagre(andreOppgave)
-        val lagretAndreOppgave = repository.finn(andreOppgave.id)
+        val lagretAndreOppgave = repository.finn(andreOppgave.id.value)
         assertNotNull(lagretAndreOppgave)
         assertNotEqualsByMicrosecond(lagretAndreOppgave.opprettet, lagretAndreOppgave.førsteOpprettet)
         assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretAndreOppgave.førsteOpprettet)
@@ -244,7 +244,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
 
         val tredjeOppgave = lagOppgave(oppgaveId + 2)
         repository.lagre(tredjeOppgave)
-        val lagretTredjeOppgave = repository.finn(tredjeOppgave.id)
+        val lagretTredjeOppgave = repository.finn(tredjeOppgave.id.value)
         assertNotNull(lagretTredjeOppgave)
         assertNotEqualsByMicrosecond(lagretTredjeOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
         assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
@@ -279,7 +279,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         expected: Oppgave,
         actual: Oppgave,
     ) {
-        assertEquals(expected.id, actual.id)
+        assertEquals(expected.id.value, actual.id.value)
         assertEqualsByMicrosecond(expected.opprettet, actual.opprettet)
         assertEqualsByMicrosecond(expected.førsteOpprettet, actual.førsteOpprettet)
         assertEquals(expected.tilstand, actual.tilstand)

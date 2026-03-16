@@ -20,7 +20,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
     fun `lagrer og finner vedtaksbegrunnelse`() {
         val oppgave = nyOppgaveForNyPerson()
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
+            oppgaveId = oppgave.id.value,
             vedtakBegrunnelse =
                 VedtakBegrunnelseFraDatabase(
                     type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -42,7 +42,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgaveForNyPerson()
 
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
+            oppgaveId = oppgave.id.value,
             vedtakBegrunnelse =
                 VedtakBegrunnelseFraDatabase(
                     type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -51,7 +51,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             saksbehandlerOid = saksbehandler.id.value,
         )
 
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.id)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.id.value)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
@@ -64,7 +64,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgaveForNyPerson()
 
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
+            oppgaveId = oppgave.id.value,
             vedtakBegrunnelse =
                 VedtakBegrunnelseFraDatabase(
                     type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -72,8 +72,8 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 ),
             saksbehandlerOid = saksbehandler.id.value,
         )
-        dao.invaliderVedtakBegrunnelse(oppgave.id)
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.id)
+        dao.invaliderVedtakBegrunnelse(oppgave.id.value)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.id.value)
         assertNull(lagretVedtakBegrunnelse)
     }
 
@@ -82,7 +82,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgaveForNyPerson()
 
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
+            oppgaveId = oppgave.id.value,
             vedtakBegrunnelse =
                 VedtakBegrunnelseFraDatabase(
                     type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
@@ -91,7 +91,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             saksbehandlerOid = saksbehandler.id.value,
         )
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
+            oppgaveId = oppgave.id.value,
             vedtakBegrunnelse =
                 VedtakBegrunnelseFraDatabase(
                     type = VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
@@ -100,7 +100,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             saksbehandlerOid = saksbehandler.id.value,
         )
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
+            oppgaveId = oppgave.id.value,
             vedtakBegrunnelse =
                 VedtakBegrunnelseFraDatabase(
                     type = VedtakBegrunnelseTypeFraDatabase.INNVILGELSE,

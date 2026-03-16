@@ -521,7 +521,7 @@ abstract class AbstractDBIntegrationTest {
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
         påVentDao.lagrePåVent(
-            this.id,
+            id.value,
             saksbehandler.id.value,
             frist,
             årsaker,
@@ -573,7 +573,7 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(saksbehandler: Saksbehandler): TotrinnsvurderingKontekst {
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id.value, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }

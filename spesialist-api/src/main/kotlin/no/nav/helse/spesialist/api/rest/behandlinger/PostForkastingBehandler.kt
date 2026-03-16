@@ -67,7 +67,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         oppgave.avventerSystem(kallKontekst.saksbehandler.ident, kallKontekst.saksbehandler.id.value)
         oppgave.fjernFraPåVent()
         kallKontekst.outbox.leggTil(person.id, OppgaveOppdatert(oppgave), "oppgave avventer system")
-        kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id)
+        kallKontekst.transaksjon.påVentDao.slettPåVent(oppgave.id.value)
         kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering =

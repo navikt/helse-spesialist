@@ -27,14 +27,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `finn SpleisBehandlingId`() {
         val oppgave = nyOppgaveForNyPerson()
-        assertEquals(oppgave.behandlingId, oppgaveDao.finnSpleisBehandlingId(oppgave.id))
+        assertEquals(oppgave.behandlingId, oppgaveDao.finnSpleisBehandlingId(oppgave.id.value))
     }
 
     @Test
     fun `finn behandlingId`() {
         val oppgave = nyOppgaveForNyPerson()
         assertDoesNotThrow {
-            oppgaveDao.finnBehandlingId(oppgave.id)
+            oppgaveDao.finnBehandlingId(oppgave.id.value)
         }
     }
 
@@ -43,14 +43,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
 
-        assertEquals(oppgave.id, oppgaveDao.finnOppgaveId(fødselsnummer))
+        assertEquals(oppgave.id.value, oppgaveDao.finnOppgaveId(fødselsnummer))
     }
 
     @Test
     fun `finner oppgaveId for ikke-avsluttet oppgave ved hjelp av vedtaksperiodeId`() {
         val oppgave = nyOppgaveForNyPerson()
 
-        assertEquals(oppgave.id, oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
+        assertEquals(oppgave.id.value, oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
 
         oppgave.invaliderOgLagre()
         assertNull(oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
@@ -59,7 +59,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `finner vedtaksperiodeId`() {
         val oppgave = nyOppgaveForNyPerson()
-        val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id)
+        val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id.value)
         assertEquals(oppgave.vedtaksperiodeId, actual)
     }
 
@@ -84,7 +84,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `henter fødselsnummeret til personen en oppgave gjelder for`() {
         val fødselsnummer = lagFødselsnummer()
         val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
-        val funnetFødselsnummer = oppgaveDao.finnFødselsnummer(oppgave.id)
+        val funnetFødselsnummer = oppgaveDao.finnFødselsnummer(oppgave.id.value)
         assertEquals(funnetFødselsnummer, fødselsnummer)
     }
 
@@ -92,7 +92,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `Finner vedtaksperiodeId med oppgaveId`() {
         val oppgave = nyOppgaveForNyPerson()
 
-        assertEquals(oppgave.vedtaksperiodeId, oppgaveDao.finnVedtaksperiodeId(oppgave.id))
+        assertEquals(oppgave.vedtaksperiodeId, oppgaveDao.finnVedtaksperiodeId(oppgave.id.value))
     }
 
     @Test

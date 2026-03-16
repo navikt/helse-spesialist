@@ -19,6 +19,7 @@ class DelegatingOppgaveDao(
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
             .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
             ?.id
+            ?.value
     }
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID =
@@ -33,7 +34,7 @@ class DelegatingOppgaveDao(
         return oppgaveRepository
             .alle()
             .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
-            .maxOf { it.id }
+            .maxOf { it.id.value }
     }
 
     override fun finnBehandlingId(oppgaveId: Long): UUID =
@@ -46,12 +47,13 @@ class DelegatingOppgaveDao(
         oppgaveRepository
             .alle()
             .filter { it.utbetalingId == utbetalingId && it.tilstand !is Oppgave.Invalidert && it.tilstand !is Oppgave.Ferdigstilt }
-            .maxByOrNull { it.id }
+            .maxByOrNull { it.id.value }
             ?.id
+            ?.value
 
     override fun finnVedtaksperiodeId(oppgaveId: Long): UUID = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId
 
-    override fun reserverNesteId(): Long = (oppgaveRepository.alle().maxOfOrNull { it.id } ?: 0L) + 1L
+    override fun reserverNesteId(): Long = (oppgaveRepository.alle().maxOfOrNull { it.id.value } ?: 0L) + 1L
 
     override fun finnEgenskaper(
         vedtaksperiodeId: UUID,
@@ -71,6 +73,7 @@ class DelegatingOppgaveDao(
             .filter { it.vedtaksperiodeId == vedtaksperiodeId && it.tilstand !is Oppgave.Ferdigstilt && it.tilstand !is Oppgave.Invalidert }
             .maxByOrNull { it.opprettet }
             ?.id
+            ?.value
 
     override fun finnFødselsnummer(oppgaveId: Long): String {
         val vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId

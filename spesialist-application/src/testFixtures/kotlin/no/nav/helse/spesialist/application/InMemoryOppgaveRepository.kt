@@ -9,6 +9,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -18,27 +19,17 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 class InMemoryOppgaveRepository : OppgaveRepository {
-    private val oppgaver = mutableMapOf<Long, Oppgave>()
-    private val oppdatertTidspunkt = mutableMapOf<Long, LocalDateTime>()
-    private val godkjenningsbehovOverrides = mutableMapOf<UUID, UUID>() // utbetalingId -> godkjenningsbehovId
+    private val oppgaver = mutableMapOf<OppgaveId, Oppgave>()
+    private val oppdatertTidspunkt = mutableMapOf<OppgaveId, LocalDateTime>()
 
     fun alle(): List<Oppgave> = oppgaver.values.toList()
-
-    fun hentOppdatertTidspunkt(id: Long): LocalDateTime? = oppdatertTidspunkt[id]
-
-    fun oppdaterGodkjenningsbehov(
-        utbetalingId: UUID,
-        godkjenningsbehovId: UUID,
-    ) {
-        godkjenningsbehovOverrides[utbetalingId] = godkjenningsbehovId
-    }
 
     override fun lagre(oppgave: Oppgave) {
         oppgaver[oppgave.id] = oppgave
         oppdatertTidspunkt[oppgave.id] = LocalDateTime.now()
     }
 
-    override fun finn(id: Long): Oppgave? = oppgaver[id]
+    override fun finn(id: Long): Oppgave? = oppgaver[OppgaveId(id)]
 
     override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id.value }
 
@@ -49,7 +40,7 @@ class InMemoryOppgaveRepository : OppgaveRepository {
     override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
         oppgaver.values.firstOrNull { it.utbetalingId == utbetalingId }?.let {
             OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov(
-                id = it.id,
+                id = it.id.value,
                 tilstand = it.tilstand,
                 godkjenningsbehovId = it.godkjenningsbehovId,
                 utbetalingId = it.utbetalingId,
@@ -91,7 +82,7 @@ class InMemoryOppgaveRepository : OppgaveRepository {
         sidestørrelse: Int,
         behandletAvOid: UUID,
     ) = Side(
-        totaltAntall = oppgaver.keys.first(),
+        totaltAntall = oppgaver.keys.first().value,
         sidetall = sidetall,
         sidestørrelse = sidestørrelse,
         elementer = oppgaver.values.map { it.toBehandletOppgaveProjeksjon() },
@@ -107,7 +98,7 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
     // Denne skal egentlig hente data fra oppgave, men det blir for knotete siden oppgave ikke er skrevet om til DDD ennå.
     return BehandletOppgaveProjeksjon(
-        id = id,
+        id = id.value,
         fødselsnummer = "42",
         ferdigstiltTidspunkt = LocalDateTime.of(2020, 2, 2, 12, 30),
         saksbehandler = "her skal saksbehandlers navn stå",
@@ -124,7 +115,7 @@ private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
 private fun Oppgave.toOppgaveProjeksjon(): OppgaveProjeksjon {
     // Denne skal egentlig hente data fra oppgave, men det blir for knotete siden oppgave ikke er skrevet om til DDD ennå.
     return OppgaveProjeksjon(
-        id = id,
+        id = id.value,
         identitetsnummer = Identitetsnummer.fraString("42"),
         egenskaper = emptySet(),
         tildeltTilOid = null,

@@ -19,14 +19,21 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SelvstendigNæringsdrivendeBeta
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
+@JvmInline
+value class OppgaveId(
+    val value: Long,
+) : ValueObject
+
 class Oppgave private constructor(
-    val id: Long,
+    id: OppgaveId,
     val opprettet: LocalDateTime,
     val førsteOpprettet: LocalDateTime?,
     tilstand: Tilstand,
@@ -44,7 +51,7 @@ class Oppgave private constructor(
     inntektskilde: Inntektskilde,
     inntektsforhold: Inntektsforhold,
     periodetype: Periodetype,
-) {
+) : Entity<OppgaveId>(id) {
     private val observers = mutableListOf<OppgaveObserver>()
     private val _egenskaper = egenskaper.toMutableSet()
 
@@ -83,10 +90,10 @@ class Oppgave private constructor(
         saksbehandler: Saksbehandler,
         brukerroller: Set<Brukerrolle>,
     ) {
-        logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
+        logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id.value))
         val tildelt = tildeltTil
         if (tildelt != null && tildelt != saksbehandler.id) {
-            logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
+            logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id.value))
             throw OppgaveTildeltNoenAndre(tildelt.value, false)
         }
         tilstand.tildel(
@@ -97,18 +104,18 @@ class Oppgave private constructor(
     }
 
     fun forsøkAvmelding(saksbehandler: Saksbehandler) {
-        logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id))
+        logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id.value))
         val tildelt =
             tildeltTil ?: run {
-                logg.info("Kan ikke fjerne tildeling når oppgave ikke er tildelt, {}", kv("oppgaveId", id))
-                throw OppgaveIkkeTildelt(this.id)
+                logg.info("Kan ikke fjerne tildeling når oppgave ikke er tildelt, {}", kv("oppgaveId", id.value))
+                throw OppgaveIkkeTildelt(id.value)
             }
 
         if (tildelt != saksbehandler.id) {
-            logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
+            logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id.value))
             sikkerlogg.info(
                 "Oppgave med {} er tildelt $tildelt, avmeldes av ${saksbehandler.ident}",
-                kv("oppgaveId", id),
+                kv("oppgaveId", id.value),
             )
         }
         tilstand.avmeld(this, saksbehandler)
@@ -118,13 +125,19 @@ class Oppgave private constructor(
         saksbehandler: Saksbehandler,
         brukerroller: Set<Brukerrolle>,
     ) {
-        logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
+        logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id.value))
         sikkerlogg.info(
             "Oppgave med {} forsøkes tildelt ${saksbehandler.ident} grunnet reservasjon.",
-            kv("oppgaveId", id),
+            kv("oppgaveId", id.value),
         )
         if (_egenskaper.contains(STIKKPRØVE)) {
-            logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
+            logg.info(
+                "Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.",
+                kv(
+                    "oppgaveId",
+                    id.value,
+                ),
+            )
             return
         }
         tilstand.tildel(
@@ -167,7 +180,7 @@ class Oppgave private constructor(
         if (_egenskaper.remove(GOSYS)) {
             logg.info(
                 "Fjerner egenskap GOSYS på {} for {}",
-                kv("oppgaveId", id),
+                kv("oppgaveId", id.value),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
             )
             oppgaveEndret()
@@ -178,7 +191,7 @@ class Oppgave private constructor(
         if (_egenskaper.add(GOSYS)) {
             logg.info(
                 "Legger til egenskap GOSYS på {} for {}",
-                kv("oppgaveId", id),
+                kv("oppgaveId", id.value),
                 kv("vedtaksperiodeId", vedtaksperiodeId),
             )
             oppgaveEndret()
@@ -236,13 +249,13 @@ class Oppgave private constructor(
         this.tildeltTil = saksbehandler.id
         logg.info(
             "Oppgave med {} tildeles saksbehandler med {}",
-            kv("oppgaveId", id),
+            kv("oppgaveId", id.value),
             kv(
                 "oid",
                 saksbehandler.id.value,
             ),
         )
-        sikkerlogg.info("Oppgave med {} tildeles ${saksbehandler.ident}", kv("oppgaveId", id))
+        sikkerlogg.info("Oppgave med {} tildeles ${saksbehandler.ident}", kv("oppgaveId", id.value))
         oppgaveEndret()
     }
 
@@ -250,13 +263,13 @@ class Oppgave private constructor(
         this.tildeltTil = null
         logg.info(
             "Oppgave med {} avmeldes saksbehandler med {}",
-            kv("oppgaveId", id),
+            kv("oppgaveId", id.value),
             kv(
                 "oid",
                 saksbehandler.id.value,
             ),
         )
-        sikkerlogg.info("Oppgave med {} avmeldes ${saksbehandler.ident}", kv("oppgaveId", id))
+        sikkerlogg.info("Oppgave med {} avmeldes ${saksbehandler.ident}", kv("oppgaveId", id.value))
         oppgaveEndret()
     }
 
@@ -269,7 +282,7 @@ class Oppgave private constructor(
         tilstand = neste
         logg.info(
             "Oppgave med {} bytter tilstand fra {} til {}",
-            kv("oppgaveId", id),
+            kv("oppgaveId", id.value),
             kv("forrigeTilstand", forrige),
             kv("nesteTilstand", neste),
         )
@@ -281,7 +294,7 @@ class Oppgave private constructor(
             logg.warn(
                 "Forventer ikke invalidering i {} for oppgave med {}",
                 kv("tilstand", this),
-                kv("oppgaveId", oppgave.id),
+                kv("oppgaveId", oppgave.id.value),
             )
         }
 
@@ -293,7 +306,7 @@ class Oppgave private constructor(
             logg.warn(
                 "Forventer ikke avventer system i {} for oppgave med {}",
                 kv("tilstand", this),
-                kv("oppgaveId", oppgave.id),
+                kv("oppgaveId", oppgave.id.value),
             )
         }
 
@@ -301,7 +314,7 @@ class Oppgave private constructor(
             logg.warn(
                 "Forventer ikke ferdigstillelse i {} for oppgave med {}",
                 kv("tilstand", this),
-                kv("oppgaveId", oppgave.id),
+                kv("oppgaveId", oppgave.id.value),
             )
         }
 
@@ -313,7 +326,7 @@ class Oppgave private constructor(
             logg.warn(
                 "Forventer ikke forsøk på tildeling i {} for oppgave med {} av ${saksbehandler.ident}",
                 kv("tilstand", this),
-                kv("oppgaveId", oppgave.id),
+                kv("oppgaveId", oppgave.id.value),
             )
         }
 
@@ -324,7 +337,7 @@ class Oppgave private constructor(
             logg.warn(
                 "Forventer ikke forsøk på avmelding i {} for oppgave med {} av ${saksbehandler.ident}",
                 kv("tilstand", this),
-                kv("oppgaveId", oppgave.id),
+                kv("oppgaveId", oppgave.id.value),
             )
         }
     }
@@ -355,10 +368,10 @@ class Oppgave private constructor(
             ) {
                 logg.info(
                     "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
-                    kv("oppgaveId", oppgave.id),
+                    kv("oppgaveId", oppgave.id.value),
                     kv("oid", saksbehandler.id.value),
                 )
-                throw ManglerTilgang(saksbehandler.id.value, oppgave.id)
+                throw ManglerTilgang(saksbehandler.id.value, oppgave.id.value)
             }
             oppgave.tildel(saksbehandler)
         }
@@ -394,21 +407,7 @@ class Oppgave private constructor(
 
     data object Invalidert : Tilstand
 
-    override fun equals(other: Any?): Boolean {
-        if (other !is Oppgave) return false
-        if (this.id != other.id) return false
-        return this.egenskaper == other.egenskaper &&
-            this.vedtaksperiodeId == other.vedtaksperiodeId
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + vedtaksperiodeId.hashCode()
-        result = 31 * result + egenskaper.hashCode()
-        return result
-    }
-
-    override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+    override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=${id.value})"
 
     fun kanSeesAv(
         brukerroller: Set<Brukerrolle>,
@@ -460,7 +459,7 @@ class Oppgave private constructor(
         ): Oppgave {
             val opprettet = LocalDateTime.now()
             return Oppgave(
-                id = id,
+                id = OppgaveId(id),
                 opprettet = opprettet,
                 førsteOpprettet = førsteOpprettet ?: opprettet,
                 tilstand = AvventerSaksbehandler,
@@ -501,7 +500,7 @@ class Oppgave private constructor(
             inntektsforhold: Inntektsforhold,
             periodetype: Periodetype,
         ) = Oppgave(
-            id = id,
+            id = OppgaveId(id),
             opprettet = opprettet,
             førsteOpprettet = førsteOpprettet,
             tilstand = tilstand,

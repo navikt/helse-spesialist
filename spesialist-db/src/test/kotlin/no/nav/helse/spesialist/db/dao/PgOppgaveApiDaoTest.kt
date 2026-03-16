@@ -17,7 +17,7 @@ class PgOppgaveApiDaoTest : AbstractDBIntegrationTest() {
         val oppgave = opprettOppgave(vedtaksperiode, behandling)
         val oppgaveId = oppgaveApiDao.finnOppgaveId(person.id.value)
         assertNotNull(oppgaveId)
-        assertEquals(oppgave.id, oppgaveId)
+        assertEquals(oppgave.id.value, oppgaveId)
     }
 
     @Test

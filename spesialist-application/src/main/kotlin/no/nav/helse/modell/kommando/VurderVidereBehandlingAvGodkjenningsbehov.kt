@@ -56,7 +56,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
                 )
                 return ferdigstill(context)
             }
-            error("Endringer i godkjenningsbehov der oppgaven med oppgaveId=${oppgave.id} er ferdigstilt")
+            error("Endringer i godkjenningsbehov der oppgaven med oppgaveId=${oppgave.id.value} er ferdigstilt")
         }
 
         if (harEndringerIGodkjenningsbehov) {
@@ -68,7 +68,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
                     "fødselsnummer" to fødselsnummer,
                 )
             }
-            loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")
+            loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id.value} pga endringer i godkjenningsbehovet")
             oppgave.avbryt()
             oppgaveRepository.lagre(oppgave)
         } else {

@@ -9,8 +9,6 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
@@ -21,7 +19,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -33,7 +30,6 @@ import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveTest {
     private companion object {
-        private val OPPGAVETYPE = SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
@@ -565,106 +561,6 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
         }
-    }
-
-    @Test
-    fun equals() {
-        val gjenopptattOppgave =
-            Oppgave.ny(
-                id = 1L,
-                førsteOpprettet = null,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = setOf(OPPGAVETYPE),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        val oppgave1 =
-            Oppgave.ny(
-                id = OPPGAVE_ID,
-                førsteOpprettet = null,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        val oppgave2 =
-            Oppgave.ny(
-                id = OPPGAVE_ID,
-                førsteOpprettet = null,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        val oppgave3 =
-            Oppgave.ny(
-                id = OPPGAVE_ID,
-                førsteOpprettet = null,
-                vedtaksperiodeId = UUID.randomUUID(),
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = setOf(SØKNAD),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        val oppgave4 =
-            Oppgave.ny(
-                id = OPPGAVE_ID,
-                førsteOpprettet = null,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = setOf(STIKKPRØVE),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        assertEquals(oppgave1, oppgave2)
-        assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
-        assertNotEquals(oppgave1, oppgave3)
-        assertNotEquals(oppgave1.hashCode(), oppgave3.hashCode())
-        assertNotEquals(oppgave1, oppgave4)
-        assertNotEquals(oppgave1.hashCode(), oppgave4.hashCode())
-
-        gjenopptattOppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
-        assertNotEquals(gjenopptattOppgave.hashCode(), oppgave2.hashCode())
-        assertNotEquals(gjenopptattOppgave, oppgave2)
-        assertNotEquals(gjenopptattOppgave, oppgave3)
-        assertNotEquals(gjenopptattOppgave, oppgave4)
-
-        oppgave2.avventerSystem(lagSaksbehandler().ident, UUID.randomUUID())
-        assertEquals(oppgave1, oppgave2)
-        assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
     private fun nyOppgave(vararg egenskaper: Egenskap) =

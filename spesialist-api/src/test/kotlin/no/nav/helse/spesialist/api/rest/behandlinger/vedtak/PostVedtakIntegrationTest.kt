@@ -90,7 +90,7 @@ class PostVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id.value, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         sessionContext.oppgaveRepository.lagre(oppgave)
         sessionContext.meldingDao.lagre(godkjenningsbehov)
@@ -335,7 +335,7 @@ class PostVedtakIntegrationTest {
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id.value, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
@@ -378,7 +378,7 @@ class PostVedtakIntegrationTest {
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id.value, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
@@ -464,10 +464,11 @@ class PostVedtakIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.meldingDao.lagre(godkjenningsbehov)
         sessionContext.vedtakRepository.lagre(
-            Vedtak.manueltUtenTotrinnskontroll(
-                behandling.spleisBehandlingId!!,
-                saksbehandler.ident,
-            ).also { it.markerSomBehandletAvSpleis() },
+            Vedtak
+                .manueltUtenTotrinnskontroll(
+                    behandling.spleisBehandlingId!!,
+                    saksbehandler.ident,
+                ).also { it.markerSomBehandletAvSpleis() },
         )
 
         // When:

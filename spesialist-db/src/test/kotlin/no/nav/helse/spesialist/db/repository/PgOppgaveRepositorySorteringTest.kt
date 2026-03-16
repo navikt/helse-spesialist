@@ -73,11 +73,11 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         )
 
         assertEquals(
-            finnTildeltTilNavn(opprettedeOppgaver.map { it.id }).sorted(),
+            finnTildeltTilNavn(opprettedeOppgaver.map { it.id.value }).sorted(),
             hentOppgaverTiOgTi(TILDELT_TIL, STIGENDE).map { finnSaksbehandlernavn(it.tildeltTilOid!!) },
         )
         assertEquals(
-            finnTildeltTilNavn(opprettedeOppgaver.map { it.id }.sorted().reversed()),
+            finnTildeltTilNavn(opprettedeOppgaver.map { it.id.value }.sorted().reversed()),
             finnTildeltTilNavn(oppgaveIds = hentOppgaverTiOgTi(TILDELT_TIL, SYNKENDE).map { it.id }),
         )
 
@@ -90,7 +90,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         }
 
         assertEquals(
-            finnPåVentId(opprettedeOppgaver.zip(frister).sortedBy { it.second }.map { it.first.id }),
+            finnPåVentId(opprettedeOppgaver.zip(frister).sortedBy { it.second }.map { it.first.id.value }),
             hentOppgaverTiOgTi(TIDSFRIST, STIGENDE, inkluderOppgaverPåVent = true).map { it.påVentId?.value },
         )
         assertEquals(
@@ -99,7 +99,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
                     .zip(frister)
                     .sortedBy { it.second }
                     .reversed()
-                    .map { it.first.id },
+                    .map { it.first.id.value },
             ),
             hentOppgaverTiOgTi(TIDSFRIST, SYNKENDE, inkluderOppgaverPåVent = true).map { it.påVentId?.value },
         )
