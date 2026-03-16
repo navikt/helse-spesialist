@@ -41,18 +41,6 @@ class PgUtbetalingDao internal constructor(
         ).update()
     }
 
-    override fun erUtbetalingForkastet(utbetalingId: UUID): Boolean =
-        asSQL(
-            """
-            SELECT 1
-            FROM utbetaling u
-            JOIN utbetaling_id ui ON u.utbetaling_id_ref = ui.id
-            WHERE ui.utbetaling_id = :utbetaling_id
-            AND status = 'FORKASTET'
-            """.trimIndent(),
-            "utbetaling_id" to utbetalingId,
-        ).singleOrNull { true } ?: false
-
     override fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,

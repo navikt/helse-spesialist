@@ -4,7 +4,6 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
@@ -19,7 +18,6 @@ import java.util.UUID
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val fødselsnummer: String,
     private val commandData: GodkjenningsbehovData,
-    private val utbetalingDao: UtbetalingDao,
     private val oppgaveRepository: OppgaveRepository,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
@@ -30,13 +28,6 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     override fun execute(context: CommandContext): Boolean {
         val utbetalingId = commandData.utbetalingId
         val meldingId = commandData.id
-
-        if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
-            loggInfo(
-                "Ignorerer godkjenningsbehov med id: $meldingId for utbetalingId: $utbetalingId fordi utbetalingen er forkastet",
-            )
-            return ferdigstill(context)
-        }
 
         if (vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             loggInfo("Ignorerer godkjenningsbehov for utbetalingId: $utbetalingId. Er allerede automatisk godkjent")
@@ -49,11 +40,10 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         }
 
         val oppgave = oppgaveRepository.finnSisteOppgaveForUtbetaling(utbetalingId) ?: return true
+        if (oppgave.tilstand is Oppgave.Invalidert) return true
 
         oppgaveDao.oppdaterPekerTilGodkjenningsbehov(meldingId, utbetalingId)
         loggInfo("Oppdaterte peker til godkjenningsbehov for oppgave med utbetalingId=$utbetalingId til id=$meldingId")
-
-        if (oppgave.tilstand is Oppgave.Invalidert) return true
 
         val harEndringerIGodkjenningsbehov = harEndringerIGodkjenningsbehov(oppgave.godkjenningsbehovId)
 

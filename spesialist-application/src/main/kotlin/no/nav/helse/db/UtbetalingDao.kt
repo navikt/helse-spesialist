@@ -39,6 +39,4 @@ interface UtbetalingDao {
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     )
-
-    fun erUtbetalingForkastet(utbetalingId: UUID): Boolean
 }

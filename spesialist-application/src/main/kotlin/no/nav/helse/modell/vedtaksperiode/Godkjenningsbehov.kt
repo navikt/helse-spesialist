@@ -384,7 +384,6 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
-                utbetalingDao = utbetalingDao,
                 oppgaveRepository = oppgaveRepository,
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,

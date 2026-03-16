@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 class UtbetalingE2ETest : AbstractE2ETest() {
-
     @Test
     fun `utbetaling endret`() {
         vedtaksløsningenMottarNySøknad()
@@ -64,21 +63,6 @@ class UtbetalingE2ETest : AbstractE2ETest() {
         assertUtbetalinger(UTBETALING_ID, 2)
         håndterUtbetalingEndret(utbetalingtype = "UTBETALING", gjeldendeStatus = FORKASTET, forrigeStatus = GODKJENT)
         assertUtbetalinger(UTBETALING_ID, 3)
-    }
-
-    // Når spinnvill utfører avviksvurdering kan spleis rekke å forkaste utbetalingen og sende ut nytt godkjenningsbehov
-    // før spesialist har mottatt det første godkjenningsbehovet
-    @Test
-    fun `ignorerer godkjenningsbehov for forkastet utbetaling`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        håndterUtbetalingOpprettet()
-        // så sender spleis ut godkjenningsbehov, som spinnvill begynner å behandle,
-        // men før spinnvill er ferdig reberegner spleis saken
-        håndterUtbetalingEndret(gjeldendeStatus = FORKASTET, forrigeStatus = IKKE_GODKJENT)
-
-        håndterGodkjenningsbehovUtenValidering()
-        assertIngenEtterspurteBehov()
     }
 
     @Test
