@@ -10,6 +10,6 @@ class TildelOppgave(
     override fun loggnavn(): String = "tildel_oppgave"
 
     override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
-        oppgave.forsøkTildeling(saksbehandlerWrapper, brukerroller)
+        oppgave.forsøkTildeling(saksbehandlerWrapper.saksbehandler, brukerroller)
     }
 }

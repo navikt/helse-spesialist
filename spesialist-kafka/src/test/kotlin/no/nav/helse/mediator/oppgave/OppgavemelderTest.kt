@@ -11,7 +11,6 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
@@ -32,7 +31,7 @@ class OppgavemelderTest {
 
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
+    private val saksbehandler = lagSaksbehandler()
 
     @Test
     fun `bygg kafkamelding`() {
@@ -59,7 +58,7 @@ class OppgavemelderTest {
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(
-            saksbehandlerWrapper = saksbehandler,
+            saksbehandler = saksbehandler,
             brukerroller = emptySet(),
         )
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
@@ -75,7 +74,7 @@ class OppgavemelderTest {
         assertEquals(BEHANDLING_ID, melding["behandlingId"].asUUID())
         assertEquals("AvventerSystem", melding["tilstand"].asText())
         assertEquals(FNR, melding["fødselsnummer"].asText())
-        assertEquals(saksbehandler.saksbehandler.id.value, melding["saksbehandler"].asUUID())
+        assertEquals(saksbehandler.id.value, melding["saksbehandler"].asUUID())
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 

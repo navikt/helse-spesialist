@@ -166,14 +166,13 @@ class SaksbehandlerMediator(
         tell(modellhandling)
 
         loggInfo("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler")
-        val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
         when (modellhandling) {
             is LeggPåVent -> {
-                leggPåVent(modellhandling, saksbehandlerWrapper)
+                leggPåVent(modellhandling, saksbehandler)
             }
 
             is FjernPåVent -> {
-                fjernFraPåVent(modellhandling, saksbehandlerWrapper)
+                fjernFraPåVent(modellhandling, saksbehandler)
             }
 
             is FjernPåVentUtenHistorikkinnslag -> {
@@ -183,7 +182,7 @@ class SaksbehandlerMediator(
             }
 
             is EndrePåVent -> {
-                endrePåVent(modellhandling, saksbehandlerWrapper)
+                endrePåVent(modellhandling, saksbehandler)
             }
         }
         loggInfo(
@@ -215,21 +214,22 @@ class SaksbehandlerMediator(
 
     private fun leggPåVent(
         handling: LeggPåVent,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
     ) {
         try {
             val dialogRef = dialogDao.lagre()
             val innslag =
                 Historikkinnslag.lagtPåVentInnslag(
                     notattekst = handling.notatTekst,
-                    saksbehandler = saksbehandlerWrapper.saksbehandler,
+                    saksbehandler = saksbehandler,
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                     dialogRef = dialogRef,
                 )
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-            oppgaveService.leggPåVent(handling, saksbehandlerWrapper)
-            PåVentRepository(påVentDao).leggPåVent(saksbehandlerWrapper.saksbehandler.id.value, handling, dialogRef)
+            oppgaveService.leggPåVent(handling, saksbehandler)
+            PåVentRepository(påVentDao).leggPåVent(saksbehandler.id.value, handling, dialogRef)
+            val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler)
             saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
             handling.utførAv(saksbehandlerWrapper)
         } catch (e: Modellfeil) {
@@ -239,7 +239,7 @@ class SaksbehandlerMediator(
 
     private fun endrePåVent(
         handling: EndrePåVent,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) throw FinnerIkkeLagtPåVent(handling.oppgaveId)
 
@@ -247,22 +247,23 @@ class SaksbehandlerMediator(
         val innslag =
             Historikkinnslag.endrePåVentInnslag(
                 notattekst = handling.notatTekst,
-                saksbehandler = saksbehandlerWrapper.saksbehandler,
+                saksbehandler = saksbehandler,
                 årsaker = handling.årsaker,
                 frist = handling.frist,
                 dialogRef = dialogRef,
             )
         periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-        oppgaveService.endrePåVent(handling, saksbehandlerWrapper)
-        PåVentRepository(påVentDao).endrePåVent(saksbehandlerWrapper.saksbehandler.id.value, handling, dialogRef)
+        oppgaveService.endrePåVent(handling, saksbehandler)
+        PåVentRepository(påVentDao).endrePåVent(saksbehandler.id.value, handling, dialogRef)
 
+        val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler)
         saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
         handling.utførAv(saksbehandlerWrapper)
     }
 
     private fun fjernFraPåVent(
         handling: FjernPåVent,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) {
             loggInfo(
@@ -272,7 +273,7 @@ class SaksbehandlerMediator(
             return
         }
         try {
-            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandlerWrapper.saksbehandler)
+            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler)
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
@@ -344,14 +345,13 @@ class SaksbehandlerMediator(
                 val opprinneligSaksbehandler =
                     checkNotNull(
                         totrinnsvurdering.saksbehandler
-                            ?.let(session.saksbehandlerRepository::finn)
-                            ?.let { SaksbehandlerWrapper(saksbehandler = it) },
+                            ?.let(session.saksbehandlerRepository::finn),
                     ) {
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
                     }
 
                 apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
-                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.id.value))
+                totrinnsvurdering.sendIRetur(oppgavereferanse, besluttendeSaksbehandler.id)
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
         } catch (modellfeil: Modellfeil) {
@@ -431,7 +431,6 @@ class SaksbehandlerMediator(
                     val beslutter =
                         totrinnsvurdering.beslutter
                             ?.let(session.saksbehandlerRepository::finn)
-                            ?.let { SaksbehandlerWrapper(saksbehandler = it) }
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
                     totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id)
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)

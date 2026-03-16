@@ -14,17 +14,23 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
-    private val saksbehandler = nyLegacySaksbehandler()
+    private val saksbehandler = opprettSaksbehandler()
+
     @Test
     fun `lagre påvent`() {
         val oppgave = nyOppgaveForNyPerson()
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgave.id, saksbehandler.saksbehandler.id.value, frist, emptyList(), null, dialogId)
+        påVentDao.lagrePåVent(oppgave.id, saksbehandler.id.value, frist, emptyList(), null, dialogId)
         val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(oppgave.vedtaksperiodeId,
-            saksbehandler.saksbehandler.id.value, frist, emptyList(), null)
+        påVent.first().assertEquals(
+            oppgave.vedtaksperiodeId,
+            saksbehandler.id.value,
+            frist,
+            emptyList(),
+            null,
+        )
     }
 
     @Test
@@ -34,7 +40,7 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
         val dialogId = dialogDao.lagre()
         påVentDao.lagrePåVent(
             oppgave.id,
-            saksbehandler.saksbehandler.id.value,
+            saksbehandler.id.value,
             frist,
             listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
             "Et notat",
@@ -42,8 +48,13 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
         )
         val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(oppgave.vedtaksperiodeId,
-            saksbehandler.saksbehandler.id.value, frist, listOf("årsak1", "årsak2"), "Et notat")
+        påVent.first().assertEquals(
+            oppgave.vedtaksperiodeId,
+            saksbehandler.id.value,
+            frist,
+            listOf("årsak1", "årsak2"),
+            "Et notat",
+        )
     }
 
     @Test
@@ -53,7 +64,7 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
         val dialogId1 = dialogDao.lagre()
         påVentDao.lagrePåVent(
             oppgave.id,
-            saksbehandler.saksbehandler.id.value,
+            saksbehandler.id.value,
             frist,
             listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
             "Et notat",
@@ -61,14 +72,19 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
         )
         val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(oppgave.vedtaksperiodeId,
-            saksbehandler.saksbehandler.id.value, frist, listOf("årsak1", "årsak2"), "Et notat")
+        påVent.first().assertEquals(
+            oppgave.vedtaksperiodeId,
+            saksbehandler.id.value,
+            frist,
+            listOf("årsak1", "årsak2"),
+            "Et notat",
+        )
 
         val nyFrist = frist.plusDays(10)
         val dialogId2 = dialogDao.lagre()
         påVentDao.oppdaterPåVent(
             oppgave.id,
-            saksbehandler.saksbehandler.id.value,
+            saksbehandler.id.value,
             nyFrist,
             listOf(PåVentÅrsak("key1", "årsak1")),
             "Et nytt notat",
@@ -77,8 +93,13 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
 
         val påVentNyFrist = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVentNyFrist.size)
-        påVentNyFrist.first().assertEquals(oppgave.vedtaksperiodeId,
-            saksbehandler.saksbehandler.id.value, nyFrist, listOf("årsak1"), "Et nytt notat")
+        påVentNyFrist.first().assertEquals(
+            oppgave.vedtaksperiodeId,
+            saksbehandler.id.value,
+            nyFrist,
+            listOf("årsak1"),
+            "Et nytt notat",
+        )
     }
 
     @Test
@@ -86,7 +107,7 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgaveForNyPerson()
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgave.id, saksbehandler.saksbehandler.id.value, frist, emptyList(), null, dialogId)
+        påVentDao.lagrePåVent(oppgave.id, saksbehandler.id.value, frist, emptyList(), null, dialogId)
         val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
         påVentDao.slettPåVent(oppgave.id)
@@ -100,7 +121,7 @@ internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
 
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgave.id, saksbehandler.saksbehandler.id.value, frist, emptyList(), null, dialogId)
+        påVentDao.lagrePåVent(oppgave.id, saksbehandler.id.value, frist, emptyList(), null, dialogId)
         val erPåVent = påVentDao.erPåVent(oppgave.vedtaksperiodeId)
         assertTrue(erPåVent)
     }

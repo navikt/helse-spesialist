@@ -6,7 +6,7 @@ class AvmeldOppgave(
     oppgaveId: Long,
 ) : Oppgavehandling(oppgaveId) {
     override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
-        oppgave.forsøkAvmelding(saksbehandlerWrapper)
+        oppgave.forsøkAvmelding(saksbehandlerWrapper.saksbehandler)
     }
 
     override fun loggnavn(): String = "avmeld_oppgave"

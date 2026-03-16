@@ -5,6 +5,7 @@ import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,7 +14,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
-    private val legacySaksbehandler = nyLegacySaksbehandler()
+    private val saksbehandler = lagSaksbehandler()
 
     @Test
     fun `Finn neste ledige id`() {
@@ -73,7 +74,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `sjekker at det fins ferdigstilt oppgave`() {
         val oppgave =
             nyOppgaveForNyPerson()
-                .avventSystemOgLagre(legacySaksbehandler)
+                .avventSystemOgLagre(saksbehandler)
                 .ferdigstillOgLagre()
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId))

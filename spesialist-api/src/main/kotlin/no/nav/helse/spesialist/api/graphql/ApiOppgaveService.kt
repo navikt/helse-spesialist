@@ -4,7 +4,7 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.Saksbehandler
 import java.util.UUID
 
 class ApiOppgaveService(
@@ -26,7 +26,7 @@ class ApiOppgaveService(
 
     fun sendTilBeslutter(
         oppgaveId: Long,
-        beslutter: SaksbehandlerWrapper?,
+        beslutter: Saksbehandler?,
     ) {
         oppgaveService.oppgave(oppgaveId) {
             sendTilBeslutter(beslutter)
@@ -35,10 +35,10 @@ class ApiOppgaveService(
 
     fun sendIRetur(
         oppgaveId: Long,
-        opprinneligSaksbehandlerWrapper: SaksbehandlerWrapper,
+        opprinneligSaksbehandler: Saksbehandler,
     ) {
         oppgaveService.oppgave(oppgaveId) {
-            sendIRetur(opprinneligSaksbehandlerWrapper)
+            sendIRetur(opprinneligSaksbehandler)
         }
     }
 

@@ -21,7 +21,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
@@ -217,10 +216,10 @@ internal class MessageContextMeldingPublisererTest {
                 periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
             )
 
-        val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
-        val beslutter = SaksbehandlerWrapper(lagSaksbehandler())
+        val saksbehandler = lagSaksbehandler()
+        val beslutter = lagSaksbehandler()
         oppgave.forsøkTildeling(
-            saksbehandlerWrapper = saksbehandler,
+            saksbehandler = saksbehandler,
             brukerroller = emptySet(),
         )
         oppgave.sendTilBeslutter(beslutter)
@@ -249,7 +248,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
             assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].map(JsonNode::asText).toSet())
             assertEquals(behandlingId, UUID.fromString(it["behandlingId"]?.asText()))
-            assertEquals(saksbehandler.saksbehandler.id.value, it["saksbehandler"]?.asUUID())
+            assertEquals(saksbehandler.id.value, it["saksbehandler"]?.asUUID())
         }
     }
 

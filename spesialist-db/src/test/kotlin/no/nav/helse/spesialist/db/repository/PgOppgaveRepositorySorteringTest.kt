@@ -18,10 +18,11 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
@@ -47,9 +48,9 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
     @Test
     fun `sorterer oppgaver riktig på tvers av paginering`() {
         val opprettedeOppgaver = mutableListOf<Oppgave>()
-        val saksbehandlere = mutableListOf<SaksbehandlerWrapper>()
+        val saksbehandlere = mutableListOf<Saksbehandler>()
         repeat(25) {
-            val saksbehandler = nyLegacySaksbehandler().also { saksbehandlere.add(it) }
+            val saksbehandler = lagSaksbehandler().also { saksbehandlere.add(it) }
             opprettOppgave().also { it.tildelOgLagre(saksbehandler) }.also(opprettedeOppgaver::add)
         }
 

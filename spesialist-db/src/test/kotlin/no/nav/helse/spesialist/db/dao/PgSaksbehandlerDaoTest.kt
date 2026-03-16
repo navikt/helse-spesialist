@@ -55,16 +55,16 @@ class PgSaksbehandlerDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `henter alle saksbehandlere som har vært inaktiv mer enn tre mnd og har tildelte oppgaver`() {
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandler = nyLegacySaksbehandler()
-        val saksbehandler2 = nyLegacySaksbehandler()
+        val saksbehandler = lagSaksbehandler()
+        val saksbehandler2 = lagSaksbehandler()
 
         saksbehandlerDao.oppdaterSistObservert(
-            saksbehandler.saksbehandler.id.value,
+            saksbehandler.id.value,
             LocalDateTime.now().minusMonths(4),
         )
 
         saksbehandlerDao.oppdaterSistObservert(
-            saksbehandler2.saksbehandler.id.value,
+            saksbehandler2.id.value,
             LocalDateTime.now().minusMonths(4),
         )
 

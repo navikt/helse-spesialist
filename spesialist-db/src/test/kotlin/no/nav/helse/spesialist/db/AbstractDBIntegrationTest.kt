@@ -34,7 +34,6 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
@@ -43,7 +42,6 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
@@ -499,42 +497,32 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun Oppgave.tildelOgLagre(
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Oppgave {
-        opprettSaksbehandler(
-            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id.value,
-            navn = saksbehandlerWrapper.saksbehandler.navn,
-            epost = saksbehandlerWrapper.saksbehandler.epost,
-            ident = saksbehandlerWrapper.saksbehandler.ident,
-        )
-        this.forsøkTildeling(saksbehandlerWrapper, brukerroller)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        this.forsøkTildeling(saksbehandler, brukerroller)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
 
     protected fun Oppgave.leggPåVentOgLagre(
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
         frist: LocalDate = LocalDate.now().plusDays(1),
         årsaker: List<PåVentÅrsak> = emptyList(),
         tekst: String? = null,
     ): Oppgave {
-        opprettSaksbehandler(
-            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id.value,
-            navn = saksbehandlerWrapper.saksbehandler.navn,
-            epost = saksbehandlerWrapper.saksbehandler.epost,
-            ident = saksbehandlerWrapper.saksbehandler.ident,
-        )
-        this.leggPåVent(true, saksbehandlerWrapper)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        this.leggPåVent(true, saksbehandler)
         val dialog =
             Dialog.Factory.ny().apply {
-                leggTilKommentar(tekst = "En kommentar", saksbehandlerident = saksbehandlerWrapper.saksbehandler.ident)
+                leggTilKommentar(tekst = "En kommentar", saksbehandlerident = saksbehandler.ident)
             }
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
         påVentDao.lagrePåVent(
             this.id,
-            saksbehandlerWrapper.saksbehandler.id.value,
+            saksbehandler.id.value,
             frist,
             årsaker,
             tekst,
@@ -549,14 +537,14 @@ abstract class AbstractDBIntegrationTest {
         return this
     }
 
-    protected fun Oppgave.sendTilBeslutterOgLagre(beslutter: SaksbehandlerWrapper?): Oppgave {
+    protected fun Oppgave.sendTilBeslutterOgLagre(beslutter: Saksbehandler?): Oppgave {
         this.sendTilBeslutter(beslutter)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
 
-    protected fun Oppgave.avventSystemOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): Oppgave {
-        this.avventerSystem(saksbehandlerWrapper.saksbehandler.ident, saksbehandlerWrapper.saksbehandler.id.value)
+    protected fun Oppgave.avventSystemOgLagre(saksbehandler: Saksbehandler): Oppgave {
+        this.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
@@ -584,14 +572,14 @@ abstract class AbstractDBIntegrationTest {
         return TotrinnsvurderingKontekst(totrinnsvurdering, fødselsnummer, oppgave)
     }
 
-    protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(saksbehandlerWrapper.saksbehandler.id.value))
+    protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(saksbehandler: Saksbehandler): TotrinnsvurderingKontekst {
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }
 
-    protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
-        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.saksbehandler.id.value))
+    protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: Saksbehandler): TotrinnsvurderingKontekst {
+        totrinnsvurdering.settBeslutter(beslutter.id)
         totrinnsvurdering.ferdigstill()
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
@@ -602,17 +590,6 @@ abstract class AbstractDBIntegrationTest {
         val fødselsnummer: String,
         val oppgave: Oppgave,
     )
-
-    protected fun nyLegacySaksbehandler(): SaksbehandlerWrapper {
-        val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
-        opprettSaksbehandler(
-            saksbehandler.saksbehandler.id.value,
-            saksbehandler.saksbehandler.navn,
-            saksbehandler.saksbehandler.epost,
-            saksbehandler.saksbehandler.ident,
-        )
-        return saksbehandler
-    }
 
     protected data class ArbeidsforholdForTest(
         val start: LocalDate,

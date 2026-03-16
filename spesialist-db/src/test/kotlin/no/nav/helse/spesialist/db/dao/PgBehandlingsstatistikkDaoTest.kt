@@ -66,7 +66,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
-            .avventSystemOgLagre(nyLegacySaksbehandler())
+            .avventSystemOgLagre(opprettSaksbehandler())
             .ferdigstillOgLagre()
         val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, LocalDate.now())
         assertEquals(1, antall)
@@ -75,18 +75,18 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Får antall tilgjengelige beslutteroppgaver`() {
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandler = nyLegacySaksbehandler()
-        val beslutter = nyLegacySaksbehandler()
+        val saksbehandler = opprettSaksbehandler()
+        val beslutter = opprettSaksbehandler()
         val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
 
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
 
-        nyTotrinnsvurdering(fødselsnummer, oppgave).sendTilBeslutterOgLagre(saksbehandlerWrapper = saksbehandler)
+        nyTotrinnsvurdering(fødselsnummer, oppgave).sendTilBeslutterOgLagre(saksbehandler = saksbehandler)
         oppgave.sendTilBeslutterOgLagre(beslutter = beslutter)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
 
         oppgave
-            .avventSystemOgLagre(saksbehandlerWrapper = beslutter)
+            .avventSystemOgLagre(saksbehandler = beslutter)
             .ferdigstillOgLagre()
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
     }
@@ -94,8 +94,8 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Får antall fullførte beslutteroppgaver`() {
         val fødselsnummer = opprettPerson().id.value
-        val saksbehandler = nyLegacySaksbehandler()
-        val beslutter = nyLegacySaksbehandler()
+        val saksbehandler = opprettSaksbehandler()
+        val beslutter = opprettSaksbehandler()
         val oppgave = nyOppgaveForNyPerson()
         assertEquals(0, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
 
@@ -103,7 +103,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
             .sendTilBeslutterOgLagre(beslutter = beslutter)
             .ferdigstillOgLagre()
         nyTotrinnsvurdering(fødselsnummer, oppgave)
-            .sendTilBeslutterOgLagre(saksbehandlerWrapper = saksbehandler)
+            .sendTilBeslutterOgLagre(saksbehandler = saksbehandler)
             .ferdigstillOgLagre(beslutter = beslutter)
 
         assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
@@ -120,7 +120,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.EGEN_ANSATT))
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
         oppgave
-            .avventSystemOgLagre(nyLegacySaksbehandler())
+            .avventSystemOgLagre(opprettSaksbehandler())
             .ferdigstillOgLagre()
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
     }
@@ -128,7 +128,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Får antall fullførte egen ansatt-oppgaver`() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.EGEN_ANSATT))
-            .avventSystemOgLagre(nyLegacySaksbehandler())
+            .avventSystemOgLagre(opprettSaksbehandler())
             .ferdigstillOgLagre()
 
         assertEquals(1, behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(LocalDate.now().minusDays(1)))

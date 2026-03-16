@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.sql.SQLException
@@ -129,22 +130,22 @@ class OppgaveService(
 
     fun leggPåVent(
         handling: LeggPåVent,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
     ) {
         finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
             oppgave(oppgaveId) {
-                this.leggPåVent(handling.skalTildeles, saksbehandlerWrapper)
+                this.leggPåVent(handling.skalTildeles, saksbehandler)
             }
         }
     }
 
     fun endrePåVent(
         handling: EndrePåVent,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
+        saksbehandler: Saksbehandler,
     ) {
         finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
             oppgave(oppgaveId) {
-                this.endrePåVent(handling.skalTildeles, saksbehandlerWrapper)
+                this.endrePåVent(handling.skalTildeles, saksbehandler)
             }
         }
     }
@@ -234,7 +235,7 @@ class OppgaveService(
 
             is Either.Success<Set<Brukerrolle>, Feil> -> {
                 try {
-                    oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result)
+                    oppgave.forsøkTildelingVedReservasjon(saksbehandler, result.result)
                 } catch (manglerTilgang: ManglerTilgang) {
                     logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
                     teamLogs.info(

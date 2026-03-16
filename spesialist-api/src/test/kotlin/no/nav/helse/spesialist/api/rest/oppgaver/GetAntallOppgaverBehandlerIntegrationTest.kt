@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.rest.oppgaver
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.util.UUID
@@ -38,21 +37,18 @@ class GetAntallOppgaverBehandlerIntegrationTest {
         val saksbehandler = lagSaksbehandler()
         val annenSaksbehandler = lagSaksbehandler()
 
-        val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler)
-        val annenSaksbehandlerWrapper = SaksbehandlerWrapper(annenSaksbehandler)
-
         lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
-            .also { it.forsøkTildeling(saksbehandlerWrapper, emptySet()) }
+            .also { it.forsøkTildeling(saksbehandler, emptySet()) }
             .also(sessionContext.oppgaveRepository::lagre)
 
         lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
-            .also { it.forsøkTildeling(saksbehandlerWrapper, emptySet()) }
+            .also { it.forsøkTildeling(saksbehandler, emptySet()) }
             .also(sessionContext.oppgaveRepository::lagre)
 
         lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
             .also {
-                it.forsøkTildeling(annenSaksbehandlerWrapper, emptySet())
-                it.leggPåVent(skalTildeles = true, saksbehandlerWrapper = saksbehandlerWrapper)
+                it.forsøkTildeling(annenSaksbehandler, emptySet())
+                it.leggPåVent(skalTildeles = true, saksbehandler = saksbehandler)
             }.also(sessionContext.oppgaveRepository::lagre)
 
         // when
