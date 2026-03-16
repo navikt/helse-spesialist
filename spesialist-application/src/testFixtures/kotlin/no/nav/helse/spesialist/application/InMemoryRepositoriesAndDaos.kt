@@ -38,7 +38,8 @@ class InMemoryRepositoriesAndDaos {
 
     private val dialogDao = DelegatingDialogDao(dialogRepository)
     private val notatDao = DelegatingNotatDao(oppgaveRepository, notatRepository)
-    private val oppgaveDao = DelegatingOppgaveDao(oppgaveRepository, behandlingRepository, vedtaksperiodeRepository, personRepository, totrinnsvurderingRepository, saksbehandlerRepository)
+    private val oppgaveDao =
+        DelegatingOppgaveDao(oppgaveRepository, behandlingRepository, vedtaksperiodeRepository)
     private val oppgaveApiDao = DelegatingOppgaveApiDao(oppgaveRepository, vedtaksperiodeRepository)
     private val personDao = DelegatingPersonDao(personRepository, inntektRepository)
     private val påVentDao = DelegatingPåVentDao(påVentRepository, oppgaveRepository)
@@ -181,7 +182,7 @@ class InMemoryRepositoriesAndDaos {
                     midlertidigBehandlingVedtakFattetDao = midlertidigBehandlingVedtakFattetDao,
                     vedtakRepository = vedtakRepository,
                     opptegnelseRepository = opptegnelseRepository,
-                    personKlargjoresDao = personKlargjoresDao
+                    personKlargjoresDao = personKlargjoresDao,
                 ),
         )
 }

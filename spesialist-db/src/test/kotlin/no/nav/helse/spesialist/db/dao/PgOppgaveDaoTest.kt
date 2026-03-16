@@ -1,14 +1,9 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.Test
@@ -61,114 +56,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Finner behandlet oppgave for visning`() {
-        val aktørId = lagAktørId()
-        val fornavn = lagFornavn()
-        val mellomnavn = lagEtternavn()
-        val etternavn = lagEtternavn()
-        val oppgave =
-            nyOppgaveForNyPerson(
-                aktørId = aktørId,
-                fornavn = fornavn,
-                mellomnavn = mellomnavn,
-                etternavn = etternavn,
-            ).tildelOgLagre(legacySaksbehandler)
-                .avventSystemOgLagre(legacySaksbehandler)
-                .ferdigstillOgLagre()
-
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id.value)
-        assertEquals(1, oppgaver.size)
-        val førsteOppgave = oppgaver.first()
-        assertEquals(oppgave.id, førsteOppgave.id)
-        assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(oppgave.egenskaper.map { it.name }, førsteOppgave.egenskaper.map { it.name })
-        assertEquals(legacySaksbehandler.saksbehandler.ident.value, førsteOppgave.ferdigstiltAv)
-        assertEquals(legacySaksbehandler.saksbehandler.ident.value, førsteOppgave.saksbehandler)
-        assertNull(førsteOppgave.beslutter)
-        assertEquals(fornavn, førsteOppgave.navn.fornavn)
-        assertEquals(mellomnavn, førsteOppgave.navn.mellomnavn)
-        assertEquals(etternavn, førsteOppgave.navn.etternavn)
-    }
-
-    @Test
-    fun `Finn behandlede oppgaver for visning`() {
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(legacySaksbehandler)
-            .avventSystemOgLagre(legacySaksbehandler)
-            .ferdigstillOgLagre()
-
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(legacySaksbehandler)
-            .avventSystemOgLagre(legacySaksbehandler)
-            .ferdigstillOgLagre()
-
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(legacySaksbehandler)
-            .avventSystemOgLagre(legacySaksbehandler)
-            .avventSystemOgLagre(legacySaksbehandler)
-
-        val annenSaksbehandler = nyLegacySaksbehandler()
-        nyOppgaveForNyPerson()
-            .tildelOgLagre(annenSaksbehandler)
-            .avventSystemOgLagre(annenSaksbehandler)
-            .ferdigstillOgLagre()
-
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id.value)
-        assertEquals(3, oppgaver.size)
-        assertEquals(3, oppgaver.first().filtrertAntall)
-    }
-
-    @Test
-    fun `Både saksbehandler som sender til beslutter og saksbehandler som utbetaler ser oppgaven i behandlede oppgaver`() {
-        val fødselsnummer = lagFødselsnummer()
-
-        val saksbehandler = nyLegacySaksbehandler()
-        val annenSaksbehandler = nyLegacySaksbehandler()
-        val beslutter = nyLegacySaksbehandler()
-        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
-        nyTotrinnsvurdering(fødselsnummer, oppgave)
-            .sendTilBeslutterOgLagre(saksbehandler)
-            .ferdigstillOgLagre(beslutter)
-        oppgave
-            .sendTilBeslutterOgLagre(null)
-            .avventSystemOgLagre(beslutter)
-            .ferdigstillOgLagre()
-
-        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandler.saksbehandler.id.value)
-        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutter.saksbehandler.id.value)
-        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandler.saksbehandler.id.value)
-
-        assertEquals(1, behandletIDagForSaksbehandler.size)
-        assertEquals(beslutter.saksbehandler.ident.value, behandletIDagForSaksbehandler.first().ferdigstiltAv)
-        assertEquals(beslutter.saksbehandler.ident.value, behandletIDagForSaksbehandler.first().beslutter)
-        assertEquals(saksbehandler.saksbehandler.ident.value, behandletIDagForSaksbehandler.first().saksbehandler)
-        assertEquals(1, behandletIDagForBeslutter.size)
-        assertEquals(beslutter.saksbehandler.ident.value, behandletIDagForBeslutter.first().ferdigstiltAv)
-        assertEquals(beslutter.saksbehandler.ident.value, behandletIDagForBeslutter.first().beslutter)
-        assertEquals(saksbehandler.saksbehandler.ident.value, behandletIDagForBeslutter.first().saksbehandler)
-        assertEquals(0, behandletIDagForAnnenSaksbehandler.size)
-    }
-
-    @Test
-    fun `Finn behandlede oppgaver med offset og limit`() {
-        nyOppgaveForNyPerson()
-            .avventSystemOgLagre(legacySaksbehandler)
-            .ferdigstillOgLagre()
-        val oppgave2 =
-            nyOppgaveForNyPerson()
-                .avventSystemOgLagre(legacySaksbehandler)
-                .ferdigstillOgLagre()
-        val oppgave3 =
-            nyOppgaveForNyPerson()
-                .avventSystemOgLagre(legacySaksbehandler)
-                .ferdigstillOgLagre()
-
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id.value, 1, 2)
-        assertEquals(2, oppgaver.size)
-        oppgaver.assertIderSamsvarerMed(oppgave2, oppgave3)
-    }
-
-    @Test
     fun `finner vedtaksperiodeId`() {
         val oppgave = nyOppgaveForNyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id)
@@ -216,9 +103,5 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(oppgave2.vedtaksperiodeId, oppgave2.utbetalingId)
         assertEquals(setOf(SØKNAD), egenskaperOppgaveId1)
         assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
-    }
-
-    private fun List<BehandletOppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {
-        assertEquals(oppgaver.map { it.id }.toSet(), map { it.id }.toSet())
     }
 }

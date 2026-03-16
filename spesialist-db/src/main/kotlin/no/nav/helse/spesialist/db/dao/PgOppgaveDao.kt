@@ -1,15 +1,12 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -80,13 +77,6 @@ class PgOppgaveDao internal constructor(
             "oppgaveId" to oppgaveId,
         ).single { row -> row.uuid("vedtaksperiode_id") }
 
-    override fun invaliderOppgave(oppgaveId: Long) {
-        asSQL(
-            "UPDATE oppgave SET status = 'Invalidert' WHERE id = :id",
-            "id" to oppgaveId,
-        ).update()
-    }
-
     override fun reserverNesteId(): Long =
         asSQL(
             """
@@ -121,21 +111,6 @@ class PgOppgaveDao internal constructor(
             it.string("fødselsnummer")
         }
 
-    override fun oppdaterPekerTilGodkjenningsbehov(
-        godkjenningsbehovId: UUID,
-        utbetalingId: UUID,
-    ) {
-        asSQL(
-            """
-            update oppgave
-            set hendelse_id_godkjenningsbehov = :godkjenningsbehovId
-            where utbetaling_id = :utbetalingId
-            """.trimIndent(),
-            "godkjenningsbehovId" to godkjenningsbehovId,
-            "utbetalingId" to utbetalingId,
-        ).update()
-    }
-
     override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean =
         asSQL(
             """
@@ -147,72 +122,6 @@ class PgOppgaveDao internal constructor(
         ).single {
             it.int("oppgave_count")
         } > 0
-
-    override fun finnBehandledeOppgaver(
-        behandletAvOid: UUID,
-        offset: Int,
-        limit: Int,
-        fom: LocalDate,
-        tom: LocalDate,
-    ): List<BehandletOppgaveFraDatabaseForVisning> =
-        asSQL(
-            """
-            SELECT
-                o.id as oppgave_id,
-                p.aktør_id,
-                p.fødselsnummer,
-                o.egenskaper,
-                o.oppdatert as ferdigstilt_tidspunkt,
-                o.ferdigstilt_av,
-                ttv.beslutter,
-                ttv.saksbehandler,
-                pi.fornavn, pi.mellomnavn, pi.etternavn,
-                count(1) OVER() AS filtered_count
-            FROM oppgave o
-                INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
-                INNER JOIN person p ON v.person_ref = p.id
-                INNER JOIN person_info pi ON p.info_ref = pi.id
-                LEFT JOIN (SELECT tv.person_ref, tv.tilstand, beslutter.ident as beslutter, saksbehandler.ident as saksbehandler
-                         FROM totrinnsvurdering tv
-                         INNER JOIN saksbehandler beslutter on tv.beslutter = beslutter.oid
-                         INNER JOIN saksbehandler saksbehandler on tv.saksbehandler = saksbehandler.oid
-                         WHERE (saksbehandler = :oid OR beslutter = :oid) AND (tv.oppdatert::date >= :fom::date AND tv.oppdatert::date <= :tom::date)
-                     ) ttv ON ttv.person_ref = p.id
-            WHERE (ttv.tilstand = 'GODKJENT' OR o.ferdigstilt_av_oid = :oid)
-                AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
-                AND (o.oppdatert::date >= :fom::date AND o.oppdatert::date <= :tom::date)
-            ORDER BY o.oppdatert
-            OFFSET :offset
-            LIMIT :limit;
-            """,
-            "oid" to behandletAvOid,
-            "fom" to fom,
-            "tom" to tom,
-            "offset" to offset,
-            "limit" to limit,
-        ).list { row ->
-            BehandletOppgaveFraDatabaseForVisning(
-                id = row.long("oppgave_id"),
-                aktørId = row.string("aktør_id"),
-                fødselsnummer = row.string("fødselsnummer"),
-                egenskaper =
-                    row
-                        .array<String>("egenskaper")
-                        .map { enumValueOf<EgenskapForDatabase>(it) }
-                        .toSet(),
-                ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
-                ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
-                saksbehandler = row.stringOrNull("saksbehandler") ?: row.stringOrNull("ferdigstilt_av"),
-                beslutter = row.stringOrNull("beslutter"),
-                navn =
-                    PersonnavnFraDatabase(
-                        row.string("fornavn"),
-                        row.stringOrNull("mellomnavn"),
-                        row.string("etternavn"),
-                    ),
-                filtrertAntall = row.int("filtered_count"),
-            )
-        }
 
     override fun finnEgenskaper(
         vedtaksperiodeId: UUID,

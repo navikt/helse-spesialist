@@ -33,7 +33,7 @@ class Oppgave private constructor(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val utbetalingId: UUID,
-    val godkjenningsbehovId: UUID,
+    godkjenningsbehovId: UUID,
     val kanAvvises: Boolean,
     ferdigstiltAvIdent: NAVIdent?,
     ferdigstiltAvOid: UUID?,
@@ -68,6 +68,9 @@ class Oppgave private constructor(
         private set
 
     var tildeltTil: SaksbehandlerOid? = tildeltTil
+        private set
+
+    var godkjenningsbehovId: UUID = godkjenningsbehovId
         private set
 
     val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
@@ -431,6 +434,10 @@ class Oppgave private constructor(
                     else -> true
                 }
         }
+
+    fun nyttGodkjenningsbehov(meldingId: UUID) {
+        godkjenningsbehovId = meldingId
+    }
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java.declaringClass)

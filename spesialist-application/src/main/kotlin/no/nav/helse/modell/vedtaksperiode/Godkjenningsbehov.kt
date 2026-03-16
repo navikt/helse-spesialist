@@ -7,14 +7,12 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
@@ -361,11 +359,9 @@ internal class GodkjenningsbehovCommand(
     påVentDao: PåVentDao,
     automatiseringDao: AutomatiseringDao,
     oppgaveRepository: OppgaveRepository,
-    oppgaveDao: OppgaveDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
-    tildelingDao: TildelingDao,
     reservasjonDao: ReservasjonDao,
     oppgaveService: OppgaveService,
     vedtakRepository: VedtakRepository,
@@ -385,11 +381,9 @@ internal class GodkjenningsbehovCommand(
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
                 oppgaveRepository = oppgaveRepository,
-                oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
                 meldingDao = meldingDao,
                 fødselsnummer = behovData.fødselsnummer,
-                tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
             ),
             OpprettKoblingTilHendelseCommand(

@@ -1,9 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
@@ -13,14 +11,13 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val fødselsnummer: String,
     private val commandData: GodkjenningsbehovData,
     private val oppgaveRepository: OppgaveRepository,
-    private val oppgaveDao: OppgaveDao,
-    private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val vedtakDao: VedtakDao,
     private val meldingDao: MeldingDao,
@@ -39,13 +36,15 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             return ferdigstill(context)
         }
 
-        val oppgave = oppgaveRepository.finnSisteOppgaveForUtbetaling(utbetalingId) ?: return true
+        val oppgave = oppgaveRepository.finn(SpleisBehandlingId(commandData.spleisBehandlingId)) ?: return true
         if (oppgave.tilstand is Oppgave.Invalidert) return true
 
-        oppgaveDao.oppdaterPekerTilGodkjenningsbehov(meldingId, utbetalingId)
+        val gammelGodkjenningsbehovId = oppgave.godkjenningsbehovId
+        oppgave.nyttGodkjenningsbehov(meldingId)
+        oppgaveRepository.lagre(oppgave)
         loggInfo("Oppdaterte peker til godkjenningsbehov for oppgave med utbetalingId=$utbetalingId til id=$meldingId")
 
-        val harEndringerIGodkjenningsbehov = harEndringerIGodkjenningsbehov(oppgave.godkjenningsbehovId)
+        val harEndringerIGodkjenningsbehov = harEndringerIGodkjenningsbehov(gammelGodkjenningsbehovId)
 
         if (oppgave.tilstand is Oppgave.Ferdigstilt) {
             if (!harEndringerIGodkjenningsbehov) {
@@ -61,16 +60,17 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         }
 
         if (harEndringerIGodkjenningsbehov) {
-            val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer)
+            val tildeltSaksbehandler = oppgave.tildeltTil
             if (tildeltSaksbehandler != null) {
-                reservasjonDao.reserverPerson(tildeltSaksbehandler.oid, fødselsnummer)
+                reservasjonDao.reserverPerson(tildeltSaksbehandler.value, fødselsnummer)
                 loggInfo(
-                    "Reserverer person til ${tildeltSaksbehandler.oid} pga eksisterende tildeling",
+                    "Reserverer person til ${tildeltSaksbehandler.value} pga eksisterende tildeling",
                     "fødselsnummer" to fødselsnummer,
                 )
             }
             loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")
-            oppgaveDao.invaliderOppgave(oppgave.id)
+            oppgave.avbryt()
+            oppgaveRepository.lagre(oppgave)
         } else {
             loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId")
             ferdigstill(context)

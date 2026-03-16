@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import java.time.LocalDate
 import java.util.UUID
 
 interface OppgaveDao {
@@ -14,19 +13,9 @@ interface OppgaveDao {
 
     fun finnVedtaksperiodeId(oppgaveId: Long): UUID
 
-    fun invaliderOppgave(oppgaveId: Long)
-
     fun reserverNesteId(): Long
 
     fun finnSpleisBehandlingId(oppgaveId: Long): UUID
-
-    fun finnBehandledeOppgaver(
-        behandletAvOid: UUID,
-        offset: Int = 0,
-        limit: Int = Int.MAX_VALUE,
-        fom: LocalDate = LocalDate.now(),
-        tom: LocalDate = LocalDate.now(),
-    ): List<BehandletOppgaveFraDatabaseForVisning>
 
     fun finnEgenskaper(
         vedtaksperiodeId: UUID,
@@ -38,9 +27,4 @@ interface OppgaveDao {
     fun finnFødselsnummer(oppgaveId: Long): String
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean
-
-    fun oppdaterPekerTilGodkjenningsbehov(
-        godkjenningsbehovId: UUID,
-        utbetalingId: UUID,
-    )
 }
