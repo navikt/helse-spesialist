@@ -22,8 +22,12 @@ class LoopbackTestRapid : RapidsConnection() {
         error("Ikke implementert, bruk publish med fødselsnummer for å kunne kjøre med flere tråder.")
     }
 
-    override fun publish(key: String, message: String) {
-        meldingsloggForFødselsnummer.computeIfAbsent(key) { mutableListOf<JsonNode>() }
+    override fun publish(
+        key: String,
+        message: String,
+    ) {
+        meldingsloggForFødselsnummer
+            .computeIfAbsent(key) { mutableListOf() }
             .add(objectMapper.readTree(message))
         notifyMessage(message, KeyMessageContext(this, key), messageMetadata, meterRegistry)
     }
@@ -40,11 +44,13 @@ class LoopbackTestRapid : RapidsConnection() {
                 index = index,
                 message = message,
                 partition = key.hashCode(),
-                offset = index.toLong()
+                offset = index.toLong(),
             )
         } to emptyList()
 
     override fun rapidName(): String = javaClass.simpleName
+
     override fun start() {}
+
     override fun stop() {}
 }

@@ -78,7 +78,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         val start = System.nanoTime()
                         withSaksbehandlerIdentMdc(call) {
                             val result =
-                                checkNotNull<GraphQLServerResponse>(application.plugin(GraphQL).server.execute(call.request)) { "Kall mot GraphQL server feilet" }
+                                checkNotNull(application.plugin(GraphQL).server.execute(call.request)) { "Kall mot GraphQL server feilet" }
 
                             if (result is GraphQLResponse<*>) {
                                 result.errors.takeUnless { it.isNullOrEmpty() }?.let {

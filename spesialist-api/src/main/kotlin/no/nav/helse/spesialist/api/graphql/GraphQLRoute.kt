@@ -21,7 +21,7 @@ fun Routing.graphQLRoute(graphQLPlugin: GraphQL) {
                 val start = System.nanoTime()
                 withSaksbehandlerIdentMdc(call) {
                     val result =
-                        checkNotNull<GraphQLServerResponse>(graphQLPlugin.server.execute(call.request)) { "Kall mot GraphQL server feilet" }
+                        checkNotNull(graphQLPlugin.server.execute(call.request)) { "Kall mot GraphQL server feilet" }
 
                     if (result is GraphQLResponse<*>) {
                         result.errors.takeUnless { it.isNullOrEmpty() }?.let {

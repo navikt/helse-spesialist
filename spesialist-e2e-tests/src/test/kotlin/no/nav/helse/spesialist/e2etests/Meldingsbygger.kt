@@ -219,7 +219,7 @@ object Meldingsbygger {
                         sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
                         arbeidsgivere =
                             vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                buildMap<String, Any> {
+                                buildMap {
                                     put("arbeidsgiver", it.organisasjonsnummer)
                                     put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
                                     put("inntektskilde", it.inntektskilde)

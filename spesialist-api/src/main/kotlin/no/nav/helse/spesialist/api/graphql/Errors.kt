@@ -7,36 +7,7 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import no.nav.helse.spesialist.application.logg.teamLogs
 
-internal fun forbiddenError(fødselsnummer: String): GraphqlErrorException =
-    graphqlErrorException(
-        403,
-        "Har ikke tilgang til person med fødselsnummer $fødselsnummer",
-        "field" to "person",
-    )
-
-internal fun notFoundError(identifikator: String? = null): GraphqlErrorException =
-    graphqlErrorException(
-        404,
-        "Finner ikke data for person med identifikator $identifikator",
-        "field" to "person",
-    )
-
-internal fun personNotReadyError(
-    fødselsnummer: String,
-    aktørId: String,
-): GraphqlErrorException =
-    graphqlErrorException(
-        409,
-        "Person med fødselsnummer $fødselsnummer er ikke klar for visning ennå",
-        "field" to "person",
-        "persondata_hentes_for" to aktørId,
-    )
-
-internal fun <T> notFound(message: String) = dataFetcherError<T>(404, message)
-
 internal fun <T> conflict(message: String) = dataFetcherError<T>(409, message)
-
-internal fun <T> internalServerError(message: String) = dataFetcherError<T>(500, message)
 
 private fun <T> dataFetcherError(
     httpCode: Int,

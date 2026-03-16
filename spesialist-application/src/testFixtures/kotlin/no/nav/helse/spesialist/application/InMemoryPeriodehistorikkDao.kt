@@ -22,7 +22,5 @@ class InMemoryPeriodehistorikkDao : PeriodehistorikkDao {
         behandlingData[behandlingId] = (behandlingData[behandlingId] ?: emptyList()) + historikkinnslag
     }
 
-    fun finnForBehandling(behandlingId: UUID): List<Historikkinnslag> = behandlingData[behandlingId] ?: emptyList()
     fun finnForOppgave(oppgaveId: Long): List<Historikkinnslag> = oppgaveData[oppgaveId] ?: emptyList()
-
 }

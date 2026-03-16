@@ -1,6 +1,5 @@
 package no.nav.helse.modell.saksbehandler
 
-import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
@@ -33,11 +32,6 @@ interface SaksbehandlerObserver {
     fun minimumSykdomsgradVurdert(
         fødselsnummer: String,
         event: MinimumSykdomsgradVurdertEvent,
-    ) {}
-
-    fun utbetalingAnnullert(
-        fødselsnummer: String,
-        event: AnnullertUtbetalingEvent,
     ) {}
 
     fun lagtPåVent(
