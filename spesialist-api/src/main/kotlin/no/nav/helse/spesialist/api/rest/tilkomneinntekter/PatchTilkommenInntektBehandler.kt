@@ -4,22 +4,20 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiPatchEndring
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.fraVerdiValidering
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
-import kotlin.reflect.KProperty0
 
 class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiTilkommenInntektPatch, Unit, ApiPatchTilkommenInntektErrorCode> {
     override val tag = Tags.TILKOMNE_INNTEKTER
@@ -53,7 +51,10 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
         val harGyldigeFraVerdier =
             sequenceOf(
                 fraVerdiValidering(endringer::organisasjonsnummer, tilkommenInntekt.organisasjonsnummer),
-                fraVerdiValidering(endringer::periode, tilkommenInntekt.periode) { it.tilPeriode() },
+                fraVerdiValidering(
+                    endringer::periode,
+                    tilkommenInntekt.periode,
+                ) { it.tilPeriode() },
                 fraVerdiValidering(endringer::periodebeløp, tilkommenInntekt.periodebeløp),
                 fraVerdiValidering(
                     endringer::ekskluderteUkedager,
@@ -181,41 +182,6 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                 ).id(),
         )
     }
-
-    private class FraVerdiValidering<T, R>(
-        felt: KProperty0<ApiPatchEndring<T>?>,
-        private val faktiskVerdi: R,
-        private val mapping: (T) -> R,
-    ) {
-        private val feltverdi = felt.get()
-        private val feltnavn = felt.name
-
-        fun valider(): Boolean {
-            if (feltverdi != null) {
-                val forventetVerdi = mapping(feltverdi.fra)
-                if (forventetVerdi != faktiskVerdi) {
-                    teamLogs.warn(
-                        "Feil / utdatert fra-verdi i request for $feltnavn." +
-                            " Requesten forventet $feltnavn=$forventetVerdi," +
-                            " men inntekten hadde $feltnavn=$faktiskVerdi",
-                    )
-                    return false
-                }
-            }
-            return true
-        }
-    }
-
-    private fun <T, R> fraVerdiValidering(
-        endringFelt: KProperty0<ApiPatchEndring<T>?>,
-        faktiskVerdi: R,
-        mapping: (T) -> R,
-    ): FraVerdiValidering<T, R> = FraVerdiValidering(endringFelt, faktiskVerdi, mapping)
-
-    private fun <T> fraVerdiValidering(
-        endringFelt: KProperty0<ApiPatchEndring<T>?>,
-        faktiskVerdi: T,
-    ): FraVerdiValidering<T, T> = FraVerdiValidering(endringFelt, faktiskVerdi) { it }
 
     private fun TilkommenInntekt.tilPubliserbarTilstand(): InntektsendringerEventBygger.PubliserbarTilstand =
         InntektsendringerEventBygger.PubliserbarTilstand(

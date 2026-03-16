@@ -148,42 +148,6 @@ data class ApiTilkommenInntektPatch(
 }
 
 @Serializable
-sealed interface ApiPatchEndring<T> {
-    val fra: T
-    val til: T
-}
-
-@Serializable
-data class ApiPatchStringEndring(
-    override val fra: String,
-    override val til: String,
-) : ApiPatchEndring<String>
-
-@Serializable
-data class ApiPatchDatoPeriodeEndring(
-    override val fra: ApiDatoPeriode,
-    override val til: ApiDatoPeriode,
-) : ApiPatchEndring<ApiDatoPeriode>
-
-@Serializable
-data class ApiPatchBigDecimalEndring(
-    override val fra: BigDecimal,
-    override val til: BigDecimal,
-) : ApiPatchEndring<BigDecimal>
-
-@Serializable
-data class ApiPatchListLocalDateEndring(
-    override val fra: List<LocalDate>,
-    override val til: List<LocalDate>,
-) : ApiPatchEndring<List<LocalDate>>
-
-@Serializable
-data class ApiPatchBooleanEndring(
-    override val fra: Boolean,
-    override val til: Boolean,
-) : ApiPatchEndring<Boolean>
-
-@Serializable
 data class ApiLeggTilTilkommenInntektRequest(
     val fodselsnummer: String,
     val verdier: ApiTilkommenInntektInput,
