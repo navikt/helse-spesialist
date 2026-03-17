@@ -33,6 +33,7 @@ class VurderingsmomenterLøsningRiver(
                 "@løsning.Risikovurdering.funn",
                 "@løsning.Risikovurdering.kontrollertOk",
             )
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -57,6 +58,7 @@ class VurderingsmomenterLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = risikovurdering,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

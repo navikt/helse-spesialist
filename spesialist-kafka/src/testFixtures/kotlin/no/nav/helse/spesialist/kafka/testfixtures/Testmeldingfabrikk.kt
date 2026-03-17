@@ -102,6 +102,7 @@ object Testmeldingfabrikk {
         fødselsnummer: String,
         fom: LocalDate,
         tom: LocalDate?,
+        sti: List<Int> = listOf(1),
     ): String =
         nyHendelse(
             id = UUID.randomUUID(),
@@ -112,6 +113,7 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("Fullmakt"),
                 "contextId" to "${UUID.randomUUID()}",
                 "hendelseId" to "${UUID.randomUUID()}",
+                "sti" to sti,
                 "@løsning" to
                     mapOf(
                         "Fullmakt" to
@@ -130,6 +132,7 @@ object Testmeldingfabrikk {
         fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ): String =
         nyHendelse(
             id = UUID.randomUUID(),
@@ -140,6 +143,7 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("Fullmakt"),
                 "contextId" to "$contextId",
                 "hendelseId" to "$hendelseId",
+                "sti" to sti,
                 "@løsning" to
                     mapOf(
                         "Fullmakt" to emptyList<Map<String, String>>(),
@@ -246,9 +250,12 @@ object Testmeldingfabrikk {
             "fom" to fom,
             "tom" to tom,
             "yrkesaktivitetstype" to yrkesaktivitetstype,
-        ).plus (
-            if (organisasjonsnummer != null) mapOf("organisasjonsnummer" to organisasjonsnummer)
-            else emptyMap<String, Any>(),
+        ).plus(
+            if (organisasjonsnummer != null) {
+                mapOf("organisasjonsnummer" to organisasjonsnummer)
+            } else {
+                emptyMap<String, Any>()
+            },
         ),
     )
 
@@ -358,6 +365,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -367,6 +375,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("Arbeidsgiverinformasjon"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -388,6 +397,7 @@ object Testmeldingfabrikk {
         hendelseId: UUID,
         contextId: UUID,
         id: UUID,
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -397,6 +407,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -416,6 +427,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -425,6 +437,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("Vergemål", "Fullmakt"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "@løsning" to
@@ -444,6 +457,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -453,6 +467,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("Arbeidsforhold"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -484,6 +499,7 @@ object Testmeldingfabrikk {
         behov: List<String>,
         detaljer: Map<String, Any>,
         id: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -493,6 +509,7 @@ object Testmeldingfabrikk {
             "@behov" to behov,
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -552,6 +569,7 @@ object Testmeldingfabrikk {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         id: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -561,6 +579,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("HentInfotrygdutbetalinger"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -592,6 +611,7 @@ object Testmeldingfabrikk {
         fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
         adressebeskyttelse: String = "Ugradert",
         id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
@@ -603,6 +623,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("HentPersoninfoV2"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "@løsning" to
@@ -629,6 +650,7 @@ object Testmeldingfabrikk {
         organisasjonsnummer: String = "orgnr",
         enhet: String = OSLO,
         id: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -638,6 +660,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("HentEnhet"),
             "hendelseId" to "$hendelseId",
             "contextId" to contextId,
+            "sti" to sti,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -768,6 +791,7 @@ object Testmeldingfabrikk {
         contextId: UUID = UUID.randomUUID(),
         id: UUID = UUID.randomUUID(),
         avviksvurderingId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ) = nyHendelse(
         id,
         "behov",
@@ -778,6 +802,7 @@ object Testmeldingfabrikk {
             "@behov" to listOf("Avviksvurdering"),
             "hendelseId" to "$hendelseId",
             "contextId" to "$contextId",
+            "sti" to sti,
             "fødselsnummer" to fødselsnummer,
             "@løsning" to
                 mapOf(
@@ -829,6 +854,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ): String =
         nyHendelse(
             id,
@@ -841,6 +867,7 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("InntekterForSykepengegrunnlag"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
+                "sti" to sti,
                 "orgnummer" to orgnummer,
                 "@løsning" to
                     mapOf(
@@ -869,6 +896,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ): String =
         nyHendelse(
             id,
@@ -881,6 +909,7 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("EgenAnsatt"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
+                "sti" to sti,
                 "@løsning" to
                     mapOf(
                         "EgenAnsatt" to erEgenAnsatt,
@@ -896,6 +925,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ): String =
         nyHendelse(
             id,
@@ -908,6 +938,7 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("ÅpneOppgaver"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
+                "sti" to sti,
                 "@løsning" to
                     mapOf(
                         "ÅpneOppgaver" to
@@ -929,6 +960,7 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        sti: List<Int> = listOf(1),
     ): String =
         nyHendelse(
             id,
@@ -941,6 +973,7 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("Risikovurdering"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
+                "sti" to sti,
                 "Risikovurdering" to
                     mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId.toString(),
@@ -1196,7 +1229,10 @@ object Testmeldingfabrikk {
             }
         }
 
-    fun avsluttetMedVedtakFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0, sykepengegrunnlag: Double = 600000.0): Map<String, Any> =
+    fun avsluttetMedVedtakFastsattIInfotrygd(
+        omregnetÅrsinntektTotalt: Double = 500000.0,
+        sykepengegrunnlag: Double = 600000.0,
+    ): Map<String, Any> =
         mapOf(
             "sykepengegrunnlag" to sykepengegrunnlag,
             "fastsatt" to "IInfotrygd",

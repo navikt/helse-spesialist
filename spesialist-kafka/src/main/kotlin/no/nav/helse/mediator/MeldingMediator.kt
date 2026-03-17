@@ -96,6 +96,7 @@ class MeldingMediator(
         contextId: UUID,
         behovId: UUID,
         løsning: Any,
+        sti: List<Int>,
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {
         medMdc(
@@ -103,7 +104,7 @@ class MeldingMediator(
             MdcKey.MELDING_ID to behovId.toString(),
             MdcKey.OPPRINNELIG_MELDING_ID to hendelseId.toString(),
         ) {
-            løsninger(kontekstbasertPubliserer, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
+            løsninger(kontekstbasertPubliserer, hendelseId, contextId, sti)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: loggInfo(
                     "mottok løsning som ikke kan brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
                 )
@@ -151,6 +152,7 @@ class MeldingMediator(
         kontekstbasertPubliserer: MeldingPubliserer,
         meldingId: UUID,
         contextId: UUID,
+        sti: List<Int>,
     ): Løsninger? {
         return løsninger.get() ?: run {
             val commandContext =
@@ -159,7 +161,7 @@ class MeldingMediator(
                     return null
                 }
             val melding = finnMelding(meldingId) ?: return null
-            Løsninger(kontekstbasertPubliserer, melding, contextId, commandContext).also { løsninger.set(it) }
+            Løsninger(kontekstbasertPubliserer, melding, contextId, commandContext, sti).also { løsninger.set(it) }
         }
     }
 
@@ -286,6 +288,7 @@ class MeldingMediator(
         private val melding: Personmelding,
         private val contextId: UUID,
         private val commandContext: CommandContext,
+        private val sti: List<Int>,
     ) {
         fun add(
             hendelseId: UUID,
@@ -301,6 +304,11 @@ class MeldingMediator(
             mediator: MeldingMediator,
             jsonNode: JsonNode,
         ) {
+            if (sti != commandContext.sti) {
+                loggInfo("Hopper over behov-løsning, kommandokjeden har sti=${commandContext.sti}, behovløsningen har sti=$sti")
+                commandContext.clear()
+                return
+            }
             val behov = jsonNode["@behov"].map(JsonNode::asText)
             loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger på $behov", "løsning-json" to jsonNode)
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)

@@ -27,6 +27,7 @@ class VergemålLøsningRiver(
             it.requireKey("@id")
             it.require("@opprettet") { node -> node.asLocalDateTime() }
             it.requireKey("@løsning.Vergemål")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -54,6 +55,7 @@ class VergemålLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = vergemålLøsning,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

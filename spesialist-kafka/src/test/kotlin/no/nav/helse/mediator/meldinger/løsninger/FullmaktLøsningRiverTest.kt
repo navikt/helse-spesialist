@@ -26,10 +26,10 @@ class FullmaktLøsningRiverTest {
             Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
                 fnr,
                 fom = now(),
-                tom = null
-            )
+                tom = null,
+            ),
         )
-        verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any()) }
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any(), any()) }
         assertTrue(slot.captured.harFullmakt)
     }
 
@@ -41,10 +41,10 @@ class FullmaktLøsningRiverTest {
             Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
                 fnr,
                 fom = now().minusYears(2),
-                tom = now().minusDays(1)
-            )
+                tom = now().minusDays(1),
+            ),
         )
-        verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any()) }
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any(), any()) }
         assertFalse(slot.captured.harFullmakt)
     }
 
@@ -53,7 +53,7 @@ class FullmaktLøsningRiverTest {
         val fnr = lagFødselsnummer()
         val slot = slot<Fullmaktløsning>()
         testRapid.sendTestMessage(Testmeldingfabrikk.lagFullmaktløsningUtenFullmakter(fnr))
-        verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any()) }
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any(), any()) }
         assertFalse(slot.captured.harFullmakt)
     }
 }

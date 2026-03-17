@@ -31,12 +31,12 @@ internal class HentEnhetLøsningRiverTest {
     @Test
     fun `leser selvstendig HentEnhet-melding`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagEnhetløsning(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any(), any()) }
     }
 
     @Test
     fun `leser HentEnhet i et behov med flere ting`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagPersoninfoløsningComposite(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentEnhetløsning>(), any(), any()) }
     }
 }

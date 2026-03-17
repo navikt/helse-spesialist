@@ -34,6 +34,7 @@ class FullmaktLøsningRiver(
             it.requireArray("@løsning.Fullmakt") {
                 interestedIn("gyldigFraOgMed", "gyldigTilOgMed")
             }
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -64,6 +65,7 @@ class FullmaktLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = fullmaktløsning,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

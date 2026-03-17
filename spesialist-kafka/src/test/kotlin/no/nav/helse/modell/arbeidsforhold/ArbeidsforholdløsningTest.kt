@@ -48,18 +48,19 @@ internal class ArbeidsforholdløsningTest {
                 aktørId = AKTØRID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
-                løsning = listOf(
-                    Arbeidsforholdløsning.Løsning(
-                        stillingstittel = STILLINGSTITTEL,
-                        stillingsprosent = STILLINGSPROSENT,
-                        startdato = STARTDATO,
-                        sluttdato = SLUTTDATO
-                    )
-                ),
-                vedtaksperiodeId = VEDTAKSPERIODE_ID
-            )
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                løsning =
+                    listOf(
+                        Arbeidsforholdløsning.Løsning(
+                            stillingstittel = STILLINGSTITTEL,
+                            stillingsprosent = STILLINGSPROSENT,
+                            startdato = STARTDATO,
+                            sluttdato = SLUTTDATO,
+                        ),
+                    ),
+            ),
         )
-        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any(), any()) }
     }
 
     @Test
@@ -69,31 +70,33 @@ internal class ArbeidsforholdløsningTest {
                 aktørId = AKTØRID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 løsning = listOf(),
-                vedtaksperiodeId = VEDTAKSPERIODE_ID
-            )
+            ),
         )
 
-        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any(), any()) }
     }
 
     @Test
     fun `oppretter løsning`() {
         val now = LocalDateTime.now()
-        val arbeidsforhold = Arbeidsforholdløsning(
-            listOf(
-                Arbeidsforholdløsning.Løsning(
-                    STARTDATO,
-                    SLUTTDATO,
-                    STILLINGSTITTEL,
-                    STILLINGSPROSENT
-                )
+        val arbeidsforhold =
+            Arbeidsforholdløsning(
+                listOf(
+                    Arbeidsforholdløsning.Løsning(
+                        STARTDATO,
+                        SLUTTDATO,
+                        STILLINGSTITTEL,
+                        STILLINGSPROSENT,
+                    ),
+                ),
             )
-        )
         arbeidsforhold.upsert(dao, FØDSELSNUMMER, ORGNR, now)
         verify(exactly = 1) {
             dao.upsertArbeidsforhold(
-                FØDSELSNUMMER, ORGNR,
+                FØDSELSNUMMER,
+                ORGNR,
                 listOf(
                     KomplettArbeidsforholdDto(
                         fødselsnummer = FØDSELSNUMMER,
@@ -103,22 +106,23 @@ internal class ArbeidsforholdløsningTest {
                         stillingstittel = STILLINGSTITTEL,
                         stillingsprosent = STILLINGSPROSENT,
                         oppdatert = now,
-                    )
-                )
+                    ),
+                ),
             )
         }
     }
 
     @Test
     fun `oppdaterer løsning`() {
-        val arbeidsforhold = listOf(
-            Arbeidsforholdløsning.Løsning(
-                STARTDATO,
-                SLUTTDATO,
-                STILLINGSTITTEL,
-                STILLINGSPROSENT
+        val arbeidsforhold =
+            listOf(
+                Arbeidsforholdløsning.Løsning(
+                    STARTDATO,
+                    SLUTTDATO,
+                    STILLINGSTITTEL,
+                    STILLINGSPROSENT,
+                ),
             )
-        )
         val now = LocalDateTime.now()
         val arbeidsforholdløsning = Arbeidsforholdløsning(arbeidsforhold)
         arbeidsforholdløsning.upsert(dao, FØDSELSNUMMER, ORGNR, now)
@@ -126,17 +130,18 @@ internal class ArbeidsforholdløsningTest {
             dao.upsertArbeidsforhold(
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNR,
-                arbeidsforhold = arbeidsforhold.map {
-                    KomplettArbeidsforholdDto(
-                        fødselsnummer = FØDSELSNUMMER,
-                        organisasjonsnummer = ORGNR,
-                        startdato = it.startdato,
-                        sluttdato = it.sluttdato,
-                        stillingstittel = it.stillingstittel,
-                        stillingsprosent = it.stillingsprosent,
-                        oppdatert = now,
-                    )
-                }
+                arbeidsforhold =
+                    arbeidsforhold.map {
+                        KomplettArbeidsforholdDto(
+                            fødselsnummer = FØDSELSNUMMER,
+                            organisasjonsnummer = ORGNR,
+                            startdato = it.startdato,
+                            sluttdato = it.sluttdato,
+                            stillingstittel = it.stillingstittel,
+                            stillingsprosent = it.stillingsprosent,
+                            oppdatert = now,
+                        )
+                    },
             )
         }
     }

@@ -24,6 +24,7 @@ class InfotrygdutbetalingerLøsningRiver(
         River.PacketValidation {
             it.requireKey("@id", "contextId", "hendelseId")
             it.requireKey("@løsning.HentInfotrygdutbetalinger")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -43,6 +44,7 @@ class InfotrygdutbetalingerLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

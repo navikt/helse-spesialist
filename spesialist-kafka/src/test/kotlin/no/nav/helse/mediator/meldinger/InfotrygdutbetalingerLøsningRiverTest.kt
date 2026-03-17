@@ -31,12 +31,12 @@ internal class InfotrygdutbetalingerLøsningRiverTest {
     @Test
     fun `leser selvstendig HentInfotrygdutbetalinger-melding`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagInfotrygdutbetalingerløsning(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentInfotrygdutbetalingerløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentInfotrygdutbetalingerløsning>(), any(), any()) }
     }
 
     @Test
     fun `leser HentInfotrygdutbetalinger i et behov med flere ting`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagPersoninfoløsningComposite(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentInfotrygdutbetalingerløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentInfotrygdutbetalingerløsning>(), any(), any()) }
     }
 }

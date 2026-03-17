@@ -32,6 +32,6 @@ internal class InntektLøsningRiverTest {
                 orgnummer = testperson.orgnummer,
             ),
         )
-        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any(), any(), any()) }
     }
 }

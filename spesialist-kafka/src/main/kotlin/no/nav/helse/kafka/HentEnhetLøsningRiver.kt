@@ -22,6 +22,7 @@ class HentEnhetLøsningRiver(
     override fun validations() =
         River.PacketValidation {
             it.requireKey("@id", "contextId", "hendelseId", "@løsning.HentEnhet")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -38,6 +39,7 @@ class HentEnhetLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = HentEnhetløsning(packet["@løsning.HentEnhet"].asText()),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

@@ -30,6 +30,7 @@ class ArbeidsforholdLøsningRiver(
                 "hendelseId",
                 "@id",
                 "@løsning.Arbeidsforhold",
+                "sti",
             )
         }
 
@@ -47,6 +48,7 @@ class ArbeidsforholdLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = packet.toArbeidsforholdløsninger(),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 

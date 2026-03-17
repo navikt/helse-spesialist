@@ -23,6 +23,7 @@ class ArbeidsgiverinformasjonLøsningRiver(
         River.PacketValidation {
             it.requireKey("contextId", "hendelseId", "@id")
             it.requireKey("@løsning.Arbeidsgiverinformasjon")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -48,6 +49,7 @@ class ArbeidsgiverinformasjonLøsningRiver(
                     },
                 ),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

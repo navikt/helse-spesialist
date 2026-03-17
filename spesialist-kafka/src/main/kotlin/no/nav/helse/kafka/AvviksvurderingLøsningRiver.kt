@@ -51,6 +51,7 @@ class AvviksvurderingLøsningRiver(
                     requireKey("årMåned", "beløp")
                 }
             }
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -65,6 +66,7 @@ class AvviksvurderingLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = løsning(packet),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 

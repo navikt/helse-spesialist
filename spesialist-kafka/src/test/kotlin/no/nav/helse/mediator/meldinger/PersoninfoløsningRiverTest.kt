@@ -31,12 +31,12 @@ internal class PersoninfoløsningRiverTest {
     @Test
     fun `leser selvstendig HentPersoninfo-melding`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagPersoninfoløsning(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any(), any()) }
     }
 
     @Test
     fun `leser HentPersoninfo i et behov med flere ting`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagPersoninfoløsningComposite(AKTØR, FNR, HENDELSE, CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<HentPersoninfoløsning>(), any(), any()) }
     }
 }

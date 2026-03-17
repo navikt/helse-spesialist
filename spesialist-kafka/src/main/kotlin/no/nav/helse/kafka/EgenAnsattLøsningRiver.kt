@@ -26,6 +26,7 @@ class EgenAnsattLøsningRiver(
             it.requireKey("@id")
             it.require("@opprettet") { message -> message.asLocalDateTime() }
             it.requireKey("@løsning.EgenAnsatt")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -54,6 +55,7 @@ class EgenAnsattLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = egenAnsattløsning,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

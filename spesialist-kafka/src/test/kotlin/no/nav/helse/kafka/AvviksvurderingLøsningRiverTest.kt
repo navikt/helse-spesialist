@@ -33,57 +33,63 @@ class AvviksvurderingLøsningRiverTest {
     private val opprettet = LocalDateTime.now()
     private val beregningsgrunnlagTotalbeløp = 900000.0
     private val sammenligningsgrunnlagTotalbeløp = 600000.0
-    private val beregningsgrunnlag = Beregningsgrunnlag(
-        totalbeløp = beregningsgrunnlagTotalbeløp,
-        omregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
-    )
-
-    private val sammenligningsgrunnlag = Sammenligningsgrunnlag(
-        totalbeløp = sammenligningsgrunnlagTotalbeløp,
-        innrapporterteInntekter = listOf(
-            InnrapportertInntekt(
-                arbeidsgiverreferanse = organisasjonsnummer,
-                inntekter = listOf(Inntekt(YearMonth.of(2018, 1), sammenligningsgrunnlagTotalbeløp))
-            )
+    private val beregningsgrunnlag =
+        Beregningsgrunnlag(
+            totalbeløp = beregningsgrunnlagTotalbeløp,
+            omregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp)),
         )
-    )
+
+    private val sammenligningsgrunnlag =
+        Sammenligningsgrunnlag(
+            totalbeløp = sammenligningsgrunnlagTotalbeløp,
+            innrapporterteInntekter =
+                listOf(
+                    InnrapportertInntekt(
+                        arbeidsgiverreferanse = organisasjonsnummer,
+                        inntekter = listOf(Inntekt(YearMonth.of(2018, 1), sammenligningsgrunnlagTotalbeløp)),
+                    ),
+                ),
+        )
 
     @Test
     fun `kan lese løsning på avviksvurdering-behov med ny vurdering`() {
         testRapid.sendTestMessage(løsningMedNyVurdering())
-        val forventetLøsning = AvviksvurderingBehovLøsning(
-            avviksvurderingId,
-            maksimaltTillattAvvik,
-            avviksprosent,
-            harAkseptabeltAvvik,
-            opprettet,
-            beregningsgrunnlag,
-            sammenligningsgrunnlag
-        )
+        val forventetLøsning =
+            AvviksvurderingBehovLøsning(
+                avviksvurderingId,
+                maksimaltTillattAvvik,
+                avviksprosent,
+                harAkseptabeltAvvik,
+                opprettet,
+                beregningsgrunnlag,
+                sammenligningsgrunnlag,
+            )
         verify(exactly = 1) {
-            mediator.løsning(hendelseId, contextId, id, forventetLøsning, any())
+            mediator.løsning(hendelseId, contextId, id, forventetLøsning, any(), any())
         }
     }
 
     @Test
     fun `kan lese løsning på avviksvurdering-behov uten ny vurdering`() {
         testRapid.sendTestMessage(løsningUtenNyVurdering())
-        val forventetLøsning = AvviksvurderingBehovLøsning(
-            avviksvurderingId = avviksvurderingId,
-            maksimaltTillattAvvik = maksimaltTillattAvvik,
-            avviksprosent = avviksprosent,
-            harAkseptabeltAvvik = harAkseptabeltAvvik,
-            opprettet = opprettet,
-            beregningsgrunnlag = beregningsgrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag
-        )
+        val forventetLøsning =
+            AvviksvurderingBehovLøsning(
+                avviksvurderingId = avviksvurderingId,
+                maksimaltTillattAvvik = maksimaltTillattAvvik,
+                avviksprosent = avviksprosent,
+                harAkseptabeltAvvik = harAkseptabeltAvvik,
+                opprettet = opprettet,
+                beregningsgrunnlag = beregningsgrunnlag,
+                sammenligningsgrunnlag = sammenligningsgrunnlag,
+            )
         verify(exactly = 1) {
-            mediator.løsning(hendelseId, contextId, id, forventetLøsning, any())
+            mediator.løsning(hendelseId, contextId, id, forventetLøsning, any(), any())
         }
     }
 
     @Language("JSON")
-    private fun løsningMedNyVurdering(): String = """
+    private fun løsningMedNyVurdering(): String =
+        """
         {
           "@event_name": "behov",
           "@behovId": "b4c1ebd1-61af-46f0-8706-31f31ea61b8b",
@@ -95,6 +101,7 @@ class AvviksvurderingLøsningRiverTest {
           "organisasjonsnummer": "$organisasjonsnummer",
           "hendelseId": "$hendelseId",
           "contextId": "$contextId",
+          "sti": [1],
           "vedtaksperiodeId": "4dde0ba9-5bbf-4c4d-800b-246cf19dfbc6",
           "Avviksvurdering": {
             "skjæringstidspunkt": "2018-01-01",
@@ -144,10 +151,11 @@ class AvviksvurderingLøsningRiverTest {
           "skjæringstidspunkt": "2018-01-01"
         }
 
-    """.trimIndent()
+        """.trimIndent()
 
     @Language("JSON")
-    private fun løsningUtenNyVurdering(): String = """
+    private fun løsningUtenNyVurdering(): String =
+        """
         {
           "@event_name": "behov",
           "@behovId": "b4c1ebd1-61af-46f0-8706-31f31ea61b8b",
@@ -159,6 +167,7 @@ class AvviksvurderingLøsningRiverTest {
           "organisasjonsnummer": "$organisasjonsnummer",
           "hendelseId": "$hendelseId",
           "contextId": "$contextId",
+          "sti": [1],
           "vedtaksperiodeId": "4dde0ba9-5bbf-4c4d-800b-246cf19dfbc6",
           "Avviksvurdering": {
             "skjæringstidspunkt": "2018-01-01",
@@ -207,5 +216,5 @@ class AvviksvurderingLøsningRiverTest {
           },
           "skjæringstidspunkt": "2018-01-01"
         }
-    """.trimIndent()
+        """.trimIndent()
 }

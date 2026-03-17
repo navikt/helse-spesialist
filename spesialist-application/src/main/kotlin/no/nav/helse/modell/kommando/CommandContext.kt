@@ -16,7 +16,8 @@ class CommandContext(
     private val hash: UUID? = null,
 ) {
     private val data = mutableListOf<Any>()
-    private val sti: MutableList<Int> = sti.toMutableList()
+    private val _sti: MutableList<Int> = sti.toMutableList()
+    val sti: List<Int> get() = _sti
     private var tidligFerdigstilt = false
     private val observers = mutableSetOf<CommandContextObserver>()
 
@@ -30,7 +31,7 @@ class CommandContext(
 
     fun behov(behov: Behov) {
         observers.forEach {
-            it.behov(behov = behov, commandContextId = id, sti = sti)
+            it.behov(behov = behov, commandContextId = id, sti = _sti)
         }
     }
 
@@ -49,19 +50,19 @@ class CommandContext(
     }
 
     internal fun suspendert(index: Int) {
-        sti.add(0, index)
+        _sti.add(0, index)
     }
 
-    internal fun clear() {
-        sti.clear()
+    fun clear() {
+        _sti.clear()
     }
 
     internal fun register(command: MacroCommand) {
-        if (sti.isEmpty()) return
-        command.restore(sti.removeAt(0))
+        if (_sti.isEmpty()) return
+        command.restore(_sti.removeAt(0))
     }
 
-    internal fun sti() = sti.toList()
+    internal fun sti() = _sti.toList()
 
     fun opprett(
         commandContextDao: CommandContextDao,
@@ -96,7 +97,7 @@ class CommandContext(
             logg.info(
                 "Restarter kommandokjede ${command.name} fordi rekkefølgen, antallet kommandoer eller navn på en eller flere kommandoer i kjeden har endret seg.",
             )
-            sti.clear()
+            clear()
         }
         return utfør(command).also { ferdig ->
             if (tidligFerdigstilt || ferdig) {
@@ -104,8 +105,8 @@ class CommandContext(
                     kommandokjedetilstandEndret(KommandokjedeEndretEvent.Ferdig(command.name, id, hendelseId))
                 }
             } else {
-                commandContextDao.suspendert(hendelseId, id, newHash, sti).also {
-                    kommandokjedetilstandEndret(KommandokjedeEndretEvent.Suspendert(command.name, sti, id, hendelseId))
+                commandContextDao.suspendert(hendelseId, id, newHash, _sti).also {
+                    kommandokjedetilstandEndret(KommandokjedeEndretEvent.Suspendert(command.name, _sti, id, hendelseId))
                 }
             }
         }
@@ -113,7 +114,7 @@ class CommandContext(
 
     private fun utfør(command: Command) =
         when {
-            sti.isEmpty() -> command.execute(this)
+            _sti.isEmpty() -> command.execute(this)
             else -> command.resume(this)
         }
 

@@ -27,6 +27,7 @@ class ÅpneGosysOppgaverLøsningRiver(
             it.requireKey("@id", "contextId", "hendelseId", "fødselsnummer")
             it.require("@løsning.ÅpneOppgaver.antall") {}
             it.requireKey("@løsning.ÅpneOppgaver.oppslagFeilet")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -49,6 +50,7 @@ class ÅpneGosysOppgaverLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = åpneGosysOppgaver,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

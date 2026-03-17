@@ -33,6 +33,7 @@ class InntektLøsningRiver(
                     interestedIn("orgnummer")
                 }
             }
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -65,6 +66,7 @@ class InntektLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = inntektsløsning,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }

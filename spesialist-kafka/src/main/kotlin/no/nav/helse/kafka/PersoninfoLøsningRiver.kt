@@ -37,6 +37,7 @@ class PersoninfoløsningRiver(
                 "@løsning.HentPersoninfoV2.adressebeskyttelse",
             )
             it.interestedIn("@løsning.HentPersoninfoV2.mellomnavn")
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -53,6 +54,7 @@ class PersoninfoløsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = parsePersoninfo(packet["@løsning.HentPersoninfoV2"]),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }
@@ -75,6 +77,7 @@ class FlerePersoninfoRiver(
                 requireKey("ident", "fornavn", "etternavn", "fødselsdato", "kjønn", "adressebeskyttelse")
                 interestedIn("mellomnavn")
             }
+            it.requireKey("sti")
         }
 
     override fun onPacket(
@@ -98,6 +101,7 @@ class FlerePersoninfoRiver(
                     },
                 ),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
+            sti = packet["sti"].map { it.asInt() },
         )
     }
 }
