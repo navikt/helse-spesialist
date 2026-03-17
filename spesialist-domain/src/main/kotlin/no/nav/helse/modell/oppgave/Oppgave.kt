@@ -39,9 +39,9 @@ class Oppgave private constructor(
     tilstand: Tilstand,
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
-    val utbetalingId: UUID,
+    utbetalingId: UUID,
     godkjenningsbehovId: UUID,
-    val kanAvvises: Boolean,
+    kanAvvises: Boolean,
     ferdigstiltAvIdent: NAVIdent?,
     ferdigstiltAvOid: UUID?,
     egenskaper: Set<Egenskap>,
@@ -54,6 +54,7 @@ class Oppgave private constructor(
 ) : Entity<OppgaveId>(id) {
     private val observers = mutableListOf<OppgaveObserver>()
     private val _egenskaper = egenskaper.toMutableSet()
+    val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
 
     var mottaker: Mottaker = mottaker
         private set
@@ -64,6 +65,10 @@ class Oppgave private constructor(
     var inntektsforhold: Inntektsforhold = inntektsforhold
         private set
     var periodetype: Periodetype = periodetype
+        private set
+    var utbetalingId: UUID = utbetalingId
+        private set
+    var kanAvvises: Boolean = kanAvvises
         private set
 
     var ferdigstiltAvOid = ferdigstiltAvOid
@@ -79,8 +84,6 @@ class Oppgave private constructor(
 
     var godkjenningsbehovId: UUID = godkjenningsbehovId
         private set
-
-    val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
 
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
