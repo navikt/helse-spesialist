@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansEvent
-import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansId
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansOpphevetEvent
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansOpprettetEvent
 
@@ -35,7 +34,6 @@ class PgSaksbehandlerStansRepository(
             asSQL(
                 """
                 INSERT INTO saksbehandler_stans_events (
-                    saksbehandlerstans_id,
                     sekvensnummer,
                     event_navn,
                     utført_av_saksbehandler_ident,
@@ -44,7 +42,6 @@ class PgSaksbehandlerStansRepository(
                     begrunnelse
                 )
                 VALUES (
-                    :saksbehandlerstans_id,
                     :sekvensnummer,
                     :event_navn,
                     :utfort_av_saksbehandler_ident,
@@ -53,7 +50,6 @@ class PgSaksbehandlerStansRepository(
                     :begrunnelse
                 )
                 """.trimIndent(),
-                "saksbehandlerstans_id" to saksbehandlerStans.id.value,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "event_navn" to event.tilDBSaksbehandlerStansEvent().name,
                 "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent.value,
@@ -80,7 +76,6 @@ class PgSaksbehandlerStansRepository(
     private fun Row.tilSaksbehandlerStansEvent(): SaksbehandlerStansEvent {
         val metadata =
             SaksbehandlerStansEvent.Metadata(
-                saksbehandlerStansId = SaksbehandlerStansId(uuid("saksbehandlerstans_id")),
                 sekvensnummer = int("sekvensnummer"),
                 utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
                 tidspunkt = instant("tidspunkt"),

@@ -3,18 +3,11 @@ package no.nav.helse.spesialist.domain.saksbehandlerstans
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
-import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.Instant
-import java.util.UUID
-
-@JvmInline
-value class SaksbehandlerStansId(
-    val value: UUID,
-) : ValueObject
 
 class SaksbehandlerStans private constructor(
     stansOpprettetEvent: SaksbehandlerStansOpprettetEvent,
-) : AggregateRoot<SaksbehandlerStansId>(stansOpprettetEvent.metadata.saksbehandlerStansId) {
+) : AggregateRoot<Identitetsnummer>(stansOpprettetEvent.identitetsnummer) {
     private val _events: MutableList<SaksbehandlerStansEvent> = mutableListOf(stansOpprettetEvent)
     val events: List<SaksbehandlerStansEvent> get() = _events
 
@@ -32,7 +25,6 @@ class SaksbehandlerStans private constructor(
             SaksbehandlerStansOpphevetEvent(
                 metadata =
                     SaksbehandlerStansEvent.Metadata(
-                        saksbehandlerStansId = id,
                         sekvensnummer = versjon + 1,
                         utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
                         tidspunkt = Instant.now(),
@@ -51,7 +43,6 @@ class SaksbehandlerStans private constructor(
             SaksbehandlerStansOpprettetEvent(
                 metadata =
                     SaksbehandlerStansEvent.Metadata(
-                        saksbehandlerStansId = id,
                         sekvensnummer = versjon + 1,
                         utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
                         tidspunkt = Instant.now(),
@@ -71,7 +62,6 @@ class SaksbehandlerStans private constructor(
             SaksbehandlerStansOpprettetEvent(
                 metadata =
                     SaksbehandlerStansEvent.Metadata(
-                        saksbehandlerStansId = SaksbehandlerStansId(UUID.randomUUID()),
                         sekvensnummer = 1,
                         utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
                         tidspunkt = Instant.now(),

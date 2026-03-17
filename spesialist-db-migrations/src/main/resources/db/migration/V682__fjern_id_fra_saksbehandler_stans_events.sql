@@ -1,0 +1,1 @@
+ALTER TABLE saksbehandler_stans_events DROP COLUMN saksbehandlerstans_id;

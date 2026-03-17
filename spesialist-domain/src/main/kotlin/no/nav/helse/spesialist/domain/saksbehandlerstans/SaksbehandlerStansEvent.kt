@@ -10,7 +10,6 @@ sealed interface SaksbehandlerStansEvent {
     val begrunnelse: String
 
     data class Metadata(
-        val saksbehandlerStansId: SaksbehandlerStansId,
         val sekvensnummer: Int,
         val utførtAvSaksbehandlerIdent: NAVIdent,
         val tidspunkt: Instant,
