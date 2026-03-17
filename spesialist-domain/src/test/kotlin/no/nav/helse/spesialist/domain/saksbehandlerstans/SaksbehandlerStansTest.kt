@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.domain.saksbehandlerstans
 
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import org.junit.jupiter.api.assertThrows
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -127,5 +128,42 @@ class SaksbehandlerStansTest {
         assertEquals(3, saksbehandlerStans.versjon)
         assertEquals(begrunnelse, stansOpprettetEvent.begrunnelse)
         assertEquals(saksbehandlerIdent, stansOpprettetEvent.metadata.utførtAvSaksbehandlerIdent)
+    }
+
+    @Test
+    fun `Ikke lov å opprette stans på eksisterende stans`() {
+        // given
+        val identitetsnummer = lagIdentitetsnummer()
+        val saksbehandlerIdent = lagSaksbehandler().ident
+
+        val saksbehandlerStans = SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+            identitetsnummer = identitetsnummer,
+            begrunnelse = "begrunnelse",
+        )
+
+        // then when
+        assertThrows<RuntimeException> { saksbehandlerStans.opprettStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse") }
+    }
+
+    @Test
+    fun `Ikke lov å oppheve stans på allerede opphevet stans`() {
+        // given
+        val identitetsnummer = lagIdentitetsnummer()
+        val saksbehandlerIdent = lagSaksbehandler().ident
+
+        val saksbehandlerStans = SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+            identitetsnummer = identitetsnummer,
+            begrunnelse = "begrunnelse",
+        )
+
+        saksbehandlerStans.opphevStans(
+            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+            begrunnelse = "begrunnelse",
+        )
+
+        // then when
+        assertThrows<RuntimeException> { saksbehandlerStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse") }
     }
 }

@@ -28,7 +28,7 @@ class SaksbehandlerStans private constructor(
         utførtAvSaksbehandlerIdent: NAVIdent,
         begrunnelse: String,
     ) {
-        val saksbehandlerStansOpphevetEvent =
+        apply(
             SaksbehandlerStansOpphevetEvent(
                 metadata =
                     SaksbehandlerStansEvent.Metadata(
@@ -39,17 +39,15 @@ class SaksbehandlerStans private constructor(
                     ),
                 identitetsnummer = identitetsnummer,
                 begrunnelse = begrunnelse,
-            )
-        versjon = saksbehandlerStansOpphevetEvent.metadata.sekvensnummer
-        erStanset = false
-        _events.add(saksbehandlerStansOpphevetEvent)
+            ),
+        )
     }
 
     fun opprettStans(
         utførtAvSaksbehandlerIdent: NAVIdent,
         begrunnelse: String,
     ) {
-        val saksbehandlerStansOpprettetEvent =
+        apply(
             SaksbehandlerStansOpprettetEvent(
                 metadata =
                     SaksbehandlerStansEvent.Metadata(
@@ -60,10 +58,8 @@ class SaksbehandlerStans private constructor(
                     ),
                 identitetsnummer = identitetsnummer,
                 begrunnelse = begrunnelse,
-            )
-        versjon = saksbehandlerStansOpprettetEvent.metadata.sekvensnummer
-        erStanset = true
-        _events.add(saksbehandlerStansOpprettetEvent)
+            ),
+        )
     }
 
     companion object {
@@ -84,5 +80,32 @@ class SaksbehandlerStans private constructor(
                 identitetsnummer = identitetsnummer,
             ),
         )
+
+        fun fraLagring(events: List<SaksbehandlerStansEvent>): SaksbehandlerStans =
+            SaksbehandlerStans(events.first() as SaksbehandlerStansOpprettetEvent)
+                .also { stans -> events.drop(1).forEach(stans::apply) }
+    }
+
+    private fun apply(event: SaksbehandlerStansEvent) {
+        håndterEvent(event)
+        when (event) {
+            is SaksbehandlerStansOpprettetEvent -> {
+                if (erStanset) error("Prøvde å opprette stans som allerede er stanset!")
+                erStanset = true
+            }
+
+            is SaksbehandlerStansOpphevetEvent -> {
+                if (!erStanset) error("Prøvde å oppheve stans som ikke er stanset!")
+                erStanset = false
+            }
+        }
+    }
+
+    private fun håndterEvent(event: SaksbehandlerStansEvent) {
+        if (event.metadata.sekvensnummer != versjon + 1) { // sekvensnummer i riktig rekkefølge
+            error("Fikk events ute av rekkefølge: $versjon -> ${event.metadata.sekvensnummer}")
+        }
+        versjon = event.metadata.sekvensnummer
+        _events.add(event)
     }
 }
