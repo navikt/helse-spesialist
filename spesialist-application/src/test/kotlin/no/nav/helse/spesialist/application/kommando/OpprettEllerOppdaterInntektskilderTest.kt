@@ -43,7 +43,11 @@ class OpprettEllerOppdaterInntektskilderTest {
 
             val behov = mutableListOf<Behov>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+                sti: List<Int>,
+            ) {
                 this.behov.add(behov)
             }
         }
@@ -68,7 +72,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer))),
-            observer.behov.toList()
+            observer.behov.toList(),
         )
     }
 
@@ -87,7 +91,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer))),
-            observer.behov.toList()
+            observer.behov.toList(),
         )
     }
 
@@ -107,7 +111,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer))),
-            observer.behov.toList()
+            observer.behov.toList(),
         )
     }
 
@@ -127,7 +131,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer))),
-            observer.behov.toList()
+            observer.behov.toList(),
         )
     }
 
@@ -191,11 +195,12 @@ class OpprettEllerOppdaterInntektskilderTest {
         val command =
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
-                identifikatorer = setOf(
-                    organisasjonsnummer1.organisasjonsnummer,
-                    organisasjonsnummer2.organisasjonsnummer,
-                    organisasjonsnummer3.organisasjonsnummer
-                ),
+                identifikatorer =
+                    setOf(
+                        organisasjonsnummer1.organisasjonsnummer,
+                        organisasjonsnummer2.organisasjonsnummer,
+                        organisasjonsnummer3.organisasjonsnummer,
+                    ),
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
             )
@@ -208,9 +213,9 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(
             listOf(
                 organisasjonsnummer2.organisasjonsnummer,
-                organisasjonsnummer3.organisasjonsnummer
+                organisasjonsnummer3.organisasjonsnummer,
             ).sorted(),
-            (actualBehovList.first() as Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver).organisasjonsnumre.sorted()
+            (actualBehovList.first() as Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver).organisasjonsnumre.sorted(),
         )
     }
 
@@ -224,11 +229,12 @@ class OpprettEllerOppdaterInntektskilderTest {
         val command =
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
-                identifikatorer = setOf(
-                    fødselsnummer1.fødselsnummer,
-                    fødselsnummer2.fødselsnummer,
-                    fødselsnummer3.fødselsnummer
-                ),
+                identifikatorer =
+                    setOf(
+                        fødselsnummer1.fødselsnummer,
+                        fødselsnummer2.fødselsnummer,
+                        fødselsnummer3.fødselsnummer,
+                    ),
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
             )
@@ -241,9 +247,9 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(
             listOf(
                 fødselsnummer2.fødselsnummer,
-                fødselsnummer3.fødselsnummer
+                fødselsnummer3.fødselsnummer,
             ).sorted(),
-            (actualBehovList.first() as Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak).identer.sorted()
+            (actualBehovList.first() as Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak).identer.sorted(),
         )
     }
 
@@ -266,8 +272,9 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(
             setOf(
                 Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer)),
-                Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer))
-            ), observer.behov.toSet()
+                Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer)),
+            ),
+            observer.behov.toSet(),
         )
     }
 
@@ -288,8 +295,8 @@ class OpprettEllerOppdaterInntektskilderTest {
         context.add(
             lagArbeidsgiverinformasjonløsning(
                 orgnummer = organisasjonsnummer.organisasjonsnummer,
-                navn = arbeidsgivernavn
-            )
+                navn = arbeidsgivernavn,
+            ),
         )
 
         val ferdig = command.resume(context)
@@ -298,7 +305,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(1, arbeidsgiverRepository.alle().size)
         arbeidsgiverRepository.alle().single().assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
-            forventetNavn = arbeidsgivernavn
+            forventetNavn = arbeidsgivernavn,
         )
     }
 
@@ -322,8 +329,8 @@ class OpprettEllerOppdaterInntektskilderTest {
             lagPersoninfoløsninger(
                 ident = fødselsnummer.fødselsnummer,
                 fornavn = fornavn,
-                etternavn = etternavn
-            )
+                etternavn = etternavn,
+            ),
         )
 
         val ferdig = command.resume(context)
@@ -332,7 +339,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(1, arbeidsgiverRepository.alle().size)
         arbeidsgiverRepository.alle().single().assertArbeidsgiver(
             forventetIdentifikator = fødselsnummer,
-            forventetNavn = "$fornavn $etternavn"
+            forventetNavn = "$fornavn $etternavn",
         )
     }
 
@@ -355,17 +362,19 @@ class OpprettEllerOppdaterInntektskilderTest {
         val arbeidsgivernavn = lagOrganisasjonsnavn()
         context.add(
             lagArbeidsgiverinformasjonløsning(
-                orgnummer = organisasjonsnummer.organisasjonsnummer, navn = arbeidsgivernavn
-            )
+                orgnummer = organisasjonsnummer.organisasjonsnummer,
+                navn = arbeidsgivernavn,
+            ),
         )
 
         val fornavn = lagFornavn()
         val etternavn = lagEtternavn()
         context.add(
             lagPersoninfoløsninger(
-                ident = fødselsnummer.fødselsnummer, fornavn = fornavn,
-                etternavn = etternavn
-            )
+                ident = fødselsnummer.fødselsnummer,
+                fornavn = fornavn,
+                etternavn = etternavn,
+            ),
         )
 
         val ferdig = command.resume(context)
@@ -373,11 +382,11 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(2, arbeidsgiverRepository.alle().size)
         arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
-            forventetNavn = arbeidsgivernavn
+            forventetNavn = arbeidsgivernavn,
         )
         arbeidsgiverRepository.finn(fødselsnummer).assertArbeidsgiver(
             forventetIdentifikator = fødselsnummer,
-            forventetNavn = "$fornavn $etternavn"
+            forventetNavn = "$fornavn $etternavn",
         )
     }
 
@@ -403,8 +412,8 @@ class OpprettEllerOppdaterInntektskilderTest {
         context.add(
             lagArbeidsgiverinformasjonløsning(
                 orgnummer = organisasjonsnummer.organisasjonsnummer,
-                navn = arbeidsgivernavn
-            )
+                navn = arbeidsgivernavn,
+            ),
         )
 
         val ferdig = command.resume(context)
@@ -413,12 +422,12 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertEquals(2, arbeidsgiverRepository.alle().size)
         arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
-            forventetNavn = arbeidsgivernavn
+            forventetNavn = arbeidsgivernavn,
         )
 
         assertEquals(
             setOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer))),
-            observer.behov.toSet()
+            observer.behov.toSet(),
         )
     }
 
@@ -435,15 +444,19 @@ class OpprettEllerOppdaterInntektskilderTest {
                 skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                    totalbeløp = 600_000.0,
-                    innrapporterteInntekter = listOf(InnrapportertInntekt(
-                        arbeidsgiverreferanse = organisasjonsnummer.organisasjonsnummer,
-                        inntekter = emptyList()
-                    ))
-                ),
-                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList())
-            )
+                sammenligningsgrunnlag =
+                    Sammenligningsgrunnlag(
+                        totalbeløp = 600_000.0,
+                        innrapporterteInntekter =
+                            listOf(
+                                InnrapportertInntekt(
+                                    arbeidsgiverreferanse = organisasjonsnummer.organisasjonsnummer,
+                                    inntekter = emptyList(),
+                                ),
+                            ),
+                    ),
+                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList()),
+            ),
         )
         val command =
             OpprettEllerOppdaterInntektskilder(
@@ -457,7 +470,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer))),
-            observer.behov.toList()
+            observer.behov.toList(),
         )
     }
 
@@ -474,11 +487,13 @@ class OpprettEllerOppdaterInntektskilderTest {
                 skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                    600_000.0, listOf(InnrapportertInntekt(organisasjonsnummer.organisasjonsnummer, emptyList()))
-                ),
-                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList())
-            )
+                sammenligningsgrunnlag =
+                    Sammenligningsgrunnlag(
+                        600_000.0,
+                        listOf(InnrapportertInntekt(organisasjonsnummer.organisasjonsnummer, emptyList())),
+                    ),
+                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList()),
+            ),
         )
         lagreOppdatertArbeidsgiver(organisasjonsnummer)
 
@@ -497,34 +512,36 @@ class OpprettEllerOppdaterInntektskilderTest {
 
     private fun lagArbeidsgiverinformasjonløsning(
         orgnummer: String,
-        navn: String
+        navn: String,
     ): Arbeidsgiverinformasjonløsning =
         Arbeidsgiverinformasjonløsning(
-            arbeidsgivere = listOf(
-                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
-                    orgnummer = orgnummer,
-                    navn = navn,
+            arbeidsgivere =
+                listOf(
+                    Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
+                        orgnummer = orgnummer,
+                        navn = navn,
+                    ),
                 ),
-            )
         )
 
     private fun lagPersoninfoløsninger(
         ident: String,
         fornavn: String,
-        etternavn: String
+        etternavn: String,
     ): HentPersoninfoløsninger =
         HentPersoninfoløsninger(
-            løsninger = listOf(
-                HentPersoninfoløsning(
-                    ident = ident,
-                    fornavn = fornavn,
-                    mellomnavn = null,
-                    etternavn = etternavn,
-                    fødselsdato = lagFødselsdato(),
-                    kjønn = Kjønn.Kvinne,
-                    adressebeskyttelse = Adressebeskyttelse.Ugradert,
+            løsninger =
+                listOf(
+                    HentPersoninfoløsning(
+                        ident = ident,
+                        fornavn = fornavn,
+                        mellomnavn = null,
+                        etternavn = etternavn,
+                        fødselsdato = lagFødselsdato(),
+                        kjønn = Kjønn.Kvinne,
+                        adressebeskyttelse = Adressebeskyttelse.Ugradert,
+                    ),
                 ),
-            ),
         )
 
     private fun Arbeidsgiver?.assertArbeidsgiver(
@@ -539,32 +556,34 @@ class OpprettEllerOppdaterInntektskilderTest {
     private fun lagreOppdatertArbeidsgiver(identifikator: ArbeidsgiverIdentifikator) {
         lagreArbeidsgiver(
             identifikator = identifikator,
-            navnSistOppdatertDato = LocalDate.now()
+            navnSistOppdatertDato = LocalDate.now(),
         )
     }
 
     private fun lagreUtdatertArbeidsgiver(identifikator: ArbeidsgiverIdentifikator) {
         lagreArbeidsgiver(
             identifikator = identifikator,
-            navnSistOppdatertDato = LocalDate.now().minusDays(15L)
+            navnSistOppdatertDato = LocalDate.now().minusDays(15L),
         )
     }
 
-    private fun lagreArbeidsgiver(identifikator: ArbeidsgiverIdentifikator, navnSistOppdatertDato: LocalDate) {
+    private fun lagreArbeidsgiver(
+        identifikator: ArbeidsgiverIdentifikator,
+        navnSistOppdatertDato: LocalDate,
+    ) {
         arbeidsgiverRepository.lagre(
             Arbeidsgiver.Factory.fraLagring(
                 id = identifikator,
-                navn = Arbeidsgiver.Navn(
-                    navn = "et navn",
-                    sistOppdatertDato = navnSistOppdatertDato,
-                ),
-            )
+                navn =
+                    Arbeidsgiver.Navn(
+                        navn = "et navn",
+                        sistOppdatertDato = navnSistOppdatertDato,
+                    ),
+            ),
         )
     }
 
-    private fun lagFødselsnummerIdentifikator() =
-        ArbeidsgiverIdentifikator.Fødselsnummer(lagFødselsnummer())
+    private fun lagFødselsnummerIdentifikator() = ArbeidsgiverIdentifikator.Fødselsnummer(lagFødselsnummer())
 
-    private fun lagOrganisasjonsnummerIdentifikator() =
-        ArbeidsgiverIdentifikator.Organisasjonsnummer(lagOrganisasjonsnummer())
+    private fun lagOrganisasjonsnummerIdentifikator() = ArbeidsgiverIdentifikator.Organisasjonsnummer(lagOrganisasjonsnummer())
 }

@@ -20,6 +20,7 @@ class Outbox(
         val commandContextId: UUID,
         val identitetsnummer: Identitetsnummer,
         val behov: List<Behov>,
+        val sti: List<Int>,
     ) : OutboxMelding
 
     fun leggTil(
@@ -27,6 +28,7 @@ class Outbox(
         commandContextId: UUID,
         identitetsnummer: Identitetsnummer,
         behov: List<Behov>,
+        sti: List<Int>,
     ) {
         outbox.add(
             OutboxBehovListe(
@@ -34,6 +36,7 @@ class Outbox(
                 commandContextId = commandContextId,
                 identitetsnummer = identitetsnummer,
                 behov = behov,
+                sti = sti,
             ),
         )
     }
@@ -100,34 +103,39 @@ class Outbox(
     fun sendAlle(meldingPubliserer: MeldingPubliserer) {
         outbox.forEach {
             when (it) {
-                is OutboxBehovListe ->
+                is OutboxBehovListe -> {
                     meldingPubliserer.publiser(
                         hendelseId = it.hendelseId,
                         commandContextId = it.commandContextId,
                         fødselsnummer = it.identitetsnummer.value,
                         behov = it.behov,
+                        sti = it.sti,
                     )
+                }
 
-                is OutboxKommandokjedeEndretEvent ->
+                is OutboxKommandokjedeEndretEvent -> {
                     meldingPubliserer.publiser(
                         fødselsnummer = it.identitetsnummer.value,
                         event = it.event,
                         hendelseNavn = it.hendelseNavn,
                     )
+                }
 
-                is OutboxSubsumsjon ->
+                is OutboxSubsumsjon -> {
                     meldingPubliserer.publiser(
                         fødselsnummer = it.identitetsnummer.value,
                         subsumsjonEvent = it.subsumsjonEvent,
                         versjonAvKode = it.versjonAvKode,
                     )
+                }
 
-                is OutboxUtgåendeHendelse ->
+                is OutboxUtgåendeHendelse -> {
                     meldingPubliserer.publiser(
                         fødselsnummer = it.identitetsnummer.value,
                         hendelse = it.hendelse,
                         årsak = it.årsak,
                     )
+                }
             }
         }
     }

@@ -29,26 +29,39 @@ internal class UtgåendeMeldingerMediatorTest {
         private val vedtaksperiodeId = UUID.randomUUID()
     }
 
-    private val meldingPubliserer = object : MeldingPubliserer {
-        var antallMeldinger: Int = 0
-            private set
+    private val meldingPubliserer =
+        object : MeldingPubliserer {
+            var antallMeldinger: Int = 0
+                private set
 
-        override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) {
-            antallMeldinger++
+            override fun publiser(
+                fødselsnummer: String,
+                hendelse: UtgåendeHendelse,
+                årsak: String,
+            ) {
+                antallMeldinger++
+            }
+
+            override fun publiser(
+                fødselsnummer: String,
+                subsumsjonEvent: SubsumsjonEvent,
+                versjonAvKode: String,
+            ) = error("Not implemented in test")
+
+            override fun publiser(
+                hendelseId: UUID,
+                commandContextId: UUID,
+                fødselsnummer: String,
+                behov: List<Behov>,
+                sti: List<Int>,
+            ) = error("Not implemented in test")
+
+            override fun publiser(
+                fødselsnummer: String,
+                event: KommandokjedeEndretEvent,
+                hendelseNavn: String,
+            ) = error("Not implemented in test")
         }
-
-        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) =
-            error("Not implemented in test")
-
-        override fun publiser(
-            hendelseId: UUID,
-            commandContextId: UUID,
-            fødselsnummer: String,
-            behov: List<Behov>
-        ) = error("Not implemented in test")
-
-        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented in test")
-    }
 
     private val utgåendeMeldingerMediator: UtgåendeMeldingerMediator = UtgåendeMeldingerMediator()
     private lateinit var testmelding: Testmelding
@@ -63,36 +76,34 @@ internal class UtgåendeMeldingerMediatorTest {
 
     @Test
     fun `sender meldinger`() {
-        val hendelse1 = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = lagFødselsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            periodetype = "FØRSTEGANGSBEHANDLING",
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-        )
-        val hendelse2 = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = lagFødselsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            periodetype = "FORLENGELSE",
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-
-        )
+        val hendelse1 =
+            VedtaksperiodeGodkjentAutomatisk(
+                fødselsnummer = lagFødselsnummer(),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                periodetype = "FØRSTEGANGSBEHANDLING",
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            )
+        val hendelse2 =
+            VedtaksperiodeGodkjentAutomatisk(
+                fødselsnummer = lagFødselsnummer(),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                periodetype = "FORLENGELSE",
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            )
         testContext.hendelse(hendelse1)
         testContext.hendelse(hendelse2)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(testmelding, meldingPubliserer)
         assertEquals(2, meldingPubliserer.antallMeldinger)
     }
 
-    private inner class Testmelding(override val id: UUID) : Vedtaksperiodemelding {
+    private class Testmelding(
+        override val id: UUID,
+    ) : Vedtaksperiodemelding {
+        override fun fødselsnummer(): String = FNR
 
-        override fun fødselsnummer(): String {
-            return FNR
-        }
-
-        override fun vedtaksperiodeId(): UUID {
-            return vedtaksperiodeId
-        }
+        override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
         override fun behandle(
             person: LegacyPerson,
@@ -102,8 +113,6 @@ internal class UtgåendeMeldingerMediatorTest {
         }
 
         @Language("JSON")
-        override fun toJson(): String {
-            return """{ "@id": "${UUID.randomUUID()}", "@event_name": "testhendelse", "@opprettet": "${LocalDateTime.now()}" }"""
-        }
+        override fun toJson(): String = """{ "@id": "${UUID.randomUUID()}", "@event_name": "testhendelse", "@opprettet": "${LocalDateTime.now()}" }"""
     }
 }

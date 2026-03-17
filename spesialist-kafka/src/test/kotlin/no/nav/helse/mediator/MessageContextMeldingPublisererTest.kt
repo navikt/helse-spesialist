@@ -59,6 +59,7 @@ internal class MessageContextMeldingPublisererTest {
             commandContextId = contextId,
             fødselsnummer = fødselsnummer,
             behov = listOf(behov),
+            sti = listOf(1, 2, 3),
         )
 
         assertTrue(!testRapid.inspektør.field(0, "@behov").isMissingOrNull())
@@ -66,6 +67,7 @@ internal class MessageContextMeldingPublisererTest {
         assertEquals(fødselsnummer, testRapid.inspektør.field(0, "fødselsnummer").asText())
         assertEquals(contextId.toString(), testRapid.inspektør.field(0, "contextId").asText())
         assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "hendelseId").asText())
+        assertEquals(listOf(1, 2, 3), testRapid.inspektør.field(0, "sti").map { it.asInt() })
         assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }

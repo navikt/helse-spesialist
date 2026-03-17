@@ -24,28 +24,45 @@ internal class DokumentMediatorTest {
 
     private val dokumentDao = mockk<DokumentDao>(relaxed = true)
 
-    private val meldingPubliserer = object : MeldingPubliserer {
-        var antallMeldinger: Int = 0
-            private set
+    private val meldingPubliserer =
+        object : MeldingPubliserer {
+            var antallMeldinger: Int = 0
+                private set
 
-        override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) {
-            antallMeldinger++
+            override fun publiser(
+                fødselsnummer: String,
+                hendelse: UtgåendeHendelse,
+                årsak: String,
+            ) {
+                antallMeldinger++
+            }
+
+            override fun publiser(
+                fødselsnummer: String,
+                subsumsjonEvent: SubsumsjonEvent,
+                versjonAvKode: String,
+            ) = error("Not implemented in test")
+
+            override fun publiser(
+                hendelseId: UUID,
+                commandContextId: UUID,
+                fødselsnummer: String,
+                behov: List<Behov>,
+                sti: List<Int>,
+            ) = error("Not implemented in test")
+
+            override fun publiser(
+                fødselsnummer: String,
+                event: KommandokjedeEndretEvent,
+                hendelseNavn: String,
+            ) = error("Not implemented in test")
         }
 
-        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) =
-            error("Not implemented in test")
-
-        override fun publiser(hendelseId: UUID, commandContextId: UUID, fødselsnummer: String, behov: List<Behov>) =
-            error("Not implemented in test")
-
-        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) =
-            error("Not implemented in test")
-    }
-
-    private val mediator = DokumentMediator(
-        publiserer = meldingPubliserer,
-        retries = RETRIES,
-    )
+    private val mediator =
+        DokumentMediator(
+            publiserer = meldingPubliserer,
+            retries = RETRIES,
+        )
 
     @Test
     fun `Prøver å hente dokumentet {retries + 1} ganger`() {

@@ -33,7 +33,11 @@ internal class KontrollerEgenAnsattstatusTest {
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+                sti: List<Int>,
+            ) {
                 this.behov.add(behov)
             }
         }

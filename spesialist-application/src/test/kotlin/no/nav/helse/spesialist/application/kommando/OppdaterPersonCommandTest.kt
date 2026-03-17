@@ -26,8 +26,7 @@ internal class OppdaterPersonCommandTest {
 
     val førsteKjenteDagFinner = { LocalDate.now() }
 
-    private fun command(identitetsnummer: Identitetsnummer) =
-        OppdaterPersonCommand(identitetsnummer.value, førsteKjenteDagFinner, personRepository, infotrygdutbetalingerRepository)
+    private fun command(identitetsnummer: Identitetsnummer) = OppdaterPersonCommand(identitetsnummer.value, førsteKjenteDagFinner, personRepository, infotrygdutbetalingerRepository)
 
     private lateinit var context: CommandContext
 
@@ -38,6 +37,7 @@ internal class OppdaterPersonCommandTest {
             override fun behov(
                 behov: Behov,
                 commandContextId: UUID,
+                sti: List<Int>,
             ) {
                 this.behov.add(behov)
             }
@@ -84,7 +84,10 @@ internal class OppdaterPersonCommandTest {
         verify(exactly = 1) { løsning.oppdater(infotrygdutbetalingerRepository, person.id.value) }
     }
 
-    private fun initLagredeInfotrygdUtbetalinger(oppdatert: LocalDate, identitetsnummer: Identitetsnummer) {
+    private fun initLagredeInfotrygdUtbetalinger(
+        oppdatert: LocalDate,
+        identitetsnummer: Identitetsnummer,
+    ) {
         infotrygdutbetalingerRepository.lagre(
             InfotrygdUtbetalinger.Factory.fraLagring(identitetsnummer, "[]", oppdatert),
         )

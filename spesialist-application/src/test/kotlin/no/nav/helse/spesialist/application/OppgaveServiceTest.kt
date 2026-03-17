@@ -73,6 +73,7 @@ internal class OppgaveServiceTest {
                 commandContextId: UUID,
                 fødselsnummer: String,
                 behov: List<Behov>,
+                sti: List<Int>,
             ) = error("Not implemented for test")
 
             override fun publiser(

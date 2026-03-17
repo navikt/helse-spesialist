@@ -10,8 +10,8 @@ interface UtgåendeMeldingerObserver {
     fun behov(
         behov: Behov,
         commandContextId: UUID,
-    ) {
-    }
+        sti: List<Int>,
+    ) {}
 
     fun hendelse(hendelse: UtgåendeHendelse) {}
 }
@@ -21,12 +21,15 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
     private val hendelser = mutableListOf<UtgåendeHendelse>()
     private val kommandokjedetilstandsendringer = mutableListOf<KommandokjedeEndretEvent>()
     private var commandContextId: UUID? = null
+    private var sti: List<Int> = emptyList()
 
     override fun behov(
         behov: Behov,
         commandContextId: UUID,
+        sti: List<Int>,
     ) {
         this.commandContextId = commandContextId
+        this.sti = sti
         this.behov.add(behov)
     }
 
@@ -49,6 +52,7 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
         behov.clear()
         hendelser.clear()
         commandContextId = null
+        sti = emptyList()
     }
 
     private fun publiserHendelser(
@@ -74,6 +78,7 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
             hendelseId = hendelse.id,
             commandContextId = contextId,
             fødselsnummer = hendelse.fødselsnummer(),
+            sti = this.sti,
             behov = behov,
         )
     }

@@ -20,16 +20,18 @@ class BehovMessageBuilderTest {
     private val fødselsnummer: String = lagFødselsnummer()
     private val commandContextId: UUID = UUID.randomUUID()
     private val hendelseId: UUID = UUID.randomUUID()
-    private fun Behov.somJson() = listOf(this).somJsonMessage(commandContextId, fødselsnummer, hendelseId).toJson()
+
+    private fun Behov.somJson() = listOf(this).somJsonMessage(commandContextId, fødselsnummer, hendelseId, listOf(1, 2, 3)).toJson()
 
     @Test
     fun `Infotrygdutbetalinger-behov`() {
         val behov = Behov.Infotrygdutbetalinger(1 jan 2018, 31 jan 2018).somJson()
         behov.assertBehov(
-            "HentInfotrygdutbetalinger", mapOf(
+            "HentInfotrygdutbetalinger",
+            mapOf(
                 "historikkFom" to (1 jan 2018),
-                "historikkTom" to (31 jan 2018)
-            )
+                "historikkTom" to (31 jan 2018),
+            ),
         )
     }
 
@@ -65,7 +67,7 @@ class BehovMessageBuilderTest {
         val behov = Behov.Arbeidsforhold(fødselsnummer, organisasjonsnummer).somJson()
         behov.assertBehov(
             "Arbeidsforhold",
-            mapOf("organisasjonsnummer" to organisasjonsnummer, "fødselsnummer" to fødselsnummer)
+            mapOf("organisasjonsnummer" to organisasjonsnummer, "fødselsnummer" to fødselsnummer),
         )
     }
 
@@ -76,7 +78,7 @@ class BehovMessageBuilderTest {
         val behov = Behov.InntekterForSykepengegrunnlag(beregningStart, beregningSlutt).somJson()
         behov.assertBehov(
             "InntekterForSykepengegrunnlag",
-            mapOf("beregningStart" to beregningStart, "beregningSlutt" to beregningSlutt)
+            mapOf("beregningStart" to beregningStart, "beregningSlutt" to beregningSlutt),
         )
     }
 
@@ -84,17 +86,20 @@ class BehovMessageBuilderTest {
     fun `Risikovurdering-behov`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val behov = Behov.Risikovurdering(
-            vedtaksperiodeId = vedtaksperiodeId,
-            organisasjonsnummer = organisasjonsnummer,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            førstegangsbehandling = true,
-            kunRefusjon = false,
-            inntekt = InntektTilRisk(
-                omregnetÅrsinntekt = 123456.7,
-                inntektskilde = "Arbeidsgiver"
-            )
-        ).somJson()
+        val behov =
+            Behov
+                .Risikovurdering(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                    førstegangsbehandling = true,
+                    kunRefusjon = false,
+                    inntekt =
+                        InntektTilRisk(
+                            omregnetÅrsinntekt = 123456.7,
+                            inntektskilde = "Arbeidsgiver",
+                        ),
+                ).somJson()
         behov.assertBehov(
             "Risikovurdering",
             mapOf(
@@ -102,11 +107,12 @@ class BehovMessageBuilderTest {
                 "organisasjonsnummer" to organisasjonsnummer,
                 "førstegangsbehandling" to true,
                 "kunRefusjon" to false,
-                "inntekt" to mapOf(
-                    "omregnetÅrsinntekt" to 123456.7,
-                    "inntektskilde" to "Arbeidsgiver",
-                )
-            )
+                "inntekt" to
+                    mapOf(
+                        "omregnetÅrsinntekt" to 123456.7,
+                        "inntektskilde" to "Arbeidsgiver",
+                    ),
+            ),
         )
     }
 
@@ -140,13 +146,15 @@ class BehovMessageBuilderTest {
         val vilkårsgrunnlagId = UUID.randomUUID()
         val skjæringstidspunkt = LocalDate.now()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val behov = Behov.Avviksvurdering(
-            listOf(OmregnetÅrsinntekt(organisasjonsnummer, 1000.0)),
-            vilkårsgrunnlagId,
-            skjæringstidspunkt,
-            organisasjonsnummer,
-            vedtaksperiodeId
-        ).somJson()
+        val behov =
+            Behov
+                .Avviksvurdering(
+                    listOf(OmregnetÅrsinntekt(organisasjonsnummer, 1000.0)),
+                    vilkårsgrunnlagId,
+                    skjæringstidspunkt,
+                    organisasjonsnummer,
+                    vedtaksperiodeId,
+                ).somJson()
         behov.assertBehov(
             "Avviksvurdering",
             mapOf(
@@ -154,13 +162,14 @@ class BehovMessageBuilderTest {
                 "organisasjonsnummer" to organisasjonsnummer,
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "vilkårsgrunnlagId" to vilkårsgrunnlagId,
-                "omregnedeÅrsinntekter" to listOf(
-                    mapOf(
-                        "organisasjonsnummer" to organisasjonsnummer,
-                        "beløp" to 1000.0
-                    )
-                ),
-            )
+                "omregnedeÅrsinntekter" to
+                    listOf(
+                        mapOf(
+                            "organisasjonsnummer" to organisasjonsnummer,
+                            "beløp" to 1000.0,
+                        ),
+                    ),
+            ),
         )
     }
 
@@ -169,9 +178,13 @@ class BehovMessageBuilderTest {
         assertEquals(fødselsnummer, this.path("fødselsnummer").asText())
         assertEquals(commandContextId, this.path("contextId").asUUID())
         assertEquals(hendelseId, this.path("hendelseId").asUUID())
+        assertEquals(listOf(1, 2, 3), this.path("sti").map { it.asInt() })
     }
 
-    private fun String.assertBehov(behovtype: String, payload: Map<String, Any>) {
+    private fun String.assertBehov(
+        behovtype: String,
+        payload: Map<String, Any>,
+    ) {
         val jsonNode = objectMapper.readTree(this)
         jsonNode.assertStandardfelter()
         assertEquals(listOf(behovtype), jsonNode.path("@behov").map { it.asText() })

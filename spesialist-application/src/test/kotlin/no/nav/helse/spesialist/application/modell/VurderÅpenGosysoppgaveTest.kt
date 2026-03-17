@@ -35,11 +35,12 @@ internal class VurderÅpenGosysoppgaveTest {
     private val behandlingAg1 = behandling(VEDTAKPERIODE_ID_AG_1)
     private val behandlingAg2 = behandling(VEDTAKPERIODE_ID_AG_2)
     private val skjæringstidspunkt = LocalDate.now().minusDays(17)
-    private val sykefraværstilfelle = Sykefraværstilfelle(
-        FNR,
-        skjæringstidspunkt,
-        listOf(behandlingAg1, behandlingAg2)
-    )
+    private val sykefraværstilfelle =
+        Sykefraværstilfelle(
+            FNR,
+            skjæringstidspunkt,
+            listOf(behandlingAg1, behandlingAg2),
+        )
     private val åpneGosysOppgaverDao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
@@ -63,6 +64,7 @@ internal class VurderÅpenGosysoppgaveTest {
             override fun behov(
                 behov: Behov,
                 commandContextId: UUID,
+                sti: List<Int>,
             ) {
                 behovsamler.add(behov)
             }
@@ -160,7 +162,10 @@ internal class VurderÅpenGosysoppgaveTest {
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
     }
 
-    private fun lagrerVarselVedÅpneOppgaver(harTildeltOppgave: Boolean, context: CommandContext) {
+    private fun lagrerVarselVedÅpneOppgaver(
+        harTildeltOppgave: Boolean,
+        context: CommandContext,
+    ) {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(context))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
@@ -177,7 +182,7 @@ internal class VurderÅpenGosysoppgaveTest {
             fom = 1 jan 2018,
             tom = 31 jan 2018,
             skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
 }
 

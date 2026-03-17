@@ -21,14 +21,17 @@ internal class OppdaterPersondataRiverIntegrationTest {
     @Test
     fun `oppdater persondata blir prosessert riktig`() {
         // Given:
-        val person = lagPerson()
-            .also(sessionContext.personRepository::lagre)
+        val person =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
 
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-            .also(sessionContext.behandlingRepository::lagre)
+        val behandling =
+            lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+                .also(sessionContext.behandlingRepository::lagre)
 
         // When:
         testRapid.sendTestMessage(oppdaterPersondataMelding(person))
@@ -43,7 +46,8 @@ internal class OppdaterPersondataRiverIntegrationTest {
         val actualJsonNode = behovMelding.json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "behov",
               "@behov": [
@@ -54,17 +58,19 @@ internal class OppdaterPersondataRiverIntegrationTest {
                 "historikkTom": "${LocalDate.now()}"
               },
               "fødselsnummer": "${person.id.value}",
-              "hendelseId": "bff52e44-d009-43c8-af43-a14a38b66cfb"
+              "hendelseId": "bff52e44-d009-43c8-af43-a14a38b66cfb",
+              "sti": [0]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode, "@behovId", "contextId")
     }
 
     @Test
     fun `oppdater persondata hopper over behov når det ikke finnes noen behandlinger`() {
         // Given:
-        val person = lagPerson()
-            .also(sessionContext.personRepository::lagre)
+        val person =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
 
         // When:
         testRapid.sendTestMessage(oppdaterPersondataMelding(person))
@@ -81,28 +87,28 @@ internal class OppdaterPersondataRiverIntegrationTest {
     @Language("JSON")
     private fun oppdaterPersondataMelding(person: Person) =
         """
-    {
-      "@event_name": "oppdater_persondata",
-      "fødselsnummer": "${person.id.value}",
-      "@id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
-      "@opprettet": "2025-08-22T10:12:25.424748984",
-      "system_read_count": 1,
-      "system_participating_services": [
         {
-          "id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
-          "time": "2025-08-22T10:12:25.424748984",
-          "service": "spesialist",
-          "instance": "spesialist-8944b8c68-zlhkj",
-          "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.19-14.16-da17e2f"
-        },
-        {
-          "id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
-          "time": "2025-08-22T10:12:25.433034589",
-          "service": "spesialist",
-          "instance": "spesialist-8944b8c68-zlhkj",
-          "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.19-14.16-da17e2f"
+          "@event_name": "oppdater_persondata",
+          "fødselsnummer": "${person.id.value}",
+          "@id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
+          "@opprettet": "2025-08-22T10:12:25.424748984",
+          "system_read_count": 1,
+          "system_participating_services": [
+            {
+              "id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
+              "time": "2025-08-22T10:12:25.424748984",
+              "service": "spesialist",
+              "instance": "spesialist-8944b8c68-zlhkj",
+              "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.19-14.16-da17e2f"
+            },
+            {
+              "id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
+              "time": "2025-08-22T10:12:25.433034589",
+              "service": "spesialist",
+              "instance": "spesialist-8944b8c68-zlhkj",
+              "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.19-14.16-da17e2f"
+            }
+          ]
         }
-      ]
-    }
-    """.trimIndent()
+        """.trimIndent()
 }

@@ -21,6 +21,7 @@ internal class OppdaterEnhetCommandTest {
             override fun behov(
                 behov: Behov,
                 commandContextId: UUID,
+                sti: List<Int>,
             ) {
                 this.behov.add(behov)
             }

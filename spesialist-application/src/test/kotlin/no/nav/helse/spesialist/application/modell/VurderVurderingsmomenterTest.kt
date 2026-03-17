@@ -38,14 +38,13 @@ internal class VurderVurderingsmomenterTest {
 
         private fun behovløsning(
             vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-            kanGodkjennesAutomatisk: Boolean = true
+            kanGodkjennesAutomatisk: Boolean = true,
         ) = Risikovurderingløsning(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
             løsning = JsonNodeFactory.instance.objectNode(),
         )
-
     }
 
     private val legacyBehandling =
@@ -55,7 +54,7 @@ internal class VurderVurderingsmomenterTest {
             fom = 1 jan 2018,
             tom = 31 jan 2018,
             skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
     private val sykefraværstilfelle =
         Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
@@ -66,7 +65,11 @@ internal class VurderVurderingsmomenterTest {
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+                sti: List<Int>,
+            ) {
                 this.behov.add(behov)
             }
         }
@@ -92,8 +95,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -111,8 +115,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -129,8 +134,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -147,8 +153,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -164,7 +171,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
         every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
-            behovløsning()
+            behovløsning(),
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
@@ -177,8 +184,8 @@ internal class VurderVurderingsmomenterTest {
         val enAnnenVedtaksperiodeId = UUID.randomUUID()
         context.add(
             behovløsning(
-                vedtaksperiodeId = enAnnenVedtaksperiodeId
-            )
+                vedtaksperiodeId = enAnnenVedtaksperiodeId,
+            ),
         )
 
         assertFalse(risikoCommand().execute(context))
@@ -189,8 +196,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
 
         observer.behov.clear()
@@ -203,8 +211,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -213,8 +222,8 @@ internal class VurderVurderingsmomenterTest {
         every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning(
-                kanGodkjennesAutomatisk = false
-            )
+                kanGodkjennesAutomatisk = false,
+            ),
         )
 
         risikoCommand().execute(context)
@@ -235,21 +244,24 @@ internal class VurderVurderingsmomenterTest {
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
-        sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
-            arbeidsgivere = listOf(
-                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                    omregnetÅrsinntekt = 123456.7,
-                    organisasjonsnummer = testperson.orgnummer,
-                    inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
-                )
+        sykepengegrunnlagsfakta =
+            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                arbeidsgivere =
+                    listOf(
+                        Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                            omregnetÅrsinntekt = 123456.7,
+                            organisasjonsnummer = testperson.orgnummer,
+                            inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
+                        ),
+                    ),
+                seksG = 6 * 118620.0,
+                sykepengegrunnlag = BigDecimal("123456.7"),
             ),
-            seksG = 6 * 118620.0,
-            sykepengegrunnlag = BigDecimal("123456.7")
-        )
     )
 
-    private fun inntekt() = InntektTilRisk(
-        omregnetÅrsinntekt = 123456.7,
-        inntektskilde = "Arbeidsgiver"
-    )
+    private fun inntekt() =
+        InntektTilRisk(
+            omregnetÅrsinntekt = 123456.7,
+            inntektskilde = "Arbeidsgiver",
+        )
 }

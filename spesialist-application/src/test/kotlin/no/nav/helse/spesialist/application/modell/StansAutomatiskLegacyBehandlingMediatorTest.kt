@@ -37,26 +37,40 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
 
-    private val meldingPubliserer = object : MeldingPubliserer {
-        private val subsumsjonEvents: MutableList<SubsumsjonEvent> = mutableListOf()
-        fun subsumsjonEvents(): List<SubsumsjonEvent> = subsumsjonEvents
+    private val meldingPubliserer =
+        object : MeldingPubliserer {
+            private val subsumsjonEvents: MutableList<SubsumsjonEvent> = mutableListOf()
 
-        override fun publiser(fødselsnummer: String, hendelse: UtgåendeHendelse, årsak: String) =
-            error("Not implemented for test")
+            fun subsumsjonEvents(): List<SubsumsjonEvent> = subsumsjonEvents
 
-        override fun publiser(fødselsnummer: String, subsumsjonEvent: SubsumsjonEvent, versjonAvKode: String) {
-            subsumsjonEvents.add(subsumsjonEvent)
+            override fun publiser(
+                fødselsnummer: String,
+                hendelse: UtgåendeHendelse,
+                årsak: String,
+            ) = error("Not implemented for test")
+
+            override fun publiser(
+                fødselsnummer: String,
+                subsumsjonEvent: SubsumsjonEvent,
+                versjonAvKode: String,
+            ) {
+                subsumsjonEvents.add(subsumsjonEvent)
+            }
+
+            override fun publiser(
+                hendelseId: UUID,
+                commandContextId: UUID,
+                fødselsnummer: String,
+                behov: List<Behov>,
+                sti: List<Int>,
+            ) = error("Not implemented for test")
+
+            override fun publiser(
+                fødselsnummer: String,
+                event: KommandokjedeEndretEvent,
+                hendelseNavn: String,
+            ) = error("Not implemented for test")
         }
-
-        override fun publiser(
-            hendelseId: UUID,
-            commandContextId: UUID,
-            fødselsnummer: String,
-            behov: List<Behov>
-        ) = error("Not implemented for test")
-
-        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented for test")
-    }
 
     private val subsumsjonsmelder = Subsumsjonsmelder("versjonAvKode", meldingPubliserer)
 
@@ -101,19 +115,19 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `Melding med status STOPP_AUTOMATIKK gjør at personen skal unntas fra automatisering`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MEDISINSK_VILKAR, MANGLENDE_MEDVIRKING),
-                )
+            meldinger(
+                stans(MEDISINSK_VILKAR, MANGLENDE_MEDVIRKING),
+            )
         assertTrue(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
     }
 
     @Test
     fun `Melding med status NORMAL gjør at personen ikke lenger er unntatt fra automatisering`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MEDISINSK_VILKAR),
-                    opphevStans(),
-                )
+            meldinger(
+                stans(MEDISINSK_VILKAR),
+                opphevStans(),
+            )
 
         assertFalse(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
     }
@@ -121,11 +135,11 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `Kan stanses på nytt etter stans er opphevet`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MEDISINSK_VILKAR),
-                    opphevStans(),
-                    stans(AKTIVITETSKRAV),
-                )
+            meldinger(
+                stans(MEDISINSK_VILKAR),
+                opphevStans(),
+                stans(AKTIVITETSKRAV),
+            )
 
         assertTrue(mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR))
     }
@@ -133,9 +147,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender subsumsjonsmelding med årsak medisinsk vilkår`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MEDISINSK_VILKAR),
-                )
+            meldinger(
+                stans(MEDISINSK_VILKAR),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -159,9 +173,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender subsumsjonsmelding med årsak bestridelse sykmelding`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(BESTRIDELSE_SYKMELDING),
-                )
+            meldinger(
+                stans(BESTRIDELSE_SYKMELDING),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -185,9 +199,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender subsumsjonsmelding med årsak aktivitetskrav`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(AKTIVITETSKRAV),
-                )
+            meldinger(
+                stans(AKTIVITETSKRAV),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -211,9 +225,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender subsumsjonsmelding med årsak manglende medvirking`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MANGLENDE_MEDVIRKING),
-                )
+            meldinger(
+                stans(MANGLENDE_MEDVIRKING),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -237,10 +251,10 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender flere subsumsjonsmeldinger når det er flere stoppmeldinger med ulik årsak`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MEDISINSK_VILKAR),
-                    stans(AKTIVITETSKRAV),
-                )
+            meldinger(
+                stans(MEDISINSK_VILKAR),
+                stans(AKTIVITETSKRAV),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -269,9 +283,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender flere subsumsjonsmeldinger når det er flere årsaker i samme stoppmelding`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(MEDISINSK_VILKAR, AKTIVITETSKRAV),
-                )
+            meldinger(
+                stans(MEDISINSK_VILKAR, AKTIVITETSKRAV),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -300,11 +314,11 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender bare subsumsjonsmelding for stoppmeldinger etter siste opphevelse av stans`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(AKTIVITETSKRAV),
-                    opphevStans(),
-                    stans(MEDISINSK_VILKAR),
-                )
+            meldinger(
+                stans(AKTIVITETSKRAV),
+                opphevStans(),
+                stans(MEDISINSK_VILKAR),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 
@@ -340,9 +354,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `sender 8-4 oppfylt subsumsjon selv om automatisering er stanset på grunn av 8-8`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
-                meldinger(
-                    stans(AKTIVITETSKRAV),
-                )
+            meldinger(
+                stans(AKTIVITETSKRAV),
+            )
 
         mediator.sjekkOmAutomatiseringErStanset(FNR, VEDTAKSPERIODEID, ORGNR)
 

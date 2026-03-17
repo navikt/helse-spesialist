@@ -40,8 +40,9 @@ class MessageContextMeldingPubliserer(
         commandContextId: UUID,
         fødselsnummer: String,
         behov: List<Behov>,
+        sti: List<Int>,
     ) {
-        val packet = behov.somJsonMessage(commandContextId, fødselsnummer, hendelseId).toJson()
+        val packet = behov.somJsonMessage(commandContextId, fødselsnummer, hendelseId, sti).toJson()
         val behovNames = behov.map(Behov::behovName)
         loggInfo("Publiserer behov for $behovNames", "json" to packet)
         context.publish(fødselsnummer, packet)

@@ -27,13 +27,18 @@ internal class PersisterInntektCommandTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private lateinit var context: CommandContext
 
-    private val observer = object : CommandContextObserver {
-        val behov = mutableListOf<Behov>()
+    private val observer =
+        object : CommandContextObserver {
+            val behov = mutableListOf<Behov>()
 
-        override fun behov(behov: Behov, commandContextId: UUID) {
-            this.behov.add(behov)
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+                sti: List<Int>,
+            ) {
+                this.behov.add(behov)
+            }
         }
-    }
 
     @BeforeEach
     fun setup() {
@@ -91,10 +96,11 @@ internal class PersisterInntektCommandTest {
 
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)
 
-    private fun inntekter() = listOf(
-        Inntekter(
-            årMåned = YearMonth.parse("2022-11"),
-            inntektsliste = listOf(Inntekter.Inntekt(beløp = 20000.0, orgnummer = "123456789"))
+    private fun inntekter() =
+        listOf(
+            Inntekter(
+                årMåned = YearMonth.parse("2022-11"),
+                inntektsliste = listOf(Inntekter.Inntekt(beløp = 20000.0, orgnummer = "123456789")),
+            ),
         )
-    )
 }

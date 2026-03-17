@@ -36,7 +36,7 @@ class VurderVergemålOgFullmaktTest {
             fom = 1 jan 2018,
             tom = 31 jan 2018,
             skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(legacyBehandling))
 
@@ -54,7 +54,11 @@ class VurderVergemålOgFullmaktTest {
             val behov = mutableListOf<Behov>()
             val hendelser = mutableListOf<String>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+                sti: List<Int>,
+            ) {
                 this.behov.add(behov)
             }
         }

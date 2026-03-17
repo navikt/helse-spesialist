@@ -39,7 +39,11 @@ internal class CommandContextTest {
             val hendelser = mutableListOf<UtgåendeHendelse>()
             val utgåendeTilstandEndringer = mutableListOf<KommandokjedeEndretEvent>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+                sti: List<Int>,
+            ) {
                 this.behov.add(behov)
             }
 
@@ -199,13 +203,14 @@ internal class CommandContextTest {
 
     @Test
     fun `holder på meldinger`() {
-        val hendelse = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = lagFødselsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            periodetype = "FØRSTEGANGSBEHANDLING"
-        )
+        val hendelse =
+            VedtaksperiodeGodkjentAutomatisk(
+                fødselsnummer = lagFødselsnummer(),
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                periodetype = "FØRSTEGANGSBEHANDLING",
+            )
         context.hendelse(hendelse)
         assertEquals(listOf(hendelse), observer.hendelser)
     }
@@ -232,6 +237,5 @@ internal class CommandContextTest {
             resumed = true
             return resumeAction(this)
         }
-
     }
 }

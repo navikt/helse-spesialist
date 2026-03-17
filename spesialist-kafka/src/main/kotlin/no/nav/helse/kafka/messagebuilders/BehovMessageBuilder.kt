@@ -8,6 +8,7 @@ fun Collection<Behov>.somJsonMessage(
     contextId: UUID,
     fødselsnummer: String,
     hendelseId: UUID,
+    sti: List<Int>,
 ): JsonMessage =
     JsonMessage.newNeed(
         behov = this.map { behov -> behov.behovName() },
@@ -19,24 +20,36 @@ fun Collection<Behov>.somJsonMessage(
                     "fødselsnummer" to fødselsnummer,
                     "contextId" to contextId,
                     "hendelseId" to hendelseId,
+                    "sti" to sti,
                 ),
     )
 
 fun Behov.behovName() =
     when (this) {
         is Behov.Arbeidsforhold -> "Arbeidsforhold"
+
         is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> "Arbeidsgiverinformasjon"
+
         is Behov.Enhet -> "HentEnhet"
+
         is Behov.Fullmakt -> "Fullmakt"
+
         is Behov.Infotrygdutbetalinger -> "HentInfotrygdutbetalinger"
+
         is Behov.InntekterForSykepengegrunnlag -> "InntekterForSykepengegrunnlag"
+
         is Behov.EgenAnsatt -> "EgenAnsatt"
+
         is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak,
         is Behov.Personinfo,
         -> "HentPersoninfoV2"
+
         is Behov.Risikovurdering -> "Risikovurdering"
+
         is Behov.Vergemål -> "Vergemål"
+
         is Behov.ÅpneOppgaver -> "ÅpneOppgaver"
+
         is Behov.Avviksvurdering -> "Avviksvurdering"
     }
 

@@ -30,7 +30,7 @@ class CommandContext(
 
     fun behov(behov: Behov) {
         observers.forEach {
-            it.behov(behov = behov, commandContextId = id)
+            it.behov(behov = behov, commandContextId = id, sti = sti)
         }
     }
 

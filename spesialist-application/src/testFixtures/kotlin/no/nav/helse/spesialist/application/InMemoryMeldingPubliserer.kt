@@ -11,7 +11,7 @@ class InMemoryMeldingPubliserer : MeldingPubliserer {
     data class PublisertUtgåendeHendelse(
         val fødselsnummer: String,
         val hendelse: UtgåendeHendelse,
-        val årsak: String
+        val årsak: String,
     )
 
     val publiserteUtgåendeHendelser = mutableListOf<PublisertUtgåendeHendelse>()
@@ -19,21 +19,21 @@ class InMemoryMeldingPubliserer : MeldingPubliserer {
     override fun publiser(
         fødselsnummer: String,
         hendelse: UtgåendeHendelse,
-        årsak: String
+        årsak: String,
     ) {
         publiserteUtgåendeHendelser.add(
             PublisertUtgåendeHendelse(
                 fødselsnummer = fødselsnummer,
                 hendelse = hendelse,
-                årsak = årsak
-            )
+                årsak = årsak,
+            ),
         )
     }
 
     data class PublisertSubsumsjon(
         val fødselsnummer: String,
         val subsumsjonEvent: SubsumsjonEvent,
-        val versjonAvKode: String
+        val versjonAvKode: String,
     )
 
     val publiserteSubsumsjoner = mutableListOf<PublisertSubsumsjon>()
@@ -41,14 +41,14 @@ class InMemoryMeldingPubliserer : MeldingPubliserer {
     override fun publiser(
         fødselsnummer: String,
         subsumsjonEvent: SubsumsjonEvent,
-        versjonAvKode: String
+        versjonAvKode: String,
     ) {
         publiserteSubsumsjoner.add(
             PublisertSubsumsjon(
                 fødselsnummer = fødselsnummer,
                 subsumsjonEvent = subsumsjonEvent,
-                versjonAvKode = versjonAvKode
-            )
+                versjonAvKode = versjonAvKode,
+            ),
         )
     }
 
@@ -56,7 +56,7 @@ class InMemoryMeldingPubliserer : MeldingPubliserer {
         val hendelseId: UUID,
         val commandContextId: UUID,
         val fødselsnummer: String,
-        val behov: List<Behov>
+        val behov: List<Behov>,
     )
 
     val publiserteBehovLister = mutableListOf<PublisertBehovListe>()
@@ -65,22 +65,23 @@ class InMemoryMeldingPubliserer : MeldingPubliserer {
         hendelseId: UUID,
         commandContextId: UUID,
         fødselsnummer: String,
-        behov: List<Behov>
+        behov: List<Behov>,
+        sti: List<Int>,
     ) {
         publiserteBehovLister.add(
             PublisertBehovListe(
                 hendelseId = hendelseId,
                 commandContextId = commandContextId,
                 fødselsnummer = fødselsnummer,
-                behov = behov
-            )
+                behov = behov,
+            ),
         )
     }
 
     data class PublisertKommandokjedeEndretEvent(
         val fødselsnummer: String,
         val event: KommandokjedeEndretEvent,
-        val hendelseNavn: String
+        val hendelseNavn: String,
     )
 
     val publiserteKommandokjedeEndretEvents = mutableListOf<PublisertKommandokjedeEndretEvent>()
@@ -88,14 +89,14 @@ class InMemoryMeldingPubliserer : MeldingPubliserer {
     override fun publiser(
         fødselsnummer: String,
         event: KommandokjedeEndretEvent,
-        hendelseNavn: String
+        hendelseNavn: String,
     ) {
         publiserteKommandokjedeEndretEvents.add(
             PublisertKommandokjedeEndretEvent(
                 fødselsnummer = fødselsnummer,
                 event = event,
-                hendelseNavn = hendelseNavn
-            )
+                hendelseNavn = hendelseNavn,
+            ),
         )
     }
 }
