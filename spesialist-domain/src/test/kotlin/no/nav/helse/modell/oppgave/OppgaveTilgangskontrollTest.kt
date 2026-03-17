@@ -1,5 +1,7 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

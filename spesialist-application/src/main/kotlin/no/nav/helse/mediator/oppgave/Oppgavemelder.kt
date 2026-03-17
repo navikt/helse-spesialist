@@ -3,8 +3,8 @@ package no.nav.helse.mediator.oppgave
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveObserver
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 
 class Oppgavemelder(
     private val fødselsnummer: String,

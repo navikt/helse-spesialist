@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 
 interface Handling {
     fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper)

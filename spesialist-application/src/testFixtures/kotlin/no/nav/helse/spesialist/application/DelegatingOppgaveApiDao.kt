@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
 
 class DelegatingOppgaveApiDao(

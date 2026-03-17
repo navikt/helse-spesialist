@@ -5,13 +5,13 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
 
 internal class VurderVidereBehandlingAvGodkjenningsbehov(

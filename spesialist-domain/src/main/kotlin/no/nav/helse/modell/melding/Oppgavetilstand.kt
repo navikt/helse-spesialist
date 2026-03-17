@@ -1,6 +1,6 @@
 package no.nav.helse.modell.melding
 
-import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 
 data class OppgaveOpprettet(
     val oppgave: Oppgave,

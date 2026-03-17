@@ -5,8 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -42,6 +40,8 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn

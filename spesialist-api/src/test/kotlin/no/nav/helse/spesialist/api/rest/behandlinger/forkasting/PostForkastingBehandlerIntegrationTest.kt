@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.rest.behandlinger.forkasting
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -14,6 +12,8 @@ import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId

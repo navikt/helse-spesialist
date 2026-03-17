@@ -11,7 +11,6 @@ import no.nav.helse.Meldingssender
 import no.nav.helse.TestMediator
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -44,6 +43,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsning
@@ -96,22 +96,26 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val meldingssender = Meldingssender(testRapid)
     protected lateinit var sisteMeldingId: UUID
     protected lateinit var sisteGodkjenningsbehovId: UUID
-    private val testMediator = TestMediator(
-        testRapid = testRapid,
-        dataSource = dataSource,
-        forsikringHenter = ClientSpiskammersetModule(
-            configuration = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
-            accessTokenGenerator = object : AccessTokenGenerator {
-                override fun hentAccessToken(scope: String): String = "tull"
-            }
-        ).spiskammersetClientForsikringHenter,
-        environmentToggles = object : EnvironmentToggles {
-            override val kanBeslutteEgneSaker: Boolean = false
-            override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-            override val kanSeForsikring: Boolean = false
-            override val devGcp: Boolean = false
-        },
-    )
+    private val testMediator =
+        TestMediator(
+            testRapid = testRapid,
+            dataSource = dataSource,
+            forsikringHenter =
+                ClientSpiskammersetModule(
+                    configuration = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
+                    accessTokenGenerator =
+                        object : AccessTokenGenerator {
+                            override fun hentAccessToken(scope: String): String = "tull"
+                        },
+                ).spiskammersetClientForsikringHenter,
+            environmentToggles =
+                object : EnvironmentToggles {
+                    override val kanBeslutteEgneSaker: Boolean = false
+                    override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+                    override val kanSeForsikring: Boolean = false
+                    override val devGcp: Boolean = false
+                },
+        )
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"
@@ -1005,7 +1009,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     arbeidsgivere,
                     vedtaksperiodeId,
                 )
-            testMediator.håndter(handling, saksbehandler   )
+            testMediator.håndter(handling, saksbehandler)
         }
     }
 
@@ -1158,7 +1162,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 """.trimIndent(),
                 "vedtaksperiodeId" to vedtaksperiodeId,
             ) { it.int(1) }
-        assertEquals(0, antallOppgaver.size) { "Det ble mot formodning opprettet en saksbehandleroppgave"}
+        assertEquals(0, antallOppgaver.size) { "Det ble mot formodning opprettet en saksbehandleroppgave" }
     }
 
     protected fun assertVarsler(
@@ -1190,9 +1194,13 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean?,
     ) {
-        val erEgenAnsatt = sessionFactory.transactionalSessionScope {
-            it.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus?.erEgenAnsatt
-        }
+        val erEgenAnsatt =
+            sessionFactory.transactionalSessionScope {
+                it.personRepository
+                    .finn(Identitetsnummer.fraString(fødselsnummer))
+                    ?.egenAnsattStatus
+                    ?.erEgenAnsatt
+            }
         assertEquals(skjermet, erEgenAnsatt)
     }
 

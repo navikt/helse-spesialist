@@ -1,4 +1,4 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.spesialist.domain.oppgave
 
 enum class Inntektsforhold {
     SelvstendigNæringsdrivende,

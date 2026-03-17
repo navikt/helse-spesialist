@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.assertDoesNotThrow

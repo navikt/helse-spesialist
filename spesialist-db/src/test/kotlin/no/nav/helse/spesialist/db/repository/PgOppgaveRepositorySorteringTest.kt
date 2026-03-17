@@ -9,11 +9,6 @@ import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.db.Sorteringsrekkefølge.STIGENDE
 import no.nav.helse.db.Sorteringsrekkefølge.SYNKENDE
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Inntektsforhold
-import no.nav.helse.modell.oppgave.Mottaker
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -22,6 +17,11 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
+import no.nav.helse.spesialist.domain.oppgave.Mottaker
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

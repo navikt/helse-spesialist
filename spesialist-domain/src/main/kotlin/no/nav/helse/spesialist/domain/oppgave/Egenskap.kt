@@ -1,0 +1,51 @@
+package no.nav.helse.spesialist.domain.oppgave
+
+enum class Egenskap(
+    val kategori: Kategori = Kategori.Ukategorisert,
+) {
+    RISK_QA,
+    FORTROLIG_ADRESSE,
+    STRENGT_FORTROLIG_ADRESSE,
+    EGEN_ANSATT,
+    BESLUTTER(kategori = Kategori.Status),
+    SPESIALSAK,
+    REVURDERING(kategori = Kategori.Oppgavetype),
+    SØKNAD(kategori = Kategori.Oppgavetype),
+    STIKKPRØVE,
+    UTBETALING_TIL_SYKMELDT(kategori = Kategori.Mottaker),
+    DELVIS_REFUSJON(kategori = Kategori.Mottaker),
+    UTBETALING_TIL_ARBEIDSGIVER(kategori = Kategori.Mottaker),
+    INGEN_UTBETALING(kategori = Kategori.Mottaker),
+    EN_ARBEIDSGIVER(kategori = Kategori.Inntektskilde),
+    FLERE_ARBEIDSGIVERE(kategori = Kategori.Inntektskilde),
+    FORLENGELSE(kategori = Kategori.Periodetype),
+    FORSTEGANGSBEHANDLING(kategori = Kategori.Periodetype),
+    INFOTRYGDFORLENGELSE(kategori = Kategori.Periodetype),
+    OVERGANG_FRA_IT(kategori = Kategori.Periodetype),
+    UTLAND,
+    HASTER,
+    RETUR(kategori = Kategori.Status),
+    SKJØNNSFASTSETTELSE,
+    PÅ_VENT(kategori = Kategori.Status),
+    TILBAKEDATERT,
+    GOSYS,
+    MANGLER_IM,
+    MEDLEMSKAP,
+    VERGEMÅL,
+    GRUNNBELØPSREGULERING,
+    SELVSTENDIG_NÆRINGSDRIVENDE(kategori = Kategori.Inntektsforhold),
+    ARBEIDSTAKER(kategori = Kategori.Inntektsforhold),
+    JORDBRUKER_REINDRIFT(kategori = Kategori.Arbeidssituasjon),
+    ;
+
+    enum class Kategori {
+        Mottaker,
+        Inntektskilde,
+        Inntektsforhold,
+        Arbeidssituasjon,
+        Oppgavetype,
+        Ukategorisert,
+        Periodetype,
+        Status,
+    }
+}

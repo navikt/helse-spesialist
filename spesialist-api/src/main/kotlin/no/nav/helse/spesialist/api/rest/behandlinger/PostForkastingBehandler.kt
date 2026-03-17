@@ -5,7 +5,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -31,6 +30,7 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.time.LocalDateTime
 
 class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasting, ApiForkastingRequest, Unit, ApiPostForkastingErrorCode> {

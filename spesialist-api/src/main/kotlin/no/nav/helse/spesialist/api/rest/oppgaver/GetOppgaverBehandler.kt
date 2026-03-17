@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.rest.oppgaver
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
@@ -16,6 +15,7 @@ import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Oppgaver
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 
 class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
     override val tag = Tags.OPPGAVER
@@ -40,17 +40,13 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                     sorterPå =
                         when (resource.sorteringsfelt) {
                             null, ApiOppgaveSorteringsfelt.opprettetTidspunkt -> SorteringsnøkkelForDatabase.OPPRETTET
-
                             ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
-
                             ApiOppgaveSorteringsfelt.påVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
-
                             ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt -> SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
                         },
                     sorteringsrekkefølge =
                         when (resource.sorteringsrekkefoelge) {
                             null, ApiSorteringsrekkefølge.STIGENDE -> Sorteringsrekkefølge.STIGENDE
-
                             ApiSorteringsrekkefølge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
                         },
                     sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,

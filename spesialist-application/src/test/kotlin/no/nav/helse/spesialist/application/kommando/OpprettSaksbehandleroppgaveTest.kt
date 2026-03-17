@@ -12,30 +12,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.ARBEIDSTAKER
-import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
-import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
-import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
-import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
-import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
-import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
-import no.nav.helse.modell.oppgave.Egenskap.HASTER
-import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
-import no.nav.helse.modell.oppgave.Egenskap.JORDBRUKER_REINDRIFT
-import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
-import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
-import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
-import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
-import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
-import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
-import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
-import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -51,6 +27,30 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.ARBEIDSTAKER
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.EN_ARBEIDSGIVER
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORSTEGANGSBEHANDLING
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.GRUNNBELØPSREGULERING
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.HASTER
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.INGEN_UTBETALING
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.JORDBRUKER_REINDRIFT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.PÅ_VENT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.REVURDERING
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.RISK_QA
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.SKJØNNSFASTSETTELSE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.SØKNAD
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -111,7 +111,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -125,7 +125,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -145,7 +145,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -159,7 +159,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -173,7 +173,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -186,7 +186,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             UTBETALING_TIL_SYKMELDT,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -206,7 +206,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             UTBETALING_TIL_ARBEIDSGIVER,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -227,7 +227,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             UTBETALING_TIL_ARBEIDSGIVER,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -242,7 +242,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             HASTER,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -256,7 +256,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             SKJØNNSFASTSETTELSE,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -270,7 +270,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             TILBAKEDATERT,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -284,7 +284,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             EGEN_ANSATT,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -298,7 +298,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             UTLAND,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -322,7 +322,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             Egenskap.INFOTRYGDFORLENGELSE,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -342,7 +342,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             PÅ_VENT,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -351,12 +351,16 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertTrue(
             opprettSaksbehandlerOppgaveCommand(
                 arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
-                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
-            ).execute(context)
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+            ).execute(context),
         )
         assertForventedeEgenskaper(
-            SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING,
-            JORDBRUKER_REINDRIFT, SELVSTENDIG_NÆRINGSDRIVENDE
+            SØKNAD,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING,
+            JORDBRUKER_REINDRIFT,
+            SELVSTENDIG_NÆRINGSDRIVENDE,
         )
     }
 
@@ -386,8 +390,8 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertTrue(
             opprettSaksbehandlerOppgaveCommand(
                 utbetalingtype = Utbetalingtype.REVURDERING,
-                tags = listOf("Grunnbeløpsregulering")
-            ).execute(context)
+                tags = listOf("Grunnbeløpsregulering"),
+            ).execute(context),
         )
         assertForventedeEgenskaper(
             REVURDERING,
@@ -395,7 +399,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             GRUNNBELØPSREGULERING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -404,20 +408,22 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertTrue(
             opprettSaksbehandlerOppgaveCommand(
                 utbetalingtype = Utbetalingtype.UTBETALING,
-                tags = listOf("Grunnbeløpsregulering")
-            ).execute(context)
+                tags = listOf("Grunnbeløpsregulering"),
+            ).execute(context),
         )
         assertForventedeEgenskaper(
             SØKNAD,
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
-
-    private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
+    private fun assertForventedeEgenskaper(
+        vararg egenskaper: Egenskap,
+        kanAvvises: Boolean = true,
+    ) {
         verify(exactly = 1) {
             oppgaveService.nyOppgave(
                 FNR,
@@ -445,20 +451,21 @@ internal class OpprettSaksbehandleroppgaveTest {
         arbeidssituasjon: Arbeidssituasjon? = null,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) = OpprettSaksbehandleroppgave(
-        behovData = godkjenningsbehovData(
-            id = HENDELSE_ID,
-            fødselsnummer = FNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            spleisBehandlingId = BEHANDLING_ID,
-            utbetalingId = UTBETALING_ID,
-            inntektskilde = inntektskilde,
-            periodetype = periodetype,
-            utbetalingtype = utbetalingtype,
-            kanAvvises = kanAvvises,
-            tags = tags,
-            arbeidssituasjon = arbeidssituasjon,
-            yrkesaktivitetstype = yrkesaktivitetstype,
-        ),
+        behovData =
+            godkjenningsbehovData(
+                id = HENDELSE_ID,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                spleisBehandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                inntektskilde = inntektskilde,
+                periodetype = periodetype,
+                utbetalingtype = utbetalingtype,
+                kanAvvises = kanAvvises,
+                tags = tags,
+                arbeidssituasjon = arbeidssituasjon,
+                yrkesaktivitetstype = yrkesaktivitetstype,
+            ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,
         personDao = personDao,

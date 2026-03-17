@@ -7,7 +7,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
@@ -45,6 +44,7 @@ import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.LocalDateTime
 

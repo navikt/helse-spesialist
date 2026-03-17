@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
 
 class DelegatingOppgaveDao(

@@ -3,12 +3,12 @@ package no.nav.helse.mediator.oppgave
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

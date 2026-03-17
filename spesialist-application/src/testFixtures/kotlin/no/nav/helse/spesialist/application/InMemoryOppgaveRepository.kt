@@ -7,12 +7,12 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset

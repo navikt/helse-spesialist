@@ -6,12 +6,6 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ManglerTilgang
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Inntektsforhold
-import no.nav.helse.modell.oppgave.Mottaker
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
-import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
@@ -25,6 +19,12 @@ import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
+import no.nav.helse.spesialist.domain.oppgave.Mottaker
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.Oppgave.Companion.ny
+import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.sql.SQLException
 import java.util.UUID

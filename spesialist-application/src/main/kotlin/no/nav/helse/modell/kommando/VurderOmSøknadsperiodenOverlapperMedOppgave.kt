@@ -2,9 +2,9 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 
 internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
     private val sessionContext: SessionContext,

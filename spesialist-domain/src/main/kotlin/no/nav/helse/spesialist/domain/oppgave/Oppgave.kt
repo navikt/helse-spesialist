@@ -1,19 +1,10 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.spesialist.domain.oppgave
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
-import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
-import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
-import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.GOSYS
-import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
-import no.nav.helse.modell.oppgave.Egenskap.RETUR
-import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
-import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
-import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
@@ -133,7 +124,7 @@ class Oppgave private constructor(
             "Oppgave med {} forsøkes tildelt ${saksbehandler.ident} grunnet reservasjon.",
             kv("oppgaveId", id.value),
         )
-        if (_egenskaper.contains(STIKKPRØVE)) {
+        if (_egenskaper.contains(Egenskap.STIKKPRØVE)) {
             logg.info(
                 "Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.",
                 kv(
@@ -151,36 +142,36 @@ class Oppgave private constructor(
     }
 
     fun sendTilBeslutter(beslutter: Saksbehandler?) {
-        _egenskaper.remove(RETUR)
-        _egenskaper.add(BESLUTTER)
+        _egenskaper.remove(Egenskap.RETUR)
+        _egenskaper.add(Egenskap.BESLUTTER)
         tildeltTil = beslutter?.id
         oppgaveEndret()
     }
 
     fun sendIRetur(saksbehandler: Saksbehandler) {
-        _egenskaper.remove(BESLUTTER)
-        _egenskaper.add(RETUR)
+        _egenskaper.remove(Egenskap.BESLUTTER)
+        _egenskaper.add(Egenskap.RETUR)
         tildeltTil = saksbehandler.id
         oppgaveEndret()
     }
 
     fun leggTilEgenAnsatt() {
-        _egenskaper.add(EGEN_ANSATT)
+        _egenskaper.add(Egenskap.EGEN_ANSATT)
         oppgaveEndret()
     }
 
     fun fjernEgenAnsatt() {
-        _egenskaper.remove(EGEN_ANSATT)
+        _egenskaper.remove(Egenskap.EGEN_ANSATT)
         oppgaveEndret()
     }
 
     fun fjernTilbakedatert() {
-        _egenskaper.remove(TILBAKEDATERT)
+        _egenskaper.remove(Egenskap.TILBAKEDATERT)
         oppgaveEndret()
     }
 
     fun fjernGosys() {
-        if (_egenskaper.remove(GOSYS)) {
+        if (_egenskaper.remove(Egenskap.GOSYS)) {
             logg.info(
                 "Fjerner egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id.value),
@@ -191,7 +182,7 @@ class Oppgave private constructor(
     }
 
     fun leggTilGosys() {
-        if (_egenskaper.add(GOSYS)) {
+        if (_egenskaper.add(Egenskap.GOSYS)) {
             logg.info(
                 "Legger til egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id.value),
@@ -211,7 +202,7 @@ class Oppgave private constructor(
         if (this.tildeltTil != null && !skalTildeles) {
             avmeld(saksbehandler)
         }
-        _egenskaper.add(PÅ_VENT)
+        _egenskaper.add(Egenskap.PÅ_VENT)
         oppgaveEndret()
     }
 
@@ -229,7 +220,7 @@ class Oppgave private constructor(
     }
 
     fun fjernFraPåVent() {
-        _egenskaper.remove(PÅ_VENT)
+        _egenskaper.remove(Egenskap.PÅ_VENT)
         oppgaveEndret()
     }
 
@@ -431,8 +422,8 @@ class Oppgave private constructor(
                 brukerroller = brukerroller,
             ) &&
                 when (it) {
-                    BESLUTTER -> Brukerrolle.Beslutter in brukerroller
-                    STIKKPRØVE -> Brukerrolle.Stikkprøve in brukerroller
+                    Egenskap.BESLUTTER -> Brukerrolle.Beslutter in brukerroller
+                    Egenskap.STIKKPRØVE -> Brukerrolle.Stikkprøve in brukerroller
                     else -> true
                 }
         }
@@ -529,19 +520,19 @@ class Oppgave private constructor(
         ): Boolean =
             when (egenskap) {
                 // Ingen skal ha tilgang til strengt fortrolig adresse i Speil foreløpig
-                STRENGT_FORTROLIG_ADRESSE -> {
+                Egenskap.STRENGT_FORTROLIG_ADRESSE -> {
                     false
                 }
 
-                EGEN_ANSATT -> {
+                Egenskap.EGEN_ANSATT -> {
                     Brukerrolle.EgenAnsatt in brukerroller
                 }
 
-                FORTROLIG_ADRESSE -> {
+                Egenskap.FORTROLIG_ADRESSE -> {
                     Brukerrolle.Kode7 in brukerroller
                 }
 
-                SELVSTENDIG_NÆRINGSDRIVENDE -> {
+                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> {
                     SelvstendigNæringsdrivendeBeta in brukerroller
                 }
 

@@ -9,8 +9,6 @@ import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -54,6 +52,8 @@ import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTT
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
@@ -190,8 +190,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionContext.infotrygdutbetalingerRepository.lagre(
             InfotrygdUtbetalinger.Factory.ny(
                 id = Identitetsnummer.fraString(fødselsnummer),
-                data = "{}"
-            )
+                data = "{}",
+            ),
         )
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
         opprettVedtaksperiode(

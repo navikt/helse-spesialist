@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Mottakertype
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -13,6 +12,7 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

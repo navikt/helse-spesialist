@@ -1,14 +1,14 @@
 package no.nav.helse.spesialist.db.repository
 
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
-import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.application.testing.assertEqualsByMicrosecond
 import no.nav.helse.spesialist.application.testing.assertNotEqualsByMicrosecond
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.PÅ_VENT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.SØKNAD
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker

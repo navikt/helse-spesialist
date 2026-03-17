@@ -2,11 +2,6 @@ package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
 import no.nav.helse.e2e.AbstractDatabaseTest
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Inntektsforhold
-import no.nav.helse.modell.oppgave.Mottaker
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -20,11 +15,11 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
-import no.nav.helse.spesialist.domain.Dialog
-import no.nav.helse.spesialist.domain.DialogId
-import no.nav.helse.spesialist.domain.Notat
-import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
+import no.nav.helse.spesialist.domain.oppgave.Mottaker
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.testfixtures.apr
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -304,31 +299,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "oid" to SAKSBEHANDLER.id.value,
             "vedtakRef" to vedtakRef,
         )
-
-    protected fun opprettDialog() =
-        sessionFactory.transactionalSessionScope { session ->
-            Dialog.Factory
-                .ny()
-                .also(session.dialogRepository::lagre)
-                .id()
-        }
-
-    protected fun opprettNotat(
-        tekst: String = "Et notat",
-        saksbehandlerOid: SaksbehandlerOid = SAKSBEHANDLER.id,
-        vedtaksperiodeId: UUID = PERIODE.id,
-        dialogRef: DialogId = opprettDialog(),
-    ) = sessionFactory.transactionalSessionScope { session ->
-        Notat.Factory
-            .ny(
-                type = NotatType.Generelt,
-                tekst = tekst,
-                dialogRef = dialogRef,
-                vedtaksperiodeId = vedtaksperiodeId,
-                saksbehandlerOid = saksbehandlerOid,
-            ).also(session.notatRepository::lagre)
-            .id()
-    }
 
     protected fun opprettPerson(
         fødselsnummer: String = FØDSELSNUMMER,

@@ -2,12 +2,12 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.rest.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.application.testing.assertAfter
 import no.nav.helse.spesialist.application.testing.assertAtLeast
 import no.nav.helse.spesialist.application.testing.assertIsNumber
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.intellij.lang.annotations.Language

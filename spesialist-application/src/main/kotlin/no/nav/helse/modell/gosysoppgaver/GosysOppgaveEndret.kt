@@ -14,7 +14,6 @@ import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivComm
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -23,6 +22,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
 
 class GosysOppgaveEndret(

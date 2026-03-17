@@ -16,7 +16,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
@@ -43,6 +42,7 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit

@@ -1,9 +1,5 @@
 package no.nav.helse.spesialist.domain.testfixtures
 
-import no.nav.helse.modell.oppgave.Inntektsforhold
-import no.nav.helse.modell.oppgave.Mottaker
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgavetype
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -33,6 +29,10 @@ import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
+import no.nav.helse.spesialist.domain.oppgave.Mottaker
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -236,7 +236,7 @@ fun lagNotat(
 
 fun lagForsikring(
     dekningsgrad: Int = 100,
-    gjelderFraDag: Int = 17
+    gjelderFraDag: Int = 17,
 ): Forsikring =
     Forsikring.Factory.ny(
         dekningsgrad = dekningsgrad,

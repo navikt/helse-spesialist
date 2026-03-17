@@ -1,7 +1,7 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
-import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.RISK_QA
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.SØKNAD
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.Risikofunn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class RisikovurderingE2ETest : AbstractE2ETest() {
-
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
         val riskfunn = listOf(Risikofunn(kategori = emptyList(), beskrivelse = "et faresignal"))

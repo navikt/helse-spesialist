@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.api.rest.oppgaver
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjon
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
@@ -14,6 +12,8 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.ZoneId
 

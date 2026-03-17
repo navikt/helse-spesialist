@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 
 internal object OppgaveMapper {
     internal fun Set<EgenskapForDatabase>.tilEgenskaperForVisning() =
