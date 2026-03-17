@@ -9,12 +9,13 @@ import kotlin.test.Test
 
 class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = PgSaksbehandlerStansRepository(session)
-    private val person = opprettPerson()
-    private val saksbehandler = opprettSaksbehandler()
 
     @Test
     fun `Kan lagre og finne ny saksbehandlerstans`() {
         // given
+        val person = opprettPerson()
+        val saksbehandler = opprettSaksbehandler()
+
         val saksbehandlerStans = SaksbehandlerStans.ny(
             utførtAvSaksbehandlerIdent = saksbehandler.ident,
             identitetsnummer = person.id,
@@ -37,6 +38,9 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `Kan lagre og finne oppheving av saksbehandlerstans`() {
         // given
+        val person = opprettPerson()
+        val saksbehandler = opprettSaksbehandler()
+
         val stans = SaksbehandlerStans.ny(
             utførtAvSaksbehandlerIdent = saksbehandler.ident,
             identitetsnummer = person.id,
