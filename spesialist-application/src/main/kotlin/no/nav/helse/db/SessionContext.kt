@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VarselRepository
@@ -48,6 +49,7 @@ interface SessionContext {
     val legacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository
     val legacyPersonRepository: LegacyPersonRepository
     val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
+    val saksbehandlerStansRepository: SaksbehandlerStansRepository
 
     val totrinnsvurderingRepository: TotrinnsvurderingRepository
     val overstyringRepository: OverstyringRepository

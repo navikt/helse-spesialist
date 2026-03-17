@@ -81,7 +81,8 @@ class PatchStansSaksbehandlerBehandlerTest {
         assertEquals("", response.bodyAsText)
 
         // Then:
-        val erStanset = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
+        val erStanset = sessionContext.saksbehandlerStansRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.erStanset == false
+
         assertFalse(erStanset)
 
         val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
@@ -144,7 +145,7 @@ class PatchStansSaksbehandlerBehandlerTest {
         assertEquals("", response.bodyAsText)
 
         // Then:
-        val erStanset = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
+        val erStanset = sessionContext.saksbehandlerStansRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.erStanset == true
         assertTrue(erStanset)
 
         val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)

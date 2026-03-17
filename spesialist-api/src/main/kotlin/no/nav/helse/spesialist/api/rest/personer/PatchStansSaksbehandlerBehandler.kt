@@ -13,7 +13,9 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 
 class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchStansSaksbehandlerErrorCode> {
     override val tag = Tags.PERSONER
@@ -30,8 +32,10 @@ class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.
         ) { person ->
             if (request.stans) {
                 opprettSaksbehandlerstans(request.begrunnelse, person, kallKontekst)
+                opprettSaksbehandlerstansV2(request.begrunnelse, person, kallKontekst)
             } else {
                 opphevSaksbehandlerstans(request.begrunnelse, person, kallKontekst)
+                opphevSaksbehandlerstansV2(request.begrunnelse, person, kallKontekst)
             }
             RestResponse.NoContent()
         }
@@ -54,6 +58,53 @@ class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.
         kallKontekst.transaksjon.stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(person.id.value)
         lagrePeriodehistorikkForOpphevelseAvSaksbehandlerstans(kallKontekst, person, begrunnelse)
         loggInfo("Opphevet saksbehandler-stans for person")
+    }
+
+    private fun opprettSaksbehandlerstansV2(
+        begrunnelse: String,
+        person: Person,
+        kallKontekst: KallKontekst,
+    ) {
+        val identitetsnummer = Identitetsnummer.fraString(person.id.value)
+        val saksbehandlerIdent = kallKontekst.saksbehandler.ident
+
+        val eksisterendeStans = kallKontekst.transaksjon.saksbehandlerStansRepository.finn(identitetsnummer)
+        val stans =
+            if (eksisterendeStans != null) {
+                if (!eksisterendeStans.erStanset) {
+                    eksisterendeStans.opprettStans(
+                        utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                        begrunnelse = begrunnelse,
+                    )
+                }
+                eksisterendeStans
+            } else {
+                SaksbehandlerStans.ny(
+                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                    begrunnelse = begrunnelse,
+                    identitetsnummer = identitetsnummer,
+                )
+            }
+        kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(stans)
+        loggInfo("Opprettet saksbehandler-stans for person med aggregat")
+    }
+
+    private fun opphevSaksbehandlerstansV2(
+        begrunnelse: String,
+        person: Person,
+        kallKontekst: KallKontekst,
+    ) {
+        val identitetsnummer = Identitetsnummer.fraString(person.id.value)
+        val eksisterendeStans = kallKontekst.transaksjon.saksbehandlerStansRepository.finn(identitetsnummer)
+
+        if (eksisterendeStans != null && eksisterendeStans.erStanset) {
+            eksisterendeStans.opphevStans(
+                utførtAvSaksbehandlerIdent = kallKontekst.saksbehandler.ident,
+                begrunnelse = begrunnelse,
+            )
+            kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(eksisterendeStans)
+        }
+        loggInfo("Opphevet saksbehandler-stans for person med aggregat")
     }
 
     private fun lagrePeriodehistorikkForSaksbehandlerstans(

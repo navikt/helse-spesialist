@@ -51,5 +51,6 @@ class InMemorySessionContext(
     override val midlertidigBehandlingVedtakFattetDao: InMemoryMidlertidigBehandlingVedtakFattetDao,
     override val vedtakRepository: InMemoryVedtakRepository,
     override val opptegnelseRepository: InMemoryOpptegnelseRepository,
-    override val personKlargjoresDao: InMemoryPersonKlargjoresDao
+    override val personKlargjoresDao: InMemoryPersonKlargjoresDao,
+    override val saksbehandlerStansRepository: SaksbehandlerStansRepository
 ) : SessionContext

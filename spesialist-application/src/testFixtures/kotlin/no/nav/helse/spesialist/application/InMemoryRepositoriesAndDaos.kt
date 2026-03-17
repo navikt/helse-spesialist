@@ -28,6 +28,7 @@ class InMemoryRepositoriesAndDaos {
     private val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
     private val vedtakBegrunnelseRepository = InMemoryVedtakBegrunnelseRepository()
     private val vedtakRepository = InMemoryVedtakRepository()
+    private val saksbehandlerStansRepository = InMemorySaksbehandlerStansRepository()
 
     private val meldingDuplikatkontrollDao = NoopMeldingDuplikatkontrollDao()
     private val poisonPillDao = NoopPoisonPillDao()
@@ -183,6 +184,7 @@ class InMemoryRepositoriesAndDaos {
                     vedtakRepository = vedtakRepository,
                     opptegnelseRepository = opptegnelseRepository,
                     personKlargjoresDao = personKlargjoresDao,
+                    saksbehandlerStansRepository = saksbehandlerStansRepository,
                 ),
         )
 }

@@ -66,6 +66,7 @@ import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
 import no.nav.helse.spesialist.db.repository.PgPersonRepository
 import no.nav.helse.spesialist.db.repository.PgPåVentRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
+import no.nav.helse.spesialist.db.repository.PgSaksbehandlerStansRepository
 import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.repository.PgVarselRepository
@@ -104,6 +105,7 @@ class DBSessionContext(
     override val legacyPersonRepository =
         PgLegacyPersonRepository(session, legacyVedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
     override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(session)
+    override val saksbehandlerStansRepository = PgSaksbehandlerStansRepository(session)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
     override val totrinnsvurderingRepository: TotrinnsvurderingRepository = PgTotrinnsvurderingRepository(session)
