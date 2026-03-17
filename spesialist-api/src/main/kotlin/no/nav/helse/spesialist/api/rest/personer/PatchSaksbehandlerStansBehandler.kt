@@ -17,18 +17,18 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 
-class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchStansSaksbehandlerErrorCode> {
+class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchSaksbehandlerStansErrorCode> {
     override val tag = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Saksbehandler,
         request: ApiStansRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<Unit, ApiPatchStansSaksbehandlerErrorCode> =
+    ): RestResponse<Unit, ApiPatchSaksbehandlerStansErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiPatchStansSaksbehandlerErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPatchStansSaksbehandlerErrorCode.MANGLER_TILGANG_TIL_PERSON },
+            personPseudoIdIkkeFunnet = { ApiPatchSaksbehandlerStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiPatchSaksbehandlerStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             if (request.stans) {
                 opprettSaksbehandlerstans(request.begrunnelse, person, kallKontekst)
@@ -146,7 +146,7 @@ class PatchStansSaksbehandlerBehandler : PatchBehandler<Personer.PersonPseudoId.
     private fun OppgaveDao.oppgaveId(fødselsnummer: String) = this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
 }
 
-enum class ApiPatchStansSaksbehandlerErrorCode(
+enum class ApiPatchSaksbehandlerStansErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {

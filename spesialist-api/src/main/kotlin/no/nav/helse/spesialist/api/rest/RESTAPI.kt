@@ -34,8 +34,8 @@ import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.PatchStansSaksbehandlerBehandler
-import no.nav.helse.spesialist.api.rest.personer.PatchStansVeilederBehandler
+import no.nav.helse.spesialist.api.rest.personer.PatchSaksbehandlerStansBehandler
+import no.nav.helse.spesialist.api.rest.personer.PatchVeilederStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetAktiveSaksbehandlereBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetBrukerBehandler
@@ -93,8 +93,8 @@ fun Routing.restRoutes(
             get(GetBehandledeOppgaverBehandler(), restAdapter)
             get(GetListeOppgaverBehandler(), restAdapter)
 
-            patch(PatchStansSaksbehandlerBehandler(), restAdapter)
-            patch(PatchStansVeilederBehandler(), restAdapter)
+            patch(PatchSaksbehandlerStansBehandler(), restAdapter)
+            patch(PatchVeilederStansBehandler(), restAdapter)
 
             get(GetSoknadBehandler(dokumentMediator = dokumentMediator), restAdapter)
             get(GetInntektsmeldingBehandler(dokumentMediator = dokumentMediator), restAdapter)

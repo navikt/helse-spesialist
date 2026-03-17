@@ -19,7 +19,7 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PatchStansVeilederBehandlerTest {
+class PatchVeilederStansBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 

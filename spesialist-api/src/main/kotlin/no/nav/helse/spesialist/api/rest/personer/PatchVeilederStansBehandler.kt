@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
 
-class PatchStansVeilederBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequest, Unit, ApiPatchVeilederStansErrorCode> {
+class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequest, Unit, ApiPatchVeilederStansErrorCode> {
     override val tag = Tags.PERSONER
 
     override fun behandle(
