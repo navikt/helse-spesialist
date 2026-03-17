@@ -6,24 +6,20 @@ import java.time.Instant
 
 sealed interface SaksbehandlerStansEvent {
     val metadata: Metadata
-    val identitetsnummer: Identitetsnummer
-    val begrunnelse: String
 
     data class Metadata(
         val sekvensnummer: Int,
         val utførtAvSaksbehandlerIdent: NAVIdent,
         val tidspunkt: Instant,
+        val identitetsnummer: Identitetsnummer,
+        val begrunnelse: String,
     )
 }
 
 data class SaksbehandlerStansOpprettetEvent(
     override val metadata: SaksbehandlerStansEvent.Metadata,
-    override val identitetsnummer: Identitetsnummer,
-    override val begrunnelse: String,
 ) : SaksbehandlerStansEvent
 
 data class SaksbehandlerStansOpphevetEvent(
     override val metadata: SaksbehandlerStansEvent.Metadata,
-    override val identitetsnummer: Identitetsnummer,
-    override val begrunnelse: String,
 ) : SaksbehandlerStansEvent

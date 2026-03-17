@@ -33,7 +33,7 @@ class SaksbehandlerStansTest {
 
         val stansOpprettetEvent = saksbehandlerStans.events.last() as SaksbehandlerStansOpprettetEvent
         assertEquals(1, stansOpprettetEvent.metadata.sekvensnummer)
-        assertEquals(begrunnelse, stansOpprettetEvent.begrunnelse)
+        assertEquals(begrunnelse, stansOpprettetEvent.metadata.begrunnelse)
         assertEquals(saksbehandlerIdent, stansOpprettetEvent.metadata.utførtAvSaksbehandlerIdent)
         with(stansOpprettetEvent.metadata.tidspunkt) {
             val now = Instant.now()
@@ -77,7 +77,7 @@ class SaksbehandlerStansTest {
         val stansOpphevetEvent = saksbehandlerStans.events.last() as SaksbehandlerStansOpphevetEvent
         assertEquals(2, stansOpphevetEvent.metadata.sekvensnummer)
         assertEquals(2, saksbehandlerStans.versjon)
-        assertEquals(begrunnelse, stansOpphevetEvent.begrunnelse)
+        assertEquals(begrunnelse, stansOpphevetEvent.metadata.begrunnelse)
         assertEquals(saksbehandlerIdent, stansOpphevetEvent.metadata.utførtAvSaksbehandlerIdent)
         with(stansOpphevetEvent.metadata.tidspunkt) {
             val now = Instant.now()
@@ -126,7 +126,7 @@ class SaksbehandlerStansTest {
         val stansOpprettetEvent = saksbehandlerStans.events.last() as SaksbehandlerStansOpprettetEvent
         assertEquals(3, stansOpprettetEvent.metadata.sekvensnummer)
         assertEquals(3, saksbehandlerStans.versjon)
-        assertEquals(begrunnelse, stansOpprettetEvent.begrunnelse)
+        assertEquals(begrunnelse, stansOpprettetEvent.metadata.begrunnelse)
         assertEquals(saksbehandlerIdent, stansOpprettetEvent.metadata.utførtAvSaksbehandlerIdent)
     }
 

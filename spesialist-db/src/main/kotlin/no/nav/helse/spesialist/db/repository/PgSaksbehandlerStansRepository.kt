@@ -54,8 +54,8 @@ class PgSaksbehandlerStansRepository(
                 "event_navn" to event.tilDBSaksbehandlerStansEvent().name,
                 "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent.value,
                 "tidspunkt" to event.metadata.tidspunkt,
-                "identitetsnummer" to event.identitetsnummer.value,
-                "begrunnelse" to event.begrunnelse,
+                "identitetsnummer" to event.metadata.identitetsnummer.value,
+                "begrunnelse" to event.metadata.begrunnelse,
             ).update()
         }
     }
@@ -79,20 +79,12 @@ class PgSaksbehandlerStansRepository(
                 sekvensnummer = int("sekvensnummer"),
                 utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
                 tidspunkt = instant("tidspunkt"),
+                identitetsnummer = Identitetsnummer.fraString(string("identitetsnummer")),
+                begrunnelse = string("begrunnelse"),
             )
         return when (string("event_navn")) {
-            "STANS_OPPRETTET" ->
-                SaksbehandlerStansOpprettetEvent(
-                    metadata = metadata,
-                    identitetsnummer = Identitetsnummer.fraString(string("identitetsnummer")),
-                    begrunnelse = string("begrunnelse"),
-                )
-            "STANS_OPPHEVET" ->
-                SaksbehandlerStansOpphevetEvent(
-                    metadata = metadata,
-                    identitetsnummer = Identitetsnummer.fraString(string("identitetsnummer")),
-                    begrunnelse = string("begrunnelse"),
-                )
+            "STANS_OPPRETTET" -> SaksbehandlerStansOpprettetEvent(metadata = metadata)
+            "STANS_OPPHEVET" -> SaksbehandlerStansOpphevetEvent(metadata = metadata)
             else -> error("Ukjent event_navn: ${string("event_navn")}")
         }
     }

@@ -7,11 +7,11 @@ import java.time.Instant
 
 class SaksbehandlerStans private constructor(
     stansOpprettetEvent: SaksbehandlerStansOpprettetEvent,
-) : AggregateRoot<Identitetsnummer>(stansOpprettetEvent.identitetsnummer) {
+) : AggregateRoot<Identitetsnummer>(stansOpprettetEvent.metadata.identitetsnummer) {
     private val _events: MutableList<SaksbehandlerStansEvent> = mutableListOf(stansOpprettetEvent)
     val events: List<SaksbehandlerStansEvent> get() = _events
 
-    val identitetsnummer: Identitetsnummer = stansOpprettetEvent.identitetsnummer
+    val identitetsnummer: Identitetsnummer = stansOpprettetEvent.metadata.identitetsnummer
     var versjon: Int = stansOpprettetEvent.metadata.sekvensnummer
         private set
     var erStanset: Boolean = true
@@ -28,9 +28,9 @@ class SaksbehandlerStans private constructor(
                         sekvensnummer = versjon + 1,
                         utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
                         tidspunkt = Instant.now(),
+                        identitetsnummer = identitetsnummer,
+                        begrunnelse = begrunnelse,
                     ),
-                identitetsnummer = identitetsnummer,
-                begrunnelse = begrunnelse,
             ),
         )
     }
@@ -46,9 +46,9 @@ class SaksbehandlerStans private constructor(
                         sekvensnummer = versjon + 1,
                         utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
                         tidspunkt = Instant.now(),
+                        identitetsnummer = identitetsnummer,
+                        begrunnelse = begrunnelse,
                     ),
-                identitetsnummer = identitetsnummer,
-                begrunnelse = begrunnelse,
             ),
         )
     }
@@ -65,9 +65,9 @@ class SaksbehandlerStans private constructor(
                         sekvensnummer = 1,
                         utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
                         tidspunkt = Instant.now(),
+                        begrunnelse = begrunnelse,
+                        identitetsnummer = identitetsnummer,
                     ),
-                begrunnelse = begrunnelse,
-                identitetsnummer = identitetsnummer,
             ),
         )
 
