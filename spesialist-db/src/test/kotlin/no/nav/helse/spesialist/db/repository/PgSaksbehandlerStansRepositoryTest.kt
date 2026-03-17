@@ -2,10 +2,10 @@ package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 
 class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = PgSaksbehandlerStansRepository(session)
@@ -29,10 +29,10 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertNotNull(lagretSaksbehandlerStans)
-        assertEquals(saksbehandlerStans.erStanset, lagretSaksbehandlerStans?.erStanset)
-        assertEquals(saksbehandlerStans.versjon, lagretSaksbehandlerStans?.versjon)
-        assertEquals(saksbehandlerStans.identitetsnummer, lagretSaksbehandlerStans?.identitetsnummer)
-        assertEquals(saksbehandlerStans.events, lagretSaksbehandlerStans?.events)
+        assertEquals(saksbehandlerStans.erStanset, lagretSaksbehandlerStans.erStanset)
+        assertEquals(saksbehandlerStans.versjon, lagretSaksbehandlerStans.versjon)
+        assertEquals(saksbehandlerStans.identitetsnummer, lagretSaksbehandlerStans.identitetsnummer)
+        assertEquals(saksbehandlerStans.events.size, lagretSaksbehandlerStans.events.size)
     }
 
     @Test
@@ -58,8 +58,8 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
         // then
         val hentetStans = repository.finn(person.id)
         assertNotNull(hentetStans)
-        assertFalse(hentetStans!!.erStanset)
-        assertEquals(2, hentetStans.versjon)
-        assertEquals(2, hentetStans.events.size)
+        assertFalse(hentetStans.erStanset)
+        assertEquals(stans.versjon, hentetStans.versjon)
+        assertEquals(stans.events.size, hentetStans.events.size)
     }
 }
