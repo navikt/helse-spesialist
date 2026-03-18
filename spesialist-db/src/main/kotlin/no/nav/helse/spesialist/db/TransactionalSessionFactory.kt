@@ -9,7 +9,7 @@ class TransactionalSessionFactory(
     private val dataSource: DataSource,
 ) : SessionFactory {
     override fun <T> transactionalSessionScope(transactionalBlock: (SessionContext) -> T): T =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        sessionOf(dataSource, returnGeneratedKey = true, strict = true).use { session ->
             session.transaction { transactionalSession ->
                 transactionalBlock(DBSessionContext(transactionalSession))
             }
