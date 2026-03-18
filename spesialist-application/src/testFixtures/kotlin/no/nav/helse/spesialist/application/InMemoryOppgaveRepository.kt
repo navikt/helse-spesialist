@@ -37,16 +37,6 @@ class InMemoryOppgaveRepository : OppgaveRepository {
         error("Not implemented for this test")
     }
 
-    override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
-        oppgaver.values.firstOrNull { it.utbetalingId == utbetalingId }?.let {
-            OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov(
-                id = it.id.value,
-                tilstand = it.tilstand,
-                godkjenningsbehovId = it.godkjenningsbehovId,
-                utbetalingId = it.utbetalingId,
-            )
-        }
-
     override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId == behandlingId }.minOfOrNull { it.opprettet }
 
     override fun finnOppgaveProjeksjoner(

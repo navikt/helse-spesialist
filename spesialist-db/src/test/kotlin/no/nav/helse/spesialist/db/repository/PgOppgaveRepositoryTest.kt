@@ -160,63 +160,6 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         }
     }
 
-    @Test
-    fun `finner tilstand på oppgave som avventer saksbehandler`() {
-        val oppgave = lagOppgave()
-        repository.lagre(oppgave)
-
-        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
-        assertEquals(Oppgave.AvventerSaksbehandler::class, oppgaveTilstand?.let { it::class })
-    }
-
-    @Test
-    fun `finner tilstand på oppgave som avventer system`() {
-        val oppgave = lagOppgave()
-        oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
-        repository.lagre(oppgave)
-
-        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
-        assertEquals(Oppgave.AvventerSystem::class, oppgaveTilstand?.let { it::class })
-    }
-
-    @Test
-    fun `finner tilstand på ferdigstilt oppgave`() {
-        val oppgave = lagOppgave()
-        oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
-        oppgave.ferdigstill()
-        repository.lagre(oppgave)
-
-        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
-        assertEquals(Oppgave.Ferdigstilt::class, oppgaveTilstand?.let { it::class })
-    }
-
-    @Test
-    fun `finner tilstand på invalidert oppgave`() {
-        val oppgave = lagOppgave()
-        oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
-        oppgave.avbryt()
-        repository.lagre(oppgave)
-
-        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
-        assertEquals(Oppgave.Invalidert::class, oppgaveTilstand?.let { it::class })
-    }
-
-    @Test
-    fun `finner tilstand på ferdigstilt oppgave når det finnes en tidligere invalidert oppgave`() {
-        val oppgaveId = nextLong()
-        val gammelOppgave = lagOppgave(oppgaveId)
-        gammelOppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
-        gammelOppgave.avbryt()
-        repository.lagre(gammelOppgave)
-
-        val oppgave = lagOppgave(oppgaveId + 1)
-        oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
-        oppgave.ferdigstill()
-        repository.lagre(oppgave)
-
-        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
-        assertEquals(Oppgave.Ferdigstilt::class, oppgaveTilstand?.let { it::class })
-    }
 
     @Test
     fun `lagrer første opprettet-kolonnen på en oppgave når det ligger to fra før på behandlingen`() {
@@ -248,12 +191,6 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         assertNotNull(lagretTredjeOppgave)
         assertNotEqualsByMicrosecond(lagretTredjeOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
         assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
-    }
-
-    @Test
-    fun `gir null som tilstand når det ikke finnes noen oppgave for utbetalingen`() {
-        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)
-        assertEquals(null, oppgaveTilstand?.let { it::class })
     }
 
     private fun lagOppgave(

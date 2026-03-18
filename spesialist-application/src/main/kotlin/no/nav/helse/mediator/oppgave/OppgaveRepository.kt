@@ -23,9 +23,6 @@ interface OppgaveRepository {
 
     fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave?
 
-    // TODO: Helst bør vi bruke finn(), men Oppgave er ikke et aggregat ennå
-    fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveTilstandStatusOgGodkjenningsbehov?
-
     fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime?
 
     fun finnOppgaveProjeksjoner(
@@ -85,12 +82,5 @@ interface OppgaveRepository {
     data class AntallOppgaverProjeksjon(
         val antallMineSaker: Int,
         val antallMineSakerPåVent: Int,
-    )
-
-    data class OppgaveTilstandStatusOgGodkjenningsbehov(
-        val id: Long,
-        val tilstand: Oppgave.Tilstand,
-        val godkjenningsbehovId: UUID,
-        val utbetalingId: UUID,
     )
 }
