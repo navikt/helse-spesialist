@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
-import no.nav.helse.modell.oppgave.OppgaveObserver
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
@@ -43,7 +42,9 @@ class Oppgave private constructor(
     inntektsforhold: Inntektsforhold,
     periodetype: Periodetype,
 ) : Entity<OppgaveId>(id) {
-    private val observers = mutableListOf<OppgaveObserver>()
+    private val _hendelser = mutableListOf<Oppgavehendelse>()
+    val hendelser get() = _hendelser.toList()
+
     private val _egenskaper = egenskaper.toMutableSet()
     val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
 
@@ -75,10 +76,6 @@ class Oppgave private constructor(
 
     var godkjenningsbehovId: UUID = godkjenningsbehovId
         private set
-
-    fun register(observer: OppgaveObserver) {
-        observers.add(observer)
-    }
 
     fun forsøkTildeling(
         saksbehandler: Saksbehandler,
@@ -268,7 +265,7 @@ class Oppgave private constructor(
     }
 
     private fun oppgaveEndret() {
-        observers.forEach { it.oppgaveEndret(this) }
+        _hendelser.add(Oppgavehendelse.OppgaveOppdatert(this))
     }
 
     private fun nesteTilstand(neste: Tilstand) {
@@ -471,7 +468,9 @@ class Oppgave private constructor(
                 inntektskilde = inntektskilde,
                 inntektsforhold = inntektsforhold,
                 periodetype = periodetype,
-            )
+            ).also {
+                it._hendelser.add(Oppgavehendelse.OppgaveOpprettet(it))
+            }
         }
 
         fun fraLagring(

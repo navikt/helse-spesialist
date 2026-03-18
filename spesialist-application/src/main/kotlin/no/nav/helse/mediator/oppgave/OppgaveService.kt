@@ -6,6 +6,8 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ManglerTilgang
+import no.nav.helse.modell.melding.OppgaveOppdatert
+import no.nav.helse.modell.melding.OppgaveOpprettet
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
@@ -24,6 +26,7 @@ import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgave.Companion.ny
+import no.nav.helse.spesialist.domain.oppgave.Oppgavehendelse
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.sql.SQLException
@@ -70,7 +73,6 @@ class OppgaveService(
         logg.info("Oppretter saksbehandleroppgave")
         teamLogs.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
         val nesteId = oppgaveDao.reserverNesteId()
-        val oppgavemelder = Oppgavemelder(fødselsnummer, meldingPubliserer)
         val oppgave =
             ny(
                 id = nesteId,
@@ -87,9 +89,10 @@ class OppgaveService(
                 inntektsforhold = inntektsforhold,
                 periodetype = periodetype,
             )
-        oppgave.register(oppgavemelder)
-        oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
+        oppgave.hendelser.forEach { hendelse ->
+            meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
+        }
         oppgaveRepository.lagre(oppgave)
     }
 
@@ -99,9 +102,11 @@ class OppgaveService(
     ): T {
         val oppgave = oppgaveRepository.finn(id) ?: error("Forventer å finne oppgave med oppgaveId=$id")
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
-        oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
         oppgaveRepository.lagre(oppgave)
+        oppgave.hendelser.forEach { hendelse ->
+            meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
+        }
         return returverdi
     }
 
@@ -249,3 +254,9 @@ class OppgaveService(
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
 }
+
+private fun Oppgavehendelse.tilUtgåendeHendelse() =
+    when (this) {
+        is Oppgavehendelse.OppgaveOppdatert -> OppgaveOppdatert(this.oppgave)
+        is Oppgavehendelse.OppgaveOpprettet -> OppgaveOpprettet(this.oppgave)
+    }

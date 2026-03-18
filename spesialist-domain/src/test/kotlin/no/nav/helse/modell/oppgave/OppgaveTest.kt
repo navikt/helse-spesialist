@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.SØKNAD
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.Oppgavehendelse
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -416,11 +417,11 @@ internal class OppgaveTest {
     @Test
     fun `sender ut oppgaveEndret når oppgave sendes til beslutter`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.register(observer)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
 
-        assertEquals(1, observer.oppgaverEndret.size)
-        assertEquals(oppgave, observer.oppgaverEndret[0])
+        assertEquals(2, oppgave.hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -430,13 +431,13 @@ internal class OppgaveTest {
     @Test
     fun `sender ut oppgaveEndret når oppgave sendes i retur`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.register(observer)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.sendIRetur(beslutter)
 
-        assertEquals(2, observer.oppgaverEndret.size)
-        assertEquals(oppgave, observer.oppgaverEndret[0])
-        assertEquals(oppgave, observer.oppgaverEndret[1])
+        assertEquals(3, oppgave.hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[2])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -528,16 +529,16 @@ internal class OppgaveTest {
     @Test
     fun `sender ut oppgaveEndret når oppgave sendes legges på vent`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandler = saksbehandlerUtenTilgang,
             brukerroller = emptySet(),
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
-        assertEquals(2, observer.oppgaverEndret.size)
-        assertEquals(oppgave, observer.oppgaverEndret[0])
-        assertEquals(oppgave, observer.oppgaverEndret[1])
+        assertEquals(3, oppgave.hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[2])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -547,7 +548,6 @@ internal class OppgaveTest {
     @Test
     fun `sender ut oppgaveEndret når oppgave ikke er på vent lenger`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(
             saksbehandler = saksbehandlerUtenTilgang,
             brukerroller = emptySet(),
@@ -555,10 +555,11 @@ internal class OppgaveTest {
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
         oppgave.fjernFraPåVent()
 
-        assertEquals(3, observer.oppgaverEndret.size)
-        assertEquals(oppgave, observer.oppgaverEndret[0])
-        assertEquals(oppgave, observer.oppgaverEndret[1])
-        assertEquals(oppgave, observer.oppgaverEndret[2])
+        assertEquals(4, oppgave.hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[2])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[3])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -581,13 +582,4 @@ internal class OppgaveTest {
             inntektsforhold = egenskaper.finnInntektsforhold(),
             periodetype = egenskaper.finnPeriodetype(),
         )
-
-    private val observer =
-        object : OppgaveObserver {
-            val oppgaverEndret = mutableListOf<Oppgave>()
-
-            override fun oppgaveEndret(oppgave: Oppgave) {
-                oppgaverEndret.add(oppgave)
-            }
-        }
 }
