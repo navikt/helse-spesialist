@@ -92,7 +92,7 @@ class SaksbehandlerStans private constructor(
     }
 
     private fun håndterEvent(event: SaksbehandlerStansEvent) {
-        if (event.metadata.sekvensnummer != versjon + 1) { // sekvensnummer i riktig rekkefølge
+        if (event.metadata.sekvensnummer != versjon + 1) {
             error("Fikk events ute av rekkefølge: $versjon -> ${event.metadata.sekvensnummer}")
         }
         versjon = event.metadata.sekvensnummer
