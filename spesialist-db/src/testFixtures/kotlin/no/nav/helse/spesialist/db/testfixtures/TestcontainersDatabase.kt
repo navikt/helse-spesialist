@@ -3,9 +3,11 @@ package no.nav.helse.spesialist.db.testfixtures
 import no.nav.helse.spesialist.db.DBModule
 import org.testcontainers.postgresql.PostgreSQLContainer
 
-class TestcontainersDatabase(moduleLabel: String) {
+class TestcontainersDatabase(
+    moduleLabel: String,
+) {
     private val postgres =
-        PostgreSQLContainer("postgres:14")
+        PostgreSQLContainer("postgres:17")
             .withReuse(true)
             .withLabel("app", "spesialist")
             .withLabel("module", moduleLabel)
