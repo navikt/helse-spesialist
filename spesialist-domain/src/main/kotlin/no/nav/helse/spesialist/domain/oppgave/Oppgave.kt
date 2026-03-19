@@ -430,6 +430,26 @@ class Oppgave private constructor(
         godkjenningsbehovId = meldingId
     }
 
+    fun oppdaterOppgave(
+        utbetalingId: UUID,
+        hendelseId: UUID,
+        kanAvvises: Boolean,
+        mottaker: Mottaker,
+        oppgavetype: Oppgavetype,
+        inntektskilde: Inntektskilde,
+        inntektsforhold: Inntektsforhold,
+        periodetype: Periodetype,
+    ) {
+        this.utbetalingId = utbetalingId
+        this.godkjenningsbehovId = hendelseId
+        this.kanAvvises = kanAvvises
+        this.mottaker = mottaker
+        this.type = oppgavetype
+        this.inntektskilde = inntektskilde
+        this.inntektsforhold = inntektsforhold
+        this.periodetype = periodetype
+    }
+
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java.declaringClass)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

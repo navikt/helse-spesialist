@@ -34,7 +34,11 @@ class InMemoryOppgaveRepository : OppgaveRepository {
     override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id }
 
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
-        error("Not implemented for this test")
+        error("Denne funksjonen må du implementere selv")
+    }
+
+    override fun finnFor(identitetsnummer: Identitetsnummer): Oppgave? {
+        error("Denne funksjonen må du implementere selv")
     }
 
     override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId.value == behandlingId }.minOfOrNull { it.opprettet }
@@ -51,7 +55,7 @@ class InMemoryOppgaveRepository : OppgaveRepository {
         sidetall: Int,
         sidestørrelse: Int,
     ): Side<OppgaveProjeksjon> {
-        error("Not implemented for this test")
+        error("Denne funksjonen må du implementere selv")
     }
 
     override fun finnListeOppgaveProjeksjoner(

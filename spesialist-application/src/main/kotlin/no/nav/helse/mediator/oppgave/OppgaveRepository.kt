@@ -23,6 +23,8 @@ interface OppgaveRepository {
 
     fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave?
 
+    fun finnFor(identitetsnummer: Identitetsnummer): Oppgave?
+
     fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime?
 
     fun finnOppgaveProjeksjoner(

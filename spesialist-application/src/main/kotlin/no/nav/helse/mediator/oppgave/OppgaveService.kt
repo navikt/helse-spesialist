@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -49,6 +50,76 @@ class OppgaveService(
             brukerrollehenter = brukerrollehenter,
         )
 
+    fun nyEllerOppdaterOppgave(
+        spleisBehandlingId: SpleisBehandlingId,
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        hendelseId: UUID,
+        kanAvvises: Boolean,
+        egenskaper: Set<Egenskap>,
+        mottaker: Mottaker,
+        oppgavetype: Oppgavetype,
+        inntektskilde: Inntektskilde,
+        inntektsforhold: Inntektsforhold,
+        periodetype: Periodetype,
+    ) {
+        val oppgave =
+            when (val oppgave = oppgaveRepository.finnFor(Identitetsnummer.fraString(fødselsnummer))) {
+                null -> {
+                    nyOppgaveOgPubliser(fødselsnummer = fødselsnummer, vedtaksperiodeId = vedtaksperiodeId, behandlingId = spleisBehandlingId.value, utbetalingId = utbetalingId, hendelseId = hendelseId, kanAvvises = kanAvvises, egenskaper = egenskaper, mottaker = mottaker, oppgavetype = oppgavetype, inntektskilde = inntektskilde, inntektsforhold = inntektsforhold, periodetype = periodetype)
+                }
+
+                else -> {
+                    if (oppgave.behandlingId != spleisBehandlingId && oppgave.tilstand in setOf(Oppgave.AvventerSaksbehandler)) {
+                        oppgave.avbryt()
+                        oppgaveRepository.lagre(oppgave)
+                        nyOppgaveOgPubliser(fødselsnummer = fødselsnummer, vedtaksperiodeId = vedtaksperiodeId, behandlingId = spleisBehandlingId.value, utbetalingId = utbetalingId, hendelseId = hendelseId, kanAvvises = kanAvvises, egenskaper = egenskaper, mottaker = mottaker, oppgavetype = oppgavetype, inntektskilde = inntektskilde, inntektsforhold = inntektsforhold, periodetype = periodetype)
+                    } else {
+                        oppgave.apply {
+                            oppdaterOppgave(utbetalingId = utbetalingId, hendelseId = hendelseId, kanAvvises = kanAvvises, mottaker = mottaker, oppgavetype = oppgavetype, inntektskilde = inntektskilde, inntektsforhold = inntektsforhold, periodetype = periodetype)
+                            meldingPubliserer.publiser(fødselsnummer, OppgaveOppdatert(this), "Oppgave endret")
+                        }
+                    }
+                }
+            }
+        tildelVedReservasjon(fødselsnummer, oppgave)
+        oppgaveRepository.lagre(oppgave)
+    }
+
+    private fun nyOppgaveOgPubliser(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
+        utbetalingId: UUID,
+        hendelseId: UUID,
+        kanAvvises: Boolean,
+        egenskaper: Set<Egenskap>,
+        mottaker: Mottaker,
+        oppgavetype: Oppgavetype,
+        inntektskilde: Inntektskilde,
+        inntektsforhold: Inntektsforhold,
+        periodetype: Periodetype,
+    ): Oppgave {
+        val oppgave =
+            nyOppgave(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = SpleisBehandlingId(behandlingId),
+                utbetalingId = utbetalingId,
+                hendelseId = hendelseId,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper,
+                mottaker = mottaker,
+                type = oppgavetype,
+                inntektskilde = inntektskilde,
+                inntektsforhold = inntektsforhold,
+                periodetype = periodetype,
+            )
+        meldingPubliserer.publiser(fødselsnummer, OppgaveOpprettet(oppgave), "Oppgave opprettet")
+        return oppgave
+    }
+
     fun nyOppgave(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
@@ -62,7 +133,7 @@ class OppgaveService(
         inntektskilde: Inntektskilde,
         inntektsforhold: Inntektsforhold,
         periodetype: Periodetype,
-    ) {
+    ): Oppgave {
         logg.info("Oppretter saksbehandleroppgave")
         teamLogs.info("Oppretter saksbehandleroppgave for {}", kv("fødselsnummer", fødselsnummer))
         val nesteId = oppgaveDao.reserverNesteId()
@@ -87,6 +158,7 @@ class OppgaveService(
             meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
         }
         oppgaveRepository.lagre(oppgave)
+        return oppgave
     }
 
     fun <T> oppgave(

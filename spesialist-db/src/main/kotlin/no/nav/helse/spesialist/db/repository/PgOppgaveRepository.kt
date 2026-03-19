@@ -96,6 +96,39 @@ class PgOppgaveRepository private constructor(
             row.rowTilOppgave()
         }
 
+    override fun finnFor(identitetsnummer: Identitetsnummer): Oppgave? =
+        asSQL(
+            """
+            SELECT
+                o.id,
+                o.egenskaper,
+                o.opprettet,
+                o.første_opprettet,
+                o.status,
+                o.behandling_id,
+                v.vedtaksperiode_id,
+                o.hendelse_id_godkjenningsbehov,
+                o.ferdigstilt_av,
+                o.ferdigstilt_av_oid,
+                o.utbetaling_id,
+                t.saksbehandler_ref,
+                o.kan_avvises,
+                o.mottaker,
+                o.oppgavetype,
+                o.inntektskilde,
+                o.inntektsforhold,
+                o.periodetype
+            FROM oppgave o
+            INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
+            INNER JOIN person p on p.id = v.person_ref
+            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            WHERE p.fødselsnummer = :fodselsnummer
+            AND status IN ('AvventerSaksbehandler', 'AvventerSystem') -- + Venter
+            ORDER BY o.id DESC
+            """.trimIndent(),
+            "fodselsnummer" to identitetsnummer.value,
+        ).singleOrNull { it.rowTilOppgave() }
+
     private fun lagreOppgave(oppgave: Oppgave) {
         asSQL(
             """
