@@ -16,7 +16,7 @@ class VedtaksperiodeReberegnetRiver(
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "vedtaksperiode_endret")
-            it.require("forrigeTilstand") { node -> check(node.asText().startsWith("AVVENTER_GODKJENNING")) }
+            it.require("forrigeTilstand") { node -> check(node.asText().contains("AVVENTER_GODKJENNING")) }
             it.forbidValues("gjeldendeTilstand", listOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
         }
 
