@@ -33,21 +33,13 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.sql.SQLException
 import java.util.UUID
 
-interface Oppgavefinner {
-    fun oppgave(
-        utbetalingId: UUID,
-        oppgaveBlock: Oppgave.() -> Unit,
-    )
-}
-
 class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val reservasjonDao: ReservasjonDao,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveRepository: OppgaveRepository,
     private val brukerrollehenter: Brukerrollehenter,
-) : Oppgavehåndterer,
-    Oppgavefinner {
+) : Oppgavehåndterer {
     fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
         OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
@@ -109,16 +101,6 @@ class OppgaveService(
             meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
         }
         return returverdi
-    }
-
-    override fun oppgave(
-        utbetalingId: UUID,
-        oppgaveBlock: Oppgave.() -> Unit,
-    ) {
-        val oppgaveId = oppgaveDao.finnOppgaveId(utbetalingId)
-        oppgaveId?.let {
-            oppgave(it, oppgaveBlock)
-        }
     }
 
     fun avbrytOppgave(
