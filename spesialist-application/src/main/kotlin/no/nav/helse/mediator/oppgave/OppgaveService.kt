@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
@@ -59,7 +60,7 @@ class OppgaveService(
     fun nyOppgave(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        behandlingId: UUID,
+        behandlingId: SpleisBehandlingId,
         utbetalingId: UUID,
         hendelseId: UUID,
         kanAvvises: Boolean,
@@ -76,7 +77,7 @@ class OppgaveService(
         val oppgave =
             ny(
                 id = nesteId,
-                førsteOpprettet = oppgaveRepository.førsteOpprettetForBehandlingId(behandlingId),
+                førsteOpprettet = oppgaveRepository.førsteOpprettetForBehandlingId(behandlingId.value),
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = behandlingId,
                 utbetalingId = utbetalingId,

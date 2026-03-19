@@ -9,6 +9,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.ddd.Entity
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -28,7 +29,7 @@ class Oppgave private constructor(
     val førsteOpprettet: LocalDateTime?,
     tilstand: Tilstand,
     val vedtaksperiodeId: UUID,
-    val behandlingId: UUID,
+    val behandlingId: SpleisBehandlingId,
     utbetalingId: UUID,
     godkjenningsbehovId: UUID,
     kanAvvises: Boolean,
@@ -437,7 +438,7 @@ class Oppgave private constructor(
             id: Long,
             førsteOpprettet: LocalDateTime?,
             vedtaksperiodeId: UUID,
-            behandlingId: UUID,
+            behandlingId: SpleisBehandlingId,
             utbetalingId: UUID,
             hendelseId: UUID,
             kanAvvises: Boolean,
@@ -478,7 +479,7 @@ class Oppgave private constructor(
             opprettet: LocalDateTime,
             førsteOpprettet: LocalDateTime?,
             tilstand: Tilstand,
-            behandlingId: UUID,
+            behandlingId: SpleisBehandlingId,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID,
             godkjenningsbehovId: UUID,

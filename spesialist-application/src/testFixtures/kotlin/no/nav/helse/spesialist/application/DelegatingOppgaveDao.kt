@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
 
@@ -24,7 +23,7 @@ class DelegatingOppgaveDao(
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID =
         behandlingRepository
-            .finn(BehandlingUnikId(oppgaveRepository.finn(oppgaveId)!!.behandlingId))!!
+            .finn(oppgaveRepository.finn(oppgaveId)!!.behandlingId)!!
             .spleisBehandlingId!!
             .value
 
@@ -40,7 +39,7 @@ class DelegatingOppgaveDao(
     override fun finnBehandlingId(oppgaveId: Long): UUID =
         behandlingRepository
             .alle()
-            .find { it.spleisBehandlingId?.value == oppgaveRepository.finn(oppgaveId)!!.behandlingId }!!
+            .find { it.spleisBehandlingId?.value == oppgaveRepository.finn(oppgaveId)!!.behandlingId.value }!!
             .id.value
 
     override fun finnOppgaveId(utbetalingId: UUID): Long? =

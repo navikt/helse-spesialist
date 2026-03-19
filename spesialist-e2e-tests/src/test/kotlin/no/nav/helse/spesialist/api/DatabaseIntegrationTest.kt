@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
@@ -25,6 +26,7 @@ import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.mar
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
@@ -59,9 +61,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
         kanAvvises: Boolean = true,
     ): Long {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = lagSpleisBehandlingId()
         return opprettVedtak(
-            behandlingId = behandlingId,
+            behandlingId = behandlingId.value,
             personId = personId,
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -264,7 +266,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode,
         kanAvvises: Boolean = true,
-        behandlingId: UUID = UUID.randomUUID(),
+        behandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),
     ) {
         opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, vedtakId)
         val hendelseId = UUID.randomUUID()
@@ -439,7 +441,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         utbetalingId: UUID = UUID.randomUUID(),
         kanAvvises: Boolean = true,
-        behandlingId: UUID = UUID.randomUUID(),
+        behandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),
     ): Long =
         sessionFactory.transactionalSessionScope {
             it.oppgaveDao.reserverNesteId().also { oppgaveId ->

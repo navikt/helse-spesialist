@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,8 +35,8 @@ import kotlin.random.Random.Default.nextLong
 internal class OppgaveServiceTest {
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
-    private val BEHANDLING_ID = UUID.randomUUID()
-    private val BEHANDLING_ID_2 = UUID.randomUUID()
+    private val BEHANDLING_ID = lagSpleisBehandlingId()
+    private val BEHANDLING_ID_2 = lagSpleisBehandlingId()
     private val UTBETALING_ID = UUID.randomUUID()
     private val UTBETALING_ID_2 = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()

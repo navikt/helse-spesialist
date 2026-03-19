@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
@@ -145,7 +146,7 @@ internal class MessageContextMeldingPublisererTest {
     fun `publiserer OppgaveOpprettet med forventet format`() {
         // Given:
         val oppgaveId = nextLong()
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = lagSpleisBehandlingId()
         val hendelseId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
@@ -187,7 +188,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(oppgaveId, it["oppgaveId"]?.longValue())
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
             assertEquals(setOf("SØKNAD"), it["egenskaper"].map(JsonNode::asText).toSet())
-            assertEquals(behandlingId, UUID.fromString(it["behandlingId"]?.asText()))
+            assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asText()))
             assertEquals(null, it["saksbehandler"])
             assertEquals(null, it["beslutter"])
         }
@@ -197,7 +198,7 @@ internal class MessageContextMeldingPublisererTest {
     fun `publiserer OppgaveOppdatert med forventet format`() {
         // Given:
         val oppgaveId = nextLong()
-        val behandlingId = UUID.randomUUID()
+        val behandlingId = lagSpleisBehandlingId()
         val hendelseId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
@@ -249,7 +250,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(oppgaveId, it["oppgaveId"]?.longValue())
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
             assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].map(JsonNode::asText).toSet())
-            assertEquals(behandlingId, UUID.fromString(it["behandlingId"]?.asText()))
+            assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asText()))
             assertEquals(saksbehandler.id.value, it["saksbehandler"]?.asUUID())
         }
     }

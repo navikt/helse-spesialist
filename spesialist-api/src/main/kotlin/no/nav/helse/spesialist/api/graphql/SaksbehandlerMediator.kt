@@ -83,7 +83,7 @@ class SaksbehandlerMediator(
         sessionFactory.transactionalSessionScope { transaction ->
             val oppgave = transaction.oppgaveRepository.finn(oppgaveId.toLong())
 
-            val spleisBehandlingId = oppgave?.behandlingId?.let(::SpleisBehandlingId)
+            val spleisBehandlingId = oppgave?.behandlingId
             val vedtaksperiodeId = spleisBehandlingId?.let(transaction.behandlingRepository::finn)?.vedtaksperiodeId
             val identitetsnummer =
                 vedtaksperiodeId

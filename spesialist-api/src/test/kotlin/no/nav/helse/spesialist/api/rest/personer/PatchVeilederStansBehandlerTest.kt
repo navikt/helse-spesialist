@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -73,7 +74,7 @@ class PatchVeilederStansBehandlerTest {
                 id = 1,
                 førsteOpprettet = null,
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = UUID.randomUUID(),
+                behandlingId = lagSpleisBehandlingId(),
                 utbetalingId = UUID.randomUUID(),
                 hendelseId = UUID.randomUUID(),
                 kanAvvises = true,

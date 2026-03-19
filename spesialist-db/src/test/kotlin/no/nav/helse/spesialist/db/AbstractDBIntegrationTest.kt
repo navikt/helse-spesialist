@@ -46,6 +46,7 @@ import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -309,7 +310,7 @@ abstract class AbstractDBIntegrationTest {
         egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
         utbetalingId: UUID,
-        behandlingId: UUID = UUID.randomUUID(),
+        behandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
     ): Oppgave {
         val oppgave =
@@ -345,7 +346,7 @@ abstract class AbstractDBIntegrationTest {
                 id = nextLong(),
                 førsteOpprettet = førsteOpprettet,
                 vedtaksperiodeId = vedtaksperiode.id.value,
-                behandlingId = behandling.spleisBehandlingId!!.value,
+                behandlingId = behandling.spleisBehandlingId!!,
                 utbetalingId = behandling.utbetalingId!!.value,
                 hendelseId = godkjenningsbehovId,
                 kanAvvises = kanAvvises,
@@ -490,7 +491,7 @@ abstract class AbstractDBIntegrationTest {
         return opprettOppgave(
             vedtaksperiodeId = vedtaksperiode.id.value,
             utbetalingId = utbetalingId,
-            behandlingId = behandling.spleisBehandlingId!!.value,
+            behandlingId = behandling.spleisBehandlingId!!,
             godkjenningsbehovId = godkjenningsbehovId,
             egenskaper = oppgaveegenskaper,
         )

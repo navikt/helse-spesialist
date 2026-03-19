@@ -23,7 +23,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         }
         val godkjenningsbehov =
             meldingDao
-                .finnSisteGodkjenningsbehov(oppgave.behandlingId)
+                .finnSisteGodkjenningsbehov(oppgave.behandlingId.value)
                 ?.data()
                 ?: error("Fant ikke godkjenningsbehov")
 

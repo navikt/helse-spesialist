@@ -75,7 +75,7 @@ class Kommandofabrikk(
         val harTildeltOppgave = oppgave.tildeltTil != null
         val godkjenningsbehovData =
             sessionContext.meldingDao
-                .finnSisteGodkjenningsbehov(oppgave.behandlingId)
+                .finnSisteGodkjenningsbehov(oppgave.behandlingId.value)
                 ?.data()
                 ?: error("Fant ikke godkjenningsbehov")
 
@@ -102,7 +102,7 @@ class Kommandofabrikk(
         sessionContext: SessionContext,
     ): TilbakedateringGodkjentCommand {
         val godkjenningsbehovData =
-            sessionContext.meldingDao.finnSisteGodkjenningsbehov(oppgave.behandlingId)?.data()
+            sessionContext.meldingDao.finnSisteGodkjenningsbehov(oppgave.behandlingId.value)?.data()
                 ?: error("Fant ikke godkjenningsbehov")
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)

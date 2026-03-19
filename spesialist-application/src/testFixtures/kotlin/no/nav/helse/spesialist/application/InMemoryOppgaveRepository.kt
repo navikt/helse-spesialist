@@ -31,13 +31,13 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 
     override fun finn(id: Long): Oppgave? = oppgaver[OppgaveId(id)]
 
-    override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id.value }
+    override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id }
 
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
         error("Not implemented for this test")
     }
 
-    override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId == behandlingId }.minOfOrNull { it.opprettet }
+    override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId.value == behandlingId }.minOfOrNull { it.opprettet }
 
     override fun finnOppgaveProjeksjoner(
         minstEnAvEgenskapene: List<Set<Egenskap>>,

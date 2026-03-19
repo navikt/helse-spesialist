@@ -51,6 +51,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -66,7 +67,7 @@ import java.util.UUID
 internal class OpprettSaksbehandleroppgaveTest {
     private val FNR = lagFødselsnummer()
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-    private val BEHANDLING_ID = UUID.randomUUID()
+    private val BEHANDLING_ID = lagSpleisBehandlingId()
     private val UTBETALING_ID = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
     private val contextId = UUID.randomUUID()
@@ -456,7 +457,7 @@ internal class OpprettSaksbehandleroppgaveTest {
                 id = HENDELSE_ID,
                 fødselsnummer = FNR,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                spleisBehandlingId = BEHANDLING_ID,
+                spleisBehandlingId = BEHANDLING_ID.value,
                 utbetalingId = UTBETALING_ID,
                 inntektskilde = inntektskilde,
                 periodetype = periodetype,

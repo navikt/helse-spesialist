@@ -27,7 +27,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `finn SpleisBehandlingId`() {
         val oppgave = nyOppgaveForNyPerson()
-        assertEquals(oppgave.behandlingId, oppgaveDao.finnSpleisBehandlingId(oppgave.id.value))
+        assertEquals(oppgave.behandlingId.value, oppgaveDao.finnSpleisBehandlingId(oppgave.id.value))
     }
 
     @Test

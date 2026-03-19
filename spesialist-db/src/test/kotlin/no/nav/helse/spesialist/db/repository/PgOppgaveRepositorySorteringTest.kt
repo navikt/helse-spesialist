@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
@@ -153,7 +154,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         val oppgave =
             Oppgave.ny(
                 id = Random.nextLong(),
-                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+                førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId.value),
                 vedtaksperiodeId = vedtaksperiode.id.value,
                 behandlingId = behandlingId,
                 utbetalingId = utbetalingId,
@@ -173,17 +174,17 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
     fun opprettBehandling(
         vedtaksperiode: Vedtaksperiode,
         utbetalingId: UUID,
-    ): UUID {
+    ): SpleisBehandlingId {
         val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
-        return behandling.spleisBehandlingId!!.value
+        return behandling.spleisBehandlingId!!
     }
 
-    fun finnBehandlingOpprettetTidspunkt(utbetalingIds: List<UUID>) =
+    fun finnBehandlingOpprettetTidspunkt(behandlingIder: List<SpleisBehandlingId>) =
         dbQuery.list(
             """
             select opprettet_tidspunkt from behandling where spleis_behandling_id = any(:ider::uuid[])
             """.trimIndent(),
-            "ider" to utbetalingIds.somDbArray(),
+            "ider" to behandlingIder.map { it.value }.somDbArray(),
         ) {
             it.localDateTime("opprettet_tidspunkt").somInstantISystemetsTidssone()
         }

@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.spesialist.application.testing.assertEqualsByMicrosecond
 import no.nav.helse.spesialist.application.testing.assertNotEqualsByMicrosecond
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.PÅ_VENT
@@ -31,7 +30,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     private val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
     private val repository = PgOppgaveRepository(session)
     private val vedtaksperiodeId = vedtaksperiode.id.value
-    private val behandlingId = behandling.id.value
+    private val behandlingId = behandling.spleisBehandlingId!!
     private val godkjenningsbehovId: UUID = UUID.randomUUID()
 
     private val saksbehandler =
@@ -64,7 +63,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         val oppgave = lagOppgave()
 
         repository.lagre(oppgave)
-        val funnetOppgave = repository.finn(SpleisBehandlingId(behandlingId))
+        val funnetOppgave = repository.finn(behandlingId)
         assertNotNull(funnetOppgave)
         assertEquals(oppgave, funnetOppgave)
     }
@@ -160,7 +159,6 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         }
     }
 
-
     @Test
     fun `lagrer første opprettet-kolonnen på en oppgave når det ligger to fra før på behandlingen`() {
         val oppgaveId = nextLong()
@@ -198,7 +196,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         egenskaper: Set<Egenskap> = setOf(SØKNAD),
     ) = Oppgave.ny(
         id = oppgaveId,
-        førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+        førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId.value),
         vedtaksperiodeId = vedtaksperiodeId,
         behandlingId = behandlingId,
         utbetalingId = utbetalingId,

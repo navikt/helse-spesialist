@@ -3,7 +3,6 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 
 internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
@@ -13,7 +12,7 @@ internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val behandling =
-            sessionContext.behandlingRepository.finn(SpleisBehandlingId(oppgave.behandlingId))
+            sessionContext.behandlingRepository.finn(oppgave.behandlingId)
                 ?: error("Fant ikke behandling")
         val søknadOverlapperMedBehandlingTilGodkjenning = søknadsperioder.any { it.overlapper(Periode(behandling.fom, behandling.tom)) }
         if (!søknadOverlapperMedBehandlingTilGodkjenning) return ferdigstill(context)

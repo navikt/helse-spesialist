@@ -55,6 +55,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -162,7 +163,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
-        spleisBehandlingId: UUID = UUID.randomUUID(),
+        spleisBehandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),
         oppgaveEgenskaper: Set<Egenskap> =
             setOf(
                 Egenskap.SØKNAD,
@@ -201,7 +202,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
+            spleisBehandlingId = spleisBehandlingId.value,
         )
         opprettOppgave(
             contextId = contextId,
@@ -317,7 +318,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         egenskaper: Set<Egenskap>,
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
-        behandlingId: UUID = UUID.randomUUID(),
+        behandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
     ) {
         val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
@@ -441,7 +442,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -461,7 +462,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = spleisBehandlingId,
+                    spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf(tag),
                     utbetalingId = utbetalingId,
                 )
@@ -486,7 +487,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -506,7 +507,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = spleisBehandlingId,
+                    spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
                 )
@@ -654,7 +655,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -674,7 +675,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = spleisBehandlingId,
+                    spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
                 )
@@ -713,7 +714,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -739,7 +740,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = spleisBehandlingId,
+                    spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
                 )
@@ -760,7 +761,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -781,7 +782,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = spleisBehandlingId,
+                    spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
                 )
@@ -804,7 +805,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `legg på vent forårsaker publisering av hendelse`() {
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(spleisBehandlingId = spleisBehandlingId)
         val frist = LocalDate.now()
         val skalTildeles = true
@@ -825,7 +826,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals("lagt_på_vent", melding?.get("@event_name")?.asText())
         assertEquals("en tekst", melding?.get("notatTekst")?.asText())
         assertEquals(listOf("key" to "arsak"), årsaker)
-        assertEquals(spleisBehandlingId, melding?.get("behandlingId")?.asUUID())
+        assertEquals(spleisBehandlingId.value, melding?.get("behandlingId")?.asUUID())
         assertEquals(oppgaveId, melding?.get("oppgaveId")?.asLong())
         assertEquals(saksbehandler.id.value, melding?.get("saksbehandlerOid")?.asUUID())
         assertEquals(saksbehandler.ident.value, melding?.get("saksbehandlerIdent")?.asText())
@@ -835,7 +836,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `endring av påVent forårsaker publisering av hendelse`() {
-        val spleisBehandlingId = UUID.randomUUID()
+        val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(spleisBehandlingId = spleisBehandlingId)
         val frist = LocalDate.now()
         val skalTildeles = true
@@ -872,7 +873,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals("lagt_på_vent", melding2?.get("@event_name")?.asText())
         assertEquals("en ny tekst", melding2?.get("notatTekst")?.asText())
         assertEquals(listOf("key" to "arsak"), årsaker)
-        assertEquals(spleisBehandlingId, melding2?.get("behandlingId")?.asUUID())
+        assertEquals(spleisBehandlingId.value, melding2?.get("behandlingId")?.asUUID())
         assertEquals(oppgaveId, melding2?.get("oppgaveId")?.asLong())
         assertEquals(saksbehandler.id.value, melding2?.get("saksbehandlerOid")?.asUUID())
         assertEquals(saksbehandler.ident.value, melding2?.get("saksbehandlerIdent")?.asText())
