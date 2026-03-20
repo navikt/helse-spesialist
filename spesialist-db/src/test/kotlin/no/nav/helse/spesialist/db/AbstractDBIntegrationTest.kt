@@ -306,7 +306,7 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun opprettOppgave(
         førsteOpprettet: LocalDateTime? = null,
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: VedtaksperiodeId,
         egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
         utbetalingId: UUID,
@@ -345,7 +345,7 @@ abstract class AbstractDBIntegrationTest {
             Oppgave.ny(
                 id = nextLong(),
                 førsteOpprettet = førsteOpprettet,
-                vedtaksperiodeId = vedtaksperiode.id.value,
+                vedtaksperiodeId = vedtaksperiode.id,
                 behandlingId = behandling.spleisBehandlingId!!,
                 utbetalingId = behandling.utbetalingId!!.value,
                 hendelseId = godkjenningsbehovId,
@@ -489,7 +489,7 @@ abstract class AbstractDBIntegrationTest {
             beløpTilArbeidsgiver = 1000,
         )
         return opprettOppgave(
-            vedtaksperiodeId = vedtaksperiode.id.value,
+            vedtaksperiodeId = vedtaksperiode.id,
             utbetalingId = utbetalingId,
             behandlingId = behandling.spleisBehandlingId!!,
             godkjenningsbehovId = godkjenningsbehovId,

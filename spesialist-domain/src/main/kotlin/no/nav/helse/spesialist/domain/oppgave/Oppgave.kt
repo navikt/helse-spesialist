@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.ddd.Entity
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -28,7 +29,7 @@ class Oppgave private constructor(
     val opprettet: LocalDateTime,
     val førsteOpprettet: LocalDateTime?,
     tilstand: Tilstand,
-    val vedtaksperiodeId: UUID,
+    val vedtaksperiodeId: VedtaksperiodeId,
     val behandlingId: SpleisBehandlingId,
     utbetalingId: UUID,
     godkjenningsbehovId: UUID,
@@ -437,7 +438,7 @@ class Oppgave private constructor(
         fun ny(
             id: Long,
             førsteOpprettet: LocalDateTime?,
-            vedtaksperiodeId: UUID,
+            vedtaksperiodeId: VedtaksperiodeId,
             behandlingId: SpleisBehandlingId,
             utbetalingId: UUID,
             hendelseId: UUID,
@@ -480,7 +481,7 @@ class Oppgave private constructor(
             førsteOpprettet: LocalDateTime?,
             tilstand: Tilstand,
             behandlingId: SpleisBehandlingId,
-            vedtaksperiodeId: UUID,
+            vedtaksperiodeId: VedtaksperiodeId,
             utbetalingId: UUID,
             godkjenningsbehovId: UUID,
             kanAvvises: Boolean,

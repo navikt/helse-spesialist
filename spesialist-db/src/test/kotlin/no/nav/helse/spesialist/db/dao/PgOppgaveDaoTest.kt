@@ -50,24 +50,24 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `finner oppgaveId for ikke-avsluttet oppgave ved hjelp av vedtaksperiodeId`() {
         val oppgave = nyOppgaveForNyPerson()
 
-        assertEquals(oppgave.id.value, oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
+        assertEquals(oppgave.id.value, oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId.value))
 
         oppgave.invaliderOgLagre()
-        assertNull(oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
+        assertNull(oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId.value))
     }
 
     @Test
     fun `finner vedtaksperiodeId`() {
         val oppgave = nyOppgaveForNyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id.value)
-        assertEquals(oppgave.vedtaksperiodeId, actual)
+        assertEquals(oppgave.vedtaksperiodeId.value, actual)
     }
 
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         val oppgave = nyOppgaveForNyPerson()
 
-        assertFalse(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId))
+        assertFalse(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId.value))
     }
 
     @Test
@@ -77,7 +77,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 .avventSystemOgLagre(saksbehandler)
                 .ferdigstillOgLagre()
 
-        assertTrue(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId))
+        assertTrue(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId.value))
     }
 
     @Test
@@ -92,7 +92,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `Finner vedtaksperiodeId med oppgaveId`() {
         val oppgave = nyOppgaveForNyPerson()
 
-        assertEquals(oppgave.vedtaksperiodeId, oppgaveDao.finnVedtaksperiodeId(oppgave.id.value))
+        assertEquals(oppgave.vedtaksperiodeId.value, oppgaveDao.finnVedtaksperiodeId(oppgave.id.value))
     }
 
     @Test
@@ -100,8 +100,8 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         val oppgave1 = nyOppgaveForNyPerson()
         val oppgave2 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT))
 
-        val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(oppgave1.vedtaksperiodeId, oppgave1.utbetalingId)
-        val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(oppgave2.vedtaksperiodeId, oppgave2.utbetalingId)
+        val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(oppgave1.vedtaksperiodeId.value, oppgave1.utbetalingId)
+        val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(oppgave2.vedtaksperiodeId.value, oppgave2.utbetalingId)
         assertEquals(setOf(SØKNAD), egenskaperOppgaveId1)
         assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
     }

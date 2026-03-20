@@ -122,7 +122,7 @@ fun lagOppgave(
     Oppgave.ny(
         id = nextLong(),
         førsteOpprettet = LocalDateTime.now(),
-        vedtaksperiodeId = UUID.randomUUID(),
+        vedtaksperiodeId = lagVedtaksperiodeId(),
         behandlingId = behandlingId,
         utbetalingId = UUID.randomUUID(),
         hendelseId = godkjenningsbehovId,

@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.SØKNAD
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavehendelse
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -34,7 +35,7 @@ import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveTest {
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val VEDTAKSPERIODE_ID = lagVedtaksperiodeId()
         private val BEHANDLING_ID = lagSpleisBehandlingId()
         private val UTBETALING_ID = UUID.randomUUID()
         private val SAKSBEHANDLER_IDENT = NAVIdent("Z999999")

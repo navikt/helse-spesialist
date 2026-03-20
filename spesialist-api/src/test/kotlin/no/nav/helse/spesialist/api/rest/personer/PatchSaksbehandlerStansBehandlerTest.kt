@@ -6,13 +6,13 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -33,7 +33,7 @@ class PatchSaksbehandlerStansBehandlerTest {
         // Given:
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
 
         val person =
             lagPerson(
@@ -43,7 +43,7 @@ class PatchSaksbehandlerStansBehandlerTest {
         val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
 
         lagVedtaksperiode(
-            id = VedtaksperiodeId(vedtaksperiodeId),
+            id = vedtaksperiodeId,
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
@@ -99,7 +99,7 @@ class PatchSaksbehandlerStansBehandlerTest {
         // Given:
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
 
         val person =
             lagPerson(
@@ -109,7 +109,7 @@ class PatchSaksbehandlerStansBehandlerTest {
         val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
 
         lagVedtaksperiode(
-            id = VedtaksperiodeId(vedtaksperiodeId),
+            id = vedtaksperiodeId,
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 

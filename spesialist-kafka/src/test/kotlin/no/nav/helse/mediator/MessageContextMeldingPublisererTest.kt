@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
@@ -148,7 +149,7 @@ internal class MessageContextMeldingPublisererTest {
         val oppgaveId = nextLong()
         val behandlingId = lagSpleisBehandlingId()
         val hendelseId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
 
         val oppgave =
             Oppgave.ny(
@@ -200,7 +201,7 @@ internal class MessageContextMeldingPublisererTest {
         val oppgaveId = nextLong()
         val behandlingId = lagSpleisBehandlingId()
         val hendelseId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
 
         val oppgave =
             Oppgave.ny(

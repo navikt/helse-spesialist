@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
@@ -273,7 +274,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
         opprettOppgave(
-            vedtaksperiodeId = periode.id,
+            vedtaksperiodeId = VedtaksperiodeId(periode.id),
             utbetalingId = utbetalingId,
             kanAvvises = kanAvvises,
             behandlingId = behandlingId,
@@ -438,7 +439,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
 
     private fun opprettOppgave(
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: VedtaksperiodeId,
         utbetalingId: UUID = UUID.randomUUID(),
         kanAvvises: Boolean = true,
         behandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),

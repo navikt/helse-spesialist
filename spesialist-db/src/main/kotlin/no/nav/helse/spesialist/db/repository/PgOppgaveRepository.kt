@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
@@ -163,7 +164,7 @@ class PgOppgaveRepository private constructor(
             "oppgavestatus" to status(oppgave.tilstand),
             "ferdigstilt_av" to oppgave.ferdigstiltAvIdent?.value,
             "ferdigstilt_av_oid" to oppgave.ferdigstiltAvOid,
-            "vedtaksperiode_id" to oppgave.vedtaksperiodeId,
+            "vedtaksperiode_id" to oppgave.vedtaksperiodeId.value,
             "behandling_id" to oppgave.behandlingId.value,
             "godkjenningsbehov_id" to oppgave.godkjenningsbehovId,
             "utbetaling_id" to oppgave.utbetalingId,
@@ -574,7 +575,7 @@ class PgOppgaveRepository private constructor(
 
     private fun finnesAnnenAktivOppgavePåPerson(
         oppgaveId: OppgaveId,
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: VedtaksperiodeId,
     ): Boolean =
         asSQL(
             """
@@ -590,7 +591,7 @@ class PgOppgaveRepository private constructor(
             AND o.status = 'AvventerSaksbehandler'
             """.trimIndent(),
             "oppgave_id" to oppgaveId.value,
-            "vedtaksperiode_id" to vedtaksperiodeId,
+            "vedtaksperiode_id" to vedtaksperiodeId.value,
         ).singleOrNull { it.boolean(1) } ?: false
 
     private fun finnOppgave(id: Long): Oppgave? =
@@ -667,7 +668,7 @@ class PgOppgaveRepository private constructor(
             førsteOpprettet = localDateTimeOrNull("første_opprettet"),
             egenskaper = egenskaper,
             tilstand = tilstand(string("status")),
-            vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            vedtaksperiodeId = VedtaksperiodeId(uuid("vedtaksperiode_id")),
             behandlingId = SpleisBehandlingId(uuid("behandling_id")),
             utbetalingId = uuid("utbetaling_id"),
             godkjenningsbehovId = uuid("hendelse_id_godkjenningsbehov"),

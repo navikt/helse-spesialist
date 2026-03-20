@@ -5,13 +5,13 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -55,7 +55,7 @@ class PatchVeilederStansBehandlerTest {
         // Given:
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
 
         val person =
             lagPerson(
@@ -65,7 +65,7 @@ class PatchVeilederStansBehandlerTest {
         val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
 
         lagVedtaksperiode(
-            id = VedtaksperiodeId(vedtaksperiodeId),
+            id = vedtaksperiodeId,
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
@@ -109,10 +109,10 @@ class PatchVeilederStansBehandlerTest {
         assertEquals(emptySet(), lagretStans.årsaker)
         assertEquals(null, lagretStans.meldingId)
 
-        val notater = sessionContext.notatRepository.finnAlleForVedtaksperiode(vedtaksperiodeId)
+        val notater = sessionContext.notatRepository.finnAlleForVedtaksperiode(vedtaksperiodeId.value)
         assertEquals(1, notater.size)
         val notat = notater.first()
-        assertEquals(vedtaksperiodeId, notat.vedtaksperiodeId)
+        assertEquals(vedtaksperiodeId.value, notat.vedtaksperiodeId)
         assertEquals(NotatType.OpphevStans, notat.type)
         assertEquals(begrunnelse, notat.tekst)
         assertEquals(saksbehandler.id, notat.saksbehandlerOid)

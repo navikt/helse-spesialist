@@ -52,6 +52,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIV
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -66,7 +67,7 @@ import java.util.UUID
 
 internal class OpprettSaksbehandleroppgaveTest {
     private val FNR = lagFødselsnummer()
-    private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    private val VEDTAKSPERIODE_ID = lagVedtaksperiodeId()
     private val BEHANDLING_ID = lagSpleisBehandlingId()
     private val UTBETALING_ID = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
@@ -104,7 +105,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter stikkprøve`() {
-        every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
+        every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID.value, any()) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -118,7 +119,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter risk QA`() {
-        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -221,7 +222,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     @Test
     fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
         every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -235,7 +236,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     @Test
     fun `oppretter oppgave med egenskap haster dersom det er endring i utbetaling til sykmeldte`() {
         every { utbetaling.harEndringIUtbetalingTilSykmeldt() } returns true
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -249,7 +250,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
+        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -263,7 +264,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap tilbakedatert dersom det finnes varsel om tilbakedatering`() {
-        every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID) } returns true
+        every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -335,7 +336,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap PÅ_VENT`() {
-        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID) } returns true
+        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -367,7 +368,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
-        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
+        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID.value) } returns true
         assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
 
         assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
@@ -456,7 +457,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             godkjenningsbehovData(
                 id = HENDELSE_ID,
                 fødselsnummer = FNR,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID.value,
                 spleisBehandlingId = BEHANDLING_ID.value,
                 utbetalingId = UTBETALING_ID,
                 inntektskilde = inntektskilde,

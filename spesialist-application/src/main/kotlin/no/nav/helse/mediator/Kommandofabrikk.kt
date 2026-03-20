@@ -81,7 +81,7 @@ class Kommandofabrikk(
 
         return GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
-            sykefraværstilfelle = person.sykefraværstilfelle(oppgave.vedtaksperiodeId),
+            sykefraværstilfelle = person.sykefraværstilfelle(oppgave.vedtaksperiodeId.value),
             harTildeltOppgave = harTildeltOppgave,
             oppgave = oppgave,
             automatisering = transaksjonellAutomatisering(sessionContext),

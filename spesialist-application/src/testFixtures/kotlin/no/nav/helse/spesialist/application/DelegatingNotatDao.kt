@@ -10,22 +10,23 @@ import java.util.UUID
 
 class DelegatingNotatDao(
     private val oppgaveRepository: OppgaveRepository,
-    private val notatRepository: NotatRepository
+    private val notatRepository: NotatRepository,
 ) : NotatDao {
     override fun lagreForOppgaveId(
         oppgaveId: Long,
         tekst: String,
         saksbehandlerOid: UUID,
         notatType: NotatType,
-        dialogRef: Long
-    ) =
-        Notat.Factory.ny(
+        dialogRef: Long,
+    ) = Notat.Factory
+        .ny(
             type = notatType,
             tekst = tekst,
             dialogRef = DialogId(dialogRef),
-            vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId,
-            saksbehandlerOid = SaksbehandlerOid(saksbehandlerOid)
-        )
-            .also(notatRepository::lagre)
-            .id().value.toLong()
+            vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId.value,
+            saksbehandlerOid = SaksbehandlerOid(saksbehandlerOid),
+        ).also(notatRepository::lagre)
+        .id()
+        .value
+        .toLong()
 }

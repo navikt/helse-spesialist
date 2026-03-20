@@ -75,7 +75,7 @@ internal class GosysOppgaveEndretCommand(
         listOf(
             VurderÅpenGosysoppgave(
                 åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-                vedtaksperiodeId = oppgave.vedtaksperiodeId,
+                vedtaksperiodeId = oppgave.vedtaksperiodeId.value,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
@@ -85,7 +85,7 @@ internal class GosysOppgaveEndretCommand(
                 oppgaveDao = oppgaveDao,
             ),
             SettTidligereAutomatiseringInaktivCommand(
-                vedtaksperiodeId = oppgave.vedtaksperiodeId,
+                vedtaksperiodeId = oppgave.vedtaksperiodeId.value,
                 hendelseId = oppgave.godkjenningsbehovId,
                 automatisering = automatisering,
             ),

@@ -155,7 +155,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             Oppgave.ny(
                 id = Random.nextLong(),
                 førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId.value),
-                vedtaksperiodeId = vedtaksperiode.id.value,
+                vedtaksperiodeId = vedtaksperiode.id,
                 behandlingId = behandlingId,
                 utbetalingId = utbetalingId,
                 hendelseId = godkjenningsbehovId,

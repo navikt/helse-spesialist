@@ -14,7 +14,7 @@ class DelegatingOppgaveApiDao(
             vedtaksperiodeRepository.alle().filter { it.identitetsnummer.value == fødselsnummer }.map { it.id.value }
         return oppgaveRepository
             .alle()
-            .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
+            .filter { it.vedtaksperiodeId.value in vedtaksperiodeIder }
             .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
             ?.id
             ?.value
@@ -23,6 +23,6 @@ class DelegatingOppgaveApiDao(
     override fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? =
         oppgaveRepository
             .alle()
-            .firstOrNull { it.vedtaksperiodeId == vedtaksperiodeId && it.tilstand is Oppgave.AvventerSaksbehandler }
+            .firstOrNull { it.vedtaksperiodeId.value == vedtaksperiodeId && it.tilstand is Oppgave.AvventerSaksbehandler }
             ?.let { OppgaveForPeriodevisningDto(id = it.id.value.toString(), kanAvvises = it.kanAvvises) }
 }

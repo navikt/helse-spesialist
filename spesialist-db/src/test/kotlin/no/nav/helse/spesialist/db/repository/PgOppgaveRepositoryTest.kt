@@ -29,7 +29,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     private val utbetalingId: UUID = UUID.randomUUID()
     private val behandling = opprettBehandling(vedtaksperiode, utbetalingId = UtbetalingId(utbetalingId))
     private val repository = PgOppgaveRepository(session)
-    private val vedtaksperiodeId = vedtaksperiode.id.value
+    private val vedtaksperiodeId = vedtaksperiode.id
     private val behandlingId = behandling.spleisBehandlingId!!
     private val godkjenningsbehovId: UUID = UUID.randomUUID()
 

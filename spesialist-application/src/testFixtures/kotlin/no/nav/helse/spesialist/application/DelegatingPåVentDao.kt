@@ -13,8 +13,7 @@ class DelegatingPåVentDao(
     private val påVentRepository: InMemoryPåVentRepository,
     private val oppgaveRepository: InMemoryOppgaveRepository,
 ) : PåVentDao {
-    override fun erPåVent(vedtaksperiodeId: UUID): Boolean =
-        påVentRepository.alle().any { it.vedtaksperiodeId.value == vedtaksperiodeId }
+    override fun erPåVent(vedtaksperiodeId: UUID): Boolean = påVentRepository.alle().any { it.vedtaksperiodeId.value == vedtaksperiodeId }
 
     override fun lagrePåVent(
         oppgaveId: Long,
@@ -22,30 +21,31 @@ class DelegatingPåVentDao(
         frist: LocalDate?,
         årsaker: List<PåVentÅrsak>,
         notatTekst: String?,
-        dialogRef: Long
+        dialogRef: Long,
     ) {
         påVentRepository.lagre(
             PåVent.Factory.ny(
-                vedtaksperiodeId = VedtaksperiodeId(oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId),
+                vedtaksperiodeId = VedtaksperiodeId(oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId.value),
                 saksbehandlerOid = SaksbehandlerOid(saksbehandlerOid),
                 frist = frist!!,
                 dialogRef = DialogId(dialogRef),
                 årsaker = årsaker.map { it.årsak },
-                notattekst = notatTekst
-            )
+                notattekst = notatTekst,
+            ),
         )
     }
 
     override fun slettPåVent(oppgaveId: Long): Int {
         val vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId
-        val påVenter = påVentRepository.alle()
-            .filter { it.vedtaksperiodeId.value == vedtaksperiodeId }
-            .onEach { påVentRepository.slett(it.id()) }
+        val påVenter =
+            påVentRepository
+                .alle()
+                .filter { it.vedtaksperiodeId.value == vedtaksperiodeId.value }
+                .onEach { påVentRepository.slett(it.id()) }
         return påVenter.size
     }
 
-    override fun erPåVent(oppgaveId: Long): Boolean =
-        erPåVent(oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId)
+    override fun erPåVent(oppgaveId: Long): Boolean = erPåVent(oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId.value)
 
     override fun oppdaterPåVent(
         oppgaveId: Long,
@@ -53,7 +53,7 @@ class DelegatingPåVentDao(
         frist: LocalDate?,
         årsaker: List<PåVentÅrsak>,
         notatTekst: String?,
-        dialogRef: Long
+        dialogRef: Long,
     ) {
         slettPåVent(oppgaveId)
         lagrePåVent(
@@ -62,7 +62,7 @@ class DelegatingPåVentDao(
             frist = frist,
             årsaker = årsaker,
             notatTekst = notatTekst,
-            dialogRef = dialogRef
+            dialogRef = dialogRef,
         )
     }
 }

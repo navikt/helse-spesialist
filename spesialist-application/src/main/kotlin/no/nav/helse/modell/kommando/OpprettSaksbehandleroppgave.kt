@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.ARBEIDSTAKER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
@@ -126,7 +127,7 @@ internal class OpprettSaksbehandleroppgave(
         val behandlingId = behovData.spleisBehandlingId
         oppgaveService.nyOppgave(
             fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
             behandlingId = SpleisBehandlingId(behandlingId),
             utbetalingId = utbetalingId,
             hendelseId = hendelseId,

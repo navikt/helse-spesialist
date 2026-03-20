@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
@@ -51,7 +52,7 @@ class OppgaveService(
 
     fun nyOppgave(
         fødselsnummer: String,
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: VedtaksperiodeId,
         behandlingId: SpleisBehandlingId,
         utbetalingId: UUID,
         hendelseId: UUID,

@@ -56,6 +56,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -160,7 +161,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         fødselsnummer: String = FNR,
         aktørId: String = AKTØR,
         organisasjonsnummer: String = ORGNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        vedtaksperiodeId: VedtaksperiodeId = VedtaksperiodeId(VEDTAKSPERIODE),
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
         spleisBehandlingId: SpleisBehandlingId = lagSpleisBehandlingId(),
@@ -198,7 +199,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         opprettVedtaksperiode(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId.value,
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             utbetalingId = utbetalingId,
@@ -314,7 +315,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     private fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        vedtaksperiodeId: VedtaksperiodeId = VedtaksperiodeId(VEDTAKSPERIODE),
         egenskaper: Set<Egenskap>,
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
@@ -440,7 +441,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         utfall: VedtakBegrunnelseTypeFraDatabase,
     ) {
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
@@ -461,7 +462,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiodeId.value,
                     spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf(tag),
                     utbetalingId = utbetalingId,
@@ -485,7 +486,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `håndter totrinnsvurdering når periode har vurdert varsel`() {
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
@@ -506,7 +507,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiodeId.value,
                     spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
@@ -515,7 +516,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         }
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId.value,
             definisjonRef = definisjonRef,
             status = "VURDERT",
         )
@@ -653,7 +654,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `håndter totrinnsvurdering send i retur`() {
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
@@ -674,7 +675,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiodeId.value,
                     spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
@@ -683,7 +684,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         }
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId.value,
             definisjonRef = definisjonRef,
             status = "VURDERT",
         )
@@ -712,7 +713,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `håndter totrinnsvurdering når periode har aktivt varsel`() {
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
@@ -732,14 +733,14 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             )
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId.value,
             definisjonRef = definisjonRef,
             status = "AKTIV",
         )
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiodeId.value,
                     spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,
@@ -759,7 +760,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `håndter totrinnsvurdering når periode ikke har noen varsler`() {
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
+        val vedtaksperiodeId = lagVedtaksperiodeId()
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = lagSpleisBehandlingId()
         nyPerson(
@@ -781,7 +782,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionFactory.transactionalSessionScope { session ->
             session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId,
+                    vedtaksperiodeId = vedtaksperiodeId.value,
                     spleisBehandlingId = spleisBehandlingId.value,
                     tags = listOf("Innvilget"),
                     utbetalingId = utbetalingId,

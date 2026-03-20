@@ -29,9 +29,9 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             saksbehandlerOid = saksbehandler.id.value,
         )
 
-        val behandlingId = finnBehandlingUnikId(oppgave.vedtaksperiodeId)
+        val behandlingId = finnBehandlingUnikId(oppgave.vedtaksperiodeId.value)
 
-        val behandlinger = behandlingDao.finnLegacyBehandlinger(oppgave.vedtaksperiodeId)
+        val behandlinger = behandlingDao.finnLegacyBehandlinger(oppgave.vedtaksperiodeId.value)
         val lagretVedtakBegrunnelse = behandlinger.first { it.id == behandlingId }
         assertEquals(Utfall.AVSLAG, lagretVedtakBegrunnelse.vedtakBegrunnelse?.utfall)
         assertEquals("En individuell begrunelse", lagretVedtakBegrunnelse.vedtakBegrunnelse?.begrunnelse)
@@ -109,7 +109,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             saksbehandlerOid = saksbehandler.id.value,
         )
 
-        val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(oppgave.vedtaksperiodeId, oppgave.utbetalingId)
+        val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(oppgave.vedtaksperiodeId.value, oppgave.utbetalingId)
 
         assertEquals(3, lagredeAvslag.size)
         with(lagredeAvslag[0]) {
