@@ -44,6 +44,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagDialog
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
@@ -243,6 +244,12 @@ abstract class AbstractDBIntegrationTest {
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         return saksbehandler
+    }
+
+    protected fun opprettDialog(): Dialog {
+        val dialog = lagDialog()
+        sessionContext.dialogRepository.lagre(dialog)
+        return dialog
     }
 
     protected fun opprettBehandling(

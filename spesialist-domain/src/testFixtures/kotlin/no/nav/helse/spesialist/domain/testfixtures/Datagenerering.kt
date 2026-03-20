@@ -13,6 +13,7 @@ import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -292,3 +293,5 @@ fun lagVedtakBegrunnelse(
     utfall = utfall,
     saksbehandlerOid = saksbehandlerOid,
 )
+
+fun lagDialog() = Dialog.Factory.ny()
