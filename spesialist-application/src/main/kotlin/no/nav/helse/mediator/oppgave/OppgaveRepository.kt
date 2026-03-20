@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,6 +19,8 @@ interface OppgaveRepository {
     fun lagre(oppgave: Oppgave)
 
     fun finn(id: Long): Oppgave?
+
+    fun finn(id: OppgaveId): Oppgave?
 
     fun finn(id: SpleisBehandlingId): Oppgave?
 

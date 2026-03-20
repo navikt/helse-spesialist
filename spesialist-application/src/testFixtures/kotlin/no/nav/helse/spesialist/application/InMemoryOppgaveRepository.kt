@@ -31,6 +31,8 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 
     override fun finn(id: Long): Oppgave? = oppgaver[OppgaveId(id)]
 
+    override fun finn(id: OppgaveId): Oppgave? = oppgaver[id]
+
     override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id }
 
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {

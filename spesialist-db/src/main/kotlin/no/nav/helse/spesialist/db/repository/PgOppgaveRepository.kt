@@ -59,6 +59,8 @@ class PgOppgaveRepository private constructor(
 
     override fun finn(id: Long): Oppgave? = finnOppgave(id)
 
+    override fun finn(id: OppgaveId): Oppgave? = finnOppgave(id.value)
+
     override fun finn(id: SpleisBehandlingId): Oppgave? = finnOppgave(id)
 
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? =

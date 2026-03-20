@@ -79,7 +79,7 @@ class PostForkastingBehandlerIntegrationTest {
         // Then:
         val funnetVarsel = varselRepository.finn(varsel.id)
         val funnetTotrinnsvurdering = totrinnsvurderingRepository.finn(totrinnsvurdering.id())
-        val funnetOppgave = oppgaveRepository.finn(oppgave.id.value)
+        val funnetOppgave = oppgaveRepository.finn(oppgave.id)
         val reservasjon =
             integrationTestFixture.sessionFactory.sessionContext.reservasjonDao
                 .hentReservasjonFor(person.id.value)
