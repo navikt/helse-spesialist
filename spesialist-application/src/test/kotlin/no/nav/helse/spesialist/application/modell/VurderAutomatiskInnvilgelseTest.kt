@@ -163,6 +163,26 @@ internal class VurderAutomatiskInnvilgelseTest {
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
+    @Test
+    fun `prøver på nytt selv om det har vært forsøkt fattet vedtak før, så lenge spleis ikke har kvittert`() {
+        vedtakRepository.lagre(Vedtak.automatisk(spleisBehandlingId))
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+
+        assertTrue(command.execute(context))
+
+        verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+    }
+
+    @Test
+    fun `prøver ikke på nytt hvis spleis har kvittert ut tidligere svar`() {
+        vedtakRepository.lagre(Vedtak.automatisk(spleisBehandlingId).also { it.markerSomBehandletAvSpleis() })
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+
+        assertTrue(command.execute(context))
+
+        verify(exactly = 0) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+    }
+
     private val commandContextDao = InMemoryCommandContextDao()
 
     private val observatør =

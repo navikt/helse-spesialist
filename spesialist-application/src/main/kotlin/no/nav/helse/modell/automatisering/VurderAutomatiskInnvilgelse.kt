@@ -10,6 +10,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.VedtakRepository
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
@@ -85,7 +86,23 @@ internal class VurderAutomatiskInnvilgelse(
     }
 
     private fun automatiserSaksbehandling(context: CommandContext) {
-        val vedtak = Vedtak.automatisk(SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId))
+        val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId)
+        val vedtak =
+            vedtakRepository.finn(spleisBehandlingId).let { vedtak ->
+                when (vedtak?.behandletAvSpleis) {
+                    null -> Vedtak.automatisk(spleisBehandlingId)
+                    true -> {
+                        logg.info("Det er allerede fattet vedtak for behandlingen, og spleis har behandlet det")
+                        return
+                    }
+
+                    false -> {
+                        logg.info("Det er tidligere forsøkt å fatte vedtak for behandlingen, men spesialist har ikke sett at spleis har behandlet svaret på godkjenningsbehovet")
+                        vedtak
+                    }
+                }
+            }
+
         vedtakRepository.lagre(vedtak)
         automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
         godkjenningMediator.automatiskUtbetaling(context, godkjenningsbehov)
