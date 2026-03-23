@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
@@ -23,6 +26,9 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
+import no.nav.helse.spesialist.application.VeilederStansRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.VeilederStans
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -36,6 +42,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val veilederStansRepository = mockk<VeilederStansRepository>(relaxed = true)
 
     private val meldingPubliserer =
         object : MeldingPubliserer {
@@ -85,7 +92,9 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
             stansAutomatiskBehandlingDao,
             periodehistorikkDao,
             oppgaveDao,
-        ) { subsumsjonsmelder }
+            { subsumsjonsmelder },
+            veilederStansRepository,
+        )
 
     @Test
     fun `Lagrer melding og periodehistorikk når stoppknapp-mleding håndteres`() {
@@ -368,6 +377,54 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
         assertEquals("8-4", subsumsjon.paragraf)
         assertEquals("1", subsumsjon.ledd)
         assertEquals(VILKAR_OPPFYLT.name, subsumsjon.utfall)
+    }
+
+    @Test
+    fun `håndter STOPP_AUTOMATIKK oppretter og lagrer ny VeilederStans`() {
+        val meldingId = randomUUID()
+        val årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV)
+        val melding = StansAutomatiskBehandlingMelding(
+            id = meldingId,
+            fødselsnummer = FNR,
+            status = "STOPP_AUTOMATIKK",
+            årsaker = årsaker,
+            opprettet = now(),
+            originalMelding = "{}",
+            kilde = "ISYFO",
+            json = "",
+        )
+        val slot = slot<VeilederStans>()
+        every { veilederStansRepository.lagre(capture(slot)) } just runs
+
+        mediator.håndter(melding)
+
+        verify(exactly = 1) { veilederStansRepository.lagre(any()) }
+        val lagretStans = slot.captured
+        assertEquals(Identitetsnummer.fraString(FNR), lagretStans.identitetsnummer)
+        assertEquals(
+            setOf(VeilederStans.StansÅrsak.MEDISINSK_VILKAR, VeilederStans.StansÅrsak.AKTIVITETSKRAV),
+            lagretStans.årsaker,
+        )
+        assertEquals(meldingId, lagretStans.originalMeldingId)
+        assertTrue(lagretStans.erStansett)
+    }
+
+    @Test
+    fun `håndter NORMAL lagrer ikke VeilederStans`() {
+        val melding = StansAutomatiskBehandlingMelding(
+            id = randomUUID(),
+            fødselsnummer = FNR,
+            status = "NORMAL",
+            årsaker = emptySet(),
+            opprettet = now(),
+            originalMelding = "{}",
+            kilde = "ISYFO",
+            json = "",
+        )
+
+        mediator.håndter(melding)
+
+        verify(exactly = 0) { veilederStansRepository.lagre(any()) }
     }
 
     private fun stans(vararg årsaker: StoppknappÅrsak) = "STOPP_AUTOMATIKK" to årsaker.toSet()
