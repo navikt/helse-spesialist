@@ -20,7 +20,12 @@ internal class BehovtidsbrukMetrikkRiverTest {
                     "@final" to true,
                     "@besvart" to LocalDateTime.now(),
                     "@løsning" to emptyMap<String, Any>(),
-                    "system_participating_services" to listOf(mapOf("time" to LocalDateTime.now().minusSeconds(3))),
+                    "system_participating_services" to listOf(
+                        mapOf(
+                            "service" to "spesialist",
+                            "time" to LocalDateTime.now().minusSeconds(3)
+                        )
+                    ),
                 )
             )
         )

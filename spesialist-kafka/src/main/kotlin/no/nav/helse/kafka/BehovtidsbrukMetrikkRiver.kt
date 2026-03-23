@@ -34,8 +34,8 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val opprinneligService = packet["system_participating_services"][0]
-        if (opprinneligService["service"].asText() != "spesialist") {
+        val opprinneligService = packet["system_participating_services"].takeUnless { it.isMissingOrNull() }?.firstOrNull()
+        if (opprinneligService == null || opprinneligService["service"]?.asText() != "spesialist") {
             return
         }
 
