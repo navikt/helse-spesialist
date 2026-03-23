@@ -34,8 +34,13 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
+        val opprinneligService = packet["system_participating_services"][0]
+        if (opprinneligService["service"].asText() != "spesialist") {
+            return
+        }
+
         val besvart = packet["@besvart"].asLocalDateTime()
-        val opprettet = packet["system_participating_services"][0].let { it["time"].asLocalDateTime() }
+        val opprettet = opprinneligService.let { it["time"].asLocalDateTime() }
         val delay = Duration.between(opprettet, besvart).toKotlinDuration()
         val behov = packet["@behov"].map(JsonNode::asText)
         val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless { it.isMissingOrNull() }?.asBoolean()
@@ -49,6 +54,6 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
             }
 
         loggDebug("Registrerer svartid for $behov som $delay.$godkjenningslog")
-        registrerTidsbrukForBehov(behov.first(), delay)
+        registrerTidsbrukForBehov(behov.joinToString(), delay)
     }
 }
