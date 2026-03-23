@@ -72,6 +72,7 @@ import no.nav.helse.spesialist.db.repository.PgVarseldefinisjonRepository
 import no.nav.helse.spesialist.db.repository.PgVedtakBegrunnelseRepository
 import no.nav.helse.spesialist.db.repository.PgVedtakRepository
 import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
+import no.nav.helse.spesialist.db.repository.PgVeilederStansRepository
 
 class DBSessionContext(
     session: Session,
@@ -104,6 +105,7 @@ class DBSessionContext(
         PgLegacyPersonRepository(session, legacyVedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
     override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(session)
     override val saksbehandlerStansRepository = PgSaksbehandlerStansRepository(session)
+    override val veilederStansRepository = PgVeilederStansRepository(session)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
     override val totrinnsvurderingRepository: TotrinnsvurderingRepository = PgTotrinnsvurderingRepository(session)

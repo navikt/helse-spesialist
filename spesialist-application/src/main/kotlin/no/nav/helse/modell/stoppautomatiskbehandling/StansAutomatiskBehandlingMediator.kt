@@ -18,8 +18,12 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingStansAutomatiskBehandling
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
+import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.VeilederStans
+import java.time.ZoneOffset
 import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
@@ -27,6 +31,7 @@ class StansAutomatiskBehandlingMediator(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
+    private val veilederStansRepository: VeilederStansRepository,
 ) : AutomatiseringStansetSjekker {
     private val subsumsjonsmelder by lazy { subsumsjonsmelderProvider() }
 
@@ -40,11 +45,22 @@ class StansAutomatiskBehandlingMediator(
                 sessionContext.periodehistorikkDao,
                 sessionContext.oppgaveDao,
                 subsumsjonsmelderProvider,
+                sessionContext.veilederStansRepository,
             )
     }
 
     fun håndter(melding: StansAutomatiskBehandlingMelding) {
         stansAutomatiskBehandlingDao.lagreFraISyfo(melding)
+        if (melding.status == "STOPP_AUTOMATIKK") {
+            veilederStansRepository.lagre(
+                VeilederStans.ny(
+                    identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer()),
+                    årsaker = melding.årsaker.map { VeilederStans.StansÅrsak.valueOf(it.name) }.toSet(),
+                    opprettet = melding.opprettet.toInstant(ZoneOffset.UTC),
+                    originalMeldingId = melding.id,
+                ),
+            )
+        }
         lagrePeriodehistorikk(melding.fødselsnummer())
     }
 

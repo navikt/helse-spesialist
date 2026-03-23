@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.VedtaksperiodeRepository
+import no.nav.helse.spesialist.application.VeilederStansRepository
 
 interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao
@@ -49,6 +50,7 @@ interface SessionContext {
     val legacyPersonRepository: LegacyPersonRepository
     val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
     val saksbehandlerStansRepository: SaksbehandlerStansRepository
+    val veilederStansRepository: VeilederStansRepository
 
     val totrinnsvurderingRepository: TotrinnsvurderingRepository
     val overstyringRepository: OverstyringRepository
