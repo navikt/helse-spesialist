@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
@@ -22,13 +21,21 @@ class ApiModuleIntegrationTestFixture(
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
-    private val saksbehandlersOid = SaksbehandlerOid(UUID.randomUUID())
-    val token: String get() =
-        token(
-            lagSaksbehandler(id = saksbehandlersOid, navn = "En Saksbehandler", epost = "utvikler@nav.no", navIdent = "X123456"),
-            setOf(Tilgang.Les, Tilgang.Skriv),
-            setOf(Brukerrolle.Utvikler),
+    private val saksbehandler = lagSaksbehandler()
+    private val saksbehandlersTilganger = setOf(Tilgang.Les, Tilgang.Skriv)
+    private val saksbehandlersBrukerroller = setOf(Brukerrolle.Utvikler)
+    val token: String get() {
+        return token(
+            saksbehandler,
+            saksbehandlersTilganger,
+            saksbehandlersBrukerroller,
         )
+    }
+
+    private fun groups(
+        tilganger: Set<Tilgang>,
+        brukerroller: Set<Brukerrolle>,
+    ): List<String> = (tilgangsgrupperTilTilganger.uuiderFor(tilganger) + tilgangsgrupperTilBrukerroller.uuiderFor(brukerroller)).map { it.toString() }
 
     fun token(
         saksbehandler: Saksbehandler,
@@ -46,7 +53,7 @@ class ApiModuleIntegrationTestFixture(
                         "preferred_username" to saksbehandler.epost,
                         "oid" to saksbehandler.id.value.toString(),
                         "name" to saksbehandler.navn,
-                        "groups" to (tilgangsgrupperTilTilganger.uuiderFor(tilganger) + tilgangsgrupperTilBrukerroller.uuiderFor(brukerroller)).map { it.toString() },
+                        "groups" to groups(tilganger, brukerroller),
                     ),
             ).serialize()
 
@@ -68,6 +75,17 @@ class ApiModuleIntegrationTestFixture(
                 }
                 get("playground") {
                     call.respondText(buildPlaygroundHtml(), ContentType.Text.Html)
+                }
+                get("/bruker") {
+                    return@get call.respond(
+                        mapOf(
+                            "oid" to saksbehandler.id.value,
+                            "preferred_username" to saksbehandler.epost,
+                            "name" to saksbehandler.navn,
+                            "NAVident" to saksbehandler.ident.value,
+                            "groups" to groups(saksbehandlersTilganger, saksbehandlersBrukerroller),
+                        ),
+                    )
                 }
             }
         }
