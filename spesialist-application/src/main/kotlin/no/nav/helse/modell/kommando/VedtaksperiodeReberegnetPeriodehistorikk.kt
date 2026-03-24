@@ -10,7 +10,7 @@ internal class VedtaksperiodeReberegnetPeriodehistorikk(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val innslag = Historikkinnslag.vedtaksperiodeReberegnet()
-        periodehistorikkDao.lagre(historikkinnslag = innslag, behandlingId = vedtaksperiode.gjeldendeUnikId)
+        periodehistorikkDao.lagre(historikkinnslag = innslag, behandlingUnikId = vedtaksperiode.gjeldendeUnikId)
         return true
     }
 }

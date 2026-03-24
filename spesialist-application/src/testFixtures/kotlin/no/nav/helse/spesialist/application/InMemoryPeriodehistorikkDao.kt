@@ -17,9 +17,9 @@ class InMemoryPeriodehistorikkDao : PeriodehistorikkDao {
 
     override fun lagre(
         historikkinnslag: Historikkinnslag,
-        behandlingId: UUID,
+        behandlingUnikId: UUID,
     ) {
-        behandlingData[behandlingId] = (behandlingData[behandlingId] ?: emptyList()) + historikkinnslag
+        behandlingData[behandlingUnikId] = (behandlingData[behandlingUnikId] ?: emptyList()) + historikkinnslag
     }
 
     fun finnForOppgave(oppgaveId: Long): List<Historikkinnslag> = oppgaveData[oppgaveId] ?: emptyList()

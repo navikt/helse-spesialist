@@ -39,16 +39,16 @@ class PgPeriodehistorikkDao private constructor(
 
     override fun lagre(
         historikkinnslag: Historikkinnslag,
-        behandlingId: UUID,
+        behandlingUnikId: UUID,
     ) {
         asSQL(
             """
                 INSERT INTO periodehistorikk (type, saksbehandler_oid, behandling_id, utbetaling_id, dialog_ref, json)
-                VALUES (:type, :saksbehandler_oid, :behandling_id, null, :dialog_ref, :json::json)
+                VALUES (:type, :saksbehandler_oid, :behandling_unik_id, null, :dialog_ref, :json::json)
         """,
             "type" to historikkinnslag.type(),
             "saksbehandler_oid" to historikkinnslag.saksbehandler?.id?.value,
-            "behandling_id" to behandlingId,
+            "behandling_unik_id" to behandlingUnikId,
             "dialog_ref" to historikkinnslag.dialogRef,
             "json" to historikkinnslag.detaljer().let { objectMapper.writeValueAsString(it) },
         ).update()
@@ -57,15 +57,34 @@ class PgPeriodehistorikkDao private constructor(
     private fun Historikkinnslag.type() =
         when (this) {
             is LagtPåVent -> "LEGG_PA_VENT"
-            is FjernetFraPåVent -> "FJERN_FRA_PA_VENT" // TODO: Mangler å migrere typen i databasen
-            is TotrinnsvurderingFerdigbehandlet -> "TOTRINNSVURDERING_ATTESTERT" // TODO: Mangler å migrere typen i databasen
-            is AvventerTotrinnsvurdering -> "TOTRINNSVURDERING_TIL_GODKJENNING" // TODO: Mangler å migrere typen i databasen
-            is TotrinnsvurderingRetur -> "TOTRINNSVURDERING_RETUR" // TODO: Mangler å migrere typen i databasen
-            is TotrinnsvurderingAutomatiskRetur -> "TOTRINNSVURDERING_RETUR" // TODO: Mangler å migrere typen i databasen
-            is AutomatiskBehandlingStanset -> "STANS_AUTOMATISK_BEHANDLING" // TODO: Mangler å migrere typen i databasen
-            is VedtaksperiodeReberegnet -> "VEDTAKSPERIODE_REBEREGNET" // TODO: Mangler å migrere typen i databasen
-            is EndrePåVent -> "ENDRE_PA_VENT" // TODO: Mangler å migrere typen i databsen??
-            is AutomatiskBehandlingStansetAvSaksbehandler -> "STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER" // TODO: Mangler å migrere typen i databsen??
+
+            is FjernetFraPåVent -> "FJERN_FRA_PA_VENT"
+
+            // TODO: Mangler å migrere typen i databasen
+            is TotrinnsvurderingFerdigbehandlet -> "TOTRINNSVURDERING_ATTESTERT"
+
+            // TODO: Mangler å migrere typen i databasen
+            is AvventerTotrinnsvurdering -> "TOTRINNSVURDERING_TIL_GODKJENNING"
+
+            // TODO: Mangler å migrere typen i databasen
+            is TotrinnsvurderingRetur -> "TOTRINNSVURDERING_RETUR"
+
+            // TODO: Mangler å migrere typen i databasen
+            is TotrinnsvurderingAutomatiskRetur -> "TOTRINNSVURDERING_RETUR"
+
+            // TODO: Mangler å migrere typen i databasen
+            is AutomatiskBehandlingStanset -> "STANS_AUTOMATISK_BEHANDLING"
+
+            // TODO: Mangler å migrere typen i databasen
+            is VedtaksperiodeReberegnet -> "VEDTAKSPERIODE_REBEREGNET"
+
+            // TODO: Mangler å migrere typen i databasen
+            is EndrePåVent -> "ENDRE_PA_VENT"
+
+            // TODO: Mangler å migrere typen i databsen??
+            is AutomatiskBehandlingStansetAvSaksbehandler -> "STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER"
+
+            // TODO: Mangler å migrere typen i databsen??
             is OpphevStansAvSaksbehandler -> "OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER" // TODO: Mangler å migrere typen i databsen??
         }
 }
