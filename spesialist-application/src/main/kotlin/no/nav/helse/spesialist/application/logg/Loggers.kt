@@ -109,6 +109,7 @@ enum class MdcKey(
     SAKSBEHANDLER_IDENT("saksbehandlerIdent"),
     SPLEIS_BEHANDLING_ID("spleisBehandlingId"),
     VEDTAKSPERIODE_ID("vedtaksperiodeId"),
+    OPPGAVE_ID("oppgaveId"),
 }
 
 fun <T> kanskjeMedMdc(

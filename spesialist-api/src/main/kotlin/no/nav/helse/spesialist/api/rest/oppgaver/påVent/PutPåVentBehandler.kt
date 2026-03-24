@@ -29,23 +29,12 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
         resource: OppgaverBase.OppgaveId.PåVent,
         request: ApiPutPåVentRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<Unit, ApiPutPåVentErrorCode> {
-        val oppgaveId = OppgaveId(resource.parent.oppgaveId)
-        val oppgave =
-            kallKontekst.transaksjon.oppgaveRepository.finn(oppgaveId)
-                ?: return RestResponse.Error(ApiPutPåVentErrorCode.OPPGAVE_IKKE_FUNNET)
-        val vedtaksperiode =
-            kallKontekst.transaksjon
-                .vedtaksperiodeRepository
-                .finn(oppgave.vedtaksperiodeId)
-                ?: error("Fant ikke vedtaksperiode")
-
-        return kallKontekst.medPerson(
-            identitetsnummer = vedtaksperiode.identitetsnummer,
-            personIkkeFunnet = { error("Fant ikke person") },
+    ): RestResponse<Unit, ApiPutPåVentErrorCode> =
+        kallKontekst.medOppgave(
+            oppgaveId = OppgaveId(resource.parent.oppgaveId),
+            oppgaveIkkeFunnet = { ApiPutPåVentErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPutPåVentErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { person ->
-            val behandling = kallKontekst.transaksjon.behandlingRepository.finn(oppgave.behandlingId) ?: error("Fant ikke behandling")
+        ) { oppgave, behandling, _, person ->
             val dialog = kallKontekst.opprettOgLagreNyDialog()
             val påVent =
                 kallKontekst.transaksjon.påVentRepository
@@ -76,7 +65,6 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
 
             RestResponse.NoContent()
         }
-    }
 
     private fun nyPåVent(
         oppgave: Oppgave,

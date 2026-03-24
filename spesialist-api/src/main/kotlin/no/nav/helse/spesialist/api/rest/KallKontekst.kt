@@ -15,6 +15,8 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
@@ -26,6 +28,27 @@ class KallKontekst(
     val outbox: Outbox,
     private val ktorCall: RoutingCall,
 ) {
+    fun <RESPONSE, ERROR : ApiErrorCode> medOppgave(
+        oppgaveId: OppgaveId,
+        oppgaveIkkeFunnet: () -> ERROR,
+        manglerTilgangTilPerson: () -> ERROR,
+        block: (Oppgave, Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
+    ): RestResponse<RESPONSE, ERROR> =
+        medMdcOgAttribute(MdcKey.OPPGAVE_ID to oppgaveId.value.toString()) {
+            val oppgave = transaksjon.oppgaveRepository.finn(oppgaveId)
+
+            if (oppgave == null) {
+                loggWarn("Oppgaven ble ikke funnet", "oppgaveId" to oppgaveId)
+                return@medMdcOgAttribute RestResponse.Error(oppgaveIkkeFunnet())
+            }
+
+            medBehandling(
+                spleisBehandlingId = oppgave.behandlingId,
+                behandlingIkkeFunnet = { error("Behandlingen ble ikke funnet") },
+                manglerTilgangTilPerson = manglerTilgangTilPerson,
+            ) { behandling, vedtaksperiode, person -> block(oppgave, behandling, vedtaksperiode, person) }
+        }
+
     fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
         spleisBehandlingId: SpleisBehandlingId,
         behandlingIkkeFunnet: () -> ERROR,
