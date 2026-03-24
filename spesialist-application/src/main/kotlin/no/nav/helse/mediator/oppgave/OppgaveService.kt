@@ -84,7 +84,7 @@ class OppgaveService(
                 periodetype = periodetype,
             )
         tildelVedReservasjon(fødselsnummer, oppgave)
-        oppgave.hendelser.forEach { hendelse ->
+        oppgave.konsumerHendelser().forEach { hendelse ->
             meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
         }
         oppgaveRepository.lagre(oppgave)
@@ -98,7 +98,7 @@ class OppgaveService(
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         val returverdi = oppgaveBlock(oppgave)
         oppgaveRepository.lagre(oppgave)
-        oppgave.hendelser.forEach { hendelse ->
+        oppgave.konsumerHendelser().forEach { hendelse ->
             meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
         }
         return returverdi

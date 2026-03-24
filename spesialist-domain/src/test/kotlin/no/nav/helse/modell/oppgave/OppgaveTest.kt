@@ -421,9 +421,10 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
 
-        assertEquals(2, oppgave.hendelser.size)
-        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
+        val hendelser = oppgave.konsumerHendelser()
+        assertEquals(2, hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[1])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -436,10 +437,11 @@ internal class OppgaveTest {
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.sendIRetur(beslutter)
 
-        assertEquals(3, oppgave.hendelser.size)
-        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[2])
+        val hendelser = oppgave.konsumerHendelser()
+        assertEquals(3, hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[1])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[2])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -537,10 +539,11 @@ internal class OppgaveTest {
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
-        assertEquals(3, oppgave.hendelser.size)
-        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[2])
+        val hendelser = oppgave.konsumerHendelser()
+        assertEquals(3, hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[1])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[2])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
@@ -557,11 +560,12 @@ internal class OppgaveTest {
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
         oppgave.fjernFraPåVent()
 
-        assertEquals(4, oppgave.hendelser.size)
-        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), oppgave.hendelser[0])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[1])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[2])
-        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), oppgave.hendelser[3])
+        val hendelser = oppgave.konsumerHendelser()
+        assertEquals(4, hendelser.size)
+        assertEquals(Oppgavehendelse.OppgaveOpprettet(oppgave), hendelser[0])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[1])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[2])
+        assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[3])
 
         inspektør(oppgave) {
             assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)

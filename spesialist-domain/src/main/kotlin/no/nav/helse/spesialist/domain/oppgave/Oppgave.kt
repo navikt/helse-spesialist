@@ -44,8 +44,9 @@ class Oppgave private constructor(
     inntektsforhold: Inntektsforhold,
     periodetype: Periodetype,
 ) : Entity<OppgaveId>(id) {
-    private val _hendelser = mutableListOf<Oppgavehendelse>()
-    val hendelser get() = _hendelser.toList()
+    private val hendelser = mutableListOf<Oppgavehendelse>()
+
+    fun konsumerHendelser(): List<Oppgavehendelse> = hendelser.toList().also { hendelser.clear() }
 
     private val _egenskaper = egenskaper.toMutableSet()
     val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
@@ -267,7 +268,7 @@ class Oppgave private constructor(
     }
 
     private fun oppgaveEndret() {
-        _hendelser.add(Oppgavehendelse.OppgaveOppdatert(this))
+        hendelser.add(Oppgavehendelse.OppgaveOppdatert(this))
     }
 
     private fun nesteTilstand(neste: Tilstand) {
@@ -471,7 +472,7 @@ class Oppgave private constructor(
                 inntektsforhold = inntektsforhold,
                 periodetype = periodetype,
             ).also {
-                it._hendelser.add(Oppgavehendelse.OppgaveOpprettet(it))
+                it.hendelser.add(Oppgavehendelse.OppgaveOpprettet(it))
             }
         }
 
