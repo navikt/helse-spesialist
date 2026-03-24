@@ -119,14 +119,15 @@ fun lagAvviksvurderingMedEnArbeidsgiver(
 fun lagOppgave(
     behandlingId: SpleisBehandlingId,
     godkjenningsbehovId: UUID,
+    vedtaksperiodeId: VedtaksperiodeId = lagVedtaksperiodeId(),
 ): Oppgave =
-    Oppgave.ny(
+    Oppgave.fraLagring(
         id = nextLong(),
         førsteOpprettet = LocalDateTime.now(),
-        vedtaksperiodeId = lagVedtaksperiodeId(),
+        vedtaksperiodeId = vedtaksperiodeId,
         behandlingId = behandlingId,
         utbetalingId = UUID.randomUUID(),
-        hendelseId = godkjenningsbehovId,
+        godkjenningsbehovId = godkjenningsbehovId,
         kanAvvises = true,
         egenskaper = emptySet(),
         mottaker = Mottaker.UtbetalingTilArbeidsgiver,
@@ -134,6 +135,11 @@ fun lagOppgave(
         inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         inntektsforhold = Inntektsforhold.Arbeidstaker,
         periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        opprettet = LocalDateTime.now(),
+        tilstand = Oppgave.AvventerSaksbehandler,
+        ferdigstiltAvOid = null,
+        ferdigstiltAvIdent = null,
+        tildeltTil = null,
     )
 
 fun lagSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())

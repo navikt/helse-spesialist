@@ -14,12 +14,33 @@ class PåVent private constructor(
     id: PåVentId?,
     val vedtaksperiodeId: VedtaksperiodeId,
     val saksbehandlerOid: SaksbehandlerOid,
-    val frist: LocalDate,
+    frist: LocalDate,
     val opprettetTidspunkt: Instant,
     val dialogRef: DialogId?,
-    val årsaker: List<String>,
-    val notattekst: String?,
+    årsaker: List<String>,
+    notattekst: String?,
 ) : LateIdAggregateRoot<PåVentId>(id) {
+    var frist: LocalDate = frist
+        private set
+
+    var årsaker: List<String> = årsaker
+        private set
+
+    var notattekst: String? = notattekst
+        private set
+
+    fun nyFrist(frist: LocalDate) {
+        this.frist = frist
+    }
+
+    fun nyeÅrsaker(årsaker: List<String>) {
+        this.årsaker = årsaker
+    }
+
+    fun nyNotattekst(notattekst: String?) {
+        this.notattekst = notattekst
+    }
+
     object Factory {
         fun ny(
             vedtaksperiodeId: VedtaksperiodeId,

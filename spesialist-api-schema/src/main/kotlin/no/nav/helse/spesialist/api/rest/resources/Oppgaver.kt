@@ -30,3 +30,17 @@ data class Oppgaver(
     val sidetall: Int? = null,
     val sidestoerrelse: Int? = null,
 )
+
+@Resource("oppgaver")
+class OppgaverBase {
+    @Resource("{oppgaveId}")
+    data class OppgaveId(
+        val parent: OppgaverBase = OppgaverBase(),
+        val oppgaveId: Long,
+    ) {
+        @Resource("pa-vent")
+        data class PåVent(
+            val parent: OppgaveId,
+        )
+    }
+}

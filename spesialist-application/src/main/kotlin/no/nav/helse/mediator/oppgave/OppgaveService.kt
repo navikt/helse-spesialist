@@ -239,7 +239,7 @@ class OppgaveService(
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
 }
 
-private fun Oppgavehendelse.tilUtgåendeHendelse() =
+fun Oppgavehendelse.tilUtgåendeHendelse() =
     when (this) {
         is Oppgavehendelse.OppgaveOppdatert -> OppgaveOppdatert(this.oppgave)
         is Oppgavehendelse.OppgaveOpprettet -> OppgaveOpprettet(this.oppgave)
