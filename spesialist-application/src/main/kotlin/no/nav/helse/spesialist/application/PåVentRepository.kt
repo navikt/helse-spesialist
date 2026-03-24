@@ -10,4 +10,6 @@ interface PåVentRepository {
     fun finnFor(vedtaksperiodeId: VedtaksperiodeId): PåVent?
 
     fun lagre(påVent: PåVent)
+
+    fun slett(id: PåVentId)
 }

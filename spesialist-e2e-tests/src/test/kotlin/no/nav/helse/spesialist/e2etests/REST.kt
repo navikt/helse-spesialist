@@ -27,7 +27,7 @@ object REST {
             request = null,
             saksbehandler = saksbehandler,
             tilganger = tilganger,
-            brukerroller = brukerroller
+            brukerroller = brukerroller,
         )
 
     fun patch(
@@ -43,7 +43,7 @@ object REST {
             request = request,
             saksbehandler = saksbehandler,
             tilganger = tilganger,
-            brukerroller = brukerroller
+            brukerroller = brukerroller,
         )
 
     fun post(
@@ -59,7 +59,7 @@ object REST {
             request = request,
             saksbehandler = saksbehandler,
             tilganger = tilganger,
-            brukerroller = brukerroller
+            brukerroller = brukerroller,
         )
 
     fun put(
@@ -75,7 +75,22 @@ object REST {
             request = request,
             saksbehandler = saksbehandler,
             tilganger = tilganger,
-            brukerroller = brukerroller
+            brukerroller = brukerroller,
+        )
+
+    fun delete(
+        relativeUrl: String,
+        saksbehandler: Saksbehandler,
+        tilganger: Set<Tilgang>,
+        brukerroller: Set<Brukerrolle>,
+    ): JsonNode? =
+        utførHttpKall(
+            method = Method.DELETE,
+            relativeUrl = relativeUrl,
+            request = null,
+            saksbehandler = saksbehandler,
+            tilganger = tilganger,
+            brukerroller = brukerroller,
         )
 
     private fun utførHttpKall(
@@ -84,7 +99,7 @@ object REST {
         request: Any?,
         saksbehandler: Saksbehandler,
         tilganger: Set<Tilgang>,
-        brukerroller: Set<Brukerrolle>
+        brukerroller: Set<Brukerrolle>,
     ): JsonNode? {
         val url = "http://localhost:${E2ETestApplikasjon.port}/${relativeUrl.encodeURLQueryComponent()}"
         val requestBodyAsString = request?.let(objectMapper.writerWithDefaultPrettyPrinter()::writeValueAsString)
@@ -94,27 +109,29 @@ object REST {
                 .create(method, URI.create(url))
                 .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
                 .setHeader(
-                    "Authorization", "Bearer ${
+                    "Authorization",
+                    "Bearer ${
                         E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(
                             saksbehandler = saksbehandler,
                             tilganger = tilganger,
                             brukerroller = brukerroller,
                         )
-                    }"
-                )
-                .connectTimeout(Timeout.ofSeconds(10))
+                    }",
+                ).connectTimeout(Timeout.ofSeconds(10))
                 .responseTimeout(Timeout.ofSeconds(10))
                 .apply { requestBodyAsString?.let { bodyString(it, ContentType.APPLICATION_JSON) } }
                 .execute()
                 .handleResponse { response -> response.code to response.entity?.let(EntityUtils::toString) }
-        logg.info(buildString {
-            append("Respons fra HTTP $method: HTTP $statusCode")
-            if (responseBodyAsString  != null) {
-                append(" med body:\n$responseBodyAsString")
-            } else {
-                append(" uten body")
-            }
-        })
+        logg.info(
+            buildString {
+                append("Respons fra HTTP $method: HTTP $statusCode")
+                if (responseBodyAsString != null) {
+                    append(" med body:\n$responseBodyAsString")
+                } else {
+                    append(" uten body")
+                }
+            },
+        )
         assertTrue(statusCode in 200..299) { "Fikk HTTP-kode $statusCode fra HTTP $method" }
         return responseBodyAsString?.let(objectMapper::readTree)
     }

@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
@@ -140,6 +141,23 @@ fun lagOppgave(
         ferdigstiltAvOid = null,
         ferdigstiltAvIdent = null,
         tildeltTil = null,
+    )
+
+fun lagPåVent(
+    vedtaksperiodeId: VedtaksperiodeId,
+    saksbehandlerOid: SaksbehandlerOid,
+    frist: LocalDate = LocalDate.now().plusDays(1),
+    dialogId: DialogId,
+    årsaker: List<String> = listOf("En årsak"),
+    notattekst: String = "En notattekst",
+): PåVent =
+    PåVent.Factory.ny(
+        vedtaksperiodeId = vedtaksperiodeId,
+        saksbehandlerOid = saksbehandlerOid,
+        frist = frist,
+        dialogRef = dialogId,
+        årsaker = årsaker,
+        notattekst = notattekst,
     )
 
 fun lagSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())

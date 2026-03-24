@@ -38,6 +38,13 @@ internal class PgPåVentRepository(
         }
     }
 
+    override fun slett(id: PåVentId) {
+        asSQL(
+            "DELETE FROM pa_vent WHERE id = :id",
+            "id" to id.value,
+        ).update()
+    }
+
     private fun insert(påVent: PåVent): Long =
         asSQL(
             """

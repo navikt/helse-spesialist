@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest.oppgaver.påVent
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.mediator.oppgave.tilUtgåendeHendelse
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
@@ -11,16 +10,15 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.oppgaver.leggTilIOutbox
 import no.nav.helse.spesialist.api.rest.resources.OppgaverBase
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Dialog
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
-import no.nav.helse.spesialist.domain.oppgave.Oppgavehendelse
 
 class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutPåVentRequest, Unit, ApiPutPåVentErrorCode> {
     override val tag = Tags.OPPGAVER
@@ -34,11 +32,11 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
             oppgaveId = OppgaveId(resource.parent.oppgaveId),
             oppgaveIkkeFunnet = { ApiPutPåVentErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPutPåVentErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { oppgave, behandling, _, person ->
+        ) { oppgave, behandling, vedtaksperiode, person ->
             val dialog = kallKontekst.opprettOgLagreNyDialog()
             val påVent =
                 kallKontekst.transaksjon.påVentRepository
-                    .finnFor(oppgave.vedtaksperiodeId)
+                    .finnFor(vedtaksperiode.id)
                     ?: nyPåVent(oppgave, kallKontekst, request, dialog)
 
             val påVentEndres = påVent.harFåttTildeltId()
@@ -60,7 +58,7 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
             kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
             kallKontekst.transaksjon.påVentRepository.lagre(påVent)
 
-            oppgave.konsumerHendelser().leggTilIOutbox(identitetsnummer = person.id, kallKontekst = kallKontekst)
+            oppgave.konsumerHendelser().leggTilIOutbox(identitetsnummer = person.id, kallKontekst = kallKontekst, "Oppgave lagt på vent")
             kallKontekst.outbox.leggTilPåVentEvent(person, oppgave, påVent, request, kallKontekst.saksbehandler)
 
             RestResponse.NoContent()
@@ -111,12 +109,6 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
         frist = request.frist,
         dialogRef = dialog.id().value,
     )
-
-    private fun List<Oppgavehendelse>.leggTilIOutbox(
-        identitetsnummer: Identitetsnummer,
-        kallKontekst: KallKontekst,
-    ) = this
-        .forEach { kallKontekst.outbox.leggTil(identitetsnummer, it.tilUtgåendeHendelse(), "Oppgave lagt på vent") }
 
     private fun Outbox.leggTilPåVentEvent(
         person: Person,

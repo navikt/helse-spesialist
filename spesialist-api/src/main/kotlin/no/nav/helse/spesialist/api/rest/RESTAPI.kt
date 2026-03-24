@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.rest.oppgaver.GetAntallOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetBehandledeOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetListeOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
+import no.nav.helse.spesialist.api.rest.oppgaver.påVent.DeletePåVentBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.PutPåVentBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
@@ -95,6 +96,7 @@ fun Routing.restRoutes(
             get(GetListeOppgaverBehandler(), restAdapter)
 
             put(PutPåVentBehandler(), restAdapter)
+            delete(DeletePåVentBehandler(), restAdapter)
 
             patch(PatchSaksbehandlerStansBehandler(), restAdapter)
             patch(PatchVeilederStansBehandler(), restAdapter)

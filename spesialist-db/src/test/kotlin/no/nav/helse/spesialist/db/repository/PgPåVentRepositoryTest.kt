@@ -8,6 +8,7 @@ import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PgPåVentRepositoryTest : AbstractDBIntegrationTest() {
@@ -20,6 +21,7 @@ class PgPåVentRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `får tildelt id ved lagring`() {
+        // given
         val påVent =
             PåVent.Factory.ny(
                 vedtaksperiodeId = vedtaksperiode.id,
@@ -29,12 +31,17 @@ class PgPåVentRepositoryTest : AbstractDBIntegrationTest() {
                 årsaker = listOf("En årsak"),
                 notattekst = "notattekst",
             )
+
+        // when
         repository.lagre(påVent)
+
+        // then
         assertTrue(påVent.harFåttTildeltId())
     }
 
     @Test
     fun `lagre og finn`() {
+        // given
         val påVent =
             PåVent.Factory.ny(
                 vedtaksperiodeId = vedtaksperiode.id,
@@ -44,7 +51,11 @@ class PgPåVentRepositoryTest : AbstractDBIntegrationTest() {
                 årsaker = listOf("En årsak"),
                 notattekst = "notattekst",
             )
+
+        // when
         repository.lagre(påVent)
+
+        // then
         val funnet = repository.finnFor(vedtaksperiode.id)
         assertNotNull(funnet)
         assertEquals(påVent, funnet)
@@ -97,5 +108,26 @@ class PgPåVentRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(oppdatertPåVent.årsaker, funnet.årsaker)
         assertEquals(oppdatertPåVent.notattekst, funnet.notattekst)
         assertEqualsByMicrosecond(opprinneligPåVent.opprettetTidspunkt, funnet.opprettetTidspunkt)
+    }
+
+    @Test
+    fun slett() {
+        // given
+        val påVent =
+            PåVent.Factory.ny(
+                vedtaksperiodeId = vedtaksperiode.id,
+                saksbehandlerOid = saksbehandler.id,
+                frist = LocalDate.now().plusDays(1),
+                dialogRef = dialog.id(),
+                årsaker = listOf("En årsak"),
+                notattekst = "notattekst",
+            )
+        repository.lagre(påVent)
+
+        // when
+        repository.slett(påVent.id())
+
+        // then
+        assertNull(repository.finnFor(vedtaksperiode.id))
     }
 }

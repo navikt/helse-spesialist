@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
@@ -21,6 +22,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class SpeilPersonReceiver(
     private val testContext: TestContext,
@@ -119,6 +121,11 @@ class SpeilPersonReceiver(
                         },
                 ),
         )
+        hentOppdatertPerson()
+    }
+
+    fun saksbehandlerFjernerOppgaveFraPåVent() {
+        callHttpDelete(relativeUrl = "api/oppgaver/${getOppgaveId()}/pa-vent")
         hentOppdatertPerson()
     }
 
@@ -400,6 +407,19 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
+    fun assertPåVent(frist: LocalDate) {
+        val påVentNode =
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["paVent"]
+        assertFalse(påVentNode.isMissingOrNull(), "Forventer at paVent ikke er null")
+        assertEquals(frist, påVentNode["frist"].asLocalDate())
+    }
+
+    fun assertIkkePåVent() {
+        val påVentNode =
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["paVent"]
+        assertTrue(påVentNode.isMissingOrNull(), "Forventer at paVent er null")
+    }
+
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {
         val egenskaper =
             person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
@@ -503,6 +523,8 @@ class SpeilPersonReceiver(
         relativeUrl: String,
         request: Any,
     ) = REST.put(relativeUrl, saksbehandler, tilganger, brukerroller, request)
+
+    private fun callHttpDelete(relativeUrl: String) = REST.delete(relativeUrl, saksbehandler, tilganger, brukerroller)
 
     private fun callHttpPatch(
         relativeUrl: String,
