@@ -83,6 +83,8 @@ spec:
           cluster: dev-gcp
         - application: logging
           namespace: nais-system
+      external:
+        - host: sykepengeperioder-api.dev-fss-pub.nais.io
   gcp:
     permissions:
       - resource:
@@ -156,6 +158,10 @@ spec:
       value: "http://sparkel-norg"
     - name: SPARKEL_NORG_SCOPE
       value: "api://dev-gcp.tbd.sparkel-norg/.default"
+    - name: SPARKEL_SYKEPENGEPERIODER_API_URL
+      value: "https://sykepengeperioder-api.dev-fss-pub.nais.io"
+    - name: SPARKEL_SYKEPENGEPERIODER_SCOPE
+      value: "api://dev-fss.tbd.sparkel-sykepengeperioder-api/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK

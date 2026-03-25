@@ -7,6 +7,7 @@ include(
     ":clients:spesialist-client-entra-id",
     ":clients:spesialist-client-krr",
     ":clients:spesialist-client-sparkel-norg",
+    ":clients:spesialist-client-sparkel-sykepengeperioder",
     ":clients:spesialist-client-speed",
     ":clients:spesialist-client-spillkar",
     ":clients:spesialist-client-spiskammerset",

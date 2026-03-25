@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTi
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
+import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSykepengeperioderModule
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
@@ -57,6 +58,11 @@ fun main() {
                     ClientSparkelNorgModule.Configuration(
                         apiUrl = env.getValue("SPARKEL_NORG_API_URL"),
                         scope = env.getValue("SPARKEL_NORG_SCOPE"),
+                    ),
+                clientSparkelSykepengeperioder =
+                    ClientSparkelSykepengeperioderModule.Configuration(
+                        apiUrl = env.getValue("SPARKEL_SYKEPENGEPERIODER_API_URL"),
+                        scope = env.getValue("SPARKEL_SYKEPENGEPERIODER_SCOPE"),
                     ),
                 clientSpeed =
                     ClientSpeedModule.Configuration(
@@ -175,6 +181,13 @@ class RapidApp {
         val clientSparkelNorgModule =
             ClientSparkelNorgModule(
                 configuration = configuration.clientSparkelNorg,
+                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                cache = valkeyModule.cache,
+            )
+
+        val clientSparkelSykepengeperioderModule =
+            ClientSparkelSykepengeperioderModule(
+                configuration = configuration.clientSparkelSykepengeperioder,
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
                 cache = valkeyModule.cache,
             )

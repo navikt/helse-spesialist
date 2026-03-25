@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTi
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.sparkel.norg.testfixtures.ClientSparkelNorgModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.testfixtures.ClientSparkelSykepengeperioderModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
@@ -31,6 +32,7 @@ fun main() {
                 clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
                 clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                 clientSparkelNorg = ClientSparkelNorgModuleIntegrationTestFixture.moduleConfiguration,
+                clientSparkelSykepengeperioder = ClientSparkelSykepengeperioderModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpeed = ClientSpeedModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,

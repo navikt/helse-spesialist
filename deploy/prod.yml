@@ -84,6 +84,8 @@ spec:
           cluster: prod-gcp
         - application: logging
           namespace: nais-system
+      external:
+        - host: sykepengeperioder-api.prod-fss-pub.nais.io
   gcp:
     permissions:
       - resource:
@@ -182,5 +184,9 @@ spec:
       value: "http://sparkel-norg"
     - name: SPARKEL_NORG_SCOPE
       value: "api://prod-gcp.tbd.sparkel-norg/.default"
+    - name: SPARKEL_SYKEPENGEPERIODER_API_URL
+      value: "https://sykepengeperioder-api.prod-fss-pub.nais.io"
+    - name: SPARKEL_SYKEPENGEPERIODER_SCOPE
+      value: "api://prod-fss.tbd.sparkel-sykepengeperioder-api/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd
