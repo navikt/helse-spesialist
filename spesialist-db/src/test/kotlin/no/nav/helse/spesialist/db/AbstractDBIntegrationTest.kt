@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -47,6 +46,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagDialog
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
@@ -117,9 +117,7 @@ abstract class AbstractDBIntegrationTest {
     internal val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
     internal val dokumentDao = daos.dokumentDao
-    internal val påVentDao = sessionContext.påVentDao
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
-    internal val dialogDao = daos.dialogDao
     internal val annulleringRepository = daos.annulleringRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
@@ -517,8 +515,8 @@ abstract class AbstractDBIntegrationTest {
     protected fun Oppgave.leggPåVentOgLagre(
         saksbehandler: Saksbehandler,
         frist: LocalDate = LocalDate.now().plusDays(1),
-        årsaker: List<PåVentÅrsak> = emptyList(),
-        tekst: String? = null,
+        årsaker: List<String> = emptyList(),
+        tekst: String = "Et notat",
     ): Oppgave {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         this.leggPåVent(true, saksbehandler)
@@ -528,14 +526,7 @@ abstract class AbstractDBIntegrationTest {
             }
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
-        påVentDao.lagrePåVent(
-            id.value,
-            saksbehandler.id.value,
-            frist,
-            årsaker,
-            tekst,
-            dialog.id().value,
-        )
+        sessionContext.påVentRepository.lagre(lagPåVent(this.vedtaksperiodeId, saksbehandler.id, frist, dialog.id(), årsaker, tekst))
         return this
     }
 

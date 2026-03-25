@@ -14,7 +14,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
@@ -395,11 +394,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             oppgaveRepository = daos.oppgaveRepository,
             brukerrollehenter = { Either.Success(emptySet()) },
         )
-    private val apiOppgaveService =
-        ApiOppgaveService(
-            oppgaveDao = daos.oppgaveDao,
-            oppgaveService = oppgaveService,
-        )
 
     private val mediator =
         SaksbehandlerMediator(
@@ -407,7 +401,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
-            apiOppgaveService = apiOppgaveService,
             sessionFactory = TransactionalSessionFactory(dataSource),
         )
 

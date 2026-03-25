@@ -5,7 +5,6 @@ import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.periodehistorikk.EndrePåVent
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -91,8 +90,14 @@ class PutPåVentBehandlerTest {
                         notatTekst = "En notattekst",
                         årsaker =
                             listOf(
-                                PåVentÅrsak(key = "f3bfeb69-0929-425d-868c-c1517654848a", årsak = "en årsak"),
-                                PåVentÅrsak(key = "9162a99f-5db2-42ea-b495-9b564088b29d", årsak = "en annen årsak"),
+                                LagtPåVentEvent.PåVentÅrsak(
+                                    key = "f3bfeb69-0929-425d-868c-c1517654848a",
+                                    årsak = "en årsak",
+                                ),
+                                LagtPåVentEvent.PåVentÅrsak(
+                                    key = "9162a99f-5db2-42ea-b495-9b564088b29d",
+                                    årsak = "en annen årsak",
+                                ),
                             ),
                         fødselsnummer = person.id.value,
                         behandlingId = spleisBehandlingId.value,
@@ -188,8 +193,14 @@ class PutPåVentBehandlerTest {
                         notatTekst = "En notattekst",
                         årsaker =
                             listOf(
-                                PåVentÅrsak(key = "f3bfeb69-0929-425d-868c-c1517654848a", årsak = "en årsak"),
-                                PåVentÅrsak(key = "9162a99f-5db2-42ea-b495-9b564088b29d", årsak = "en annen årsak"),
+                                LagtPåVentEvent.PåVentÅrsak(
+                                    key = "f3bfeb69-0929-425d-868c-c1517654848a",
+                                    årsak = "en årsak",
+                                ),
+                                LagtPåVentEvent.PåVentÅrsak(
+                                    key = "9162a99f-5db2-42ea-b495-9b564088b29d",
+                                    årsak = "en annen årsak",
+                                ),
                             ),
                         fødselsnummer = person.id.value,
                         behandlingId = spleisBehandlingId.value,
@@ -213,8 +224,14 @@ class PutPåVentBehandlerTest {
                         notatTekst = "En annen notattekst",
                         årsaker =
                             listOf(
-                                PåVentÅrsak(key = "8d7550d8-b7b3-49f6-abe8-21e904399451", årsak = "en tredje årsak"),
-                                PåVentÅrsak(key = "b73be817-7ad3-495d-8070-accc56fbbbc8", årsak = "en fjerde årsak"),
+                                LagtPåVentEvent.PåVentÅrsak(
+                                    key = "8d7550d8-b7b3-49f6-abe8-21e904399451",
+                                    årsak = "en tredje årsak",
+                                ),
+                                LagtPåVentEvent.PåVentÅrsak(
+                                    key = "b73be817-7ad3-495d-8070-accc56fbbbc8",
+                                    årsak = "en fjerde årsak",
+                                ),
                             ),
                         fødselsnummer = person.id.value,
                         behandlingId = spleisBehandlingId.value,

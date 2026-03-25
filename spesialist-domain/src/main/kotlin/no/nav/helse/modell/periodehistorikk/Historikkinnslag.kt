@@ -1,6 +1,6 @@
 package no.nav.helse.modell.periodehistorikk
 
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import java.time.LocalDate
@@ -17,7 +17,7 @@ sealed interface Historikkinnslag {
         fun lagtPåVentInnslag(
             notattekst: String?,
             saksbehandler: Saksbehandler,
-            årsaker: List<PåVentÅrsak>,
+            årsaker: List<LagtPåVentEvent.PåVentÅrsak>,
             frist: LocalDate,
             dialogRef: Long,
         ): LagtPåVent =
@@ -39,7 +39,7 @@ sealed interface Historikkinnslag {
         fun endrePåVentInnslag(
             notattekst: String?,
             saksbehandler: Saksbehandler,
-            årsaker: List<PåVentÅrsak>,
+            årsaker: List<LagtPåVentEvent.PåVentÅrsak>,
             frist: LocalDate,
             dialogRef: Long,
         ): EndrePåVent =
@@ -104,7 +104,7 @@ data class LagtPåVent(
     override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
-    val årsaker: List<PåVentÅrsak>,
+    val årsaker: List<LagtPåVentEvent.PåVentÅrsak>,
     val notattekst: String?,
     val frist: LocalDate,
 ) : Historikkinnslag {
@@ -127,7 +127,7 @@ data class EndrePåVent(
     override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
-    val årsaker: List<PåVentÅrsak>,
+    val årsaker: List<LagtPåVentEvent.PåVentÅrsak>,
     val notattekst: String?,
     val frist: LocalDate,
 ) : Historikkinnslag {

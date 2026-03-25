@@ -111,17 +111,6 @@ class OppgaveService(
         }
     }
 
-    // Sørger for at vi alltid bruker den aktive oppgaven, i tilfelle saksbehandler har utdaterte data når de forsøker å utføre handlingen
-    private fun finnAktivOppgaveId(oppgaveId: Long): Long? = oppgaveDao.finnVedtaksperiodeId(oppgaveId).let { oppgaveDao.finnIdForAktivOppgave(it) }
-
-    fun fjernFraPåVent(oppgaveId: Long) {
-        finnAktivOppgaveId(oppgaveId)?.let { aktivOppgaveId ->
-            oppgave(aktivOppgaveId) {
-                this.fjernFraPåVent()
-            }
-        }
-    }
-
     override fun endretEgenAnsattStatus(
         erEgenAnsatt: Boolean,
         fødselsnummer: String,
@@ -175,8 +164,6 @@ class OppgaveService(
             teamLogs.warn("Kunne ikke reservere person", e)
         }
     }
-
-    fun finnFødselsnummer(oppgavereferanse: Long): String = oppgaveDao.finnFødselsnummer(oppgavereferanse)
 
     private fun tildelVedReservasjon(
         fødselsnummer: String,

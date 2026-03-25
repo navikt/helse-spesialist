@@ -1,6 +1,5 @@
 package no.nav.helse.modell.melding
 
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradPeriode
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -134,7 +133,12 @@ data class LagtPåVentEvent(
     val årsaker: List<PåVentÅrsak>,
     val saksbehandlerOid: UUID,
     val saksbehandlerIdent: String,
-) : UtgåendeHendelse
+) : UtgåendeHendelse {
+    data class PåVentÅrsak(
+        val key: String,
+        val årsak: String,
+    )
+}
 
 data class InntektsendringerEvent(
     val inntektskilder: List<Inntektskilde>,

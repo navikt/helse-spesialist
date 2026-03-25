@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.rest.oppgaver.påVent
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiPutPåVentRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -89,7 +88,7 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
         saksbehandler = kallKontekst.saksbehandler,
         årsaker =
             request.årsaker.map {
-                PåVentÅrsak(key = it.key, årsak = it.årsak)
+                LagtPåVentEvent.PåVentÅrsak(key = it.key, årsak = it.årsak)
             },
         frist = request.frist,
         dialogRef = dialog.id().value,
@@ -104,7 +103,7 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
         saksbehandler = kallKontekst.saksbehandler,
         årsaker =
             request.årsaker.map {
-                PåVentÅrsak(key = it.key, årsak = it.årsak)
+                LagtPåVentEvent.PåVentÅrsak(key = it.key, årsak = it.årsak)
             },
         frist = request.frist,
         dialogRef = dialog.id().value,
@@ -126,7 +125,7 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
                 request.skalTildeles,
                 frist = påVent.frist,
                 påVent.notattekst,
-                request.årsaker.map { PåVentÅrsak(it.key, it.årsak) },
+                request.årsaker.map { LagtPåVentEvent.PåVentÅrsak(it.key, it.årsak) },
                 saksbehandlerOid = saksbehandler.id.value,
                 saksbehandlerIdent = saksbehandler.ident.value,
             ),

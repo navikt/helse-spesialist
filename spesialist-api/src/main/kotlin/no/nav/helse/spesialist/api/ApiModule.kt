@@ -80,7 +80,6 @@ class ApiModule(
     private val apiOppgaveService =
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
-            oppgaveService = oppgaveService,
         )
 
     private val stansAutomatiskBehandlinghåndterer =
@@ -92,7 +91,6 @@ class ApiModule(
             versjonAvKode = configuration.versjonAvKode,
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
-            apiOppgaveService = apiOppgaveService,
             sessionFactory = sessionFactory,
         )
 

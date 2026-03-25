@@ -10,7 +10,6 @@ import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
-import no.nav.helse.mediator.påvent.PåVentRepository
 import no.nav.helse.modell.FinnerIkkePåVent
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
@@ -19,16 +18,13 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
-import no.nav.helse.modell.saksbehandler.handlinger.PåVent
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.ANNET
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
@@ -46,6 +42,7 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import no.nav.helse.spesialist.domain.overstyringer.Arbeidsforhold
 import no.nav.helse.spesialist.domain.overstyringer.Overstyring
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
@@ -66,14 +63,10 @@ class SaksbehandlerMediator(
     private val versjonAvKode: String,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
-    private val apiOppgaveService: ApiOppgaveService,
     private val sessionFactory: SessionFactory,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
-    private val påVentDao = daos.påVentDao
-    private val periodehistorikkDao = daos.periodehistorikkDao
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
-    private val dialogDao = daos.dialogDao
 
     fun finnMdcParametreForOppgaveId(oppgaveId: String): List<Pair<MdcKey, String?>> =
         sessionFactory.transactionalSessionScope { transaction ->
@@ -128,10 +121,6 @@ class SaksbehandlerMediator(
                 håndter(modellhandling, saksbehandlerWrapper)
             }
 
-            is PåVent -> {
-                error("dette burde ikke skje")
-            }
-
             is Personhandling -> {
                 håndter(modellhandling, saksbehandlerWrapper)
             }
@@ -153,29 +142,6 @@ class SaksbehandlerMediator(
         return behandling.utfall()
     }
 
-    fun påVent(
-        handling: ApiPaVentRequest,
-        saksbehandler: Saksbehandler,
-    ) {
-        val modellhandling = handling.tilModellversjon()
-        sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
-        tell(modellhandling)
-
-        loggInfo("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler")
-        when (modellhandling) {
-            is FjernPåVentUtenHistorikkinnslag -> {
-                fjernFraPåVentUtenHistorikkinnslag(
-                    modellhandling,
-                )
-            }
-        }
-        loggInfo(
-            "Handling ${modellhandling.loggnavn()} utført på oppgave på vegne av saksbehandler",
-            "oppgaveId" to modellhandling.oppgaveId,
-            "saksbehandlerIdent" to saksbehandler.ident.value,
-        )
-    }
-
     private fun håndter(
         handling: Oppgavehandling,
         saksbehandlerWrapper: SaksbehandlerWrapper,
@@ -194,22 +160,6 @@ class SaksbehandlerMediator(
         handling.utførAv(saksbehandlerWrapper)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
-    }
-
-    private fun fjernFraPåVentUtenHistorikkinnslag(handling: FjernPåVentUtenHistorikkinnslag) {
-        if (!påVentDao.erPåVent(handling.oppgaveId)) {
-            loggInfo(
-                "Oppgave er ikke på vent",
-                "oppgaveId" to handling.oppgaveId,
-            )
-            return
-        }
-        try {
-            oppgaveService.fjernFraPåVent(handling.oppgaveId)
-            PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
-        } catch (e: Modellfeil) {
-            throw e.tilApiversjon()
-        }
     }
 
     private fun håndterVedtakBegrunnelse(
@@ -244,14 +194,16 @@ class SaksbehandlerMediator(
         notatTekst: String,
     ): SendIReturResult {
         loggInfo(
-            "Oppgave med sendes i retur av beslutter",
+            "Oppgave sendes i retur av beslutter",
             "oppgaveId" to oppgavereferanse,
             "beslutterIdent" to besluttendeSaksbehandler.ident.value,
         )
 
-        try {
-            sessionFactory.transactionalSessionScope { session ->
-                val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
+        sessionFactory.transactionalSessionScope { session ->
+            val oppgave = session.oppgaveRepository.finn(OppgaveId(oppgavereferanse)) ?: error("Fant ikke oppgave")
+            val vedtaksperiode = session.vedtaksperiodeRepository.finn(oppgave.vedtaksperiodeId) ?: error("Fant ikke vedtaksperiode")
+            try {
+                val fødselsnummer = vedtaksperiode.identitetsnummer.value
                 val totrinnsvurdering = session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
                 checkNotNull(totrinnsvurdering) {
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
@@ -264,41 +216,36 @@ class SaksbehandlerMediator(
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
                     }
 
-                apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
+                oppgave.sendIRetur(opprinneligSaksbehandler)
                 totrinnsvurdering.sendIRetur(oppgavereferanse, besluttendeSaksbehandler.id)
+                session.oppgaveRepository.lagre(oppgave)
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+            } catch (modellfeil: Modellfeil) {
+                return@transactionalSessionScope SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil.tilApiversjon())
             }
-        } catch (modellfeil: Modellfeil) {
-            return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil.tilApiversjon())
+            try {
+                val påVent = session.påVentRepository.finnFor(oppgave.vedtaksperiodeId)
+                if (påVent != null) {
+                    oppgave.fjernFraPåVent()
+                    session.påVentRepository.slett(påVent.id())
+                    session.oppgaveRepository.lagre(oppgave)
+                }
+            } catch (modellfeil: ApiModellfeil) {
+                return@transactionalSessionScope SendIReturResult.Feil.KunneIkkeLeggePåVent(modellfeil)
+            }
+            try {
+                val dialogRef = session.dialogDao.lagre()
+                val innslag =
+                    Historikkinnslag.totrinnsvurderingRetur(
+                        notattekst = notatTekst,
+                        saksbehandler = besluttendeSaksbehandler,
+                        dialogRef = dialogRef,
+                    )
+                session.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
+            } catch (e: Exception) {
+                return@transactionalSessionScope SendIReturResult.Feil.KunneIkkeOppretteHistorikkinnslag(e)
+            }
         }
-
-        try {
-            påVent(
-                ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse),
-                besluttendeSaksbehandler,
-            )
-        } catch (modellfeil: ApiModellfeil) {
-            return SendIReturResult.Feil.KunneIkkeLeggePåVent(modellfeil)
-        }
-
-        try {
-            val dialogRef = dialogDao.lagre()
-            val innslag =
-                Historikkinnslag.totrinnsvurderingRetur(
-                    notattekst = notatTekst,
-                    saksbehandler = besluttendeSaksbehandler,
-                    dialogRef = dialogRef,
-                )
-            periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
-        } catch (e: Exception) {
-            return SendIReturResult.Feil.KunneIkkeOppretteHistorikkinnslag(e)
-        }
-
-        loggInfo(
-            "Oppgave sendes i retur",
-            "oppgaveId" to oppgavereferanse,
-            "beslutterIdent" to besluttendeSaksbehandler.ident.value,
-        )
 
         return SendIReturResult.Ok
     }
@@ -322,10 +269,11 @@ class SaksbehandlerMediator(
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling(e)
             }
 
-            val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
+            val oppgave = sessionContext.oppgaveRepository.finn(OppgaveId(oppgavereferanse)) ?: error("Fant ikke oppgave")
+            val vedtaksperiode = sessionContext.vedtaksperiodeRepository.finn(oppgave.vedtaksperiodeId) ?: error("Fant ikke vedtaksperiode")
             try {
                 håndterVedtakBegrunnelse(
-                    utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
+                    utfall = hentUtfallFraBehandling(oppgave.behandlingId.value, sessionContext),
                     begrunnelse = begrunnelse,
                     oppgaveId = oppgavereferanse,
                     saksbehandlerOid = saksbehandler.id.value,
@@ -335,20 +283,19 @@ class SaksbehandlerMediator(
             }
 
             try {
-                sessionFactory.transactionalSessionScope { session ->
-                    val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                    val totrinnsvurdering = session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-                    checkNotNull(totrinnsvurdering) {
-                        "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
-                    }
-
-                    val beslutter =
-                        totrinnsvurdering.beslutter
-                            ?.let(session.saksbehandlerRepository::finn)
-                    apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
-                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id)
-                    session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+                val fødselsnummer = vedtaksperiode.identitetsnummer.value
+                val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
+                checkNotNull(totrinnsvurdering) {
+                    "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
                 }
+
+                val beslutter =
+                    totrinnsvurdering.beslutter
+                        ?.let(sessionContext.saksbehandlerRepository::finn)
+                oppgave.sendTilBeslutter(beslutter)
+                sessionContext.oppgaveRepository.lagre(oppgave)
+                totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id)
+                sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             } catch (modellfeil: Modellfeil) {
                 loggError("Feil ved sending til beslutter", modellfeil)
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
@@ -358,7 +305,12 @@ class SaksbehandlerMediator(
             }
 
             try {
-                påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandler)
+                val påVent = sessionContext.påVentRepository.finnFor(oppgave.vedtaksperiodeId)
+                if (påVent != null) {
+                    oppgave.fjernFraPåVent()
+                    sessionContext.påVentRepository.slett(påVent.id())
+                    sessionContext.oppgaveRepository.lagre(oppgave)
+                }
             } catch (modellfeil: ApiModellfeil) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
             } catch (e: Exception) {
@@ -373,7 +325,7 @@ class SaksbehandlerMediator(
 
             try {
                 val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandler)
-                periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
+                sessionContext.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
             } catch (e: Exception) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(
                     e,
@@ -453,11 +405,6 @@ class SaksbehandlerMediator(
             is TildelOppgave -> this.tilModellversjon(brukerroller)
             is AvmeldOppgave -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
-        }
-
-    private fun ApiPaVentRequest.tilModellversjon(): PåVent =
-        when (this) {
-            is ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag -> this.tilModellversjon()
         }
 
     private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtArbeidsforhold =
@@ -574,8 +521,6 @@ class SaksbehandlerMediator(
                 },
             begrunnelse = begrunnelse,
         )
-
-    private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag = FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
     private fun TildelOppgave.tilModellversjon(
         brukerroller: Set<Brukerrolle>,

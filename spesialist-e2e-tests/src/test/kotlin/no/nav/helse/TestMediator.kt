@@ -10,7 +10,6 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.Either
@@ -24,7 +23,7 @@ class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
     forsikringHenter: ForsikringHenter,
-    environmentToggles: EnvironmentToggles
+    environmentToggles: EnvironmentToggles,
 ) {
     private val daos = DBDaos(dataSource)
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
@@ -35,21 +34,14 @@ class TestMediator(
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            brukerrollehenter = { Either.Success( emptySet()) },
+            brukerrollehenter = { Either.Success(emptySet()) },
         )
-    private val apiOppgaveService =
-        ApiOppgaveService(
-            oppgaveDao = daos.oppgaveDao,
-            oppgaveService = oppgaveService,
-        )
-
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             daos = daos,
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
-            apiOppgaveService = apiOppgaveService,
             sessionFactory = TransactionalSessionFactory(dataSource),
         )
 
