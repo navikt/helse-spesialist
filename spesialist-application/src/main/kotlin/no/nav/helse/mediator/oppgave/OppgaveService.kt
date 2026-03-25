@@ -101,7 +101,7 @@ class OppgaveService(
         return returverdi
     }
 
-    fun avbrytOppgave(
+    fun utfør(
         handling: Oppgavehandling,
         saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {

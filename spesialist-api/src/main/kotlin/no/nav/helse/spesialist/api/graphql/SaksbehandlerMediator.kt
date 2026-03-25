@@ -147,7 +147,7 @@ class SaksbehandlerMediator(
         saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         try {
-            oppgaveService.avbrytOppgave(handling, saksbehandlerWrapper)
+            oppgaveService.utfør(handling, saksbehandlerWrapper)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
