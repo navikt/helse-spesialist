@@ -26,10 +26,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
-import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.application.Either
@@ -71,7 +69,6 @@ import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -805,84 +802,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `legg på vent forårsaker publisering av hendelse`() {
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(spleisBehandlingId = spleisBehandlingId)
-        val frist = LocalDate.now()
-        val skalTildeles = true
-        mediator.påVent(
-            ApiPaVentRequest.ApiLeggPaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                frist,
-                skalTildeles,
-                "en tekst",
-                listOf(ApiPaVentRequest.ApiPaVentArsak("key", "arsak")),
-            ),
-            saksbehandler,
-        )
-        val melding = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
-        val årsaker = melding?.get("årsaker")?.map { it.get("key").asText() to it.get("årsak").asText() }
-        assertNotNull(melding)
-        assertEquals("lagt_på_vent", melding?.get("@event_name")?.asText())
-        assertEquals("en tekst", melding?.get("notatTekst")?.asText())
-        assertEquals(listOf("key" to "arsak"), årsaker)
-        assertEquals(spleisBehandlingId.value, melding?.get("behandlingId")?.asUUID())
-        assertEquals(oppgaveId, melding?.get("oppgaveId")?.asLong())
-        assertEquals(saksbehandler.id.value, melding?.get("saksbehandlerOid")?.asUUID())
-        assertEquals(saksbehandler.ident.value, melding?.get("saksbehandlerIdent")?.asText())
-        assertEquals(frist, melding?.get("frist")?.asLocalDate())
-        assertEquals(skalTildeles, melding?.get("skalTildeles")?.asBoolean())
-    }
-
-    @Test
-    fun `endring av påVent forårsaker publisering av hendelse`() {
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(spleisBehandlingId = spleisBehandlingId)
-        val frist = LocalDate.now()
-        val skalTildeles = true
-        mediator.påVent(
-            ApiPaVentRequest.ApiLeggPaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                frist,
-                skalTildeles,
-                "en tekst",
-                listOf(ApiPaVentRequest.ApiPaVentArsak("key", "arsak")),
-            ),
-            saksbehandler,
-        )
-        val melding1 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
-        assertEquals("lagt_på_vent", melding1?.get("@event_name")?.asText())
-
-        val nyFrist = LocalDate.now().plusDays(5)
-        mediator.påVent(
-            ApiPaVentRequest.ApiEndrePaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                nyFrist,
-                skalTildeles,
-                "en ny tekst",
-                listOf(ApiPaVentRequest.ApiPaVentArsak("key", "arsak")),
-            ),
-            saksbehandler,
-        )
-
-        val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").lastOrNull()
-        val årsaker = melding2?.get("årsaker")?.map { it.get("key").asText() to it.get("årsak").asText() }
-        assertNotNull(melding2)
-        assertEquals("lagt_på_vent", melding2?.get("@event_name")?.asText())
-        assertEquals("en ny tekst", melding2?.get("notatTekst")?.asText())
-        assertEquals(listOf("key" to "arsak"), årsaker)
-        assertEquals(spleisBehandlingId.value, melding2?.get("behandlingId")?.asUUID())
-        assertEquals(oppgaveId, melding2?.get("oppgaveId")?.asLong())
-        assertEquals(saksbehandler.id.value, melding2?.get("saksbehandlerOid")?.asUUID())
-        assertEquals(saksbehandler.ident.value, melding2?.get("saksbehandlerIdent")?.asText())
-        assertEquals(nyFrist, melding2?.get("frist")?.asLocalDate())
-        assertEquals(skalTildeles, melding2?.get("skalTildeles")?.asBoolean())
-    }
-
-    @Test
     fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
         nyPerson()
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
@@ -910,98 +829,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
-    }
-
-    @Test
-    fun `legg på vent`() {
-        nyPerson()
-        mediator.påVent(
-            ApiPaVentRequest.ApiLeggPaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                LocalDate.now().plusDays(21),
-                true,
-                "notat tekst",
-                listOf(
-                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
-                    ApiPaVentRequest.ApiPaVentArsak("key2", "arsak2"),
-                ),
-            ),
-            saksbehandler,
-        )
-        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        val historikk = daos.periodehistorikkApiDao.finn(UTBETALING_ID)
-        assertEquals(PeriodehistorikkType.LEGG_PA_VENT, historikk.first().type)
-        assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
-    }
-
-    @Test
-    fun `endre på vent`() {
-        nyPerson()
-        mediator.påVent(
-            ApiPaVentRequest.ApiLeggPaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                LocalDate.now().plusDays(10),
-                true,
-                "notat tekst",
-                listOf(
-                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
-                    ApiPaVentRequest.ApiPaVentArsak("key2", "arsak2"),
-                ),
-            ),
-            saksbehandler,
-        )
-        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        val historikk = daos.periodehistorikkApiDao.finn(UTBETALING_ID)
-        assertEquals(PeriodehistorikkType.LEGG_PA_VENT, historikk.first().type)
-        assertTrue(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
-
-        mediator.påVent(
-            ApiPaVentRequest.ApiEndrePaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                LocalDate.now().plusDays(20),
-                true,
-                "ny notat tekst",
-                listOf(
-                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
-                ),
-            ),
-            saksbehandler,
-        )
-        val melding2 = testRapid.inspektør.hendelser("lagt_på_vent").last()
-        val historikk2 = daos.periodehistorikkApiDao.finn(UTBETALING_ID).sortedBy { it.id }
-        assertEquals(PeriodehistorikkType.ENDRE_PA_VENT, historikk2.last().type)
-        assertEquals("ny notat tekst", melding2["notatTekst"].asText())
-    }
-
-    @Test
-    fun `fjern på vent`() {
-        nyPerson()
-        mediator.påVent(
-            ApiPaVentRequest.ApiLeggPaVent(
-                oppgaveId,
-                saksbehandler.id.value,
-                LocalDate.now().plusDays(21),
-                false,
-                "notat tekst",
-                listOf(
-                    ApiPaVentRequest.ApiPaVentArsak("key", "arsak"),
-                    ApiPaVentRequest.ApiPaVentArsak("key2", "arsak2"),
-                ),
-            ),
-            saksbehandler,
-        )
-        mediator.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId), saksbehandler)
-        val melding = testRapid.inspektør.hendelser("oppgave_oppdatert").last()
-        val historikk = daos.periodehistorikkApiDao.finn(UTBETALING_ID)
-        assertTrue(
-            historikk
-                .map { it.type }
-                .containsAll(listOf(PeriodehistorikkType.FJERN_FRA_PA_VENT, PeriodehistorikkType.LEGG_PA_VENT)),
-        )
-        assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
     private fun assertVedtakBegrunnelse(

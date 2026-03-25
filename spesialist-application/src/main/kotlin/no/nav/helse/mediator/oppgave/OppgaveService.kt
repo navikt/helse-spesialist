@@ -8,8 +8,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
-import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
-import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -19,7 +17,6 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
@@ -116,28 +113,6 @@ class OppgaveService(
 
     // Sørger for at vi alltid bruker den aktive oppgaven, i tilfelle saksbehandler har utdaterte data når de forsøker å utføre handlingen
     private fun finnAktivOppgaveId(oppgaveId: Long): Long? = oppgaveDao.finnVedtaksperiodeId(oppgaveId).let { oppgaveDao.finnIdForAktivOppgave(it) }
-
-    fun leggPåVent(
-        handling: LeggPåVent,
-        saksbehandler: Saksbehandler,
-    ) {
-        finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
-            oppgave(oppgaveId) {
-                this.leggPåVent(handling.skalTildeles, saksbehandler)
-            }
-        }
-    }
-
-    fun endrePåVent(
-        handling: EndrePåVent,
-        saksbehandler: Saksbehandler,
-    ) {
-        finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
-            oppgave(oppgaveId) {
-                this.endrePåVent(handling.skalTildeles, saksbehandler)
-            }
-        }
-    }
 
     fun fjernFraPåVent(oppgaveId: Long) {
         finnAktivOppgaveId(oppgaveId)?.let { aktivOppgaveId ->

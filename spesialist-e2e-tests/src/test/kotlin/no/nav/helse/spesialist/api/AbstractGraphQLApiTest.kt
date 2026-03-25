@@ -32,7 +32,6 @@ import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
@@ -129,7 +128,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 saksbehandlerMediator = saksbehandlerMediator,
                             ),
                         person = PersonMutationHandler(personhåndterer = personhåndterer),
-                        paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     ),
             )
 

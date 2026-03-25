@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.domain.legacy
 
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
-import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
-import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
@@ -60,24 +58,6 @@ class SaksbehandlerWrapper(
         val subsumsjonEvent = hendelse.byggSubsumsjon(saksbehandler.epost).byggEvent()
         observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
         observers.forEach { it.sykepengegrunnlagSkjønnsfastsatt(event.fødselsnummer, event) }
-    }
-
-    internal fun håndter(hendelse: LeggPåVent) {
-        val event =
-            hendelse.byggEvent(
-                oid = saksbehandler.id.value,
-                ident = saksbehandler.ident.value,
-            )
-        observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
-    }
-
-    internal fun håndter(hendelse: EndrePåVent) {
-        val event =
-            hendelse.byggEvent(
-                oid = saksbehandler.id.value,
-                ident = saksbehandler.ident.value,
-            )
-        observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
     }
 
     override fun toString(): String = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id.value}"

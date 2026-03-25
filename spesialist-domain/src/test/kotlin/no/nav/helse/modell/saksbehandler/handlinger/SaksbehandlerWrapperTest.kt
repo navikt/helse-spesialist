@@ -1,6 +1,5 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
@@ -20,7 +19,6 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.UUID
 
 internal class SaksbehandlerWrapperTest {
@@ -216,35 +214,6 @@ internal class SaksbehandlerWrapperTest {
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
                 saksbehandlerOid = saksbehandler.saksbehandler.id,
-            ),
-        )
-        assertEquals(true, observert)
-    }
-
-    @Test
-    fun `håndtering av lagtPåVent medfører utgående event`() {
-        var observert = false
-        val observer =
-            object : SaksbehandlerObserver {
-                override fun lagtPåVent(
-                    fødselsnummer: String,
-                    event: LagtPåVentEvent,
-                ) {
-                    observert = true
-                }
-            }
-
-        val saksbehandler = saksbehandler()
-        saksbehandler.register(observer)
-        saksbehandler.håndter(
-            LeggPåVent(
-                fødselsnummer = "1234",
-                oppgaveId = "12345".toLong(),
-                frist = LocalDate.now(),
-                behandlingId = UUID.randomUUID(),
-                skalTildeles = true,
-                notatTekst = "en tekst",
-                årsaker = listOf(PåVentÅrsak("key", "arsak")),
             ),
         )
         assertEquals(true, observert)

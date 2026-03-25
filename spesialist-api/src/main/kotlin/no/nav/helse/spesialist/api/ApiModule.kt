@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
@@ -130,7 +129,6 @@ class ApiModule(
                                 saksbehandlerMediator = saksbehandlerMediator,
                             ),
                         person = PersonMutationHandler(personhåndterer = personhåndterer),
-                        paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     ),
             )
         }

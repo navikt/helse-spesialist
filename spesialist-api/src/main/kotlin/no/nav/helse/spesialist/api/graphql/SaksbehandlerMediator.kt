@@ -19,15 +19,11 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
-import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
-import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.saksbehandler.handlinger.PåVent
-import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
@@ -167,22 +163,10 @@ class SaksbehandlerMediator(
 
         loggInfo("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler")
         when (modellhandling) {
-            is LeggPåVent -> {
-                leggPåVent(modellhandling, saksbehandler)
-            }
-
-            is FjernPåVent -> {
-                fjernFraPåVent(modellhandling, saksbehandler)
-            }
-
             is FjernPåVentUtenHistorikkinnslag -> {
                 fjernFraPåVentUtenHistorikkinnslag(
                     modellhandling,
                 )
-            }
-
-            is EndrePåVent -> {
-                endrePåVent(modellhandling, saksbehandler)
             }
         }
         loggInfo(
@@ -210,76 +194,6 @@ class SaksbehandlerMediator(
         handling.utførAv(saksbehandlerWrapper)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
-    }
-
-    private fun leggPåVent(
-        handling: LeggPåVent,
-        saksbehandler: Saksbehandler,
-    ) {
-        try {
-            val dialogRef = dialogDao.lagre()
-            val innslag =
-                Historikkinnslag.lagtPåVentInnslag(
-                    notattekst = handling.notatTekst,
-                    saksbehandler = saksbehandler,
-                    årsaker = handling.årsaker,
-                    frist = handling.frist,
-                    dialogRef = dialogRef,
-                )
-            periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-            oppgaveService.leggPåVent(handling, saksbehandler)
-            PåVentRepository(påVentDao).leggPåVent(saksbehandler.id.value, handling, dialogRef)
-            val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler)
-            saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
-            handling.utførAv(saksbehandlerWrapper)
-        } catch (e: Modellfeil) {
-            throw e.tilApiversjon()
-        }
-    }
-
-    private fun endrePåVent(
-        handling: EndrePåVent,
-        saksbehandler: Saksbehandler,
-    ) {
-        if (!påVentDao.erPåVent(handling.oppgaveId)) throw FinnerIkkeLagtPåVent(handling.oppgaveId)
-
-        val dialogRef = dialogDao.lagre()
-        val innslag =
-            Historikkinnslag.endrePåVentInnslag(
-                notattekst = handling.notatTekst,
-                saksbehandler = saksbehandler,
-                årsaker = handling.årsaker,
-                frist = handling.frist,
-                dialogRef = dialogRef,
-            )
-        periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-        oppgaveService.endrePåVent(handling, saksbehandler)
-        PåVentRepository(påVentDao).endrePåVent(saksbehandler.id.value, handling, dialogRef)
-
-        val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler)
-        saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
-        handling.utførAv(saksbehandlerWrapper)
-    }
-
-    private fun fjernFraPåVent(
-        handling: FjernPåVent,
-        saksbehandler: Saksbehandler,
-    ) {
-        if (!påVentDao.erPåVent(handling.oppgaveId)) {
-            loggInfo(
-                "Oppgave er ikke på vent",
-                "oppgaveId" to handling.oppgaveId,
-            )
-            return
-        }
-        try {
-            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler)
-            periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-            oppgaveService.fjernFraPåVent(handling.oppgaveId)
-            PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
-        } catch (e: Modellfeil) {
-            throw e.tilApiversjon()
-        }
     }
 
     private fun fjernFraPåVentUtenHistorikkinnslag(handling: FjernPåVentUtenHistorikkinnslag) {
@@ -543,10 +457,7 @@ class SaksbehandlerMediator(
 
     private fun ApiPaVentRequest.tilModellversjon(): PåVent =
         when (this) {
-            is ApiPaVentRequest.ApiLeggPaVent -> this.tilModellversjon()
-            is ApiPaVentRequest.ApiFjernPaVent -> this.tilModellversjon()
             is ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag -> this.tilModellversjon()
-            is ApiPaVentRequest.ApiEndrePaVent -> this.tilModellversjon()
         }
 
     private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtArbeidsforhold =
@@ -663,30 +574,6 @@ class SaksbehandlerMediator(
                 },
             begrunnelse = begrunnelse,
         )
-
-    private fun ApiPaVentRequest.ApiLeggPaVent.tilModellversjon(): LeggPåVent =
-        LeggPåVent(
-            fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
-            oppgaveId = oppgaveId,
-            behandlingId = apiOppgaveService.spleisBehandlingId(oppgaveId),
-            frist = frist,
-            skalTildeles = skalTildeles,
-            notatTekst = notatTekst,
-            årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
-        )
-
-    private fun ApiPaVentRequest.ApiEndrePaVent.tilModellversjon(): EndrePåVent =
-        EndrePåVent(
-            fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
-            oppgaveId = oppgaveId,
-            behandlingId = apiOppgaveService.spleisBehandlingId(oppgaveId),
-            frist = frist,
-            skalTildeles = skalTildeles,
-            notatTekst = notatTekst,
-            årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
-        )
-
-    private fun ApiPaVentRequest.ApiFjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
 
     private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag = FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
