@@ -104,5 +104,10 @@ class Personer {
         class NotatVedtaksperiodeIder(
             val parent: PersonPseudoId,
         )
+
+        @Resource("infotrygdperioder")
+        class Infotrygdperioder(
+            val parent: PersonPseudoId,
+        )
     }
 }

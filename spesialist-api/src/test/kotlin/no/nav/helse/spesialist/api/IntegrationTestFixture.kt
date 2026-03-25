@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
+import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -86,6 +87,7 @@ class IntegrationTestFixture {
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
     val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
     val alleIdenterHenterMock: AlleIdenterHenter = mockk(relaxed = true)
+    val infotrygdperiodeHenterMock: InfotrygdperiodeHenter = mockk(relaxed = true)
 
     private val apiModule =
         ApiModule(
@@ -118,6 +120,7 @@ class IntegrationTestFixture {
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             personinfoHenter = personinfoHenterMock,
+            infotrygdperiodeHenter = infotrygdperiodeHenterMock,
         )
 
     class Response(

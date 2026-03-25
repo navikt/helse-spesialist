@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -51,6 +52,7 @@ class ApiModule(
     private val inngangsvilkårInnsender: InngangsvilkårInnsender,
     private val alleIdenterHenter: AlleIdenterHenter,
     private val personinfoHenter: PersoninfoHenter,
+    private val infotrygdperiodeHenter: InfotrygdperiodeHenter,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
 ) {
@@ -150,6 +152,7 @@ class ApiModule(
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             alleIdenterHenter = alleIdenterHenter,
             personinfoHenter = personinfoHenter,
+            infotrygdperiodeHenter = infotrygdperiodeHenter,
         )
     }
 }

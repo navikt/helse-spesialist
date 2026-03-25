@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.DeletePåVentBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.PutPåVentBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBehandler
+import no.nav.helse.spesialist.api.rest.personer.GetInfotrygdperioderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchSaksbehandlerStansBehandler
@@ -55,6 +56,7 @@ import no.nav.helse.spesialist.api.sse.sse
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -69,6 +71,7 @@ fun Routing.restRoutes(
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     behandlendeEnhetHenter: BehandlendeEnhetHenter,
     forsikringHenter: ForsikringHenter,
+    infotrygdperiodeHenter: InfotrygdperiodeHenter,
     inngangsvilkårHenter: InngangsvilkårHenter,
     inngangsvilkårInnsender: InngangsvilkårInnsender,
     alleIdenterHenter: AlleIdenterHenter,
@@ -138,6 +141,8 @@ fun Routing.restRoutes(
             get(GetPersonBehandler(personinfoHenter, alleIdenterHenter), restAdapter)
 
             get(GetNotatVedtaksperiodeIderForPersonBehandler(), restAdapter)
+
+            get(GetInfotrygdperioderForPersonBehandler(infotrygdperiodeHenter), restAdapter)
 
             get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
         }

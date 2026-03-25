@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
+import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -117,6 +118,7 @@ object TestRunner {
                 inngangsvilkårInnsender = mockk(relaxed = true),
                 alleIdenterHenter = mockk<AlleIdenterHenter>(relaxed = true),
                 personinfoHenter = mockk(relaxed = true),
+                infotrygdperiodeHenter = mockk(relaxed = true),
                 meldingPubliserer = mockk(relaxed = true),
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
@@ -180,6 +182,7 @@ object TestRunner {
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
                     alleIdenterHenter = avhengigheter.alleIdenterHenter,
                     personinfoHenter = avhengigheter.personinfoHenter,
+                    infotrygdperiodeHenter = avhengigheter.infotrygdperiodeHenter,
                 )
             }
 
@@ -221,6 +224,7 @@ object TestRunner {
         val inngangsvilkårInnsender: InngangsvilkårInnsender,
         val alleIdenterHenter: AlleIdenterHenter,
         val personinfoHenter: PersoninfoHenter,
+        val infotrygdperiodeHenter: InfotrygdperiodeHenter,
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,

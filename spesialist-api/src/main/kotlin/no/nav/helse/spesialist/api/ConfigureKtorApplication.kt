@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
@@ -61,6 +62,7 @@ fun configureKtorApplication(
     behandlendeEnhetHenter: BehandlendeEnhetHenter,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
+    infotrygdperiodeHenter: InfotrygdperiodeHenter,
 ) {
     with(ktorApplication) {
         install(CallId) { configureCallIdPlugin() }
@@ -108,6 +110,7 @@ fun configureKtorApplication(
                 inngangsvilkårInnsender = inngangsvilkårInnsender,
                 alleIdenterHenter = alleIdenterHenter,
                 personinfoHenter = personinfoHenter,
+                infotrygdperiodeHenter = infotrygdperiodeHenter,
             )
         }
     }
