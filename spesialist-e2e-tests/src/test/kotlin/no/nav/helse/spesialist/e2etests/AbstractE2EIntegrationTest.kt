@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.VedtakFattetMelding
@@ -47,12 +48,15 @@ abstract class AbstractE2EIntegrationTest {
         E2ETestApplikasjon.spleisStub.also {
             it.init(testContext)
         }
+
     protected fun spleisIngorererMeldinger() {
         spleisStub.ikkeSvarPåMeldingerFor(testContext.person)
     }
+
     protected fun spleisLeserMeldinger() {
         spleisStub.svarPåMeldingerFor(testContext.person)
     }
+
     private val testRapid = E2ETestApplikasjon.testRapid
 
     protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
@@ -194,13 +198,22 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals("EtterSkjønn", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 
-    protected fun assertOppgaveTildeltSaksbehandler() {
+    protected fun assertOppgaveTildeltSaksbehandlerEvent() {
         val oppgaveEvent =
             testRapid
                 .meldingslogg(testContext.person.fødselsnummer)
                 .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
                 ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
         assertEquals(saksbehandler.id.value, oppgaveEvent["saksbehandler"].asUUID())
+    }
+
+    protected fun assertOppgaveIkkeTildeltEvent() {
+        val oppgaveEvent =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
+                ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
+        assertTrue(oppgaveEvent.path("saksbehandler").isMissingOrNull())
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {

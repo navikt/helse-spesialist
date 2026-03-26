@@ -74,6 +74,11 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
+    fun saksbehandlerAvmelderSegSaken() {
+        callHttpDelete(relativeUrl = "/api/personer/$personPseudoId/tildeling")
+        hentOppdatertPerson()
+    }
+
     fun saksbehandlerFatterVedtak(
         behandlingId: UUID,
         begrunnelse: String? = null,
@@ -416,6 +421,20 @@ class SpeilPersonReceiver(
         val påVentNode =
             person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["paVent"]
         assertTrue(påVentNode.isMissingOrNull(), "Forventer at paVent er null")
+    }
+
+    fun assertTildelt() {
+        val tildelingNode =
+            person["tildeling"]
+        assertFalse(tildelingNode.isMissingOrNull(), "Forventer at tildeling ikke er null")
+        assertEquals(saksbehandler.id.value, tildelingNode["oid"].asUUID())
+        assertEquals(saksbehandler.navn, tildelingNode["navn"].asText())
+        assertEquals(saksbehandler.epost, tildelingNode["epost"].asText())
+    }
+
+    fun assertIkkeTildelt() {
+        val tildelingNode = person["tildeling"]
+        assertTrue(tildelingNode.isMissingOrNull(), "Forventer at tildeling er null")
     }
 
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {

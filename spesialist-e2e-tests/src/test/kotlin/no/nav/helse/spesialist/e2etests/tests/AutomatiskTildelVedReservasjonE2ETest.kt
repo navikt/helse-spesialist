@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.e2etests.tests
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import kotlin.test.Test
 
-class AutomatiskTildelVedReservasjonE2ETest: AbstractE2EIntegrationTest() {
+class AutomatiskTildelVedReservasjonE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `tildel oppgave automatisk til saksbehandler etter reberegning`() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
@@ -15,8 +15,9 @@ class AutomatiskTildelVedReservasjonE2ETest: AbstractE2EIntegrationTest() {
         spleisReberegnerAutomatisk(førsteVedtaksperiode())
         spleisSenderGodkjenningsbehov(førsteVedtaksperiode())
 
-        assertOppgaveTildeltSaksbehandler()
+        assertOppgaveTildeltSaksbehandlerEvent()
     }
+
     @Test
     fun `tildel oppgave automatisk til saksbehandler etter overstyring`() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
@@ -26,6 +27,6 @@ class AutomatiskTildelVedReservasjonE2ETest: AbstractE2EIntegrationTest() {
             saksbehandlerSkjønnsfastsetter830TredjeAvsnitt()
         }
 
-        assertOppgaveTildeltSaksbehandler()
+        assertOppgaveTildeltSaksbehandlerEvent()
     }
 }

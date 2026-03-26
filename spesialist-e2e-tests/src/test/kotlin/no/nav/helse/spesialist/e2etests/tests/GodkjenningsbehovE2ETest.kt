@@ -4,7 +4,6 @@ import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 
 class GodkjenningsbehovE2ETest : AbstractE2EIntegrationTest() {
-
     @Test
     fun `kan fortsatt fatte vedtak ved godkjenningsbehov med endret skjæringstidspunkt`() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
@@ -45,8 +44,7 @@ class GodkjenningsbehovE2ETest : AbstractE2EIntegrationTest() {
             saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!, "En begrunnelse")
         }
 
-        assertOppgaveTildeltSaksbehandler()
+        assertOppgaveTildeltSaksbehandlerEvent()
         assertBehandlingTilstand("VedtakFattet")
     }
-
 }
