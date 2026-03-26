@@ -7,15 +7,12 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.api.graphql.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.graphql.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SendIReturResult
 import no.nav.helse.spesialist.api.graphql.SendTilGodkjenningResult
@@ -27,9 +24,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DataSourceDbQuery
@@ -72,7 +66,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
@@ -386,21 +379,12 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val oppgaveService =
-        OppgaveService(
-            oppgaveDao = daos.oppgaveDao,
-            reservasjonDao = sessionContext.reservasjonDao,
-            meldingPubliserer = meldingPubliserer,
-            oppgaveRepository = daos.oppgaveRepository,
-            brukerrollehenter = { Either.Success(emptySet()) },
-        )
 
     private val mediator =
         SaksbehandlerMediator(
             daos = DBDaos(dataSource),
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
-            oppgaveService = oppgaveService,
             sessionFactory = TransactionalSessionFactory(dataSource),
         )
 
@@ -564,7 +548,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler, emptySet())
+        mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering =
             sessionFactory.transactionalSessionScope { session ->
                 session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
@@ -625,7 +609,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler, emptySet())
+        mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering =
             sessionFactory.transactionalSessionScope { session ->
                 session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
@@ -786,44 +770,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals(SendTilGodkjenningResult.Ok, result)
     }
 
-    @Test
-    fun `forsøk tildeling av oppgave`() {
-        nyPerson()
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
-        val melding = testRapid.inspektør.hendelser().last()
-        assertEquals("oppgave_oppdatert", melding)
-    }
-
-    @Test
-    fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
-        nyPerson()
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
-        testRapid.reset()
-        assertThrows<OppgaveTildeltNoenAndre> {
-            mediator.håndter(TildelOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
-        }
-        assertEquals(0, testRapid.inspektør.hendelser().size)
-    }
-
-    @Test
-    fun `forsøk avmelding av oppgave`() {
-        nyPerson()
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
-        testRapid.reset()
-        mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler, emptySet())
-        val melding = testRapid.inspektør.hendelser().last()
-        assertEquals("oppgave_oppdatert", melding)
-    }
-
-    @Test
-    fun `forsøk avmelding av oppgave når den ikke er tildelt`() {
-        nyPerson()
-        assertThrows<OppgaveIkkeTildelt> {
-            mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
-        }
-        assertEquals(0, testRapid.inspektør.hendelser().size)
-    }
-
     private fun assertVedtakBegrunnelse(
         expectedUtfall: VedtakBegrunnelseTypeFraDatabase,
         expectedBegrunnelse: String,
@@ -909,7 +855,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler, emptySet())
+        mediator.håndter(overstyring, saksbehandler)
         val hendelse = testRapid.inspektør.hendelser("overstyr_tidslinje").first()
         val overstyringId = finnOverstyringId(person.fødselsnummer)
 
@@ -947,7 +893,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler, emptySet())
+        mediator.håndter(overstyring, saksbehandler)
         val hendelse = testRapid.inspektør.hendelser("overstyr_arbeidsforhold").first()
 
         assertNotNull(hendelse["@id"].asText())
@@ -1036,7 +982,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler, emptySet())
+        mediator.håndter(overstyring, saksbehandler)
 
         val hendelse = testRapid.inspektør.hendelser("overstyr_inntekt_og_refusjon").first()
 
@@ -1110,7 +1056,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 vedtaksperiodeId = PERIODE.id,
             )
 
-        mediator.håndter(skjønnsfastsetting, saksbehandler, emptySet())
+        mediator.håndter(skjønnsfastsetting, saksbehandler)
 
         val hendelse = testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").first()
 

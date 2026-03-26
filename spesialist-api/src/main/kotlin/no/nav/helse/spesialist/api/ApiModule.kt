@@ -7,7 +7,6 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.PersonhåndtererImpl
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
@@ -17,7 +16,6 @@ import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndtererIm
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
@@ -32,7 +30,6 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 
@@ -40,7 +37,6 @@ class ApiModule(
     private val configuration: Configuration,
     daos: Daos,
     private val meldingPubliserer: MeldingPubliserer,
-    brukerrollehenter: Brukerrollehenter,
     private val sessionFactory: SessionFactory,
     private val opptegnelseListener: OpptegnelseListener,
     private val environmentToggles: EnvironmentToggles,
@@ -70,15 +66,6 @@ class ApiModule(
             publiserer = meldingPubliserer,
         )
 
-    val oppgaveService =
-        OppgaveService(
-            oppgaveDao = daos.oppgaveDao,
-            reservasjonDao = daos.reservasjonDao,
-            meldingPubliserer = meldingPubliserer,
-            oppgaveRepository = daos.oppgaveRepository,
-            brukerrollehenter = brukerrollehenter,
-        )
-
     private val apiOppgaveService =
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
@@ -92,7 +79,6 @@ class ApiModule(
             daos = daos,
             versjonAvKode = configuration.versjonAvKode,
             meldingPubliserer = meldingPubliserer,
-            oppgaveService = oppgaveService,
             sessionFactory = sessionFactory,
         )
 
@@ -118,7 +104,6 @@ class ApiModule(
                     ),
                 mutationHandlers =
                     MutationHandlers(
-                        tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                         overstyring =
                             OverstyringMutationHandler(
                                 saksbehandlerMediator = saksbehandlerMediator,

@@ -30,7 +30,6 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
@@ -52,6 +51,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import java.util.Collections
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 
 class IntegrationTestFixture {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
@@ -94,14 +94,16 @@ class IntegrationTestFixture {
             configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
             daos = daos,
             meldingPubliserer = meldingPubliserer,
-            brukerrollehenter = { Either.Success(emptySet()) },
             sessionFactory = sessionFactory,
             opptegnelseListener =
                 object : OpptegnelseListener {
-                    override suspend fun onOpptegnelse(identitetsnummer: Identitetsnummer, block: suspend () -> Unit) {
+                    override suspend fun onOpptegnelse(
+                        identitetsnummer: Identitetsnummer,
+                        block: suspend () -> Unit,
+                    ) {
                         flow {
                             repeat(10) {
-                                delay(50)
+                                delay(50.milliseconds)
                                 emit(Unit)
                             }
                         }.collect {

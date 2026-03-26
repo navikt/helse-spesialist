@@ -8,7 +8,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
-import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -19,7 +18,6 @@ import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
@@ -99,16 +97,6 @@ class OppgaveService(
             meldingPubliserer.publiser(fødselsnummer, hendelse.tilUtgåendeHendelse(), "oppgave endret")
         }
         return returverdi
-    }
-
-    fun utfør(
-        handling: Oppgavehandling,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
-    ) {
-        oppgave(handling.oppgaveId()) {
-            handling.oppgave(this)
-            handling.utførAv(saksbehandlerWrapper)
-        }
     }
 
     override fun endretEgenAnsattStatus(

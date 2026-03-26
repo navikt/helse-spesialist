@@ -7,8 +7,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
-import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationSchema
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
@@ -26,7 +24,6 @@ class SpesialistSchema(
     )
 
     class MutationHandlers(
-        val tildeling: TildelingMutationSchema,
         val overstyring: OverstyringMutationSchema,
         val skjonnsfastsettelse: SkjonnsfastsettelseMutationSchema,
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
@@ -44,7 +41,6 @@ class SpesialistSchema(
 
         schemaConfiguration.mutations =
             listOf(
-                TildelingMutation(handler = mutationHandlers.tildeling),
                 OverstyringMutation(handler = mutationHandlers.overstyring),
                 SkjonnsfastsettelseMutation(handler = mutationHandlers.skjonnsfastsettelse),
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),

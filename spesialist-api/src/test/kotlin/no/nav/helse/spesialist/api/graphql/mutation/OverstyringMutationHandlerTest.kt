@@ -27,18 +27,19 @@ internal class OverstyringMutationHandlerTest {
     @Test
     fun `overstyr tidslinje`() {
         runQuery(
-            whenever = overstyrTidslinjeMutation(
-                ApiTidslinjeOverstyring(
-                    UUID.randomUUID(),
-                    lagOrganisasjonsnummer(),
-                    lagFødselsnummer(),
-                    lagAktørId(),
-                    "En begrunnelse",
-                    listOf(
-                        ApiOverstyringDag(10 jan 2018, "Feriedag", "Sykedag", null, 100, null),
+            whenever =
+                overstyrTidslinjeMutation(
+                    ApiTidslinjeOverstyring(
+                        UUID.randomUUID(),
+                        lagOrganisasjonsnummer(),
+                        lagFødselsnummer(),
+                        lagAktørId(),
+                        "En begrunnelse",
+                        listOf(
+                            ApiOverstyringDag(10 jan 2018, "Feriedag", "Sykedag", null, 100, null),
+                        ),
                     ),
-                )
-            ),
+                ),
             then = { _, body, _ ->
                 assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
@@ -48,18 +49,19 @@ internal class OverstyringMutationHandlerTest {
     @Test
     fun `overstyr tidslinje til arbeidsdag`() {
         runQuery(
-            whenever = overstyrTidslinjeMutation(
-                ApiTidslinjeOverstyring(
-                    UUID.randomUUID(),
-                    lagOrganisasjonsnummer(),
-                    lagFødselsnummer(),
-                    lagAktørId(),
-                    "En begrunnelse",
-                    listOf(
-                        ApiOverstyringDag(10 jan 2018, "Arbeidsdag", "Sykedag", null, 100, null),
+            whenever =
+                overstyrTidslinjeMutation(
+                    ApiTidslinjeOverstyring(
+                        UUID.randomUUID(),
+                        lagOrganisasjonsnummer(),
+                        lagFødselsnummer(),
+                        lagAktørId(),
+                        "En begrunnelse",
+                        listOf(
+                            ApiOverstyringDag(10 jan 2018, "Arbeidsdag", "Sykedag", null, 100, null),
+                        ),
                     ),
-                )
-            ),
+                ),
             then = { _, body, _ ->
                 assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
@@ -69,18 +71,19 @@ internal class OverstyringMutationHandlerTest {
     @Test
     fun `overstyr tidslinje fra arbeidsdag`() {
         runQuery(
-            whenever = overstyrTidslinjeMutation(
-                ApiTidslinjeOverstyring(
-                    UUID.randomUUID(),
-                    lagOrganisasjonsnummer(),
-                    lagFødselsnummer(),
-                    lagAktørId(),
-                    "En begrunnelse",
-                    listOf(
-                        ApiOverstyringDag(10 jan 2018, "Sykedag", "Arbeidsdag", null, 100, null),
+            whenever =
+                overstyrTidslinjeMutation(
+                    ApiTidslinjeOverstyring(
+                        UUID.randomUUID(),
+                        lagOrganisasjonsnummer(),
+                        lagFødselsnummer(),
+                        lagAktørId(),
+                        "En begrunnelse",
+                        listOf(
+                            ApiOverstyringDag(10 jan 2018, "Sykedag", "Arbeidsdag", null, 100, null),
+                        ),
                     ),
-                )
-            ),
+                ),
             then = { _, body, _ ->
                 assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
@@ -90,23 +93,24 @@ internal class OverstyringMutationHandlerTest {
     @Test
     fun `overstyr arbeidsforhold`() {
         runQuery(
-            whenever = overstyrArbeidsforholdMutation(
-                ApiArbeidsforholdOverstyringHandling(
-                    lagFødselsnummer(),
-                    lagAktørId(),
-                    10 jan 2018,
-                    listOf(
-                        ApiOverstyringArbeidsforhold(
-                            lagOrganisasjonsnummer(),
-                            true,
-                            "En begrunnelse",
-                            "En forklaring",
-                            null
+            whenever =
+                overstyrArbeidsforholdMutation(
+                    ApiArbeidsforholdOverstyringHandling(
+                        lagFødselsnummer(),
+                        lagAktørId(),
+                        10 jan 2018,
+                        listOf(
+                            ApiOverstyringArbeidsforhold(
+                                lagOrganisasjonsnummer(),
+                                true,
+                                "En begrunnelse",
+                                "En forklaring",
+                                null,
+                            ),
                         ),
+                        vedtaksperiodeId = UUID.randomUUID(),
                     ),
-                    vedtaksperiodeId = UUID.randomUUID(),
-                )
-            ),
+                ),
             then = { _, body, _ ->
                 assertTrue(body["data"]["overstyrArbeidsforhold"].asBoolean())
             },
@@ -116,34 +120,35 @@ internal class OverstyringMutationHandlerTest {
     @Test
     fun `overstyr inntekt og refusjon`() {
         runQuery(
-            whenever = overstyrInntektOgRefusjonMutation(
-                ApiInntektOgRefusjonOverstyring(
-                    lagAktørId(),
-                    lagFødselsnummer(),
-                    9 jan 2018,
-                    listOf(
-                        ApiOverstyringArbeidsgiver(
-                            lagOrganisasjonsnummer(),
-                            24000.0,
-                            25000.0,
-                            listOf(
-                                ApiOverstyringRefusjonselement(10 jan 2018, 31 jan 2018, 24000.0),
-                                ApiOverstyringRefusjonselement(1 feb 2018, null, 24000.0),
+            whenever =
+                overstyrInntektOgRefusjonMutation(
+                    ApiInntektOgRefusjonOverstyring(
+                        lagAktørId(),
+                        lagFødselsnummer(),
+                        9 jan 2018,
+                        listOf(
+                            ApiOverstyringArbeidsgiver(
+                                lagOrganisasjonsnummer(),
+                                24000.0,
+                                25000.0,
+                                listOf(
+                                    ApiOverstyringRefusjonselement(10 jan 2018, 31 jan 2018, 24000.0),
+                                    ApiOverstyringRefusjonselement(1 feb 2018, null, 24000.0),
+                                ),
+                                listOf(
+                                    ApiOverstyringRefusjonselement(10 jan 2018, 31 jan 2018, 25000.0),
+                                    ApiOverstyringRefusjonselement(1 feb 2018, null, 25000.0),
+                                ),
+                                "En begrunnelse",
+                                "En forklaring",
+                                null,
+                                null,
+                                null,
                             ),
-                            listOf(
-                                ApiOverstyringRefusjonselement(10 jan 2018, 31 jan 2018, 25000.0),
-                                ApiOverstyringRefusjonselement(1 feb 2018, null, 25000.0),
-                            ),
-                            "En begrunnelse",
-                            "En forklaring",
-                            null,
-                            null,
-                            null,
                         ),
+                        vedtaksperiodeId = UUID.randomUUID(),
                     ),
-                    vedtaksperiodeId = UUID.randomUUID(),
-                )
-            ),
+                ),
             then = { _, body, _ ->
                 assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
             },
@@ -155,19 +160,20 @@ internal class OverstyringMutationHandlerTest {
         runQuery(
             given = {
                 every {
-                    it.saksbehandlerMediator.håndter(any(), any(), any())
+                    it.saksbehandlerMediator.håndter(any(), any())
                 } throws IOException("noe galt skjedde liksom mot databasen")
             },
-            whenever = overstyrTidslinjeMutation(
-                ApiTidslinjeOverstyring(
-                    UUID.randomUUID(),
-                    lagOrganisasjonsnummer(),
-                    lagFødselsnummer(),
-                    lagAktørId(),
-                    "En begrunnelse",
-                    emptyList(),
-                )
-            ),
+            whenever =
+                overstyrTidslinjeMutation(
+                    ApiTidslinjeOverstyring(
+                        UUID.randomUUID(),
+                        lagOrganisasjonsnummer(),
+                        lagFødselsnummer(),
+                        lagAktørId(),
+                        "En begrunnelse",
+                        emptyList(),
+                    ),
+                ),
             then = { _, body, _ ->
                 assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
             },

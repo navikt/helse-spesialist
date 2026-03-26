@@ -41,7 +41,6 @@ class TestMediator(
             daos = daos,
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
-            oppgaveService = oppgaveService,
             sessionFactory = TransactionalSessionFactory(dataSource),
         )
 
@@ -104,6 +103,6 @@ class TestMediator(
         handling: HandlingFraApi,
         saksbehandler: Saksbehandler,
     ) {
-        saksbehandlerMediator.håndter(handling, saksbehandler, emptySet())
+        saksbehandlerMediator.håndter(handling, saksbehandler)
     }
 }

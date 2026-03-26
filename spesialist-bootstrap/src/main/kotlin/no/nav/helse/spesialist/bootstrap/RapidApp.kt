@@ -236,7 +236,6 @@ class RapidApp {
                 configuration = configuration.api,
                 daos = dbModule.daos,
                 meldingPubliserer = kafkaModule.meldingPubliserer,
-                brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
                 sessionFactory = dbModule.sessionFactory,
                 opptegnelseListener = dbModule.opptegnelseListener,
                 environmentToggles = configuration.environmentToggles,

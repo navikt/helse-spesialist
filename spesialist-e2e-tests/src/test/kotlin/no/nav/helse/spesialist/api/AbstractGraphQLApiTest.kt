@@ -34,7 +34,6 @@ import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
@@ -117,7 +116,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                 mutationHandlers =
                     SpesialistSchema.MutationHandlers(
-                        tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                         overstyring =
                             OverstyringMutationHandler(
                                 saksbehandlerMediator = saksbehandlerMediator,

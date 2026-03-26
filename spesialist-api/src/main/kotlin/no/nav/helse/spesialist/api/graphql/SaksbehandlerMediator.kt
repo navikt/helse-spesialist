@@ -8,7 +8,6 @@ import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.modell.FinnerIkkePåVent
 import no.nav.helse.modell.ManglerTilgang
@@ -19,7 +18,6 @@ import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
-import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
@@ -30,9 +28,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggError
@@ -53,7 +49,6 @@ import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.overstyringer.Refusjonselement
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.tell
 import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.Modellfeil as ApiModellfeil
@@ -62,7 +57,6 @@ class SaksbehandlerMediator(
     daos: Daos,
     private val versjonAvKode: String,
     private val meldingPubliserer: MeldingPubliserer,
-    private val oppgaveService: OppgaveService,
     private val sessionFactory: SessionFactory,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
@@ -89,12 +83,10 @@ class SaksbehandlerMediator(
     fun håndter(
         handlingFraApi: HandlingFraApi,
         saksbehandler: Saksbehandler,
-        brukerroller: Set<Brukerrolle>,
     ) {
         val modellhandling =
             handlingFraApi.tilModellversjon(
                 saksbehandlerOid = saksbehandler.id,
-                brukerroller = brukerroller,
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
@@ -117,10 +109,6 @@ class SaksbehandlerMediator(
                 modellhandling.utførAv(saksbehandlerWrapper)
             }
 
-            is Oppgavehandling -> {
-                håndter(modellhandling, saksbehandlerWrapper)
-            }
-
             is Personhandling -> {
                 håndter(modellhandling, saksbehandlerWrapper)
             }
@@ -140,17 +128,6 @@ class SaksbehandlerMediator(
             sessionContext.behandlingRepository.finn(SpleisBehandlingId(spleisBehandlingId))
                 ?: error("Fant ikke behandling for SpleisBehandlingId $spleisBehandlingId")
         return behandling.utfall()
-    }
-
-    private fun håndter(
-        handling: Oppgavehandling,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
-    ) {
-        try {
-            oppgaveService.utfør(handling, saksbehandlerWrapper)
-        } catch (e: Modellfeil) {
-            throw e.tilApiversjon()
-        }
     }
 
     private fun håndter(
@@ -395,15 +372,12 @@ class SaksbehandlerMediator(
 
     private fun HandlingFraApi.tilModellversjon(
         saksbehandlerOid: SaksbehandlerOid,
-        brukerroller: Set<Brukerrolle>,
     ): Handling =
         when (this) {
             is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandlerOid)
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
-            is TildelOppgave -> this.tilModellversjon(brukerroller)
-            is AvmeldOppgave -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
 
@@ -521,16 +495,6 @@ class SaksbehandlerMediator(
                 },
             begrunnelse = begrunnelse,
         )
-
-    private fun TildelOppgave.tilModellversjon(
-        brukerroller: Set<Brukerrolle>,
-    ): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
-        no.nav.helse.modell.saksbehandler.handlinger
-            .TildelOppgave(this.oppgaveId, brukerroller)
-
-    private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
-        no.nav.helse.modell.saksbehandler.handlinger
-            .AvmeldOppgave(this.oppgaveId)
 
     private fun Utfall.toDatabaseType() =
         when (this) {
