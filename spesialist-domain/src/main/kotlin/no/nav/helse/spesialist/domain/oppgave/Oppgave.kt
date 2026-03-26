@@ -90,29 +90,23 @@ class Oppgave private constructor(
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id.value))
             throw OppgaveTildeltNoenAndre(tildelt.value, false)
         }
-        tilstand.tildel(
-            oppgave = this,
-            saksbehandler = saksbehandler,
-            brukerroller = brukerroller,
-        )
+        sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
+
+        tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
     }
 
-    fun forsøkAvmelding(saksbehandler: Saksbehandler) {
-        logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id.value))
-        val tildelt =
-            tildeltTil ?: run {
-                logg.info("Kan ikke fjerne tildeling når oppgave ikke er tildelt, {}", kv("oppgaveId", id.value))
-                throw OppgaveIkkeTildelt(id.value)
-            }
-
-        if (tildelt != saksbehandler.id) {
-            logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id.value))
-            sikkerlogg.info(
-                "Oppgave med {} er tildelt $tildelt, avmeldes av ${saksbehandler.ident}",
+    private fun sjekkAtOppgaveKanTildeles(
+        brukerroller: Set<Brukerrolle>,
+        saksbehandler: Saksbehandler,
+    ) {
+        if (!kanTildelesTil(brukerroller = brukerroller)) {
+            logg.info(
+                "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
                 kv("oppgaveId", id.value),
+                kv("oid", saksbehandler.id.value),
             )
+            throw ManglerTilgang(saksbehandler.id.value, id.value)
         }
-        tilstand.avmeld(this, saksbehandler)
     }
 
     fun forsøkTildelingVedReservasjon(
@@ -134,11 +128,26 @@ class Oppgave private constructor(
             )
             return
         }
-        tilstand.tildel(
-            oppgave = this,
-            saksbehandler = saksbehandler,
-            brukerroller = brukerroller,
-        )
+        sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
+        tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
+    }
+
+    fun forsøkAvmelding(saksbehandler: Saksbehandler) {
+        logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id.value))
+        val tildelt =
+            tildeltTil ?: run {
+                logg.info("Kan ikke fjerne tildeling når oppgave ikke er tildelt, {}", kv("oppgaveId", id.value))
+                throw OppgaveIkkeTildelt(id.value)
+            }
+
+        if (tildelt != saksbehandler.id) {
+            logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id.value))
+            sikkerlogg.info(
+                "Oppgave med {} er tildelt $tildelt, avmeldes av ${saksbehandler.ident}",
+                kv("oppgaveId", id.value),
+            )
+        }
+        tilstand.avmeld(this)
     }
 
     fun sendTilBeslutter(beslutter: Saksbehandler?) {
@@ -200,7 +209,7 @@ class Oppgave private constructor(
             tildel(saksbehandler)
         }
         if (this.tildeltTil != null && !skalTildeles) {
-            avmeld(saksbehandler)
+            avmeld()
         }
         _egenskaper.add(Egenskap.PÅ_VENT)
         oppgaveEndret()
@@ -212,7 +221,7 @@ class Oppgave private constructor(
     ) {
         if (tildeltTil == saksbehandler.id) {
             if (!skalVæreTildeltSaksbehandler) {
-                avmeld(saksbehandler)
+                avmeld()
             }
         } else if (skalVæreTildeltSaksbehandler) {
             tildel(saksbehandler)
@@ -253,17 +262,10 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    private fun avmeld(saksbehandler: Saksbehandler) {
+    private fun avmeld() {
         this.tildeltTil = null
-        logg.info(
-            "Oppgave med {} avmeldes saksbehandler med {}",
-            kv("oppgaveId", id.value),
-            kv(
-                "oid",
-                saksbehandler.id.value,
-            ),
-        )
-        sikkerlogg.info("Oppgave med {} avmeldes ${saksbehandler.ident}", kv("oppgaveId", id.value))
+        logg.info("Oppgave med {} avmeldes", kv("oppgaveId", id.value))
+        sikkerlogg.info("Oppgave med {} avmeldes", kv("oppgaveId", id.value))
         oppgaveEndret()
     }
 
@@ -315,21 +317,17 @@ class Oppgave private constructor(
         fun tildel(
             oppgave: Oppgave,
             saksbehandler: Saksbehandler,
-            brukerroller: Set<Brukerrolle>,
         ) {
             logg.warn(
-                "Forventer ikke forsøk på tildeling i {} for oppgave med {} av ${saksbehandler.ident}",
+                "Forventer ikke forsøk på tildeling i {} for oppgave med {}",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id.value),
             )
         }
 
-        fun avmeld(
-            oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
-        ) {
+        fun avmeld(oppgave: Oppgave) {
             logg.warn(
-                "Forventer ikke forsøk på avmelding i {} for oppgave med {} av ${saksbehandler.ident}",
+                "Forventer ikke forsøk på avmelding i {} for oppgave med {}",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id.value),
             )
@@ -354,27 +352,14 @@ class Oppgave private constructor(
         override fun tildel(
             oppgave: Oppgave,
             saksbehandler: Saksbehandler,
-            brukerroller: Set<Brukerrolle>,
         ) {
-            if (!oppgave.kanTildelesTil(
-                    brukerroller = brukerroller,
-                )
-            ) {
-                logg.info(
-                    "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
-                    kv("oppgaveId", oppgave.id.value),
-                    kv("oid", saksbehandler.id.value),
-                )
-                throw ManglerTilgang(saksbehandler.id.value, oppgave.id.value)
-            }
             oppgave.tildel(saksbehandler)
         }
 
         override fun avmeld(
             oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
         ) {
-            oppgave.avmeld(saksbehandler)
+            oppgave.avmeld()
         }
     }
 
