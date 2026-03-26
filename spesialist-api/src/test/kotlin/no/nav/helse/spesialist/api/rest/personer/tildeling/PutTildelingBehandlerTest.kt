@@ -98,4 +98,88 @@ class PutTildelingBehandlerTest {
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
         assertEquals(null, oppgave.tildeltTil)
     }
+
+    @Test
+    fun `no content hvis saksbehandler allerede er tildelt oppgaven`() {
+        // given
+        val person = lagPerson().also(personRepository::lagre)
+        val personPseudoId =
+            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+                .nyPersonPseudoId(person.id)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
+        val spleisBehandlingId = behandling.spleisBehandlingId!!
+        val saksbehandler = lagSaksbehandler().also(saksbehandlerRepository::lagre)
+        val oppgave =
+            lagOppgave(
+                behandlingId = spleisBehandlingId,
+                godkjenningsbehovId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiode.id,
+            ).also {
+                it.forsøkTildeling(saksbehandler, emptySet())
+                oppgaveRepository.lagre(it)
+                it.konsumerHendelser() // nullstill hendelser som ikke er relevante for testen
+            }
+
+        // when
+        val response =
+            integrationTestFixture.put(
+                url = "/api/personer/${personPseudoId.value}/tildeling",
+                saksbehandler = saksbehandler,
+                body =
+                    """
+                    {
+                      "navident": "${saksbehandler.ident.value}"
+                    }
+                    """.trimIndent(),
+            )
+
+        // then
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        assertEquals(saksbehandler.id, oppgave.tildeltTil)
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+    }
+
+    @Test
+    fun `bad request hvis oppgaven er tildelt en annen saksbehandler`() {
+        // given
+        val person = lagPerson().also(personRepository::lagre)
+        val personPseudoId =
+            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+                .nyPersonPseudoId(person.id)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
+        val spleisBehandlingId = behandling.spleisBehandlingId!!
+        val saksbehandlerSomErTildeltOppgaven = lagSaksbehandler()
+        val oppgave =
+            lagOppgave(
+                behandlingId = spleisBehandlingId,
+                godkjenningsbehovId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiode.id,
+            ).also {
+                it.forsøkTildeling(saksbehandlerSomErTildeltOppgaven, emptySet())
+                oppgaveRepository.lagre(it)
+                it.konsumerHendelser() // nullstill hendelser som ikke er relevante for testen
+            }
+
+        val saksbehandler = lagSaksbehandler().also(saksbehandlerRepository::lagre)
+
+        // when
+        val response =
+            integrationTestFixture.put(
+                url = "/api/personer/${personPseudoId.value}/tildeling",
+                saksbehandler = saksbehandler,
+                body =
+                    """
+                    {
+                      "navident": "${saksbehandler.ident.value}"
+                    }
+                    """.trimIndent(),
+            )
+
+        // then
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(saksbehandlerSomErTildeltOppgaven.id, oppgave.tildeltTil)
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+    }
 }
