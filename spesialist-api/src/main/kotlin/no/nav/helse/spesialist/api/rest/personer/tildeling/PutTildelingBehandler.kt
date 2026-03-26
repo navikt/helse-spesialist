@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 
 class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, ApiTildelingRequest, Unit, ApiPostTildelingErrorCode> {
-    override val tag = Tags.OPPGAVER
+    override val tag = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Tildeling,

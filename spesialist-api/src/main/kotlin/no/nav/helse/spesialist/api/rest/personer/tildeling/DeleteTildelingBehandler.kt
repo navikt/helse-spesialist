@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 
 class DeleteTildelingBehandler : DeleteBehandler<Personer.PersonPseudoId.Tildeling, Unit, ApiDeleteTildelingErrorCode> {
-    override val tag: Tags = Tags.OPPGAVER
+    override val tag: Tags = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Tildeling,
