@@ -166,16 +166,10 @@ class KallKontekst(
                 return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
             }
 
-            val oppgaveId = transaksjon.oppgaveDao.finnOppgaveId(identitetsnummer.value)
-
             // Best effort for å finne ut om saksbehandler har tilgang til oppgaven som gjelder
             // Litt vanskelig å få pent så lenge vi har dynamisk resolving av resten, og tilsynelatende "mange" oppgaver
             val harTilgangTilOppgave =
-                oppgaveId?.let { oppgaveId ->
-                    transaksjon.oppgaveRepository
-                        .finn(oppgaveId)
-                        ?.kanSeesAv(brukerroller)
-                } ?: true
+                transaksjon.oppgaveRepository.finnAktivForPerson(identitetsnummer)?.kanSeesAv(brukerroller) ?: true
 
             if (!harTilgangTilOppgave) {
                 loggWarn("Saksbehandler har ikke tilgang til aktiv oppgave på personen", "identitetsnummer" to identitetsnummer)
