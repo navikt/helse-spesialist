@@ -12,23 +12,23 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 
-class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, ApiTildelingRequest, Unit, ApiPostTildelingErrorCode> {
+class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, ApiTildelingRequest, Unit, ApiPutTildelingErrorCode> {
     override val tag = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Tildeling,
         request: ApiTildelingRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<Unit, ApiPostTildelingErrorCode> =
+    ): RestResponse<Unit, ApiPutTildelingErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiPostTildelingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
+            personPseudoIdIkkeFunnet = { ApiPutTildelingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            manglerTilgangTilPerson = { ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
             val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPerson(it.id) ?: error("Fant ikke oppgave")
 
             if (!oppgave.kanTildelesTil(brukerroller = kallKontekst.brukerroller)) {
-                return@medPerson RestResponse.Error(ApiPostTildelingErrorCode.MANGLER_TILGANG_TIL_OPPGAVE)
+                return@medPerson RestResponse.Error(ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_OPPGAVE)
             }
 
             if (oppgave.erTildelt()) {
@@ -37,7 +37,7 @@ class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, Ap
                     return@medPerson RestResponse.NoContent()
                 } else {
                     loggInfo("Oppgaven er allerede tildelt en annen saksbehandler", "tildeltSaksbehandler" to oppgave.tildeltTil?.value)
-                    return@medPerson RestResponse.Error(ApiPostTildelingErrorCode.OPPGAVE_TILDELT_ANNEN_SAKSBEHANDLER)
+                    return@medPerson RestResponse.Error(ApiPutTildelingErrorCode.OPPGAVE_TILDELT_ANNEN_SAKSBEHANDLER)
                 }
             }
 
@@ -49,12 +49,12 @@ class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, Ap
         }
 }
 
-enum class ApiPostTildelingErrorCode(
+enum class ApiPutTildelingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     PERSON_PSEUDO_ID_IKKE_FUNNET("Personpseudoid ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     MANGLER_TILGANG_TIL_OPPGAVE("Mangler tilgang til oppgave", HttpStatusCode.Forbidden),
-    OPPGAVE_TILDELT_ANNEN_SAKSBEHANDLER("Oppgaven er allerede tildelt en annen saksbehandler", HttpStatusCode.BadRequest),
+    OPPGAVE_TILDELT_ANNEN_SAKSBEHANDLER("Oppgaven er allerede tildelt en annen saksbehandler", HttpStatusCode.Conflict),
 }

@@ -141,7 +141,7 @@ class PutTildelingBehandlerTest {
     }
 
     @Test
-    fun `bad request hvis oppgaven er tildelt en annen saksbehandler`() {
+    fun `conflict hvis oppgaven er tildelt en annen saksbehandler`() {
         // given
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId =
@@ -178,7 +178,7 @@ class PutTildelingBehandlerTest {
             )
 
         // then
-        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(HttpStatusCode.Conflict.value, response.status)
         assertEquals(saksbehandlerSomErTildeltOppgaven.id, oppgave.tildeltTil)
         integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
