@@ -82,10 +82,6 @@ class GetInfotrygdperioderForPersonBehandler(
         ApiInfotrygdperiode(
             fom = fom,
             tom = tom,
-            grad = grad,
-            dagsats = dagsats,
-            typetekst = type,
-            organisasjonsnummer = organisasjonsnummer,
         )
 }
 

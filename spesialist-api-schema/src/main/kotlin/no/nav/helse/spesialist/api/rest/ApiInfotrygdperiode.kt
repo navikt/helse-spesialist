@@ -20,8 +20,4 @@ import java.util.UUID
 data class ApiInfotrygdperiode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val grad: Int,
-    val dagsats: BigDecimal,
-    val typetekst: String,
-    val organisasjonsnummer: String?,
 )

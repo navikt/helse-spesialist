@@ -61,11 +61,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
             [
               {
                 "fom": "2021-06-01",
-                "tom": "2021-06-30",
-                "grad": 100,
-                "dagsats": 1234.00,
-                "typetekst": "PERM",
-                "organisasjonsnummer": "123456789"
+                "tom": "2021-06-30"
               }
             ]
             """.trimIndent(),
@@ -102,7 +98,6 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         assertEquals(200, response.status)
         val body = response.bodyAsJsonNode!!
         assertEquals(1, body.size())
-        assertEquals("UTBETALING", body[0]["typetekst"].asText())
     }
 
     @Test
