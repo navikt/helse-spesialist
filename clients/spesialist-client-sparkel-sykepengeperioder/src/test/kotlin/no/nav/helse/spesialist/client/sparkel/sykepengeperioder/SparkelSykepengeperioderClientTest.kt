@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.domain.Infotrygdperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
-import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,14 +52,9 @@ class SparkelSykepengeperioderClientTest {
             expectedPerioder =
                 listOf(
                     Infotrygdperiode(
-                        personidentifikator = identitetsnummer,
-                        organisasjonsnummer = "123456789",
                         fom = LocalDate.of(2024, 1, 1),
                         tom = LocalDate.of(2024, 1, 31),
-                        grad = 80,
-                        dagsats = BigDecimal("1000.00"),
                         type = "UTBETALING",
-                        tags = emptySet(),
                     ),
                 ),
         )
@@ -93,14 +87,9 @@ class SparkelSykepengeperioderClientTest {
             expectedPerioder =
                 listOf(
                     Infotrygdperiode(
-                        personidentifikator = identitetsnummer,
-                        organisasjonsnummer = null,
                         fom = LocalDate.of(2024, 2, 1),
                         tom = LocalDate.of(2024, 2, 29),
-                        grad = 100,
-                        dagsats = BigDecimal("2000.00"),
                         type = "ETTERBETALING",
-                        tags = setOf("UsikkerGrad"),
                     ),
                 ),
         )

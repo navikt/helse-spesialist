@@ -122,14 +122,9 @@ class SparkelSykepengeperioderClient(
     ) {
         fun tilDomene(): Infotrygdperiode =
             Infotrygdperiode(
-                personidentifikator = Identitetsnummer.fraString(personidentifikator),
-                organisasjonsnummer = organisasjonsnummer,
                 fom = fom,
                 tom = tom,
-                grad = grad,
-                dagsats = dagsats,
                 type = type,
-                tags = tags,
             )
     }
 }

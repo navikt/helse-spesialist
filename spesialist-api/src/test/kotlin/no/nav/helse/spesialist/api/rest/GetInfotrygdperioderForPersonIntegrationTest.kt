@@ -6,13 +6,11 @@ import io.mockk.verify
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Infotrygdperiode
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
-import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,13 +39,9 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         val expectedFom = behandlingFom.minusYears(3)
         val periode =
             lagInfotrygdperiode(
-                identitetsnummer = person.id,
                 fom = LocalDate.of(2021, 6, 1),
                 tom = LocalDate.of(2021, 6, 30),
-                grad = 100,
-                dagsats = BigDecimal("1234.00"),
                 type = "PERM",
-                organisasjonsnummer = "123456789",
             )
         every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns listOf(periode)
 
@@ -85,10 +79,10 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         val expectedFom = behandlingFom.minusYears(3)
         every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
             listOf(
-                lagInfotrygdperiode(identitetsnummer = person.id, type = "UTBETALING"),
-                lagInfotrygdperiode(identitetsnummer = person.id, type = "SANKSJON"),
-                lagInfotrygdperiode(identitetsnummer = person.id, type = "TILBAKEFØRT"),
-                lagInfotrygdperiode(identitetsnummer = person.id, type = "UKJENT"),
+                lagInfotrygdperiode(type = "UTBETALING"),
+                lagInfotrygdperiode(type = "SANKSJON"),
+                lagInfotrygdperiode(type = "TILBAKEFØRT"),
+                lagInfotrygdperiode(type = "UKJENT"),
             )
 
         // When:
@@ -208,9 +202,9 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         val expectedFom = behandlingFom.minusYears(3)
         every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
             listOf(
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 3, 1), tom = LocalDate.of(2021, 3, 15)),
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 31)),
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 5, 1), tom = LocalDate.of(2021, 5, 31)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 3, 1), tom = LocalDate.of(2021, 3, 15)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 31)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 5, 1), tom = LocalDate.of(2021, 5, 31)),
             )
 
         // When:
@@ -240,8 +234,8 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         val expectedFom = behandlingFom.minusYears(3)
         every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
             listOf(
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 15)),
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 16), tom = LocalDate.of(2021, 1, 31)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 15)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 1, 16), tom = LocalDate.of(2021, 1, 31)),
             )
 
         // When:
@@ -271,8 +265,8 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         val expectedFom = behandlingFom.minusYears(3)
         every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
             listOf(
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 10)),
-                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 15), tom = LocalDate.of(2021, 1, 31)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 10)),
+                lagInfotrygdperiode(fom = LocalDate.of(2021, 1, 15), tom = LocalDate.of(2021, 1, 31)),
             )
 
         // When:
@@ -316,21 +310,12 @@ class GetInfotrygdperioderForPersonIntegrationTest {
     }
 
     private fun lagInfotrygdperiode(
-        identitetsnummer: Identitetsnummer,
         fom: LocalDate = LocalDate.of(2021, 1, 1),
         tom: LocalDate = LocalDate.of(2021, 1, 31),
-        grad: Int = 100,
-        dagsats: BigDecimal = BigDecimal("1000.00"),
         type: String = "PERM",
-        organisasjonsnummer: String? = "123456789",
     ) = Infotrygdperiode(
-        personidentifikator = identitetsnummer,
-        organisasjonsnummer = organisasjonsnummer,
         fom = fom,
         tom = tom,
-        grad = grad,
-        dagsats = dagsats,
         type = type,
-        tags = emptySet(),
     )
 }
