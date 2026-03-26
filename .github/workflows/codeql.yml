@@ -6,6 +6,10 @@ on:
     paths-ignore:
         - '.github/**'
         - 'deploy/**'
+  pull_request:
+    paths-ignore:
+        - '.github/**'
+        - 'deploy/**'
 
 jobs:
   analyze:
