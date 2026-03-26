@@ -74,7 +74,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
     }
 
     @Test
-    fun `filtrerer bort sanksjon-perioder`() {
+    fun `filtrerer bort SANKSJON, TILBAKEFØRT og UKJENT perioder`() {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
@@ -89,9 +89,10 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         val expectedFom = behandlingFom.minusYears(3)
         every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
             listOf(
-                lagInfotrygdperiode(identitetsnummer = person.id, type = "PERM"),
-                lagInfotrygdperiode(identitetsnummer = person.id, type = "sanksjon"),
+                lagInfotrygdperiode(identitetsnummer = person.id, type = "UTBETALING"),
                 lagInfotrygdperiode(identitetsnummer = person.id, type = "SANKSJON"),
+                lagInfotrygdperiode(identitetsnummer = person.id, type = "TILBAKEFØRT"),
+                lagInfotrygdperiode(identitetsnummer = person.id, type = "UKJENT"),
             )
 
         // When:
@@ -101,7 +102,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         assertEquals(200, response.status)
         val body = response.bodyAsJsonNode!!
         assertEquals(1, body.size())
-        assertEquals("PERM", body[0]["typetekst"].asText())
+        assertEquals("UTBETALING", body[0]["typetekst"].asText())
     }
 
     @Test
@@ -194,6 +195,97 @@ class GetInfotrygdperioderForPersonIntegrationTest {
             response.bodyAsJsonNode!!,
         )
         verify { integrationTestFixture.infotrygdperiodeHenterMock wasNot Called }
+    }
+
+    @Test
+    fun `sorterer perioder stigende på fom`() {
+        // Given:
+        val person = lagPerson()
+        personRepository.lagre(person)
+        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+
+        val behandlingFom = LocalDate.of(2022, 1, 1)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id, fom = behandlingFom)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+
+        val expectedFom = behandlingFom.minusYears(3)
+        every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
+            listOf(
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 3, 1), tom = LocalDate.of(2021, 3, 15)),
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 31)),
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 5, 1), tom = LocalDate.of(2021, 5, 31)),
+            )
+
+        // When:
+        val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/infotrygdperioder")
+
+        // Then:
+        assertEquals(200, response.status)
+        val body = response.bodyAsJsonNode!!
+        assertEquals("2021-01-01", body[0]["fom"].asText())
+        assertEquals("2021-03-01", body[1]["fom"].asText())
+        assertEquals("2021-05-01", body[2]["fom"].asText())
+    }
+
+    @Test
+    fun `slår sammen sammenhengende perioder til én`() {
+        // Given:
+        val person = lagPerson()
+        personRepository.lagre(person)
+        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+
+        val behandlingFom = LocalDate.of(2022, 1, 1)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id, fom = behandlingFom)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+
+        val expectedFom = behandlingFom.minusYears(3)
+        every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
+            listOf(
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 15)),
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 16), tom = LocalDate.of(2021, 1, 31)),
+            )
+
+        // When:
+        val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/infotrygdperioder")
+
+        // Then:
+        assertEquals(200, response.status)
+        val body = response.bodyAsJsonNode!!
+        assertEquals(1, body.size())
+        assertEquals("2021-01-01", body[0]["fom"].asText())
+        assertEquals("2021-01-31", body[0]["tom"].asText())
+    }
+
+    @Test
+    fun `beholder separate perioder når det er gap mellom dem`() {
+        // Given:
+        val person = lagPerson()
+        personRepository.lagre(person)
+        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+
+        val behandlingFom = LocalDate.of(2022, 1, 1)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id, fom = behandlingFom)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+
+        val expectedFom = behandlingFom.minusYears(3)
+        every { integrationTestFixture.infotrygdperiodeHenterMock.hentFor(person.id, expectedFom) } returns
+            listOf(
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 1), tom = LocalDate.of(2021, 1, 10)),
+                lagInfotrygdperiode(identitetsnummer = person.id, fom = LocalDate.of(2021, 1, 15), tom = LocalDate.of(2021, 1, 31)),
+            )
+
+        // When:
+        val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/infotrygdperioder")
+
+        // Then:
+        assertEquals(200, response.status)
+        assertEquals(2, response.bodyAsJsonNode!!.size())
     }
 
     @Test

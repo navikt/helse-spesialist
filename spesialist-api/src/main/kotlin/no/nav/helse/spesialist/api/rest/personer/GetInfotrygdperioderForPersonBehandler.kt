@@ -42,12 +42,40 @@ class GetInfotrygdperioderForPersonBehandler(
         val perioder =
             infotrygdperiodeHenter
                 .hentFor(identitetsnummer = person.id, fom = fom)
-                .filterNot { it.type.lowercase() == "sanksjon" }
+                .filterNot { it.type in setOf("SANKSJON", "TILBAKEFØRT", "UKJENT") }
+                .sortedBy { it.fom }
+                .sammenslå()
                 .map { it.tilApiInfotrygdperiode() }
 
         loggInfo("Hentet ${perioder.size} infotrygdperioder")
 
         return RestResponse.OK(perioder)
+    }
+
+    private fun List<Infotrygdperiode>.sammenslå(): List<Infotrygdperiode> {
+        if (isEmpty()) return emptyList()
+
+        val resultat = mutableListOf<Infotrygdperiode>()
+        var infotrygdperiode = first()
+
+        while (true) {
+            var tom = infotrygdperiode.tom
+            var utvideTom = true
+
+            while (utvideTom) {
+                val senesteTom = filter { it.fom <= tom.plusDays(1) }.maxOfOrNull { it.tom }
+                if (senesteTom != null && senesteTom > tom) {
+                    tom = senesteTom
+                } else {
+                    utvideTom = false
+                }
+            }
+
+            resultat.add(infotrygdperiode.copy(tom = tom))
+            infotrygdperiode = firstOrNull { it.fom > tom.plusDays(1) } ?: break
+        }
+
+        return resultat
     }
 
     private fun Infotrygdperiode.tilApiInfotrygdperiode(): ApiInfotrygdperiode =
