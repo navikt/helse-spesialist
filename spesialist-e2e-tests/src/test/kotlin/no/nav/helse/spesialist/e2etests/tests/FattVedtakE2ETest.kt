@@ -436,7 +436,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
             val behandlingId = førsteVedtaksperiode().spleisBehandlingId!!
-            spleisIngorererMeldinger()
+            spleisIgnorererMeldinger()
             saksbehandlerFatterVedtak(behandlingId, "begrunnelse nummer en")
             spleisLeserMeldinger()
             saksbehandlerFatterVedtak(behandlingId, "begrunnelse nummer to")

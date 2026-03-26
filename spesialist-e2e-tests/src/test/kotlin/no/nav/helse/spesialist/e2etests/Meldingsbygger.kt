@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -98,6 +99,9 @@ object Meldingsbygger {
                     ),
             ),
         tags: List<String> = listOf("Innvilget"),
+        kanAvvises: Boolean = true,
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
+        perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -113,20 +117,20 @@ object Meldingsbygger {
             førstegangsbehandling = true,
             utbetalingtype = Utbetalingtype.UTBETALING,
             inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-            orgnummereMedRelevanteArbeidsforhold = emptyList(),
-            kanAvvises = true,
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+            kanAvvises = kanAvvises,
             spleisBehandlingId = vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             tags = tags,
             perioderMedSammeSkjæringstidspunkt =
-                listOf(
+                (perioderMedSammeSkjæringstidspunkt ?: listOf(vedtaksperiode)).map { periode ->
                     mapOf(
-                        "fom" to vedtaksperiode.fom,
-                        "tom" to vedtaksperiode.tom,
-                        "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
-                        "behandlingId" to vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
-                    ),
-                ),
+                        "fom" to periode.fom,
+                        "tom" to periode.tom,
+                        "vedtaksperiodeId" to periode.vedtaksperiodeId,
+                        "behandlingId" to periode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
+                    )
+                },
             sykepengegrunnlagsfakta =
                 when (sykepengegrunnlagsfakta.fastsatt) {
                     Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> {
@@ -284,6 +288,23 @@ object Meldingsbygger {
     ) = Testmeldingfabrikk.lagEndretSkjermetinfo(
         fødselsnummer = person.fødselsnummer,
         skjermet = skjermet,
+        id = UUID.randomUUID(),
+    )
+
+    fun byggAvsluttetUtenVedtak(
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        skjæringstidspunkt: LocalDate = vedtaksperiode.skjæringstidspunkt,
+    ) = Testmeldingfabrikk.lagAvsluttetUtenVedtak(
+        aktørId = person.aktørId,
+        fødselsnummer = person.fødselsnummer,
+        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+        spleisBehandlingId = vedtaksperiode.spleisBehandlingIdForÅByggeMelding("avsluttet_uten_vedtak"),
+        fom = vedtaksperiode.fom,
+        tom = vedtaksperiode.tom,
+        skjæringstidspunkt = skjæringstidspunkt,
         id = UUID.randomUUID(),
     )
 }

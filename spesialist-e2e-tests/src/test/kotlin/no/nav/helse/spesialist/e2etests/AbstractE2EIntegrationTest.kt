@@ -14,9 +14,13 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.FullmaktBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
@@ -49,7 +53,7 @@ abstract class AbstractE2EIntegrationTest {
             it.init(testContext)
         }
 
-    protected fun spleisIngorererMeldinger() {
+    protected fun spleisIgnorererMeldinger() {
         spleisStub.ikkeSvarPåMeldingerFor(testContext.person)
     }
 
@@ -63,6 +67,10 @@ abstract class AbstractE2EIntegrationTest {
     protected val risikovurderingBehovLøser = finnLøserForDenneTesten<RisikovurderingBehovLøser>()
     protected val åpneOppgaverBehovLøser = finnLøserForDenneTesten<ÅpneOppgaverBehovLøser>()
     protected val hentInfotrygdutbetalingerBehovLøser = finnLøserForDenneTesten<HentInfotrygdutbetalingerBehovLøser>()
+    protected val hentEnhetBehovLøser = finnLøserForDenneTesten<HentEnhetBehovLøser>()
+    protected val vergemålBehovLøser = finnLøserForDenneTesten<VergemålBehovLøser>()
+    protected val egenAnsattBehovLøser = finnLøserForDenneTesten<EgenAnsattBehovLøser>()
+    protected val fullmaktBehovLøser = finnLøserForDenneTesten<FullmaktBehovLøser>()
 
     private inline fun <reified T : AbstractBehovLøser> finnLøserForDenneTesten() = behovLøserStub.finnLøser<T>(testContext.person.fødselsnummer)
 
@@ -82,12 +90,21 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun søknadOgGodkjenningbehovKommerInn(
         tags: List<String> = listOf("Innvilget"),
+        kanAvvises: Boolean = true,
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
+        perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
         tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {},
     ): Vedtaksperiode {
         personSenderSøknad()
         val vedtaksperiode = førsteVedtaksperiode()
         spleisForberederBehandling(vedtaksperiode, tilleggsmeldinger)
-        spleisSenderGodkjenningsbehov(vedtaksperiode, tags = tags)
+        spleisSenderGodkjenningsbehov(
+            vedtaksperiode,
+            tags = tags,
+            kanAvvises = kanAvvises,
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+            perioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt,
+        )
         return vedtaksperiode
     }
 
@@ -242,7 +259,7 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(expectedForkastet, actualForkastet)
     }
 
-    protected fun assertGjeldendeOppgavestatus(expectedStatus: String) {
+    protected fun assertGjeldendeOppgavestatus(expectedStatus: String, vedtaksperiode: Vedtaksperiode = førsteVedtaksperiode()) {
         val actualStatus =
             sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
                 session.run(
@@ -253,7 +270,7 @@ abstract class AbstractE2EIntegrationTest {
                         WHERE o.vedtak_ref = v.id
                         AND v.vedtaksperiode_id = :vedtaksperiode_id
                         """.trimIndent(),
-                        "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                        "vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId,
                     ).map { it.string("status") }.asSingle,
                 )
             }
@@ -290,6 +307,45 @@ abstract class AbstractE2EIntegrationTest {
             AvviksvurderingBehovLøser.SAMMENLIGNINGSGRUNNLAG_TOTALBELØP,
             vedtakFattet["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble(),
         )
+    }
+
+    protected fun assertBehandlingsinformasjon(
+        vedtaksperiode: Vedtaksperiode,
+        forventedeTags: List<String>,
+    ) {
+        val spleisBehandlingId = requireNotNull(vedtaksperiode.spleisBehandlingId) {
+            "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
+        }
+        val tags =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        "SELECT tags FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId AND spleis_behandling_id = :spleisBehandlingId",
+                        "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
+                        "spleisBehandlingId" to spleisBehandlingId,
+                    ).map { it.array<String>("tags").toList() }.asSingle,
+                )
+            }
+        assertEquals(forventedeTags, tags)
+    }
+
+    protected fun assertSkjæringstidspunktForBehandling(
+        vedtaksperiode: Vedtaksperiode,
+        forventetSkjæringstidspunkt: java.time.LocalDate,
+    ) {
+        val spleisBehandlingId = requireNotNull(vedtaksperiode.spleisBehandlingId) {
+            "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
+        }
+        val lagretSkjæringstidspunkt =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        "SELECT skjæringstidspunkt FROM behandling WHERE spleis_behandling_id = :spleisBehandlingId",
+                        "spleisBehandlingId" to spleisBehandlingId,
+                    ).map { it.localDate("skjæringstidspunkt") }.asSingle,
+                )
+            }
+        assertEquals(forventetSkjæringstidspunkt, lagretSkjæringstidspunkt)
     }
 
     protected fun leggTilVedtaksperiode() {
@@ -371,6 +427,9 @@ abstract class AbstractE2EIntegrationTest {
     protected fun spleisSenderGodkjenningsbehov(
         vedtaksperiode: Vedtaksperiode,
         tags: List<String> = listOf("Innvilget"),
+        kanAvvises: Boolean = true,
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
+        perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
     ) {
         testRapid.publish(
             testContext.person.fødselsnummer,
@@ -380,6 +439,20 @@ abstract class AbstractE2EIntegrationTest {
                 vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
                 vedtaksperiode = vedtaksperiode,
                 tags = tags,
+                kanAvvises = kanAvvises,
+                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+                perioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt,
+            ),
+        )
+    }
+
+    protected fun spleisAvslutterUtenVedtak(vedtaksperiode: Vedtaksperiode) {
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggAvsluttetUtenVedtak(
+                vedtaksperiode = vedtaksperiode,
+                person = testContext.person,
+                arbeidsgiver = testContext.arbeidsgiver,
             ),
         )
     }
