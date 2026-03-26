@@ -33,6 +33,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("tildeling")
+        class Tildeling(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("dokumenter")
         class Dokumenter(
             val parent: PersonPseudoId,

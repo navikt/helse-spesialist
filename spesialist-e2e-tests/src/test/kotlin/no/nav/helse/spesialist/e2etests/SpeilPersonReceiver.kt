@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.rest.ApiKommentarRequest
 import no.nav.helse.spesialist.api.rest.ApiPatchKommentarRequest
 import no.nav.helse.spesialist.api.rest.ApiPutPåVentRequest
 import no.nav.helse.spesialist.api.rest.ApiPåVentÅrsak
+import no.nav.helse.spesialist.api.rest.ApiTildelingRequest
 import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Periode
@@ -66,12 +67,9 @@ class SpeilPersonReceiver(
     }
 
     fun saksbehandlerTildelerSegSaken() {
-        callGraphQL(
-            operationName = "Tildeling",
-            variables =
-                mapOf(
-                    "oppgavereferanse" to getOppgaveId(),
-                ),
+        callHttpPut(
+            relativeUrl = "/api/personer/$personPseudoId/tildeling",
+            request = ApiTildelingRequest(navident = saksbehandler.ident.value),
         )
         hentOppdatertPerson()
     }

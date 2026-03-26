@@ -80,6 +80,14 @@ class Oppgave private constructor(
     var godkjenningsbehovId: UUID = godkjenningsbehovId
         private set
 
+    fun tildelTil(
+        saksbehandler: Saksbehandler,
+        brukerroller: Set<Brukerrolle>,
+    ) {
+        sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
+        tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
+    }
+
     fun forsøkTildeling(
         saksbehandler: Saksbehandler,
         brukerroller: Set<Brukerrolle>,
@@ -248,6 +256,37 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
+    fun kanSeesAv(
+        brukerroller: Set<Brukerrolle>,
+    ): Boolean =
+        egenskaper.all {
+            harTilgangTilEgenskap(
+                egenskap = it,
+                brukerroller = brukerroller,
+            )
+        }
+
+    fun kanTildelesTil(
+        brukerroller: Set<Brukerrolle>,
+    ): Boolean =
+        egenskaper.all {
+            harTilgangTilEgenskap(
+                egenskap = it,
+                brukerroller = brukerroller,
+            ) &&
+                when (it) {
+                    Egenskap.BESLUTTER -> Brukerrolle.Beslutter in brukerroller
+                    Egenskap.STIKKPRØVE -> Brukerrolle.Stikkprøve in brukerroller
+                    else -> true
+                }
+        }
+
+    fun nyttGodkjenningsbehov(meldingId: UUID) {
+        godkjenningsbehovId = meldingId
+    }
+
+    fun erTildelt(): Boolean = tildeltTil != null
+
     private fun tildel(saksbehandler: Saksbehandler) {
         this.tildeltTil = saksbehandler.id
         logg.info(
@@ -387,35 +426,6 @@ class Oppgave private constructor(
     data object Invalidert : Tilstand
 
     override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=${id.value})"
-
-    fun kanSeesAv(
-        brukerroller: Set<Brukerrolle>,
-    ): Boolean =
-        egenskaper.all {
-            harTilgangTilEgenskap(
-                egenskap = it,
-                brukerroller = brukerroller,
-            )
-        }
-
-    fun kanTildelesTil(
-        brukerroller: Set<Brukerrolle>,
-    ): Boolean =
-        egenskaper.all {
-            harTilgangTilEgenskap(
-                egenskap = it,
-                brukerroller = brukerroller,
-            ) &&
-                when (it) {
-                    Egenskap.BESLUTTER -> Brukerrolle.Beslutter in brukerroller
-                    Egenskap.STIKKPRØVE -> Brukerrolle.Stikkprøve in brukerroller
-                    else -> true
-                }
-        }
-
-    fun nyttGodkjenningsbehov(meldingId: UUID) {
-        godkjenningsbehovId = meldingId
-    }
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java.declaringClass)

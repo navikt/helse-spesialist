@@ -18,7 +18,9 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 
-class InMemoryOppgaveRepository : OppgaveRepository {
+class InMemoryOppgaveRepository(
+    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+) : OppgaveRepository {
     private val oppgaver = mutableMapOf<OppgaveId, Oppgave>()
     private val oppdatertTidspunkt = mutableMapOf<OppgaveId, LocalDateTime>()
 
@@ -36,7 +38,8 @@ class InMemoryOppgaveRepository : OppgaveRepository {
     override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id }
 
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
-        error("Not implemented for test")
+        val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
+        return oppgaver.values.singleOrNull { it.vedtaksperiodeId in ider }
     }
 
     override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId.value == behandlingId }.minOfOrNull { it.opprettet }

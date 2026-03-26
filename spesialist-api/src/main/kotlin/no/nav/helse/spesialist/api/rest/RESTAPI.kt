@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchSaksbehandlerStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchVeilederStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
+import no.nav.helse.spesialist.api.rest.personer.tildeling.PutTildelingBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetAktiveSaksbehandlereBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetBrukerBehandler
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.GetTilkomneInntektskilderForPersonBehandler
@@ -100,6 +101,8 @@ fun Routing.restRoutes(
 
             put(PutPåVentBehandler(), restAdapter)
             delete(DeletePåVentBehandler(), restAdapter)
+
+            put(PutTildelingBehandler(), restAdapter)
 
             patch(PatchSaksbehandlerStansBehandler(), restAdapter)
             patch(PatchVeilederStansBehandler(), restAdapter)
