@@ -8,6 +8,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.RoutingCall
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.helse.MeldingPubliserer
@@ -126,6 +127,10 @@ class RestAdapter(
             coMedMdcFraKall(call) {
                 result
                     .onFailure { cause ->
+                        if (cause is CancellationException) {
+                            loggWarn("Klienten koblet fra før svaret ble sendt", cause)
+                            return@coMedMdcFraKall
+                        }
                         val problemDetails =
                             if (cause is WrappedApiHttpProblemDetailsException) {
                                 cause.problemDetails
