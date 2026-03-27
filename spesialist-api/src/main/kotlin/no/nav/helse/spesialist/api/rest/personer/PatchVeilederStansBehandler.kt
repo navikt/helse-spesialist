@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
 
@@ -30,6 +31,7 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
         ) { person ->
             if (!request.stans) {
                 opphevVeilederStans(request.begrunnelse, person, kallKontekst)
+                opphevVeilederStansV2(request.begrunnelse, person, kallKontekst)
             }
             RestResponse.NoContent()
         }
@@ -51,6 +53,26 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
             dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
         )
         loggInfo("Opphevet veileder-stans for person")
+    }
+
+    private fun opphevVeilederStansV2(
+        begrunnelse: String,
+        person: Person,
+        kallKontekst: KallKontekst,
+    ) {
+        val identitetsnummer = Identitetsnummer.fraString(person.id.value)
+
+        val aktivVeilederStans =
+            kallKontekst.transaksjon.veilederStansRepository.finnAktiv(identitetsnummer)
+
+        if (aktivVeilederStans != null) {
+            aktivVeilederStans.opphevStans(
+                opphevetAvSaksbehandlerIdent = kallKontekst.saksbehandler.ident,
+                begrunnelse = begrunnelse,
+            )
+            kallKontekst.transaksjon.veilederStansRepository.lagre(aktivVeilederStans)
+            loggInfo("Opphevet veileder-stans for person")
+        }
     }
 }
 
