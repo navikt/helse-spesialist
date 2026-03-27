@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -63,7 +63,7 @@ internal class VurderAutomatiskAvvisningTest {
             godkjenningMediator.automatiskAvvisning(
                 context = context,
                 begrunnelser = listOf(forventetÅrsak),
-                behov = any()
+                behov = any(),
             )
         }
     }
@@ -80,10 +80,11 @@ internal class VurderAutomatiskAvvisningTest {
         personDao = personDao,
         vergemålDao = vergemålDao,
         godkjenningMediator = godkjenningMediator,
-        godkjenningsbehov = godkjenningsbehovData(
-            fødselsnummer = fødselsnummer,
-            kanAvvises = kanAvvises,
-        ),
+        godkjenningsbehov =
+            godkjenningsbehovData(
+                fødselsnummer = fødselsnummer,
+                kanAvvises = kanAvvises,
+            ),
     )
 
     private companion object {

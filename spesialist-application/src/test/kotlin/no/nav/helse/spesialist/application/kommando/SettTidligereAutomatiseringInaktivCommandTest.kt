@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class SettTidligereAutomatiseringInaktivCommandTest {
-
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val hendelseId = UUID.randomUUID()

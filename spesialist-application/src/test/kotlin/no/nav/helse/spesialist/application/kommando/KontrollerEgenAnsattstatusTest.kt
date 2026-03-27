@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -11,9 +11,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -52,14 +50,14 @@ internal class KontrollerEgenAnsattstatusTest {
     @Test
     fun `ber om informasjon om egen ansatt`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        assertFalse(command.execute(context))
-        assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
+        Assertions.assertFalse(command.execute(context))
+        Assertions.assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
     }
 
     @Test
     fun `mangler løsning ved resume`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        assertFalse(command.resume(context))
+        Assertions.assertFalse(command.resume(context))
         verify(exactly = 0) { personRepository.lagre(any()) }
     }
 
@@ -67,18 +65,18 @@ internal class KontrollerEgenAnsattstatusTest {
     fun `lagrer løsning ved resume`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
-        assertTrue(command.resume(context))
+        Assertions.assertTrue(command.resume(context))
         verify(exactly = 1) { personRepository.lagre(any()) }
     }
 
     @Test
     fun `sender ikke behov om informasjonen finnes`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = false)
-        assertTrue(command.resume(context))
-        assertEquals(emptyList<Behov>(), observer.behov.toList())
+        Assertions.assertTrue(command.resume(context))
+        Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
 
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
-        assertTrue(command.resume(context))
-        assertEquals(emptyList<Behov>(), observer.behov.toList())
+        Assertions.assertTrue(command.resume(context))
+        Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
     }
 }

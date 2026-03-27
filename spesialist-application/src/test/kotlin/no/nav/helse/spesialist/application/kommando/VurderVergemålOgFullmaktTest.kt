@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.mockk

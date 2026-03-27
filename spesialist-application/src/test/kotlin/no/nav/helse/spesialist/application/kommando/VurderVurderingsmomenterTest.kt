@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import io.mockk.Runs
