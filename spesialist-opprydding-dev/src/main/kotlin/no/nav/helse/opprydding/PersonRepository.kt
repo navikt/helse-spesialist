@@ -60,7 +60,6 @@ internal class PersonRepository(
     }
 
     private fun TransactionalSession.slettPerson(personRef: Int) {
-        val infotrygdutbetalingRef = finnInfotrygdutbetalingerRef(personRef)
         val personinfoRef = finnPersoninfoRef(personRef)
 
         @Language("PostgreSQL")
@@ -68,7 +67,6 @@ internal class PersonRepository(
         run(queryOf(query, personRef).asExecute)
 
         slettInfo(personinfoRef)
-        slettInfotrygdutbetalinger(infotrygdutbetalingRef)
     }
 
     private fun TransactionalSession.slettAvviksvurdering(fødselsnummer: String) {
@@ -125,19 +123,6 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = "DELETE FROM person_info WHERE id IN (${personinfoRef.joinToString { "?" }})"
         run(queryOf(query, *personinfoRef.toTypedArray()).asExecute)
-    }
-
-    private fun TransactionalSession.finnInfotrygdutbetalingerRef(personRef: Int): List<Int> {
-        @Language("PostgreSQL")
-        val query = "SELECT i.id FROM infotrygdutbetalinger i INNER JOIN person p on i.id = p.infotrygdutbetalinger_ref WHERE p.id = ?"
-        return run(queryOf(query, personRef).map { it.int("id") }.asList)
-    }
-
-    private fun TransactionalSession.slettInfotrygdutbetalinger(infotrygdutbetalingerRef: List<Int>) {
-        if (infotrygdutbetalingerRef.isEmpty()) return
-        @Language("PostgreSQL")
-        val query = "DELETE FROM infotrygdutbetalinger WHERE id IN (${infotrygdutbetalingerRef.joinToString { "?" }})"
-        run(queryOf(query, *infotrygdutbetalingerRef.toTypedArray()).asExecute)
     }
 
     private fun TransactionalSession.slettOpptegnelse(personRef: Int) {

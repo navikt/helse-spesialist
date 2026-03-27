@@ -6,8 +6,6 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.repository.PgInfotrygdutbetalingerRepository
-import no.nav.helse.spesialist.domain.InfotrygdUtbetalinger
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -18,28 +16,11 @@ import java.time.YearMonth
 
 @Isolated
 internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
-    private val infotrygdutbetalingerRepository = PgInfotrygdutbetalingerRepository(session)
-
     @BeforeEach
     fun tømTabeller() {
         sessionOf(dataSource).use {
-            it.run(queryOf("truncate person_info, inntekt, infotrygdutbetalinger restart identity cascade").asExecute)
+            it.run(queryOf("truncate person_info, inntekt restart identity cascade").asExecute)
         }
-    }
-
-    @Test
-    fun `lagre infotrygdutbetalinger`() {
-        val person = opprettPerson()
-        infotrygdutbetalingerRepository.lagre(InfotrygdUtbetalinger.Factory.ny(person.id, "{}"))
-        assertEquals(1, infotrygdUtbetalinger().size)
-    }
-
-    @Test
-    fun `oppdaterer infotrygdutbetalinger`() {
-        val person = opprettPerson()
-        assertEquals(null, infotrygdUtbetalinger().firstOrNull())
-        infotrygdutbetalingerRepository.lagre(InfotrygdUtbetalinger.Factory.ny(person.id, """{"test":[]}"""))
-        assertEquals("{\"test\":[]}", infotrygdUtbetalinger().first())
     }
 
     @Test
@@ -110,15 +91,6 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
             personDao.finnInntekter(person.id.value, LocalDate.parse("2020-01-01"))!!.first().årMåned,
         )
     }
-
-    private fun infotrygdUtbetalinger() =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf("SELECT data FROM infotrygdutbetalinger")
-                    .map { row -> row.string("data") }
-                    .asList,
-            )
-        }
 
     private fun inntekter(): List<Inntekter> =
         sessionOf(dataSource).use { session ->

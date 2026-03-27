@@ -26,7 +26,6 @@ class InMemorySessionContext(
     override val periodehistorikkDao: InMemoryPeriodehistorikkDao,
     override val personDao: DelegatingPersonDao,
     override val personRepository: InMemoryPersonRepository,
-    override val infotrygdutbetalingerRepository: InfotrygdutbetalingerRepository,
     override val personPseudoIdDao: InMemoryPersonPseudoIdDao,
     override val påVentDao: DelegatingPåVentDao,
     override val påVentRepository: InMemoryPåVentRepository,

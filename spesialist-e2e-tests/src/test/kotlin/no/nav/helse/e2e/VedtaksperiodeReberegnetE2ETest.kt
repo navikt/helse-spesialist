@@ -26,7 +26,6 @@ class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
-            SUSPENDERT,
             AVBRUTT,
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
@@ -51,7 +50,6 @@ class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
-            SUSPENDERT,
             FERDIG,
         )
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Invalidert)
@@ -66,7 +64,6 @@ class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
             NY,
-            SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,

@@ -611,7 +611,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
                     kjoenn = "Ukjent",
                     adressebeskyttelse = "Ugradert",
                 ),
-            infotrygdutbetalingerRef = insertInfotrygdutbetalinger(),
             enhetRef = 101,
         ).also { personId ->
             insertEgenAnsatt(
@@ -624,21 +623,19 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         fødselsnummer: String,
         aktørId: String,
         infoRef: Long,
-        infotrygdutbetalingerRef: Long,
         enhetRef: Int,
     ): Long =
         requireNotNull(
             dbQuery.updateAndReturnGeneratedKey(
                 """
                 INSERT INTO person
-                (fødselsnummer, aktør_id, info_ref, personinfo_oppdatert, infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert, enhet_ref, enhet_ref_oppdatert)
+                (fødselsnummer, aktør_id, info_ref, personinfo_oppdatert, enhet_ref, enhet_ref_oppdatert)
                 VALUES
-                (:foedselsnummer, :aktoer_id, :info_ref, now(), :infotrygdutbetalinger_ref, now(), :enhet_ref, now())
+                (:foedselsnummer, :aktoer_id, :info_ref, now(), :enhet_ref, now())
                 """.trimIndent(),
                 "foedselsnummer" to fødselsnummer,
                 "aktoer_id" to aktørId,
                 "info_ref" to infoRef,
-                "infotrygdutbetalinger_ref" to infotrygdutbetalingerRef,
                 "enhet_ref" to enhetRef,
             ),
         )
@@ -683,13 +680,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
                 navnString = lagOrganisasjonsnavn(),
             ).also(sessionContext.arbeidsgiverRepository::lagre)
     }
-
-    private fun insertInfotrygdutbetalinger(): Long =
-        requireNotNull(
-            dbQuery.updateAndReturnGeneratedKey(
-                "INSERT INTO infotrygdutbetalinger (data) VALUES ('[]')",
-            ),
-        )
 
     private fun opprettOppgave(
         status: Oppgavestatus,

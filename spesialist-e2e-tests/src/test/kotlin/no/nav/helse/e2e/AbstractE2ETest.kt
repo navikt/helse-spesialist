@@ -266,10 +266,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
                 enhet = enhet,
             )
-            håndterInfotrygdutbetalingerløsning(
-                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-            )
             håndterArbeidsgiverinformasjonløsning(
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
@@ -731,22 +727,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             meldingssender.sendEnhetløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, enhet)
     }
 
-    protected fun håndterInfotrygdutbetalingerløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-    ) {
-        assertEtterspurteBehov("HentInfotrygdutbetalinger")
-        sisteMeldingId =
-            meldingssender.sendInfotrygdutbetalingerløsning(
-                aktørId,
-                fødselsnummer,
-                organisasjonsnummer,
-                vedtaksperiodeId,
-            )
-    }
-
     protected fun håndterArbeidsgiverinformasjonløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -929,22 +909,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         if (!harOppdatertMetadata) assertEtterspurteBehov("HentPersoninfoV2")
         sisteMeldingId = meldingssender.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
-    }
-
-    protected fun håndterOppdaterPersondata(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-    ) {
-        sisteMeldingId = meldingssender.sendOppdaterPersondata(aktørId, fødselsnummer)
-        assertEtterspurteBehov("HentInfotrygdutbetalinger")
-    }
-
-    protected fun håndterSkalKlargjøresForVisning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-    ) {
-        sisteMeldingId = meldingssender.sendKlargjørPersonForVisning(aktørId, fødselsnummer)
-        assertEtterspurteBehov("HentPersoninfoV2")
     }
 
     protected fun håndterOverstyrTidslinje(

@@ -292,15 +292,6 @@ type Handling {
     type: Periodehandling!
 }
 
-type Infotrygdutbetaling {
-    dagsats: Float!
-    fom: String!
-    grad: String!
-    organisasjonsnummer: String!
-    tom: String!
-    typetekst: String!
-}
-
 type InntektFraAOrdningen {
     maned: YearMonth!
     sum: Float!
@@ -466,7 +457,6 @@ type Person {
     dodsdato: LocalDate
     enhet: Enhet!
     fodselsnummer: String!
-    infotrygdutbetalinger: [Infotrygdutbetaling!]
     personinfo: Personinfo!
     selvstendigNaering: SelvstendigNaering
     tildeling: Tildeling

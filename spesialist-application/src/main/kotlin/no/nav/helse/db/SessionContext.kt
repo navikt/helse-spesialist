@@ -4,7 +4,6 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
-import no.nav.helse.spesialist.application.InfotrygdutbetalingerRepository
 import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
@@ -65,7 +64,6 @@ interface SessionContext {
     val påVentRepository: PåVentRepository
     val personRepository: PersonRepository
     val vedtaksperiodeRepository: VedtaksperiodeRepository
-    val infotrygdutbetalingerRepository: InfotrygdutbetalingerRepository
     val varselRepository: VarselRepository
     val varseldefinisjonRepository: VarseldefinisjonRepository
     val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository

@@ -565,15 +565,6 @@ fragment person on Person {
         id
         __typename
     }
-    infotrygdutbetalinger {
-        organisasjonsnummer
-        dagsats
-        fom
-        tom
-        grad
-        typetekst
-        __typename
-    }
     personinfo {
         fornavn
         mellomnavn

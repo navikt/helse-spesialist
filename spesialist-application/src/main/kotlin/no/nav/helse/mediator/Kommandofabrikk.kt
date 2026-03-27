@@ -20,7 +20,6 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
@@ -165,21 +164,6 @@ class Kommandofabrikk(
         )
     }
 
-    internal fun oppdaterPersondata(
-        hendelse: Personmelding,
-        sessionContext: SessionContext,
-    ): OppdaterPersondataCommand =
-        OppdaterPersondataCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            førsteKjenteDagFinner = {
-                sessionContext.legacyVedtaksperiodeRepository.førsteKjenteDag(
-                    hendelse.fødselsnummer(),
-                )
-            },
-            infotrygdutbetalingerRepository = sessionContext.infotrygdutbetalingerRepository,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
-        )
-
     internal fun klargjørTilgangsrelaterteData(
         hendelse: Personmelding,
         sessionContext: SessionContext,
@@ -247,15 +231,9 @@ class Kommandofabrikk(
         sessionContext: SessionContext,
     ): GodkjenningsbehovCommand {
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
-        val førsteKjenteDagFinner = {
-            sessionContext.legacyVedtaksperiodeRepository.førsteKjenteDag(
-                godkjenningsbehovData.fødselsnummer,
-            )
-        }
         return GodkjenningsbehovCommand(
             behovData = godkjenningsbehovData,
             utbetaling = utbetaling,
-            førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = transaksjonellAutomatisering(sessionContext),
             vedtakDao = sessionContext.vedtakDao,
             meldingDao = sessionContext.meldingDao,
@@ -279,7 +257,6 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             vedtakRepository = sessionContext.vedtakRepository,
             personRepository = sessionContext.personRepository,
-            infotrygdutbetalingerRepository = sessionContext.infotrygdutbetalingerRepository,
             opptegnelseRepository = sessionContext.opptegnelseRepository,
         )
     }

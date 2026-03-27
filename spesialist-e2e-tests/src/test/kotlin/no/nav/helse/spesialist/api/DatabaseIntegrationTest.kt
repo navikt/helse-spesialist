@@ -312,8 +312,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long {
         val personId = opprettMinimalPerson(fødselsnummer, aktørId)
         val personinfoid = opprettPersoninfo(adressebeskyttelse)
-        val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
-        oppdaterPersonpekere(fødselsnummer, personinfoid, infotrygdutbetalingerid)
+        oppdaterPersonpekere(fødselsnummer, personinfoid)
         opprettEgenAnsatt(personId, erEgenAnsatt)
         oppdaterEnhet(personId, bostedId)
         return personId
@@ -322,25 +321,23 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettMinimalPerson(
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØRID,
-    ) = opprettHelPerson(fødselsnummer, aktørId, null, null, null)
+    ) = opprettHelPerson(fødselsnummer, aktørId, null, null)
 
     private fun opprettHelPerson(
         fødselsnummer: String,
         aktørId: String,
         personinfoid: Long?,
         bostedId: Int?,
-        infotrygdutbetalingerid: Long?,
     ) = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO person (fødselsnummer, aktør_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
-            VALUES (:foedselsnummer, :aktoerId, :personinfoId, :enhetId, :infotrygdutbetalingerId)
+            INSERT INTO person (fødselsnummer, aktør_id, info_ref, enhet_ref)
+            VALUES (:foedselsnummer, :aktoerId, :personinfoId, :enhetId)
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer,
             "aktoerId" to aktørId,
             "personinfoId" to personinfoid,
             "enhetId" to bostedId,
-            "infotrygdutbetalingerId" to infotrygdutbetalingerid,
         ),
     )
 
@@ -358,32 +355,20 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "adressebeskyttelse" to adressebeskyttelse.name,
         )
 
-    private fun oppdaterPersonpekere(
-        fødselsnummer: String,
-        personinfoId: Long? = null,
-        infotrygdutbetalingerId: Long? = null,
-    ) {
+    private fun oppdaterPersonpekere(fødselsnummer: String, personinfoId: Long? = null) {
         dbQuery.update(
             """
             update person
             set info_ref=:personinfoId,
-                infotrygdutbetalinger_ref=:infotrygdutbetalingerRef,
                 personinfo_oppdatert = (
                     CASE 
                         when (:harPersoninfoId is not null) then now()
-                    END
-                ),
-                infotrygdutbetalinger_oppdatert = (
-                    CASE 
-                        when (:harInfotrygdutbetalingerRef is not null) then now()
                     END
                 )
             where fødselsnummer = :foedselsnummer
             """.trimIndent(),
             "personinfoId" to personinfoId,
             "harPersoninfoId" to (personinfoId != null),
-            "infotrygdutbetalingerRef" to infotrygdutbetalingerId,
-            "harInfotrygdutbetalingerRef" to (infotrygdutbetalingerId != null),
             "foedselsnummer" to fødselsnummer,
         )
     }
@@ -432,11 +417,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
         return oid
     }
-
-    private fun opprettInfotrygdutbetalinger() =
-        dbQuery.updateAndReturnGeneratedKey(
-            "INSERT INTO infotrygdutbetalinger (data) VALUES ('[]')",
-        )
 
     private fun opprettOppgave(
         vedtaksperiodeId: VedtaksperiodeId,

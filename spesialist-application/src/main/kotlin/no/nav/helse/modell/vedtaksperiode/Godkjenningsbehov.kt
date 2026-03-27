@@ -54,7 +54,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
-import no.nav.helse.spesialist.application.InfotrygdutbetalingerRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -344,7 +343,6 @@ class Godkjenningsbehov(
 internal class GodkjenningsbehovCommand(
     behovData: GodkjenningsbehovData,
     utbetaling: Utbetaling,
-    førsteKjenteDagFinner: () -> LocalDate?,
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     meldingDao: MeldingDao,
@@ -368,7 +366,6 @@ internal class GodkjenningsbehovCommand(
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
     personRepository: PersonRepository,
-    infotrygdutbetalingerRepository: InfotrygdutbetalingerRepository,
     opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
@@ -421,13 +418,11 @@ internal class GodkjenningsbehovCommand(
             ForberedVisningCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 organisasjonsnummer = behovData.organisasjonsnummer,
-                førsteKjenteDagFinner = førsteKjenteDagFinner,
                 arbeidsgiverIdentifikatorer = (behovData.orgnummereMedRelevanteArbeidsforhold + behovData.organisasjonsnummer).toSet(),
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
                 arbeidsforholdDao = arbeidsforholdDao,
                 personRepository = personRepository,
-                infotrygdutbetalingerRepository = infotrygdutbetalingerRepository,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = behovData.fødselsnummer,
@@ -511,21 +506,17 @@ internal class GodkjenningsbehovCommand(
 private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
-    førsteKjenteDagFinner: () -> LocalDate?,
     arbeidsgiverIdentifikatorer: Set<String>,
     arbeidsgiverRepository: ArbeidsgiverRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     personRepository: PersonRepository,
-    infotrygdutbetalingerRepository: InfotrygdutbetalingerRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterPersonCommand(
                 fødselsnummer = fødselsnummer,
-                førsteKjenteDagFinner = førsteKjenteDagFinner,
                 personRepository = personRepository,
-                infotrygdutbetalingerRepository = infotrygdutbetalingerRepository,
             ),
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = fødselsnummer,

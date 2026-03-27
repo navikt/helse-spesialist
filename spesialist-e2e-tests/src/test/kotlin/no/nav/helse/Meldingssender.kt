@@ -353,32 +353,6 @@ class Meldingssender(
             )
         }
 
-    fun sendInfotrygdutbetalingerløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-    ): UUID =
-        newUUID.also { id ->
-            val behov = testRapid.inspektør.siste("behov")
-            assertEquals("HentInfotrygdutbetalinger", behov["@behov"].map { it.asText() }.single())
-            val contextId = UUID.fromString(behov["contextId"].asText())
-            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-            testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagInfotrygdutbetalingerløsning(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    hendelseId = hendelseId,
-                    contextId = contextId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    organisasjonsnummer = organisasjonsnummer,
-                    id = id,
-                    sti = behov["sti"].map { it.asInt() },
-                ),
-            )
-        }
-
     fun sendArbeidsgiverinformasjonløsning(
         aktørId: String,
         fødselsnummer: String,

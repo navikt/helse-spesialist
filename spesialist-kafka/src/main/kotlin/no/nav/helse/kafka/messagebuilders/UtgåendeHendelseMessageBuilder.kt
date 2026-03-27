@@ -9,7 +9,6 @@ import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
-import no.nav.helse.modell.melding.OppdaterPersondata
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
@@ -54,8 +53,6 @@ internal fun UtgåendeHendelse.eventName() =
 
         is KlargjørPersonForVisning -> "klargjør_person_for_visning"
 
-        is OppdaterPersondata -> "oppdater_persondata"
-
         is HentDokument -> "hent-dokument"
 
         is OppgaveOpprettet -> "oppgave_opprettet"
@@ -90,7 +87,6 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is Godkjenningsbehovløsning -> this.detaljer()
         is VedtakFattetMelding -> this.detaljer()
         is KlargjørPersonForVisning -> emptyMap()
-        is OppdaterPersondata -> emptyMap()
         is HentDokument -> this.detaljer()
         is OppgaveOpprettet -> this.detaljer()
         is OppgaveOppdatert -> this.detaljer()

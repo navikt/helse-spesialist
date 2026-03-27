@@ -47,15 +47,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
             "id" : "0301",
             "__typename" : "Enhet"
           },
-          "infotrygdutbetalinger" : [ {
-            "organisasjonsnummer" : "${testContext.arbeidsgiver.organisasjonsnummer}",
-            "dagsats" : 1000.0,
-            "fom" : "2018-01-01",
-            "tom" : "2018-01-31",
-            "grad" : "100",
-            "typetekst" : "ArbRef",
-            "__typename" : "Infotrygdutbetaling"
-          } ],
           "personinfo" : {
             "fornavn" : "${testContext.person.fornavn}",
             "mellomnavn" : ${testContext.person.mellomnavn?.let { "\"$it\"" }},

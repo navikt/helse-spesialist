@@ -49,7 +49,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiFjernetFraPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiHistorikkinnslag
-import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiKjonn
@@ -855,11 +854,6 @@ class PersonQueryHandler(
                                     },
                         )
                     },
-            infotrygdutbetalinger =
-                transaction.infotrygdutbetalingerRepository
-                    .finn(identitetsnummer)
-                    ?.data
-                    ?.let { jsonString -> tilApiInfotrygdutbetalinger(jsonString) },
             vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },
         ).let {
             AuditLogger.loggOk(
@@ -1377,21 +1371,6 @@ private fun SnapshotUtbetalingstatus.tilApiUtbetalingstatus(): ApiUtbetalingstat
         SnapshotUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
         SnapshotUtbetalingstatus.UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
     }
-
-private fun tilApiInfotrygdutbetalinger(jsonString: String): List<ApiInfotrygdutbetaling> =
-    objectMapper
-        .readTree(jsonString)
-        .filterNot { it["typetekst"].asText().lowercase() == "sanksjon" }
-        .map {
-            ApiInfotrygdutbetaling(
-                fom = it["fom"].asText(),
-                tom = it["tom"].asText(),
-                grad = it["grad"].asText(),
-                dagsats = it["dagsats"].asDouble(),
-                typetekst = it["typetekst"].asText(),
-                organisasjonsnummer = it["organisasjonsnummer"].asText(),
-            )
-        }
 
 private fun TildelingApiDto.tilApiTildeling(): ApiTildeling =
     ApiTildeling(

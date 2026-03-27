@@ -32,7 +32,6 @@ import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.InfotrygdUtbetalinger
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -176,12 +175,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
                 ),
                 null,
-            ),
-        )
-        sessionContext.infotrygdutbetalingerRepository.lagre(
-            InfotrygdUtbetalinger.Factory.ny(
-                id = Identitetsnummer.fraString(fødselsnummer),
-                data = "{}",
             ),
         )
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)

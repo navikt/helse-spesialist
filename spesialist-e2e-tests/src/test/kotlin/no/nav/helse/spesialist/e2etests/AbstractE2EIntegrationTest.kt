@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLø
 import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.FullmaktBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålBehovLøser
@@ -66,7 +65,6 @@ abstract class AbstractE2EIntegrationTest {
     protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
     protected val risikovurderingBehovLøser = finnLøserForDenneTesten<RisikovurderingBehovLøser>()
     protected val åpneOppgaverBehovLøser = finnLøserForDenneTesten<ÅpneOppgaverBehovLøser>()
-    protected val hentInfotrygdutbetalingerBehovLøser = finnLøserForDenneTesten<HentInfotrygdutbetalingerBehovLøser>()
     protected val hentEnhetBehovLøser = finnLøserForDenneTesten<HentEnhetBehovLøser>()
     protected val vergemålBehovLøser = finnLøserForDenneTesten<VergemålBehovLøser>()
     protected val egenAnsattBehovLøser = finnLøserForDenneTesten<EgenAnsattBehovLøser>()

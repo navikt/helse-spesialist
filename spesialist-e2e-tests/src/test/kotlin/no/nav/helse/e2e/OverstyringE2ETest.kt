@@ -316,8 +316,6 @@ class OverstyringE2ETest : AbstractE2ETest() {
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer =
                         object : Personhåndterer {
-                            override fun oppdaterPersondata(fødselsnummer: String) {}
-
                             override fun klargjørPersonForVisning(fødselsnummer: String) {}
                         },
                     snapshothenter = snapshothenter,

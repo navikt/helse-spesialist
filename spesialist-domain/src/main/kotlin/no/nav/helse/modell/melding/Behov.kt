@@ -17,11 +17,6 @@ sealed interface Behov : UtgåendeMelding {
         val ikkeEldreEnn: LocalDate,
     ) : Behov
 
-    data class Infotrygdutbetalinger(
-        val fom: LocalDate,
-        val tom: LocalDate,
-    ) : Behov
-
     data object Personinfo : Behov
 
     data object Enhet : Behov

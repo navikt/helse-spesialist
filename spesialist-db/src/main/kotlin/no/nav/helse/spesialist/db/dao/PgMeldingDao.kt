@@ -10,7 +10,6 @@ import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENNING
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.db.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
 import no.nav.helse.db.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
-import no.nav.helse.db.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
 import no.nav.helse.db.MeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.db.MeldingDao.Meldingtype.UTBETALING_ENDRET
 import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
@@ -23,7 +22,6 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
-import no.nav.helse.modell.person.OppdaterPersondata
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -202,7 +200,6 @@ class PgMeldingDao private constructor(
         return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
             GODKJENNING -> Godkjenningsbehov.fraJson(json)
-            OPPDATER_PERSONSNAPSHOT -> OppdaterPersondata(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
@@ -221,7 +218,6 @@ class PgMeldingDao private constructor(
             is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
             is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
             is Godkjenningsbehov -> GODKJENNING
-            is OppdaterPersondata -> OPPDATER_PERSONSNAPSHOT
             is UtbetalingEndret -> UTBETALING_ENDRET
             is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
             is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET

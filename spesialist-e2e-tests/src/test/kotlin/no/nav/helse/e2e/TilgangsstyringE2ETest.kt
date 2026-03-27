@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -106,7 +105,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterGodkjenningsbehov()
         håndterPersoninfoløsning(adressebeskyttelse = adressebeskyttelse)
         håndterEnhetløsning()
-        håndterInfotrygdutbetalingerløsning()
         håndterArbeidsgiverinformasjonløsning()
         håndterArbeidsforholdløsning()
     }
@@ -172,23 +170,10 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer =
                         object : Personhåndterer {
-                            override fun oppdaterPersondata(fødselsnummer: String) {}
-
                             override fun klargjørPersonForVisning(fødselsnummer: String) {}
                         },
                     snapshothenter = snapshothenter,
                     sessionFactory = sessionFactory,
                 ),
         )
-
-    companion object {
-        private fun assertFeilmelding(
-            feilmelding: String,
-            errors: List<GraphQLError>,
-        ) {
-            assertTrue(errors.any { it.message.contains(feilmelding) }) {
-                "Forventet \"$feilmelding\", men fikk ${errors.map { it.message }}"
-            }
-        }
-    }
 }

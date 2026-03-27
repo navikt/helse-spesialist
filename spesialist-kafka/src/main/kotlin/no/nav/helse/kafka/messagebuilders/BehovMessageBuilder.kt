@@ -34,8 +34,6 @@ fun Behov.behovName() =
 
         is Behov.Fullmakt -> "Fullmakt"
 
-        is Behov.Infotrygdutbetalinger -> "HentInfotrygdutbetalinger"
-
         is Behov.InntekterForSykepengegrunnlag -> "InntekterForSykepengegrunnlag"
 
         is Behov.EgenAnsatt -> "EgenAnsatt"
@@ -62,7 +60,6 @@ private fun Behov.detaljer(): Map<String, Any?> =
         is Behov.Arbeidsforhold -> this.detaljer()
         is Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver -> this.detaljer()
         is Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak -> this.detaljer()
-        is Behov.Infotrygdutbetalinger -> this.detaljer()
         is Behov.InntekterForSykepengegrunnlag -> this.detaljer()
         is Behov.Personinfo -> emptyMap()
         is Behov.Risikovurdering -> this.detaljer()
@@ -99,12 +96,6 @@ private fun Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver.detaljer(): Map<S
 private fun Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak.detaljer(): Map<String, Any> =
     mapOf(
         "ident" to this.identer,
-    )
-
-private fun Behov.Infotrygdutbetalinger.detaljer(): Map<String, Any> =
-    mapOf(
-        "historikkFom" to this.fom,
-        "historikkTom" to this.tom,
     )
 
 private fun Behov.InntekterForSykepengegrunnlag.detaljer(): Map<String, Any> =

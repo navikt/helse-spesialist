@@ -6,7 +6,6 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -22,18 +21,6 @@ class BehovMessageBuilderTest {
     private val hendelseId: UUID = UUID.randomUUID()
 
     private fun Behov.somJson() = listOf(this).somJsonMessage(commandContextId, fødselsnummer, hendelseId, listOf(1, 2, 3)).toJson()
-
-    @Test
-    fun `Infotrygdutbetalinger-behov`() {
-        val behov = Behov.Infotrygdutbetalinger(1 jan 2018, 31 jan 2018).somJson()
-        behov.assertBehov(
-            "HentInfotrygdutbetalinger",
-            mapOf(
-                "historikkFom" to (1 jan 2018),
-                "historikkTom" to (31 jan 2018),
-            ),
-        )
-    }
 
     @Test
     fun `Personinfo-behov`() {

@@ -3,10 +3,8 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
-import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
@@ -30,13 +28,11 @@ import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
@@ -49,30 +45,6 @@ internal class MessageContextMeldingPublisererTest {
     private val hendelseId = UUID.randomUUID()
     private val fødselsnummer = lagFødselsnummer()
     private val årsak = "JUnit"
-
-    @Test
-    fun `publiserer behov med forventet format`() {
-        val fom = LocalDate.now().minusDays(1)
-        val tom = LocalDate.now()
-        val behov = Behov.Infotrygdutbetalinger(fom, tom)
-
-        meldingPubliserer.publiser(
-            hendelseId = hendelseId,
-            commandContextId = contextId,
-            fødselsnummer = fødselsnummer,
-            behov = listOf(behov),
-            sti = listOf(1, 2, 3),
-        )
-
-        assertTrue(!testRapid.inspektør.field(0, "@behov").isMissingOrNull())
-        assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
-        assertEquals(fødselsnummer, testRapid.inspektør.field(0, "fødselsnummer").asText())
-        assertEquals(contextId.toString(), testRapid.inspektør.field(0, "contextId").asText())
-        assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "hendelseId").asText())
-        assertEquals(listOf(1, 2, 3), testRapid.inspektør.field(0, "sti").map { it.asInt() })
-        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
-        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
-    }
 
     @Test
     fun `publiserer hendelse med forventet format`() {

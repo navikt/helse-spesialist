@@ -5,16 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@GraphQLName("Infotrygdutbetaling")
-data class ApiInfotrygdutbetaling(
-    val fom: String,
-    val tom: String,
-    val grad: String,
-    val dagsats: Double,
-    val typetekst: String,
-    val organisasjonsnummer: String,
-)
-
 @GraphQLName("Saksbehandler")
 data class ApiSaksbehandler(
     val navn: String,
@@ -93,6 +83,5 @@ data class ApiPerson(
     val tilleggsinfoForInntektskilder: List<ApiTilleggsinfoForInntektskilde>,
     val arbeidsgivere: List<ApiArbeidsgiver>,
     val selvstendigNaering: ApiSelvstendigNaering?,
-    val infotrygdutbetalinger: List<ApiInfotrygdutbetaling>?,
     val vilkarsgrunnlagV2: List<ApiVilkårsgrunnlagV2>,
 )

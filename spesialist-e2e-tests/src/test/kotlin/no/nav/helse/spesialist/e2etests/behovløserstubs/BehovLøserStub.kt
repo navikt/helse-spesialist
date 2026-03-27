@@ -34,7 +34,6 @@ class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.Pa
             AvviksvurderingBehovLøser(),
             EgenAnsattBehovLøser(),
             HentEnhetBehovLøser(),
-            HentInfotrygdutbetalingerBehovLøser(arbeidsgiver.organisasjonsnummer),
             HentPersoninfoV2BehovLøser(person),
             InntekterForSykepengegrunnlagBehovLøser(arbeidsgiver.organisasjonsnummer),
             RisikovurderingBehovLøser(),

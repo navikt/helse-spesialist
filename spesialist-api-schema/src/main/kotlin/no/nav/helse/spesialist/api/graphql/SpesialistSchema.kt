@@ -3,8 +3,6 @@ package no.nav.helse.spesialist.api.graphql
 import com.expediagroup.graphql.server.ktor.GraphQLConfiguration
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.PersonMutation
-import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
@@ -27,7 +25,6 @@ class SpesialistSchema(
         val overstyring: OverstyringMutationSchema,
         val skjonnsfastsettelse: SkjonnsfastsettelseMutationSchema,
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
-        val person: PersonMutationSchema,
     )
 
     fun setup(schemaConfiguration: GraphQLConfiguration.SchemaConfiguration) {
@@ -44,7 +41,6 @@ class SpesialistSchema(
                 OverstyringMutation(handler = mutationHandlers.overstyring),
                 SkjonnsfastsettelseMutation(handler = mutationHandlers.skjonnsfastsettelse),
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),
-                PersonMutation(handler = mutationHandlers.person),
             )
 
         schemaConfiguration.hooks = schemaGeneratorHooks

@@ -45,12 +45,8 @@ internal abstract class AbstractDatabaseTest {
             INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
             VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
             INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES ($fødselsnummer, now());
-            INSERT INTO infotrygdutbetalinger(id, data)
-            VALUES (${sequence_number}, '{}'::json);
-            INSERT INTO person(id, fødselsnummer, aktør_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert,
-                               infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert)
-            VALUES (${sequence_number}, '$fødselsnummer', '${aktør_id}', ${sequence_number}, 101, now(), now(), ${sequence_number},
-                    now());
+            INSERT INTO person(id, fødselsnummer, aktør_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert)
+            VALUES (${sequence_number}, '$fødselsnummer', '${aktør_id}', ${sequence_number}, 101, now(), now());
             INSERT INTO personpseudoid(pseudoid, identitetsnummer)
             VALUES (gen_random_uuid(), '$fødselsnummer');
             INSERT INTO arbeidsgiver(identifikator, navn, navn_sist_oppdatert_dato)
@@ -226,6 +222,7 @@ internal abstract class AbstractDatabaseTest {
                 "ukoblede_annulleringer",
                 "midlertidig_behandling_vedtak_fattet",
                 "tmp_slettede_varsler",
+                "infotrygdutbetalinger"
             ),
         )
         tabeller.forEach { tabellnavn ->
