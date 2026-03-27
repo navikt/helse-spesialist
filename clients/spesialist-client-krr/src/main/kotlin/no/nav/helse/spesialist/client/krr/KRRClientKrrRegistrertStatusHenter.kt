@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistre
 import no.nav.helse.spesialist.application.hentGjennomCache
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggWarn
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
@@ -58,7 +59,17 @@ class KRRClientKrrRegistrertStatusHenter(
                     val responseJson = objectMapper.readTree(responseBody)
 
                     if (responseJson["feil"]?.isEmpty == false) {
-                        responseError("Fikk feil tilbake fra KRR", responseJson.toString())
+                        if (responseJson["feil"][fødselsnummer]?.asText() == "person_ikke_funnet") {
+                            loggWarn(
+                                "KRR ga feil tilbake om at personen ikke finnes." +
+                                    "Regner det som at den ikke ligger i KRR.",
+                                "fødselsnummer" to fødselsnummer,
+                                "respons fra KRR" to response,
+                            )
+                            KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+                        } else {
+                            responseError("Fikk feil tilbake fra KRR", responseJson.toString())
+                        }
                     } else {
                         responseJson["personer"][fødselsnummer].let {
                             if (it == null) {
