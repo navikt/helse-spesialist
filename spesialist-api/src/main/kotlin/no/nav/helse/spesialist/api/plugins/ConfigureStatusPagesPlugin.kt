@@ -10,6 +10,7 @@ import io.ktor.server.response.respondText
 import no.nav.helse.spesialist.api.graphql.Modellfeil
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggWarn
 import java.util.concurrent.CancellationException
 
 fun StatusPagesConfig.configureStatusPagesPlugin() {
@@ -19,8 +20,11 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
     }
     exception<CancellationException> { call: ApplicationCall, exception: CancellationException ->
         val uri = call.request.uri
-        if (!uri.endsWith("/sse")) return@exception onThrowable(call, exception)
-        loggInfo("SSE-tilkobling lukket")
+        if (uri.endsWith("/sse")) {
+            loggInfo("SSE-tilkobling lukket")
+        } else {
+            loggWarn("Klienten koblet fra før svaret ble sendt", exception)
+        }
     }
     exception<Throwable> { call, cause ->
         onThrowable(call, cause)
