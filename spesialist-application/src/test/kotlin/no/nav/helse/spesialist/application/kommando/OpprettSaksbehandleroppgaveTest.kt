@@ -92,7 +92,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @BeforeEach
     fun beforeEach() {
-        every { utbetaling.ingenUtbetaling() } returns true
         clearMocks(oppgaveService)
     }
 
@@ -214,7 +213,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egenskap ingen utbetaling`() {
-        every { utbetaling.ingenUtbetaling() } returns true
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }

@@ -29,8 +29,6 @@ class Utbetaling(
 
     internal fun delvisRefusjon() = personbeløp != 0 && arbeidsgiverbeløp != 0
 
-    internal fun ingenUtbetaling() = arbeidsgiverbeløp == 0 && personbeløp == 0
-
     internal fun harEndringIUtbetalingTilSykmeldt() = personbeløp != 0
 
     override fun equals(other: Any?): Boolean =
