@@ -22,7 +22,7 @@ class StansAutomatiskBehandlingMelding(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { stansAutomatiskBehandling(this@StansAutomatiskBehandlingMelding, sessionContext) }
+        kommandostarter { stansAutomatiskBehandling(this@StansAutomatiskBehandlingMelding) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

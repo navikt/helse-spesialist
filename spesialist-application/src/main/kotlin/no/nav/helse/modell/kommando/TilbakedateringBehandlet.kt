@@ -14,6 +14,7 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -75,12 +76,11 @@ internal class TilbakedateringGodkjentCommand(
     godkjenningsbehov: GodkjenningsbehovData,
     automatiseringDao: AutomatiseringDao,
     vedtakRepository: VedtakRepository,
-    sessionContext: SessionContext,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             VurderOmSøknadsperiodenOverlapperMedOppgave(oppgave, søknadsperioder),
-            ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
+            ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") { sessionContext: SessionContext, _: Outbox ->
                 oppgave.fjernTilbakedatert()
                 sessionContext.oppgaveRepository.lagre(oppgave)
             },

@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.tilUtgåendeHendelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -34,7 +35,7 @@ class EndretEgenAnsattStatus(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus, sessionContext) }
+        kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer
@@ -46,21 +47,31 @@ internal class EndretEgenAnsattStatusCommand(
     private val fødselsnummer: String,
     erEgenAnsatt: Boolean,
     opprettet: LocalDateTime,
-    personRepository: PersonRepository,
-    oppgaveService: OppgaveService,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            ikkesuspenderendeCommand("lagreEgenAnsattStatus") {
-                val person = personRepository.finn(Identitetsnummer.fraString(fødselsnummer)) ?: return@ikkesuspenderendeCommand
+            ikkesuspenderendeCommand("lagreEgenAnsattStatus") { sessionContext: SessionContext, _: Outbox ->
+                val person = sessionContext.personRepository.finn(Identitetsnummer.fraString(fødselsnummer)) ?: return@ikkesuspenderendeCommand
                 person.oppdaterEgenAnsattStatus(
                     erEgenAnsatt = erEgenAnsatt,
                     oppdatertTidspunkt = opprettet.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
                 )
-                personRepository.lagre(person)
+                sessionContext.personRepository.lagre(person)
             },
-            ikkesuspenderendeCommand("endretEgenAnsattStatus") {
-                oppgaveService.endretEgenAnsattStatus(erEgenAnsatt, fødselsnummer)
+            ikkesuspenderendeCommand("endretEgenAnsattStatus") { sessionContext: SessionContext, outbox: Outbox ->
+                val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+                val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer) ?: return@ikkesuspenderendeCommand
+                if (erEgenAnsatt) {
+                    loggInfo("Legger til egenskap EGEN_ANSATT", "fødselsnummer" to fødselsnummer, "oppgaveId" to oppgave.id.value)
+                    oppgave.leggTilEgenAnsatt()
+                } else {
+                    loggInfo("Fjerner egenskap EGEN_ANSATT", "fødselsnummer" to fødselsnummer, "oppgaveId" to oppgave.id.value)
+                    oppgave.fjernEgenAnsatt()
+                }
+                oppgave.konsumerHendelser().forEach {
+                    outbox.leggTil(identitetsnummer, it.tilUtgåendeHendelse(), "endret egenansatt-status")
+                }
+                sessionContext.oppgaveRepository.lagre(oppgave)
             },
         )
 }

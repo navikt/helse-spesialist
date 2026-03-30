@@ -16,7 +16,6 @@ import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
@@ -62,7 +61,6 @@ internal class VedtaksperiodeReberegnetCommand(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -79,7 +77,6 @@ internal class VedtaksperiodeReberegnetCommand(
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
-                vedtakRepository = vedtakRepository,
             ),
         )
 }

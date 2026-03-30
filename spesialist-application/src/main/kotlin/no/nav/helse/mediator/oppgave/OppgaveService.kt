@@ -99,28 +99,6 @@ class OppgaveService(
         return returverdi
     }
 
-    override fun endretEgenAnsattStatus(
-        erEgenAnsatt: Boolean,
-        fødselsnummer: String,
-    ) {
-        val oppgaveId =
-            oppgaveDao.finnOppgaveId(fødselsnummer) ?: run {
-                teamLogs.info("Ingen aktiv oppgave for {}", kv("fødselsnummer", fødselsnummer))
-                return
-            }
-        oppgave(oppgaveId) {
-            if (erEgenAnsatt) {
-                logg.info("Legger til egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
-                teamLogs.info("Legger til egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
-                leggTilEgenAnsatt()
-            } else {
-                logg.info("Fjerner egenskap EGEN_ANSATT på {}", kv("oppgaveId", oppgaveId))
-                teamLogs.info("Fjerner egenskap EGEN_ANSATT for {}", kv("fødselsnummer", fødselsnummer))
-                fjernEgenAnsatt()
-            }
-        }
-    }
-
     fun avbrytOppgaveFor(vedtaksperiodeId: UUID) {
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also {
             oppgave(it) {

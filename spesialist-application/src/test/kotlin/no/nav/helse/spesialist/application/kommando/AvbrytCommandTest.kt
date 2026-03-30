@@ -26,7 +26,6 @@ internal class AvbrytCommandTest : ApplicationTest() {
                 reservasjonDao = mockk(relaxed = true),
                 tildelingDao = mockk(relaxed = true),
                 totrinnsvurderingRepository = mockk(relaxed = true),
-                vedtakRepository = mockk(relaxed = true),
             )
     }
 

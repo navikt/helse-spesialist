@@ -14,7 +14,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
@@ -60,7 +59,6 @@ class VedtaksperiodeForkastetCommand(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -73,7 +71,6 @@ class VedtaksperiodeForkastetCommand(
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
-                vedtakRepository = vedtakRepository,
             ),
             AvbrytTotrinnsvurderingCommand(
                 fødselsnummer = fødselsnummer,

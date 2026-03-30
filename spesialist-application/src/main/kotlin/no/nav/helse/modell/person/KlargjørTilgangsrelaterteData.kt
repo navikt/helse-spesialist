@@ -10,8 +10,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterEnhetCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.spesialist.application.OpptegnelseRepository
-import no.nav.helse.spesialist.application.PersonKlargjoresDao
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
@@ -43,9 +42,7 @@ class KlargjørTilgangsrelaterteData(
 
 internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
-    personKlargjoresDao: PersonKlargjoresDao,
     personRepository: PersonRepository,
-    opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -59,16 +56,16 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 fødselsnummer = fødselsnummer,
                 personRepository = personRepository,
             ),
-            ikkesuspenderendeCommand("opprettOptegnelse") {
+            ikkesuspenderendeCommand("opprettOptegnelse") { sessionContext: SessionContext, _: Outbox ->
                 val opptegnelse =
                     Opptegnelse.ny(
                         identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                         type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
                     )
-                opptegnelseRepository.lagre(opptegnelse)
+                sessionContext.opptegnelseRepository.lagre(opptegnelse)
             },
-            ikkesuspenderendeCommand("ferdigstillKlargjøring") {
-                personKlargjoresDao.personKlargjort(fødselsnummer)
+            ikkesuspenderendeCommand("ferdigstillKlargjøring") { sessionContext: SessionContext, _: Outbox ->
+                sessionContext.personKlargjoresDao.personKlargjort(fødselsnummer)
             },
         )
 }

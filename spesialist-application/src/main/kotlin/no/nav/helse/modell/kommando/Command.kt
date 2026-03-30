@@ -23,14 +23,14 @@ interface Command {
 
 internal fun ikkesuspenderendeCommand(
     navnForLogging: String = "<navn ikke oppgitt>",
-    block: () -> Unit,
+    block: (SessionContext, Outbox) -> Unit,
 ) = object : Command {
     override fun execute(
         context: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        block()
+        block(sessionContext, outbox)
         return true
     }
 

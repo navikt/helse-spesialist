@@ -56,14 +56,11 @@ class Kommandofabrikk(
 
     internal fun endretEgenAnsattStatus(
         melding: EndretEgenAnsattStatus,
-        sessionContext: SessionContext,
     ): EndretEgenAnsattStatusCommand =
         EndretEgenAnsattStatusCommand(
             fødselsnummer = melding.fødselsnummer(),
             erEgenAnsatt = melding.erEgenAnsatt,
             opprettet = melding.opprettet,
-            personRepository = sessionContext.personRepository,
-            oppgaveService = transaksjonellOppgaveService(sessionContext),
         )
 
     internal fun gosysOppgaveEndret(
@@ -118,7 +115,6 @@ class Kommandofabrikk(
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
             vedtakRepository = sessionContext.vedtakRepository,
-            sessionContext = sessionContext,
         )
     }
 
@@ -138,7 +134,6 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-            vedtakRepository = sessionContext.vedtakRepository,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -171,9 +166,7 @@ class Kommandofabrikk(
     ): KlargjørTilgangsrelaterteDataCommand =
         KlargjørTilgangsrelaterteDataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            personKlargjoresDao = sessionContext.personKlargjoresDao,
             personRepository = sessionContext.personRepository,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
         )
 
     internal fun utbetalingEndret(
@@ -212,13 +205,11 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-            vedtakRepository = sessionContext.vedtakRepository,
         )
 
     internal fun stansAutomatiskBehandling(
         hendelse: StansAutomatiskBehandlingMelding,
-        sessionContext: SessionContext,
-    ) = ikkesuspenderendeCommand {
+    ) = ikkesuspenderendeCommand { sessionContext: SessionContext, _: Outbox ->
         StansAutomatiskBehandlingMediator.Factory
             .stansAutomatiskBehandlingMediator(
                 sessionContext,
