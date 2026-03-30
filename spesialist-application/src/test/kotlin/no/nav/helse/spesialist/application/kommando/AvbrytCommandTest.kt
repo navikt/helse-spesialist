@@ -11,21 +11,23 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class AvbrytCommandTest {
+internal class AvbrytCommandTest : ApplicationTest() {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
-        private fun lagAvbrytCommand(commandContextDao: CommandContextDao) = AvbrytCommand(
-            fødselsnummer = "fnr",
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            commandContextDao = commandContextDao,
-            oppgaveService = mockk<OppgaveService>(relaxed = true),
-            reservasjonDao = mockk(relaxed = true),
-            tildelingDao = mockk(relaxed = true),
-            totrinnsvurderingRepository = mockk(relaxed = true),
-            vedtakRepository = mockk(relaxed = true),
-        )
+
+        private fun lagAvbrytCommand(commandContextDao: CommandContextDao) =
+            AvbrytCommand(
+                fødselsnummer = "fnr",
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                commandContextDao = commandContextDao,
+                oppgaveService = mockk<OppgaveService>(relaxed = true),
+                reservasjonDao = mockk(relaxed = true),
+                tildelingDao = mockk(relaxed = true),
+                totrinnsvurderingRepository = mockk(relaxed = true),
+                vedtakRepository = mockk(relaxed = true),
+            )
     }
 
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
@@ -35,7 +37,7 @@ internal class AvbrytCommandTest {
 
     @Test
     fun `avbryter command context`() {
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
     }
 }

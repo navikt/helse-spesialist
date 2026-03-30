@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VurderAutomatiskAvvisningTest {
+internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
     private lateinit var context: CommandContext
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
@@ -58,7 +58,7 @@ internal class VurderAutomatiskAvvisningTest {
         command: VurderAutomatiskAvvisning,
         forventetÅrsak: String,
     ) {
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         verify(exactly = 1) {
             godkjenningMediator.automatiskAvvisning(
                 context = context,
@@ -69,7 +69,7 @@ internal class VurderAutomatiskAvvisningTest {
     }
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }
 

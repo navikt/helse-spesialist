@@ -25,9 +25,10 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val poisonPills: MutableMap<String, Set<String>> = mutableMapOf()
-    private val poisonPillDao = object : PoisonPillDao {
-        override fun poisonPills() = PoisonPills(poisonPills.toMap())
-    }
+    private val poisonPillDao =
+        object : PoisonPillDao {
+            override fun poisonPills() = PoisonPills(poisonPills.toMap())
+        }
 
     private val meldingMediator =
         MeldingMediator(
@@ -38,13 +39,15 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
             dokumentDao = daos.dokumentDao,
-            legacyVarselRepository = LegacyVarselRepository(
-                legacyVarselDao = daos.legacyVarselDao,
-                definisjonDao = daos.definisjonDao
-            ),
+            legacyVarselRepository =
+                LegacyVarselRepository(
+                    legacyVarselDao = daos.legacyVarselDao,
+                    definisjonDao = daos.definisjonDao,
+                ),
             poisonPillDao = poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false,
             poisonPillTimeToLive = Duration.ofMillis(25),
+            versjonAvKode = "1.0.0",
         )
 
     @BeforeEach

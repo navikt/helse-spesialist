@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
@@ -6,14 +6,14 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.application.Testdata
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class ForberedBehandlingAvGodkjenningsbehovTest {
+internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
     @Test
     fun `skjæringstidspunkt for behandling i VedtakFattet oppdateres ikke ved mottak av nytt godkjenningsbehov`() {
         val spleisBehandlingId1 = UUID.randomUUID()
@@ -54,7 +54,7 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest {
             )
 
         val commandData =
-            godkjenningsbehovData().copy(
+            Testdata.godkjenningsbehovData().copy(
                 spleisVedtaksperioder =
                     listOf(
                         SpleisVedtaksperiode(
@@ -67,8 +67,8 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest {
                     ),
             )
 
-        ForberedBehandlingAvGodkjenningsbehov(commandData, person).execute(CommandContext(UUID.randomUUID()))
+        ForberedBehandlingAvGodkjenningsbehov(commandData, person).execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
 
-        assertEquals(1 jan 2018, behandling1.skjæringstidspunkt())
+        Assertions.assertEquals(1 jan 2018, behandling1.skjæringstidspunkt())
     }
 }

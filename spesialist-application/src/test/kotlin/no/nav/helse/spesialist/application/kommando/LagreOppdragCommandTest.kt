@@ -16,8 +16,7 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 import kotlin.test.Test
 
-class LagreOppdragCommandTest {
-
+class LagreOppdragCommandTest : ApplicationTest() {
     @Test
     fun `lagre arbeidsgiverbeløp og personbeløp`() {
         // given
@@ -28,7 +27,7 @@ class LagreOppdragCommandTest {
         val command = command(arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
 
         // when
-        command.execute(CommandContext(UUID.randomUUID()))
+        command.execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
 
         // then
         verify(exactly = 1) {
@@ -41,12 +40,15 @@ class LagreOppdragCommandTest {
                 arbeidsgiverFagsystemIdRef = any(),
                 personFagsystemIdRef = any(),
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
-                personbeløp = personbeløp
+                personbeløp = personbeløp,
             )
         }
     }
 
-    private fun command(arbeidsgiverbeløp: Int, personbeløp: Int): LagreOppdragCommand {
+    private fun command(
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int,
+    ): LagreOppdragCommand {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         return LagreOppdragCommand(

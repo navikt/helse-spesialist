@@ -79,7 +79,7 @@ internal class TilbakedateringGodkjentCommand(
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            VurderOmSøknadsperiodenOverlapperMedOppgave(sessionContext, oppgave, søknadsperioder),
+            VurderOmSøknadsperiodenOverlapperMedOppgave(oppgave, søknadsperioder),
             ikkesuspenderendeCommand("fjernTilbakedatertEgenskap") {
                 oppgave.fjernTilbakedatert()
                 sessionContext.oppgaveRepository.lagre(oppgave)

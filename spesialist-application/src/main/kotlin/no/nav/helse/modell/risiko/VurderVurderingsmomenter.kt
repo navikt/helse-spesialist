@@ -1,6 +1,7 @@
 package no.nav.helse.modell.risiko
 
 import no.nav.helse.db.RisikovurderingDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -11,6 +12,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
@@ -24,9 +26,17 @@ internal class VurderVurderingsmomenter(
     private val utbetaling: Utbetaling,
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context)
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ) = behandle(context)
 
-    override fun resume(context: CommandContext) = behandle(context)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
         if (risikovurderingAlleredeGjort()) return true
@@ -43,8 +53,11 @@ internal class VurderVurderingsmomenter(
                     kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
                     inntekt =
                         when (sykepengegrunnlagsfakta) {
-                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd -> null
-                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker ->
+                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd -> {
+                                null
+                            }
+
+                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker -> {
                                 sykepengegrunnlagsfakta.arbeidsgivere
                                     .find { it.organisasjonsnummer == organisasjonsnummer }
                                     ?.let { sykepengegrunnlagsArbeidsgiver ->
@@ -53,12 +66,14 @@ internal class VurderVurderingsmomenter(
                                             inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
                                         )
                                     }
+                            }
 
-                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende ->
+                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende -> {
                                 InntektTilRisk(
                                     omregnetÅrsinntekt = sykepengegrunnlagsfakta.selvstendig.beregningsgrunnlag.toDouble(),
                                     inntektskilde = "Sigrun", // TODO: Hardkodet, verdi - avklar med Risk og Spleis
                                 )
+                            }
                         },
                 ),
             )

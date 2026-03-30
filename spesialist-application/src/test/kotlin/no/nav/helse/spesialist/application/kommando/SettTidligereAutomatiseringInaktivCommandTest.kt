@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class SettTidligereAutomatiseringInaktivCommandTest {
+internal class SettTidligereAutomatiseringInaktivCommandTest : ApplicationTest() {
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val hendelseId = UUID.randomUUID()
@@ -33,7 +33,7 @@ internal class SettTidligereAutomatiseringInaktivCommandTest {
 
     @Test
     fun `kaller utfør og returnerer true`() {
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
 
         verify {
             automatisering.settInaktiv(vedtaksperiodeId, hendelseId)

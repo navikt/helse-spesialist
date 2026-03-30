@@ -1,6 +1,8 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.OppdaterEnhetCommand
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.spesialist.application.InMemoryPersonRepository
@@ -13,7 +15,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-internal class OppdaterEnhetCommandTest {
+internal class OppdaterEnhetCommandTest : ApplicationTest() {
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -38,7 +40,7 @@ internal class OppdaterEnhetCommandTest {
     fun `mangler enhet`() {
         val person = lagPerson(enhet = null).also(personRepository::lagre)
         val command = OppdaterEnhetCommand(person.id.value, personRepository)
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(listOf(Behov.Enhet), observer.behov.toList())
     }
@@ -52,7 +54,7 @@ internal class OppdaterEnhetCommandTest {
         // when
         val løsning = HentEnhetløsning("1002")
         context.add(løsning)
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
 
         // then
         val funnet = personRepository.finn(person.id)
@@ -66,7 +68,7 @@ internal class OppdaterEnhetCommandTest {
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
         val person = lagPerson().also(personRepository::lagre)
         val command = OppdaterEnhetCommand(person.id.value, personRepository)
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }
 }

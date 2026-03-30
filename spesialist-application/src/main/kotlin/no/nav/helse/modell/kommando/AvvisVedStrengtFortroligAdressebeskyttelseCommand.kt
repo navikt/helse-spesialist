@@ -1,8 +1,10 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -15,7 +17,11 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val personRepository: PersonRepository,
     private val oppgaveRepository: OppgaveRepository,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val oppgave = oppgaveRepository.finnAktivForPerson(identitetsnummer)
         if (oppgave == null) {
             loggInfo("Ingen aktiv oppgave for personen. Ingenting å avvise")

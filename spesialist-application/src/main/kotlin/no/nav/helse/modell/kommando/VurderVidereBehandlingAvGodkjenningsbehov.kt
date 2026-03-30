@@ -2,11 +2,13 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
@@ -22,7 +24,11 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val vedtakDao: VedtakDao,
     private val meldingDao: MeldingDao,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val utbetalingId = commandData.utbetalingId
         val meldingId = commandData.id
 

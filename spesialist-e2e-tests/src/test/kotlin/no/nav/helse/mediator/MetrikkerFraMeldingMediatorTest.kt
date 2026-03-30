@@ -30,12 +30,14 @@ class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
             dokumentDao = daos.dokumentDao,
-            legacyVarselRepository = LegacyVarselRepository(
-                legacyVarselDao = daos.legacyVarselDao,
-                definisjonDao = daos.definisjonDao
-            ),
+            legacyVarselRepository =
+                LegacyVarselRepository(
+                    legacyVarselDao = daos.legacyVarselDao,
+                    definisjonDao = daos.definisjonDao,
+                ),
             poisonPillDao = daos.poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false,
+            versjonAvKode = "1.0.0",
         )
     }
 
@@ -44,7 +46,7 @@ class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
         meldingssender.sendSøknadSendt("aktørId", fødselsnummer, "organisasjonsnummer")
 
         val innslag =
-            metrikker.scrape("text/plain", setOf("command_tidsbruk_count"))//, arrayOf("command"), arrayOf("SøknadSendtCommand"))
+            metrikker.scrape("text/plain", setOf("command_tidsbruk_count")) // , arrayOf("command"), arrayOf("SøknadSendtCommand"))
         // Siden metrikker er globale vil tallet variere avhengig av hvor mange tester som ble kjørt
         assertNotNull(innslag)
         println(innslag)

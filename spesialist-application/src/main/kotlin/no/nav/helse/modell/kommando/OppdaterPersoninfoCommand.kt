@@ -1,7 +1,9 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -18,7 +20,11 @@ internal class OppdaterPersoninfoCommand(
         private val datoForUtdatert = LocalDate.now().minusDays(14)
     }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val person =
             personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")
@@ -27,7 +33,11 @@ internal class OppdaterPersoninfoCommand(
         return behandle(context, person)
     }
 
-    override fun resume(context: CommandContext): Boolean {
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val person =
             personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")

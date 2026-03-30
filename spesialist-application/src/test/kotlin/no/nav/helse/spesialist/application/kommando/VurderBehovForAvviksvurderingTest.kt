@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-class VurderBehovForAvviksvurderingTest {
+class VurderBehovForAvviksvurderingTest : ApplicationTest() {
     private val fødselsnummer = lagFødselsnummer()
     private val organisasjonsnummer = lagOrganisasjonsnummer()
     private val vilkårsgrunnlagId = UUID.randomUUID()
@@ -133,7 +133,7 @@ class VurderBehovForAvviksvurderingTest {
             )
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertEquals(0, observer.behov.size)
     }
 
@@ -142,7 +142,7 @@ class VurderBehovForAvviksvurderingTest {
         val command = vurderBehovForAvviksvurderingCommand(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertEquals(0, observer.behov.size)
     }
 
@@ -151,7 +151,7 @@ class VurderBehovForAvviksvurderingTest {
         val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertEquals(1, observer.behov.size)
         val behov = observer.behov.single()
         assertInstanceOf<Behov.Avviksvurdering>(behov)
@@ -177,7 +177,7 @@ class VurderBehovForAvviksvurderingTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
             ),
         )
-        command.resume(context)
+        command.resume(context, sessionContext, outbox)
         assertEquals(1, repository.avviksvurderinger.size)
         assertEquals(
             Avviksvurdering(
@@ -209,7 +209,7 @@ class VurderBehovForAvviksvurderingTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
             ),
         )
-        command.resume(context)
+        command.resume(context, sessionContext, outbox)
         assertTrue(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 
@@ -228,7 +228,7 @@ class VurderBehovForAvviksvurderingTest {
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
             ),
         )
-        command.resume(context)
+        command.resume(context, sessionContext, outbox)
         assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 
@@ -238,7 +238,7 @@ class VurderBehovForAvviksvurderingTest {
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         val context = CommandContext(UUID.randomUUID())
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
-        command.resume(context)
+        command.resume(context, sessionContext, outbox)
         assertEquals(0, repository.avviksvurderinger.size)
         assertEquals(1, repository.koblinger.size)
         assertEquals(avviksvurderingId to vilkårsgrunnlagId, repository.koblinger.single())
@@ -250,7 +250,7 @@ class VurderBehovForAvviksvurderingTest {
         val context = CommandContext(UUID.randomUUID())
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
-        command.resume(context)
+        command.resume(context, sessionContext, outbox)
         assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 

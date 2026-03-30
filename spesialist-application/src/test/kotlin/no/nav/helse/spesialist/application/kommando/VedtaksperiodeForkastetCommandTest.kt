@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VedtaksperiodeForkastetCommandTest {
+internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
     private companion object {
         private val HENDELSE = UUID.randomUUID()
         private val VEDTAKSPERIODE = UUID.randomUUID()
@@ -43,7 +43,7 @@ internal class VedtaksperiodeForkastetCommandTest {
     @Test
     fun `avbryter kommandoer og markerer vedtaksperiode som forkastet`() {
         every { personDao.finnPersonMedFødselsnummer(FNR) } returns 1
-        Assertions.assertTrue(vedtaksperiodeForkastetCommand.execute(context))
+        Assertions.assertTrue(vedtaksperiodeForkastetCommand.execute(context, sessionContext, outbox))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
     }
 }

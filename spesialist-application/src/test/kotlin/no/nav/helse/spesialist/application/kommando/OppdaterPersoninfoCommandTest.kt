@@ -18,7 +18,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-internal class OppdaterPersoninfoCommandTest {
+internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
     private companion object {
         private const val FORNAVN = "LITEN"
         private const val MELLOMNAVN = "STOR"
@@ -50,7 +50,7 @@ internal class OppdaterPersoninfoCommandTest {
     fun `mangler personinfo`() {
         val person = lagPerson(info = null).also(personRepository::lagre)
         val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
     }
@@ -64,7 +64,7 @@ internal class OppdaterPersoninfoCommandTest {
         // when
         val løsning = HentPersoninfoløsning(person.id.value, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Ukjent, Adressebeskyttelse.Fortrolig)
         context.add(løsning)
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
 
         // then
         val funnet = personRepository.finn(person.id)
@@ -84,7 +84,7 @@ internal class OppdaterPersoninfoCommandTest {
         val person = lagPerson().also(personRepository::lagre)
         val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }
 
@@ -92,7 +92,7 @@ internal class OppdaterPersoninfoCommandTest {
     fun `oppdaterer personinfo dersom force er satt til true`() {
         val person = lagPerson().also(personRepository::lagre)
         val command = OppdaterPersoninfoCommand(person.id, personRepository, force = true)
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(listOf(Behov.Personinfo), observer.behov.toList())

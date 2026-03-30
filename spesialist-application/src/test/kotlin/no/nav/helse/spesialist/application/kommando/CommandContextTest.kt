@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.kommando.Command
@@ -14,6 +15,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -23,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class CommandContextTest {
+internal class CommandContextTest : ApplicationTest() {
     private lateinit var context: CommandContext
 
     private companion object {
@@ -70,7 +72,7 @@ internal class CommandContextTest {
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this.id, this))
+            assertTrue(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             assertTrue(executed)
             assertFalse(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
@@ -82,7 +84,7 @@ internal class CommandContextTest {
     fun `resumer kommando med tilstand`() {
         context = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, this.id, this))
+            assertTrue(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             assertFalse(executed)
             assertTrue(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
@@ -93,7 +95,7 @@ internal class CommandContextTest {
     @Test
     fun `suspenderer ved execute`() {
         TestCommand(executeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this.id, this))
+            assertFalse(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
         }
@@ -104,7 +106,7 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, this.id, this))
+            assertFalse(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
         }
@@ -113,7 +115,7 @@ internal class CommandContextTest {
     @Test
     fun ferdigstiller() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
@@ -121,7 +123,7 @@ internal class CommandContextTest {
     @Test
     fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
         TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -133,7 +135,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -146,7 +148,7 @@ internal class CommandContextTest {
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
         context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
         val result = observer.utgåendeTilstandEndringer
@@ -161,7 +163,7 @@ internal class CommandContextTest {
             this.ferdigstill(context)
             false
         }).apply {
-            context.utfør(commandContextDao, this.id, this)
+            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
@@ -228,12 +230,20 @@ internal class CommandContextTest {
 
         val id: UUID = HENDELSE
 
-        override fun execute(context: CommandContext): Boolean {
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+            outbox: Outbox,
+        ): Boolean {
             executed = true
             return executeAction(this)
         }
 
-        override fun resume(context: CommandContext): Boolean {
+        override fun resume(
+            context: CommandContext,
+            sessionContext: SessionContext,
+            outbox: Outbox,
+        ): Boolean {
             resumed = true
             return resumeAction(this)
         }

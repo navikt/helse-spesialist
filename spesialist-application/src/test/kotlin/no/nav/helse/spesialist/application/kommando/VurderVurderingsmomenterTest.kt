@@ -29,7 +29,7 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VurderVurderingsmomenterTest {
+internal class VurderVurderingsmomenterTest : ApplicationTest() {
     private val risikovurderingDao = mockk<RisikovurderingDao>()
     private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
 
@@ -85,7 +85,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Sender behov for risikovurdering ved execute`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
         val risikoCommand = risikoCommand()
-        assertFalse(risikoCommand.execute(context))
+        assertFalse(risikoCommand.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(
@@ -105,7 +105,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Sender behov for risikovurdering ved resume dersom vi mangler løsning`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
         val risikoCommand = risikoCommand()
-        assertFalse(risikoCommand.resume(context))
+        assertFalse(risikoCommand.resume(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(
@@ -125,7 +125,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Sender kunRefusjon=true når det ikke skal utbetales noe til den sykmeldte`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns false
 
-        assertFalse(risikoCommand().execute(context))
+        assertFalse(risikoCommand().execute(context, sessionContext, outbox))
 
         assertEquals(
             Behov.Risikovurdering(
@@ -144,7 +144,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Sender kunRefusjon=false når det er utbetaling til den sykmeldte`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
 
-        assertFalse(risikoCommand().execute(context))
+        assertFalse(risikoCommand().execute(context, sessionContext, outbox))
 
         assertEquals(
             Behov.Risikovurdering(
@@ -162,8 +162,8 @@ internal class VurderVurderingsmomenterTest {
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
         every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns mockk()
-        assertTrue(risikoCommand().resume(context))
-        assertTrue(risikoCommand().execute(context))
+        assertTrue(risikoCommand().resume(context, sessionContext, outbox))
+        assertTrue(risikoCommand().execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }
 
@@ -174,7 +174,7 @@ internal class VurderVurderingsmomenterTest {
             behovløsning(),
         )
         val risikoCommand = risikoCommand()
-        assertTrue(risikoCommand.execute(context))
+        assertTrue(risikoCommand.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
         verify(exactly = 1) { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) }
     }
@@ -188,7 +188,7 @@ internal class VurderVurderingsmomenterTest {
             ),
         )
 
-        assertFalse(risikoCommand().execute(context))
+        assertFalse(risikoCommand().execute(context, sessionContext, outbox))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
@@ -203,7 +203,7 @@ internal class VurderVurderingsmomenterTest {
 
         observer.behov.clear()
 
-        assertFalse(risikoCommand().resume(context))
+        assertFalse(risikoCommand().resume(context, sessionContext, outbox))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
@@ -226,7 +226,7 @@ internal class VurderVurderingsmomenterTest {
             ),
         )
 
-        risikoCommand().execute(context)
+        risikoCommand().execute(context, sessionContext, outbox)
 
         assertEquals(listOf("SB_RV_1"), legacyBehandling.toDto().varsler.map { it.varselkode })
     }

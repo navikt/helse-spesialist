@@ -25,7 +25,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VurderÅpenGosysoppgaveTest {
+internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
     private companion object {
         private const val FNR = "12345678911"
         private val VEDTAKPERIODE_ID_AG_1 = UUID.randomUUID()
@@ -74,13 +74,13 @@ internal class VurderÅpenGosysoppgaveTest {
     fun `Ber om åpne oppgaver i gosys`() {
         val behov = mutableListOf<Behov>()
         val context = commandContext(behov)
-        assertFalse(command().execute(context))
+        assertFalse(command().execute(context, sessionContext, outbox))
         assertEquals(listOf(Behov.ÅpneOppgaver(skjæringstidspunkt.minusYears(1))), behov.toList())
     }
 
     @Test
     fun `Mangler løsning ved resume`() {
-        assertFalse(command().resume(commandContext()))
+        assertFalse(command().resume(commandContext(), sessionContext, outbox))
         verify(exactly = 0) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
     }
 
@@ -88,7 +88,7 @@ internal class VurderÅpenGosysoppgaveTest {
     fun `Lagrer løsning ved resume`() {
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
-        assertTrue(command().resume(context))
+        assertTrue(command().resume(context, sessionContext, outbox))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
     }
 
@@ -100,7 +100,7 @@ internal class VurderÅpenGosysoppgaveTest {
         }
         commandContext().let { commandContext ->
             commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
-            assertTrue(command().resume(commandContext))
+            assertTrue(command().resume(commandContext, sessionContext, outbox))
         }
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
@@ -116,7 +116,7 @@ internal class VurderÅpenGosysoppgaveTest {
         behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
-        assertTrue(command(harTildeltOppgave = true).resume(context))
+        assertTrue(command(harTildeltOppgave = true).resume(context, sessionContext, outbox))
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
@@ -136,7 +136,7 @@ internal class VurderÅpenGosysoppgaveTest {
     fun `Lagrer varsel ved oppslag feilet`() {
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
-        assertTrue(command().resume(context))
+        assertTrue(command().resume(context, sessionContext, outbox))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
@@ -149,7 +149,7 @@ internal class VurderÅpenGosysoppgaveTest {
         behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
-        command().resume(context)
+        command().resume(context, sessionContext, outbox)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
     }
 
@@ -158,7 +158,7 @@ internal class VurderÅpenGosysoppgaveTest {
         behandlingAg2.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
-        command().resume(context)
+        command().resume(context, sessionContext, outbox)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
     }
 
@@ -167,7 +167,7 @@ internal class VurderÅpenGosysoppgaveTest {
         context: CommandContext,
     ) {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
-        assertTrue(command(harTildeltOppgave).resume(context))
+        assertTrue(command(harTildeltOppgave).resume(context, sessionContext, outbox))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)

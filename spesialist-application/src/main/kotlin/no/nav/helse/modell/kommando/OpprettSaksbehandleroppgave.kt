@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -19,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
@@ -73,7 +75,11 @@ internal class OpprettSaksbehandleroppgave(
     private val påVentDao: PåVentDao,
     private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val fødselsnummer = behovData.fødselsnummer
         val vedtaksperiodeId = behovData.vedtaksperiodeId
         val hendelseId = behovData.id

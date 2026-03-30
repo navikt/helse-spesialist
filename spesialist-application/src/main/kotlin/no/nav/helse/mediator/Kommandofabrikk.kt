@@ -35,6 +35,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -265,6 +266,7 @@ class Kommandofabrikk(
         commandContextObservers: Set<CommandContextObserver>,
         commandContext: CommandContext,
         sessionContext: SessionContext,
+        outbox: Outbox,
     ): Kommandostarter =
         { kommandooppretter ->
             val transactionalCommandContextDao = sessionContext.commandContextDao
@@ -277,6 +279,8 @@ class Kommandofabrikk(
                     commandContextObservers = commandContextObservers,
                     commandContextDao = transactionalCommandContextDao,
                     metrikkDao = sessionContext.metrikkDao,
+                    sessionContext = sessionContext,
+                    outbox = outbox,
                 )
             }
         }
@@ -294,6 +298,8 @@ class Kommandofabrikk(
         command: Command,
         meldingId: UUID,
         commandContext: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
         commandContextObservers: Collection<CommandContextObserver>,
         commandContextDao: CommandContextDao,
         metrikkDao: MetrikkDao,
@@ -302,7 +308,7 @@ class Kommandofabrikk(
         val contextId = commandContext.id()
         medMdc(MdcKey.CONTEXT_ID to contextId.toString()) {
             try {
-                if (commandContext.utfør(commandContextDao, meldingId, command)) {
+                if (commandContext.utfør(commandContextDao, sessionContext, outbox, meldingId, command)) {
                     val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                     metrikker(command.name, kjøretid, contextId, metrikkDao)
                     loggInfo("Kommando(er) for ${command.name} er utført ferdig")

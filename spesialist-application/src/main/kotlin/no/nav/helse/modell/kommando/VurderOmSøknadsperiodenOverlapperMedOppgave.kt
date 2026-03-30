@@ -2,15 +2,19 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 
 internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
-    private val sessionContext: SessionContext,
     private val oppgave: Oppgave,
     private val søknadsperioder: List<Periode>,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val behandling =
             sessionContext.behandlingRepository.finn(oppgave.behandlingId)
                 ?: error("Fant ikke behandling")

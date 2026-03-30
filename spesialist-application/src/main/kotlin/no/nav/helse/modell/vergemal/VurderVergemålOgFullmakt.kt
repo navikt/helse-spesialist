@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vergemal
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
@@ -9,6 +10,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_4
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 
@@ -18,9 +20,17 @@ internal class VurderVergemålOgFullmakt(
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context)
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ) = behandle(context)
 
-    override fun resume(context: CommandContext) = behandle(context)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
         val vergemålløsning = context.get<Vergemålløsning>()

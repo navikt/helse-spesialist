@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VurderEnhetUtlandTest {
+internal class VurderEnhetUtlandTest : ApplicationTest() {
     private lateinit var context: CommandContext
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
@@ -34,7 +34,7 @@ internal class VurderEnhetUtlandTest {
     fun `skal legge på varsel om utland`() {
         val slot = slot<LegacyVarsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
-        assertTrue(hentCommand().execute(context))
+        assertTrue(hentCommand().execute(context, sessionContext, outbox))
         verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
@@ -43,7 +43,7 @@ internal class VurderEnhetUtlandTest {
     fun `skal legge på varsel for utland også ved revurdering`() {
         val slot = slot<LegacyVarsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
-        assertTrue(hentCommand().execute(context))
+        assertTrue(hentCommand().execute(context, sessionContext, outbox))
         verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
         assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }

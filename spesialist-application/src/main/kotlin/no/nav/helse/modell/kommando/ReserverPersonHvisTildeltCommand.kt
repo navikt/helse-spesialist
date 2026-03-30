@@ -1,7 +1,9 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
@@ -13,7 +15,11 @@ internal class ReserverPersonHvisTildeltCommand(
     private val tildelingDao: TildelingDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val saksbehandlerOid: UUID =

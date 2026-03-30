@@ -33,7 +33,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-class OpprettEllerOppdaterInntektskilderTest {
+class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
     private val arbeidsgiverRepository = InMemoryArbeidsgiverRepository()
     private val avviksvurderingRepository = InMemoryAvviksvurderingRepository()
 
@@ -68,7 +68,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer))),
@@ -87,7 +87,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer))),
@@ -107,7 +107,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer))),
@@ -127,7 +127,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(fødselsnummer.fødselsnummer))),
@@ -147,7 +147,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertTrue(ferdig)
         assertTrue(observer.behov.isEmpty())
     }
@@ -164,7 +164,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertTrue(ferdig)
         assertTrue(observer.behov.isEmpty())
     }
@@ -180,7 +180,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertTrue(ferdig)
         assertTrue(observer.behov.isEmpty())
     }
@@ -205,7 +205,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         val actualBehovList = observer.behov.toList()
         assertEquals(1, actualBehovList.size)
@@ -239,7 +239,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         val actualBehovList = observer.behov.toList()
         assertEquals(1, actualBehovList.size)
@@ -267,7 +267,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         assertEquals(
             setOf(
@@ -289,7 +289,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
             )
-        command.execute(context)
+        command.execute(context, sessionContext, outbox)
 
         val arbeidsgivernavn = lagOrganisasjonsnavn()
         context.add(
@@ -299,7 +299,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             ),
         )
 
-        val ferdig = command.resume(context)
+        val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
 
         assertEquals(1, arbeidsgiverRepository.alle().size)
@@ -321,7 +321,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        command.execute(context)
+        command.execute(context, sessionContext, outbox)
 
         val fornavn = lagFornavn()
         val etternavn = lagEtternavn()
@@ -333,7 +333,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             ),
         )
 
-        val ferdig = command.resume(context)
+        val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
 
         assertEquals(1, arbeidsgiverRepository.alle().size)
@@ -357,7 +357,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
             )
-        command.execute(context)
+        command.execute(context, sessionContext, outbox)
 
         val arbeidsgivernavn = lagOrganisasjonsnavn()
         context.add(
@@ -377,7 +377,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             ),
         )
 
-        val ferdig = command.resume(context)
+        val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
         assertEquals(2, arbeidsgiverRepository.alle().size)
         arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
@@ -404,7 +404,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
             )
-        command.execute(context)
+        command.execute(context, sessionContext, outbox)
 
         observer.reset()
 
@@ -416,7 +416,7 @@ class OpprettEllerOppdaterInntektskilderTest {
             ),
         )
 
-        val ferdig = command.resume(context)
+        val ferdig = command.resume(context, sessionContext, outbox)
         assertFalse(ferdig)
 
         assertEquals(2, arbeidsgiverRepository.alle().size)
@@ -466,7 +466,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertFalse(ferdig)
         assertEquals(
             listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer.organisasjonsnummer))),
@@ -505,7 +505,7 @@ class OpprettEllerOppdaterInntektskilderTest {
                 avviksvurderingRepository = avviksvurderingRepository,
             )
 
-        val ferdig = command.execute(context)
+        val ferdig = command.execute(context, sessionContext, outbox)
         assertTrue(ferdig)
         assertEquals(emptyList<Behov>(), observer.behov.toList())
     }

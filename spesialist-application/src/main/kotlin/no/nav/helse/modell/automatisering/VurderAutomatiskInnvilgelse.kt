@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.db.AutomatiseringDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
@@ -9,6 +10,7 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -29,7 +31,11 @@ internal class VurderAutomatiskInnvilgelse(
     private val utbetalingId = godkjenningsbehov.utbetalingId
     private val hendelseId = godkjenningsbehov.id
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val resultat =
             automatisering.utfør(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
@@ -90,7 +96,10 @@ internal class VurderAutomatiskInnvilgelse(
         val vedtak =
             vedtakRepository.finn(spleisBehandlingId).let { vedtak ->
                 when (vedtak?.behandletAvSpleis) {
-                    null -> Vedtak.automatisk(spleisBehandlingId)
+                    null -> {
+                        Vedtak.automatisk(spleisBehandlingId)
+                    }
+
                     true -> {
                         logg.info("Det er allerede fattet vedtak for behandlingen, og spleis har behandlet det")
                         return

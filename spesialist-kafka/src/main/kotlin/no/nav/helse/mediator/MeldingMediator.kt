@@ -18,6 +18,7 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -38,6 +39,7 @@ class MeldingMediator(
     private val legacyVarselRepository: LegacyVarselRepository,
     private val poisonPillDao: PoisonPillDao,
     private val ignorerMeldingerForUkjentePersoner: Boolean,
+    private val versjonAvKode: String,
     poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
 ) {
     private val poisonPillsCache: LoadingCache<Unit, PoisonPills> =
@@ -262,6 +264,7 @@ class MeldingMediator(
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
+        val outbox = Outbox(versjonAvKode = versjonAvKode)
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
                 sessionContext.legacyPersonRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
@@ -271,11 +274,13 @@ class MeldingMediator(
                             setOf(utgåendeMeldingerMediator),
                             commandContext(sessionContext.commandContextDao),
                             sessionContext,
+                            outbox,
                         )
                     melding.behandle(this, kommandostarter, sessionContext)
                 }
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
+            outbox.sendAlle(kontekstbasertPubliserer)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)
         } finally {

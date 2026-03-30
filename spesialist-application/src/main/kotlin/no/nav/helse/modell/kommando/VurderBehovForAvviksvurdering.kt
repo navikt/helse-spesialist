@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -8,6 +9,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.time.LocalDate
 import java.util.UUID
@@ -22,13 +24,21 @@ class VurderBehovForAvviksvurdering(
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val organisasjonsnummer: String,
 ) : Command {
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
         return behov(context, sykepengegrunnlagsfakta)
     }
 
-    override fun resume(context: CommandContext): Boolean {
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context, sykepengegrunnlagsfakta)
         val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class VurderVergemålOgFullmaktTest {
+class VurderVergemålOgFullmaktTest : ApplicationTest() {
     private companion object {
         private const val FNR = "12345678911"
         private val VEDTAKSPERIODE_ID = UUID.fromString("1cd0d9cb-62e8-4f16-b634-f2b9dab550b6")
@@ -72,13 +72,13 @@ class VurderVergemålOgFullmaktTest {
 
     @Test
     fun `Ber om informasjon om vergemål hvis den mangler`() {
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertEquals(setOf(Behov.Vergemål, Behov.Fullmakt), observer.behov.toSet())
     }
 
     @Test
     fun `gjør ingen behandling om vi mangler løsning ved resume`() {
-        assertFalse(command.resume(context))
+        assertFalse(command.resume(context, sessionContext, outbox))
         verify(exactly = 0) { vergemålDao.lagre(any(), any(), any()) }
     }
 
@@ -87,7 +87,7 @@ class VurderVergemålOgFullmaktTest {
         val ingenVergemål = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false)
         context.add(Vergemålløsning(ingenVergemål))
         context.add(Fullmaktløsning(false))
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål, false) }
         assertEquals(0, observer.hendelser.size)
         legacyBehandling.inspektør {
@@ -100,7 +100,7 @@ class VurderVergemålOgFullmaktTest {
         val harVergemål = VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = false)
         context.add(Vergemålløsning(harVergemål))
         context.add(Fullmaktløsning(false))
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål, false) }
         assertEquals(0, observer.hendelser.size)
     }
@@ -110,7 +110,7 @@ class VurderVergemålOgFullmaktTest {
         val harFullmakt = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = true)
         context.add(Vergemålløsning(harFullmakt))
         context.add(Fullmaktløsning(false))
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt, false) }
         assertEquals(0, observer.hendelser.size)
     }
@@ -120,7 +120,7 @@ class VurderVergemålOgFullmaktTest {
         val harFremtidsfullmakt = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false)
         context.add(Vergemålløsning(harFremtidsfullmakt))
         context.add(Fullmaktløsning(true))
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt, true) }
         assertEquals(0, observer.hendelser.size)
     }
@@ -130,7 +130,7 @@ class VurderVergemålOgFullmaktTest {
         val harAlt = VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = true)
         context.add(Vergemålløsning(harAlt))
         context.add(Fullmaktløsning(false))
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt, false) }
         assertEquals(0, observer.hendelser.size)
         legacyBehandling.inspektør {

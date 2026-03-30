@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class VedtaksperiodeDbDtoReberegnetPeriodehistorikkTest {
+class VedtaksperiodeReberegnetPeriodehistorikkTest : ApplicationTest() {
     @Test
     fun `Lagrer historikkinnslag når vedtaksperioden er reberegnet`() {
         val context = CommandContext(UUID.randomUUID())
         val repository = mockk<PeriodehistorikkDao>(relaxed = true)
         val command = VedtaksperiodeReberegnetPeriodehistorikk(mockk(relaxed = true), repository)
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         verify(exactly = 1) { repository.lagre(any<VedtaksperiodeReberegnet>(), any<UUID>()) }
     }
 }

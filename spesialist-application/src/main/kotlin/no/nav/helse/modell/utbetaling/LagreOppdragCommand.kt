@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -9,6 +10,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import org.slf4j.LoggerFactory
@@ -41,7 +43,11 @@ class LagreOppdragCommand(
         internal fun lagre(utbetalingDao: UtbetalingDao) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)
     }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         lagOpptegnelse()
         log.info("lagrer utbetaling $utbetalingId med status $status")
         lagre()
@@ -79,9 +85,11 @@ class LagreOppdragCommand(
                 Utbetalingtype.ANNULLERING if status == UTBETALING_FEILET -> {
                     Opptegnelse.Type.UTBETALING_ANNULLERING_FEILET
                 }
+
                 Utbetalingtype.ANNULLERING if status == ANNULLERT -> {
                     Opptegnelse.Type.UTBETALING_ANNULLERING_OK
                 }
+
                 Utbetalingtype.REVURDERING if status in
                     listOf(
                         UTBETALT,
@@ -91,7 +99,10 @@ class LagreOppdragCommand(
                 -> {
                     Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET
                 }
-                else -> return
+
+                else -> {
+                    return
+                }
             }
 
         val opptegnelse =

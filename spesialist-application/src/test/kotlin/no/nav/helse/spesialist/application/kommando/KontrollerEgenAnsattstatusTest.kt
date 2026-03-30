@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class KontrollerEgenAnsattstatusTest {
+internal class KontrollerEgenAnsattstatusTest : ApplicationTest() {
     private companion object {
         private const val FNR = "12345678911"
     }
@@ -50,14 +50,14 @@ internal class KontrollerEgenAnsattstatusTest {
     @Test
     fun `ber om informasjon om egen ansatt`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        Assertions.assertFalse(command.execute(context))
+        Assertions.assertFalse(command.execute(context, sessionContext, outbox))
         Assertions.assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
     }
 
     @Test
     fun `mangler løsning ved resume`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        Assertions.assertFalse(command.resume(context))
+        Assertions.assertFalse(command.resume(context, sessionContext, outbox))
         verify(exactly = 0) { personRepository.lagre(any()) }
     }
 
@@ -65,18 +65,18 @@ internal class KontrollerEgenAnsattstatusTest {
     fun `lagrer løsning ved resume`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
-        Assertions.assertTrue(command.resume(context))
+        Assertions.assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { personRepository.lagre(any()) }
     }
 
     @Test
     fun `sender ikke behov om informasjonen finnes`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = false)
-        Assertions.assertTrue(command.resume(context))
+        Assertions.assertTrue(command.resume(context, sessionContext, outbox))
         Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
 
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
-        Assertions.assertTrue(command.resume(context))
+        Assertions.assertTrue(command.resume(context, sessionContext, outbox))
         Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
     }
 }

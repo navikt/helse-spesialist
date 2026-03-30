@@ -1,10 +1,12 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
@@ -44,7 +46,11 @@ internal class OpprettEllerOppdaterInntektskilder(
                 }
             }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
         if (nyeArbeidsgiverIdentifikatorer.isEmpty() && utdaterteArbeidsgivere.isEmpty()) return true
         if (nyeArbeidsgiverIdentifikatorer.isNotEmpty()) {
@@ -66,7 +72,11 @@ internal class OpprettEllerOppdaterInntektskilder(
 
     private fun Arbeidsgiver.toLogString(): String = "$id, $navn"
 
-    override fun resume(context: CommandContext): Boolean {
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
 
         nyeArbeidsgiverIdentifikatorer.forEach { identifikator ->
@@ -92,7 +102,7 @@ internal class OpprettEllerOppdaterInntektskilder(
             }
         }
 
-        return execute(context)
+        return execute(context, sessionContext, outbox)
     }
 
     private fun finnNavnILøsninger(

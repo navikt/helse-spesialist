@@ -35,7 +35,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-internal class VurderBehovForTotrinnskontrollTest {
+internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
@@ -130,7 +130,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -141,7 +141,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -155,7 +155,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -169,7 +169,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -180,7 +180,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
             lagTotrinnsvurdering(saksbehandler = saksbehandler)
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
@@ -197,7 +197,7 @@ internal class VurderBehovForTotrinnskontrollTest {
                 beslutter = beslutter,
             )
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
@@ -211,7 +211,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
 
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }

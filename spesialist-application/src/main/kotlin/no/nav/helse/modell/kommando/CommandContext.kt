@@ -2,11 +2,13 @@ package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 
@@ -89,6 +91,8 @@ class CommandContext(
 
     internal fun utfør(
         commandContextDao: CommandContextDao,
+        sessionContext: SessionContext,
+        outbox: Outbox,
         hendelseId: UUID,
         command: Command,
     ): Boolean {
@@ -99,7 +103,7 @@ class CommandContext(
             )
             clear()
         }
-        return utfør(command).also { ferdig ->
+        return utfør(command, sessionContext, outbox).also { ferdig ->
             if (tidligFerdigstilt || ferdig) {
                 commandContextDao.ferdig(hendelseId, id).also {
                     kommandokjedetilstandEndret(KommandokjedeEndretEvent.Ferdig(command.name, id, hendelseId))
@@ -112,11 +116,14 @@ class CommandContext(
         }
     }
 
-    private fun utfør(command: Command) =
-        when {
-            _sti.isEmpty() -> command.execute(this)
-            else -> command.resume(this)
-        }
+    private fun utfør(
+        command: Command,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ) = when {
+        _sti.isEmpty() -> command.execute(this, sessionContext, outbox)
+        else -> command.resume(this, sessionContext, outbox)
+    }
 
     internal companion object {
         internal fun Command.ferdigstill(context: CommandContext): Boolean {

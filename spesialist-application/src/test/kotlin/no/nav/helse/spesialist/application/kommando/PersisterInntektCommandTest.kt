@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-internal class PersisterInntektCommandTest {
+internal class PersisterInntektCommandTest : ApplicationTest() {
     private companion object {
         private const val FNR = "12345678910"
     }
@@ -53,7 +53,7 @@ internal class PersisterInntektCommandTest {
 
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
     }
 
@@ -63,7 +63,7 @@ internal class PersisterInntektCommandTest {
 
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
-        assertTrue(command.execute(context))
+        assertTrue(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }
 
@@ -75,11 +75,11 @@ internal class PersisterInntektCommandTest {
 
         val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
-        assertFalse(command.execute(context))
+        assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         context.add(løsning())
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
     }
 
@@ -90,7 +90,7 @@ internal class PersisterInntektCommandTest {
 
         val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
-        assertTrue(command.resume(context))
+        assertTrue(command.resume(context, sessionContext, outbox))
         verify(exactly = 0) { personDao.lagreInntekter(any(), any(), any()) }
     }
 

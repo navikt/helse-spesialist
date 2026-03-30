@@ -1,6 +1,8 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.spesialist.application.Outbox
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -12,7 +14,11 @@ internal class AvbrytOppgaveCommand(
         private val log = LoggerFactory.getLogger(AvbrytOppgaveCommand::class.java)
     }
 
-    override fun execute(context: CommandContext): Boolean {
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ): Boolean {
         log.info("invaliderer alle oppgaver relatert til vedtaksperiodeId=$vedtaksperiodeId")
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
         return true

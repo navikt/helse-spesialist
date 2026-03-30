@@ -1,9 +1,11 @@
 package no.nav.helse.modell.egenansatt
 
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -12,9 +14,17 @@ internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
     private val personRepository: PersonRepository,
 ) : Command {
-    override fun execute(context: CommandContext) = behandle(context)
+    override fun execute(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ) = behandle(context)
 
-    override fun resume(context: CommandContext) = behandle(context)
+    override fun resume(
+        context: CommandContext,
+        sessionContext: SessionContext,
+        outbox: Outbox,
+    ) = behandle(context)
 
     private fun behandle(context: CommandContext): Boolean {
         if (viHarInformasjon()) return true
