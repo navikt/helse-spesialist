@@ -22,9 +22,17 @@ internal class OppdaterPersonCommand(
         )
 
     private class OppdaterInfotrygdutbetalingerCommand : Command {
-        override fun execute(context: CommandContext, sessionContext: SessionContext, outbox: Outbox): Boolean = ignorer()
+        override fun execute(
+            context: CommandContext,
+            sessionContext: SessionContext,
+            outbox: Outbox,
+        ): Boolean = ignorer()
 
-        override fun resume(context: CommandContext, sessionContext: SessionContext, outbox: Outbox): Boolean = ignorer()
+        override fun resume(
+            context: CommandContext,
+            sessionContext: SessionContext,
+            outbox: Outbox,
+        ): Boolean = ignorer()
 
         private fun ignorer(): Boolean = true.also { log.info("Infotrygd-utbetalinger hentes ikke i kommandokjeden lenger") }
     }
