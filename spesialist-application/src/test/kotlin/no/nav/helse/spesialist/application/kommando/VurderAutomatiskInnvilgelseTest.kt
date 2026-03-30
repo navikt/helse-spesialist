@@ -19,6 +19,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.InMemoryCommandContextDao
+import no.nav.helse.spesialist.application.InMemoryMeldingDao
 import no.nav.helse.spesialist.application.InMemoryVedtakRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -183,7 +184,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
         verify(exactly = 0) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
     }
 
-    private val commandContextDao = InMemoryCommandContextDao()
+    private val commandContextDao = InMemoryCommandContextDao(InMemoryMeldingDao())
 
     private val observatør =
         object : CommandContextObserver {

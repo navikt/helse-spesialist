@@ -129,11 +129,6 @@ class Kommandofabrikk(
             vedtaksperiode = vedtaksperiode,
             spleisBehandlingId = spleisBehandlingId,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
-            commandContextDao = sessionContext.commandContextDao,
-            oppgaveService = transaksjonellOppgaveService(sessionContext),
-            reservasjonDao = sessionContext.reservasjonDao,
-            tildelingDao = sessionContext.tildelingDao,
-            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -192,7 +187,6 @@ class Kommandofabrikk(
     internal fun vedtaksperiodeForkastet(
         hendelse: VedtaksperiodeForkastet,
         alleForkastedeVedtaksperiodeIder: List<UUID>,
-        sessionContext: SessionContext,
     ): VedtaksperiodeForkastetCommand =
         VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
@@ -200,11 +194,6 @@ class Kommandofabrikk(
             spleisBehandlingId = hendelse.spleisBehandlingId,
             id = hendelse.id,
             alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
-            commandContextDao = sessionContext.commandContextDao,
-            oppgaveService = transaksjonellOppgaveService(sessionContext),
-            reservasjonDao = sessionContext.reservasjonDao,
-            tildelingDao = sessionContext.tildelingDao,
-            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
         )
 
     internal fun stansAutomatiskBehandling(
@@ -229,7 +218,6 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(sessionContext),
             vedtakDao = sessionContext.vedtakDao,
             meldingDao = sessionContext.meldingDao,
-            commandContextDao = sessionContext.commandContextDao,
             personDao = sessionContext.personDao,
             arbeidsgiverRepository = sessionContext.arbeidsgiverRepository,
             arbeidsforholdDao = sessionContext.arbeidsforholdDao,

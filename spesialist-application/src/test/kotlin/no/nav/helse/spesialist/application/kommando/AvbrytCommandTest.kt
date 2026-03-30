@@ -1,42 +1,42 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.CommandContextDao
-import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertEquals
 
 internal class AvbrytCommandTest : ApplicationTest() {
-    private companion object {
-        private val VEDTAKSPERIODE = UUID.randomUUID()
-        private val CONTEXT = UUID.randomUUID()
+    private val vedtaksperiodeId = UUID.randomUUID()
+    private val commandContextId = UUID.randomUUID()
 
-        private fun lagAvbrytCommand(commandContextDao: CommandContextDao) =
-            AvbrytCommand(
-                fødselsnummer = "fnr",
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-                commandContextDao = commandContextDao,
-                oppgaveService = mockk<OppgaveService>(relaxed = true),
-                reservasjonDao = mockk(relaxed = true),
-                tildelingDao = mockk(relaxed = true),
-                totrinnsvurderingRepository = mockk(relaxed = true),
-            )
-    }
+    private fun lagAvbrytCommand() =
+        AvbrytCommand(
+            fødselsnummer = lagFødselsnummer(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+        )
 
-    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val context = CommandContext(CONTEXT)
+    private val context = CommandContext(commandContextId)
 
-    private val command = lagAvbrytCommand(commandContextDao)
+    private val command = lagAvbrytCommand()
 
     @Test
     fun `avbryter command context`() {
-        assertTrue(command.execute(context, sessionContext, outbox))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
+        // given
+        val hendelseId = UUID.randomUUID()
+        val enAnnenCommandContextId = UUID.randomUUID()
+        sessionContext.meldingDao.lagre(hendelseId, "{}", MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET, vedtaksperiodeId)
+        sessionContext.commandContextDao.opprett(hendelseId, enAnnenCommandContextId)
+        // when
+        val kommandoFerdig = command.execute(context, sessionContext, outbox)
+
+        // then
+        assertTrue(kommandoFerdig)
+        assertEquals(mapOf(enAnnenCommandContextId to hendelseId), sessionContext.commandContextDao.avbrutteKommandokjeder)
     }
 }

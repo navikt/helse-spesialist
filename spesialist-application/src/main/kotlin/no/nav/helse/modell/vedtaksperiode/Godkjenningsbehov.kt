@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
-import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
@@ -346,7 +345,6 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     meldingDao: MeldingDao,
-    commandContextDao: CommandContextDao,
     personDao: PersonDao,
     arbeidsgiverRepository: ArbeidsgiverRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
@@ -389,7 +387,6 @@ internal class GodkjenningsbehovCommand(
             ),
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
-                commandContextDao = commandContextDao,
             ),
             VurderBehovForAvviksvurdering(
                 fødselsnummer = behovData.fødselsnummer,

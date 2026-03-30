@@ -32,7 +32,7 @@ class InMemoryDaos(
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val stansAutomatiskBehandlingSaksbehandlerDao: InMemoryStansAutomatiskBehandlingSaksbehandlerDao,
-    override val tildelingDao: UnimplementedTildelingDao,
+    override val tildelingDao: DelegatingTildelingDao,
     override val tildelingApiDao: UnimplementedTildelingApiDao,
     override val varselApiRepository: UnimplementedVarselApiRepository,
     override val vedtakBegrunnelseDao: UnimplementedVedtakBegrunnelseDao,

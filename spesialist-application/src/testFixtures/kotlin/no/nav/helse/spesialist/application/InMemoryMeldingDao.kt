@@ -7,14 +7,17 @@ import java.util.UUID
 
 class InMemoryMeldingDao : MeldingDao {
     val godkjenningsbehov = mutableListOf<Godkjenningsbehov>()
+    internal val vedtaksperiodemeldinger = mutableListOf<Vedtaksperiodemelding>()
 
-    override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
-        return godkjenningsbehov.first { it.id == meldingId }
-    }
+    internal data class Vedtaksperiodemelding(
+        val id: UUID,
+        val meldingtype: MeldingDao.Meldingtype,
+        val vedtaksperiodeId: UUID,
+    )
 
-    override fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov? {
-        return godkjenningsbehov.filter { it.spleisBehandlingId == spleisBehandlingId }.maxByOrNull { it.opprettet }
-    }
+    override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov = godkjenningsbehov.first { it.id == meldingId }
+
+    override fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov? = godkjenningsbehov.filter { it.spleisBehandlingId == spleisBehandlingId }.maxByOrNull { it.opprettet }
 
     override fun finn(id: UUID): Personmelding? {
         TODO("Not yet implemented")
@@ -30,13 +33,15 @@ class InMemoryMeldingDao : MeldingDao {
         id: UUID,
         json: String,
         meldingtype: MeldingDao.Meldingtype,
-        vedtaksperiodeId: UUID?
+        vedtaksperiodeId: UUID?,
     ) {
+        if (vedtaksperiodeId == null) return
+        vedtaksperiodemeldinger.add(Vedtaksperiodemelding(id, meldingtype, vedtaksperiodeId))
     }
 
     override fun sisteBehandlingOpprettetOmKorrigertSøknad(
         fødselsnummer: String,
-        vedtaksperiodeId: UUID
+        vedtaksperiodeId: UUID,
     ): MeldingDao.BehandlingOpprettetKorrigertSøknad? {
         TODO("Not yet implemented")
     }
@@ -51,7 +56,7 @@ class InMemoryMeldingDao : MeldingDao {
 
     override fun opprettAutomatiseringKorrigertSøknad(
         vedtaksperiodeId: UUID,
-        meldingId: UUID
+        meldingId: UUID,
     ) {
         TODO("Not yet implemented")
     }

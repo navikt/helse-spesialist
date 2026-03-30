@@ -1,19 +1,14 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
@@ -42,7 +37,7 @@ class VedtaksperiodeForkastet(
         sessionContext: SessionContext,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
-        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, person.forkastedeVedtaksperiodeIder(), sessionContext) }
+        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, person.forkastedeVedtaksperiodeIder()) }
     }
 
     override fun toJson() = json
@@ -54,11 +49,6 @@ class VedtaksperiodeForkastetCommand(
     val spleisBehandlingId: SpleisBehandlingId?,
     val id: UUID,
     val alleForkastedeVedtaksperiodeIder: List<UUID>,
-    commandContextDao: CommandContextDao,
-    oppgaveService: OppgaveService,
-    reservasjonDao: ReservasjonDao,
-    tildelingDao: TildelingDao,
-    totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -66,16 +56,10 @@ class VedtaksperiodeForkastetCommand(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
-                commandContextDao = commandContextDao,
-                oppgaveService = oppgaveService,
-                reservasjonDao = reservasjonDao,
-                tildelingDao = tildelingDao,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
             AvbrytTotrinnsvurderingCommand(
                 fødselsnummer = fødselsnummer,
                 alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
         )
 }

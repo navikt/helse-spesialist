@@ -36,7 +36,7 @@ class InMemorySessionContext(
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val stansAutomatiskBehandlingSaksbehandlerDao: InMemoryStansAutomatiskBehandlingSaksbehandlerDao,
     override val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
-    override val tildelingDao: UnimplementedTildelingDao,
+    override val tildelingDao: DelegatingTildelingDao,
     override val tilkommenInntektRepository: InMemoryTilkommenInntektRepository,
     override val totrinnsvurderingRepository: InMemoryTotrinnsvurderingRepository,
     override val utbetalingDao: UnimplementedUtbetalingDao,
@@ -51,5 +51,5 @@ class InMemorySessionContext(
     override val vedtakRepository: InMemoryVedtakRepository,
     override val opptegnelseRepository: InMemoryOpptegnelseRepository,
     override val personKlargjoresDao: InMemoryPersonKlargjoresDao,
-    override val saksbehandlerStansRepository: SaksbehandlerStansRepository
+    override val saksbehandlerStansRepository: SaksbehandlerStansRepository,
 ) : SessionContext

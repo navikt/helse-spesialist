@@ -6,8 +6,12 @@ import java.time.Duration
 import java.time.Instant
 import java.util.UUID
 
-class InMemoryCommandContextDao : CommandContextDao {
+class InMemoryCommandContextDao(
+    private val meldingDao: InMemoryMeldingDao,
+) : CommandContextDao {
     private val data = mutableListOf<Data>()
+    internal val avbrutteKommandokjeder get() =
+        data.filter { it.tilstand == Data.CommandContextTilstand.AVBRUTT }.associate { it.contextId to it.hendelseId }
 
     private data class Data(
         val id: Int,
@@ -18,7 +22,7 @@ class InMemoryCommandContextDao : CommandContextDao {
         val sti: List<Int>,
         val hash: UUID?,
     ) {
-        enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT, FEIL }
+        enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT, FEIL, AVBRUTT }
     }
 
     override fun nyContext(meldingId: UUID): CommandContext =
@@ -28,15 +32,24 @@ class InMemoryCommandContextDao : CommandContextDao {
             }
         }
 
-    override fun opprett(hendelseId: UUID, contextId: UUID) {
+    override fun opprett(
+        hendelseId: UUID,
+        contextId: UUID,
+    ) {
         lagre(hendelseId, contextId, Data.CommandContextTilstand.NY, null)
     }
 
-    override fun ferdig(hendelseId: UUID, contextId: UUID) {
+    override fun ferdig(
+        hendelseId: UUID,
+        contextId: UUID,
+    ) {
         lagre(hendelseId, contextId, Data.CommandContextTilstand.FERDIG, null)
     }
 
-    override fun feil(hendelseId: UUID, contextId: UUID) {
+    override fun feil(
+        hendelseId: UUID,
+        contextId: UUID,
+    ) {
         lagre(hendelseId, contextId, Data.CommandContextTilstand.FEIL, null)
     }
 
@@ -49,7 +62,20 @@ class InMemoryCommandContextDao : CommandContextDao {
         lagre(hendelseId, contextId, Data.CommandContextTilstand.SUSPENDERT, hash, sti)
     }
 
-    override fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) = TODO("Ikke implementert for tester")
+    override fun avbryt(
+        vedtaksperiodeId: UUID,
+        contextId: UUID,
+    ): List<Pair<UUID, UUID>> {
+        val hendelseIder =
+            meldingDao.vedtaksperiodemeldinger
+                .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+                .map { it.id }
+                .toSet()
+        val kontekster = data.filter { it.hendelseId in hendelseIder }
+        return kontekster
+            .onEach { lagre(it.hendelseId, it.contextId, Data.CommandContextTilstand.AVBRUTT, null) }
+            .map { it.contextId to it.hendelseId }
+    }
 
     private fun lagre(
         hendelseId: UUID,
@@ -66,8 +92,8 @@ class InMemoryCommandContextDao : CommandContextDao {
                 opprettet = Instant.now(),
                 tilstand = tilstand,
                 sti = sti,
-                hash = hash
-            )
+                hash = hash,
+            ),
         )
     }
 
@@ -77,12 +103,16 @@ class InMemoryCommandContextDao : CommandContextDao {
         }
 
     override fun finnSuspendert(contextId: UUID) =
-        data.filter { it.contextId == contextId }.maxByOrNull { it.id }
+        data
+            .filter { it.contextId == contextId }
+            .maxByOrNull { it.id }
             ?.takeIf { it.tilstand == Data.CommandContextTilstand.SUSPENDERT }
             ?.let { CommandContext(id = contextId, sti = it.sti, hash = it.hash) }
 
     override fun finnSuspendertEllerFeil(contextId: UUID) =
-        data.filter { it.contextId == contextId }.maxByOrNull { it.id }
+        data
+            .filter { it.contextId == contextId }
+            .maxByOrNull { it.id }
             ?.takeIf { it.tilstand == Data.CommandContextTilstand.SUSPENDERT || it.tilstand == Data.CommandContextTilstand.FEIL }
             ?.let { CommandContext(id = contextId, sti = it.sti, hash = it.hash) }
 }

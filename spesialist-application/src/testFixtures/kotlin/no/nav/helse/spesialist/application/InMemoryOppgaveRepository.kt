@@ -39,7 +39,16 @@ class InMemoryOppgaveRepository(
 
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
         val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
-        return oppgaver.values.singleOrNull { it.vedtaksperiodeId in ider }
+        return oppgaver.values
+            .filter { it.tilstand in listOf(Oppgave.AvventerSaksbehandler) }
+            .singleOrNull { it.vedtaksperiodeId in ider }
+    }
+
+    override fun finnGjeldendeForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
+        val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
+        return oppgaver.values
+            .filter { it.tilstand in listOf(Oppgave.AvventerSystem, Oppgave.AvventerSaksbehandler) }
+            .singleOrNull { it.vedtaksperiodeId in ider }
     }
 
     override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? = oppgaver.values.filter { it.behandlingId.value == behandlingId }.minOfOrNull { it.opprettet }

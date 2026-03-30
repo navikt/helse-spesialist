@@ -1,26 +1,31 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.tilUtgåendeHendelse
 import no.nav.helse.spesialist.application.Outbox
-import org.slf4j.LoggerFactory
-import java.util.UUID
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Identitetsnummer
 
 internal class AvbrytOppgaveCommand(
-    private val vedtaksperiodeId: UUID,
-    private val oppgaveService: OppgaveService,
+    private val identitetsnummer: Identitetsnummer,
 ) : Command {
-    private companion object {
-        private val log = LoggerFactory.getLogger(AvbrytOppgaveCommand::class.java)
-    }
-
     override fun execute(
         context: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        log.info("invaliderer alle oppgaver relatert til vedtaksperiodeId=$vedtaksperiodeId")
-        oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
+        val oppgave = sessionContext.oppgaveRepository.finnGjeldendeForPerson(identitetsnummer)
+
+        if (oppgave == null) {
+            loggInfo("Fant ingen oppgave for person, ingen oppgave å avbryte", "fødselsnummer" to identitetsnummer.value)
+            return true
+        }
+
+        oppgave.avbryt()
+        sessionContext.oppgaveRepository.lagre(oppgave)
+        oppgave.konsumerHendelser().forEach {
+            outbox.leggTil(identitetsnummer, it.tilUtgåendeHendelse(), "avbrutt oppgave")
+        }
         return true
     }
 }

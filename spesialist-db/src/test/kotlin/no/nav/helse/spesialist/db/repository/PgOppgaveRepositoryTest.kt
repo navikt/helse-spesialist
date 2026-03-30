@@ -59,6 +59,28 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `lagre og finn gjeldende oppgave for person - avventer saksbehandler`() {
+        val oppgave = lagOppgave()
+
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finnGjeldendeForPerson(person.id)
+        assertNotNull(funnetOppgave)
+        assertEquals(oppgave, funnetOppgave)
+    }
+
+    @Test
+    fun `lagre og finn gjeldende oppgave for person - avventer system`() {
+        val saksbehandler = lagSaksbehandler()
+        val oppgave = lagOppgave()
+        oppgave.avventerSystem(saksbehandler.ident, saksbehandler.id.value)
+
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finnGjeldendeForPerson(person.id)
+        assertNotNull(funnetOppgave)
+        assertEquals(oppgave, funnetOppgave)
+    }
+
+    @Test
     fun `lagre og finn oppgave for spleisBehandlingId`() {
         val oppgave = lagOppgave()
 

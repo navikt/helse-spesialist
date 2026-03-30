@@ -1,12 +1,8 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TildelingDao
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -15,23 +11,13 @@ internal class AvbrytCommand(
     fødselsnummer: String,
     vedtaksperiodeId: UUID,
     spleisBehandlingId: SpleisBehandlingId?,
-    commandContextDao: CommandContextDao,
-    oppgaveService: OppgaveService,
-    reservasjonDao: ReservasjonDao,
-    tildelingDao: TildelingDao,
-    totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : MacroCommand() {
     private val log = LoggerFactory.getLogger(this::class.java)
     override val commands: List<Command> =
         listOf(
-            ReserverPersonHvisTildeltCommand(
-                fødselsnummer = fødselsnummer,
-                reservasjonDao = reservasjonDao,
-                tildelingDao = tildelingDao,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
-            ),
-            AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),
-            AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextDao = commandContextDao),
+            ReserverPersonHvisTildeltCommand(fødselsnummer = fødselsnummer),
+            AvbrytOppgaveCommand(identitetsnummer = Identitetsnummer.fraString(fødselsnummer)),
+            AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
             ikkesuspenderendeCommand("fjernVedtak") { sessionContext: SessionContext, _: Outbox ->
                 if (spleisBehandlingId == null) return@ikkesuspenderendeCommand
                 val vedtak = sessionContext.vedtakRepository.finn(spleisBehandlingId) ?: return@ikkesuspenderendeCommand

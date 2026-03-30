@@ -1,48 +1,44 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.PersonDao
-import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import org.junit.jupiter.api.Assertions
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
-    private companion object {
-        private val HENDELSE = UUID.randomUUID()
-        private val VEDTAKSPERIODE = UUID.randomUUID()
-        private val CONTEXT = UUID.randomUUID()
-        private const val FNR = "fnr"
-    }
+    private val hendelseId = UUID.randomUUID()
+    private val vedtaksperiodeId = UUID.randomUUID()
+    private val contextId = UUID.randomUUID()
+    private val fødselsnummer = lagFødselsnummer()
 
-    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val personDao = mockk<PersonDao>(relaxed = true)
-    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    private val context = CommandContext(CONTEXT)
+    private val context = CommandContext(contextId)
     private val vedtaksperiodeForkastetCommand =
         VedtaksperiodeForkastetCommand(
-            fødselsnummer = FNR,
-            vedtaksperiodeId = VEDTAKSPERIODE,
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            id = HENDELSE,
+            id = hendelseId,
             alleForkastedeVedtaksperiodeIder = emptyList(),
-            commandContextDao = commandContextDao,
-            oppgaveService = oppgaveService,
-            reservasjonDao = mockk(relaxed = true),
-            tildelingDao = mockk(relaxed = true),
-            totrinnsvurderingRepository = mockk(relaxed = true),
         )
 
     @Test
     fun `avbryter kommandoer og markerer vedtaksperiode som forkastet`() {
-        every { personDao.finnPersonMedFødselsnummer(FNR) } returns 1
-        Assertions.assertTrue(vedtaksperiodeForkastetCommand.execute(context, sessionContext, outbox))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
+        // given
+        val hendelseId = UUID.randomUUID()
+        val enAnnenCommandContextId = UUID.randomUUID()
+        sessionContext.meldingDao.lagre(hendelseId, "{}", MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET, vedtaksperiodeId)
+        sessionContext.commandContextDao.opprett(hendelseId, enAnnenCommandContextId)
+
+        // when
+        val kommandoFerdig = vedtaksperiodeForkastetCommand.execute(context, sessionContext, outbox)
+
+        // then
+        assertTrue(kommandoFerdig)
+        assertEquals(mapOf(enAnnenCommandContextId to hendelseId), sessionContext.commandContextDao.avbrutteKommandokjeder)
     }
 }

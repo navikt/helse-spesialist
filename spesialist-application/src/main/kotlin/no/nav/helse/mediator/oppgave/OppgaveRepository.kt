@@ -24,7 +24,11 @@ interface OppgaveRepository {
 
     fun finn(id: SpleisBehandlingId): Oppgave?
 
+    // finner oppgave i tilstand AvventerSaksbehandler
     fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave?
+
+    // finner oppgave i tilstand AvventerSaksbehandler eller AvventerSystem
+    fun finnGjeldendeForPerson(identitetsnummer: Identitetsnummer): Oppgave?
 
     fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime?
 
