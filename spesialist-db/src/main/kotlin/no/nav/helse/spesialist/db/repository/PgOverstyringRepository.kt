@@ -255,7 +255,12 @@ class PgOverstyringRepository(
                 """.trimIndent(),
                 "skjaeringstidspunkt" to skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt,
                 "aarsak" to skjønnsfastsattSykepengegrunnlag.årsak,
-                "type" to skjønnsfastsattSykepengegrunnlag.type.name,
+                "type" to
+                    when (skjønnsfastsattSykepengegrunnlag.type) {
+                        SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> "OMREGNET_ÅRSINNTEKT"
+                        SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT -> "RAPPORTERT_ÅRSINNTEKT"
+                        SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET -> "ANNET"
+                    },
                 "subsumsjon" to
                     skjønnsfastsattSykepengegrunnlag.lovhjemmel.let { objectMapper.writeValueAsString(skjønnsfastsattSykepengegrunnlag.lovhjemmel) },
                 "overstyringRef" to overstyringRef,
@@ -598,7 +603,13 @@ class PgOverstyringRepository(
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnSkjønnsfastsattArbeidsgiver(this),
             årsak = string("arsak"),
-            type = enumValueOf(string("type")),
+            type =
+                when (val type = string("type")) {
+                    "OMREGNET_ÅRSINNTEKT" -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                    "RAPPORTERT_ÅRSINNTEKT" -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                    "ANNET" -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                    else -> error("Ugyldig type: $type")
+                },
             begrunnelseMal = string("mal"),
             begrunnelseFritekst = string("fritekst"),
             begrunnelseKonklusjon = string("konklusjon"),
