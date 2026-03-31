@@ -23,7 +23,6 @@ import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
-import java.util.UUID
 
 class PgOverstyringRepository(
     session: Session,
@@ -236,14 +235,11 @@ class PgOverstyringRepository(
         skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag,
         totrinnsvurderingId: TotrinnsvurderingId,
     ): Long {
-        // Den felles informasjonen ligger på alle arbeidsgiverne. Burde kanskje skilles ut i eget objekt
-        val enArbeidsgiver = skjønnsfastsattSykepengegrunnlag.arbeidsgivere.first()
-
         val (begrunnelseFritekstId, begrunnelseMalId, begrunnelseKonklusjonId) =
             mapOf(
-                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST" to enArbeidsgiver.begrunnelseFritekst,
-                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL" to enArbeidsgiver.begrunnelseMal,
-                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON" to enArbeidsgiver.begrunnelseKonklusjon,
+                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST" to skjønnsfastsattSykepengegrunnlag.begrunnelseFritekst,
+                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL" to skjønnsfastsattSykepengegrunnlag.begrunnelseMal,
+                "SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON" to skjønnsfastsattSykepengegrunnlag.begrunnelseKonklusjon,
             ).map { (type, tekst) ->
                 checkNotNull(tekst)
                 insertBegrunnelse(type, tekst, skjønnsfastsattSykepengegrunnlag.saksbehandlerOid)
@@ -258,13 +254,13 @@ class PgOverstyringRepository(
                 VALUES (:skjaeringstidspunkt, :aarsak, :subsumsjon::json, :overstyringRef, :initierendeVedtaksperiodeId, :begrunnelseFritekstRef, :begrunnelseMalRef, :begrunnelseKonklusjonRef, :type)
                 """.trimIndent(),
                 "skjaeringstidspunkt" to skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt,
-                "aarsak" to enArbeidsgiver.årsak,
-                "type" to enArbeidsgiver.type.name,
+                "aarsak" to skjønnsfastsattSykepengegrunnlag.årsak,
+                "type" to skjønnsfastsattSykepengegrunnlag.type.name,
                 "subsumsjon" to
-                    enArbeidsgiver.lovhjemmel?.let { objectMapper.writeValueAsString(enArbeidsgiver.lovhjemmel) },
+                    skjønnsfastsattSykepengegrunnlag.lovhjemmel.let { objectMapper.writeValueAsString(skjønnsfastsattSykepengegrunnlag.lovhjemmel) },
                 "overstyringRef" to overstyringRef,
                 "initierendeVedtaksperiodeId" to
-                    enArbeidsgiver.initierendeVedtaksperiodeId?.let { UUID.fromString(it) },
+                    skjønnsfastsattSykepengegrunnlag.vedtaksperiodeId,
                 "begrunnelseFritekstRef" to begrunnelseFritekstId,
                 "begrunnelseMalRef" to begrunnelseMalId,
                 "begrunnelseKonklusjonRef" to begrunnelseKonklusjonId,
@@ -458,7 +454,7 @@ class PgOverstyringRepository(
                 WHERE skjonnsfastsetting_sykepengegrunnlag_ref = :id
                 """,
             "id" to overstyringRow.long("overstyring_skjonn_id"),
-        ).list { it.toSkjønnsfastsattArbeidsgiver(overstyringRow) }
+        ).list { it.toSkjønnsfastsattArbeidsgiver() }
 
     private fun finnMinimumSykdomsgradArbeidsgiver(id: Long): List<MinimumSykdomsgradArbeidsgiver> =
         asSQL(
@@ -601,21 +597,20 @@ class PgOverstyringRepository(
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnSkjønnsfastsattArbeidsgiver(this),
+            årsak = string("arsak"),
+            type = enumValueOf(string("type")),
+            begrunnelseMal = string("mal"),
+            begrunnelseFritekst = string("fritekst"),
+            begrunnelseKonklusjon = string("konklusjon"),
+            lovhjemmel = objectMapper.readValue(string("subsumsjon")),
         )
     }
 
-    private fun Row.toSkjønnsfastsattArbeidsgiver(overstyringRow: Row): SkjønnsfastsattArbeidsgiver =
+    private fun Row.toSkjønnsfastsattArbeidsgiver(): SkjønnsfastsattArbeidsgiver =
         SkjønnsfastsattArbeidsgiver(
             organisasjonsnummer = string("arbeidsgiver_identifikator"),
             årlig = double("arlig"),
             fraÅrlig = double("fra_arlig"),
-            årsak = overstyringRow.string("arsak"),
-            type = enumValueOf(overstyringRow.string("type")),
-            begrunnelseMal = overstyringRow.string("mal"),
-            begrunnelseFritekst = overstyringRow.string("fritekst"),
-            begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
-            lovhjemmel = null,
-            initierendeVedtaksperiodeId = overstyringRow.stringOrNull("initierende_vedtaksperiode_id"),
         )
 
     private fun Row.toMinimumSykdomsgradPeriode(): Pair<Boolean, MinimumSykdomsgradPeriode> =

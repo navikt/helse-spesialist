@@ -9,6 +9,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver.Companion.byggSubsumsjon
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -23,6 +24,12 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     override val opprettet: LocalDateTime,
     ferdigstilt: Boolean,
     val skjæringstidspunkt: LocalDate,
+    val årsak: String,
+    val type: Skjønnsfastsettingstype,
+    val begrunnelseMal: String?,
+    val begrunnelseFritekst: String?,
+    val begrunnelseKonklusjon: String?,
+    val lovhjemmel: Lovhjemmel,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
 ) : Overstyring(id, ferdigstilt),
     Personhandling {
@@ -40,6 +47,12 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             vedtaksperiodeId: UUID,
             skjæringstidspunkt: LocalDate,
             arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+            årsak: String,
+            type: Skjønnsfastsettingstype,
+            begrunnelseMal: String?,
+            begrunnelseFritekst: String?,
+            begrunnelseKonklusjon: String?,
+            lovhjemmel: Lovhjemmel,
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
@@ -50,6 +63,12 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
+            årsak = årsak,
+            type = type,
+            begrunnelseMal = begrunnelseMal,
+            begrunnelseFritekst = begrunnelseFritekst,
+            begrunnelseKonklusjon = begrunnelseKonklusjon,
+            lovhjemmel = lovhjemmel,
             arbeidsgivere = arbeidsgivere,
         )
 
@@ -64,6 +83,12 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             vedtaksperiodeId: UUID,
             skjæringstidspunkt: LocalDate,
             arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+            årsak: String,
+            type: Skjønnsfastsettingstype,
+            begrunnelseMal: String?,
+            begrunnelseFritekst: String?,
+            begrunnelseKonklusjon: String?,
+            lovhjemmel: Lovhjemmel,
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = id,
             eksternHendelseId = eksternHendelseId,
@@ -74,6 +99,12 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
+            årsak = årsak,
+            type = type,
+            begrunnelseMal = begrunnelseMal,
+            begrunnelseFritekst = begrunnelseFritekst,
+            begrunnelseKonklusjon = begrunnelseKonklusjon,
+            lovhjemmel = lovhjemmel,
             arbeidsgivere = arbeidsgivere,
         )
     }
@@ -96,27 +127,22 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::byggEvent),
         )
 
-    internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon = arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer)
+    internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon = arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer, vedtaksperiodeId, lovhjemmel)
 }
 
 data class SkjønnsfastsattArbeidsgiver(
     val organisasjonsnummer: String,
     val årlig: Double,
     val fraÅrlig: Double,
-    val årsak: String,
-    val type: Skjønnsfastsettingstype,
-    val begrunnelseMal: String?,
-    val begrunnelseFritekst: String?,
-    val begrunnelseKonklusjon: String?,
-    val lovhjemmel: Lovhjemmel?,
-    val initierendeVedtaksperiodeId: String?,
 ) {
     internal companion object {
         internal fun List<SkjønnsfastsattArbeidsgiver>.byggSubsumsjon(
             saksbehandlerEpost: String,
             fødselsnummer: String,
+            vedtaksperiodeId: UUID,
+            lovhjemmel: Lovhjemmel,
         ) = Subsumsjon(
-            lovhjemmel = this.first().lovhjemmel!!,
+            lovhjemmel = lovhjemmel,
             fødselsnummer = fødselsnummer,
             input =
                 mapOf(
@@ -129,7 +155,7 @@ data class SkjønnsfastsattArbeidsgiver(
             utfall = VILKAR_BEREGNET,
             sporing =
                 SporingSkjønnsfastsattSykepengegrunnlag(
-                    vedtaksperioder = this.mapNotNull { ag -> ag.initierendeVedtaksperiodeId?.let { UUID.fromString(it) } },
+                    vedtaksperioder = listOf(vedtaksperiodeId),
                     organisasjonsnummer = this.map { ag -> ag.organisasjonsnummer },
                     saksbehandler = listOf(saksbehandlerEpost),
                 ),
@@ -141,17 +167,6 @@ data class SkjønnsfastsattArbeidsgiver(
             organisasjonsnummer = organisasjonsnummer,
             årlig = årlig,
             fraÅrlig = fraÅrlig,
-            årsak = årsak,
-            type =
-                when (type) {
-                    Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> "OMREGNET_ÅRSINNTEKT"
-                    Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT -> "RAPPORTERT_ÅRSINNTEKT"
-                    Skjønnsfastsettingstype.ANNET -> "ANNET"
-                },
-            begrunnelseMal = begrunnelseMal,
-            begrunnelseFritekst = begrunnelseFritekst,
-            begrunnelseKonklusjon = begrunnelseKonklusjon,
-            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
     enum class Skjønnsfastsettingstype {

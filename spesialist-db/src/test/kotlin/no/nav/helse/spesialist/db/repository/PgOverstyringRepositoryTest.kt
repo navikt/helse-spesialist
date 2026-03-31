@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.db.repository
 
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Person
@@ -371,6 +372,12 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiode.id.value,
             skjæringstidspunkt = 1 jan 2018,
             arbeidsgivere = listOf(nySkjønnsfastsattArbeidsgiver()),
+            årsak = "årsak",
+            type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+            begrunnelseMal = "mal",
+            begrunnelseKonklusjon = "konklusjon",
+            begrunnelseFritekst = "fritekst",
+            lovhjemmel = Lovhjemmel("8-30", "1", null, "folketrygdloven", "1996-01-01"),
         )
 
     private fun nySkjønnsfastsattArbeidsgiver(): SkjønnsfastsattArbeidsgiver =
@@ -378,13 +385,6 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
             organisasjonsnummer = organisasjonsnummer,
             årlig = 1000.0,
             fraÅrlig = 10001.0,
-            årsak = "årsak",
-            type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-            begrunnelseMal = "mal",
-            begrunnelseKonklusjon = "konklusjon",
-            begrunnelseFritekst = "fritekst",
-            initierendeVedtaksperiodeId = vedtaksperiode.id.value.toString(),
-            lovhjemmel = null,
         )
 
     private fun finnFerdigstilteOverstyringer(totrinnsvurderingId: TotrinnsvurderingId): List<OverstyringId> =

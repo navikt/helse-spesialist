@@ -85,12 +85,6 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
         val organisasjonsnummer: String,
         val årlig: Double,
         val fraÅrlig: Double,
-        val årsak: String,
-        val type: String,
-        val begrunnelseMal: String?,
-        val begrunnelseFritekst: String?,
-        val begrunnelseKonklusjon: String?,
-        val initierendeVedtaksperiodeId: String?,
     )
 }
 

@@ -1038,7 +1038,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                             arlig = 21000.0,
                             fraArlig = 25001.0,
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
-                            arsak = "En årsak 2",
+                            arsak = "En årsak",
                             type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",
                             begrunnelseFritekst = "begrunnelsefritekst",
@@ -1063,19 +1063,11 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
-            assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
-            assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
-            assertEquals("begrunnelseKonklusjon", it["begrunnelseKonklusjon"].asText())
-            assertEquals("En årsak", it["årsak"].asText())
             assertEquals(25000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
         }
         hendelse["arbeidsgivere"].last().let {
             assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
-            assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
-            assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
-            assertEquals("begrunnelseKonklusjon", it["begrunnelseKonklusjon"].asText())
-            assertEquals("En årsak 2", it["årsak"].asText())
             assertEquals(21000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
         }

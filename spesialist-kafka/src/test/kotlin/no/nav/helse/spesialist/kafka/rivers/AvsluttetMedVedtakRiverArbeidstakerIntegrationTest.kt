@@ -397,7 +397,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type": "SkjønnsfastsattSykepengegrunnlagMal",
-                  "begrunnelse": "${skjønnsfastsettelse.arbeidsgivere.first().begrunnelseMal}",
+                  "begrunnelse": "${skjønnsfastsettelse.begrunnelseMal}",
                   "perioder": [
                     {
                       "fom": "${behandling.fom}",
@@ -407,7 +407,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 },
                 {
                   "type": "SkjønnsfastsattSykepengegrunnlagFritekst",
-                  "begrunnelse": "${skjønnsfastsettelse.arbeidsgivere.first().begrunnelseFritekst}",
+                  "begrunnelse": "${skjønnsfastsettelse.begrunnelseFritekst}",
                   "perioder": [
                     {
                       "fom": "${behandling.fom}",
@@ -417,7 +417,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 },
                 {
                   "type": "SkjønnsfastsattSykepengegrunnlagKonklusjon",
-                  "begrunnelse": "${skjønnsfastsettelse.arbeidsgivere.first().begrunnelseKonklusjon}",
+                  "begrunnelse": "${skjønnsfastsettelse.begrunnelseKonklusjon}",
                   "perioder": [
                     {
                       "fom": "${behandling.fom}",
@@ -506,7 +506,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type": "SkjønnsfastsattSykepengegrunnlagMal",
-                  "begrunnelse": "${skjønnsfastsettelse.arbeidsgivere.first().begrunnelseMal}",
+                  "begrunnelse": "${skjønnsfastsettelse.begrunnelseMal}",
                   "perioder": [
                     {
                       "fom": "${behandling.fom}",
@@ -516,7 +516,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 },
                 {
                   "type": "SkjønnsfastsattSykepengegrunnlagFritekst",
-                  "begrunnelse": "${skjønnsfastsettelse.arbeidsgivere.first().begrunnelseFritekst}",
+                  "begrunnelse": "${skjønnsfastsettelse.begrunnelseFritekst}",
                   "perioder": [
                     {
                       "fom": "${behandling.fom}",
@@ -526,7 +526,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 },
                 {
                   "type": "SkjønnsfastsattSykepengegrunnlagKonklusjon",
-                  "begrunnelse": "${skjønnsfastsettelse.arbeidsgivere.first().begrunnelseKonklusjon}",
+                  "begrunnelse": "${skjønnsfastsettelse.begrunnelseKonklusjon}",
                   "perioder": [
                     {
                       "fom": "${behandling.fom}",

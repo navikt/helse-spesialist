@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
 
 internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
     private val arbeidsgiver = opprettArbeidsgiver()
@@ -113,33 +112,32 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         skjæringstidspunkt: LocalDate = 1 jan 2018,
     ): SkjønnsfastsattSykepengegrunnlag =
         SkjønnsfastsattSykepengegrunnlag.ny(
-            aktørId = person.aktørId,
+            saksbehandlerOid = saksbehandler.id,
             fødselsnummer = person.id.value,
-            skjæringstidspunkt = skjæringstidspunkt,
+            aktørId = person.aktørId,
             vedtaksperiodeId = vedtaksperiode.id.value,
+            skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere =
                 listOf(
                     SkjønnsfastsattArbeidsgiver(
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         årlig = 1.0,
                         fraÅrlig = 1.0,
-                        årsak = "årsak",
-                        type = type,
-                        begrunnelseMal = "mal",
-                        begrunnelseKonklusjon = "konklusjon",
-                        begrunnelseFritekst = "fritekst",
-                        lovhjemmel =
-                            Lovhjemmel(
-                                paragraf = "paragraf",
-                                ledd = "ledd",
-                                bokstav = "bokstav",
-                                lovverksversjon = "lovverksversjon",
-                                lovverk = "lovverk",
-                            ),
-                        initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                     ),
                 ),
-            saksbehandlerOid = saksbehandler.id,
+            årsak = "årsak",
+            type = type,
+            begrunnelseMal = "mal",
+            begrunnelseKonklusjon = "konklusjon",
+            begrunnelseFritekst = "fritekst",
+            lovhjemmel =
+                Lovhjemmel(
+                    paragraf = "paragraf",
+                    ledd = "ledd",
+                    bokstav = "bokstav",
+                    lovverksversjon = "lovverksversjon",
+                    lovverk = "lovverk",
+                ),
         )
 
     private val Arbeidsgiver.organisasjonsnummer get() =

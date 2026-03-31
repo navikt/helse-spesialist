@@ -9,19 +9,19 @@ class DelegatingSykefraværstilfelleDao(
     private val overstyringRepository: InMemoryOverstyringRepository,
 ) : SykefraværstilfelleDao {
     override fun finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlagDto> =
-        overstyringRepository.data.values.flatten()
+        overstyringRepository.data.values
+            .flatten()
             .filter { it.fødselsnummer == fødselsnummer }
             .filterIsInstance<SkjønnsfastsattSykepengegrunnlag>()
             .map { skjønnsfastsatt ->
-                val førsteArbeidsgiver = skjønnsfastsatt.arbeidsgivere.first()
                 SkjønnsfastsattSykepengegrunnlagDto(
-                    type = enumValueOf(førsteArbeidsgiver.type.name),
-                    årsak = førsteArbeidsgiver.lovhjemmel!!.ledd!!.tilÅrsakDto(),
+                    type = enumValueOf(skjønnsfastsatt.type.name),
+                    årsak = skjønnsfastsatt.lovhjemmel.ledd!!.tilÅrsakDto(),
                     skjæringstidspunkt = skjønnsfastsatt.skjæringstidspunkt,
-                    begrunnelseFraMal = førsteArbeidsgiver.begrunnelseMal!!,
-                    begrunnelseFraFritekst = førsteArbeidsgiver.begrunnelseFritekst!!,
-                    begrunnelseFraKonklusjon = førsteArbeidsgiver.begrunnelseKonklusjon!!,
-                    opprettet = skjønnsfastsatt.opprettet
+                    begrunnelseFraMal = skjønnsfastsatt.begrunnelseMal!!,
+                    begrunnelseFraFritekst = skjønnsfastsatt.begrunnelseFritekst!!,
+                    begrunnelseFraKonklusjon = skjønnsfastsatt.begrunnelseKonklusjon!!,
+                    opprettet = skjønnsfastsatt.opprettet,
                 )
             }
 

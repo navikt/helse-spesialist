@@ -403,8 +403,9 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): SkjønnsfastsattSykepengegrunnlag =
-        SkjønnsfastsattSykepengegrunnlag.ny(
+    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): SkjønnsfastsattSykepengegrunnlag {
+        val enArbeidsgiver = arbeidsgivere.first()
+        return SkjønnsfastsattSykepengegrunnlag.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -416,24 +417,24 @@ class SaksbehandlerMediator(
                         organisasjonsnummer = ag.organisasjonsnummer,
                         årlig = ag.arlig,
                         fraÅrlig = ag.fraArlig,
-                        årsak = ag.arsak,
-                        type =
-                            when (ag.type) {
-                                OMREGNET_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                                RAPPORTERT_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                                ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
-                            },
-                        begrunnelseMal = ag.begrunnelseMal,
-                        begrunnelseFritekst = ag.begrunnelseFritekst,
-                        begrunnelseKonklusjon = ag.begrunnelseKonklusjon,
-                        lovhjemmel =
-                            ag.lovhjemmel?.let {
-                                Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
-                            },
-                        initierendeVedtaksperiodeId = ag.initierendeVedtaksperiodeId,
                     )
                 },
+            årsak = enArbeidsgiver.arsak,
+            type =
+                when (enArbeidsgiver.type) {
+                    OMREGNET_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
+                    RAPPORTERT_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
+                    ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
+                },
+            begrunnelseMal = enArbeidsgiver.begrunnelseMal,
+            begrunnelseFritekst = enArbeidsgiver.begrunnelseFritekst,
+            begrunnelseKonklusjon = enArbeidsgiver.begrunnelseKonklusjon,
+            lovhjemmel =
+                enArbeidsgiver.lovhjemmel!!.let {
+                    Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
+                },
         )
+    }
 
     private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon.ny(

@@ -211,21 +211,20 @@ fun lagSkjønnsfastsattSykepengegrunnlag(
                     organisasjonsnummer = organisasjonsnummer,
                     årlig = skjønnsfastsattBeløp.toDouble(),
                     fraÅrlig = omregnetÅrsinntekt.toDouble(),
-                    årsak = "Skjønnsfastsettelse ved mer enn 25 % avvik (§ 8-30 andre avsnitt)",
-                    type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET,
-                    begrunnelseMal = "Begrunnelse fra mal her",
-                    begrunnelseFritekst = "Begrunnelse fra fritekst her",
-                    begrunnelseKonklusjon = "Begrunnelse fra konklusjon her",
-                    lovhjemmel =
-                        Lovhjemmel(
-                            paragraf = "8-30",
-                            ledd = "2",
-                            bokstav = null,
-                            lovverk = "folketrygdloven",
-                            lovverksversjon = "2019-01-01",
-                        ),
-                    initierendeVedtaksperiodeId = vedtaksperiodeId.value.toString(),
                 ),
+            ),
+        årsak = "Skjønnsfastsettelse ved mer enn 25 % avvik (§ 8-30 andre avsnitt)",
+        type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET,
+        begrunnelseMal = "Begrunnelse fra mal her",
+        begrunnelseFritekst = "Begrunnelse fra fritekst her",
+        begrunnelseKonklusjon = "Begrunnelse fra konklusjon her",
+        lovhjemmel =
+            Lovhjemmel(
+                paragraf = "8-30",
+                ledd = "2",
+                bokstav = null,
+                lovverk = "folketrygdloven",
+                lovverksversjon = "2019-01-01",
             ),
     )
 
