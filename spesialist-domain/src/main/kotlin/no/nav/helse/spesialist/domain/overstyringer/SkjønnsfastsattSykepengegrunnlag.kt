@@ -127,7 +127,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::byggEvent),
         )
 
-    internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon = arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer, vedtaksperiodeId, lovhjemmel)
+    fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon = arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer, vedtaksperiodeId, lovhjemmel)
 }
 
 data class SkjønnsfastsattArbeidsgiver(

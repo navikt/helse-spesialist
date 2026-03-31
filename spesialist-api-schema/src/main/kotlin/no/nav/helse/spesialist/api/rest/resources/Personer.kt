@@ -38,6 +38,22 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("sykefravaerstilfeller")
+        class Sykefraværstilfeller(
+            val parent: PersonPseudoId,
+        ) {
+            @Resource("{skjæringstidspunkt}")
+            class Skjæringstidspunkt(
+                val parent: Sykefraværstilfeller,
+                val skjæringstidspunkt: LocalDate,
+            ) {
+                @Resource("sykepengegrunnlag")
+                class Sykepengegrunnlag(
+                    val parent: Skjæringstidspunkt,
+                )
+            }
+        }
+
         @Resource("dokumenter")
         class Dokumenter(
             val parent: PersonPseudoId,

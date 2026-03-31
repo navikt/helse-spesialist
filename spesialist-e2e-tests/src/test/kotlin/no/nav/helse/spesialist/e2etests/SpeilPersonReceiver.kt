@@ -6,9 +6,11 @@ import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
 import no.nav.helse.spesialist.api.rest.ApiKommentarRequest
+import no.nav.helse.spesialist.api.rest.ApiLovverksreferanse
 import no.nav.helse.spesialist.api.rest.ApiPatchKommentarRequest
 import no.nav.helse.spesialist.api.rest.ApiPutPåVentRequest
 import no.nav.helse.spesialist.api.rest.ApiPåVentÅrsak
+import no.nav.helse.spesialist.api.rest.ApiSykepengegrunnlagRequest
 import no.nav.helse.spesialist.api.rest.ApiTildelingRequest
 import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
@@ -350,48 +352,37 @@ class SpeilPersonReceiver(
     }
 
     fun saksbehandlerSkjønnsfastsetter830TredjeAvsnitt(begrunnelseFritekst: String = "skjønnsfastsetter tredje avsnitt") {
-        callGraphQL(
-            operationName = "SkjonnsfastsettelseMutation",
-            variables =
-                mapOf(
-                    "skjonnsfastsettelse" to
-                        mapOf(
-                            "aktorId" to testContext.person.aktørId,
-                            "fodselsnummer" to testContext.person.fødselsnummer,
-                            "skjaringstidspunkt" to
-                                testContext.vedtaksperioder
-                                    .first()
-                                    .skjæringstidspunkt
-                                    .toString(),
-                            "vedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
-                            "arbeidsgivere" to
+        callHttpPost(
+            relativeUrl = "/api/personer/$personPseudoId/sykefravaerstilfeller/${testContext.vedtaksperioder.first().skjæringstidspunkt}/sykepengegrunnlag",
+            request =
+                ApiSykepengegrunnlagRequest(
+                    årsak = "Skjønnsfastsettelse ved mangelfull eller uriktig rapportering (§ 8-30 tredje avsnitt)",
+                    begrunnelseMal = "Inntekten som arbeidsgiver har rapportert til Skatteetaten er mangelfull eller uriktig. Vi har derfor skjønnsfastsatt sykepengegrunnlaget ditt. Se folketrygdloven § 8-30 tredje avsnitt.\n\nMålet med den skjønnsmessige vurderingen er å komme frem til inntekten du ville hatt om du ikke hadde blitt syk.",
+                    begrunnelseFritekst = begrunnelseFritekst,
+                    begrunnelseKonklusjon = "Vi har fastsatt sykepengegrunnlaget ditt til 450 000,00 kroner.",
+                    intierendeVedtaksperiodeId = testContext.vedtaksperioder.first().vedtaksperiodeId,
+                    sykepengegrunnlagstype =
+                        ApiSykepengegrunnlagRequest.ApiSykepengegrunnlagtype.ApiSkjønnsfastsatt(
+                            skjønnsfastsettelsestype = ApiSykepengegrunnlagRequest.ApiSykepengegrunnlagtype.ApiSkjønnsfastsatt.ApiSkjønnsfastsettelsestype.ANNET,
+                            skjønnsfastsatteInntekter =
                                 listOf(
-                                    mapOf(
-                                        "arlig" to 450000,
-                                        "arsak" to "Skjønnsfastsettelse ved mangelfull eller uriktig rapportering (§ 8-30 tredje avsnitt)",
-                                        "lovhjemmel" to
-                                            mapOf(
-                                                "ledd" to "3",
-                                                "paragraf" to "8-30",
-                                                "lovverk" to "folketrygdloven",
-                                                "lovverksversjon" to "2019-01-01",
-                                            ),
-                                        "begrunnelseFritekst" to begrunnelseFritekst,
-                                        "begrunnelseKonklusjon" to "Vi har fastsatt sykepengegrunnlaget ditt til 450 000,00 kroner.",
-                                        "begrunnelseMal" to "Inntekten som arbeidsgiver har rapportert til Skatteetaten er mangelfull eller uriktig. Vi har derfor skjønnsfastsatt sykepengegrunnlaget ditt. Se folketrygdloven § 8-30 tredje avsnitt.\n\nMålet med den skjønnsmessige vurderingen er å komme frem til inntekten du ville hatt om du ikke hadde blitt syk.",
-                                        "fraArlig" to 480000,
-                                        "initierendeVedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
-                                        "organisasjonsnummer" to testContext.arbeidsgiver.organisasjonsnummer,
-                                        "type" to "ANNET",
+                                    ApiSykepengegrunnlagRequest.ApiSykepengegrunnlagtype.ApiSkjønnsfastsatt.ApiSkjønnsfastsattInntekt(
+                                        testContext.arbeidsgiver.organisasjonsnummer,
+                                        årlig = 450000.0,
+                                        fraÅrlig = 480000.0,
                                     ),
+                                ),
+                            lovverksreferanse =
+                                ApiLovverksreferanse(
+                                    paragraf = "8-30",
+                                    ledd = "3",
+                                    lovverk = "folketrygdloven",
+                                    lovverksversjon = "2019-01-01",
+                                    bokstav = null,
                                 ),
                         ),
                 ),
-        ).also {
-            if (it["data"].isMissingOrNull()) {
-                error("Forventer at mutation ikke feiler, fikk: $it")
-            }
-        }
+        )
         hentOppdatertPerson()
     }
 

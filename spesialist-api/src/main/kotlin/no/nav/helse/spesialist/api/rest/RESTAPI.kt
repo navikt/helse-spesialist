@@ -40,6 +40,7 @@ import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchSaksbehandlerStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchVeilederStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
+import no.nav.helse.spesialist.api.rest.personer.sykefraværstilfeller.sykepengegrunnlag.PostSykepengegrunnlagBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.DeleteTildelingBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.PutTildelingBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetAktiveSaksbehandlereBehandler
@@ -117,6 +118,8 @@ fun Routing.restRoutes(
             post(PostVurderteInngangsvilkårForPersonBehandler(inngangsvilkårInnsender), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)
             patch(PatchTilkommenInntektBehandler(), restAdapter)
+
+            post(PostSykepengegrunnlagBehandler(), restAdapter)
 
             post(PostVedtakBehandler(environmentToggles), restAdapter)
             post(PostForkastingBehandler(), restAdapter)
