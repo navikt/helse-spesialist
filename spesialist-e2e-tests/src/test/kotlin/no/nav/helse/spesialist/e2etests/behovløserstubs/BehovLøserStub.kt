@@ -19,6 +19,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.PacketListener {
+    var svarerPåBehov = true
     private val løsereForFødselsnummer = ConcurrentHashMap<String, List<AbstractBehovLøser>>()
     private fun løserPerBehov(fødselsnummer: String) =
         løsereForFødselsnummer(fødselsnummer).associateBy(AbstractBehovLøser::behov)
@@ -84,6 +85,8 @@ class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.Pa
         løserPerBehov: Map<String, AbstractBehovLøser>,
         context: MessageContext
     ) {
+        if (!svarerPåBehov) return
+
         val innkommendeMeldingMap: Map<String, Any?> =
             objectMapper.readValue(
                 objectMapper.writeValueAsString(jsonNode),

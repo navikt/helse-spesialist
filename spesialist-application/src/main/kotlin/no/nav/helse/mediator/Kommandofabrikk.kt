@@ -65,9 +65,12 @@ class Kommandofabrikk(
 
     internal fun gosysOppgaveEndret(
         person: LegacyPerson,
-        oppgave: Oppgave,
+        oppgave: Oppgave?,
         sessionContext: SessionContext,
-    ): GosysOppgaveEndretCommand {
+    ): Command {
+        if (oppgave == null) {
+            return ikkesuspenderendeCommand("GosysOppgaveEndretCommand") { _, _ -> }
+        }
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(oppgave.utbetalingId)
         val harTildeltOppgave = oppgave.tildeltTil != null
         val godkjenningsbehovData =

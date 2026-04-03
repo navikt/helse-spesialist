@@ -20,7 +20,6 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.VedtakRepository
-import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import java.util.UUID
@@ -44,10 +43,6 @@ class GosysOppgaveEndret(
         val identitetsnummer = Identitetsnummer.fraString(person.fødselsnummer)
         kommandostarter {
             val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
-            if (oppgave == null) {
-                loggInfo("Ingen aktiv oppgave for personen, avslutter behandling av meldingen")
-                return@kommandostarter null
-            }
             gosysOppgaveEndret(person, oppgave, sessionContext)
         }
     }
