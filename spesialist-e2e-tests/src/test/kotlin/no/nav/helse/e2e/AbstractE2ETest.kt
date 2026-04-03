@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.every
@@ -29,7 +28,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.SpleisClient
@@ -103,10 +101,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             forsikringHenter =
                 ClientSpiskammersetModule(
                     configuration = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
-                    accessTokenGenerator =
-                        object : AccessTokenGenerator {
-                            override fun hentAccessToken(scope: String): String = "tull"
-                        },
+                    accessTokenGenerator = { "tull" },
                 ).spiskammersetClientForsikringHenter,
             environmentToggles =
                 object : EnvironmentToggles {
@@ -830,23 +825,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
     }
 
-    protected fun saksbehandlerVurdererVarsel(
-        vedtaksperiodeId: UUID,
-        varselkode: String,
-        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT,
-    ) {
-        dbQuery.update(
-            """
-            UPDATE selve_varsel 
-            SET status = 'VURDERT', status_endret_ident = :ident, status_endret_tidspunkt = now()
-            WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "varselkode" to varselkode,
-            "ident" to saksbehandlerIdent,
-        )
-    }
-
     protected fun håndterAvsluttetMedVedtak(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -1125,31 +1103,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, antallOppgaver.size) { "Det ble mot formodning opprettet en saksbehandleroppgave" }
     }
 
-    protected fun assertVarsler(
-        vedtaksperiodeId: UUID,
-        forventetAntall: Int,
-    ) {
-        val antall =
-            dbQuery.single(
-                "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId",
-                "vedtaksperiodeId" to vedtaksperiodeId,
-            ) { it.int(1) }
-        assertEquals(forventetAntall, antall)
-    }
-
-    protected fun assertVarsel(
-        vedtaksperiodeId: UUID,
-        varselkode: String,
-    ) {
-        val antall =
-            dbQuery.single(
-                "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode",
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "varselkode" to varselkode,
-            ) { it.int(1) }
-        assertEquals(1, antall) { "Fant ikke varsel $varselkode for vedtaksperiodeId $vedtaksperiodeId i selve_varsel" }
-    }
-
     protected fun assertSkjermet(
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean?,
@@ -1162,13 +1115,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     ?.erEgenAnsatt
             }
         assertEquals(skjermet, erEgenAnsatt)
-    }
-
-    protected fun assertAdressebeskyttelse(
-        fødselsnummer: String = FØDSELSNUMMER,
-        adressebeskyttelse: Adressebeskyttelse?,
-    ) {
-        assertEquals(adressebeskyttelse, daos.personDao.finnAdressebeskyttelse(fødselsnummer))
     }
 
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
@@ -1185,13 +1131,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         ) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
-    protected fun assertPersonEksistererIkke(
-        fødselsnummer: String,
-        aktørId: String,
-    ) {
-        assertEquals(0, person(fødselsnummer, aktørId))
-    }
-
     protected fun assertUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse, sisteMeldingId)
         assertEquals(1, meldinger.size) {
@@ -1204,14 +1143,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, meldinger.size) {
             "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
         }
-    }
-
-    protected fun assertInnholdIBehov(
-        behov: String,
-        block: (JsonNode) -> Unit,
-    ) {
-        val etterspurtBehov = testRapid.inspektør.behov(behov).last()
-        block(etterspurtBehov)
     }
 
     private fun assertEtterspurteBehov(vararg behov: String) {

@@ -478,17 +478,4 @@ abstract class AbstractE2EIntegrationTest {
         brukerroller = brukerroller,
     )
 
-    protected fun callHttpPost(
-        relativeUrl: String,
-        saksbehandler: Saksbehandler = this.saksbehandler,
-        tilganger: Set<Tilgang> = this.tilganger,
-        brukerroller: Set<Brukerrolle> = this.brukerroller,
-        request: Any,
-    ) = REST.post(
-        relativeUrl = relativeUrl,
-        saksbehandler = saksbehandler,
-        request = request,
-        tilganger = tilganger,
-        brukerroller = brukerroller,
-    )
 }
