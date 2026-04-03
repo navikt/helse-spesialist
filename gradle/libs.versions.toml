@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 flyway = "12.2.0"
 openApiGenerator = "7.21.0"
 graphqlKotlin = "8.4.0"
