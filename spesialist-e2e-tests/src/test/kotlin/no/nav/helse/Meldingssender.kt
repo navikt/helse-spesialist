@@ -151,18 +151,6 @@ class Meldingssender(
             )
         }
 
-    fun sendGosysOppgaveEndret(
-        fødselsnummer: String,
-    ): UUID =
-        newUUID.also { id ->
-            testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagGosysOppgaveEndret(
-                    fødselsnummer = fødselsnummer,
-                    id = id,
-                ),
-            )
-        }
-
     fun sendTilbakedateringBehandlet(
         fødselsnummer: String,
         perioder: List<Periode>,

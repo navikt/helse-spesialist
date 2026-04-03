@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertNull
+import java.time.LocalDate
 import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
@@ -81,6 +82,9 @@ abstract class AbstractE2EIntegrationTest {
     protected fun organisasjonsnummer() = testContext.arbeidsgiver.organisasjonsnummer
 
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
+
+    protected fun sisteSendteBehovnavn(): String =
+        meldinger().mapNotNull { it["@behov"] }.filterNot { it.hasNonNull("@løsning") }.last()[0].asText()
 
     protected fun vedtakFattetMelding(): JsonNode =
         meldinger().find { it["@event_name"].asText() == "vedtak_fattet" }
@@ -329,7 +333,7 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun assertSkjæringstidspunktForBehandling(
         vedtaksperiode: Vedtaksperiode,
-        forventetSkjæringstidspunkt: java.time.LocalDate,
+        forventetSkjæringstidspunkt: LocalDate,
     ) {
         val spleisBehandlingId = requireNotNull(vedtaksperiode.spleisBehandlingId) {
             "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"

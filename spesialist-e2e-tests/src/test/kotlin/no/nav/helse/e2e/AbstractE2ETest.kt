@@ -482,10 +482,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun håndterGosysOppgaveEndret(fødselsnummer: String = FØDSELSNUMMER) {
-        sisteMeldingId = meldingssender.sendGosysOppgaveEndret(fødselsnummer)
-    }
-
     protected fun håndterTilbakedateringBehandlet(
         fødselsnummer: String = FØDSELSNUMMER,
         perioder: List<Periode>,
