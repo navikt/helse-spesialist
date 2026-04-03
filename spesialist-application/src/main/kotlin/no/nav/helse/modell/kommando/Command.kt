@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.application.Outbox
 
 interface Command {
     fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean
@@ -26,7 +26,7 @@ internal fun ikkesuspenderendeCommand(
     block: (SessionContext, Outbox) -> Unit,
 ) = object : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
