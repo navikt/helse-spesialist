@@ -1,20 +1,20 @@
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:
-  name: team-speilvendt-alerts-slack
+  name: team-sas-alerts-slack
   namespace: tbd
   labels:
     team: tbd
-    alertmanagerConfig: team-speilvendt-alerts-slack
+    alertmanagerConfig: team-sas-alerts-slack
 spec:
   receivers:
-    - name: team-speilvendt-alerts-receiver
+    - name: team-sas-alerts-receiver
       slackConfigs:
         - apiURL:
             key: apiUrl
             name: slack-webhook
-          channel: "#team-speilvendt-alerts"
-          iconEmoji: ":speil:"
+          channel: "#team-sas-alerts"
+          iconEmoji: ":small_airplane:"
           username: "Varsling"
           sendResolved: true
           title: |-
@@ -50,10 +50,10 @@ spec:
     groupBy:
       - alertname
     matchers:
-      - name: "team_speilvendt_alerts"
+      - name: "team_sas_alerts"
         matchType: "="
         value: "slack"
     groupInterval: 10s
     groupWait: 5s
-    receiver: team-speilvendt-alerts-receiver
+    receiver: team-sas-alerts-receiver
     repeatInterval: 2m
