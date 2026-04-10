@@ -184,6 +184,10 @@ internal abstract class AbstractDatabaseTest {
             
             INSERT INTO saksbehandler_stans_events(sekvensnummer, event_navn, utført_av_saksbehandler_ident, tidspunkt, identitetsnummer, begrunnelse) 
             VALUES (1, 'STANS_OPPRETTET', 'I123456', now(), '$fødselsnummer', 'En begrunnelse');
+            
+            INSERT INTO veileder_stans(id, identitetsnummer, arsaker, opprettet, original_melding_id, opphevet_av_saksbehandler_ident, opphevet_begrunnelse, opphevet_tidspunkt)
+            VALUES (gen_random_uuid(), '$fødselsnummer', '{MEDISINSK_VILKAR}', now(), gen_random_uuid(), 'I123456', 'En begrunnelse', now());
+            
             """.trimIndent()
         sessionOf(dataSource).use { session ->
             session.update(queryOf(sql))

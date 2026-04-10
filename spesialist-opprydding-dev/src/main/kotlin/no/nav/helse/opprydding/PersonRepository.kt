@@ -47,6 +47,7 @@ internal class PersonRepository(
                 it.slettTilkommenInntekt(fødselsnummer)
                 it.slettPerson(personId)
                 it.slettSaksbehandlerStans(fødselsnummer)
+                it.slettVeilederStans(fødselsnummer)
 
                 sikkerlogg.info("Person med fødselsnummer $fødselsnummer ble slettet")
             }
@@ -541,6 +542,13 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query =
             "DELETE FROM saksbehandler_stans_events WHERE identitetsnummer = :fodselsnummer"
+        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
+    }
+
+    private fun TransactionalSession.slettVeilederStans(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query =
+            "DELETE FROM veileder_stans WHERE identitetsnummer = :fodselsnummer"
         run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 }
