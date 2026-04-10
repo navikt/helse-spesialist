@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.client.spiskammerset
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.modell.vedtaksperiode.objectMapper
+import no.nav.helse.modell.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.logg.loggError

@@ -1,4 +1,4 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.modell
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

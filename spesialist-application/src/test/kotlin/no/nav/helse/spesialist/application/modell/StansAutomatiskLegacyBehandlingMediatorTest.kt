@@ -105,7 +105,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
                 status = "STOPP_AUTOMATIKK",
                 årsaker = setOf(MEDISINSK_VILKAR),
                 opprettet = now(),
-                originalMelding = "{}",
+                originalMelding = """{"uuid": "${randomUUID()}"}""",
                 kilde = "ISYFO",
                 json = "",
             )
@@ -383,13 +383,14 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     fun `håndter STOPP_AUTOMATIKK oppretter og lagrer ny VeilederStans`() {
         val meldingId = randomUUID()
         val årsaker = setOf(MEDISINSK_VILKAR, AKTIVITETSKRAV)
+        val originalMeldingId = randomUUID()
         val melding = StansAutomatiskBehandlingMelding(
             id = meldingId,
             fødselsnummer = FNR,
             status = "STOPP_AUTOMATIKK",
             årsaker = årsaker,
             opprettet = now(),
-            originalMelding = "{}",
+            originalMelding = """{"uuid": "$originalMeldingId"}""",
             kilde = "ISYFO",
             json = "",
         )
@@ -405,7 +406,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
             setOf(VeilederStans.StansÅrsak.MEDISINSK_VILKAR, VeilederStans.StansÅrsak.AKTIVITETSKRAV),
             lagretStans.årsaker,
         )
-        assertEquals(meldingId, lagretStans.originalMeldingId)
+        assertEquals(originalMeldingId, lagretStans.originalMeldingId)
         assertTrue(lagretStans.erStansett)
     }
 

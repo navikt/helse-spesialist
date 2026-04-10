@@ -8,6 +8,7 @@ import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.melding.SubsumsjonEvent
+import no.nav.helse.modell.objectMapper
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
@@ -57,7 +58,7 @@ class StansAutomatiskBehandlingMediator(
                     identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer()),
                     årsaker = melding.årsaker.map { VeilederStans.StansÅrsak.valueOf(it.name) }.toSet(),
                     opprettet = melding.opprettet.toInstant(ZoneOffset.UTC),
-                    originalMeldingId = melding.id,
+                    originalMeldingId = UUID.fromString(objectMapper.readTree(melding.originalMelding).path("uuid").asText()),
                 ),
             )
         }

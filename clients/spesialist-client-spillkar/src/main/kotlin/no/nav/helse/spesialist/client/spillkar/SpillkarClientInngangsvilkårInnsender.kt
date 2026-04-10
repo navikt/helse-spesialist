@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.client.spillkar
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.modell.vedtaksperiode.objectMapper
+import no.nav.helse.modell.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.logg.loggDebug
