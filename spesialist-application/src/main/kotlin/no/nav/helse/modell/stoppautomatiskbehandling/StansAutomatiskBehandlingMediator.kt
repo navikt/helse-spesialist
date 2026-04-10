@@ -1,6 +1,7 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
 import no.nav.helse.AutomatiseringStansetSjekker
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.SessionContext
@@ -33,6 +34,7 @@ class StansAutomatiskBehandlingMediator(
     private val oppgaveDao: OppgaveDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val veilederStansRepository: VeilederStansRepository,
+    private val environmentToggles: EnvironmentToggles,
 ) : AutomatiseringStansetSjekker {
     private val subsumsjonsmelder by lazy { subsumsjonsmelderProvider() }
 
@@ -40,6 +42,7 @@ class StansAutomatiskBehandlingMediator(
         fun stansAutomatiskBehandlingMediator(
             sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
+            environmentToggles: EnvironmentToggles,
         ): StansAutomatiskBehandlingMediator =
             StansAutomatiskBehandlingMediator(
                 sessionContext.stansAutomatiskBehandlingDao,
@@ -47,12 +50,13 @@ class StansAutomatiskBehandlingMediator(
                 sessionContext.oppgaveDao,
                 subsumsjonsmelderProvider,
                 sessionContext.veilederStansRepository,
+                environmentToggles,
             )
     }
 
     fun håndter(melding: StansAutomatiskBehandlingMelding) {
         stansAutomatiskBehandlingDao.lagreFraISyfo(melding)
-        if (melding.status == "STOPP_AUTOMATIKK") {
+        if (melding.status == "STOPP_AUTOMATIKK" && environmentToggles.devGcp) {
             veilederStansRepository.lagre(
                 VeilederStans.ny(
                     identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer()),

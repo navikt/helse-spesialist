@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.AutomatiseringStansetSjekker
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
@@ -57,6 +58,7 @@ internal class Automatisering(
             sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
             stikkprøver: Stikkprøver,
+            environmentToggles: EnvironmentToggles,
         ): Automatisering =
             Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
@@ -64,6 +66,7 @@ internal class Automatisering(
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
                         sessionContext,
                         subsumsjonsmelderProvider,
+                        environmentToggles,
                     ),
                 automatiseringDao = sessionContext.automatiseringDao,
                 åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,

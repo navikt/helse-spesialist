@@ -60,6 +60,7 @@ class KafkaModule(
                                 )
                             },
                             stikkprøver = stikkprøver,
+                            environmentToggles = environmentToggles,
                         ),
                     dokumentDao = daos.dokumentDao,
                     legacyVarselRepository =
