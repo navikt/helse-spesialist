@@ -16,11 +16,12 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val saksbehandlerStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            identitetsnummer = person.id,
-            begrunnelse = "begrunnelse"
-        )
+        val saksbehandlerStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandler.ident,
+                identitetsnummer = person.id,
+                begrunnelse = "begrunnelse",
+            )
 
         repository.lagre(saksbehandlerStans)
 
@@ -41,17 +42,18 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val stans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            identitetsnummer = person.id,
-            begrunnelse = "Oppretter stans"
-        )
+        val stans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandler.ident,
+                identitetsnummer = person.id,
+                begrunnelse = "Oppretter stans",
+            )
         repository.lagre(stans)
 
         // when
         stans.opphevStans(
             utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            begrunnelse = "Opphever stans"
+            begrunnelse = "Opphever stans",
         )
         repository.lagre(stans)
 

@@ -98,8 +98,14 @@ class StansAutomatiskBehandlingMediator(
             a.opprettet.compareTo(b.opprettet)
         }.forEach {
             when (it.status) {
-                "STOPP_AUTOMATIKK" -> gjeldende += it
-                "NORMAL" -> gjeldende.clear()
+                "STOPP_AUTOMATIKK" -> {
+                    gjeldende += it
+                }
+
+                "NORMAL" -> {
+                    gjeldende.clear()
+                }
+
                 else -> {
                     logg.error("Ukjent status-type: {}", it.status)
                     gjeldende += it
