@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBeh
 import no.nav.helse.spesialist.api.rest.personer.GetInfotrygdperioderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
+import no.nav.helse.spesialist.api.rest.personer.GetVeilederStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchSaksbehandlerStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PatchVeilederStansBehandler
 import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
@@ -108,6 +109,8 @@ fun Routing.restRoutes(
             delete(DeleteTildelingBehandler(), restAdapter)
 
             patch(PatchSaksbehandlerStansBehandler(), restAdapter)
+
+            get(GetVeilederStansBehandler(), restAdapter)
             patch(PatchVeilederStansBehandler(), restAdapter)
 
             get(GetSoknadBehandler(dokumentMediator = dokumentMediator), restAdapter)
