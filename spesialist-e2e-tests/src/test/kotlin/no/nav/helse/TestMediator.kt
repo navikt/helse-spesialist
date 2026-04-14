@@ -68,7 +68,6 @@ class TestMediator(
             oppgaveService = { oppgaveService },
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
-            environmentToggles = environmentToggles,
         )
 
     init {

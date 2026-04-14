@@ -7,7 +7,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
@@ -95,12 +94,6 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
             oppgaveDao,
             { subsumsjonsmelder },
             veilederStansRepository,
-            object : EnvironmentToggles {
-                override val kanBeslutteEgneSaker = false
-                override val kanGodkjenneUtenBesluttertilgang = false
-                override val kanSeForsikring = false
-                override val devGcp = true
-            },
         )
 
     @Test

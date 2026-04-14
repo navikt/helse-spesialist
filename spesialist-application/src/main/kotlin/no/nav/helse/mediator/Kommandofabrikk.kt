@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.db.MetrikkDao
@@ -52,7 +51,6 @@ class Kommandofabrikk(
     oppgaveService: () -> OppgaveService,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
-    private val environmentToggles: EnvironmentToggles,
 ) {
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
 
@@ -208,7 +206,6 @@ class Kommandofabrikk(
             .stansAutomatiskBehandlingMediator(
                 sessionContext,
                 subsumsjonsmelderProvider,
-                environmentToggles,
             ).håndter(hendelse)
     }
 
@@ -277,7 +274,6 @@ class Kommandofabrikk(
             sessionContext,
             subsumsjonsmelderProvider,
             stikkprøver,
-            environmentToggles,
         )
 
     private fun iverksett(
