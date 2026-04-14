@@ -53,7 +53,7 @@ class GetVeilederStansBehandlerTest {
         assertEquals(200, response.status)
         val body = response.body<ApiVeilederStans>()
         assertEquals(
-            setOf(ApiVeilederStans.ApiStansÅrsak.MEDISINSK_VILKAR, ApiVeilederStans.ApiStansÅrsak.AKTIVITETSKRAV),
+            setOf(ApiVeilederStans.Årsak.MEDISINSK_VILKAR, ApiVeilederStans.Årsak.AKTIVITETSKRAV),
             body.årsaker,
         )
         val forventetTidspunkt = opprettet.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime()

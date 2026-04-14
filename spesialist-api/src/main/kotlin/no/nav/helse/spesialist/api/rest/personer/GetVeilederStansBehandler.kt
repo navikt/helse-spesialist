@@ -35,10 +35,10 @@ class GetVeilederStansBehandler : GetBehandler<Personer.PersonPseudoId.Stans.Vei
                         stans.årsaker
                             .map {
                                 when (it) {
-                                    VeilederStans.StansÅrsak.MEDISINSK_VILKAR -> ApiVeilederStans.ApiStansÅrsak.MEDISINSK_VILKAR
-                                    VeilederStans.StansÅrsak.AKTIVITETSKRAV -> ApiVeilederStans.ApiStansÅrsak.AKTIVITETSKRAV
-                                    VeilederStans.StansÅrsak.MANGLENDE_MEDVIRKING -> ApiVeilederStans.ApiStansÅrsak.MANGLENDE_MEDVIRKING
-                                    VeilederStans.StansÅrsak.BESTRIDELSE_SYKMELDING -> ApiVeilederStans.ApiStansÅrsak.BESTRIDELSE_SYKMELDING
+                                    VeilederStans.StansÅrsak.MEDISINSK_VILKAR -> ApiVeilederStans.Årsak.MEDISINSK_VILKAR
+                                    VeilederStans.StansÅrsak.AKTIVITETSKRAV -> ApiVeilederStans.Årsak.AKTIVITETSKRAV
+                                    VeilederStans.StansÅrsak.MANGLENDE_MEDVIRKING -> ApiVeilederStans.Årsak.MANGLENDE_MEDVIRKING
+                                    VeilederStans.StansÅrsak.BESTRIDELSE_SYKMELDING -> ApiVeilederStans.Årsak.BESTRIDELSE_SYKMELDING
                                 }
                             }.toSet(),
                     tidspunkt = stans.opprettet.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
