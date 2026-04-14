@@ -18,8 +18,9 @@ import java.util.UUID
 
 @Serializable
 data class ApiVeilederStans(
+    val erStanset: Boolean,
     val årsaker: Set<Årsak>,
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: LocalDateTime?,
 ) {
     enum class Årsak {
         MEDISINSK_VILKAR,

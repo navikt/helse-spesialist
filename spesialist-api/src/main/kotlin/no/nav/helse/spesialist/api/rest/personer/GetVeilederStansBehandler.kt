@@ -26,11 +26,10 @@ class GetVeilederStansBehandler : GetBehandler<Personer.PersonPseudoId.Stans.Vei
         ) { person ->
             val stans =
                 kallKontekst.transaksjon.veilederStansRepository.finnAktiv(person.id)
-                    ?: return@medPerson RestResponse.Error(
-                        ApiGetVeilederStansErrorCode.STANS_IKKE_FUNNET,
-                    )
+                    ?: return@medPerson RestResponse.OK(ApiVeilederStans(erStanset = false, årsaker = emptySet(), tidspunkt = null))
             RestResponse.OK(
                 ApiVeilederStans(
+                    erStanset = true,
                     årsaker =
                         stans.årsaker
                             .map {
@@ -53,5 +52,4 @@ enum class ApiGetVeilederStansErrorCode(
 ) : ApiErrorCode {
     PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    STANS_IKKE_FUNNET("Fant ikke veileder stans", HttpStatusCode.NotFound),
 }

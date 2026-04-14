@@ -52,6 +52,7 @@ class GetVeilederStansBehandlerTest {
         // Then:
         assertEquals(200, response.status)
         val body = response.body<ApiVeilederStans>()
+        assertEquals(true, body.erStanset)
         assertEquals(
             setOf(ApiVeilederStans.Årsak.MEDISINSK_VILKAR, ApiVeilederStans.Årsak.AKTIVITETSKRAV),
             body.årsaker,
@@ -61,7 +62,7 @@ class GetVeilederStansBehandlerTest {
     }
 
     @Test
-    fun `Returnerer 404 når ingen aktiv stans finnes`() {
+    fun `Returnerer erStanset=false når ingen aktiv stans finnes`() {
         // Given:
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
@@ -82,11 +83,15 @@ class GetVeilederStansBehandlerTest {
             )
 
         // Then:
-        assertEquals(404, response.status)
+        assertEquals(200, response.status)
+        val body = response.body<ApiVeilederStans>()
+        assertEquals(false, body.erStanset)
+        assertEquals(emptySet(), body.årsaker)
+        assertEquals(null, body.tidspunkt)
     }
 
     @Test
-    fun `Returnerer 404 når stansen er opphevet`() {
+    fun `Returnerer erStanset=false når stansen er opphevet`() {
         // Given:
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
@@ -120,7 +125,11 @@ class GetVeilederStansBehandlerTest {
             )
 
         // Then:
-        assertEquals(404, response.status)
+        assertEquals(200, response.status)
+        val body = response.body<ApiVeilederStans>()
+        assertEquals(false, body.erStanset)
+        assertEquals(emptySet(), body.årsaker)
+        assertEquals(null, body.tidspunkt)
     }
 
     @Test
