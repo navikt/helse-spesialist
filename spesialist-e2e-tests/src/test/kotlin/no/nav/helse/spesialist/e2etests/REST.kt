@@ -132,7 +132,7 @@ object REST {
                 }
             },
         )
-        assertTrue(statusCode in 200..299) { "Fikk HTTP-kode $statusCode fra HTTP $method" }
+        assertTrue(statusCode in 200..299) { "$method-kall ga status $statusCode (forventet mellom 200 og 299)" }
         return responseBodyAsString?.let(objectMapper::readTree)
     }
 }
