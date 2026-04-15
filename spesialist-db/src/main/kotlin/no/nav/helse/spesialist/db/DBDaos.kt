@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.db.dao.PgPoisonPillDao
 import no.nav.helse.spesialist.db.dao.PgPåVentDao
 import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
-import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
@@ -58,7 +57,6 @@ class DBDaos(
     override val påVentDao = PgPåVentDao(dataSource)
     override val reservasjonDao = PgReservasjonDao(dataSource)
     override val saksbehandlerDao = PgSaksbehandlerDao(dataSource)
-    override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(dataSource)
     override val tildelingDao = PgTildelingDao(dataSource)
     override val legacyVarselDao = PgLegacyVarselDao(dataSource)
     override val vedtakDao = PgVedtakDao(dataSource)

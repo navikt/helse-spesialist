@@ -205,7 +205,6 @@ class Kommandofabrikk(
         StansAutomatiskBehandlingMediator.Factory
             .stansAutomatiskBehandlingMediator(
                 sessionContext,
-                subsumsjonsmelderProvider,
             ).håndter(hendelse)
     }
 

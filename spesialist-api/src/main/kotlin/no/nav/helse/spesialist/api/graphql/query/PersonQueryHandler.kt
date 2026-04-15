@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.api.AuditLogger
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
@@ -134,7 +133,6 @@ import java.util.UUID
 class PersonQueryHandler(
     private val daos: Daos,
     private val apiOppgaveService: ApiOppgaveService,
-    private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
     private val snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
@@ -1032,7 +1030,6 @@ class PersonQueryHandler(
             fodselsdato = personinfo.fødselsdato!!,
             kjonn = personinfo.kjønn.tilApiKjonn(),
             adressebeskyttelse = personinfo.adressebeskyttelse.tilApiAdressebeskyttelse(),
-            unntattFraAutomatisering = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(id.value),
             fullmakt = daos.vergemålApiDao.harFullmakt(id.value),
             automatiskBehandlingStansetAvSaksbehandler = daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(id.value),
         )

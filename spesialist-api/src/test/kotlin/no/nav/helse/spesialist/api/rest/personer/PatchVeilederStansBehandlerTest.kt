@@ -5,6 +5,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.VeilederStans
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
@@ -16,6 +17,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
+import java.time.Instant
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,6 +58,9 @@ class PatchVeilederStansBehandlerTest {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
         val vedtaksperiodeId = lagVedtaksperiodeId()
+        val originalMeldingId = UUID.randomUUID()
+        val opprettet = Instant.now()
+        val årsaker = setOf(VeilederStans.StansÅrsak.AKTIVITETSKRAV)
 
         val person =
             lagPerson(
@@ -68,6 +73,15 @@ class PatchVeilederStansBehandlerTest {
             id = vedtaksperiodeId,
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
+
+        sessionContext.veilederStansRepository.lagre(
+            VeilederStans.ny(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                årsaker = årsaker,
+                opprettet = opprettet,
+                originalMeldingId = originalMeldingId,
+            ),
+        )
 
         sessionContext.oppgaveRepository.lagre(
             Oppgave.ny(
@@ -101,13 +115,13 @@ class PatchVeilederStansBehandlerTest {
 
         // Then:
         // Sjekk persistert data
-        val lagredeStans = sessionContext.stansAutomatiskBehandlingDao.hentFor(fødselsnummer)
+        val lagredeStans = sessionContext.veilederStansRepository.finnAlle(Identitetsnummer.fraString(fødselsnummer))
         assertEquals(1, lagredeStans.size)
         val lagretStans = lagredeStans.first()
-        assertEquals(fødselsnummer, lagretStans.fødselsnummer)
-        assertEquals("NORMAL", lagretStans.status)
-        assertEquals(emptySet(), lagretStans.årsaker)
-        assertEquals(null, lagretStans.meldingId)
+        assertEquals(fødselsnummer, lagretStans.identitetsnummer.value)
+        assertEquals(årsaker, lagretStans.årsaker)
+        assertEquals(originalMeldingId, lagretStans.originalMeldingId)
+        assertEquals(opprettet, lagretStans.opprettet)
 
         val notater = sessionContext.notatRepository.finnAlleForVedtaksperiode(vedtaksperiodeId.value)
         assertEquals(1, notater.size)

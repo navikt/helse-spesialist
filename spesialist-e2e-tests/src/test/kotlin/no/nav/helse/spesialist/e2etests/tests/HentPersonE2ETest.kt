@@ -55,12 +55,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
             "fodselsdato" : "${testContext.person.fødselsdato}",
             "kjonn" : "${testContext.person.kjønn}",
             "fullmakt" : false,
-            "unntattFraAutomatisering" : {
-              "erUnntatt" : false,
-              "arsaker" : [ ],
-              "tidspunkt" : null,
-              "__typename" : "UnntattFraAutomatiskGodkjenning"
-            },
             "__typename" : "Personinfo"
           },
           "tildeling" : null,

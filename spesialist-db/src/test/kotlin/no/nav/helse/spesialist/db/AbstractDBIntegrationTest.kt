@@ -117,7 +117,6 @@ abstract class AbstractDBIntegrationTest {
     internal val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
     internal val dokumentDao = daos.dokumentDao
-    internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val annulleringRepository = daos.annulleringRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository

@@ -18,7 +18,6 @@ class InMemoryRepositoriesAndDaos {
     private val personPseudoIdDao = InMemoryPersonPseudoIdDao()
     private val påVentRepository = InMemoryPåVentRepository()
     private val saksbehandlerRepository = InMemorySaksbehandlerRepository()
-    private val stansAutomatiskBehandlingDao = InMemoryStansAutomatiskBehandlingDao()
     private val tilkommenInntektRepository = InMemoryTilkommenInntektRepository()
     private val totrinnsvurderingRepository = InMemoryTotrinnsvurderingRepository()
     private val varselRepository = InMemoryVarselRepository()
@@ -121,7 +120,6 @@ class InMemoryRepositoriesAndDaos {
             risikovurderingApiDao = risikovurderingApiDao,
             saksbehandlerDao = saksbehandlerDao,
             saksbehandlerRepository = saksbehandlerRepository,
-            stansAutomatiskBehandlingDao = stansAutomatiskBehandlingDao,
             stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
             tildelingDao = tildelingDao,
             tildelingApiDao = tildelingApiDao,
@@ -165,7 +163,6 @@ class InMemoryRepositoriesAndDaos {
                     risikovurderingDao = risikovurderingDao,
                     saksbehandlerDao = saksbehandlerDao,
                     saksbehandlerRepository = saksbehandlerRepository,
-                    stansAutomatiskBehandlingDao = stansAutomatiskBehandlingDao,
                     stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
                     sykefraværstilfelleDao = sykefraværstilfelleDao,
                     tildelingDao = tildelingDao,

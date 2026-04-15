@@ -174,12 +174,12 @@ class OverstyringE2ETest : AbstractE2ETest() {
         håndterOverstyrArbeidsforhold()
 
         every { dataFetchingEnvironment.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER) } returns
-                Saksbehandler(
-                    id = SaksbehandlerOid(value = UUID.randomUUID()),
-                    navn = "epost",
-                    epost = "navn",
-                    ident = NAVIdent("A123456"),
-                )
+            Saksbehandler(
+                id = SaksbehandlerOid(value = UUID.randomUUID()),
+                navn = "epost",
+                epost = "navn",
+                ident = NAVIdent("A123456"),
+            )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns emptySet()
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
@@ -190,9 +190,12 @@ class OverstyringE2ETest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
 
         mockSnapshot()
-        val personPseudoId = sessionFactory.transactionalSessionScope {
-            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-        }.value.toString()
+        val personPseudoId =
+            sessionFactory
+                .transactionalSessionScope {
+                    it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                }.value
+                .toString()
 
         val snapshot: ApiPerson =
             personQuery.person(personPseudoId, env = dataFetchingEnvironment).data!!
@@ -313,7 +316,6 @@ class OverstyringE2ETest : AbstractE2ETest() {
                 PersonQueryHandler(
                     daos = daos,
                     apiOppgaveService = mockk(relaxed = true),
-                    stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer =
                         object : Personhåndterer {
                             override fun klargjørPersonForVisning(fødselsnummer: String) {}

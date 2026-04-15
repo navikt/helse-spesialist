@@ -137,26 +137,26 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun settOppDefaultDataOgTilganger() {
         every { dataFetchingEnvironment.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER) } returns
-                Saksbehandler(
-                    id = SaksbehandlerOid(value = UUID.randomUUID()),
-                    navn = "epost",
-                    epost = "navn",
-                    ident = NAVIdent("A123456"),
-                )
+            Saksbehandler(
+                id = SaksbehandlerOid(value = UUID.randomUUID()),
+                navn = "epost",
+                epost = "navn",
+                ident = NAVIdent("A123456"),
+            )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns emptySet()
         saksbehandlertilgangTilSkjermede(harTilgang = false)
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
-                setOfNotNull(Brukerrolle.EgenAnsatt.takeIf { harTilgang })
+            setOfNotNull(Brukerrolle.EgenAnsatt.takeIf { harTilgang })
     }
 
     private fun saksbehandlertilgangTilKode7(
         @Suppress("SameParameterValue") harTilgang: Boolean,
     ) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
-                setOfNotNull(Brukerrolle.Kode7.takeIf { harTilgang })
+            setOfNotNull(Brukerrolle.Kode7.takeIf { harTilgang })
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
@@ -167,7 +167,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                 PersonQueryHandler(
                     daos = daos,
                     apiOppgaveService = mockk(relaxed = true),
-                    stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer =
                         object : Personhåndterer {
                             override fun klargjørPersonForVisning(fødselsnummer: String) {}

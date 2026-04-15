@@ -46,7 +46,6 @@ import no.nav.helse.spesialist.db.dao.PgPåVentDao
 import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
 import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
-import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgSykefraværstilfelleDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
@@ -92,7 +91,6 @@ class DBSessionContext(
     override val reservasjonDao = PgReservasjonDao(session)
     override val risikovurderingDao = PgRisikovurderingDao(session)
     override val saksbehandlerDao = PgSaksbehandlerDao(session)
-    override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(session)
     override val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
     override val tildelingDao = PgTildelingDao(session)
     override val utbetalingDao = PgUtbetalingDao(session)

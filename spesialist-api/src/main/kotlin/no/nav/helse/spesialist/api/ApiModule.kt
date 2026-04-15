@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
-import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
@@ -70,9 +69,6 @@ class ApiModule(
             oppgaveDao = daos.oppgaveDao,
         )
 
-    private val stansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlinghåndtererImpl(daos.stansAutomatiskBehandlingDao)
-
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             daos = daos,
@@ -91,7 +87,6 @@ class ApiModule(
                             PersonQueryHandler(
                                 daos = daos,
                                 apiOppgaveService = apiOppgaveService,
-                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,

@@ -573,12 +573,6 @@ fragment person on Person {
         fodselsdato
         kjonn
         fullmakt
-        unntattFraAutomatisering {
-            erUnntatt
-            arsaker
-            tidspunkt
-            __typename
-        }
         __typename
     }
     tildeling {

@@ -25,7 +25,6 @@ import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
-import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
@@ -106,7 +105,6 @@ object TestRunner {
                 apiOppgaveService = mockk(relaxed = true),
                 personhåndterer = mockk(relaxed = true),
                 dokumentMediator = mockk(relaxed = true),
-                stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                 behandlingstatistikk = mockk(relaxed = true),
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
@@ -131,7 +129,6 @@ object TestRunner {
                                     PersonQueryHandler(
                                         daos = avhengigheter.daos,
                                         apiOppgaveService = avhengigheter.apiOppgaveService,
-                                        stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
                                         personhåndterer = avhengigheter.personhåndterer,
                                         snapshothenter = avhengigheter.snapshothenter,
                                         sessionFactory = avhengigheter.sessionFactory,
@@ -210,7 +207,6 @@ object TestRunner {
         val apiOppgaveService: ApiOppgaveService,
         val personhåndterer: Personhåndterer,
         val dokumentMediator: DokumentMediator,
-        val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,

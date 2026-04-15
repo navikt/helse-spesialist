@@ -31,7 +31,6 @@ interface Daos {
     val påVentDao: PåVentDao
     val reservasjonDao: ReservasjonDao
     val saksbehandlerDao: SaksbehandlerDao
-    val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val tildelingDao: TildelingDao
     val legacyVarselDao: LegacyVarselDao
     val vedtakDao: VedtakDao

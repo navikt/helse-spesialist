@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import no.nav.helse.AutomatiseringStansetSjekker
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
@@ -18,7 +17,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansSubsumsjonmelder
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -28,6 +27,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -39,7 +39,7 @@ import kotlin.random.Random
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
-    private val automatiseringStansetSjekker: AutomatiseringStansetSjekker,
+    private val veilederStansSubsumsjonmelder: VeilederStansSubsumsjonmelder,
     private val automatiseringDao: AutomatiseringDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val vergemålDao: VergemålDao,
@@ -51,6 +51,7 @@ internal class Automatisering(
     private val personRepository: PersonRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
+    private val veilederStansRepository: VeilederStansRepository,
 ) {
     object Factory {
         fun automatisering(
@@ -60,11 +61,7 @@ internal class Automatisering(
         ): Automatisering =
             Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
-                automatiseringStansetSjekker =
-                    StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
-                        sessionContext,
-                        subsumsjonsmelderProvider,
-                    ),
+                veilederStansSubsumsjonmelder = VeilederStansSubsumsjonmelder(subsumsjonsmelderProvider),
                 automatiseringDao = sessionContext.automatiseringDao,
                 åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
                 vergemålDao = sessionContext.vergemålDao,
@@ -76,6 +73,7 @@ internal class Automatisering(
                 personRepository = sessionContext.personRepository,
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao,
+                veilederStansRepository = sessionContext.veilederStansRepository,
             )
     }
 
@@ -126,7 +124,9 @@ internal class Automatisering(
                 vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)
         ) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
-            -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
+            -> {
+                return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
+            }
 
             is AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad,
             is SkyldesKorrigertSøknad.KanAutomatiseres,
@@ -221,34 +221,44 @@ internal class Automatisering(
         when (yrkesaktivitetstype) {
             Yrkesaktivitetstype.ARBEIDSTAKER -> {
                 when {
-                    UTS ->
+                    UTS -> {
                         when {
-                            flereArbeidsgivere ->
+                            flereArbeidsgivere -> {
                                 when {
                                     førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
                                     !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
                                 }
+                            }
 
-                            !flereArbeidsgivere ->
+                            !flereArbeidsgivere -> {
                                 when {
                                     førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
                                     !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
                                 }
+                            }
                         }
+                    }
 
-                    flereArbeidsgivere ->
+                    flereArbeidsgivere -> {
                         when {
                             førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
                             !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
                         }
+                    }
 
-                    stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
+                    stikkprøver.fullRefusjonEnArbeidsgiver() -> {
+                        return "Refusjon, en arbeidsgiver"
+                    }
                 }
             }
+
             Yrkesaktivitetstype.SELVSTENDIG -> {
                 if (!førstegangsbehandling && stikkprøver.selvstendigNæringsdrivendeForlengelse()) return "Forlengelse, selvstendig næringsdrivende"
             }
-            else -> error("Støtter ikke behandling av personer med yrkesaktivitetstype $yrkesaktivitetstype")
+
+            else -> {
+                error("Støtter ikke behandling av personer med yrkesaktivitetstype $yrkesaktivitetstype")
+            }
         }
         return null
     }
@@ -267,12 +277,11 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler risikovurdering") { false }
-        val unntattFraAutomatisering =
-            automatiseringStansetSjekker.sjekkOmAutomatiseringErStanset(
-                fødselsnummer,
-                vedtaksperiodeId,
-                organisasjonsnummer,
-            )
+
+        val veilederStans =
+            veilederStansRepository.finnAktiv(Identitetsnummer.fraString(fødselsnummer))
+        veilederStansSubsumsjonmelder.sendMelding(veilederStans, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+
         val automatiseringStansetAvSaksbehandler = stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
@@ -281,7 +290,8 @@ internal class Automatisering(
         val harKravOmTotrinnsvurdering =
             totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
-        val selvstendigNæringsdrivendeFGB = yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && periodetype == FØRSTEGANGSBEHANDLING
+        val selvstendigNæringsdrivendeFGB =
+            yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && periodetype == FØRSTEGANGSBEHANDLING
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
 
@@ -289,7 +299,7 @@ internal class Automatisering(
             validering("Gjelder selvstendig næring") { !selvstendigNæringsdrivendeFGB },
             risikovurdering,
             validering("Automatisering stanset av saksbehandler") { !automatiseringStansetAvSaksbehandler },
-            validering("Unntatt fra automatisk godkjenning") { !unntattFraAutomatisering },
+            validering("Unntatt fra automatisk godkjenning") { veilederStans == null },
             validering("Har varsler") { !forhindrerAutomatisering },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false

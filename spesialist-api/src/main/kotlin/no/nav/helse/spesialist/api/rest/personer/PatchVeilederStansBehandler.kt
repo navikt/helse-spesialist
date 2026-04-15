@@ -31,31 +31,12 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
         ) { person ->
             if (!request.stans) {
                 opphevVeilederStans(request.begrunnelse, person, kallKontekst)
-                opphevVeilederStansV2(request.begrunnelse, person, kallKontekst)
             }
             RestResponse.NoContent()
         }
     }
 
     private fun opphevVeilederStans(
-        begrunnelse: String,
-        person: Person,
-        kallKontekst: KallKontekst,
-    ) {
-        kallKontekst.transaksjon.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = person.id.value)
-        kallKontekst.transaksjon.notatDao.lagreForOppgaveId(
-            oppgaveId =
-                kallKontekst.transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = person.id.value)
-                    ?: kallKontekst.transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = person.id.value),
-            tekst = begrunnelse,
-            saksbehandlerOid = kallKontekst.saksbehandler.id.value,
-            notatType = NotatType.OpphevStans,
-            dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
-        )
-        loggInfo("Opphevet veileder-stans for person")
-    }
-
-    private fun opphevVeilederStansV2(
         begrunnelse: String,
         person: Person,
         kallKontekst: KallKontekst,
@@ -71,6 +52,15 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
                 begrunnelse = begrunnelse,
             )
             kallKontekst.transaksjon.veilederStansRepository.lagre(aktivVeilederStans)
+            kallKontekst.transaksjon.notatDao.lagreForOppgaveId(
+                oppgaveId =
+                    kallKontekst.transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = person.id.value)
+                        ?: kallKontekst.transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = person.id.value),
+                tekst = begrunnelse,
+                saksbehandlerOid = kallKontekst.saksbehandler.id.value,
+                notatType = NotatType.OpphevStans,
+                dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
+            )
             loggInfo("Opphevet veileder-stans for person")
         }
     }

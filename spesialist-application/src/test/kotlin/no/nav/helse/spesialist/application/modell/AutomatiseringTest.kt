@@ -20,7 +20,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.risiko.Risikovurdering
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansSubsumsjonmelder
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
@@ -31,8 +31,11 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.VeilederStans
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -43,6 +46,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -59,10 +63,11 @@ internal class AutomatiseringTest {
         mockk<RisikovurderingDao> {
             every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         }
-    private val stansAutomatiskBehandlingMediatorMock =
-        mockk<StansAutomatiskBehandlingMediator> {
-            every { sjekkOmAutomatiseringErStanset(fødselsnummer, vedtaksperiodeId, orgnummer) } returns false
+    private val veilederStansRepositoryMock =
+        mockk<VeilederStansRepository>(relaxed = true) {
+            every { finnAktiv(any()) } returns null
         }
+    private val veilederStansSubsumsjonmelder = VeilederStansSubsumsjonmelder { mockk(relaxed = true) }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val personRepository =
         mockk<PersonRepository>(relaxed = true) {
@@ -105,7 +110,7 @@ internal class AutomatiseringTest {
     private val automatisering =
         Automatisering(
             risikovurderingDao = risikovurderingDaoMock,
-            automatiseringStansetSjekker = stansAutomatiskBehandlingMediatorMock,
+            veilederStansSubsumsjonmelder = veilederStansSubsumsjonmelder,
             automatiseringDao = automatiseringDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             vergemålDao = vergemålDaoMock,
@@ -117,6 +122,7 @@ internal class AutomatiseringTest {
             personRepository = personRepository,
             totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
             stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDaoMock,
+            veilederStansRepository = veilederStansRepositoryMock,
         )
 
     @BeforeEach
@@ -274,12 +280,19 @@ internal class AutomatiseringTest {
     @Test
     fun `selvstendig næringsdrivende forlengelse som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveSelvstendigNæringsdrivendeForlengelse = true
-        blirStikkprøve(enUtbetaling(personbeløp = 500), periodetype = FORLENGELSE, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+        blirStikkprøve(
+            enUtbetaling(personbeløp = 500),
+            periodetype = FORLENGELSE,
+            yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+        )
     }
 
     @Test
     fun `periode med forlengelse av selvstendig næringsdrivende skal automatisk godkjennes`() {
-        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 0), yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+        blirAutomatiskBehandlet(
+            enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 0),
+            yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+        )
     }
 
     @Test
@@ -337,7 +350,13 @@ internal class AutomatiseringTest {
 
     @Test
     fun `veileder har stanset automatisk behandling`() {
-        every { stansAutomatiskBehandlingMediatorMock.sjekkOmAutomatiseringErStanset(any(), any(), any()) } returns true
+        every { veilederStansRepositoryMock.finnAktiv(any()) } returns
+            VeilederStans.ny(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                årsaker = setOf(VeilederStans.StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
         blirManuellOppgave()
     }
 
@@ -452,7 +471,13 @@ internal class AutomatiseringTest {
         utbetaling: Utbetaling = enUtbetaling(),
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-    ) = assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype, yrkesaktivitetstype = yrkesaktivitetstype))
+    ) = assertStikkprøve(
+        forsøkAutomatisering(
+            utbetaling = utbetaling,
+            periodetype = periodetype,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+        ),
+    )
 
     private fun blirManuellOppgaveMedFeil(
         utbetaling: Utbetaling = enUtbetaling(),

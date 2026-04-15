@@ -30,7 +30,6 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeid
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
-import no.nav.helse.spesialist.api.graphql.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
@@ -56,7 +55,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-    private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
@@ -103,7 +101,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                             PersonQueryHandler(
                                 daos = daos,
                                 apiOppgaveService = apiOppgaveService,
-                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
