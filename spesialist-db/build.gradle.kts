@@ -9,7 +9,6 @@ dependencies {
     implementation(libs.kotliquery)
     implementation(libs.hikari)
     implementation(libs.postgresJdbcDriver)
-    implementation(libs.postgresPgJdbcDriver)
 
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)

@@ -33,7 +33,7 @@ internal class DataSourceBuilder(
                 )
         }
 
-    internal val listenNotifyConnection: Connection get() = DriverManager.getConnection(configuration.jdbcUrl.replace("jdbc:postgresql://", "jdbc:pgsql://"), configuration.username, configuration.password)
+    internal val listenNotifyConnection: Connection get() = DriverManager.getConnection(configuration.jdbcUrl, configuration.username, configuration.password)
 
     fun build(): HikariDataSource = HikariDataSource(hikariConfig)
 }
