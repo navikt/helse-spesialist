@@ -443,7 +443,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             assertThrows<AssertionError> {
                 saksbehandlerFatterVedtak(behandlingId)
             }.also {
-                assertContains(it.message!!, "Fikk HTTP-kode 409")
+                assertContains(it.message!!, "POST-kall ga status 409")
             }
         }
 
