@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.kafka.StansAutomatiskBehandlingRiver
+import no.nav.helse.kafka.VeilederStansRiver
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.spesialist.kafka.medRivers
 import org.intellij.lang.annotations.Language
@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class StansAutomatiskLegacyBehandlingRiverTest {
+internal class VeilederStansRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().medRivers(StansAutomatiskBehandlingRiver(mediator))
+    private val testRapid = TestRapid().medRivers(VeilederStansRiver(mediator))
 
     @Test
     fun `Leser stans automatisk behandling`() {

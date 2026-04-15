@@ -8,10 +8,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMelding
 
-class StansAutomatiskBehandlingRiver(
+class VeilederStansRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation =
@@ -43,7 +43,7 @@ class StansAutomatiskBehandlingRiver(
         val originalMelding = packet["originalMelding"].asText()
 
         mediator.mottaMelding(
-            StansAutomatiskBehandlingMelding(
+            VeilederStansMelding(
                 id = id,
                 fødselsnummer = fødselsnummer,
                 status = status,

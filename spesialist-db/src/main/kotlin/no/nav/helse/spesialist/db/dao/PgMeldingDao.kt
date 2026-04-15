@@ -23,7 +23,7 @@ import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
@@ -226,7 +226,7 @@ class PgMeldingDao private constructor(
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
-            is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
+            is VeilederStansMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
 }

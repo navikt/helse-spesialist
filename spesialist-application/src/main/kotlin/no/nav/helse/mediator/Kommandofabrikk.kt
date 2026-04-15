@@ -21,8 +21,8 @@ import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
@@ -199,11 +199,11 @@ class Kommandofabrikk(
             alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
         )
 
-    internal fun stansAutomatiskBehandling(
-        hendelse: StansAutomatiskBehandlingMelding,
+    internal fun veilederStansBehandler(
+        hendelse: VeilederStansMelding,
     ) = ikkesuspenderendeCommand { sessionContext: SessionContext, _: Outbox ->
-        StansAutomatiskBehandlingMediator.Factory
-            .stansAutomatiskBehandlingMediator(
+        VeilederStansMediator.Factory
+            .veilederStansMediator(
                 sessionContext,
             ).håndter(hendelse)
     }

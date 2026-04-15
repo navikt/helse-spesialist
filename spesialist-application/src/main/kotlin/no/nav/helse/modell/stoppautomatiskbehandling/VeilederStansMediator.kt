@@ -12,23 +12,23 @@ import no.nav.helse.spesialist.domain.VeilederStans
 import java.time.ZoneOffset
 import java.util.UUID
 
-class StansAutomatiskBehandlingMediator(
+class VeilederStansMediator(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val oppgaveDao: OppgaveDao,
     private val veilederStansRepository: VeilederStansRepository,
 ) {
     object Factory {
-        fun stansAutomatiskBehandlingMediator(
+        fun veilederStansMediator(
             sessionContext: SessionContext,
-        ): StansAutomatiskBehandlingMediator =
-            StansAutomatiskBehandlingMediator(
+        ): VeilederStansMediator =
+            VeilederStansMediator(
                 sessionContext.periodehistorikkDao,
                 sessionContext.oppgaveDao,
                 sessionContext.veilederStansRepository,
             )
     }
 
-    fun håndter(melding: StansAutomatiskBehandlingMelding) {
+    fun håndter(melding: VeilederStansMelding) {
         if (melding.status == "STOPP_AUTOMATIKK") {
             veilederStansRepository.lagre(
                 VeilederStans.ny(

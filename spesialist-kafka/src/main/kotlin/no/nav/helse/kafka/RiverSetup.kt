@@ -67,7 +67,7 @@ class RiverSetup(
             BehandlingOpprettetRiver(),
             BehandlingLukketRiver(),
             KommandokjedePåminnelseRiver(mediator),
-            StansAutomatiskBehandlingRiver(mediator),
+            VeilederStansRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
         ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao, sessionFactory, versjonAvKode) }
 

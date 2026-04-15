@@ -7,7 +7,7 @@ import no.nav.helse.modell.person.LegacyPerson
 import java.time.LocalDateTime
 import java.util.UUID
 
-class StansAutomatiskBehandlingMelding(
+class VeilederStansMelding(
     override val id: UUID,
     private val fødselsnummer: String,
     val kilde: String,
@@ -22,7 +22,7 @@ class StansAutomatiskBehandlingMelding(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { stansAutomatiskBehandling(this@StansAutomatiskBehandlingMelding) }
+        kommandostarter { veilederStansBehandler(this@VeilederStansMelding) }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

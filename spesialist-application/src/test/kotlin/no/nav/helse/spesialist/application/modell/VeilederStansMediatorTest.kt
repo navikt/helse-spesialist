@@ -9,10 +9,10 @@ import io.mockk.verify
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMelding
 import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.VeilederStans
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime.now
 import java.util.UUID.randomUUID
 
-class StansAutomatiskLegacyBehandlingMediatorTest {
+class VeilederStansMediatorTest {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val veilederStansRepository = mockk<VeilederStansRepository>(relaxed = true)
@@ -32,7 +32,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     }
 
     private val mediator =
-        StansAutomatiskBehandlingMediator(
+        VeilederStansMediator(
             periodehistorikkDao,
             oppgaveDao,
             veilederStansRepository,
@@ -41,7 +41,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `Lagrer periodehistorikk når stoppknapp-melding håndteres`() {
         val melding =
-            StansAutomatiskBehandlingMelding(
+            VeilederStansMelding(
                 id = randomUUID(),
                 fødselsnummer = FNR,
                 status = "STOPP_AUTOMATIKK",
@@ -66,7 +66,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     fun `håndter STOPP_AUTOMATIKK oppretter og lagrer ny VeilederStans`() {
         val originalMeldingId = randomUUID()
         val melding =
-            StansAutomatiskBehandlingMelding(
+            VeilederStansMelding(
                 id = randomUUID(),
                 fødselsnummer = FNR,
                 status = "STOPP_AUTOMATIKK",
@@ -95,7 +95,7 @@ class StansAutomatiskLegacyBehandlingMediatorTest {
     @Test
     fun `håndter NORMAL lagrer ikke VeilederStans`() {
         val melding =
-            StansAutomatiskBehandlingMelding(
+            VeilederStansMelding(
                 id = randomUUID(),
                 fødselsnummer = FNR,
                 status = "NORMAL",
