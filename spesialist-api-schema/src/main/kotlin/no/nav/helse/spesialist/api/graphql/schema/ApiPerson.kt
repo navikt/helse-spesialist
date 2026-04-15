@@ -11,13 +11,6 @@ data class ApiSaksbehandler(
     val ident: String?,
 )
 
-@GraphQLName("UnntattFraAutomatiskGodkjenning")
-data class ApiUnntattFraAutomatiskGodkjenning(
-    val erUnntatt: Boolean,
-    val arsaker: List<String>,
-    val tidspunkt: LocalDateTime?,
-)
-
 @GraphQLName("Enhet")
 data class ApiEnhet(
     val id: String,
