@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.micrometer.prometheus)
     implementation(libs.bundles.kotlinx.coroutines)
     implementation(libs.bundles.smiley4.ktor.openapi.tools)
+    implementation(libs.opentelemetry.instrumentation.annotations)
 
     testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-domain")))

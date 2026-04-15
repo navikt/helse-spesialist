@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import io.opentelemetry.api.trace.Span
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
@@ -25,6 +26,7 @@ class OverstyringMutationHandler(
             MdcKey.VEDTAKSPERIODE_ID to overstyring.vedtaksperiodeId.toString(),
             MdcKey.IDENTITETSNUMMER to overstyring.fodselsnummer,
         ) {
+            Span.current().setAttribute("speil.saksbehandlerhandling", "overstyr_tidslinje")
             try {
                 saksbehandlerMediator.håndter(
                     handlingFraApi = overstyring,
