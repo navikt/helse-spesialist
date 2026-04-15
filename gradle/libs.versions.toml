@@ -62,7 +62,6 @@ opentelemetry-instrumentation-annotations = 'io.opentelemetry.instrumentation:op
 mockOauth2Server = "no.nav.security:mock-oauth2-server:3.0.1"
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.9"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.10"
-postgresPgJdbcDriver = "com.impossibl.pgjdbc-ng:pgjdbc-ng:0.8.9"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.28.2"
 rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2026031212461773315969.b17173a21e7b"
 slf4jApi = "org.slf4j:slf4j-api:2.0.17"
