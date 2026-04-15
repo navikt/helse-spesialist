@@ -68,23 +68,15 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
         val identitetsnummer = Identitetsnummer.fraString(person.id.value)
         val saksbehandlerIdent = kallKontekst.saksbehandler.ident
 
-        val eksisterendeStans = kallKontekst.transaksjon.saksbehandlerStansRepository.finn(identitetsnummer)
+        val eksisterendeAktivStans = kallKontekst.transaksjon.saksbehandlerStansRepository.finnAktiv(identitetsnummer)
+        if (eksisterendeAktivStans != null) return
+
         val stans =
-            if (eksisterendeStans != null) {
-                if (!eksisterendeStans.erStanset) {
-                    eksisterendeStans.opprettStans(
-                        utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-                        begrunnelse = begrunnelse,
-                    )
-                }
-                eksisterendeStans
-            } else {
-                SaksbehandlerStans.ny(
-                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-                    begrunnelse = begrunnelse,
-                    identitetsnummer = identitetsnummer,
-                )
-            }
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                begrunnelse = begrunnelse,
+                identitetsnummer = identitetsnummer,
+            )
         kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(stans)
         loggInfo("Opprettet saksbehandler-stans for person med aggregat")
     }
@@ -95,14 +87,14 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
         kallKontekst: KallKontekst,
     ) {
         val identitetsnummer = Identitetsnummer.fraString(person.id.value)
-        val eksisterendeStans = kallKontekst.transaksjon.saksbehandlerStansRepository.finn(identitetsnummer)
+        val aktivStans = kallKontekst.transaksjon.saksbehandlerStansRepository.finnAktiv(identitetsnummer)
 
-        if (eksisterendeStans != null && eksisterendeStans.erStanset) {
-            eksisterendeStans.opphevStans(
+        if (aktivStans != null) {
+            aktivStans.opphevStans(
                 utførtAvSaksbehandlerIdent = kallKontekst.saksbehandler.ident,
                 begrunnelse = begrunnelse,
             )
-            kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(eksisterendeStans)
+            kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(aktivStans)
         }
         loggInfo("Opphevet saksbehandler-stans for person med aggregat")
     }

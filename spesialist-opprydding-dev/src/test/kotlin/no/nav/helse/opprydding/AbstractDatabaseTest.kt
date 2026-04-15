@@ -182,8 +182,8 @@ internal abstract class AbstractDatabaseTest {
             INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 420, 'avslagtekst', 'AVSLAG', '${saksbehandler_oid}');
             INSERT INTO vedtak_begrunnelse(vedtaksperiode_id, begrunnelse_ref, behandling_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number} + 420, ${sequence_number});
             
-            INSERT INTO saksbehandler_stans_events(sekvensnummer, event_navn, utført_av_saksbehandler_ident, tidspunkt, identitetsnummer, begrunnelse) 
-            VALUES (1, 'STANS_OPPRETTET', 'I123456', now(), '$fødselsnummer', 'En begrunnelse');
+            INSERT INTO saksbehandler_stans(id, identitetsnummer, utfort_av_ident, begrunnelse, opprettet)
+            VALUES (gen_random_uuid(), '$fødselsnummer', 'I123456', 'En begrunnelse', now());
             
             INSERT INTO veileder_stans(id, identitetsnummer, arsaker, opprettet, original_melding_id, opphevet_av_saksbehandler_ident, opphevet_begrunnelse, opphevet_tidspunkt)
             VALUES (gen_random_uuid(), '$fødselsnummer', '{MEDISINSK_VILKAR}', now(), gen_random_uuid(), 'I123456', 'En begrunnelse', now());

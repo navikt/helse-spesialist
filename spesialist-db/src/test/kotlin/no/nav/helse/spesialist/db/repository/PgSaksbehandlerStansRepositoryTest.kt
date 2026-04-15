@@ -6,62 +6,93 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = PgSaksbehandlerStansRepository(session)
 
     @Test
-    fun `Kan lagre og finne ny saksbehandlerstans`() {
-        // given
+    fun `Kan lagre og finne aktiv saksbehandlerstans`() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val saksbehandlerStans =
-            SaksbehandlerStans.ny(
-                utførtAvSaksbehandlerIdent = saksbehandler.ident,
-                identitetsnummer = person.id,
-                begrunnelse = "begrunnelse",
-            )
+        val stans = SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = saksbehandler.ident,
+            identitetsnummer = person.id,
+            begrunnelse = "begrunnelse",
+        )
+        repository.lagre(stans)
 
-        repository.lagre(saksbehandlerStans)
+        val lagretStans = repository.finnAktiv(person.id)
 
-        // when
-        val lagretSaksbehandlerStans = repository.finn(person.id)
-
-        // then
-        assertNotNull(lagretSaksbehandlerStans)
-        assertEquals(saksbehandlerStans.erStanset, lagretSaksbehandlerStans.erStanset)
-        assertEquals(saksbehandlerStans.versjon, lagretSaksbehandlerStans.versjon)
-        assertEquals(saksbehandlerStans.identitetsnummer, lagretSaksbehandlerStans.identitetsnummer)
-        assertEquals(saksbehandlerStans.events.size, lagretSaksbehandlerStans.events.size)
+        assertNotNull(lagretStans)
+        assertTrue(lagretStans.erStanset)
+        assertNull(lagretStans.stansOpphevet)
+        assertEquals(stans.id, lagretStans.id)
+        assertEquals(stans.identitetsnummer, lagretStans.identitetsnummer)
+        assertEquals(stans.utførtAv, lagretStans.utførtAv)
+        assertEquals(stans.begrunnelse, lagretStans.begrunnelse)
     }
 
     @Test
     fun `Kan lagre og finne oppheving av saksbehandlerstans`() {
-        // given
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val stans =
-            SaksbehandlerStans.ny(
-                utførtAvSaksbehandlerIdent = saksbehandler.ident,
-                identitetsnummer = person.id,
-                begrunnelse = "Oppretter stans",
-            )
+        val stans = SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = saksbehandler.ident,
+            identitetsnummer = person.id,
+            begrunnelse = "Oppretter stans",
+        )
         repository.lagre(stans)
 
-        // when
         stans.opphevStans(
             utførtAvSaksbehandlerIdent = saksbehandler.ident,
             begrunnelse = "Opphever stans",
         )
         repository.lagre(stans)
 
-        // then
-        val hentetStans = repository.finn(person.id)
-        assertNotNull(hentetStans)
-        assertFalse(hentetStans.erStanset)
-        assertEquals(stans.versjon, hentetStans.versjon)
-        assertEquals(stans.events.size, hentetStans.events.size)
+        assertNull(repository.finnAktiv(person.id))
+
+        val alle = repository.finnAlle(person.id)
+        assertEquals(1, alle.size)
+        assertFalse(alle.first().erStanset)
+        assertNotNull(alle.first().stansOpphevet).also { opphevet ->
+            assertEquals(saksbehandler.ident, opphevet.utførtAv)
+            assertEquals("Opphever stans", opphevet.begrunnelse)
+        }
+    }
+
+    @Test
+    fun `Re-stans oppretter ny rad og bevarer historikk`() {
+        val person = opprettPerson()
+        val saksbehandler = opprettSaksbehandler()
+
+        val førstStans = SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = saksbehandler.ident,
+            identitetsnummer = person.id,
+            begrunnelse = "Første stans",
+        )
+        repository.lagre(førstStans)
+
+        førstStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandler.ident, begrunnelse = "Opphever")
+        repository.lagre(førstStans)
+
+        val andreStans = SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = saksbehandler.ident,
+            identitetsnummer = person.id,
+            begrunnelse = "Andre stans",
+        )
+        repository.lagre(andreStans)
+
+        val aktiv = repository.finnAktiv(person.id)
+        assertNotNull(aktiv)
+        assertTrue(aktiv.erStanset)
+        assertEquals(andreStans.id, aktiv.id)
+        assertEquals("Andre stans", aktiv.begrunnelse)
+
+        val alle = repository.finnAlle(person.id)
+        assertEquals(2, alle.size)
     }
 }

@@ -541,7 +541,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettSaksbehandlerStans(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query =
-            "DELETE FROM saksbehandler_stans_events WHERE identitetsnummer = :fodselsnummer"
+            "DELETE FROM saksbehandler_stans WHERE identitetsnummer = :fodselsnummer"
         run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 

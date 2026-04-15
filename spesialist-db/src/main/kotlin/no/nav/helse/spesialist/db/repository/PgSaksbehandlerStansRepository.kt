@@ -9,96 +9,96 @@ import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
-import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansEvent
-import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansOpphevetEvent
-import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansOpprettetEvent
+import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansId
 
 class PgSaksbehandlerStansRepository(
     session: Session,
 ) : QueryRunner by MedSession(session),
     SaksbehandlerStansRepository {
     override fun lagre(saksbehandlerStans: SaksbehandlerStans) {
-        val sistePersisterteSekvensnummer =
-            asSQL(
-                """
-                SELECT MAX(sekvensnummer) FROM saksbehandler_stans_events
-                WHERE identitetsnummer = :identitetsnummer
-                """.trimIndent(),
-                "identitetsnummer" to saksbehandlerStans.identitetsnummer.value,
-            ).singleOrNull { it.intOrNull(1) }
-        if (sistePersisterteSekvensnummer != null) {
-            saksbehandlerStans.events.filter { it.metadata.sekvensnummer > sistePersisterteSekvensnummer }
-        } else {
-            saksbehandlerStans.events
-        }.forEach { event ->
-            asSQL(
-                """
-                INSERT INTO saksbehandler_stans_events (
-                    sekvensnummer,
-                    event_navn,
-                    utført_av_saksbehandler_ident,
-                    tidspunkt, 
-                    identitetsnummer, 
-                    begrunnelse
-                )
-                VALUES (
-                    :sekvensnummer,
-                    :event_navn,
-                    :utfort_av_saksbehandler_ident,
-                    :tidspunkt, 
-                    :identitetsnummer, 
-                    :begrunnelse
-                )
-                """.trimIndent(),
-                "sekvensnummer" to event.metadata.sekvensnummer,
-                "event_navn" to event.tilDBSaksbehandlerStansEvent().name,
-                "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent.value,
-                "tidspunkt" to event.metadata.tidspunkt,
-                "identitetsnummer" to event.metadata.identitetsnummer.value,
-                "begrunnelse" to event.metadata.begrunnelse,
-            ).update()
-        }
-    }
-
-    override fun finn(identitetsnummer: Identitetsnummer): SaksbehandlerStans? {
-        val events =
-            asSQL(
-                """
-                SELECT * FROM saksbehandler_stans_events
-                WHERE identitetsnummer = :identitetsnummer
-                """.trimIndent(),
-                "identitetsnummer" to identitetsnummer.value,
-            ).list { it.tilSaksbehandlerStansEvent() }
-
-        return events.takeUnless { it.isEmpty() }?.tilSaksbehandlerStans()
-    }
-
-    private fun Row.tilSaksbehandlerStansEvent(): SaksbehandlerStansEvent {
-        val metadata =
-            SaksbehandlerStansEvent.Metadata(
-                sekvensnummer = int("sekvensnummer"),
-                utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
-                tidspunkt = instant("tidspunkt"),
-                identitetsnummer = Identitetsnummer.fraString(string("identitetsnummer")),
-                begrunnelse = string("begrunnelse"),
+        asSQL(
+            """
+            INSERT INTO saksbehandler_stans (
+                id,
+                identitetsnummer,
+                utfort_av_ident,
+                begrunnelse,
+                opprettet,
+                opphevet_av_ident,
+                opphevet_begrunnelse,
+                opphevet_tidspunkt
             )
-        return when (string("event_navn")) {
-            "STANS_OPPRETTET" -> SaksbehandlerStansOpprettetEvent(metadata = metadata)
-            "STANS_OPPHEVET" -> SaksbehandlerStansOpphevetEvent(metadata = metadata)
-            else -> error("Ukjent event_navn: ${string("event_navn")}")
-        }
+            VALUES (
+                :id,
+                :identitetsnummer,
+                :utfort_av_ident,
+                :begrunnelse,
+                :opprettet,
+                :opphevet_av_ident,
+                :opphevet_begrunnelse,
+                :opphevet_tidspunkt
+            )
+            ON CONFLICT (id) DO UPDATE SET
+                opphevet_av_ident = EXCLUDED.opphevet_av_ident,
+                opphevet_begrunnelse = EXCLUDED.opphevet_begrunnelse,
+                opphevet_tidspunkt = EXCLUDED.opphevet_tidspunkt
+            """.trimIndent(),
+            "id" to saksbehandlerStans.id.value,
+            "identitetsnummer" to saksbehandlerStans.identitetsnummer.value,
+            "utfort_av_ident" to saksbehandlerStans.utførtAv.value,
+            "begrunnelse" to saksbehandlerStans.begrunnelse,
+            "opprettet" to saksbehandlerStans.opprettet,
+            "opphevet_av_ident" to saksbehandlerStans.stansOpphevet?.utførtAv?.value,
+            "opphevet_begrunnelse" to saksbehandlerStans.stansOpphevet?.begrunnelse,
+            "opphevet_tidspunkt" to saksbehandlerStans.stansOpphevet?.tidspunkt,
+        ).update()
     }
 
-    private fun SaksbehandlerStansEvent.tilDBSaksbehandlerStansEvent() =
-        when (this) {
-            is SaksbehandlerStansOpprettetEvent -> DBSaksbehandlerStansEventType.STANS_OPPRETTET
-            is SaksbehandlerStansOpphevetEvent -> DBSaksbehandlerStansEventType.STANS_OPPHEVET
-        }
+    override fun finnAlle(identitetsnummer: Identitetsnummer): List<SaksbehandlerStans> =
+        asSQL(
+            """
+            SELECT * FROM saksbehandler_stans
+            WHERE identitetsnummer = :identitetsnummer
+            ORDER BY opprettet DESC
+            """.trimIndent(),
+            "identitetsnummer" to identitetsnummer.value,
+        ).list { it.tilSaksbehandlerStans() }
 
-    private fun List<SaksbehandlerStansEvent>.tilSaksbehandlerStans(): SaksbehandlerStans = SaksbehandlerStans.fraLagring(events = sortedBy { it.metadata.sekvensnummer })
-}
+    override fun finnAktiv(identitetsnummer: Identitetsnummer): SaksbehandlerStans? =
+        asSQL(
+            """
+            SELECT * FROM saksbehandler_stans
+            WHERE identitetsnummer = :identitetsnummer
+            AND opphevet_tidspunkt IS NULL
+            ORDER BY opprettet DESC
+            LIMIT 1
+            """.trimIndent(),
+            "identitetsnummer" to identitetsnummer.value,
+        ).singleOrNull { it.tilSaksbehandlerStans() }
 
-private enum class DBSaksbehandlerStansEventType {
-    STANS_OPPRETTET,
-    STANS_OPPHEVET,
+    private fun Row.tilSaksbehandlerStans(): SaksbehandlerStans {
+        val opphevetAvIdent = stringOrNull("opphevet_av_ident")
+        val opphevetBegrunnelse = stringOrNull("opphevet_begrunnelse")
+        val opphevetTidspunkt = instantOrNull("opphevet_tidspunkt")
+
+        val stansOpphevet =
+            if (opphevetAvIdent != null && opphevetBegrunnelse != null && opphevetTidspunkt != null) {
+                SaksbehandlerStans.StansOpphevet(
+                    utførtAv = NAVIdent(opphevetAvIdent),
+                    begrunnelse = opphevetBegrunnelse,
+                    tidspunkt = opphevetTidspunkt,
+                )
+            } else {
+                null
+            }
+
+        return SaksbehandlerStans.fraLagring(
+            id = SaksbehandlerStansId(uuid("id")),
+            identitetsnummer = Identitetsnummer.fraString(string("identitetsnummer")),
+            utførtAv = NAVIdent(string("utfort_av_ident")),
+            begrunnelse = string("begrunnelse"),
+            opprettet = instant("opprettet"),
+            stansOpphevet = stansOpphevet,
+        )
+    }
 }

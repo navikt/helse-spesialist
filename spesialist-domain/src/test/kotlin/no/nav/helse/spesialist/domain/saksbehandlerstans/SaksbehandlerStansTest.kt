@@ -7,148 +7,93 @@ import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SaksbehandlerStansTest {
 
     @Test
     fun `kan opprette saksbehandlerstans`() {
-        // given
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
         val begrunnelse = "begrunnelse"
 
-
-        // when
         val saksbehandlerStans = SaksbehandlerStans.ny(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
             identitetsnummer = identitetsnummer,
             begrunnelse = begrunnelse,
         )
 
-        // then
         assertTrue(saksbehandlerStans.erStanset)
-        assertEquals(1, saksbehandlerStans.events.size)
-        assertEquals(SaksbehandlerStansOpprettetEvent::class, saksbehandlerStans.events.last()::class)
-
-        val stansOpprettetEvent = saksbehandlerStans.events.last() as SaksbehandlerStansOpprettetEvent
-        assertEquals(1, stansOpprettetEvent.metadata.sekvensnummer)
-        assertEquals(begrunnelse, stansOpprettetEvent.metadata.begrunnelse)
-        assertEquals(saksbehandlerIdent, stansOpprettetEvent.metadata.utførtAvSaksbehandlerIdent)
-        with(stansOpprettetEvent.metadata.tidspunkt) {
+        assertNull(saksbehandlerStans.stansOpphevet)
+        assertEquals(identitetsnummer, saksbehandlerStans.identitetsnummer)
+        assertEquals(saksbehandlerIdent, saksbehandlerStans.utførtAv)
+        assertEquals(begrunnelse, saksbehandlerStans.begrunnelse)
+        assertNotNull(saksbehandlerStans.id)
+        with(saksbehandlerStans.opprettet) {
             val now = Instant.now()
-            assertTrue(
-                isBefore(now),
-                "Forventet at den lagrede verdien av tidspunkt var før nå ($now), men den var $this"
-            )
-            assertTrue(
-                isAfter(now.minusSeconds(5)),
-                "Forventet at den lagrede verdien av tidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
-            )
+            assertTrue(isBefore(now), "Forventet at opprettet var før nå ($now), men den var $this")
+            assertTrue(isAfter(now.minusSeconds(5)), "Forventet at opprettet var mindre enn fem sekunder før nå")
         }
     }
 
     @Test
     fun `kan opprette og oppheve stans`() {
-        // given
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
-        val begrunnelse = "begrunnelse to"
 
-
-        // when
         val saksbehandlerStans = SaksbehandlerStans.ny(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
             identitetsnummer = identitetsnummer,
             begrunnelse = "begrunnelse en",
         )
 
+        val opphevBegrunnelse = "begrunnelse to"
         saksbehandlerStans.opphevStans(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            begrunnelse = begrunnelse,
+            begrunnelse = opphevBegrunnelse,
         )
 
-        // then
         assertFalse(saksbehandlerStans.erStanset)
         assertEquals(identitetsnummer, saksbehandlerStans.identitetsnummer)
-        assertEquals(2, saksbehandlerStans.events.size)
-        assertEquals(SaksbehandlerStansOpphevetEvent::class, saksbehandlerStans.events.last()::class)
-
-        val stansOpphevetEvent = saksbehandlerStans.events.last() as SaksbehandlerStansOpphevetEvent
-        assertEquals(2, stansOpphevetEvent.metadata.sekvensnummer)
-        assertEquals(2, saksbehandlerStans.versjon)
-        assertEquals(begrunnelse, stansOpphevetEvent.metadata.begrunnelse)
-        assertEquals(saksbehandlerIdent, stansOpphevetEvent.metadata.utførtAvSaksbehandlerIdent)
-        with(stansOpphevetEvent.metadata.tidspunkt) {
-            val now = Instant.now()
-            assertTrue(
-                isBefore(now),
-                "Forventet at den lagrede verdien av tidspunkt var før nå ($now), men den var $this"
-            )
-            assertTrue(
-                isAfter(now.minusSeconds(5)),
-                "Forventet at den lagrede verdien av tidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
-            )
+        assertNotNull(saksbehandlerStans.stansOpphevet).also { opphevet ->
+            assertEquals(saksbehandlerIdent, opphevet.utførtAv)
+            assertEquals(opphevBegrunnelse, opphevet.begrunnelse)
+            with(opphevet.tidspunkt) {
+                val now = Instant.now()
+                assertTrue(isBefore(now), "Forventet at opphevet tidspunkt var før nå")
+                assertTrue(isAfter(now.minusSeconds(5)), "Forventet at opphevet tidspunkt var nylig")
+            }
         }
     }
 
     @Test
-    fun `kan opprette, oppheve og opprette stans`() {
-        // given
+    fun `re-stans oppretter ny instans med ny id`() {
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
-        val begrunnelse = "begrunnelse tre"
 
-
-        // when
-        val saksbehandlerStans = SaksbehandlerStans.ny(
+        val førstStans = SaksbehandlerStans.ny(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
             identitetsnummer = identitetsnummer,
             begrunnelse = "begrunnelse en",
         )
+        førstStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse to")
 
-        saksbehandlerStans.opphevStans(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            begrunnelse = "begrunnelse to",
-        )
-
-        saksbehandlerStans.opprettStans(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            begrunnelse = begrunnelse,
-        )
-
-        // then
-        assertTrue(saksbehandlerStans.erStanset)
-        assertEquals(identitetsnummer, saksbehandlerStans.identitetsnummer)
-        assertEquals(3, saksbehandlerStans.events.size)
-        assertEquals(SaksbehandlerStansOpprettetEvent::class, saksbehandlerStans.events.last()::class)
-
-        val stansOpprettetEvent = saksbehandlerStans.events.last() as SaksbehandlerStansOpprettetEvent
-        assertEquals(3, stansOpprettetEvent.metadata.sekvensnummer)
-        assertEquals(3, saksbehandlerStans.versjon)
-        assertEquals(begrunnelse, stansOpprettetEvent.metadata.begrunnelse)
-        assertEquals(saksbehandlerIdent, stansOpprettetEvent.metadata.utførtAvSaksbehandlerIdent)
-    }
-
-    @Test
-    fun `Ikke lov å opprette stans på eksisterende stans`() {
-        // given
-        val identitetsnummer = lagIdentitetsnummer()
-        val saksbehandlerIdent = lagSaksbehandler().ident
-
-        val saksbehandlerStans = SaksbehandlerStans.ny(
+        val andreStans = SaksbehandlerStans.ny(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
             identitetsnummer = identitetsnummer,
-            begrunnelse = "begrunnelse",
+            begrunnelse = "begrunnelse tre",
         )
 
-        // then when
-        assertThrows<RuntimeException> { saksbehandlerStans.opprettStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse") }
+        assertTrue(andreStans.erStanset)
+        assertNull(andreStans.stansOpphevet)
+        assertEquals(identitetsnummer, andreStans.identitetsnummer)
+        assertTrue(førstStans.id != andreStans.id, "Re-stans skal ha ny unik id")
     }
 
     @Test
     fun `Ikke lov å oppheve stans på allerede opphevet stans`() {
-        // given
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
 
@@ -157,13 +102,13 @@ class SaksbehandlerStansTest {
             identitetsnummer = identitetsnummer,
             begrunnelse = "begrunnelse",
         )
-
         saksbehandlerStans.opphevStans(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
             begrunnelse = "begrunnelse",
         )
 
-        // then when
-        assertThrows<RuntimeException> { saksbehandlerStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse") }
+        assertThrows<RuntimeException> {
+            saksbehandlerStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse")
+        }
     }
 }

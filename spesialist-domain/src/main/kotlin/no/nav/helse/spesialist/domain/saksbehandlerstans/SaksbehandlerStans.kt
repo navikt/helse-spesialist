@@ -3,55 +3,46 @@ package no.nav.helse.spesialist.domain.saksbehandlerstans
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.Instant
+import java.util.UUID
+
+@JvmInline
+value class SaksbehandlerStansId(
+    val value: UUID,
+) : ValueObject
 
 class SaksbehandlerStans private constructor(
-    stansOpprettetEvent: SaksbehandlerStansOpprettetEvent,
-) : AggregateRoot<Identitetsnummer>(stansOpprettetEvent.metadata.identitetsnummer) {
-    private val _events: MutableList<SaksbehandlerStansEvent> = mutableListOf(stansOpprettetEvent)
-    val events: List<SaksbehandlerStansEvent> get() = _events
+    id: SaksbehandlerStansId,
+    val identitetsnummer: Identitetsnummer,
+    val utførtAv: NAVIdent,
+    val begrunnelse: String,
+    val opprettet: Instant,
+    stansOpphevet: StansOpphevet?,
+) : AggregateRoot<SaksbehandlerStansId>(id) {
+    var stansOpphevet: StansOpphevet? = stansOpphevet
+        private set
 
-    val identitetsnummer: Identitetsnummer = stansOpprettetEvent.metadata.identitetsnummer
-    var versjon: Int = stansOpprettetEvent.metadata.sekvensnummer
-        private set
-    var erStanset: Boolean = true
-        private set
+    val erStanset: Boolean get() = stansOpphevet == null
 
     fun opphevStans(
         utførtAvSaksbehandlerIdent: NAVIdent,
         begrunnelse: String,
     ) {
-        apply(
-            SaksbehandlerStansOpphevetEvent(
-                metadata =
-                    SaksbehandlerStansEvent.Metadata(
-                        sekvensnummer = versjon + 1,
-                        utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
-                        tidspunkt = Instant.now(),
-                        identitetsnummer = identitetsnummer,
-                        begrunnelse = begrunnelse,
-                    ),
-            ),
-        )
+        check(erStanset) { "Prøvde å oppheve stans som ikke er stanset!" }
+        stansOpphevet =
+            StansOpphevet(
+                utførtAv = utførtAvSaksbehandlerIdent,
+                begrunnelse = begrunnelse,
+                tidspunkt = Instant.now(),
+            )
     }
 
-    fun opprettStans(
-        utførtAvSaksbehandlerIdent: NAVIdent,
-        begrunnelse: String,
-    ) {
-        apply(
-            SaksbehandlerStansOpprettetEvent(
-                metadata =
-                    SaksbehandlerStansEvent.Metadata(
-                        sekvensnummer = versjon + 1,
-                        utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
-                        tidspunkt = Instant.now(),
-                        identitetsnummer = identitetsnummer,
-                        begrunnelse = begrunnelse,
-                    ),
-            ),
-        )
-    }
+    data class StansOpphevet(
+        val utførtAv: NAVIdent,
+        val begrunnelse: String,
+        val tidspunkt: Instant,
+    )
 
     companion object {
         fun ny(
@@ -59,43 +50,28 @@ class SaksbehandlerStans private constructor(
             begrunnelse: String,
             identitetsnummer: Identitetsnummer,
         ) = SaksbehandlerStans(
-            SaksbehandlerStansOpprettetEvent(
-                metadata =
-                    SaksbehandlerStansEvent.Metadata(
-                        sekvensnummer = 1,
-                        utførtAvSaksbehandlerIdent = utførtAvSaksbehandlerIdent,
-                        tidspunkt = Instant.now(),
-                        begrunnelse = begrunnelse,
-                        identitetsnummer = identitetsnummer,
-                    ),
-            ),
+            id = SaksbehandlerStansId(UUID.randomUUID()),
+            identitetsnummer = identitetsnummer,
+            utførtAv = utførtAvSaksbehandlerIdent,
+            begrunnelse = begrunnelse,
+            opprettet = Instant.now(),
+            stansOpphevet = null,
         )
 
-        fun fraLagring(events: List<SaksbehandlerStansEvent>): SaksbehandlerStans =
-            SaksbehandlerStans(events.first() as SaksbehandlerStansOpprettetEvent)
-                .also { stans -> events.drop(1).forEach(stans::apply) }
-    }
-
-    private fun apply(event: SaksbehandlerStansEvent) {
-        håndterEvent(event)
-        when (event) {
-            is SaksbehandlerStansOpprettetEvent -> {
-                if (erStanset) error("Prøvde å opprette stans som allerede er stanset!")
-                erStanset = true
-            }
-
-            is SaksbehandlerStansOpphevetEvent -> {
-                if (!erStanset) error("Prøvde å oppheve stans som ikke er stanset!")
-                erStanset = false
-            }
-        }
-    }
-
-    private fun håndterEvent(event: SaksbehandlerStansEvent) {
-        if (event.metadata.sekvensnummer != versjon + 1) {
-            error("Fikk events ute av rekkefølge: $versjon -> ${event.metadata.sekvensnummer}")
-        }
-        versjon = event.metadata.sekvensnummer
-        _events.add(event)
+        fun fraLagring(
+            id: SaksbehandlerStansId,
+            identitetsnummer: Identitetsnummer,
+            utførtAv: NAVIdent,
+            begrunnelse: String,
+            opprettet: Instant,
+            stansOpphevet: StansOpphevet?,
+        ) = SaksbehandlerStans(
+            id = id,
+            identitetsnummer = identitetsnummer,
+            utførtAv = utførtAv,
+            begrunnelse = begrunnelse,
+            opprettet = opprettet,
+            stansOpphevet = stansOpphevet,
+        )
     }
 }
