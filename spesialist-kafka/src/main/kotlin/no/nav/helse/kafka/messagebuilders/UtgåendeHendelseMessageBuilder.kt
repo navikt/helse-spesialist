@@ -349,6 +349,7 @@ private fun OverstyrtTidslinjeEvent.detaljer(): Map<String, Any> =
         "@id" to eksternHendelseId,
         "aktørId" to aktørId,
         "organisasjonsnummer" to organisasjonsnummer,
+        "vedtaksperiodeId" to vedtaksperiodeId,
         "dager" to dager,
     ).let { if (organisasjonsnummer.uppercase() == "SELVSTENDIG") it + mapOf("yrkesaktivitetstype" to "SELVSTENDIG") else it }
 

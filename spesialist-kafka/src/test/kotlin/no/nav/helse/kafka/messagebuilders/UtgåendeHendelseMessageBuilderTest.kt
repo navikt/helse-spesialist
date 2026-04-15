@@ -468,6 +468,7 @@ class UtgåendeHendelseMessageBuilderTest {
                     "fødselsnummer" to fødselsnummer,
                     "aktørId" to aktørId,
                     "organisasjonsnummer" to organisasjonsnummer,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
                     "dager" to
                         listOf(
                             mapOf(
