@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
-import no.nav.helse.spesialist.kafka.medRivers
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 import kotlin.test.Test
@@ -20,10 +19,6 @@ internal class OvervåkOverstyringerRiverTest {
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
     val sessionFactory = integrationTestFixture.sessionFactory
     private val sessionContext = sessionFactory.sessionContext
-
-    init {
-        testRapid.medRivers(OvervåkOverstyringerRiver(sessionFactory))
-    }
 
     @Test
     fun `overstyringer i blå perioder gir innslag i venter-tabellen`() {

@@ -4,4 +4,6 @@ interface VenterPåKvitteringForOverstyringRepository {
     fun finn(meldingId: MeldingId): VenterPåKvitteringForOverstyring?
 
     fun lagre(venterPåKvitteringForOverstyring: VenterPåKvitteringForOverstyring)
+
+    fun slett(meldingId: MeldingId)
 }

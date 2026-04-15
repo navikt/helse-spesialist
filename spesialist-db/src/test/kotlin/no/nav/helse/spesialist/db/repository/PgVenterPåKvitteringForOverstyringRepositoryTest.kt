@@ -8,6 +8,7 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PgVenterPåKvitteringForOverstyringRepositoryTest: AbstractDBIntegrationTest() {
 
@@ -27,5 +28,21 @@ class PgVenterPåKvitteringForOverstyringRepositoryTest: AbstractDBIntegrationTe
         val lagret = repository.finn(meldingId)
         assertNotNull(lagret)
         assertEquals(identitetsnummer, lagret.identitetsnummer)
+    }
+
+    @Test
+    fun `kan slette`() {
+        // Given
+        val meldingId = MeldingId(UUID.randomUUID())
+        val identitetsnummer = lagIdentitetsnummer()
+        val venterPåKvitteringForOverstyring = VenterPåKvitteringForOverstyring.ny(meldingId, identitetsnummer)
+        repository.lagre(venterPåKvitteringForOverstyring)
+        assertNotNull(repository.finn(meldingId))
+
+        // When
+        repository.slett(meldingId)
+
+        // Then
+        assertNull(repository.finn(meldingId))
     }
 }

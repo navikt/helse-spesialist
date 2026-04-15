@@ -43,4 +43,11 @@ class PgVenterPåKvitteringForOverstyringRepository(
                 identitetsnummer = Identitetsnummer.fraString(it.string("identitetsnummer")),
             )
         }
+
+    override fun slett(meldingId: MeldingId) {
+        asSQL(
+            "DELETE FROM venter_på_kvittering_for_overstyring WHERE melding_id = :meldingId",
+            "meldingId" to meldingId.value,
+        ).update()
+    }
 }
