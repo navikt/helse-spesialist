@@ -439,6 +439,7 @@ class UtgåendeHendelseMessageBuilderTest {
     fun `Overstyr tidslinje-hendelse for selvstendig næringsdrivende har yrkesaktivitetstype SELVSTENDIG`() {
         val aktørId = lagAktørId()
         val organisasjonsnummer = "SELVSTENDIG"
+        val vedtaksperiodeId = UUID.randomUUID()
         val dager =
             listOf(
                 OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
@@ -456,6 +457,7 @@ class UtgåendeHendelseMessageBuilderTest {
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 dager = dager,
             )
 

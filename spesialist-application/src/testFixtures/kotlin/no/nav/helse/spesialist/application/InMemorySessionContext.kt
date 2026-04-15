@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 
 class InMemorySessionContext(
     override val annulleringRepository: InMemoryAnnulleringRepository,
@@ -9,6 +10,7 @@ class InMemorySessionContext(
     override val automatiseringDao: UnimplementedAutomatiseringDao,
     override val avviksvurderingRepository: InMemoryAvviksvurderingRepository,
     override val behandlingRepository: InMemoryBehandlingRepository,
+    override val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository,
     override val commandContextDao: InMemoryCommandContextDao,
     override val dialogDao: DelegatingDialogDao,
     override val dialogRepository: InMemoryDialogRepository,

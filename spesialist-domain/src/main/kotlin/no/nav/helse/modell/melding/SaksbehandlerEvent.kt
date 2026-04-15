@@ -40,6 +40,7 @@ data class OverstyrtTidslinjeEvent(
     val fødselsnummer: String,
     val aktørId: String,
     val organisasjonsnummer: String,
+    val vedtaksperiodeId: UUID,
     val dager: List<OverstyrtTidslinjeEventDag>,
 ) : UtgåendeHendelse {
     data class OverstyrtTidslinjeEventDag(

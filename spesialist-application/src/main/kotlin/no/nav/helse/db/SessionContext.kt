@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
@@ -73,4 +74,5 @@ interface SessionContext {
     val vedtakRepository: VedtakRepository
     val opptegnelseRepository: OpptegnelseRepository
     val personKlargjoresDao: PersonKlargjoresDao
+    val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository
 }

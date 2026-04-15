@@ -69,6 +69,7 @@ class RiverSetup(
             KommandokjedePåminnelseRiver(mediator),
             VeilederStansRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
+            // OvervåkOverstyringerRiver(sessionFactory), # utkommentert til resten av featuren er ferdig, for å unngå unødvendige rader i tabellen
         ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao, sessionFactory, versjonAvKode) }
 
     fun registrerRivers(rapidsConnection: RapidsConnection) {

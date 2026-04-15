@@ -226,7 +226,8 @@ internal abstract class AbstractDatabaseTest {
                 "ukoblede_annulleringer",
                 "midlertidig_behandling_vedtak_fattet",
                 "tmp_slettede_varsler",
-                "infotrygdutbetalinger"
+                "infotrygdutbetalinger",
+                "venter_på_kvittering_for_overstyring"
             ),
         )
         tabeller.forEach { tabellnavn ->

@@ -5,6 +5,7 @@ import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakBegrunnelseRepository
+import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
@@ -72,6 +73,7 @@ import no.nav.helse.spesialist.db.repository.PgVedtakBegrunnelseRepository
 import no.nav.helse.spesialist.db.repository.PgVedtakRepository
 import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
 import no.nav.helse.spesialist.db.repository.PgVeilederStansRepository
+import no.nav.helse.spesialist.db.repository.PgVenterPåKvitteringForOverstyringRepository
 
 class DBSessionContext(
     session: Session,
@@ -128,4 +130,5 @@ class DBSessionContext(
     override val vedtakRepository: VedtakRepository = PgVedtakRepository(session)
     override val opptegnelseRepository: OpptegnelseRepository = PgOpptegnelseRepository(session)
     override val personKlargjoresDao: PersonKlargjoresDao = PgPersonKlargjoresDao(session)
+    override val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository = PgVenterPåKvitteringForOverstyringRepository(session)
 }

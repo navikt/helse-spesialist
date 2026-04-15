@@ -89,6 +89,7 @@ class OverstyrtTidslinje private constructor(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
             dager = dager.map(OverstyrtTidslinjedag::byggEvent),
         )
 
