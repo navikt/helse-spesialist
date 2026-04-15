@@ -1,0 +1,1 @@
+alter table venter_på_kvittering_for_overstyring rename to venter_paa_kvittering_for_overstyring;

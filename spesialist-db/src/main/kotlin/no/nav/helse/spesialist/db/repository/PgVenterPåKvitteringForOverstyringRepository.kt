@@ -16,7 +16,7 @@ class PgVenterPåKvitteringForOverstyringRepository(
     override fun lagre(venterPåKvitteringForOverstyring: VenterPåKvitteringForOverstyring) {
         asSQL(
             """
-            INSERT INTO venter_på_kvittering_for_overstyring (
+            INSERT INTO venter_paa_kvittering_for_overstyring (
                 melding_id,
                 identitetsnummer
             )
@@ -33,7 +33,7 @@ class PgVenterPåKvitteringForOverstyringRepository(
     override fun finn(meldingId: MeldingId): VenterPåKvitteringForOverstyring? =
         asSQL(
             """
-            SELECT * FROM venter_på_kvittering_for_overstyring 
+            SELECT * FROM venter_paa_kvittering_for_overstyring 
             WHERE melding_id = :meldingId
             """.trimIndent(),
             "meldingId" to meldingId.value,
@@ -46,7 +46,7 @@ class PgVenterPåKvitteringForOverstyringRepository(
 
     override fun slett(meldingId: MeldingId) {
         asSQL(
-            "DELETE FROM venter_på_kvittering_for_overstyring WHERE melding_id = :meldingId",
+            "DELETE FROM venter_paa_kvittering_for_overstyring WHERE melding_id = :meldingId",
             "meldingId" to meldingId.value,
         ).update()
     }
