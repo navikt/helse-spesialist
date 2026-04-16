@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -13,7 +12,6 @@ import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.melding.Behov
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -38,11 +36,6 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
             }
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(personDao)
-    }
 
     @Test
     fun `Sender behov om inntekt ikke er lagret fra før`() {

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -27,7 +26,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
@@ -130,11 +128,6 @@ internal class OppgaveServiceTest {
             inntektsforhold = Inntektsforhold.Arbeidstaker,
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         )
-    }
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(oppgaveDao)
     }
 
     @Test

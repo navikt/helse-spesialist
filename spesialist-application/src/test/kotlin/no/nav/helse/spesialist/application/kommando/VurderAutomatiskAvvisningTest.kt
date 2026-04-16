@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -9,10 +8,8 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -22,12 +19,7 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
-    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
-    @BeforeEach
-    fun setup() {
-        clearMocks(vergemålDao, personDao, godkjenningMediator, sykefraværstilfelle)
-    }
 
     @Test
     fun `skal avvise ved vergemål dersom perioden kan avvises`() {

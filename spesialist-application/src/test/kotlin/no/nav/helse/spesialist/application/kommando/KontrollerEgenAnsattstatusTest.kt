@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,7 +11,6 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
@@ -38,11 +36,6 @@ internal class KontrollerEgenAnsattstatusTest : ApplicationTest() {
             }
         }
     private val commandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(personRepository)
-    }
 
     @Test
     fun `ber om informasjon om egen ansatt`() {

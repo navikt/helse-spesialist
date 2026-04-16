@@ -1,34 +1,25 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.VergemålDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VurderEnhetUtlandTest : ApplicationTest() {
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
-
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
-    @BeforeEach
-    fun setup() {
-        clearMocks(vergemålDao, personDao, sykefraværstilfelle)
-    }
 
     @Test
     fun `skal legge på varsel om utland`() {

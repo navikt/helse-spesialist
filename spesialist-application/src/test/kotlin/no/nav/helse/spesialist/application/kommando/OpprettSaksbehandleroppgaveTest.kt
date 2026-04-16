@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -61,7 +60,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -89,11 +87,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
-
-    @BeforeEach
-    fun beforeEach() {
-        clearMocks(oppgaveService)
-    }
 
     @Test
     fun `oppretter oppgave`() {

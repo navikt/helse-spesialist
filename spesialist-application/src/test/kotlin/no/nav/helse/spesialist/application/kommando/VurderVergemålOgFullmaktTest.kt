@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.VergemålDao
@@ -18,7 +17,6 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -61,11 +59,6 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
             }
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
-
-    @BeforeEach
-    fun setup() {
-        clearMocks(vergemålDao)
-    }
 
     @Test
     fun `Ber om informasjon om vergemål hvis den mangler`() {
