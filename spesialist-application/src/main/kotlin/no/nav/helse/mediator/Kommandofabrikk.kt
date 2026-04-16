@@ -129,9 +129,10 @@ class Kommandofabrikk(
     ): VedtaksperiodeReberegnetCommand =
         VedtaksperiodeReberegnetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
-            vedtaksperiode = vedtaksperiode,
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
             spleisBehandlingId = spleisBehandlingId,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
+            spesialistBehandlingId = vedtaksperiode.gjeldendeUnikId,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -190,13 +191,14 @@ class Kommandofabrikk(
     internal fun vedtaksperiodeForkastet(
         hendelse: VedtaksperiodeForkastet,
         alleForkastedeVedtaksperiodeIder: List<UUID>,
+        sessionContext: SessionContext,
     ): VedtaksperiodeForkastetCommand =
         VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             spleisBehandlingId = hendelse.spleisBehandlingId,
-            id = hendelse.id,
             alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
+            oppgaveRepository = sessionContext.oppgaveRepository,
         )
 
     internal fun veilederStansBehandler(

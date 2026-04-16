@@ -5,13 +5,18 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.kommando.AvbrytCommand
+import no.nav.helse.modell.kommando.AvbrytContextCommand
+import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
+import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtaksperiodeReberegnet(
@@ -48,20 +53,33 @@ class VedtaksperiodeReberegnet(
 
 internal class VedtaksperiodeReberegnetCommand(
     fødselsnummer: String,
-    vedtaksperiode: LegacyVedtaksperiode,
+    vedtaksperiodeId: UUID,
     spleisBehandlingId: SpleisBehandlingId,
     periodehistorikkDao: PeriodehistorikkDao,
+    spesialistBehandlingId: UUID,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             VedtaksperiodeReberegnetPeriodehistorikk(
-                vedtaksperiode = vedtaksperiode,
+                spesialistBehandlingId = spesialistBehandlingId,
                 periodehistorikkDao = periodehistorikkDao,
             ),
-            AvbrytCommand(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
-                spleisBehandlingId = spleisBehandlingId,
+            ReserverPersonHvisTildeltCommand(fødselsnummer = fødselsnummer),
+            AvbrytOppgaveCommand(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                vedtaksperiodeId = vedtaksperiodeId,
             ),
+            AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
+            ikkesuspenderendeCommand("fjernVedtak") { sessionContext: SessionContext, _: Outbox ->
+                val vedtak = sessionContext.vedtakRepository.finn(spleisBehandlingId) ?: return@ikkesuspenderendeCommand
+                if (vedtak.behandletAvSpleis) {
+                    log.warn("Spleis har behandlet svar på godkjenningsbehov for perioden, det er merkelig at spesialist behandler godkjenningsbehov etterpå")
+                    return@ikkesuspenderendeCommand
+                }
+                log.info("Sletter vedtak for $spleisBehandlingId")
+                sessionContext.vedtakRepository.slett(spleisBehandlingId)
+            },
         )
+
+    private val log = LoggerFactory.getLogger(this::class.java)
 }

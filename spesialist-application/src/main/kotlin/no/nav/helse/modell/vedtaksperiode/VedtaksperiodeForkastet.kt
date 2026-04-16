@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.kommando.AvbrytCommand
+import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.modell.kommando.AvbrytContextCommand
+import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
 import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.LegacyPerson
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
@@ -37,7 +40,13 @@ class VedtaksperiodeForkastet(
         sessionContext: SessionContext,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
-        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, person.forkastedeVedtaksperiodeIder()) }
+        kommandostarter {
+            vedtaksperiodeForkastet(
+                this@VedtaksperiodeForkastet,
+                person.forkastedeVedtaksperiodeIder(),
+                sessionContext,
+            )
+        }
     }
 
     override fun toJson() = json
@@ -47,16 +56,16 @@ class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val spleisBehandlingId: SpleisBehandlingId?,
-    val id: UUID,
     val alleForkastedeVedtaksperiodeIder: List<UUID>,
+    val oppgaveRepository: OppgaveRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
-            AvbrytCommand(
-                fødselsnummer = fødselsnummer,
+            AvbrytOppgaveCommand(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
             ),
+            AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
             AvbrytTotrinnsvurderingCommand(
                 fødselsnummer = fødselsnummer,
                 alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
