@@ -47,7 +47,7 @@ internal class OpprettEllerOppdaterInntektskilder(
             }
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -66,21 +66,21 @@ internal class OpprettEllerOppdaterInntektskilder(
             )
         }
 
-        sendBehov(context, nyeArbeidsgiverIdentifikatorer + utdaterteArbeidsgivere.map(Arbeidsgiver::id))
+        sendBehov(commandContext, nyeArbeidsgiverIdentifikatorer + utdaterteArbeidsgivere.map(Arbeidsgiver::id))
         return false
     }
 
     private fun Arbeidsgiver.toLogString(): String = "$id, $navn"
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
 
         nyeArbeidsgiverIdentifikatorer.forEach { identifikator ->
-            val navnFraLøsning = finnNavnILøsninger(identifikator, context)
+            val navnFraLøsning = finnNavnILøsninger(identifikator, commandContext)
             if (navnFraLøsning != null) {
                 val arbeidsgiver =
                     Arbeidsgiver.Factory.ny(
@@ -94,7 +94,7 @@ internal class OpprettEllerOppdaterInntektskilder(
 
         utdaterteArbeidsgivere.forEach { arbeidsgiver ->
             val identifikator = arbeidsgiver.id
-            val navnFraLøsning = finnNavnILøsninger(identifikator, context)
+            val navnFraLøsning = finnNavnILøsninger(identifikator, commandContext)
             if (navnFraLøsning != null) {
                 arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
                 loggInfo("Lagrer oppdatert arbeidsgiver", "arbeidsgiver" to arbeidsgiver.toLogString())
@@ -102,23 +102,23 @@ internal class OpprettEllerOppdaterInntektskilder(
             }
         }
 
-        return execute(context, sessionContext, outbox)
+        return execute(commandContext, sessionContext, outbox)
     }
 
     private fun finnNavnILøsninger(
         identifikator: ArbeidsgiverIdentifikator,
-        context: CommandContext,
+        commandContext: CommandContext,
     ): String? =
         when (identifikator) {
             is ArbeidsgiverIdentifikator.Fødselsnummer -> {
-                context
+                commandContext
                     .get<HentPersoninfoløsninger>()
                     ?.relevantLøsning(identifikator.fødselsnummer)
                     ?.navn()
             }
 
             is ArbeidsgiverIdentifikator.Organisasjonsnummer -> {
-                context
+                commandContext
                     .get<Arbeidsgiverinformasjonløsning>()
                     ?.relevantLøsning(identifikator.organisasjonsnummer)
                     ?.navn
@@ -126,7 +126,7 @@ internal class OpprettEllerOppdaterInntektskilder(
         }
 
     private fun sendBehov(
-        context: CommandContext,
+        commandContext: CommandContext,
         arbeidsgiverIdentifikatorer: Set<ArbeidsgiverIdentifikator>,
     ) {
         val enkeltpersonforetakBehov =
@@ -137,7 +137,7 @@ internal class OpprettEllerOppdaterInntektskilder(
                 ?.let(Behov.Arbeidsgiverinformasjon::Enkeltpersonforetak)
 
         if (enkeltpersonforetakBehov != null) {
-            context.behov(enkeltpersonforetakBehov)
+            commandContext.behov(enkeltpersonforetakBehov)
         }
 
         val ordinærArbeidsgiverBehov =
@@ -148,7 +148,7 @@ internal class OpprettEllerOppdaterInntektskilder(
                 ?.let { Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(it) }
 
         if (ordinærArbeidsgiverBehov != null) {
-            context.behov(ordinærArbeidsgiverBehov)
+            commandContext.behov(ordinærArbeidsgiverBehov)
         }
     }
 

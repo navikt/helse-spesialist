@@ -22,22 +22,22 @@ internal class VurderÅpenGosysoppgave(
     private val oppgaveService: OppgaveService,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(context)
+    ) = behandle(commandContext)
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ): Boolean = behandle(context)
+    ): Boolean = behandle(commandContext)
 
-    private fun behandle(context: CommandContext): Boolean {
-        val løsning = context.get<ÅpneGosysOppgaverløsning>()
+    private fun behandle(commandContext: CommandContext): Boolean {
+        val løsning = commandContext.get<ÅpneGosysOppgaverløsning>()
         if (løsning == null) {
             logg.info("Trenger oppgaveinformasjon fra Gosys")
-            context.behov(
+            commandContext.behov(
                 Behov.ÅpneOppgaver(
                     ikkeEldreEnn = ikkeEldreEnn(vedtaksperiodeId),
                 ),

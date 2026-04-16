@@ -59,7 +59,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     private val sykefraværstilfelle =
         Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
 
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     private val observer =
         object : CommandContextObserver {
@@ -76,8 +76,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
+        commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(observer)
         every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns null
     }
 
@@ -85,7 +85,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     fun `Sender behov for risikovurdering ved execute`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
         val risikoCommand = risikoCommand()
-        assertFalse(risikoCommand.execute(context, sessionContext, outbox))
+        assertFalse(risikoCommand.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(
@@ -105,7 +105,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     fun `Sender behov for risikovurdering ved resume dersom vi mangler løsning`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
         val risikoCommand = risikoCommand()
-        assertFalse(risikoCommand.resume(context, sessionContext, outbox))
+        assertFalse(risikoCommand.resume(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(
@@ -125,7 +125,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     fun `Sender kunRefusjon=true når det ikke skal utbetales noe til den sykmeldte`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns false
 
-        assertFalse(risikoCommand().execute(context, sessionContext, outbox))
+        assertFalse(risikoCommand().execute(commandContext, sessionContext, outbox))
 
         assertEquals(
             Behov.Risikovurdering(
@@ -144,7 +144,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     fun `Sender kunRefusjon=false når det er utbetaling til den sykmeldte`() {
         every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
 
-        assertFalse(risikoCommand().execute(context, sessionContext, outbox))
+        assertFalse(risikoCommand().execute(commandContext, sessionContext, outbox))
 
         assertEquals(
             Behov.Risikovurdering(
@@ -162,19 +162,19 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
         every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns mockk()
-        assertTrue(risikoCommand().resume(context, sessionContext, outbox))
-        assertTrue(risikoCommand().execute(context, sessionContext, outbox))
+        assertTrue(risikoCommand().resume(commandContext, sessionContext, outbox))
+        assertTrue(risikoCommand().execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }
 
     @Test
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
         every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
-        context.add(
+        commandContext.add(
             behovløsning(),
         )
         val risikoCommand = risikoCommand()
-        assertTrue(risikoCommand.execute(context, sessionContext, outbox))
+        assertTrue(risikoCommand.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
         verify(exactly = 1) { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) }
     }
@@ -182,13 +182,13 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     @Test
     fun `Om vi har fått løsning på en annen vedtaksperiode sendes det behov`() {
         val enAnnenVedtaksperiodeId = UUID.randomUUID()
-        context.add(
+        commandContext.add(
             behovløsning(
                 vedtaksperiodeId = enAnnenVedtaksperiodeId,
             ),
         )
 
-        assertFalse(risikoCommand().execute(context, sessionContext, outbox))
+        assertFalse(risikoCommand().execute(commandContext, sessionContext, outbox))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
@@ -203,7 +203,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
         observer.behov.clear()
 
-        assertFalse(risikoCommand().resume(context, sessionContext, outbox))
+        assertFalse(risikoCommand().resume(commandContext, sessionContext, outbox))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
@@ -220,13 +220,13 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     @Test
     fun `Lager varsel om risk-svaret tilsier det`() {
         every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
-        context.add(
+        commandContext.add(
             behovløsning(
                 kanGodkjennesAutomatisk = false,
             ),
         )
 
-        risikoCommand().execute(context, sessionContext, outbox)
+        risikoCommand().execute(commandContext, sessionContext, outbox)
 
         assertEquals(listOf("SB_RV_1"), legacyBehandling.toDto().varsler.map { it.varselkode })
     }

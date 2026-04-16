@@ -25,22 +25,22 @@ class VurderBehovForAvviksvurdering(
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
-        return behov(context, sykepengegrunnlagsfakta)
+        return behov(commandContext, sykepengegrunnlagsfakta)
     }
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
-        val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context, sykepengegrunnlagsfakta)
+        val løsning = commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
         val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
         if (eksisterendeAvviksvurdering != null) {
@@ -64,10 +64,10 @@ class VurderBehovForAvviksvurdering(
     }
 
     private fun behov(
-        context: CommandContext,
+        commandContext: CommandContext,
         sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker,
     ): Boolean {
-        context.behov(
+        commandContext.behov(
             Behov.Avviksvurdering(
                 omregnedeÅrsinntekter =
                     sykepengegrunnlagsfakta.arbeidsgivere.map {

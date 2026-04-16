@@ -25,7 +25,7 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
     }
 
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     private val observer =
         object : CommandContextObserver {
@@ -42,8 +42,8 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
+        commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(observer)
         clearMocks(personDao)
     }
 
@@ -53,7 +53,7 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
 
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
-        assertFalse(command.execute(context, sessionContext, outbox))
+        assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
     }
 
@@ -63,7 +63,7 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
 
         val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
 
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }
 
@@ -75,11 +75,11 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
 
         val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
-        assertFalse(command.execute(context, sessionContext, outbox))
+        assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
-        context.add(løsning())
-        assertTrue(command.resume(context, sessionContext, outbox))
+        commandContext.add(løsning())
+        assertTrue(command.resume(commandContext, sessionContext, outbox))
         verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
     }
 
@@ -90,7 +90,7 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
 
         val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
 
-        assertTrue(command.resume(context, sessionContext, outbox))
+        assertTrue(command.resume(commandContext, sessionContext, outbox))
         verify(exactly = 0) { personDao.lagreInntekter(any(), any(), any()) }
     }
 

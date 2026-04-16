@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
@@ -26,7 +26,7 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
+        commandContext = CommandContext(UUID.randomUUID())
         clearMocks(vergemålDao, personDao, godkjenningMediator, sykefraværstilfelle)
     }
 
@@ -58,10 +58,10 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
         command: VurderAutomatiskAvvisning,
         forventetÅrsak: String,
     ) {
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         verify(exactly = 1) {
             godkjenningMediator.automatiskAvvisning(
-                context = context,
+                commandContext = commandContext,
                 begrunnelser = listOf(forventetÅrsak),
                 behov = any(),
             )
@@ -69,7 +69,7 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
     }
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }
 

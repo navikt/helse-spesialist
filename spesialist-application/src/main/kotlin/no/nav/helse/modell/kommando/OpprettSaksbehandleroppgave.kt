@@ -76,7 +76,7 @@ internal class OpprettSaksbehandleroppgave(
     private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

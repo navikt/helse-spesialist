@@ -21,7 +21,7 @@ internal class OppdaterEnhetCommand(
     private val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -30,18 +30,18 @@ internal class OppdaterEnhetCommand(
                 ?: error("Fant ikke person")
         val sistOppdatert = person.enhetRefOppdatert
         if (sistOppdatert != null && sistOppdatert > datoForUtdatert) return ignorer()
-        return behandle(context, person)
+        return behandle(commandContext, person)
     }
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         val person =
             personRepository.finn(identitetsnummer)
                 ?: error("Fant ikke person")
-        return behandle(context, person)
+        return behandle(commandContext, person)
     }
 
     private fun ignorer(): Boolean {
@@ -49,18 +49,18 @@ internal class OppdaterEnhetCommand(
         return true
     }
 
-    private fun trengerMerInformasjon(context: CommandContext): Boolean {
+    private fun trengerMerInformasjon(commandContext: CommandContext): Boolean {
         val behov = Behov.Enhet
         loggInfo("trenger oppdatert $behov")
-        context.behov(behov)
+        commandContext.behov(behov)
         return false
     }
 
     private fun behandle(
-        context: CommandContext,
+        commandContext: CommandContext,
         person: Person,
     ): Boolean {
-        val løsning = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
+        val løsning = commandContext.get<HentEnhetløsning>() ?: return trengerMerInformasjon(commandContext)
         loggInfo("oppdaterer enhetsnr")
         person.oppdaterEnhet(løsning.enhet())
         personRepository.lagre(person)

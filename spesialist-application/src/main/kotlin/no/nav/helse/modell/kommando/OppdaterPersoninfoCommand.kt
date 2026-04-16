@@ -21,7 +21,7 @@ internal class OppdaterPersoninfoCommand(
     }
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -30,18 +30,18 @@ internal class OppdaterPersoninfoCommand(
                 ?: error("Fant ikke person")
         val sistOppdatert = person.infoOppdatert
         if (sistOppdatert != null && sistOppdatert > datoForUtdatert && !force) return ignorer()
-        return behandle(context, person)
+        return behandle(commandContext, person)
     }
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         val person =
             personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")
-        return behandle(context, person)
+        return behandle(commandContext, person)
     }
 
     private fun ignorer(): Boolean {
@@ -50,19 +50,19 @@ internal class OppdaterPersoninfoCommand(
     }
 
     private fun behandle(
-        context: CommandContext,
+        commandContext: CommandContext,
         person: Person,
     ): Boolean {
-        val løsning = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
+        val løsning = commandContext.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(commandContext)
         logg.info("oppdaterer personinfo")
         person.oppdaterInfo(løsning.personinfo())
         personRepository.lagre(person)
         return true
     }
 
-    private fun trengerMerInformasjon(context: CommandContext): Boolean {
+    private fun trengerMerInformasjon(commandContext: CommandContext): Boolean {
         logg.info("trenger oppdatert ${BEHOV::class.simpleName}")
-        context.behov(BEHOV)
+        commandContext.behov(BEHOV)
         return false
     }
 }

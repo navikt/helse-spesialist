@@ -13,7 +13,7 @@ internal class SjekkAtOppgaveFortsattErÅpenCommand(
     private val oppgaveDao: OppgaveDao,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -23,7 +23,7 @@ internal class SjekkAtOppgaveFortsattErÅpenCommand(
                 "Ingen åpne oppgaver for personen, kommandokjeden ferdigstilles/avsluttes",
                 "fødselsnummer" to fødselsnummer,
             )
-            ferdigstill(context)
+            ferdigstill(commandContext)
         }
         return true
     }

@@ -12,7 +12,7 @@ internal class AvbrytOppgaveCommand(
     private val vedtaksperiodeId: UUID,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

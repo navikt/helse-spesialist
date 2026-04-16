@@ -88,17 +88,17 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             vedtakRepository = vedtakRepository,
         )
 
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(this.observatør)
+        commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(this.observatør)
     }
 
     @Test
     fun `kaller automatiser utfør og returnerer true`() {
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         verify(exactly = 1) {
             automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
@@ -110,7 +110,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns Automatiseringsresultat.KanAutomatiseres
 
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
 
         val løsning =
             this
@@ -125,7 +125,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     @Test
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         val vedtak = vedtakRepository.finn(spleisBehandlingId)
         assertIs<Vedtak.Automatisk>(vedtak)
         verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
@@ -139,7 +139,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             Automatiseringsresultat.KanIkkeAutomatiseres(
                 problemer,
             )
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertNull(vedtakRepository.finn(spleisBehandlingId))
         verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
         verify(exactly = 1) { automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
@@ -151,7 +151,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             Automatiseringsresultat.Stikkprøve(
                 "En årsak",
             )
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertNull(vedtakRepository.finn(spleisBehandlingId))
         verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
         verify(exactly = 1) { automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }
@@ -160,7 +160,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     @Test
     fun `Ferdigstiller kjede når perioden kan behandles automatisk`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
-        context.utfør(commandContextDao, sessionContext, outbox, UUID.randomUUID(), command)
+        commandContext.utfør(commandContextDao, sessionContext, outbox, UUID.randomUUID(), command)
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
@@ -169,7 +169,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
         vedtakRepository.lagre(Vedtak.automatisk(spleisBehandlingId))
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
 
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
 
         verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
     }
@@ -179,7 +179,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
         vedtakRepository.lagre(Vedtak.automatisk(spleisBehandlingId).also { it.markerSomBehandletAvSpleis() })
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
 
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
 
         verify(exactly = 0) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
     }

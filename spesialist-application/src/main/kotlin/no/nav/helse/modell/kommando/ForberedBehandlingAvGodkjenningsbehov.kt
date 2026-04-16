@@ -10,7 +10,7 @@ internal class ForberedBehandlingAvGodkjenningsbehov(
     private val person: LegacyPerson,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

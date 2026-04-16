@@ -25,12 +25,12 @@ internal class OpprettEllerOppdaterArbeidsforhold(
             }
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         if (arbeidsforhold.any { it.måOppdateres() }) {
-            return trengerMerInformasjon(context).also {
+            return trengerMerInformasjon(commandContext).also {
                 log.info("Trenger mer informasjon for å opprette eller oppdatere arbeidsforhold")
             }
         } else {
@@ -40,11 +40,11 @@ internal class OpprettEllerOppdaterArbeidsforhold(
     }
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val løsning = context.get<Arbeidsforholdløsning>() ?: return trengerMerInformasjon(context)
+        val løsning = commandContext.get<Arbeidsforholdløsning>() ?: return trengerMerInformasjon(commandContext)
         return behandle(løsning)
     }
 
@@ -55,8 +55,8 @@ internal class OpprettEllerOppdaterArbeidsforhold(
         return true
     }
 
-    private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov(Behov.Arbeidsforhold(fødselsnummer, organisasjonsnummer))
+    private fun trengerMerInformasjon(commandContext: CommandContext): Boolean {
+        commandContext.behov(Behov.Arbeidsforhold(fødselsnummer, organisasjonsnummer))
         return false
     }
 }

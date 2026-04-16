@@ -32,7 +32,7 @@ internal class VurderAutomatiskInnvilgelse(
     private val hendelseId = godkjenningsbehov.id
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -75,8 +75,8 @@ internal class VurderAutomatiskInnvilgelse(
                     "vedtaksperiodeId" to vedtaksperiodeId,
                     "utbetalingId" to utbetalingId,
                 )
-                automatiserSaksbehandling(context)
-                return ferdigstill(context)
+                automatiserSaksbehandling(commandContext)
+                return ferdigstill(commandContext)
             }
         }
 
@@ -91,7 +91,7 @@ internal class VurderAutomatiskInnvilgelse(
         automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
-    private fun automatiserSaksbehandling(context: CommandContext) {
+    private fun automatiserSaksbehandling(commandContext: CommandContext) {
         val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId)
         val vedtak =
             vedtakRepository.finn(spleisBehandlingId).let { vedtak ->
@@ -114,7 +114,7 @@ internal class VurderAutomatiskInnvilgelse(
 
         vedtakRepository.lagre(vedtak)
         automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
-        godkjenningMediator.automatiskUtbetaling(context, godkjenningsbehov)
+        godkjenningMediator.automatiskUtbetaling(commandContext, godkjenningsbehov)
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
     }
 }

@@ -126,21 +126,21 @@ class CommandContext(
     }
 
     internal companion object {
-        internal fun Command.ferdigstill(context: CommandContext): Boolean {
+        internal fun Command.ferdigstill(commandContext: CommandContext): Boolean {
             logg.info(
                 "Kommando ${this.javaClass.simpleName} ferdigstilte {}",
-                keyValue("context_id", "${context.id}"),
+                keyValue("context_id", "${commandContext.id}"),
             )
-            context.ferdigstill()
+            commandContext.ferdigstill()
             return true
         }
 
         internal fun run(
-            context: CommandContext,
+            commandContext: CommandContext,
             commands: List<Command>,
             runner: (command: Command) -> Boolean,
         ) = commands.all {
-            if (context.tidligFerdigstilt) {
+            if (commandContext.tidligFerdigstilt) {
                 true
             } else {
                 runner(it)

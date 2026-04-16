@@ -15,7 +15,7 @@ internal class PersisterInntektCommand(
     private val personDao: PersonDao,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -25,16 +25,16 @@ internal class PersisterInntektCommand(
             "Inntekter er ikke tidligere lagret for person, sender behov",
             "fødselsnummer" to fødselsnummer,
         )
-        return trengerInntekt(context)
+        return trengerInntekt(commandContext)
     }
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
-        val løsning = context.get<Inntektløsning>() ?: return trengerInntekt(context)
+        val løsning = commandContext.get<Inntektløsning>() ?: return trengerInntekt(commandContext)
 
         loggInfo(
             "Lagrer inntekter for person",
@@ -44,8 +44,8 @@ internal class PersisterInntektCommand(
         return true
     }
 
-    private fun trengerInntekt(context: CommandContext): Boolean {
-        context.behov(
+    private fun trengerInntekt(commandContext: CommandContext): Boolean {
+        commandContext.behov(
             Behov.InntekterForSykepengegrunnlag(
                 fom = skjæringstidspunkt.minusMonths(12).toYearMonth(),
                 tom = skjæringstidspunkt.minusMonths(1).toYearMonth(),

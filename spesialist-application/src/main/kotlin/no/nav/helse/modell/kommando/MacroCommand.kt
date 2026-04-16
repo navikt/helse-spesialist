@@ -16,50 +16,50 @@ abstract class MacroCommand : Command {
     }
 
     final override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         require(commands.isNotEmpty())
         logg.info("Utfører makro-kommando ${this::class.simpleName}")
-        context.register(this)
-        return run(context, sessionContext, outbox, commands)
+        commandContext.register(this)
+        return run(commandContext, sessionContext, outbox, commands)
     }
 
     final override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        logg.info("Gjenopptar ${this::class.simpleName}, sti: ${context.sti()}")
-        context.register(this)
-        if (!runCommand(context, sessionContext, outbox, commands[currentIndex], Command::resume)) return false
-        return run(context, sessionContext, outbox, commands.subList(currentIndex, commands.size))
+        logg.info("Gjenopptar ${this::class.simpleName}, sti: ${commandContext.sti()}")
+        commandContext.register(this)
+        if (!runCommand(commandContext, sessionContext, outbox, commands[currentIndex], Command::resume)) return false
+        return run(commandContext, sessionContext, outbox, commands.subList(currentIndex, commands.size))
     }
 
     final override fun hash(): String = name + commands.joinToString { it.hash() }
 
     private fun run(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
         commands: List<Command>,
     ): Boolean =
-        CommandContext.run(context, commands) {
+        CommandContext.run(commandContext, commands) {
             historikk.add(0, it)
-            runCommand(context, sessionContext, outbox, it, Command::execute)
+            runCommand(commandContext, sessionContext, outbox, it, Command::execute)
         }
 
     private fun runCommand(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
         command: Command,
         commandAction: Command.(CommandContext, SessionContext, Outbox) -> Boolean,
     ): Boolean {
-        if (!commandAction(command, context, sessionContext, outbox)) {
-            context.suspendert(currentIndex)
-            logg.info("Kommando ${command::class.simpleName} suspenderte, nåværende sti: ${context.sti()}")
+        if (!commandAction(command, commandContext, sessionContext, outbox)) {
+            commandContext.suspendert(currentIndex)
+            logg.info("Kommando ${command::class.simpleName} suspenderte, nåværende sti: ${commandContext.sti()}")
             return false
         }
         logg.info("Kommando ${command.name} er ferdig")

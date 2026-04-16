@@ -21,25 +21,25 @@ internal class VurderVergemålOgFullmakt(
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(context)
+    ) = behandle(commandContext)
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ): Boolean = behandle(context)
+    ): Boolean = behandle(commandContext)
 
-    private fun behandle(context: CommandContext): Boolean {
-        val vergemålløsning = context.get<Vergemålløsning>()
-        val fullmaktløsning = context.get<Fullmaktløsning>()
+    private fun behandle(commandContext: CommandContext): Boolean {
+        val vergemålløsning = commandContext.get<Vergemålløsning>()
+        val fullmaktløsning = commandContext.get<Fullmaktløsning>()
 
         if (vergemålløsning == null || fullmaktløsning == null) {
             logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
-            context.behov(Behov.Vergemål)
-            context.behov(Behov.Fullmakt)
+            commandContext.behov(Behov.Vergemål)
+            commandContext.behov(Behov.Fullmakt)
             return false
         }
 

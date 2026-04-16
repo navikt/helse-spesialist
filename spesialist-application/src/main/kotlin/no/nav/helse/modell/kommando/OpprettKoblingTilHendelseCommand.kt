@@ -14,7 +14,7 @@ internal class OpprettKoblingTilHendelseCommand(
     private val vedtaksperiodeId = commandData.vedtaksperiodeId
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

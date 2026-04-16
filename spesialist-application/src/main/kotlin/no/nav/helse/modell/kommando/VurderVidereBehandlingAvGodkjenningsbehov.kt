@@ -25,7 +25,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val meldingDao: MeldingDao,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -39,7 +39,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
                     "Det var litt rart at dette kom inn, " +
                     "men det kan være normalt dersom behandlingen i Spesialist nettopp ble ferdig.",
             )
-            return ferdigstill(context)
+            return ferdigstill(commandContext)
         }
 
         val oppgave = oppgaveRepository.finn(SpleisBehandlingId(commandData.spleisBehandlingId)) ?: return true
@@ -60,7 +60,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
                         "Det var litt rart at dette kom inn, " +
                         "men det kan være normalt dersom behandlingen i Spesialist nettopp ble ferdig.",
                 )
-                return ferdigstill(context)
+                return ferdigstill(commandContext)
             }
             error("Endringer i godkjenningsbehov der oppgaven med oppgaveId=${oppgave.id.value} er ferdigstilt")
         }
@@ -79,7 +79,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             oppgaveRepository.lagre(oppgave)
         } else {
             loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId")
-            ferdigstill(context)
+            ferdigstill(commandContext)
         }
         return true
     }

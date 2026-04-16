@@ -13,7 +13,7 @@ internal class SettTidligereAutomatiseringInaktivCommand(
     private val automatisering: Automatisering,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

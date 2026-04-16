@@ -120,7 +120,7 @@ class CommandHashTest {
 
     private class commandA : Command {
         override fun execute(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean = true
@@ -128,7 +128,7 @@ class CommandHashTest {
 
     private class commandB : Command {
         override fun execute(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean = true
@@ -136,7 +136,7 @@ class CommandHashTest {
 
     private class commandC : Command {
         override fun execute(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean = true

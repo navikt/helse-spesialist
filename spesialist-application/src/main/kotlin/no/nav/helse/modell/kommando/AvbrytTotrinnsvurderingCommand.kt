@@ -10,7 +10,7 @@ internal class AvbrytTotrinnsvurderingCommand(
     private val alleForkastedeVedtaksperiodeIder: List<UUID>,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

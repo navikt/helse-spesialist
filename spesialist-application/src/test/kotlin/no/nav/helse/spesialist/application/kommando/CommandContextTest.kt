@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class CommandContextTest : ApplicationTest() {
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     private companion object {
         private val HENDELSE = UUID.randomUUID()
@@ -60,19 +60,19 @@ internal class CommandContextTest : ApplicationTest() {
 
     @BeforeEach
     fun setupEach() {
-        context = CommandContext(CONTEXT)
-        context.nyObserver(observer)
+        commandContext = CommandContext(CONTEXT)
+        commandContext.nyObserver(observer)
     }
 
     @Test
     fun `Tom command context`() {
-        assertNull(context.get<TestObject1>())
+        assertNull(commandContext.get<TestObject1>())
     }
 
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
+            assertTrue(commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             assertTrue(executed)
             assertFalse(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
@@ -82,9 +82,9 @@ internal class CommandContextTest : ApplicationTest() {
 
     @Test
     fun `resumer kommando med tilstand`() {
-        context = CommandContext(CONTEXT, listOf(1))
+        commandContext = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            assertTrue(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
+            assertTrue(commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             assertFalse(executed)
             assertTrue(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply.id, CONTEXT) }
@@ -95,7 +95,7 @@ internal class CommandContextTest : ApplicationTest() {
     @Test
     fun `suspenderer ved execute`() {
         TestCommand(executeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
+            assertFalse(commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), any()) }
         }
@@ -104,9 +104,9 @@ internal class CommandContextTest : ApplicationTest() {
     @Test
     fun `suspenderer ved resume`() {
         val sti = listOf(1)
-        context = CommandContext(CONTEXT, sti)
+        commandContext = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
-            assertFalse(context.utfør(commandContextDao, sessionContext, outbox, this.id, this))
+            assertFalse(commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply.id, CONTEXT, hash().convertToUUID(), sti) }
         }
@@ -114,16 +114,16 @@ internal class CommandContextTest : ApplicationTest() {
 
     @Test
     fun ferdigstiller() {
-        TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
+        TestCommand(executeAction = { this.ferdigstill(commandContext) }).apply {
+            commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
 
     @Test
     fun `lager kommandokjede_ferdigstilt hendelse når kommandokjeden ferdigstilles`() {
-        TestCommand(executeAction = { this.ferdigstill(context) }).apply {
-            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
+        TestCommand(executeAction = { this.ferdigstill(commandContext) }).apply {
+            commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -135,7 +135,7 @@ internal class CommandContextTest : ApplicationTest() {
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
+            commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
@@ -144,13 +144,13 @@ internal class CommandContextTest : ApplicationTest() {
 
     @Test
     fun `lager kommandokjede_avbrutt hendelse når kommandokjeden avbrytes`() {
-        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(context.id(), HENDELSE))
+        every { commandContextDao.avbryt(any(), any()) } returns listOf(Pair(commandContext.id(), HENDELSE))
         TestCommand(executeAction = {
             false
         }).apply {
-            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
+            commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
-        context.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
+        commandContext.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last() is KommandokjedeEndretEvent.Avbrutt)
@@ -158,12 +158,12 @@ internal class CommandContextTest : ApplicationTest() {
 
     @Test
     fun `ferdigstiller selv ved suspendering`() {
-        context = CommandContext(CONTEXT)
+        commandContext = CommandContext(CONTEXT)
         TestCommand(executeAction = {
-            this.ferdigstill(context)
+            this.ferdigstill(commandContext)
             false
         }).apply {
-            context.utfør(commandContextDao, sessionContext, outbox, this.id, this)
+            commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this)
             verify(exactly = 1) { commandContextDao.ferdig(any(), any()) }
         }
     }
@@ -172,25 +172,25 @@ internal class CommandContextTest : ApplicationTest() {
     fun `Henter ut første av en gitt type`() {
         val testObject1 = TestObject1()
         val testObject2 = TestObject1()
-        context.add(testObject1)
-        context.add(testObject2)
-        assertEquals(testObject1, context.get<TestObject1>())
+        commandContext.add(testObject1)
+        commandContext.add(testObject2)
+        assertEquals(testObject1, commandContext.get<TestObject1>())
     }
 
     @Test
     fun `Henter ut riktig type`() {
         val testObject1 = TestObject1()
         val testObject2 = TestObject2()
-        context.add(testObject1)
-        context.add(testObject2)
-        assertEquals(testObject1, context.get<TestObject1>())
-        assertEquals(testObject2, context.get<TestObject2>())
+        commandContext.add(testObject1)
+        commandContext.add(testObject2)
+        assertEquals(testObject1, commandContext.get<TestObject1>())
+        assertEquals(testObject2, commandContext.get<TestObject2>())
     }
 
     @Test
     fun `samler opp behov`() {
-        context.behov(Behov.Vergemål)
-        context.behov(Behov.Fullmakt)
+        commandContext.behov(Behov.Vergemål)
+        commandContext.behov(Behov.Fullmakt)
         val result = observer.behov
         assertEquals(2, result.size)
         assertEquals(setOf(Behov.Vergemål, Behov.Fullmakt), result.toSet())
@@ -213,7 +213,7 @@ internal class CommandContextTest : ApplicationTest() {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 periodetype = "FØRSTEGANGSBEHANDLING",
             )
-        context.hendelse(hendelse)
+        commandContext.hendelse(hendelse)
         assertEquals(listOf(hendelse), observer.hendelser)
     }
 
@@ -231,7 +231,7 @@ internal class CommandContextTest : ApplicationTest() {
         val id: UUID = HENDELSE
 
         override fun execute(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean {
@@ -240,7 +240,7 @@ internal class CommandContextTest : ApplicationTest() {
         }
 
         override fun resume(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean {

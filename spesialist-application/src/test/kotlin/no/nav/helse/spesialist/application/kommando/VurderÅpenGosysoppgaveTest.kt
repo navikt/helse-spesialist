@@ -164,10 +164,10 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
 
     private fun lagrerVarselVedÅpneOppgaver(
         harTildeltOppgave: Boolean,
-        context: CommandContext,
+        commandContext: CommandContext,
     ) {
-        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
-        assertTrue(command(harTildeltOppgave).resume(context, sessionContext, outbox))
+        commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
+        assertTrue(command(harTildeltOppgave).resume(commandContext, sessionContext, outbox))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)

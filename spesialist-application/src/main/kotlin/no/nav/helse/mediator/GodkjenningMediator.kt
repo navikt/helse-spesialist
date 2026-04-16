@@ -13,12 +13,12 @@ class GodkjenningMediator(
     private val opptegnelseRepository: OpptegnelseRepository,
 ) {
     internal fun automatiskUtbetaling(
-        context: CommandContext,
+        commandContext: CommandContext,
         behov: GodkjenningsbehovData,
     ) {
         behov.godkjennAutomatisk()
-        context.hendelse(behov.medLøsning())
-        context.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
+        commandContext.hendelse(behov.medLøsning())
+        commandContext.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
         val opptegnelse =
             Opptegnelse.ny(
                 identitetsnummer = Identitetsnummer.fraString(behov.fødselsnummer),
@@ -33,15 +33,15 @@ class GodkjenningMediator(
     }
 
     internal fun automatiskAvvisning(
-        context: CommandContext,
+        commandContext: CommandContext,
         begrunnelser: List<String>,
         behov: GodkjenningsbehovData,
     ) {
         behov.avvisAutomatisk(
             begrunnelser = begrunnelser,
         )
-        context.hendelse(behov.medLøsning())
-        context.hendelse(behov.lagVedtaksperiodeAvvistAutomatisk())
+        commandContext.hendelse(behov.medLøsning())
+        commandContext.hendelse(behov.lagVedtaksperiodeAvvistAutomatisk())
         val opptegnelse =
             Opptegnelse.ny(
                 identitetsnummer = Identitetsnummer.fraString(behov.fødselsnummer),

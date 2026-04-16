@@ -51,7 +51,7 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
             }
         }
 
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     private fun enCommand() =
         OpprettEllerOppdaterArbeidsforhold(
@@ -75,17 +75,17 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
+        commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(observer)
     }
 
     @Test
     fun `oppretter arbeidsforhold`() {
         arbeidsforholdFinnesIkke()
         val command = enCommand()
-        assertFalse(command.execute(context, sessionContext, outbox))
+        assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
-        context.add(
+        commandContext.add(
             Arbeidsforholdløsning(
                 listOf(
                     Arbeidsforholdløsning.Løsning(
@@ -97,7 +97,7 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
                 ),
             ),
         )
-        assertTrue(command.resume(context, sessionContext, outbox))
+        assertTrue(command.resume(commandContext, sessionContext, outbox))
 
         assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
         assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
@@ -107,9 +107,9 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
     fun `oppdaterer arbeidsforhold`() {
         arbeidsforholdFinnes(enKomplettArbeidsforholdDto(oppdatert = LocalDateTime.now().minusYears(1)))
         val command = enCommand()
-        assertFalse(command.execute(context, sessionContext, outbox))
+        assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
-        context.add(
+        commandContext.add(
             Arbeidsforholdløsning(
                 listOf(
                     Arbeidsforholdløsning.Løsning(
@@ -121,7 +121,7 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
                 ),
             ),
         )
-        assertTrue(command.resume(context, sessionContext, outbox))
+        assertTrue(command.resume(commandContext, sessionContext, outbox))
 
         assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
         assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
@@ -130,14 +130,14 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
     @Test
     fun `oppretter ikke arbeidsforhold når den finnes`() {
         arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
-        assertTrue(enCommand().execute(context, sessionContext, outbox))
+        assertTrue(enCommand().execute(commandContext, sessionContext, outbox))
         assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
     }
 
     @Test
     fun `oppdaterer ikke arbeidsforhold når den er oppdatert`() {
         arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
-        assertTrue(enCommand().execute(context, sessionContext, outbox))
+        assertTrue(enCommand().execute(commandContext, sessionContext, outbox))
         assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
     }
 
@@ -145,9 +145,9 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
     fun `oppretter arbeidsforhold når det ikke finnes for orgnummeret`() {
         arbeidsforholdFinnes(enKomplettArbeidsforholdDto(organisasjonsnummer = ORGANISASJONSNUMMER.reversed()))
         val command = enCommand()
-        assertFalse(command.execute(context, sessionContext, outbox))
+        assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
-        context.add(
+        commandContext.add(
             Arbeidsforholdløsning(
                 listOf(
                     Arbeidsforholdløsning.Løsning(
@@ -159,7 +159,7 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
                 ),
             ),
         )
-        assertTrue(command.resume(context, sessionContext, outbox))
+        assertTrue(command.resume(commandContext, sessionContext, outbox))
         assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
     }
 

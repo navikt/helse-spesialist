@@ -11,7 +11,7 @@ internal class VedtaksperiodeReberegnetPeriodehistorikk(
     private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

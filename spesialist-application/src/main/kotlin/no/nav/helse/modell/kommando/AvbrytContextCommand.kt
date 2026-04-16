@@ -13,12 +13,12 @@ internal class AvbrytContextCommand(
     }
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         log.info("Avbryter alle command contexter knyttet til vedtaksperiodeId=$vedtaksperiodeId")
-        context.avbrytAlleForPeriode(sessionContext.commandContextDao, vedtaksperiodeId)
+        commandContext.avbrytAlleForPeriode(sessionContext.commandContextDao, vedtaksperiodeId)
         return true
     }
 }

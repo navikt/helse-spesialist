@@ -18,7 +18,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val oppgaveRepository: OppgaveRepository,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -46,7 +46,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         val årsaker = listOf("Adressebeskyttelse strengt fortrolig")
 
         godkjenningMediator.automatiskAvvisning(
-            context = context,
+            commandContext = commandContext,
             begrunnelser = årsaker,
             behov = godkjenningsbehov,
         )

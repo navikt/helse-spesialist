@@ -11,7 +11,7 @@ internal class OpprettKoblingTilUtbetalingCommand(
     private val utbetalingDao: UtbetalingDao,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

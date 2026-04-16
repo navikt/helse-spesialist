@@ -27,24 +27,24 @@ internal class VurderVurderingsmomenter(
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(context)
+    ) = behandle(commandContext)
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ): Boolean = behandle(context)
+    ): Boolean = behandle(commandContext)
 
-    private fun behandle(context: CommandContext): Boolean {
+    private fun behandle(commandContext: CommandContext): Boolean {
         if (risikovurderingAlleredeGjort()) return true
 
-        val løsning = context.get<Risikovurderingløsning>()
+        val løsning = commandContext.get<Risikovurderingløsning>()
         if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
             loggInfo("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
-            context.behov(
+            commandContext.behov(
                 Behov.Risikovurdering(
                     vedtaksperiodeId = vedtaksperiodeId,
                     organisasjonsnummer = organisasjonsnummer,

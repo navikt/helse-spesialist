@@ -21,7 +21,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

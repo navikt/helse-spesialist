@@ -25,7 +25,7 @@ internal class KontrollerEgenAnsattstatusTest : ApplicationTest() {
     private val personRepository = mockk<PersonRepository>(relaxed = true)
 
     private val command = KontrollerEgenAnsattstatus(FNR, personRepository)
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     private val observer =
         object : CommandContextObserver {
@@ -42,41 +42,41 @@ internal class KontrollerEgenAnsattstatusTest : ApplicationTest() {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
+        commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(observer)
         clearMocks(personRepository)
     }
 
     @Test
     fun `ber om informasjon om egen ansatt`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        Assertions.assertFalse(command.execute(context, sessionContext, outbox))
+        Assertions.assertFalse(command.execute(commandContext, sessionContext, outbox))
         Assertions.assertEquals(listOf(Behov.EgenAnsatt), observer.behov.toList())
     }
 
     @Test
     fun `mangler løsning ved resume`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        Assertions.assertFalse(command.resume(context, sessionContext, outbox))
+        Assertions.assertFalse(command.resume(commandContext, sessionContext, outbox))
         verify(exactly = 0) { personRepository.lagre(any()) }
     }
 
     @Test
     fun `lagrer løsning ved resume`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = null)
-        context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
-        Assertions.assertTrue(command.resume(context, sessionContext, outbox))
+        commandContext.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
+        Assertions.assertTrue(command.resume(commandContext, sessionContext, outbox))
         verify(exactly = 1) { personRepository.lagre(any()) }
     }
 
     @Test
     fun `sender ikke behov om informasjonen finnes`() {
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = false)
-        Assertions.assertTrue(command.resume(context, sessionContext, outbox))
+        Assertions.assertTrue(command.resume(commandContext, sessionContext, outbox))
         Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
 
         every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
-        Assertions.assertTrue(command.resume(context, sessionContext, outbox))
+        Assertions.assertTrue(command.resume(commandContext, sessionContext, outbox))
         Assertions.assertEquals(emptyList<Behov>(), observer.behov.toList())
     }
 }

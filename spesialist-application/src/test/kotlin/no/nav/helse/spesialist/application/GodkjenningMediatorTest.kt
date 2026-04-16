@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class GodkjenningMediatorTest {
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val hendelserInspektør =
         object : CommandContextObserver {
@@ -31,14 +31,14 @@ internal class GodkjenningMediatorTest {
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(hendelserInspektør)
+        commandContext = CommandContext(UUID.randomUUID())
+        commandContext.nyObserver(hendelserInspektør)
     }
 
     @Test
     fun `automatisk godkjenning medfører VedtaksperiodeGodkjentAutomatisk`() {
         mediator.automatiskUtbetaling(
-            context = context,
+            commandContext = commandContext,
             behov = godkjenningsbehovData(fødselsnummer = fnr)
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentAutomatisk>())
@@ -47,7 +47,7 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `automatisk avvisning medfører VedtaksperiodeAvvistAutomatisk`() {
         mediator.automatiskAvvisning(
-            context = context,
+            commandContext = commandContext,
             behov = godkjenningsbehovData(fødselsnummer = fnr),
             begrunnelser = emptyList(),
         )
@@ -57,7 +57,7 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `automatisk avvisning skal opprette opptegnelse`() {
         mediator.automatiskAvvisning(
-            context = context,
+            commandContext = commandContext,
             begrunnelser = listOf("foo"),
             behov = godkjenningsbehovData(fødselsnummer = fnr),
         )
@@ -67,7 +67,7 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `automatisk utbetaling skal opprette opptegnelse`() {
         mediator.automatiskUtbetaling(
-            context = context,
+            commandContext = commandContext,
             behov = godkjenningsbehovData(fødselsnummer = fnr)
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()

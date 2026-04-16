@@ -10,7 +10,7 @@ internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

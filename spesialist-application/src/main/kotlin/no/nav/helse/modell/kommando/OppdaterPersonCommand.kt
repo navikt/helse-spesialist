@@ -23,13 +23,13 @@ internal class OppdaterPersonCommand(
 
     private class OppdaterInfotrygdutbetalingerCommand : Command {
         override fun execute(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean = ignorer()
 
         override fun resume(
-            context: CommandContext,
+            commandContext: CommandContext,
             sessionContext: SessionContext,
             outbox: Outbox,
         ): Boolean = ignorer()

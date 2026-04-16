@@ -24,16 +24,16 @@ internal class SettTidligereAutomatiseringInaktivCommandTest : ApplicationTest()
             automatisering,
         )
 
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
+        commandContext = CommandContext(UUID.randomUUID())
     }
 
     @Test
     fun `kaller utfør og returnerer true`() {
-        assertTrue(command.execute(context, sessionContext, outbox))
+        assertTrue(command.execute(commandContext, sessionContext, outbox))
 
         verify {
             automatisering.settInaktiv(vedtaksperiodeId, hendelseId)

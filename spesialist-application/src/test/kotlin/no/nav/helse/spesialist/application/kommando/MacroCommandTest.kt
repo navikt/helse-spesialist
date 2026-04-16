@@ -19,14 +19,14 @@ internal class MacroCommandTest : ApplicationTest() {
     private var executeCount: Int = 0
     private var resumeCount: Int = 0
 
-    private lateinit var context: CommandContext
+    private lateinit var commandContext: CommandContext
 
     @BeforeEach
     fun beforeEach() {
         constants.clear()
         executeCount = 0
         resumeCount = 0
-        context = CommandContext(UUID.randomUUID())
+        commandContext = CommandContext(UUID.randomUUID())
     }
 
     @Test
@@ -42,9 +42,9 @@ internal class MacroCommandTest : ApplicationTest() {
                 true
             })
         val macroCommand = command1 + command2
-        assertTrue(macroCommand.execute(context, sessionContext, outbox))
+        assertTrue(macroCommand.execute(commandContext, sessionContext, outbox))
         assertRekkefølge("Kommando A", "Kommando B")
-        assertTrue(context.sti().isEmpty())
+        assertTrue(commandContext.sti().isEmpty())
     }
 
     @Test
@@ -60,9 +60,9 @@ internal class MacroCommandTest : ApplicationTest() {
                 true
             })
         val macroCommand = command1 + command2
-        assertFalse(macroCommand.execute(context, sessionContext, outbox))
+        assertFalse(macroCommand.execute(commandContext, sessionContext, outbox))
         assertRekkefølge("Kommando A")
-        assertEquals(listOf(0), context.sti())
+        assertEquals(listOf(0), commandContext.sti())
     }
 
     @Test
@@ -84,10 +84,10 @@ internal class MacroCommandTest : ApplicationTest() {
                 true
             })
         val macroCommand = command1 + command2
-        macroCommand.execute(context, sessionContext, outbox)
-        assertTrue(macroCommand.resume(context, sessionContext, outbox))
+        macroCommand.execute(commandContext, sessionContext, outbox)
+        assertTrue(macroCommand.resume(commandContext, sessionContext, outbox))
         assertRekkefølge("Kommando A Før", "Kommando A Etter", "Kommando B")
-        assertTrue(context.sti().isEmpty())
+        assertTrue(commandContext.sti().isEmpty())
     }
 
     @Test
@@ -119,12 +119,12 @@ internal class MacroCommandTest : ApplicationTest() {
                     },
                 )
         val macroCommand2 = command1 + macroCommand1
-        macroCommand2.execute(context, sessionContext, outbox)
-        assertEquals(listOf(1, 0), context.sti())
-        macroCommand2.resume(context, sessionContext, outbox)
-        assertEquals(listOf(1, 1), context.sti())
-        macroCommand2.resume(context, sessionContext, outbox)
-        assertTrue(context.sti().isEmpty())
+        macroCommand2.execute(commandContext, sessionContext, outbox)
+        assertEquals(listOf(1, 0), commandContext.sti())
+        macroCommand2.resume(commandContext, sessionContext, outbox)
+        assertEquals(listOf(1, 1), commandContext.sti())
+        macroCommand2.resume(commandContext, sessionContext, outbox)
+        assertTrue(commandContext.sti().isEmpty())
         assertRekkefølge("A", "B før", "B etter", "C før", "C etter")
     }
 
@@ -198,12 +198,12 @@ internal class MacroCommandTest : ApplicationTest() {
     fun `Utfører ikke commands etter at context er ferdigstilt i execute`() {
         val macroCommand =
             command(
-                execute = { this.ferdigstill(context) },
+                execute = { this.ferdigstill(commandContext) },
             ) +
                 command(
                     execute = { throw Exception() },
                 )
-        assertDoesNotThrow { macroCommand.execute(context, sessionContext, outbox) }
+        assertDoesNotThrow { macroCommand.execute(commandContext, sessionContext, outbox) }
     }
 
     @Test
@@ -211,12 +211,12 @@ internal class MacroCommandTest : ApplicationTest() {
         val macroCommand =
             command(
                 execute = { throw Exception() },
-                resume = { this.ferdigstill(context) },
+                resume = { this.ferdigstill(commandContext) },
             ) +
                 command(
                     execute = { throw Exception() },
                 )
-        assertDoesNotThrow { macroCommand.resume(context, sessionContext, outbox) }
+        assertDoesNotThrow { macroCommand.resume(commandContext, sessionContext, outbox) }
     }
 
     private fun assertRekkefølge(vararg konstanter: String) {
@@ -229,26 +229,26 @@ internal class MacroCommandTest : ApplicationTest() {
         }
 
     private fun command(
-        execute: Command.(context: CommandContext) -> Boolean,
-        resume: Command.(context: CommandContext) -> Boolean = { true },
+        execute: Command.(commandContext: CommandContext) -> Boolean,
+        resume: Command.(commandContext: CommandContext) -> Boolean = { true },
     ): Command {
         return object : Command {
             override fun execute(
-                context: CommandContext,
+                commandContext: CommandContext,
                 sessionContext: SessionContext,
                 outbox: Outbox,
             ): Boolean {
                 executeCount += 1
-                return execute(this, context)
+                return execute(this, this@MacroCommandTest.commandContext)
             }
 
             override fun resume(
-                context: CommandContext,
+                commandContext: CommandContext,
                 sessionContext: SessionContext,
                 outbox: Outbox,
             ): Boolean {
                 resumeCount += 1
-                return resume(this, context)
+                return resume(this, this@MacroCommandTest.commandContext)
             }
         }
     }

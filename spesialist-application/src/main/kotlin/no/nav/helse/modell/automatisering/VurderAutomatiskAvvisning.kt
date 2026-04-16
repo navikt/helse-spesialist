@@ -20,7 +20,7 @@ internal class VurderAutomatiskAvvisning(
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -43,12 +43,12 @@ internal class VurderAutomatiskAvvisning(
         }
 
         godkjenningMediator.automatiskAvvisning(
-            context,
+            commandContext,
             begrunnelser = avvisningsårsaker.toList(),
             behov = godkjenningsbehov,
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")
-        return ferdigstill(context)
+        return ferdigstill(commandContext)
     }
 
     private fun årsaker(

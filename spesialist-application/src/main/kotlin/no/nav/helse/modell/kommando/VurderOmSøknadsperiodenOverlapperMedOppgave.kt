@@ -11,7 +11,7 @@ internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
     private val søknadsperioder: List<Periode>,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
@@ -19,7 +19,7 @@ internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
             sessionContext.behandlingRepository.finn(oppgave.behandlingId)
                 ?: error("Fant ikke behandling")
         val søknadOverlapperMedBehandlingTilGodkjenning = søknadsperioder.any { it.overlapper(Periode(behandling.fom, behandling.tom)) }
-        if (!søknadOverlapperMedBehandlingTilGodkjenning) return ferdigstill(context)
+        if (!søknadOverlapperMedBehandlingTilGodkjenning) return ferdigstill(commandContext)
         return true
     }
 }

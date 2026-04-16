@@ -44,7 +44,7 @@ class LagreOppdragCommand(
     }
 
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {

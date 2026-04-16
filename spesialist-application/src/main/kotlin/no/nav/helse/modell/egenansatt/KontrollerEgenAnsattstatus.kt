@@ -15,23 +15,23 @@ internal class KontrollerEgenAnsattstatus(
     private val personRepository: PersonRepository,
 ) : Command {
     override fun execute(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(context)
+    ) = behandle(commandContext)
 
     override fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(context)
+    ) = behandle(commandContext)
 
-    private fun behandle(context: CommandContext): Boolean {
+    private fun behandle(commandContext: CommandContext): Boolean {
         if (viHarInformasjon()) return true
-        val løsning = context.get<EgenAnsattløsning>()
+        val løsning = commandContext.get<EgenAnsattløsning>()
         if (løsning == null) {
             logg.info("Trenger informasjon om egen ansatt")
-            context.behov(Behov.EgenAnsatt)
+            commandContext.behov(Behov.EgenAnsatt)
             return false
         }
 

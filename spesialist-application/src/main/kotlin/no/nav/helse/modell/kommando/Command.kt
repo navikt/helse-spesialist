@@ -11,7 +11,7 @@ interface Command {
     ): Boolean
 
     fun resume(
-        context: CommandContext,
+        commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ) = true
