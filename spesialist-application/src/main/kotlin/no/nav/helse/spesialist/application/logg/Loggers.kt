@@ -55,13 +55,6 @@ inline fun <reified T> T.loggDebug(
     loggMedDetaljer(logg, Level.DEBUG, melding, teamLogsDetaljer.toList())
 }
 
-inline fun <reified T> T.loggTrace(
-    melding: String,
-    vararg teamLogsDetaljer: Pair<String, Any?>,
-) {
-    loggMedDetaljer(logg, Level.TRACE, melding, teamLogsDetaljer.toList())
-}
-
 fun loggMedDetaljer(
     logger: Logger,
     level: Level,
@@ -85,8 +78,9 @@ private fun String.medTeamLogsDetaljer(teamLogsDetaljer: List<Pair<String, Any?>
     buildString {
         append(this@medTeamLogsDetaljer)
         if (teamLogsDetaljer.isNotEmpty()) {
-            append(" - ")
+            append(" -")
             teamLogsDetaljer.forEach { (name, value) ->
+                append(" ")
                 append(name)
                 append(": ")
                 append(if (value is String) "\"$value\"" else value.toString())
