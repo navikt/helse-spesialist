@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -51,15 +50,6 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
             }
         }
 
-    private lateinit var commandContext: CommandContext
-
-    private fun enCommand() =
-        OpprettEllerOppdaterArbeidsforhold(
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGANISASJONSNUMMER,
-            arbeidsforholdDao = repository,
-        )
-
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -72,12 +62,13 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
                 this.behov.add(behov)
             }
         }
-
-    @BeforeEach
-    fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
-        commandContext.nyObserver(observer)
-    }
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
+    private fun enCommand() =
+        OpprettEllerOppdaterArbeidsforhold(
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            arbeidsforholdDao = repository,
+        )
 
     @Test
     fun `oppretter arbeidsforhold`() {

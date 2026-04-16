@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
-    private lateinit var commandContext: CommandContext
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
@@ -26,7 +26,6 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
 
     @BeforeEach
     fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
         clearMocks(vergemålDao, personDao, godkjenningMediator, sykefraværstilfelle)
     }
 

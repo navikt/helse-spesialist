@@ -47,8 +47,6 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             sykefraværstilfelle = sykefraværstilfelle,
         )
-    private lateinit var commandContext: CommandContext
-
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -62,11 +60,10 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
                 this.behov.add(behov)
             }
         }
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
 
     @BeforeEach
     fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
-        commandContext.nyObserver(observer)
         clearMocks(vergemålDao)
     }
 

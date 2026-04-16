@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.test.assertIs
@@ -60,6 +59,21 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
         )
     private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
     private val vedtakRepository = InMemoryVedtakRepository()
+    private val observatør =
+        object : CommandContextObserver {
+            val hendelser = mutableListOf<UtgåendeHendelse>()
+            lateinit var gjeldendeTilstand: String
+                private set
+
+            override fun hendelse(hendelse: UtgåendeHendelse) {
+                hendelser.add(hendelse)
+            }
+
+            override fun tilstandEndret(event: KommandokjedeEndretEvent) {
+                gjeldendeTilstand = event::class.simpleName!!
+            }
+        }
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(this.observatør) }
     private val command =
         VurderAutomatiskInnvilgelse(
             automatisering,
@@ -87,14 +101,6 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             oppgaveService = mockk(relaxed = true),
             vedtakRepository = vedtakRepository,
         )
-
-    private lateinit var commandContext: CommandContext
-
-    @BeforeEach
-    fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
-        commandContext.nyObserver(this.observatør)
-    }
 
     @Test
     fun `kaller automatiser utfør og returnerer true`() {
@@ -185,19 +191,4 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     }
 
     private val commandContextDao = InMemoryCommandContextDao(InMemoryMeldingDao())
-
-    private val observatør =
-        object : CommandContextObserver {
-            val hendelser = mutableListOf<UtgåendeHendelse>()
-            lateinit var gjeldendeTilstand: String
-                private set
-
-            override fun hendelse(hendelse: UtgåendeHendelse) {
-                hendelser.add(hendelse)
-            }
-
-            override fun tilstandEndret(event: KommandokjedeEndretEvent) {
-                gjeldendeTilstand = event::class.simpleName!!
-            }
-        }
 }

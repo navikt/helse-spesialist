@@ -6,7 +6,6 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -24,12 +23,7 @@ internal class SettTidligereAutomatiseringInaktivCommandTest : ApplicationTest()
             automatisering,
         )
 
-    private lateinit var commandContext: CommandContext
-
-    @BeforeEach
-    fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
-    }
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
     @Test
     fun `kaller utfør og returnerer true`() {

@@ -58,9 +58,6 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         )
     private val sykefraværstilfelle =
         Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
-
-    private lateinit var commandContext: CommandContext
-
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -73,11 +70,11 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 this.behov.add(behov)
             }
         }
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
+
 
     @BeforeEach
     fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
-        commandContext.nyObserver(observer)
         every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns null
     }
 

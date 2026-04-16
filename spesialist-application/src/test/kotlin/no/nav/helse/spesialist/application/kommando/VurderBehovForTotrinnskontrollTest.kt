@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -83,7 +82,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
 
             override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
         }
-    private lateinit var commandContext: CommandContext
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
     val sykefraværstilfelle =
         Sykefraværstilfelle(
@@ -117,11 +116,6 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
             totrinnsvurderingRepository = totrinnsvurderingRepository,
             sykefraværstilfelle = sykefraværstilfelle,
         )
-
-    @BeforeEach
-    fun setUp() {
-        commandContext = CommandContext(UUID.randomUUID())
-    }
 
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {

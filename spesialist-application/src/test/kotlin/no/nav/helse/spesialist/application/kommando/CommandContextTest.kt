@@ -21,20 +21,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class CommandContextTest : ApplicationTest() {
-    private lateinit var commandContext: CommandContext
-
-    private companion object {
-        private val HENDELSE = UUID.randomUUID()
-        private val CONTEXT = UUID.randomUUID()
-    }
-
-    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -58,11 +48,14 @@ internal class CommandContextTest : ApplicationTest() {
             }
         }
 
-    @BeforeEach
-    fun setupEach() {
-        commandContext = CommandContext(CONTEXT)
-        commandContext.nyObserver(observer)
+    private val commandContext: CommandContext = CommandContext(CONTEXT).also { it.nyObserver(observer) }
+
+    private companion object {
+        private val HENDELSE = UUID.randomUUID()
+        private val CONTEXT = UUID.randomUUID()
     }
+
+    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
 
     @Test
     fun `Tom command context`() {
@@ -82,7 +75,7 @@ internal class CommandContextTest : ApplicationTest() {
 
     @Test
     fun `resumer kommando med tilstand`() {
-        commandContext = CommandContext(CONTEXT, listOf(1))
+        val commandContext = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
             assertTrue(commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             assertFalse(executed)
@@ -104,7 +97,7 @@ internal class CommandContextTest : ApplicationTest() {
     @Test
     fun `suspenderer ved resume`() {
         val sti = listOf(1)
-        commandContext = CommandContext(CONTEXT, sti)
+        val commandContext = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
             assertFalse(commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
@@ -158,7 +151,7 @@ internal class CommandContextTest : ApplicationTest() {
 
     @Test
     fun `ferdigstiller selv ved suspendering`() {
-        commandContext = CommandContext(CONTEXT)
+        val commandContext = CommandContext(CONTEXT)
         TestCommand(executeAction = {
             this.ferdigstill(commandContext)
             false

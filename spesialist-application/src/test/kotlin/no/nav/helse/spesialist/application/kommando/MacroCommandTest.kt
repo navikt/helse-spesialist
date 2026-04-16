@@ -19,14 +19,13 @@ internal class MacroCommandTest : ApplicationTest() {
     private var executeCount: Int = 0
     private var resumeCount: Int = 0
 
-    private lateinit var commandContext: CommandContext
+    private val commandContext = CommandContext(UUID.randomUUID())
 
     @BeforeEach
     fun beforeEach() {
         constants.clear()
         executeCount = 0
         resumeCount = 0
-        commandContext = CommandContext(UUID.randomUUID())
     }
 
     @Test

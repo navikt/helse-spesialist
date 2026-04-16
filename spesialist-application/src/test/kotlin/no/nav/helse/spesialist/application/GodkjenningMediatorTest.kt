@@ -10,12 +10,10 @@ import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class GodkjenningMediatorTest {
-    private lateinit var commandContext: CommandContext
     private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
     private val hendelserInspektør =
         object : CommandContextObserver {
@@ -27,13 +25,9 @@ internal class GodkjenningMediatorTest {
                 hendelser.add(hendelse)
             }
         }
-    private val mediator = GodkjenningMediator(opptegnelseRepository)
+    private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(hendelserInspektør) }
 
-    @BeforeEach
-    fun setup() {
-        commandContext = CommandContext(UUID.randomUUID())
-        commandContext.nyObserver(hendelserInspektør)
-    }
+    private val mediator = GodkjenningMediator(opptegnelseRepository)
 
     @Test
     fun `automatisk godkjenning medfører VedtaksperiodeGodkjentAutomatisk`() {
