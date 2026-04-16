@@ -196,25 +196,25 @@ class LegacyBehandling private constructor(
 
     private fun harMedlemskapsvarsel(): Boolean {
         val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
-        logg.info("$this harMedlemskapsvarsel: $inneholderMedlemskapsvarsel")
+        logg.info("Behandling $this har medlemskapsvarsel: $inneholderMedlemskapsvarsel")
         return inneholderMedlemskapsvarsel
     }
 
     private fun kreverSkjønnsfastsettelse(): Boolean {
         val inneholderAvviksvarsel = varsler.inneholderAktivtVarselOmAvvik()
-        logg.info("$this harAvviksvarsel: $inneholderAvviksvarsel")
+        logg.info("Behandling $this har varsel om avvik: $inneholderAvviksvarsel")
         return inneholderAvviksvarsel
     }
 
     private fun erTilbakedatert(): Boolean {
         val inneholderTilbakedateringsvarsel = varsler.inneholderVarselOmTilbakedatering()
-        logg.info("$this harTilbakedateringsvarsel: $inneholderTilbakedateringsvarsel")
+        logg.info("Behandling $this har varsel om tilbakedatering: $inneholderTilbakedateringsvarsel")
         return inneholderTilbakedateringsvarsel
     }
 
-    private fun harKunÅpenGosysOppgave(): Boolean {
+    private fun harKunVarselOmÅpenGosysOppgave(): Boolean {
         val inneholderKunÅpenGosysOppgaveVarsel = varsler.inneholderVarselOmÅpenGosysOppgave() && varsler.size == 1
-        logg.info("$this harKunÅpenGosysOppgavevarsel: $inneholderKunÅpenGosysOppgaveVarsel")
+        logg.info("Behandling $this har kun varsel om åpen Gosys-oppgave: $inneholderKunÅpenGosysOppgaveVarsel")
         return inneholderKunÅpenGosysOppgaveVarsel
     }
 
@@ -373,7 +373,7 @@ class LegacyBehandling private constructor(
         override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
 
-    override fun toString(): String = "spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId, spleisBehandlingId=$spleisBehandlingId, fom=${periode.fom}, tom=${periode.tom}, skjæringstidspunkt=$skjæringstidspunkt"
+    override fun toString(): String = "LegacyBehandling(spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId, spleisBehandlingId=$spleisBehandlingId, fom=${periode.fom}, tom=${periode.tom}, skjæringstidspunkt=$skjæringstidspunkt)"
 
     override fun equals(other: Any?): Boolean =
         this === other ||
@@ -486,7 +486,7 @@ class LegacyBehandling private constructor(
 
         internal fun List<LegacyBehandling>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.harKunÅpenGosysOppgave()
+                it.harKunVarselOmÅpenGosysOppgave()
             }
 
         internal fun List<LegacyBehandling>.deaktiver(varsel: LegacyVarsel) {
