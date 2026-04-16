@@ -35,7 +35,6 @@ interface Daos {
     val legacyVarselDao: LegacyVarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
-    val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
 
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
     val behandlingApiRepository: BehandlingApiRepository

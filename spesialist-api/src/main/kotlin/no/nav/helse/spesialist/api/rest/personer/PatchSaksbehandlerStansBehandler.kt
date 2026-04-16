@@ -31,34 +31,12 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
             manglerTilgangTilPerson = { ApiPatchSaksbehandlerStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             if (request.stans) {
-                opprettSaksbehandlerstans(request.begrunnelse, person, kallKontekst)
                 opprettSaksbehandlerstansV2(request.begrunnelse, person, kallKontekst)
             } else {
-                opphevSaksbehandlerstans(request.begrunnelse, person, kallKontekst)
                 opphevSaksbehandlerstansV2(request.begrunnelse, person, kallKontekst)
             }
             RestResponse.NoContent()
         }
-
-    private fun opprettSaksbehandlerstans(
-        begrunnelse: String,
-        person: Person,
-        kallKontekst: KallKontekst,
-    ) {
-        kallKontekst.transaksjon.stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(person.id.value)
-        lagrePeriodehistorikkForSaksbehandlerstans(kallKontekst, person, begrunnelse)
-        loggInfo("Opprettet saksbehandler-stans for person")
-    }
-
-    private fun opphevSaksbehandlerstans(
-        begrunnelse: String,
-        person: Person,
-        kallKontekst: KallKontekst,
-    ) {
-        kallKontekst.transaksjon.stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(person.id.value)
-        lagrePeriodehistorikkForOpphevelseAvSaksbehandlerstans(kallKontekst, person, begrunnelse)
-        loggInfo("Opphevet saksbehandler-stans for person")
-    }
 
     private fun opprettSaksbehandlerstansV2(
         begrunnelse: String,
@@ -78,6 +56,7 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
                 identitetsnummer = identitetsnummer,
             )
         kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(stans)
+        lagrePeriodehistorikkForSaksbehandlerstans(kallKontekst, person, begrunnelse)
         loggInfo("Opprettet saksbehandler-stans for person med aggregat")
     }
 
@@ -96,6 +75,7 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
             )
             kallKontekst.transaksjon.saksbehandlerStansRepository.lagre(aktivStans)
         }
+        lagrePeriodehistorikkForOpphevelseAvSaksbehandlerstans(kallKontekst, person, begrunnelse)
         loggInfo("Opphevet saksbehandler-stans for person med aggregat")
     }
 

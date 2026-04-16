@@ -120,7 +120,6 @@ abstract class AbstractDBIntegrationTest {
     internal val annulleringRepository = daos.annulleringRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
-    internal val stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao
 
     internal fun testhendelse(
         hendelseId: UUID,

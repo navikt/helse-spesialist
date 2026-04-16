@@ -6,10 +6,12 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
+import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
@@ -68,7 +70,13 @@ class PatchSaksbehandlerStansBehandlerTest {
         )
         val begrunnelse = "begrunnelse"
 
-        sessionContext.stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(fødselsnummer)
+        sessionContext.saksbehandlerStansRepository.lagre(
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = NAVIdent("I123456"),
+                begrunnelse = "Eksisterende stans",
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+            ),
+        )
 
         // When:
         val response =

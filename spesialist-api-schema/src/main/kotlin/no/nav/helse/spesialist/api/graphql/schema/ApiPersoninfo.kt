@@ -28,5 +28,4 @@ data class ApiPersoninfo(
     val kjonn: ApiKjonn,
     val adressebeskyttelse: ApiAdressebeskyttelse,
     val fullmakt: Boolean? = null,
-    val automatiskBehandlingStansetAvSaksbehandler: Boolean? = null,
 )

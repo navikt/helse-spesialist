@@ -81,7 +81,6 @@ class InMemoryRepositoriesAndDaos {
     private val påVentApiDao = UnimplementedPåVentApiDao()
     private val risikovurderingDao = UnimplementedRisikovurderingDao()
     private val risikovurderingApiDao = UnimplementedRisikovurderingApiDao()
-    private val stansAutomatiskBehandlingSaksbehandlerDao = InMemoryStansAutomatiskBehandlingSaksbehandlerDao()
     private val tildelingDao = DelegatingTildelingDao(oppgaveRepository, saksbehandlerRepository)
     private val tildelingApiDao = UnimplementedTildelingApiDao()
     private val utbetalingDao = UnimplementedUtbetalingDao()
@@ -121,7 +120,6 @@ class InMemoryRepositoriesAndDaos {
             risikovurderingApiDao = risikovurderingApiDao,
             saksbehandlerDao = saksbehandlerDao,
             saksbehandlerRepository = saksbehandlerRepository,
-            stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
             tildelingDao = tildelingDao,
             tildelingApiDao = tildelingApiDao,
             varselApiRepository = varselApiRepository,
@@ -164,7 +162,6 @@ class InMemoryRepositoriesAndDaos {
                     risikovurderingDao = risikovurderingDao,
                     saksbehandlerDao = saksbehandlerDao,
                     saksbehandlerRepository = saksbehandlerRepository,
-                    stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
                     sykefraværstilfelleDao = sykefraværstilfelleDao,
                     tildelingDao = tildelingDao,
                     tilkommenInntektRepository = tilkommenInntektRepository,

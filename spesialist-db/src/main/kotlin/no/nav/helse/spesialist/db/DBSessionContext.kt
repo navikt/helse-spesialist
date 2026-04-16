@@ -47,7 +47,6 @@ import no.nav.helse.spesialist.db.dao.PgPåVentDao
 import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
 import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
-import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgSykefraværstilfelleDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgUtbetalingDao
@@ -103,7 +102,6 @@ class DBSessionContext(
     override val legacyVedtaksperiodeRepository = PgLegacyVedtaksperiodeRepository(legacyBehandlingDao, vedtakDao)
     override val legacyPersonRepository =
         PgLegacyPersonRepository(session, legacyVedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
-    override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(session)
     override val saksbehandlerStansRepository = PgSaksbehandlerStansRepository(session)
     override val veilederStansRepository = PgVeilederStansRepository(session)
 

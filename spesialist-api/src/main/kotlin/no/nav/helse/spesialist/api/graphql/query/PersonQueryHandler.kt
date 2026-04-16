@@ -1031,7 +1031,6 @@ class PersonQueryHandler(
             kjonn = personinfo.kjønn.tilApiKjonn(),
             adressebeskyttelse = personinfo.adressebeskyttelse.tilApiAdressebeskyttelse(),
             fullmakt = daos.vergemålApiDao.harFullmakt(id.value),
-            automatiskBehandlingStansetAvSaksbehandler = daos.stansAutomatiskBehandlingSaksbehandlerDao.erStanset(id.value),
         )
     }
 

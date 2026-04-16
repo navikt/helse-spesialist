@@ -8,7 +8,6 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
@@ -30,6 +29,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
@@ -37,11 +37,13 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.VeilederStans
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -67,6 +69,9 @@ internal class AutomatiseringTest {
         mockk<VeilederStansRepository>(relaxed = true) {
             every { finnAktiv(any()) } returns null
         }
+    private val saksbehandlerStansRepositoryMock = mockk<SaksbehandlerStansRepository>(relaxed = true) {
+        every { finnAktiv(any()) } returns null
+    }
     private val veilederStansSubsumsjonmelder = VeilederStansSubsumsjonmelder { mockk(relaxed = true) }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val personRepository =
@@ -74,8 +79,6 @@ internal class AutomatiseringTest {
             every { finn(any()) } returns lagPerson(erEgenAnsatt = false)
         }
     private val totrinnsvurderingRepositoryMock = mockk<TotrinnsvurderingRepository>(relaxed = true)
-    private val stansAutomatiskBehandlingSaksbehandlerDaoMock =
-        mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
     private val personDaoMock =
         mockk<PersonDao>(relaxed = true) {
             every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
@@ -121,8 +124,8 @@ internal class AutomatiseringTest {
             legacyBehandlingDao = legacyBehandlingDaoMock,
             personRepository = personRepository,
             totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
-            stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDaoMock,
             veilederStansRepository = veilederStansRepositoryMock,
+            saksbehandlerStansRepository = saksbehandlerStansRepositoryMock,
         )
 
     @BeforeEach
@@ -362,7 +365,11 @@ internal class AutomatiseringTest {
 
     @Test
     fun `saksbehandler har stanset automatisk behandling`() {
-        every { stansAutomatiskBehandlingSaksbehandlerDaoMock.erStanset(any()) } returns true
+        every { saksbehandlerStansRepositoryMock.finnAktiv(any()) } returns SaksbehandlerStans.ny(
+            utførtAvSaksbehandlerIdent = lagSaksbehandler().ident,
+            begrunnelse = "Begrunnelse",
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        )
         blirManuellOppgave()
     }
 

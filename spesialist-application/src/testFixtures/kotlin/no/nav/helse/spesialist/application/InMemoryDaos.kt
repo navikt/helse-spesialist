@@ -30,7 +30,6 @@ class InMemoryDaos(
     override val risikovurderingApiDao: UnimplementedRisikovurderingApiDao,
     override val saksbehandlerDao: DelegatingSaksbehandlerDao,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
-    override val stansAutomatiskBehandlingSaksbehandlerDao: InMemoryStansAutomatiskBehandlingSaksbehandlerDao,
     override val tildelingDao: DelegatingTildelingDao,
     override val tildelingApiDao: UnimplementedTildelingApiDao,
     override val varselApiRepository: UnimplementedVarselApiRepository,

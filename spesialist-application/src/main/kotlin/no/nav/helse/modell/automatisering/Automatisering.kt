@@ -7,7 +7,6 @@ import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
@@ -26,6 +25,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.PersonRepository
+import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
@@ -50,8 +50,8 @@ internal class Automatisering(
     private val legacyBehandlingDao: LegacyBehandlingDao,
     private val personRepository: PersonRepository,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
     private val veilederStansRepository: VeilederStansRepository,
+    private val saksbehandlerStansRepository: SaksbehandlerStansRepository,
 ) {
     object Factory {
         fun automatisering(
@@ -72,8 +72,8 @@ internal class Automatisering(
                 legacyBehandlingDao = sessionContext.legacyBehandlingDao,
                 personRepository = sessionContext.personRepository,
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-                stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao,
                 veilederStansRepository = sessionContext.veilederStansRepository,
+                saksbehandlerStansRepository = sessionContext.saksbehandlerStansRepository,
             )
     }
 
@@ -282,7 +282,8 @@ internal class Automatisering(
             veilederStansRepository.finnAktiv(Identitetsnummer.fraString(fødselsnummer))
         veilederStansSubsumsjonmelder.sendMelding(veilederStans, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
 
-        val automatiseringStansetAvSaksbehandler = stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
+        val automatiseringStansetAvSaksbehandler =
+            saksbehandlerStansRepository.finnAktiv(Identitetsnummer.fraString(fødselsnummer))?.erStanset ?: false
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
