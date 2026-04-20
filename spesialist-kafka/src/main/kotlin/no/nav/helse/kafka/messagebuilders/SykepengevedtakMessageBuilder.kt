@@ -70,7 +70,7 @@ private fun VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.t
 
 private fun VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =
     mapOf(
-        "omregnetÅrsinntekt" to `omregnetÅrsinntektTotalt`,
+        "omregnetÅrsinntekt" to omregnetÅrsinntektTotalt,
         "innrapportertÅrsinntekt" to innrapportertÅrsinntekt,
         "avviksprosent" to avviksprosent,
         "6G" to seksG,
