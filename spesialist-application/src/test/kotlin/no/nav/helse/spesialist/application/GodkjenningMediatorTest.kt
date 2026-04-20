@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.application
 
-import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
@@ -9,12 +7,18 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
-import org.junit.jupiter.api.Assertions.assertNotNull
+import no.nav.helse.spesialist.application.kommando.ApplicationTest
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Opptegnelse
+import no.nav.helse.spesialist.domain.Sekvensnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
-internal class GodkjenningMediatorTest {
-    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
+internal class GodkjenningMediatorTest : ApplicationTest() {
+    private val fødselsnummer = lagFødselsnummer()
     private val hendelserInspektør =
         object : CommandContextObserver {
             private val hendelser = mutableListOf<UtgåendeHendelse>()
@@ -27,13 +31,13 @@ internal class GodkjenningMediatorTest {
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(hendelserInspektør) }
 
-    private val mediator = GodkjenningMediator(opptegnelseRepository)
+    private val mediator = GodkjenningMediator(sessionContext.opptegnelseRepository)
 
     @Test
     fun `automatisk godkjenning medfører VedtaksperiodeGodkjentAutomatisk`() {
         mediator.automatiskUtbetaling(
             commandContext = commandContext,
-            behov = godkjenningsbehovData(fødselsnummer = fnr)
+            behov = godkjenningsbehovData(fødselsnummer = fødselsnummer),
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentAutomatisk>())
     }
@@ -41,19 +45,19 @@ internal class GodkjenningMediatorTest {
     @Test
     fun `automatisk avvisning medfører VedtaksperiodeAvvistAutomatisk`() {
         mediator.automatiskAvvisning(
-            commandContext = commandContext,
-            behov = godkjenningsbehovData(fødselsnummer = fnr),
+            behov = godkjenningsbehovData(fødselsnummer = fødselsnummer),
+            outbox = outbox,
             begrunnelser = emptyList(),
         )
-        assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeAvvistAutomatisk>())
+        assertUtgåendeHendelse<VedtaksperiodeAvvistAutomatisk>()
     }
 
     @Test
     fun `automatisk avvisning skal opprette opptegnelse`() {
         mediator.automatiskAvvisning(
-            commandContext = commandContext,
             begrunnelser = listOf("foo"),
-            behov = godkjenningsbehovData(fødselsnummer = fnr),
+            outbox = outbox,
+            behov = godkjenningsbehovData(fødselsnummer = fødselsnummer),
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
@@ -62,19 +66,14 @@ internal class GodkjenningMediatorTest {
     fun `automatisk utbetaling skal opprette opptegnelse`() {
         mediator.automatiskUtbetaling(
             commandContext = commandContext,
-            behov = godkjenningsbehovData(fødselsnummer = fnr)
+            behov = godkjenningsbehovData(fødselsnummer = fødselsnummer),
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
 
-    private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =
-        verify(exactly = 1) {
-            opptegnelseRepository.lagre(
-                any()
-            )
-        }
-
-    private companion object {
-        const val fnr = "12341231221"
+    private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() {
+        val opptegnelser = sessionContext.opptegnelseRepository.finnAlleForPersonEtter(Sekvensnummer(0), Identitetsnummer.fraString(fødselsnummer))
+        assertEquals(1, opptegnelser.size)
+        assertEquals(Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV, opptegnelser.single().type)
     }
 }

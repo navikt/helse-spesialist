@@ -43,7 +43,7 @@ internal class VurderAutomatiskAvvisning(
         }
 
         godkjenningMediator.automatiskAvvisning(
-            commandContext,
+            outbox = outbox,
             begrunnelser = avvisningsårsaker.toList(),
             behov = godkjenningsbehov,
         )

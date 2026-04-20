@@ -152,9 +152,6 @@ class Kommandofabrikk(
         val identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer())
         return AdressebeskyttelseEndretCommand(
             identitetsnummer = identitetsnummer,
-            meldingDao = sessionContext.meldingDao,
-            personRepository = sessionContext.personRepository,
-            oppgaveRepository = sessionContext.oppgaveRepository,
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
         )
     }

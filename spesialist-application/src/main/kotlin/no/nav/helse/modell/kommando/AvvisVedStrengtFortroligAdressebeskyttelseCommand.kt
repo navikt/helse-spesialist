@@ -1,11 +1,8 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse
@@ -13,28 +10,25 @@ import no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val identitetsnummer: Identitetsnummer,
     private val godkjenningMediator: GodkjenningMediator,
-    private val meldingDao: MeldingDao,
-    private val personRepository: PersonRepository,
-    private val oppgaveRepository: OppgaveRepository,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val oppgave = oppgaveRepository.finnAktivForPerson(identitetsnummer)
+        val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
         if (oppgave == null) {
             loggInfo("Ingen aktiv oppgave for personen. Ingenting å avvise")
             return true
         }
         val godkjenningsbehov =
-            meldingDao
+            sessionContext.meldingDao
                 .finnSisteGodkjenningsbehov(oppgave.behandlingId.value)
                 ?.data()
                 ?: error("Fant ikke godkjenningsbehov")
 
         val adressebeskyttelse =
-            personRepository
+            sessionContext.personRepository
                 .finn(identitetsnummer)
                 ?.info
                 ?.adressebeskyttelse
@@ -46,12 +40,12 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         val årsaker = listOf("Adressebeskyttelse strengt fortrolig")
 
         godkjenningMediator.automatiskAvvisning(
-            commandContext = commandContext,
             begrunnelser = årsaker,
             behov = godkjenningsbehov,
+            outbox = outbox,
         )
         oppgave.avbryt()
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
         return true
     }
 }

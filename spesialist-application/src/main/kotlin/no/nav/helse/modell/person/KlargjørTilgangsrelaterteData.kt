@@ -48,7 +48,6 @@ internal class KlargjørTilgangsrelaterteDataCommand(
         listOf(
             OppdaterPersoninfoCommand(
                 identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-                personRepository = personRepository,
                 force = false,
             ),
             OppdaterEnhetCommand(fødselsnummer, personRepository),

@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.OpptegnelseRepository
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
@@ -33,18 +34,19 @@ class GodkjenningMediator(
     }
 
     internal fun automatiskAvvisning(
-        commandContext: CommandContext,
+        outbox: Outbox,
         begrunnelser: List<String>,
         behov: GodkjenningsbehovData,
     ) {
         behov.avvisAutomatisk(
             begrunnelser = begrunnelser,
         )
-        commandContext.hendelse(behov.medLøsning())
-        commandContext.hendelse(behov.lagVedtaksperiodeAvvistAutomatisk())
+        val identitetsnummer = Identitetsnummer.fraString(behov.fødselsnummer)
+        outbox.leggTil(identitetsnummer, behov.medLøsning(), "automatisk avvisning")
+        outbox.leggTil(identitetsnummer, behov.lagVedtaksperiodeAvvistAutomatisk(), "automatisk avvisning")
         val opptegnelse =
             Opptegnelse.ny(
-                identitetsnummer = Identitetsnummer.fraString(behov.fødselsnummer),
+                identitetsnummer = identitetsnummer,
                 type = Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
             )
         opptegnelseRepository.lagre(opptegnelse)

@@ -6,7 +6,6 @@ import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentPersoninfoløsning
-import no.nav.helse.spesialist.application.InMemoryPersonRepository
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.typer.Kjønn
@@ -26,7 +25,7 @@ internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
         private val FØDSELSDATO = LocalDate.EPOCH
     }
 
-    private val personRepository = InMemoryPersonRepository()
+    private val personRepository = sessionContext.personRepository
 
     private val observer =
         object : CommandContextObserver {
@@ -49,7 +48,7 @@ internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
     @Test
     fun `mangler personinfo`() {
         val person = lagPerson(info = null).also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
+        val command = OppdaterPersoninfoCommand(person.id, force = false)
         assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(listOf(Behov.Personinfo), observer.behov.toList())
@@ -59,7 +58,7 @@ internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
     fun `utdatert personinfo`() {
         // given
         val person = lagPerson(infoSistOppdatert = LocalDate.now().minusDays(15)).also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
+        val command = OppdaterPersoninfoCommand(person.id, force = false)
 
         // when
         val løsning = HentPersoninfoløsning(person.id.value, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Ukjent, Adressebeskyttelse.Fortrolig)
@@ -82,7 +81,7 @@ internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
         val person = lagPerson().also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = false)
+        val command = OppdaterPersoninfoCommand(person.id, force = false)
 
         assertTrue(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
@@ -91,7 +90,7 @@ internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
     @Test
     fun `oppdaterer personinfo dersom force er satt til true`() {
         val person = lagPerson().also(personRepository::lagre)
-        val command = OppdaterPersoninfoCommand(person.id, personRepository, force = true)
+        val command = OppdaterPersoninfoCommand(person.id, force = true)
         assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 

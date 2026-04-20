@@ -20,7 +20,6 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
 
-
     @Test
     fun `skal avvise ved vergemål dersom perioden kan avvises`() {
         every { vergemålDao.harVergemål(fødselsnummer) } returns true
@@ -52,9 +51,9 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         verify(exactly = 1) {
             godkjenningMediator.automatiskAvvisning(
-                commandContext = commandContext,
                 begrunnelser = listOf(forventetÅrsak),
                 behov = any(),
+                outbox = outbox,
             )
         }
     }

@@ -4,7 +4,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
@@ -12,7 +11,6 @@ import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
     private val identitetsnummer: Identitetsnummer,
-    private val personRepository: PersonRepository,
     private val force: Boolean,
 ) : Command {
     private companion object {
@@ -26,11 +24,11 @@ internal class OppdaterPersoninfoCommand(
         outbox: Outbox,
     ): Boolean {
         val person =
-            personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
+            sessionContext.personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")
         val sistOppdatert = person.infoOppdatert
         if (sistOppdatert != null && sistOppdatert > datoForUtdatert && !force) return ignorer()
-        return behandle(commandContext, person)
+        return behandle(commandContext, sessionContext, person)
     }
 
     override fun resume(
@@ -39,9 +37,9 @@ internal class OppdaterPersoninfoCommand(
         outbox: Outbox,
     ): Boolean {
         val person =
-            personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
+            sessionContext.personRepository.finn(this@OppdaterPersoninfoCommand.identitetsnummer)
                 ?: error("Fant ikke person")
-        return behandle(commandContext, person)
+        return behandle(commandContext, sessionContext, person)
     }
 
     private fun ignorer(): Boolean {
@@ -51,12 +49,13 @@ internal class OppdaterPersoninfoCommand(
 
     private fun behandle(
         commandContext: CommandContext,
+        sessionContext: SessionContext,
         person: Person,
     ): Boolean {
         val løsning = commandContext.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(commandContext)
         logg.info("oppdaterer personinfo")
         person.oppdaterInfo(løsning.personinfo())
-        personRepository.lagre(person)
+        sessionContext.personRepository.lagre(person)
         return true
     }
 
