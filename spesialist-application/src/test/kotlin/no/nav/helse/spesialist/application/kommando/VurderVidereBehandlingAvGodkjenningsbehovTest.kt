@@ -2,11 +2,6 @@ package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.VedtakDao
-import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -14,18 +9,15 @@ import no.nav.helse.spesialist.application.Testdata
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class VurderVidereBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
-    private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
-    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val meldingDao = mockk<MeldingDao>(relaxed = true)
-
     @Test
     fun `oppdaterer oppgavens peker til godkjenningsbehov ved mottak av nytt godkjenningsbehov`() {
+        // given
         val spleisBehandlingId = UUID.randomUUID()
         val oldData =
             Testdata.godkjenningsbehovData(
@@ -43,24 +35,24 @@ internal class VurderVidereBehandlingAvGodkjenningsbehovTest : ApplicationTest()
 
         val oldGodkjenningsbehov = mockk<Godkjenningsbehov>(relaxed = true)
         every { oldGodkjenningsbehov.data() } returns oldData
+        every { oldGodkjenningsbehov.id } returns oldData.id
 
-        every { vedtakDao.erAutomatiskGodkjent(newData.utbetalingId) } returns false
-        every { oppgaveRepository.finn(SpleisBehandlingId(spleisBehandlingId)) } returns oppgave
-        every { meldingDao.finn(oldData.id) } returns oldGodkjenningsbehov
+        sessionContext.oppgaveRepository.lagre(oppgave)
+        sessionContext.meldingDao.lagre(oldGodkjenningsbehov)
 
         val command =
             VurderVidereBehandlingAvGodkjenningsbehov(
                 fødselsnummer = newData.fødselsnummer,
                 commandData = newData,
-                oppgaveRepository = oppgaveRepository,
-                reservasjonDao = reservasjonDao,
-                vedtakDao = vedtakDao,
-                meldingDao = meldingDao,
             )
+
+        // when
         command.execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
 
-        Assertions.assertEquals(newData.id, oppgave.godkjenningsbehovId)
-        Assertions.assertEquals(Oppgave.Invalidert, oppgave.tilstand)
-        verify(exactly = 2) { oppgaveRepository.lagre(oppgave) }
+        // then
+        val lagretOppgave = sessionContext.oppgaveRepository.finn(oppgave.id)
+        assertNotNull(lagretOppgave)
+        assertEquals(newData.id, lagretOppgave.godkjenningsbehovId)
+        assertEquals(Oppgave.Invalidert, lagretOppgave.tilstand)
     }
 }

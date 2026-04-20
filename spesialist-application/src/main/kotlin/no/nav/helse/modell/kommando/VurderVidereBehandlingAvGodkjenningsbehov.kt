@@ -1,12 +1,7 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VedtakDao
-import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
@@ -19,10 +14,6 @@ import java.util.UUID
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val fødselsnummer: String,
     private val commandData: GodkjenningsbehovData,
-    private val oppgaveRepository: OppgaveRepository,
-    private val reservasjonDao: ReservasjonDao,
-    private val vedtakDao: VedtakDao,
-    private val meldingDao: MeldingDao,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -32,7 +23,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         val utbetalingId = commandData.utbetalingId
         val meldingId = commandData.id
 
-        if (vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
+        if (sessionContext.vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             loggInfo("Ignorerer godkjenningsbehov for utbetalingId: $utbetalingId. Er allerede automatisk godkjent")
             loggWarn(
                 "utbetalingId: $utbetalingId er allerede ferdig behandlet. " +
@@ -42,15 +33,15 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             return ferdigstill(commandContext)
         }
 
-        val oppgave = oppgaveRepository.finn(SpleisBehandlingId(commandData.spleisBehandlingId)) ?: return true
+        val oppgave = sessionContext.oppgaveRepository.finn(SpleisBehandlingId(commandData.spleisBehandlingId)) ?: return true
         if (oppgave.tilstand is Oppgave.Invalidert) return true
 
         val gammelGodkjenningsbehovId = oppgave.godkjenningsbehovId
         oppgave.nyttGodkjenningsbehov(meldingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
         loggInfo("Oppdaterte peker til godkjenningsbehov for oppgave med utbetalingId=$utbetalingId til id=$meldingId")
 
-        val harEndringerIGodkjenningsbehov = harEndringerIGodkjenningsbehov(gammelGodkjenningsbehovId)
+        val harEndringerIGodkjenningsbehov = harEndringerIGodkjenningsbehov(sessionContext, gammelGodkjenningsbehovId)
 
         if (oppgave.tilstand is Oppgave.Ferdigstilt) {
             if (!harEndringerIGodkjenningsbehov) {
@@ -68,7 +59,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         if (harEndringerIGodkjenningsbehov) {
             val tildeltSaksbehandler = oppgave.tildeltTil
             if (tildeltSaksbehandler != null) {
-                reservasjonDao.reserverPerson(tildeltSaksbehandler.value, fødselsnummer)
+                sessionContext.reservasjonDao.reserverPerson(tildeltSaksbehandler.value, fødselsnummer)
                 loggInfo(
                     "Reserverer person til ${tildeltSaksbehandler.value} pga eksisterende tildeling",
                     "fødselsnummer" to fødselsnummer,
@@ -76,7 +67,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             }
             loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id.value} pga endringer i godkjenningsbehovet")
             oppgave.avbryt()
-            oppgaveRepository.lagre(oppgave)
+            sessionContext.oppgaveRepository.lagre(oppgave)
         } else {
             loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId")
             ferdigstill(commandContext)
@@ -84,11 +75,11 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         return true
     }
 
-    private fun harEndringerIGodkjenningsbehov(godkjenningsbehovId: UUID): Boolean {
-        val godkjenningsbehovData =
-            (meldingDao.finn(godkjenningsbehovId) as? Godkjenningsbehov)?.data()
-                ?: error("Fant ikke lagret godkjenningsbehov med id $godkjenningsbehovId")
-
+    private fun harEndringerIGodkjenningsbehov(
+        sessionContext: SessionContext,
+        godkjenningsbehovId: UUID,
+    ): Boolean {
+        val godkjenningsbehovData = sessionContext.meldingDao.finnGodkjenningsbehov(godkjenningsbehovId).data()
         return harEndringerIGodkjenningsbehov(commandData, godkjenningsbehovData)
     }
 

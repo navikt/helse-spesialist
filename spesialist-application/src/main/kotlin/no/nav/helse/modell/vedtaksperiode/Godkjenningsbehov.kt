@@ -5,11 +5,9 @@ import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
-import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.UtbetalingDao
@@ -23,7 +21,6 @@ import no.nav.helse.mediator.asEnum
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
@@ -345,7 +342,6 @@ internal class GodkjenningsbehovCommand(
     utbetaling: Utbetaling,
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
-    meldingDao: MeldingDao,
     personDao: PersonDao,
     arbeidsgiverRepository: ArbeidsgiverRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
@@ -355,11 +351,9 @@ internal class GodkjenningsbehovCommand(
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
     automatiseringDao: AutomatiseringDao,
-    oppgaveRepository: OppgaveRepository,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
-    reservasjonDao: ReservasjonDao,
     oppgaveService: OppgaveService,
     vedtakRepository: VedtakRepository,
     godkjenningMediator: GodkjenningMediator,
@@ -376,15 +370,10 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
-                oppgaveRepository = oppgaveRepository,
-                vedtakDao = vedtakDao,
-                meldingDao = meldingDao,
                 fødselsnummer = behovData.fødselsnummer,
-                reservasjonDao = reservasjonDao,
             ),
             OpprettKoblingTilHendelseCommand(
                 commandData = behovData,
-                vedtakDao = vedtakDao,
             ),
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,

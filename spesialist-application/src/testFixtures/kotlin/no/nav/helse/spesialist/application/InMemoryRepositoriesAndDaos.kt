@@ -68,7 +68,7 @@ class InMemoryRepositoriesAndDaos {
 
     private val arbeidsforholdDao = UnimplementedArbeidsforholdDao()
     private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
-    private val automatiseringDao = UnimplementedAutomatiseringDao()
+    private val automatiseringDao = InMemoryAutomatiseringDao()
     private val behandlingApiRepository = UnimplementedBehandlingApiRepository()
     private val behandlingsstatistikkDao = UnimplementedBehandlingsstatistikkDao()
     private val definisjonDao = UnimplementedDefinisjonDao()
@@ -86,7 +86,7 @@ class InMemoryRepositoriesAndDaos {
     private val utbetalingDao = UnimplementedUtbetalingDao()
     private val varselApiRepository = UnimplementedVarselApiRepository()
     private val vedtakBegrunnelseDao = UnimplementedVedtakBegrunnelseDao()
-    private val vedtakDao = UnimplementedVedtakDao()
+    private val vedtakDao = DelegatingVedtakDao(automatiseringDao)
     private val vergemålDao = UnimplementedVergemålDao()
     private val vergemålApiDao = UnimplementedVergemålApiDao()
     private val åpneGosysOppgaverDao = UnimplementedÅpneGosysOppgaverDao()

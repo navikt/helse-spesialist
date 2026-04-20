@@ -6,20 +6,23 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.util.UUID
 
-class UnimplementedVedtakDao : VedtakDao {
+class DelegatingVedtakDao(
+    private val automatiseringDao: InMemoryAutomatiseringDao,
+) : VedtakDao {
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
-        inntektskilde: Inntektskilde
+        inntektskilde: Inntektskilde,
     ) {
         TODO("Not yet implemented")
     }
 
-    override fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean = automatiseringDao.automatisert.contains(utbetalingId)
 
-    override fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    override fun opprettKobling(
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+    ) {
         TODO("Not yet implemented")
     }
 
@@ -37,7 +40,7 @@ class UnimplementedVedtakDao : VedtakDao {
 
     override fun lagreVedtaksperiode(
         fødselsnummer: String,
-        vedtaksperiodeDto: VedtaksperiodeDto
+        vedtaksperiodeDto: VedtaksperiodeDto,
     ) {
         TODO("Not yet implemented")
     }

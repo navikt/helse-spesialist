@@ -4,35 +4,43 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AutomatiseringDto
 import java.util.UUID
 
-class UnimplementedAutomatiseringDao : AutomatiseringDao {
+class InMemoryAutomatiseringDao : AutomatiseringDao {
+    val automatisert = mutableListOf<UUID>()
+
     override fun plukketUtTilStikkprøve(
         vedtaksperiodeId: UUID,
-        hendelseId: UUID
+        hendelseId: UUID,
     ): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun settAutomatiseringInaktiv(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    override fun settAutomatiseringInaktiv(
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+    ) {
         TODO("Not yet implemented")
     }
 
-    override fun settAutomatiseringProblemInaktiv(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    override fun settAutomatiseringProblemInaktiv(
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+    ) {
         TODO("Not yet implemented")
     }
 
     override fun automatisert(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ) {
-        TODO("Not yet implemented")
+        automatisert.add(utbetalingId)
     }
 
     override fun manuellSaksbehandling(
         problems: List<String>,
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ) {
         TODO("Not yet implemented")
     }
@@ -40,21 +48,21 @@ class UnimplementedAutomatiseringDao : AutomatiseringDao {
     override fun stikkprøve(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ) {
         TODO("Not yet implemented")
     }
 
     override fun hentAktivAutomatisering(
         vedtaksperiodeId: UUID,
-        hendelseId: UUID
+        hendelseId: UUID,
     ): AutomatiseringDto? {
         TODO("Not yet implemented")
     }
 
     override fun finnAktiveProblemer(
         vedtaksperiodeRef: Long,
-        hendelseId: UUID
+        hendelseId: UUID,
     ): List<String> {
         TODO("Not yet implemented")
     }
