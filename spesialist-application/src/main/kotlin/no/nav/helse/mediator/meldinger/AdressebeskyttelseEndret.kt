@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
@@ -36,7 +35,6 @@ class AdressebeskyttelseEndret(
         kommandostarter {
             adressebeskyttelseEndret(
                 this@AdressebeskyttelseEndret,
-                sessionContext,
             )
         }
     }
@@ -44,14 +42,12 @@ class AdressebeskyttelseEndret(
 
 internal class AdressebeskyttelseEndretCommand(
     identitetsnummer: Identitetsnummer,
-    godkjenningMediator: GodkjenningMediator,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterPersoninfoCommand(identitetsnummer, force = true),
             AvvisVedStrengtFortroligAdressebeskyttelseCommand(
                 identitetsnummer = identitetsnummer,
-                godkjenningMediator = godkjenningMediator,
             ),
         )
 }

@@ -147,12 +147,10 @@ class Kommandofabrikk(
 
     internal fun adressebeskyttelseEndret(
         melding: AdressebeskyttelseEndret,
-        sessionContext: SessionContext,
     ): AdressebeskyttelseEndretCommand {
         val identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer())
         return AdressebeskyttelseEndretCommand(
             identitetsnummer = identitetsnummer,
-            godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
         )
     }
 

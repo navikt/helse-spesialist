@@ -2,23 +2,25 @@ package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.VergemålDao
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertEquals
 
 internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
+    private val fødselsnummer = lagFødselsnummer()
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
 
     @Test
     fun `skal avvise ved vergemål dersom perioden kan avvises`() {
@@ -46,38 +48,31 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
 
     private fun assertAvvisning(
         command: VurderAutomatiskAvvisning,
-        forventetÅrsak: String,
+        forventetBegrunnelse: String,
     ) {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        verify(exactly = 1) {
-            godkjenningMediator.automatiskAvvisning(
-                begrunnelser = listOf(forventetÅrsak),
-                behov = any(),
-                outbox = outbox,
-            )
+        assertUtgåendeHendelse<VedtaksperiodeAvvistAutomatisk>()
+        assertUtgåendeHendelse<Godkjenningsbehovløsning> {
+            assertEquals(listOf(forventetBegrunnelse), it.begrunnelser)
         }
     }
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
+        assertIkkeUtgåendeHendelse<VedtaksperiodeAvvistAutomatisk>()
+        assertIkkeUtgåendeHendelse<Godkjenningsbehovløsning>()
     }
 
     private fun lagCommand(
         kanAvvises: Boolean = true,
-        fødselsnummer: String = "12345678910",
+        fødselsnummer: String = this.fødselsnummer,
     ) = VurderAutomatiskAvvisning(
         personDao = personDao,
         vergemålDao = vergemålDao,
-        godkjenningMediator = godkjenningMediator,
         godkjenningsbehov =
             godkjenningsbehovData(
                 fødselsnummer = fødselsnummer,
                 kanAvvises = kanAvvises,
             ),
     )
-
-    private companion object {
-        private const val fødselsnummer = "12345678910"
-    }
 }

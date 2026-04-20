@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse
 
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val identitetsnummer: Identitetsnummer,
-    private val godkjenningMediator: GodkjenningMediator,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -38,8 +37,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         }
 
         val årsaker = listOf("Adressebeskyttelse strengt fortrolig")
-
-        godkjenningMediator.automatiskAvvisning(
+        GodkjenningMediator(sessionContext.opptegnelseRepository).automatiskAvvisning(
             begrunnelser = årsaker,
             behov = godkjenningsbehov,
             outbox = outbox,

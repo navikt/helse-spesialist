@@ -458,7 +458,6 @@ internal class GodkjenningsbehovCommand(
             VurderAutomatiskAvvisning(
                 personDao = personDao,
                 vergemålDao = vergemålDao,
-                godkjenningMediator = godkjenningMediator,
                 godkjenningsbehov = behovData,
             ),
             VurderBehovForTotrinnskontroll(

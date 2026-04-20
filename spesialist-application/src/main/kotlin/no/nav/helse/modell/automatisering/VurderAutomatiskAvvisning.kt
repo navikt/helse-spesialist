@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.application.logg.logg
 internal class VurderAutomatiskAvvisning(
     private val personDao: PersonDao,
     private val vergemålDao: VergemålDao,
-    private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
     override fun execute(
@@ -42,7 +41,7 @@ internal class VurderAutomatiskAvvisning(
             return true
         }
 
-        godkjenningMediator.automatiskAvvisning(
+        GodkjenningMediator(sessionContext.opptegnelseRepository).automatiskAvvisning(
             outbox = outbox,
             begrunnelser = avvisningsårsaker.toList(),
             behov = godkjenningsbehov,
