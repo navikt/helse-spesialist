@@ -381,7 +381,6 @@ internal class GodkjenningsbehovCommand(
             VurderBehovForAvviksvurdering(
                 fødselsnummer = behovData.fødselsnummer,
                 skjæringstidspunkt = behovData.skjæringstidspunkt,
-                avviksvurderingRepository = avviksvurderingRepository,
                 sykepengegrunnlagsfakta = behovData.sykepengegrunnlagsfakta,
                 vilkårsgrunnlagId = behovData.vilkårsgrunnlagId,
                 legacyBehandling =

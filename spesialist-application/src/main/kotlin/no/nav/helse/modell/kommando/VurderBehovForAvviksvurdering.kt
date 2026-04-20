@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
@@ -17,7 +16,6 @@ import java.util.UUID
 class VurderBehovForAvviksvurdering(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
-    private val avviksvurderingRepository: AvviksvurderingRepository,
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
     private val vilkårsgrunnlagId: UUID,
     private val legacyBehandling: LegacyBehandling,
@@ -41,10 +39,10 @@ class VurderBehovForAvviksvurdering(
     ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         val løsning = commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
-        val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
+        val eksisterendeAvviksvurdering = sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
         if (eksisterendeAvviksvurdering != null) {
-            avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
+            sessionContext.avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
             return true
         }
         val avviksvurdering =
@@ -58,7 +56,7 @@ class VurderBehovForAvviksvurdering(
                 sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
                 beregningsgrunnlag = løsning.beregningsgrunnlag,
             )
-        avviksvurderingRepository.lagre(avviksvurdering)
+        sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
         if (!løsning.harAkseptabeltAvvik) legacyBehandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(legacyBehandling.vedtaksperiodeId()))
         return true
     }

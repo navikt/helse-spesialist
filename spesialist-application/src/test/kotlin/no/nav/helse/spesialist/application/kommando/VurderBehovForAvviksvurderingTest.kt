@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
+import org.junit.jupiter.api.assertNotNull
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -85,29 +85,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
 
-    private val repository =
-        object : AvviksvurderingRepository {
-            var avviksvurderingSomSkalReturneres: Avviksvurdering? = null
-            val avviksvurderinger = mutableListOf<Avviksvurdering>()
-            val koblinger = mutableListOf<Pair<UUID, UUID>>()
-
-            override fun lagre(avviksvurdering: Avviksvurdering) {
-                avviksvurderinger.add(avviksvurdering)
-            }
-
-            override fun opprettKobling(
-                avviksvurderingId: UUID,
-                vilkårsgrunnlagId: UUID,
-            ) {
-                koblinger.add(avviksvurderingId to vilkårsgrunnlagId)
-            }
-
-            override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering = error("Ikke implementert i test")
-
-            override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? = avviksvurderingSomSkalReturneres
-
-            override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> = error("Ikke implementert i test")
-        }
+    private val repository = sessionContext.avviksvurderingRepository
 
     private val observer =
         object : CommandContextObserver {
@@ -178,7 +156,8 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             ),
         )
         command.resume(context, sessionContext, outbox)
-        assertEquals(1, repository.avviksvurderinger.size)
+        val avviksvurderinger = repository.finnAvviksvurderinger(fødselsnummer)
+        assertEquals(1, avviksvurderinger.size)
         assertEquals(
             Avviksvurdering(
                 unikId = avviksvurderingId,
@@ -190,7 +169,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
                 beregningsgrunnlag = beregningsgrunnlag,
             ),
-            repository.avviksvurderinger.single(),
+            avviksvurderinger.single(),
         )
     }
 
@@ -234,23 +213,33 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
 
     @Test
     fun `lagrer kun ned kobling ved løsning med avviksvurdering som finnes fra før av`() {
+        // given
         val command = vurderBehovForAvviksvurderingCommand()
-        repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
+        repository.lagre(enAvviksvurdering(avviksvurderingId = avviksvurderingId))
         val context = CommandContext(UUID.randomUUID())
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
+
+        // when
         command.resume(context, sessionContext, outbox)
-        assertEquals(0, repository.avviksvurderinger.size)
-        assertEquals(1, repository.koblinger.size)
-        assertEquals(avviksvurderingId to vilkårsgrunnlagId, repository.koblinger.single())
+
+        // then
+        val avviksvurderinger = repository.finnAvviksvurderinger(fødselsnummer)
+        assertEquals(1, avviksvurderinger.size)
+        assertNotNull(repository.hentAvviksvurdering(vilkårsgrunnlagId))
     }
 
     @Test
     fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
+        // given
         val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
-        repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
+        repository.lagre(enAvviksvurdering(avviksvurderingId = avviksvurderingId))
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
+
+        // when
         command.resume(context, sessionContext, outbox)
+
+        // then
         assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 
@@ -284,7 +273,6 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
     ) = VurderBehovForAvviksvurdering(
         fødselsnummer = fødselsnummer,
         skjæringstidspunkt = skjæringstidspunkt,
-        avviksvurderingRepository = repository,
         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
         vilkårsgrunnlagId = vilkårsgrunnlagId,
         legacyBehandling = legacyBehandling,
