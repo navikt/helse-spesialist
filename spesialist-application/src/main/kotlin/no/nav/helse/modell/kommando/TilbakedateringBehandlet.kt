@@ -42,7 +42,7 @@ class TilbakedateringBehandlet(
         json = jsonNode.toString(),
     )
 
-    override fun behandle(
+    override fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,

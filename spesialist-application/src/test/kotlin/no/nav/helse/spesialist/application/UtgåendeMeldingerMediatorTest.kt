@@ -105,7 +105,7 @@ internal class UtgåendeMeldingerMediatorTest {
 
         override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-        override fun behandle(
+        override fun behandleMedLegacyPerson(
             person: LegacyPerson,
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,

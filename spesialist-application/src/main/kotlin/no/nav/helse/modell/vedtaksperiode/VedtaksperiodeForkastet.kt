@@ -36,7 +36,7 @@ class VedtaksperiodeForkastet(
 
     override fun vedtaksperiodeId() = vedtaksperiodeId
 
-    override fun behandle(
+    override fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,

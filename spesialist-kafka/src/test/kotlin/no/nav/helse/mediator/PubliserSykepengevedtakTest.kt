@@ -45,7 +45,7 @@ internal class PubliserSykepengevedtakTest {
 
     private val personmelding =
         object : Personmelding {
-            override fun behandle(
+            override fun behandleMedLegacyPerson(
                 person: LegacyPerson,
                 kommandostarter: Kommandostarter,
                 sessionContext: SessionContext,
@@ -85,7 +85,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
-                dekning = null
+                dekning = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -157,7 +157,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
-                dekning = null
+                dekning = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -243,7 +243,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
-                dekning = null
+                dekning = null,
             )
         utgåendeMeldingerMediator.hendelse(spleis)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -348,7 +348,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
-                dekning = null
+                dekning = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -475,7 +475,7 @@ internal class PubliserSykepengevedtakTest {
                 beslutter = beslutterIdentOgNavn,
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
-                dekning = null
+                dekning = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)

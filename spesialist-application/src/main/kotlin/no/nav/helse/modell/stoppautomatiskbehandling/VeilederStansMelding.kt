@@ -17,7 +17,7 @@ class VeilederStansMelding(
     val originalMelding: String,
     private val json: String,
 ) : Personmelding {
-    override fun behandle(
+    override fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,

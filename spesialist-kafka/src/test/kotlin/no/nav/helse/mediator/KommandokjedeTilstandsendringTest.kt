@@ -14,12 +14,20 @@ class KommandokjedeTilstandsendringTest {
     private val mediator = UtgåendeMeldingerMediator()
     private val testRapid = TestRapid()
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
-    private val testmelding = object : Personmelding {
-        override fun behandle(person: LegacyPerson, kommandostarter: Kommandostarter, sessionContext: SessionContext) {}
-        override fun fødselsnummer(): String = lagFødselsnummer()
-        override fun toJson(): String = "{}"
-        override val id: UUID = UUID.randomUUID()
-    }
+    private val testmelding =
+        object : Personmelding {
+            override fun behandleMedLegacyPerson(
+                person: LegacyPerson,
+                kommandostarter: Kommandostarter,
+                sessionContext: SessionContext,
+            ) {}
+
+            override fun fødselsnummer(): String = lagFødselsnummer()
+
+            override fun toJson(): String = "{}"
+
+            override val id: UUID = UUID.randomUUID()
+        }
 
     @Test
     fun kommandokjede_ferdigstilt() {

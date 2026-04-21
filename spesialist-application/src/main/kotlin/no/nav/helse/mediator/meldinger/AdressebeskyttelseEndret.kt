@@ -27,7 +27,7 @@ class AdressebeskyttelseEndret(
 
     override fun toJson(): String = json
 
-    override fun behandle(
+    override fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,

@@ -12,7 +12,7 @@ interface Melding {
 }
 
 interface Personmelding : Melding {
-    fun behandle(
+    fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,

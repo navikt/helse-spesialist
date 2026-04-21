@@ -276,7 +276,7 @@ class MeldingMediator(
                             sessionContext,
                             outbox,
                         )
-                    melding.behandle(this, kommandostarter, sessionContext)
+                    melding.behandleMedLegacyPerson(this, kommandostarter, sessionContext)
                 }
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)

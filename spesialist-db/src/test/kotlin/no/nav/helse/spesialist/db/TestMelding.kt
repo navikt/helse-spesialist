@@ -10,12 +10,13 @@ internal class TestMelding(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fnr: String,
-    private val json: String = "{}"
+    private val json: String = "{}",
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer(): String = fnr
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
-    override fun behandle(
+
+    override fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,

@@ -93,7 +93,7 @@ class Godkjenningsbehov(
 
     override fun toJson() = json
 
-    override fun behandle(
+    override fun behandleMedLegacyPerson(
         person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
