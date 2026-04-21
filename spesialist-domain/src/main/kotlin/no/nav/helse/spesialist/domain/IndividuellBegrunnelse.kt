@@ -9,7 +9,7 @@ value class VedtakBegrunnelseId(
     val value: Long,
 ) : ValueObject
 
-class VedtakBegrunnelse private constructor(
+class IndividuellBegrunnelse private constructor(
     id: VedtakBegrunnelseId?,
     val spleisBehandlingId: SpleisBehandlingId,
     val tekst: String,
@@ -37,7 +37,7 @@ class VedtakBegrunnelse private constructor(
             utfall: Utfall,
             invalidert: Boolean,
             saksbehandlerOid: SaksbehandlerOid,
-        ) = VedtakBegrunnelse(
+        ) = IndividuellBegrunnelse(
             id = id,
             spleisBehandlingId = spleisBehandlingId,
             tekst = tekst,
@@ -51,7 +51,7 @@ class VedtakBegrunnelse private constructor(
             tekst: String,
             utfall: Utfall,
             saksbehandlerOid: SaksbehandlerOid,
-        ) = VedtakBegrunnelse(
+        ) = IndividuellBegrunnelse(
             id = null,
             spleisBehandlingId = spleisBehandlingId,
             tekst = tekst,

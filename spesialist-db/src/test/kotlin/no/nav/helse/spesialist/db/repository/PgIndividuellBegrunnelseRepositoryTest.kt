@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,13 +12,13 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
+class PgIndividuellBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
     private val arbeidsgiver = opprettArbeidsgiver()
     private val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
     private val behandling = opprettBehandling(vedtaksperiode)
     private val spleisBehandlingId = behandling.spleisBehandlingId!!
-    private val repository = sessionContext.vedtakBegrunnelseRepository
+    private val repository = sessionContext.individuellBegrunnelseRepository
 
     @Test
     fun `lagre og finn vedtaksbegrunnelse`() {
@@ -26,7 +26,7 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
         val tekst = "Lorem ipsum dolor sit amet"
         val saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
         repository.lagre(
-            VedtakBegrunnelse.ny(
+            IndividuellBegrunnelse.ny(
                 spleisBehandlingId = spleisBehandlingId,
                 tekst = tekst,
                 utfall = Utfall.INNVILGELSE,
@@ -49,7 +49,7 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
     fun `henter ikke vedtakbegrunnelse som er invalidert`() {
         // when
         repository.lagre(
-            VedtakBegrunnelse.ny(
+            IndividuellBegrunnelse.ny(
                 spleisBehandlingId = spleisBehandlingId,
                 tekst = "Lorem ipsum dolor sit amet",
                 utfall = Utfall.INNVILGELSE,

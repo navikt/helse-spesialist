@@ -7,11 +7,11 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.Vedtak
-import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.domain.testfixtures.lagAvviksvurderingMedEnArbeidsgiver
@@ -103,7 +103,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -175,7 +175,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "DelvisInnvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -247,7 +247,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -356,7 +356,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 },
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -465,7 +465,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 },
                 {
                   "type" : "DelvisInnvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -526,7 +526,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -599,7 +599,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -679,7 +679,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -702,7 +702,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
     private lateinit var person: Person
     private lateinit var vedtaksperiode: Vedtaksperiode
     private lateinit var behandling: Behandling
-    private lateinit var vedtakBegrunnelse: VedtakBegrunnelse
+    private lateinit var individuellBegrunnelse: IndividuellBegrunnelse
     private lateinit var avviksvurdering: Avviksvurdering
 
     private fun setup() {
@@ -725,12 +725,12 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             ).also(sessionContext.behandlingRepository::lagre)
 
-        this.vedtakBegrunnelse =
+        this.individuellBegrunnelse =
             lagVedtakBegrunnelse(
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 utfall = utfall,
                 saksbehandlerOid = saksbehandler.id,
-            ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
+            ).also(sessionContext.individuellBegrunnelseRepository::lagre)
 
         this.avviksvurdering =
             lagAvviksvurderingMedEnArbeidsgiver(

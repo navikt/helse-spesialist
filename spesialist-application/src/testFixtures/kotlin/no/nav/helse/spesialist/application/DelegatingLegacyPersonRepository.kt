@@ -20,7 +20,7 @@ class DelegatingLegacyPersonRepository(
     private val legacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository,
     private val behandlingRepository: InMemoryBehandlingRepository,
     private val varselRepository: InMemoryVarselRepository,
-    private val vedtakBegrunnelseRepository: InMemoryVedtakBegrunnelseRepository,
+    private val individuellBegrunnelseRepository: InMemoryIndividuellBegrunnelseRepository,
     private val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
 ) : LegacyPersonRepository {
     override fun brukPersonHvisFinnes(
@@ -70,11 +70,11 @@ class DelegatingLegacyPersonRepository(
                                                 tags = behandling.tags.toList(),
                                                 vedtakBegrunnelse =
                                                     behandling.spleisBehandlingId
-                                                        ?.let { vedtakBegrunnelseRepository.finn(it) }
-                                                        ?.let { vedtakBegrunnelse ->
+                                                        ?.let { individuellBegrunnelseRepository.finn(it) }
+                                                        ?.let { individuellBegrunnelse ->
                                                             VedtakBegrunnelse(
-                                                                utfall = vedtakBegrunnelse.utfall,
-                                                                begrunnelse = vedtakBegrunnelse.tekst,
+                                                                utfall = individuellBegrunnelse.utfall,
+                                                                begrunnelse = individuellBegrunnelse.tekst,
                                                             )
                                                         },
                                                 varsler =

@@ -8,10 +8,10 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Forsikring
+import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Vedtak
-import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtakBegrunnelse
@@ -104,7 +104,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -186,7 +186,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -268,7 +268,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -350,7 +350,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
-                  "begrunnelse" : "${vedtakBegrunnelse.tekst}",
+                  "begrunnelse" : "${individuellBegrunnelse.tekst}",
                   "perioder" : [
                     {
                       "fom" : "${behandling.fom}",
@@ -373,7 +373,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
     private lateinit var person: Person
     private lateinit var vedtaksperiode: Vedtaksperiode
     private lateinit var behandling: Behandling
-    private lateinit var vedtakBegrunnelse: VedtakBegrunnelse
+    private lateinit var individuellBegrunnelse: IndividuellBegrunnelse
 
     private fun setup() {
         this.saksbehandler =
@@ -397,12 +397,12 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
             ).also(sessionContext.behandlingRepository::lagre)
 
-        this.vedtakBegrunnelse =
+        this.individuellBegrunnelse =
             lagVedtakBegrunnelse(
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 utfall = Utfall.INNVILGELSE,
                 saksbehandlerOid = saksbehandler.id,
-            ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
+            ).also(sessionContext.individuellBegrunnelseRepository::lagre)
     }
 
     private fun initGodkjenningsbehov(erJordbruker: Boolean = false) {

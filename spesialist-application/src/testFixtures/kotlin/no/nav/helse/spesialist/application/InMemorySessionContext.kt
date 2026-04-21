@@ -43,7 +43,7 @@ class InMemorySessionContext(
     override val varselRepository: InMemoryVarselRepository,
     override val varseldefinisjonRepository: InMemoryVarseldefinisjonRepository,
     override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
-    override val vedtakBegrunnelseRepository: InMemoryVedtakBegrunnelseRepository,
+    override val individuellBegrunnelseRepository: InMemoryIndividuellBegrunnelseRepository,
     override val vedtakDao: DelegatingVedtakDao,
     override val vergemålDao: UnimplementedVergemålDao,
     override val åpneGosysOppgaverDao: UnimplementedÅpneGosysOppgaverDao,

@@ -121,7 +121,7 @@ class VedtakFattetMeldingBuilder(
     ): VedtakFattetMelding {
         val utbetalingId = checkNotNull(behandling.utbetalingId)
         val individuellBegrunnelse =
-            sessionContext.vedtakBegrunnelseRepository.finn(behandlingId)?.let {
+            sessionContext.individuellBegrunnelseRepository.finn(behandlingId)?.let {
                 VedtakFattetMelding.Begrunnelse(
                     type =
                         when (it.utfall) {

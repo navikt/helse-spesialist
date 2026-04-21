@@ -27,7 +27,7 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.VedtakBegrunnelse
+import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
@@ -408,8 +408,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                     transaction.saksbehandlerRepository.lagre(it)
                 }
             }
-        val vedtakBegrunnelse =
-            VedtakBegrunnelse
+        val individuellBegrunnelse =
+            IndividuellBegrunnelse
                 .ny(
                     spleisBehandlingId = behandling.spleisBehandlingId!!,
                     tekst = avslagsbegrunnelse,
@@ -417,7 +417,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                     saksbehandlerOid = saksbehandler.id,
                 ).also {
                     sessionFactory.transactionalSessionScope { transaction ->
-                        transaction.vedtakBegrunnelseRepository.lagre(it)
+                        transaction.individuellBegrunnelseRepository.lagre(it)
                     }
                 }
 

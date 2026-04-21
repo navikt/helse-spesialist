@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.PåVent
@@ -28,7 +29,6 @@ import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.Varselvurdering
-import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
@@ -310,7 +310,7 @@ fun lagVedtakBegrunnelse(
     tekst: String = "Her er en begrunnelsestekst",
     utfall: Utfall = Utfall.entries.random(),
     saksbehandlerOid: SaksbehandlerOid = lagSaksbehandler().id,
-) = VedtakBegrunnelse.ny(
+) = IndividuellBegrunnelse.ny(
     spleisBehandlingId = spleisBehandlingId,
     tekst = tekst,
     utfall = utfall,

@@ -67,7 +67,7 @@ interface SessionContext {
     val vedtaksperiodeRepository: VedtaksperiodeRepository
     val varselRepository: VarselRepository
     val varseldefinisjonRepository: VarseldefinisjonRepository
-    val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
+    val individuellBegrunnelseRepository: IndividuellBegrunnelseRepository
     val personPseudoIdDao: PersonPseudoIdDao
     val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao
     val vedtakRepository: VedtakRepository

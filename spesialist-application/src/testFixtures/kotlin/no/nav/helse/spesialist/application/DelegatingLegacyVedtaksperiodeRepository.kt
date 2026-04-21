@@ -19,7 +19,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 class DelegatingLegacyVedtaksperiodeRepository(
     private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
     private val behandlingRepository: InMemoryBehandlingRepository,
-    private val vedtakBegrunnelseRepository: InMemoryVedtakBegrunnelseRepository,
+    private val vedtakBegrunnelseRepository: InMemoryIndividuellBegrunnelseRepository,
     private val varselRepository: VarselRepository,
 ) : LegacyVedtaksperiodeRepository {
     override fun finnVedtaksperioder(fødselsnummer: String) =

@@ -24,7 +24,7 @@ class InMemoryRepositoriesAndDaos {
     private val varseldefinisjonRepository = InMemoryVarseldefinisjonRepository()
     private val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
     private val oppgaveRepository = InMemoryOppgaveRepository(vedtaksperiodeRepository)
-    private val vedtakBegrunnelseRepository = InMemoryVedtakBegrunnelseRepository()
+    private val vedtakBegrunnelseRepository = InMemoryIndividuellBegrunnelseRepository()
     private val vedtakRepository = InMemoryVedtakRepository()
     private val saksbehandlerStansRepository = InMemorySaksbehandlerStansRepository()
     private val veilederStansRepository = InMemoryVeilederStansRepository()
@@ -169,7 +169,7 @@ class InMemoryRepositoriesAndDaos {
                     varselRepository = varselRepository,
                     varseldefinisjonRepository = varseldefinisjonRepository,
                     vedtaksperiodeRepository = vedtaksperiodeRepository,
-                    vedtakBegrunnelseRepository = vedtakBegrunnelseRepository,
+                    individuellBegrunnelseRepository = vedtakBegrunnelseRepository,
                     vedtakDao = vedtakDao,
                     vergemålDao = vergemålDao,
                     åpneGosysOppgaverDao = åpneGosysOppgaverDao,

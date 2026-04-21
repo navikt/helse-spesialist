@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.db
 import kotliquery.Session
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.BehandlingRepository
+import no.nav.helse.db.IndividuellBegrunnelseRepository
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VedtakBegrunnelseRepository
 import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
@@ -56,6 +56,7 @@ import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
 import no.nav.helse.spesialist.db.repository.PgArbeidsgiverRepository
 import no.nav.helse.spesialist.db.repository.PgBehandlingRepository
 import no.nav.helse.spesialist.db.repository.PgDialogRepository
+import no.nav.helse.spesialist.db.repository.PgIndividuellBegrunnelseRepository
 import no.nav.helse.spesialist.db.repository.PgNotatRepository
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.db.repository.PgOpptegnelseRepository
@@ -68,7 +69,6 @@ import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.repository.PgVarselRepository
 import no.nav.helse.spesialist.db.repository.PgVarseldefinisjonRepository
-import no.nav.helse.spesialist.db.repository.PgVedtakBegrunnelseRepository
 import no.nav.helse.spesialist.db.repository.PgVedtakRepository
 import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
 import no.nav.helse.spesialist.db.repository.PgVeilederStansRepository
@@ -121,7 +121,7 @@ class DBSessionContext(
     override val vedtaksperiodeRepository: VedtaksperiodeRepository = PgVedtaksperiodeRepository(session)
     override val varselRepository: VarselRepository = PgVarselRepository(session)
     override val varseldefinisjonRepository: VarseldefinisjonRepository = PgVarseldefinisjonRepository(session)
-    override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository = PgVedtakBegrunnelseRepository(session)
+    override val individuellBegrunnelseRepository: IndividuellBegrunnelseRepository = PgIndividuellBegrunnelseRepository(session)
     override val personPseudoIdDao: PersonPseudoIdDao = PgPersonPseudoIdDao(session)
     override val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao =
         PgMidlertidigBehandlingVedtakFattetDao(session)

@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -41,7 +42,6 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Vedtak
-import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
@@ -191,9 +191,9 @@ class PostVedtakBehandler(
         saksbehandlerOid: SaksbehandlerOid,
         spleisBehandlingId: SpleisBehandlingId,
     ) {
-        val repo = transaksjon.vedtakBegrunnelseRepository
+        val repo = transaksjon.individuellBegrunnelseRepository
         val eksisterende = repo.finn(spleisBehandlingId)
-        val nyBegrunnelse = VedtakBegrunnelse.ny(spleisBehandlingId, begrunnelse.orEmpty(), utfall(), saksbehandlerOid)
+        val nyBegrunnelse = IndividuellBegrunnelse.ny(spleisBehandlingId, begrunnelse.orEmpty(), utfall(), saksbehandlerOid)
         if (eksisterende == null) {
             repo.lagre(nyBegrunnelse)
         } else if (eksisterende.erForskjelligFra(begrunnelse.orEmpty(), utfall())) {
