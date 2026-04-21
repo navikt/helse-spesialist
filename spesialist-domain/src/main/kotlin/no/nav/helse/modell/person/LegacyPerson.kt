@@ -6,7 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEventueltAvviksvarselTil
 import org.slf4j.LoggerFactory
@@ -18,7 +17,6 @@ class LegacyPerson(
     val fødselsnummer: String,
     vedtaksperioder: List<LegacyVedtaksperiode>,
     val skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
-    val avviksvurderinger: List<Avviksvurdering>,
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
 
@@ -29,7 +27,6 @@ class LegacyPerson(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             vedtaksperioder = vedtaksperioder.map { it.toDto() },
-            avviksvurderinger = avviksvurderinger,
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
 
@@ -113,7 +110,6 @@ class LegacyPerson(
             fødselsnummer: String,
             vedtaksperioder: List<VedtaksperiodeDto>,
             skjønnsfastsattSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlagDto>,
-            avviksvurderinger: List<Avviksvurdering>,
         ): LegacyPerson =
             LegacyPerson(
                 aktørId = aktørId,
@@ -127,7 +123,6 @@ class LegacyPerson(
                             behandlinger = it.behandlinger,
                         )
                     },
-                avviksvurderinger = avviksvurderinger,
                 skjønnsfastsatteSykepengegrunnlag =
                     skjønnsfastsattSykepengegrunnlag
                         .sortedBy { it.opprettet }

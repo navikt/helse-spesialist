@@ -19,8 +19,6 @@ class PgLegacyPersonRepository(
     private val sykefraværstilfelleDao: SykefraværstilfelleDao,
     private val personDao: PersonDao,
 ) : LegacyPersonRepository {
-    private val avviksvurderingRepository = PgAvviksvurderingRepository(session)
-
     override fun brukPersonHvisFinnes(
         fødselsnummer: String,
         personScope: LegacyPerson.() -> Unit,
@@ -65,7 +63,6 @@ class PgLegacyPersonRepository(
                 sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
                     fødselsnummer,
                 ),
-            avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer),
         )
     }
 

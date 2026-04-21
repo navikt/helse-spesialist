@@ -62,7 +62,6 @@ class InMemoryRepositoriesAndDaos {
             behandlingRepository,
             varselRepository,
             vedtakBegrunnelseRepository,
-            avviksvurderingRepository,
             sykefraværstilfelleDao,
         )
 

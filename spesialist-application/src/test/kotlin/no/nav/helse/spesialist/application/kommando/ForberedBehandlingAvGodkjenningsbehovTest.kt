@@ -50,7 +50,6 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                         ),
                     ),
                 skjønnsfastsatteSykepengegrunnlag = emptyList(),
-                avviksvurderinger = emptyList(),
             )
 
         val commandData =
