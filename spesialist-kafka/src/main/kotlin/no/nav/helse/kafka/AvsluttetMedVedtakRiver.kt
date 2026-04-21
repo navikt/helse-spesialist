@@ -1,43 +1,18 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import no.nav.helse.VedtakFattetMeldingBuilder
+import no.nav.helse.VedtakFattetMeldingBuilder.Companion.YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.melding.SaksbehandlerIdentOgNavn
-import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
-import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
-import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
-import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
-import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
-import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.logg.loggError
-import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggWarn
-import no.nav.helse.spesialist.domain.Forsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.ResultatAvForsikring
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.Vedtak
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import java.math.BigDecimal
-import java.util.UUID
 
 class AvsluttetMedVedtakRiver(
     private val forsikringHenter: ForsikringHenter,
@@ -71,368 +46,37 @@ class AvsluttetMedVedtakRiver(
         transaksjon: SessionContext,
         eventMetadata: EventMetadata,
     ) {
-        val spleisBehandlingId = packet["behandlingId"].asUUID()
-        val erSelvstendig = packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
-        val forsikring =
-            if (erSelvstendig && environmentToggles.kanSeForsikring) {
-                forsikringHenter.hentForsikringsinformasjon(SpleisBehandlingId(spleisBehandlingId)).let {
-                    when (it) {
-                        is ResultatAvForsikring.MottattForsikring ->
-                            it.forsikring
-
-                        is ResultatAvForsikring.IngenForsikring ->
-                            null
-                    }
-                }
-            } else {
-                null
-            }
-
-        val vedtak =
-            transaksjon.vedtakRepository.finn(SpleisBehandlingId(spleisBehandlingId))
-                ?: error("Finner ikke relevant informasjon knyttet til vedtaket")
-
-        transaksjon.meldingDao.lagre(
-            id = packet["@id"].asUUID(),
-            json = packet.toJson(),
-            meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
-            vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-        )
-        transaksjon.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
-            loggInfo("Personen finnes i databasen, behandler melding $eventName")
-
-            val vedtaksperiode =
-                vedtaksperioder().finnBehandling(spleisBehandlingId)
-                    ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
-            val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
-
-            if (behandling.tags.isEmpty()) {
-                loggError(
-                    "Ingen tags funnet for behandling",
-                    "vedtaksperiodeId" to behandling.vedtaksperiodeId,
-                    "spleisBehandlingId" to behandling.spleisBehandlingId,
-                )
-            }
-
-            val sisteGodkjenningsbehov: Godkjenningsbehov? =
-                transaksjon.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
-            if (sisteGodkjenningsbehov == null) {
-                loggWarn(
-                    "Finner ikke godkjenningsbehov tilhørende behandling",
-                    "spleisBehandlingId" to spleisBehandlingId,
-                )
-            }
-
-            behandling.håndterVedtakFattet()
-
-            val meldingOmVedtak =
-                when (vedtak) {
-                    is Vedtak.Automatisk -> {
-                        byggVedtaksmelding(
-                            packet = packet,
-                            behandling = behandling,
-                            vedtaksperiode = vedtaksperiode,
-                            godkjenningsbehov = sisteGodkjenningsbehov,
-                            saksbehandlerIdentOgNavn = null,
-                            beslutterIdentOgNavn = null,
-                            automatiskFattet = true,
-                            forsikring = forsikring,
-                        )
-                    }
-
-                    is Vedtak.ManueltMedTotrinnskontroll -> {
-                        val saksbehandler =
-                            transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent)
-                                ?: error("Finner ikke saksbehandler")
-                        val beslutter =
-                            transaksjon.saksbehandlerRepository.finn(vedtak.beslutterIdent)
-                                ?: error("Finner ikke beslutter")
-                        byggVedtaksmelding(
-                            packet = packet,
-                            behandling = behandling,
-                            vedtaksperiode = vedtaksperiode,
-                            godkjenningsbehov = sisteGodkjenningsbehov,
-                            saksbehandlerIdentOgNavn =
-                                SaksbehandlerIdentOgNavn(
-                                    saksbehandler.ident.value,
-                                    saksbehandler.navn,
-                                ),
-                            beslutterIdentOgNavn =
-                                SaksbehandlerIdentOgNavn(
-                                    beslutter.ident.value,
-                                    beslutter.navn,
-                                ),
-                            automatiskFattet = false,
-                            forsikring = forsikring,
-                        )
-                    }
-
-                    is Vedtak.ManueltUtenTotrinnskontroll -> {
-                        val saksbehandler =
-                            transaksjon.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent)
-                                ?: error("Finner ikke saksbehandler")
-                        byggVedtaksmelding(
-                            packet = packet,
-                            behandling = behandling,
-                            vedtaksperiode = vedtaksperiode,
-                            godkjenningsbehov = sisteGodkjenningsbehov,
-                            saksbehandlerIdentOgNavn =
-                                SaksbehandlerIdentOgNavn(
-                                    saksbehandler.ident.value,
-                                    saksbehandler.navn,
-                                ),
-                            beslutterIdentOgNavn = null,
-                            automatiskFattet = false,
-                            forsikring = forsikring,
-                        )
-                    }
-                }
-
-            outbox.leggTil(
-                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-                hendelse = meldingOmVedtak,
-                årsak = eventName,
+        val spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID())
+        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText())
+        val vedtakFattetMeldingBuilder =
+            VedtakFattetMeldingBuilder(
+                identitetsnummer = identitetsnummer,
+                sessionContext = transaksjon,
+                behandlingId = spleisBehandlingId,
+                packet = packet,
+                forsikringHenter = forsikringHenter,
+                environmentToggles = environmentToggles,
             )
-        }
-    }
-
-    private fun LegacyPerson.byggVedtaksmelding(
-        packet: JsonMessage,
-        behandling: LegacyBehandling,
-        vedtaksperiode: LegacyVedtaksperiode,
-        godkjenningsbehov: Godkjenningsbehov?,
-        saksbehandlerIdentOgNavn: SaksbehandlerIdentOgNavn?,
-        beslutterIdentOgNavn: SaksbehandlerIdentOgNavn?,
-        automatiskFattet: Boolean,
-        forsikring: Forsikring?,
-    ): UtgåendeHendelse {
-        val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
-
         val erSelvstendig = packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
-        return VedtakFattetMelding(
-            fødselsnummer = packet["fødselsnummer"].asText(),
-            aktørId = aktørId,
-            organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-            yrkesaktivitetstype = packet["yrkesaktivitetstype"].asText(),
-            vedtaksperiodeId = behandling.vedtaksperiodeId,
-            behandlingId = behandling.behandlingId(),
-            utbetalingId = behandling.utbetalingId(),
-            fom = behandling.fom(),
-            tom = behandling.tom(),
-            skjæringstidspunkt = behandling.skjæringstidspunkt,
-            hendelser = packet["hendelser"].map<JsonNode, UUID> { it.asUUID() },
-            sykepengegrunnlag = packet["sykepengegrunnlagsfakta"]["sykepengegrunnlag"].asBigDecimal(),
-            vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
-            tags =
-                (
-                    if (fastsatt == FASTSATT_I_INFOTRYGD) {
-                        behandling.tags
-                    } else {
-                        behandling.tags.filterNot { it == TAG_6G_BEGRENSET }
-                    }
-                ).toSet(),
-            begrunnelser =
-                if (fastsatt == FASTSATT_ETTER_SKJØNN) {
-                    val skjønnsfastsattSykepengegrunnlag =
-                        skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
-                            ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
-                    listOf(
-                        VedtakFattetMelding.Begrunnelse(
-                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
-                            begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal,
-                        ),
-                        VedtakFattetMelding.Begrunnelse(
-                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
-                            begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst,
-                        ),
-                        VedtakFattetMelding.Begrunnelse(
-                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
-                            begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon,
-                        ),
-                    )
-                } else {
-                    emptyList()
-                } + listOfNotNull(behandling.vedtakBegrunnelse?.toBegrunnelse()),
-            saksbehandler = saksbehandlerIdentOgNavn,
-            beslutter = beslutterIdentOgNavn,
-            automatiskFattet = automatiskFattet,
-            sykepengegrunnlagsfakta =
+
+        lateinit var vedtakFattetMelding: VedtakFattetMelding
+        transaksjon.legacyPersonRepository.brukPersonHvisFinnes(identitetsnummer.value) {
+            vedtakFattetMelding =
                 if (erSelvstendig) {
-                    if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {
-                        error(
-                            "Ustøttet verdi sykepengegrunnlagsfakta.fastsatt for selvstendig næringsdrivende: \"$fastsatt\"." +
-                                " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes.",
-                        )
-                    }
-                    byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
-                        packet = packet,
-                        tags = behandling.tags,
-                        sykepengegrunnlagsfakta = godkjenningsbehov!!.sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
-                    )
+                    vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForSelvstendig()
                 } else {
-                    when (fastsatt) {
-                        FASTSATT_I_INFOTRYGD -> {
-                            byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet = packet)
-                        }
-
-                        FASTSATT_ETTER_HOVEDREGEL -> {
-                            byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
-                                packet = packet,
-                                tags = behandling.tags,
-                                avviksvurdering = finnAvviksvurdering(behandling),
-                            )
-                        }
-
-                        FASTSATT_ETTER_SKJØNN -> {
-                            val skjønnsfastsattSykepengegrunnlag =
-                                skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
-                                    ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
-                            byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
-                                packet = packet,
-                                tags = behandling.tags,
-                                skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag,
-                                avviksvurdering = finnAvviksvurdering(behandling),
-                            )
-                        }
-
-                        else -> {
-                            error("Ukjent verdi for sykepengegrunnlagsfakta.fastsatt: \"$fastsatt\"")
-                        }
-                    }
-                },
-            dekning =
-                if (erSelvstendig && forsikring != null && environmentToggles.kanSeForsikring) {
-                    VedtakFattetMelding.Dekning(
-                        dekningsgrad = forsikring.dekningsgrad,
-                        gjelderFraDag = forsikring.gjelderFraDag,
-                    )
-                } else if (erSelvstendig && forsikring == null) {
-                    VedtakFattetMelding.Dekning(
-                        dekningsgrad = if (godkjenningsbehov?.arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) 100 else 80,
-                        gjelderFraDag = 17,
-                    )
-                } else {
-                    null
-                },
+                    vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForArbeidstaker(this.skjønnsfastsatteSykepengegrunnlag)
+                }
+            val vedtaksperiode =
+                vedtaksperioder().finnBehandling(spleisBehandlingId.value)
+                    ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+            val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId.value)
+            behandling.håndterVedtakFattet()
+        }
+        outbox.leggTil(
+            identitetsnummer = identitetsnummer,
+            hendelse = vedtakFattetMelding,
+            årsak = eventName,
         )
-    }
-
-    private fun byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
-        packet: JsonMessage,
-        tags: List<String>,
-        sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
-    ) = VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
-        beregningsgrunnlag =
-            BigDecimal(
-                packet["sykepengegrunnlagsfakta"]["selvstendig"]["beregningsgrunnlag"].asText(),
-            ),
-        tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-        seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
-        pensjonsgivendeInntekter =
-            sykepengegrunnlagsfakta.selvstendig.pensjonsgivendeInntekter.map { inntekt ->
-                PensjonsgivendeInntekt(
-                    årstall = inntekt.årstall,
-                    beløp = inntekt.beløp,
-                )
-            },
-    )
-
-    private fun byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
-        packet: JsonMessage,
-        avviksvurdering: Avviksvurdering,
-        tags: List<String>,
-    ) = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
-        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
-        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asBigDecimal(),
-        tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-        avviksprosent = avviksvurdering.avviksprosent.toBigDecimal(),
-        innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),
-        arbeidsgivere =
-            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
-                val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
-                VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
-                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
-                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
-                    innrapportertÅrsinntekt =
-                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter
-                            .filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
-                            .flatMap(InnrapportertInntekt::inntekter)
-                            .sumOf(Inntekt::beløp)
-                            .toBigDecimal(),
-                )
-            },
-    )
-
-    private fun byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
-        packet: JsonMessage,
-        skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag,
-        avviksvurdering: Avviksvurdering,
-        tags: List<String>,
-    ) = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-        omregnetÅrsinntektTotalt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
-        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asBigDecimal(),
-        avviksprosent = avviksvurdering.avviksprosent.toBigDecimal(),
-        innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),
-        tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-        skjønnsfastsatt = packet["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asBigDecimal(),
-        skjønnsfastsettingtype =
-            when (skjønnsfastsattSykepengegrunnlag.type) {
-                Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT -> VedtakFattetMelding.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                Skjønnsfastsettingstype.ANNET -> VedtakFattetMelding.Skjønnsfastsettingstype.ANNET
-            },
-        skjønnsfastsettingsårsak =
-            when (skjønnsfastsattSykepengegrunnlag.årsak) {
-                Skjønnsfastsettingsårsak.ANDRE_AVSNITT -> VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
-                Skjønnsfastsettingsårsak.TREDJE_AVSNITT -> VedtakFattetMelding.Skjønnsfastsettingsårsak.TREDJE_AVSNITT
-            },
-        arbeidsgivere =
-            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
-                val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
-                VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
-                    organisasjonsnummer = organisasjonsnummer,
-                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
-                    innrapportertÅrsinntekt =
-                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter
-                            .filter { it.arbeidsgiverreferanse == organisasjonsnummer }
-                            .flatMap(InnrapportertInntekt::inntekter)
-                            .sumOf(Inntekt::beløp)
-                            .toBigDecimal(),
-                    skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asBigDecimal(),
-                )
-            },
-    )
-
-    private fun byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet: JsonMessage) =
-        VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
-            omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
-        )
-
-    private fun LegacyPerson.finnAvviksvurdering(behandling: LegacyBehandling): Avviksvurdering =
-        avviksvurderinger
-            .filter { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
-            .maxByOrNull { it.opprettet }
-            ?: error("Fant ikke avviksvurdering for vedtak")
-
-    private fun VedtakBegrunnelse.toBegrunnelse(): VedtakFattetMelding.Begrunnelse =
-        VedtakFattetMelding.Begrunnelse(
-            type =
-                when (utfall) {
-                    Utfall.AVSLAG -> VedtakFattetMelding.BegrunnelseType.Avslag
-                    Utfall.DELVIS_INNVILGELSE -> VedtakFattetMelding.BegrunnelseType.DelvisInnvilgelse
-                    Utfall.INNVILGELSE -> VedtakFattetMelding.BegrunnelseType.Innvilgelse
-                },
-            begrunnelse = begrunnelse.orEmpty(),
-        )
-
-    companion object {
-        private const val FASTSATT_ETTER_HOVEDREGEL = "EtterHovedregel"
-        private const val FASTSATT_ETTER_SKJØNN = "EtterSkjønn"
-        private const val FASTSATT_I_INFOTRYGD = "IInfotrygd"
-
-        private const val YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE = "SELVSTENDIG"
-        private const val TAG_6G_BEGRENSET = "6GBegrenset"
     }
 }
-
-private fun JsonNode.asBigDecimal(): BigDecimal = BigDecimal(asText())
