@@ -1,6 +1,5 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import java.time.LocalDate
 import java.util.UUID
@@ -15,7 +14,6 @@ data class BehandlingDto(
     val tom: LocalDate,
     val tilstand: TilstandDto,
     val tags: List<String>,
-    val vedtakBegrunnelse: VedtakBegrunnelse?,
     val varsler: List<VarselDto>,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
 )

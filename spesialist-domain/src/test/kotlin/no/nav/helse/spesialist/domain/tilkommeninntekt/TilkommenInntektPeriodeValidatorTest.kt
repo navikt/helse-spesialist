@@ -33,22 +33,23 @@ class TilkommenInntektPeriodeValidatorTest {
     fun `kan ikke legge til periode som overlapper med annen periode`() {
         val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val tilkommenInntekt = TilkommenInntekt.ny(
-            periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
-            periodebeløp = BigDecimal("10000.0"),
-            identitetsnummer = identitetsnummer,
-            saksbehandlerIdent = lagSaksbehandler().ident,
-            notatTilBeslutter = "et notat til beslutter",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            organisasjonsnummer = organisasjonsnummer
-        )
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                periode = (1 jan 2018) tilOgMed (31 jan 2018),
+                ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
+                periodebeløp = BigDecimal("10000.0"),
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                organisasjonsnummer = organisasjonsnummer,
+            )
 
         assertThrows<IllegalStateException> {
             TilkommenInntektPeriodeValidator.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
                 periode = (15 jan 2018) tilOgMed (31 jan 2018),
                 organisasjonsnummer = organisasjonsnummer,
-                andreTilkomneInntekter = listOf(tilkommenInntekt)
+                andreTilkomneInntekter = listOf(tilkommenInntekt),
             )
         }
     }
@@ -60,10 +61,11 @@ class TilkommenInntektPeriodeValidatorTest {
         val vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018))
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertTrue(erInnenfor)
@@ -73,16 +75,18 @@ class TilkommenInntektPeriodeValidatorTest {
     fun `periode som overlapper med flere perioder er innenfor sykefraværstilfellet`() {
         // Given:
         val periode = 1 jan 2018 tilOgMed (28 feb 2018)
-        val vedtaksperioder = listOf(
-            lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018),
-            lagVedtaksperiode(fom = 1 feb 2018, tom = 28 feb 2018)
-        )
+        val vedtaksperioder =
+            listOf(
+                lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018),
+                lagVedtaksperiode(fom = 1 feb 2018, tom = 28 feb 2018),
+            )
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertTrue(erInnenfor)
@@ -92,16 +96,18 @@ class TilkommenInntektPeriodeValidatorTest {
     fun `periode som overlapper med usammenhengende perioder er ikke innenfor sykefraværstilfellet`() {
         // Given:
         val periode = 1 jan 2018 tilOgMed (28 feb 2018)
-        val vedtaksperioder = listOf(
-            lagVedtaksperiode(fom = 1 jan 2018, tom = 20 jan 2018),
-            lagVedtaksperiode(fom = 1 feb 2018, tom = 28 feb 2018)
-        )
+        val vedtaksperioder =
+            listOf(
+                lagVedtaksperiode(fom = 1 jan 2018, tom = 20 jan 2018),
+                lagVedtaksperiode(fom = 1 feb 2018, tom = 28 feb 2018),
+            )
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertFalse(erInnenfor)
@@ -111,16 +117,18 @@ class TilkommenInntektPeriodeValidatorTest {
     fun `periode som dekker en tidligere periode når det fins nyere sykefraværstilfelle er innenfor`() {
         // Given:
         val periode = 1 jan 2018 tilOgMed (20 jan 2018)
-        val vedtaksperioder = listOf(
-            lagVedtaksperiode(fom = 1 jan 2018, tom = 20 jan 2018),
-            lagVedtaksperiode(fom = 1 feb 2018, tom = 28 feb 2018)
-        )
+        val vedtaksperioder =
+            listOf(
+                lagVedtaksperiode(fom = 1 jan 2018, tom = 20 jan 2018),
+                lagVedtaksperiode(fom = 1 feb 2018, tom = 28 feb 2018),
+            )
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertTrue(erInnenfor)
@@ -132,16 +140,18 @@ class TilkommenInntektPeriodeValidatorTest {
         val periode = 15 jan 2018 tilOgMed (15 feb 2018)
         val ag1 = lagOrganisasjonsnummer()
         val ag2 = lagOrganisasjonsnummer()
-        val vedtaksperioder = listOf(
-            lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018, organisasjonsnummer = ag1),
-            lagVedtaksperiode(fom = 1 feb 2018, 28 feb 2018, organisasjonsnummer = ag2),
-        )
+        val vedtaksperioder =
+            listOf(
+                lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018, organisasjonsnummer = ag1),
+                lagVedtaksperiode(fom = 1 feb 2018, 28 feb 2018, organisasjonsnummer = ag2),
+            )
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertTrue(erInnenfor)
@@ -154,10 +164,11 @@ class TilkommenInntektPeriodeValidatorTest {
         val vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018))
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertFalse(erInnenfor)
@@ -167,16 +178,18 @@ class TilkommenInntektPeriodeValidatorTest {
     fun `usorterte perioder resulterer i en sammenhende periode`() {
         // Given:
         val periode = 12 jun 2025 tilOgMed (11 jul 2025)
-        val vedtaksperioder = listOf(
-            lagVedtaksperiode(fom = 13 jun 2025, tom = 24 aug 2025),
-            lagVedtaksperiode(fom = 25 mai 2025, tom = 12 jun 2025),
-        )
+        val vedtaksperioder =
+            listOf(
+                lagVedtaksperiode(fom = 13 jun 2025, tom = 24 aug 2025),
+                lagVedtaksperiode(fom = 25 mai 2025, tom = 12 jun 2025),
+            )
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertTrue(erInnenfor)
@@ -186,16 +199,18 @@ class TilkommenInntektPeriodeValidatorTest {
     fun `periode som slutter etter tom er ikke innenfor sykefraværstilfellet`() {
         // Given:
         val periode = 1 jan 2018 tilOgMed (1 feb 2018)
-        val vedtaksperioder = listOf(
-            lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018),
-            lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018)
-        )
+        val vedtaksperioder =
+            listOf(
+                lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018),
+                lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018),
+            )
 
         // When:
-        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        val erInnenfor =
+            TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+                periode = periode,
+                vedtaksperioder = vedtaksperioder,
+            )
 
         // Then:
         assertFalse(erInnenfor)
@@ -258,7 +273,7 @@ class TilkommenInntektPeriodeValidatorTest {
 
         assertEquals(
             listOf(sykefraværstilfelle1, sykefraværstilfelle2),
-            listOf(periode1, periode2, periode3, periode4).tilSykefraværstillfellePerioder()
+            listOf(periode1, periode2, periode3, periode4).tilSykefraværstillfellePerioder(),
         )
     }
 
@@ -266,29 +281,29 @@ class TilkommenInntektPeriodeValidatorTest {
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate = fom,
-        organisasjonsnummer: String = lagOrganisasjonsnummer()
+        organisasjonsnummer: String = lagOrganisasjonsnummer(),
     ): VedtaksperiodeDto {
         val vedtaksperiodeId = UUID.randomUUID()
         return VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             forkastet = false,
-            behandlinger = listOf(
-                BehandlingDto(
-                    id = UUID.randomUUID(),
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingId = UUID.randomUUID(),
-                    spleisBehandlingId = UUID.randomUUID(),
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    fom = fom,
-                    tom = tom,
-                    tilstand = TilstandDto.KlarTilBehandling,
-                    tags = emptyList(),
-                    vedtakBegrunnelse = null,
-                    varsler = emptyList(),
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-                )
-            )
+            behandlinger =
+                listOf(
+                    BehandlingDto(
+                        id = UUID.randomUUID(),
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        utbetalingId = UUID.randomUUID(),
+                        spleisBehandlingId = UUID.randomUUID(),
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        fom = fom,
+                        tom = tom,
+                        tilstand = TilstandDto.KlarTilBehandling,
+                        tags = emptyList(),
+                        varsler = emptyList(),
+                        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                    ),
+                ),
         )
     }
 }

@@ -4,8 +4,6 @@ import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -79,7 +77,6 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 tom = 31 jan 2018,
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
-                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.AVSLAG, "En begrunnelse"),
                 varsler = listOf(varsel),
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             ),
@@ -97,7 +94,6 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 tom = 31 jan 2018,
                 tilstand = TilstandDto.KlarTilBehandling,
                 tags = listOf("TAG"),
-                vedtakBegrunnelse = null,
                 varsler = listOf(varsel),
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             ),

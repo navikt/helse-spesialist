@@ -157,7 +157,6 @@ class LegacyVedtaksperiode(
                                     },
                             )
                         }.toSet(),
-                vedtakBegrunnelse = vedtakBegrunnelse,
                 yrkesaktivitetstype = yrkesaktivitetstype,
             )
     }

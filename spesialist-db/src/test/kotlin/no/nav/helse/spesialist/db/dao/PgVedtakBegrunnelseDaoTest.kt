@@ -2,40 +2,16 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
     private val saksbehandler = opprettSaksbehandler()
     private val dao = daos.vedtakBegrunnelseDao
-    private val behandlingDao = daos.legacyBehandlingDao
-
-    @Test
-    fun `lagrer og finner vedtaksbegrunnelse`() {
-        val oppgave = nyOppgaveForNyPerson()
-        dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id.value,
-            vedtakBegrunnelse =
-                VedtakBegrunnelseFraDatabase(
-                    type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-                    tekst = "En individuell begrunelse",
-                ),
-            saksbehandlerOid = saksbehandler.id.value,
-        )
-
-        val behandlingId = finnBehandlingUnikId(oppgave.vedtaksperiodeId.value)
-
-        val behandlinger = behandlingDao.finnLegacyBehandlinger(oppgave.vedtaksperiodeId.value)
-        val lagretVedtakBegrunnelse = behandlinger.first { it.id == behandlingId }
-        assertEquals(Utfall.AVSLAG, lagretVedtakBegrunnelse.vedtakBegrunnelse?.utfall)
-        assertEquals("En individuell begrunelse", lagretVedtakBegrunnelse.vedtakBegrunnelse?.begrunnelse)
-    }
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse basert på oppgaveid`() {
@@ -131,10 +107,4 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             assertFalse(invalidert)
         }
     }
-
-    private fun finnBehandlingUnikId(vedtaksperiodeId: UUID): UUID =
-        dbQuery.single(
-            "SELECT unik_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.uuid("unik_id") }
 }

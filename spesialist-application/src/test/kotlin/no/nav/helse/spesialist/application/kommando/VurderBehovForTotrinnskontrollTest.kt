@@ -55,7 +55,6 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
                             tilstand = TilstandDto.KlarTilBehandling,
                             id = UUID.randomUUID(),
                             tags = emptyList(),
-                            vedtakBegrunnelse = null,
                             varsler = emptyList(),
                         ),
                     ),

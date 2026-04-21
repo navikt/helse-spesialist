@@ -4,8 +4,6 @@ import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
@@ -69,27 +67,6 @@ class PgVedtakBegrunnelseDao internal constructor(
             "oppgaveId" to oppgaveId,
         ).update()
 
-    override fun finnVedtakBegrunnelse(
-        vedtaksperiodeId: UUID,
-        behandlingId: Long,
-    ): VedtakBegrunnelse? =
-        asSQL(
-            """
-            SELECT b.type, b.tekst FROM vedtak_begrunnelse AS vb, begrunnelse AS b
-            WHERE vb.vedtaksperiode_id = :vedtaksperiodeId 
-            AND vb.behandling_ref = :behandlingId 
-            AND vb.invalidert = false 
-            AND b.id = vb.begrunnelse_ref
-            ORDER BY vb.opprettet DESC LIMIT 1
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "behandlingId" to behandlingId,
-        ).singleOrNull { vedtakBegrunnelse ->
-            val begrunnelse = vedtakBegrunnelse.string("tekst")
-            val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(vedtakBegrunnelse.string("type"))
-            VedtakBegrunnelse(utfall = type.toDomain(), begrunnelse = begrunnelse)
-        }
-
     override fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase? =
         asSQL(
             """
@@ -108,13 +85,6 @@ class PgVedtakBegrunnelseDao internal constructor(
             val tekst = begrunnelse.string("tekst")
             val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(begrunnelse.string("type"))
             VedtakBegrunnelseFraDatabase(type = type, tekst = tekst)
-        }
-
-    private fun VedtakBegrunnelseTypeFraDatabase.toDomain() =
-        when (this) {
-            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Utfall.AVSLAG
-            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Utfall.DELVIS_INNVILGELSE
-            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> Utfall.INNVILGELSE
         }
 
     override fun finnAlleVedtakBegrunnelser(

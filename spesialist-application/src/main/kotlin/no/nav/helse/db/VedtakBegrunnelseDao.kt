@@ -1,15 +1,9 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import java.util.UUID
 
 interface VedtakBegrunnelseDao {
     fun invaliderVedtakBegrunnelse(oppgaveId: Long): Int
-
-    fun finnVedtakBegrunnelse(
-        vedtaksperiodeId: UUID,
-        behandlingId: Long,
-    ): VedtakBegrunnelse?
 
     fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase?
 

@@ -531,7 +531,6 @@ internal class LegacyBehandlingTest {
                 tom,
                 TilstandDto.KlarTilBehandling,
                 tags,
-                null,
                 listOf(varsel.toDto()),
                 Yrkesaktivitetstype.ARBEIDSTAKER,
             ),

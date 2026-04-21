@@ -15,7 +15,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.innehold
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
 import org.slf4j.Logger
@@ -32,7 +31,6 @@ class LegacyBehandling private constructor(
     periode: Periode,
     tilstand: Tilstand,
     tags: List<String>,
-    val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<LegacyVarsel>,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
 ) {
@@ -54,7 +52,6 @@ class LegacyBehandling private constructor(
         periode = Periode(fom, tom),
         tilstand = VidereBehandlingAvklares,
         tags = emptyList(),
-        vedtakBegrunnelse = null,
         varsler = emptySet(),
         yrkesaktivitetstype = yrkesaktivitetstype,
     )
@@ -106,7 +103,6 @@ class LegacyBehandling private constructor(
             tom = periode.tom,
             tilstand = tilstand.toDto(),
             tags = tags,
-            vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler.map(LegacyVarsel::toDto),
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
@@ -421,7 +417,6 @@ class LegacyBehandling private constructor(
             tilstand: Tilstand,
             tags: List<String>,
             varsler: Set<LegacyVarsel>,
-            vedtakBegrunnelse: VedtakBegrunnelse?,
             yrkesaktivitetstype: Yrkesaktivitetstype,
         ) = LegacyBehandling(
             id = id,
@@ -432,7 +427,6 @@ class LegacyBehandling private constructor(
             periode = Periode(fom, tom),
             tilstand = tilstand,
             tags = tags,
-            vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler,
             yrkesaktivitetstype = yrkesaktivitetstype,
         )

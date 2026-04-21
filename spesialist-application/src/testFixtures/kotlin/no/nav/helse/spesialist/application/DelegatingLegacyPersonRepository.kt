@@ -8,7 +8,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Varsel
@@ -20,7 +19,6 @@ class DelegatingLegacyPersonRepository(
     private val legacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository,
     private val behandlingRepository: InMemoryBehandlingRepository,
     private val varselRepository: InMemoryVarselRepository,
-    private val individuellBegrunnelseRepository: InMemoryIndividuellBegrunnelseRepository,
     private val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
 ) : LegacyPersonRepository {
     override fun brukPersonHvisFinnes(
@@ -68,15 +66,6 @@ class DelegatingLegacyPersonRepository(
                                                         Behandling.Tilstand.KlarTilBehandling -> LegacyBehandling.KlarTilBehandling
                                                     },
                                                 tags = behandling.tags.toList(),
-                                                vedtakBegrunnelse =
-                                                    behandling.spleisBehandlingId
-                                                        ?.let { individuellBegrunnelseRepository.finn(it) }
-                                                        ?.let { individuellBegrunnelse ->
-                                                            VedtakBegrunnelse(
-                                                                utfall = individuellBegrunnelse.utfall,
-                                                                begrunnelse = individuellBegrunnelse.tekst,
-                                                            )
-                                                        },
                                                 varsler =
                                                     varselRepository
                                                         .alle()

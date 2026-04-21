@@ -51,7 +51,6 @@ class InMemoryRepositoriesAndDaos {
         DelegatingLegacyVedtaksperiodeRepository(
             vedtaksperiodeRepository,
             behandlingRepository,
-            vedtakBegrunnelseRepository,
             varselRepository,
         )
     private val legacyPersonRepository =
@@ -61,7 +60,6 @@ class InMemoryRepositoriesAndDaos {
             legacyVedtaksperiodeRepository,
             behandlingRepository,
             varselRepository,
-            vedtakBegrunnelseRepository,
             sykefraværstilfelleDao,
         )
 

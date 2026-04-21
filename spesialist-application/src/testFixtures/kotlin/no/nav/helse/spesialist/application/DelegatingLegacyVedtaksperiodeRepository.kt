@@ -6,7 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -19,7 +18,6 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 class DelegatingLegacyVedtaksperiodeRepository(
     private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
     private val behandlingRepository: InMemoryBehandlingRepository,
-    private val vedtakBegrunnelseRepository: InMemoryIndividuellBegrunnelseRepository,
     private val varselRepository: VarselRepository,
 ) : LegacyVedtaksperiodeRepository {
     override fun finnVedtaksperioder(fødselsnummer: String) =
@@ -106,15 +104,6 @@ class DelegatingLegacyVedtaksperiodeRepository(
                                     Behandling.Tilstand.KlarTilBehandling -> TilstandDto.KlarTilBehandling
                                 },
                             tags = behandling.tags.toList(),
-                            vedtakBegrunnelse =
-                                behandling.spleisBehandlingId
-                                    ?.let(vedtakBegrunnelseRepository::finn)
-                                    ?.let {
-                                        VedtakBegrunnelse(
-                                            utfall = it.utfall,
-                                            begrunnelse = it.tekst,
-                                        )
-                                    },
                             varsler =
                                 varselRepository
                                     .finnVarslerFor(listOf(behandling.id))

@@ -32,7 +32,6 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                 tilstand = LegacyBehandling.VedtakFattet,
                 tags = emptyList(),
                 varsler = emptySet(),
-                vedtakBegrunnelse = null,
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             )
 
