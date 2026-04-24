@@ -53,6 +53,7 @@ import no.nav.helse.spesialist.api.rest.tilkomneinntekter.PostTilkomneInntekterB
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostAnmodOmForkastingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.api.rest.vurderinger.GetVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.vurderinger.PostArbeidstidsvurderingBehandler
@@ -130,6 +131,7 @@ fun Routing.restRoutes(
             post(PostForkastingBehandler(), restAdapter)
 
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
+            post(PostAnmodOmForkastingBehandler(), restAdapter)
 
             post(PostArbeidstidsvurderingBehandler(), restAdapter)
 

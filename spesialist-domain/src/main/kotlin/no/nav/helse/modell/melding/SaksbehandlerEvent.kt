@@ -118,6 +118,13 @@ data class AnnullertUtbetalingEvent(
     )
 }
 
+data class AnmodningOmForkastingEvent(
+    val fødselsnummer: String,
+    val vedtaksperiodeId: String,
+    val organisasjonsnummer: String,
+    val yrkesaktivitetstype: String,
+) : UtgåendeHendelse
+
 data class LagtPåVentEvent(
     val fødselsnummer: String,
     val oppgaveId: Long,

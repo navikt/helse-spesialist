@@ -2,6 +2,7 @@ package no.nav.helse.kafka.messagebuilders
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import no.nav.helse.modell.melding.AnmodningOmForkastingEvent
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.HentDokument
@@ -61,6 +62,8 @@ internal fun UtgåendeHendelse.eventName() =
 
         is AnnullertUtbetalingEvent -> "annullering"
 
+        is AnmodningOmForkastingEvent -> "anmodning_om_forkasting"
+
         is LagtPåVentEvent -> "lagt_på_vent"
 
         is MinimumSykdomsgradVurdertEvent -> "minimum_sykdomsgrad_vurdert"
@@ -91,6 +94,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is OppgaveOpprettet -> this.detaljer()
         is OppgaveOppdatert -> this.detaljer()
         is AnnullertUtbetalingEvent -> this.detaljer()
+        is AnmodningOmForkastingEvent -> this.detaljer()
         is LagtPåVentEvent -> this.detaljer()
         is MinimumSykdomsgradVurdertEvent -> this.detaljer()
         is OverstyrtArbeidsforholdEvent -> this.detaljer()
@@ -294,6 +298,13 @@ private fun AnnullertUtbetalingEvent.detaljer(): Map<String, Any> =
         "vedtaksperiodeId" to vedtaksperiodeId,
         kommentar?.let { "kommentar" to it },
         arsaker?.let { "arsaker" to it.map { arsak -> mapOf("arsak" to arsak.arsak, "key" to arsak.key) } },
+    ).toMap()
+
+private fun AnmodningOmForkastingEvent.detaljer(): Map<String, Any> =
+    listOfNotNull(
+        "organisasjonsnummer" to organisasjonsnummer,
+        "yrkesaktivitetstype" to yrkesaktivitetstype,
+        "vedtaksperiodeId" to vedtaksperiodeId,
     ).toMap()
 
 private fun LagtPåVentEvent.detaljer(): Map<String, Any> =

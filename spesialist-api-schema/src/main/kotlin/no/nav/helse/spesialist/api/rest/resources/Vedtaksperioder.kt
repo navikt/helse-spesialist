@@ -23,5 +23,10 @@ class Vedtaksperioder {
         class Annuller(
             val parent: VedtaksperiodeId,
         )
+
+        @Resource("anmod_om_forkasting")
+        class AnmodOmForkasting(
+            val parent: VedtaksperiodeId,
+        )
     }
 }
