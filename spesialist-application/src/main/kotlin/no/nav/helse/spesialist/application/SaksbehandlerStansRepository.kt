@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 
 interface SaksbehandlerStansRepository {
-    fun lagre(stans: SaksbehandlerStans)
+    fun lagre(saksbehandlerStans: SaksbehandlerStans)
 
     fun finnAlle(identitetsnummer: Identitetsnummer): List<SaksbehandlerStans>
 
