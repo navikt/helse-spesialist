@@ -10,8 +10,10 @@ import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
 import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
@@ -70,5 +72,13 @@ class VedtaksperiodeForkastetCommand(
                 fødselsnummer = fødselsnummer,
                 alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
             ),
+            ikkesuspenderendeCommand("opprettOpptegnelse") { sessionContext, _ ->
+                sessionContext.opptegnelseRepository.lagre(
+                    Opptegnelse.ny(
+                        identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                        type = Opptegnelse.Type.PERSONDATA_OPPDATERT,
+                    ),
+                )
+            },
         )
 }

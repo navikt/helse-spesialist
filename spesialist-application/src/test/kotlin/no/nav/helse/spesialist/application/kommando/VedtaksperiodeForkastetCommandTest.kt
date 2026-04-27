@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application.kommando
 import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
+import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
@@ -41,6 +42,34 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         assertEquals(
             mapOf(commandContextIdForGodkjenningsbehov to hendelseId),
             sessionContext.commandContextDao.avbrutteKommandokjeder
+        )
+    }
+
+    @Test
+    fun `lager opptegnelse når en vedtaksperiode forkastes`() {
+        // given
+        val commandContextIdForGodkjenningsbehov = randomUUID()
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id).also(sessionContext.vedtaksperiodeRepository::lagre)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+
+        // when
+        val hendelseId = randomUUID()
+        sessionContext.meldingDao.lagre(hendelseId, "{}", VEDTAKSPERIODE_FORKASTET, vedtaksperiode.id.value)
+        sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
+        val kommandoFerdig = VedtaksperiodeForkastetCommand(
+            fødselsnummer = person.id.value,
+            vedtaksperiodeId = vedtaksperiode.id.value,
+            spleisBehandlingId = behandling.spleisBehandlingId!!,
+            alleForkastedeVedtaksperiodeIder = emptyList(),
+            oppgaveRepository = sessionContext.oppgaveRepository,
+        ).execute(CommandContext(randomUUID()), sessionContext, outbox)
+
+        // then
+        assertTrue(kommandoFerdig)
+        assertEquals(
+            Opptegnelse.Type.PERSONDATA_OPPDATERT, sessionContext.opptegnelseRepository.alle().single().type
         )
     }
 
