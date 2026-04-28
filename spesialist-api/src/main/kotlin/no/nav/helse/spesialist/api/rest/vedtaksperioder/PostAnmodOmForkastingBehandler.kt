@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.AnmodningOmForkastingEvent
-import no.nav.helse.spesialist.api.rest.ApiAnmodOmForkastingRequest
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
@@ -13,12 +12,12 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
-class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting, ApiAnmodOmForkastingRequest, Unit, ApiPostAnmodOmForkastingErrorCode> {
+class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting, Unit, Unit, ApiPostAnmodOmForkastingErrorCode> {
     override val tag = Tags.VEDTAKSPERIODER
 
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting,
-        request: ApiAnmodOmForkastingRequest,
+        request: Unit,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostAnmodOmForkastingErrorCode> =
         kallKontekst.medVedtaksperiode(
