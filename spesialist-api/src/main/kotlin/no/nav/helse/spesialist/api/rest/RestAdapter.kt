@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.principal
+import io.ktor.server.request.contentLength
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -49,7 +50,11 @@ class RestAdapter(
         call: RoutingCall,
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
-        val request: REQUEST = call.receive()
+        val request: REQUEST =
+            when (call.request.contentLength()) {
+                null, 0L -> Unit as REQUEST
+                else -> call.receive()
+            }
         wrapOgDeleger(call, behandler.påkrevdeBrukerroller, behandler.påkrevdTilgang) { kallKontekst ->
             behandler.behandle(
                 resource,
