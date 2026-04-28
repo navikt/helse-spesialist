@@ -24,7 +24,7 @@ class Vedtaksperioder {
             val parent: VedtaksperiodeId,
         )
 
-        @Resource("anmod_om_forkasting")
+        @Resource("anmod-om-forkasting")
         class AnmodOmForkasting(
             val parent: VedtaksperiodeId,
         )
