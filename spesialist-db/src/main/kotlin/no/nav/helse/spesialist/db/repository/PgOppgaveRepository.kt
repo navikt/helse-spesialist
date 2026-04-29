@@ -359,10 +359,10 @@ class PgOppgaveRepository private constructor(
                 WHERE o.egenskaper @> ARRAY['SØKNAD']::varchar[]
                 AND (o.egenskaper && ARRAY['FORSTEGANGSBEHANDLING', 'FORLENGELSE']::varchar[])
                 AND NOT o.egenskaper && ARRAY[
-                    'PÅ_VENT', 'BESLUTTER', 'RETUR','UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON', 'INGEN_UTBETALING', 
-                    'HASTER', 'VERGEMÅL', 'UTLAND', 'EGEN_ANSATT', 'STIKKPRØVE', 'RISK_QA', 'FORTROLIG_ADRESSE', 
-                    'SKJØNNSFASTSETTELSE', 'TILBAKEDATERT', 'MANGLER_IM', 'MEDLEMSKAP', 'TILKOMMEN', 
-                    'GRUNNBELØPSREGULERING' 
+                    'PÅ_VENT', 'BESLUTTER', 'RETUR','UTBETALING_TIL_SYKMELDT', 'DELVIS_REFUSJON', 'INGEN_UTBETALING',
+                    'HASTER', 'VERGEMÅL', 'UTLAND', 'EGEN_ANSATT', 'STIKKPRØVE', 'RISK_QA', 'FORTROLIG_ADRESSE',
+                    'TILBAKEDATERT', 'MANGLER_IM', 'MEDLEMSKAP', 'TILKOMMEN', 'FLERE_ARBEIDSGIVERE',
+                    'GRUNNBELØPSREGULERING'
                 ]::varchar[]
                 GROUP BY o.id
             ), har_ekskludert_varsler AS (
