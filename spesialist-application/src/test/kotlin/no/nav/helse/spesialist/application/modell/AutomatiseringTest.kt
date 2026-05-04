@@ -140,8 +140,8 @@ internal class AutomatiseringTest {
                 meldingId = hendelseId,
                 vedtaksperiodeId = vedtaksperiodeId,
             )
-        every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
-        every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns false
+        every { meldingDaoMock.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId) } returns 1
+        every { meldingDaoMock.erKorrigertSøknadTidligereAutomatiskBehandlet(hendelseId) } returns false
         every {
             legacyBehandlingDaoMock.førsteLegacyBehandlingVedtakFattetTidspunkt(
                 vedtaksperiodeId,
@@ -172,11 +172,11 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
-        every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 3
+        every { meldingDaoMock.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId) } returns 3
         val gjeldendeBehandling = enBehandling()
         blirManuellOppgaveMedFeilOgVarsel(
             legacyBehandling = gjeldendeBehandling,
-            problems = listOf("Antall automatisk godkjente korrigerte søknader er større eller lik 2"),
+            problems = listOf("Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer"),
             varselkode = Varselkode.SB_SØ_1,
         )
     }
@@ -192,7 +192,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `Automatisering av korrigert søknad er allerede håndtert for tidligere sykefraværstilfelle`() {
-        every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns true
+        every { meldingDaoMock.erKorrigertSøknadTidligereAutomatiskBehandlet(hendelseId) } returns true
         blirAutomatiskBehandlet()
     }
 

@@ -71,17 +71,17 @@ class PgMeldingDaoTest {
         val vedtaksperiodeId1 = UUID.randomUUID()
 
         // When:
-        meldingDao.opprettAutomatiseringKorrigertSøknad(
+        meldingDao.opprettAutomatiseringMedKorrigertSøknad(
             vedtaksperiodeId = vedtaksperiodeId1,
             meldingId = UUID.randomUUID(),
         )
-        meldingDao.opprettAutomatiseringKorrigertSøknad(
+        meldingDao.opprettAutomatiseringMedKorrigertSøknad(
             vedtaksperiodeId = UUID.randomUUID(),
             meldingId = UUID.randomUUID(),
         )
 
         // Then:
-        assertEquals(1, meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId1))
+        assertEquals(1, meldingDao.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId1))
     }
 
     @Test
@@ -91,10 +91,10 @@ class PgMeldingDaoTest {
         val meldingId = UUID.randomUUID()
 
         // When:
-        meldingDao.opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, meldingId)
+        meldingDao.opprettAutomatiseringMedKorrigertSøknad(vedtaksperiodeId, meldingId)
 
         // Then:
-        assertTrue(meldingDao.erKorrigertSøknadAutomatiskBehandlet(meldingId))
+        assertTrue(meldingDao.erKorrigertSøknadTidligereAutomatiskBehandlet(meldingId))
     }
 
     @Test

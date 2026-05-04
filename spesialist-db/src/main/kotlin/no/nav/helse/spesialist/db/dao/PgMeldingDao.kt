@@ -82,7 +82,7 @@ class PgMeldingDao private constructor(
         }
     }
 
-    override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int =
+    override fun antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId: UUID): Int =
         asSQL(
             """
             SELECT count(1) AS antall
@@ -92,7 +92,7 @@ class PgMeldingDao private constructor(
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).single { it.int("antall") }
 
-    override fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean =
+    override fun erKorrigertSøknadTidligereAutomatiskBehandlet(meldingId: UUID): Boolean =
         asSQL(
             """
             SELECT count(1) AS antall
@@ -102,7 +102,7 @@ class PgMeldingDao private constructor(
             "hendelseId" to meldingId,
         ).single { it.int("antall") > 0 }
 
-    override fun opprettAutomatiseringKorrigertSøknad(
+    override fun opprettAutomatiseringMedKorrigertSøknad(
         vedtaksperiodeId: UUID,
         meldingId: UUID,
     ) {

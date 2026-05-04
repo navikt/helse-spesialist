@@ -18,11 +18,11 @@ interface MeldingDao {
         vedtaksperiodeId: UUID,
     ): BehandlingOpprettetKorrigertSøknad?
 
-    fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean
+    fun erKorrigertSøknadTidligereAutomatiskBehandlet(meldingId: UUID): Boolean
 
-    fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int
+    fun antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId: UUID): Int
 
-    fun opprettAutomatiseringKorrigertSøknad(
+    fun opprettAutomatiseringMedKorrigertSøknad(
         vedtaksperiodeId: UUID,
         meldingId: UUID,
     )

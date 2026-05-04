@@ -46,15 +46,15 @@ class InMemoryMeldingDao : MeldingDao {
         TODO("Not yet implemented")
     }
 
-    override fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean {
+    override fun erKorrigertSøknadTidligereAutomatiskBehandlet(meldingId: UUID): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int {
+    override fun antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId: UUID): Int {
         TODO("Not yet implemented")
     }
 
-    override fun opprettAutomatiseringKorrigertSøknad(
+    override fun opprettAutomatiseringMedKorrigertSøknad(
         vedtaksperiodeId: UUID,
         meldingId: UUID,
     ) {

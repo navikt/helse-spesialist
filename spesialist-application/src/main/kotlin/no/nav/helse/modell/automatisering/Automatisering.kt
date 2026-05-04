@@ -189,27 +189,30 @@ internal class Automatisering(
         val hendelseId = behandlingOpprettetKorrigertSøknad.meldingId
         val vedtaksperiodeId = behandlingOpprettetKorrigertSøknad.vedtaksperiodeId
 
-        if (meldingDao.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
+        if (meldingDao.erKorrigertSøknadTidligereAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
 
         val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
             legacyBehandlingDao
                 .førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId)
                 ?.isBefore(LocalDateTime.now().minusMonths(6))
                 ?: true
-        val antallTidligereKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
-        meldingDao.opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, hendelseId)
 
         if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) {
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Mer enn 6 måneder siden vedtak på første mottatt søknad",
             )
         }
+
+        val antallTidligereKorrigeringer =
+            meldingDao.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId)
         if (antallTidligereKorrigeringer >= 2) {
             sykefraværstilfelle.håndter(Varselkode.SB_SØ_1.nyttVarsel(vedtaksperiodeId))
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
-                "Antall automatisk godkjente korrigerte søknader er større eller lik 2",
+                "Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer",
             )
         }
+
+        meldingDao.opprettAutomatiseringMedKorrigertSøknad(vedtaksperiodeId, hendelseId)
 
         return SkyldesKorrigertSøknad.KanAutomatiseres
     }
