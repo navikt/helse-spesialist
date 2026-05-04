@@ -196,20 +196,22 @@ internal class Automatisering(
                 .førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId)
                 ?.isBefore(LocalDateTime.now().minusMonths(6))
                 ?: true
-        val antallTidligereKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
-        meldingDao.opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, hendelseId)
 
         if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) {
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Mer enn 6 måneder siden vedtak på første mottatt søknad",
             )
         }
+
+        val antallTidligereKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
         if (antallTidligereKorrigeringer >= 2) {
             sykefraværstilfelle.håndter(Varselkode.SB_SØ_1.nyttVarsel(vedtaksperiodeId))
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Antall automatisk godkjente korrigerte søknader er større eller lik 2",
             )
         }
+
+        meldingDao.opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, hendelseId)
 
         return SkyldesKorrigertSøknad.KanAutomatiseres
     }
