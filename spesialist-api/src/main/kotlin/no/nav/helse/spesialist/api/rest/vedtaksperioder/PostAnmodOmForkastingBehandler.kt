@@ -11,8 +11,12 @@ import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting, Unit, Unit, ApiPostAnmodOmForkastingErrorCode> {
+    override val påkrevdTilgang = Tilgang.Skriv
+    override val påkrevdeBrukerroller = setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta)
     override val tag = Tags.VEDTAKSPERIODER
 
     override fun behandle(
@@ -24,9 +28,7 @@ class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.Vedtaksperi
             vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { ApiPostAnmodOmForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostAnmodOmForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { vedtaksperiode, _ ->
-            behandleForVedtaksperiode(vedtaksperiode, kallKontekst)
-        }
+        ) { vedtaksperiode, _ -> behandleForVedtaksperiode(vedtaksperiode, kallKontekst) }
 
     private fun behandleForVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -58,7 +60,13 @@ enum class ApiPostAnmodOmForkastingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
+    MANGLER_TILGANG_TIL_PERSON(
+        "Mangler tilgang til person",
+        HttpStatusCode.Forbidden,
+    ),
+    VEDTAKSPERIODE_IKKE_FUNNET(
+        "Fant ikke vedtaksperiode",
+        HttpStatusCode.NotFound,
+    ),
     BEHANDLING_IKKE_FUNNET("Fant ikke tilhørende behandling", HttpStatusCode.NotFound),
 }
