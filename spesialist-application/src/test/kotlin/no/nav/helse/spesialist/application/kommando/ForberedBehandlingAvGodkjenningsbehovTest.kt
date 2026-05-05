@@ -51,7 +51,7 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                 skjønnsfastsatteSykepengegrunnlag = emptyList(),
             )
 
-        val commandData =
+        val godkjenningsbehovData =
             Testdata.godkjenningsbehovData().copy(
                 spleisVedtaksperioder =
                     listOf(
@@ -65,7 +65,7 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                     ),
             )
 
-        ForberedBehandlingAvGodkjenningsbehov(commandData, person).execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
+        ForberedBehandlingAvGodkjenningsbehov(godkjenningsbehovData, person).execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
 
         Assertions.assertEquals(1 jan 2018, behandling1.skjæringstidspunkt())
     }

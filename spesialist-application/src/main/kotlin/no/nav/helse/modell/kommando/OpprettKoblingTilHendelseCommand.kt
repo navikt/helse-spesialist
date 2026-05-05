@@ -5,11 +5,11 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
 
 internal class OpprettKoblingTilHendelseCommand(
-    commandData: GodkjenningsbehovData,
+    godkjenningsbehovData: GodkjenningsbehovData,
 ) : Command {
-    private val meldingId = commandData.id
+    private val meldingId = godkjenningsbehovData.id
 
-    private val vedtaksperiodeId = commandData.vedtaksperiodeId
+    private val vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId
 
     override fun execute(
         commandContext: CommandContext,

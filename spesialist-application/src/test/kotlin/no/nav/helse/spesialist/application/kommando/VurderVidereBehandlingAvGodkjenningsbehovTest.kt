@@ -43,7 +43,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehovTest : ApplicationTest()
         val command =
             VurderVidereBehandlingAvGodkjenningsbehov(
                 fødselsnummer = newData.fødselsnummer,
-                commandData = newData,
+                godkjenningsbehovData = newData,
             )
 
         // when

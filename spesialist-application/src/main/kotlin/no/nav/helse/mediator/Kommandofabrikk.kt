@@ -212,7 +212,7 @@ class Kommandofabrikk(
     ): GodkjenningsbehovCommand {
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
         return GodkjenningsbehovCommand(
-            behovData = godkjenningsbehovData,
+            godkjenningsbehovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
             vedtakDao = sessionContext.vedtakDao,

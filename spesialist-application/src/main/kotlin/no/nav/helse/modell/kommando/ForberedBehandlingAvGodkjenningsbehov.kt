@@ -6,7 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
 
 internal class ForberedBehandlingAvGodkjenningsbehov(
-    private val commandData: GodkjenningsbehovData,
+    private val godkjenningsbehovData: GodkjenningsbehovData,
     private val person: LegacyPerson,
 ) : Command {
     override fun execute(
@@ -14,13 +14,13 @@ internal class ForberedBehandlingAvGodkjenningsbehov(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        person.mottaSpleisVedtaksperioder(commandData.spleisVedtaksperioder)
-        person.flyttEventuelleAvviksvarsler(commandData.vedtaksperiodeId, commandData.skjæringstidspunkt)
+        person.mottaSpleisVedtaksperioder(godkjenningsbehovData.spleisVedtaksperioder)
+        person.flyttEventuelleAvviksvarsler(godkjenningsbehovData.vedtaksperiodeId, godkjenningsbehovData.skjæringstidspunkt)
         person.oppdaterPeriodeTilGodkjenning(
-            commandData.vedtaksperiodeId,
-            commandData.tags,
-            commandData.spleisBehandlingId,
-            commandData.utbetalingId,
+            godkjenningsbehovData.vedtaksperiodeId,
+            godkjenningsbehovData.tags,
+            godkjenningsbehovData.spleisBehandlingId,
+            godkjenningsbehovData.utbetalingId,
         )
         return true
     }

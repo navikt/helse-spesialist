@@ -13,15 +13,15 @@ import java.util.UUID
 
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val fødselsnummer: String,
-    private val commandData: GodkjenningsbehovData,
+    private val godkjenningsbehovData: GodkjenningsbehovData,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val utbetalingId = commandData.utbetalingId
-        val meldingId = commandData.id
+        val utbetalingId = godkjenningsbehovData.utbetalingId
+        val meldingId = godkjenningsbehovData.id
 
         if (sessionContext.vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             loggInfo("Ignorerer godkjenningsbehov for utbetalingId: $utbetalingId. Er allerede automatisk godkjent")
@@ -33,7 +33,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             return ferdigstill(commandContext)
         }
 
-        val oppgave = sessionContext.oppgaveRepository.finn(SpleisBehandlingId(commandData.spleisBehandlingId)) ?: return true
+        val oppgave = sessionContext.oppgaveRepository.finn(SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)) ?: return true
         if (oppgave.tilstand is Oppgave.Invalidert) return true
 
         val gammelGodkjenningsbehovId = oppgave.godkjenningsbehovId
@@ -80,7 +80,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         godkjenningsbehovId: UUID,
     ): Boolean {
         val godkjenningsbehovData = sessionContext.meldingDao.finnGodkjenningsbehov(godkjenningsbehovId).data()
-        return harEndringerIGodkjenningsbehov(commandData, godkjenningsbehovData)
+        return harEndringerIGodkjenningsbehov(this.godkjenningsbehovData, godkjenningsbehovData)
     }
 
     private fun harEndringerIGodkjenningsbehov(
