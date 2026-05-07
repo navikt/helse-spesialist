@@ -224,7 +224,7 @@ class PgBehandlingsstatistikkDao internal constructor(
             SELECT count(*) AS avvisninger
             FROM vedtaksperiode v
             JOIN oppgave o ON v.id = o.vedtak_ref
-            WHERE status = 'Ferdigstilt' AND oppdatert >= :fom AND forkastet;
+            WHERE status = 'Invalidert' AND oppdatert >= :fom AND forkastet;
             """.trimIndent(),
             "fom" to fom,
         ).single { it.int("avvisninger") } ?: 0
