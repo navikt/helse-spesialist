@@ -21,6 +21,9 @@ on:
         branches:
             - main
             - 'dev-**'
+    schedule:
+      - cron: '0 4 * * 3'
+        timezone: 'Europe/Oslo'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
