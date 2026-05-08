@@ -90,7 +90,6 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         nytt.fødselsnummer != gammelt.fødselsnummer ||
             nytt.organisasjonsnummer != gammelt.organisasjonsnummer ||
             nytt.vedtaksperiodeId != gammelt.vedtaksperiodeId ||
-            nytt.spleisVedtaksperioder.sortedBy { it.vedtaksperiodeId } != gammelt.spleisVedtaksperioder.sortedBy { it.vedtaksperiodeId } ||
             nytt.spleisBehandlingId != gammelt.spleisBehandlingId ||
             nytt.vilkårsgrunnlagId != gammelt.vilkårsgrunnlagId ||
             nytt.tags.sorted() != gammelt.tags.sorted() ||
