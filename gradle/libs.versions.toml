@@ -16,7 +16,7 @@ apache-httpclient5-fluent = "org.apache.httpcomponents.client5:httpclient5-fluen
 
 auth0-jwt = "com.auth0:java-jwt:4.5.2"
 
-caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
+caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.4"
 
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
