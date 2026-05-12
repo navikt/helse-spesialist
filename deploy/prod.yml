@@ -62,6 +62,7 @@ spec:
           - id: {{ENTRAID_UUID_STIKKPROVE}}
           - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}}
           - id: {{ENTRAID_UUID_SPEIL_RIKSREVISJONEN}}
+          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG}}
   accessPolicy:
     inbound:
       rules:
