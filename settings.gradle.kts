@@ -12,6 +12,7 @@ include(
     ":clients:spesialist-client-spillkar",
     ":clients:spesialist-client-spiskammerset",
     ":clients:spesialist-client-spleis",
+    ":clients:spesialist-client-personpseudoid",
     "spesialist-valkey",
     "spesialist-db-migrations",
     "spesialist-db",

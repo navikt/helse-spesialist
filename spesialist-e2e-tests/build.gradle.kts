@@ -32,4 +32,5 @@ dependencies {
     testImplementation(testFixtures(project(":clients:spesialist-client-spleis")))
     testImplementation(testFixtures(project(":clients:spesialist-client-speed")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spillkar")))
+    testImplementation(testFixtures(project(":clients:spesialist-client-personpseudoid")))
 }

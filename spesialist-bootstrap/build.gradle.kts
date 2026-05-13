@@ -8,6 +8,7 @@ dependencies {
     api(project(":clients:spesialist-client-spillkar"))
     api(project(":clients:spesialist-client-spiskammerset"))
     api(project(":clients:spesialist-client-spleis"))
+    api(project(":clients:spesialist-client-personpseudoid"))
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
     api(project(":spesialist-valkey"))
@@ -25,6 +26,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:spesialist-client-spillkar")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spiskammerset")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spleis")))
+    testImplementation(testFixtures(project(":clients:spesialist-client-personpseudoid")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
     testImplementation(libs.mockOauth2Server)
 }
