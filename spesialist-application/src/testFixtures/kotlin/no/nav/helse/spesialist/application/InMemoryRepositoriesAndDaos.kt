@@ -15,7 +15,6 @@ class InMemoryRepositoriesAndDaos {
     private val overstyringRepository = InMemoryOverstyringRepository()
     private val personKlargjoresDao = InMemoryPersonKlargjoresDao()
     private val personRepository = InMemoryPersonRepository()
-    private val personPseudoIdDao = InMemoryPersonPseudoIdDao()
     private val påVentRepository = InMemoryPåVentRepository()
     private val saksbehandlerRepository = InMemorySaksbehandlerRepository()
     private val tilkommenInntektRepository = InMemoryTilkommenInntektRepository()
@@ -152,7 +151,6 @@ class InMemoryRepositoriesAndDaos {
                     periodehistorikkDao = periodehistorikkDao,
                     personDao = personDao,
                     personRepository = personRepository,
-                    personPseudoIdDao = personPseudoIdDao,
                     påVentDao = påVentDao,
                     påVentRepository = påVentRepository,
                     reservasjonDao = reservasjonDao,

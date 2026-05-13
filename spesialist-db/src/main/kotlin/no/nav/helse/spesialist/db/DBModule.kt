@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db
 
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.db.dao.PgPersonPseudoIdDao
 import javax.sql.DataSource
 
 class DBModule(
@@ -17,6 +18,7 @@ class DBModule(
     private val _dataSource: HikariDataSource = dataSourceBuilder.build()
     val dataSource: DataSource = _dataSource
     val daos = DBDaos(dataSource)
+    val personPseudoIdDao = PgPersonPseudoIdDao(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
     val opptegnelseListener = PgOpptegnelseListener { dataSourceBuilder.listenNotifyConnection }
 

@@ -230,7 +230,7 @@ class RapidApp {
         val personPseudoIdProvider =
             ValkeyPersonPseudoIdProvider(
                 configuration = configuration.clientPersonPseudoId,
-                fallbackPersonPseudoIdDao = dbModule.daos.personPseudoIdDao,
+                fallbackPersonPseudoIdDao = dbModule.personPseudoIdDao,
             )
 
         val kafkaModule =

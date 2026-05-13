@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db
 
 import no.nav.helse.db.Daos
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
@@ -16,7 +15,6 @@ import no.nav.helse.spesialist.db.dao.PgNotatDao
 import no.nav.helse.spesialist.db.dao.PgOppgaveDao
 import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.PgPersonPseudoIdDao
 import no.nav.helse.spesialist.db.dao.PgPoisonPillDao
 import no.nav.helse.spesialist.db.dao.PgPåVentDao
 import no.nav.helse.spesialist.db.dao.PgReservasjonDao
@@ -75,5 +73,4 @@ class DBDaos(
     override val vergemålApiDao = PgVergemålApiDao(dataSource)
     override val oppgaveRepository = PgOppgaveRepository(dataSource)
     override val saksbehandlerRepository = PgSaksbehandlerRepository(dataSource)
-    override val personPseudoIdDao: PersonPseudoIdDao = PgPersonPseudoIdDao(dataSource)
 }

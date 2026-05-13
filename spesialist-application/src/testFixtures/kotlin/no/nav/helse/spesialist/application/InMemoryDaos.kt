@@ -36,5 +36,4 @@ class InMemoryDaos(
     override val vedtakBegrunnelseDao: UnimplementedVedtakBegrunnelseDao,
     override val vedtakDao: DelegatingVedtakDao,
     override val vergemålApiDao: UnimplementedVergemålApiDao,
-    override val personPseudoIdDao: PersonPseudoIdDao = InMemoryPersonPseudoIdDao(),
 ) : Daos

@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.PersonKlargjoresDao
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
@@ -68,7 +67,6 @@ interface SessionContext {
     val varselRepository: VarselRepository
     val varseldefinisjonRepository: VarseldefinisjonRepository
     val individuellBegrunnelseRepository: IndividuellBegrunnelseRepository
-    val personPseudoIdDao: PersonPseudoIdDao
     val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao
     val vedtakRepository: VedtakRepository
     val opptegnelseRepository: OpptegnelseRepository
