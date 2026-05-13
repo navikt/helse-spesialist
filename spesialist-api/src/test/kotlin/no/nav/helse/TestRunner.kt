@@ -36,11 +36,13 @@ import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdDao
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
+import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -71,6 +73,8 @@ object TestRunner {
         )
 
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
+
+    private val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
 
     private fun token(
         saksbehandler: Saksbehandler,
@@ -118,6 +122,7 @@ object TestRunner {
                 meldingPubliserer = mockk(relaxed = true),
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
+                personPseudoIdProvider = personPseudoIdProvider,
             )
         testApplication {
             application {
@@ -132,6 +137,7 @@ object TestRunner {
                                         personhåndterer = avhengigheter.personhåndterer,
                                         snapshothenter = avhengigheter.snapshothenter,
                                         sessionFactory = avhengigheter.sessionFactory,
+                                        personPseudoIdProvider = personPseudoIdProvider,
                                     ),
                                 behandlingsstatistikk =
                                     BehandlingsstatistikkQueryHandler(
@@ -162,6 +168,8 @@ object TestRunner {
                     forsikringHenter = avhengigheter.forsikringHenter,
                     inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
                     inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
+                    alleIdenterHenter = avhengigheter.alleIdenterHenter,
+                    personinfoHenter = avhengigheter.personinfoHenter,
                     environmentToggles =
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker: Boolean = false
@@ -173,9 +181,8 @@ object TestRunner {
                     behandlendeEnhetHenter = avhengigheter.behandlendeEnhetHenter,
                     tilgangsgrupperTilBrukerroller = avhengigheter.tilgangsgrupperTilBrukerroller,
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
-                    alleIdenterHenter = avhengigheter.alleIdenterHenter,
-                    personinfoHenter = avhengigheter.personinfoHenter,
                     infotrygdperiodeHenter = avhengigheter.infotrygdperiodeHenter,
+                    personPseudoIdProvider = avhengigheter.personPseudoIdProvider,
                 )
             }
 
@@ -220,5 +227,6 @@ object TestRunner {
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,
+        val personPseudoIdProvider: PersonPseudoIdDao,
     )
 }

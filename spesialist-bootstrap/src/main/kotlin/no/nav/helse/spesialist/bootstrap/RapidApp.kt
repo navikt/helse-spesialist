@@ -264,6 +264,7 @@ class RapidApp {
                 tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,
                 personinfoHenter = clientSpeedModule.personinfoHenter,
                 infotrygdperiodeHenter = clientSparkelSykepengeperioderModule.sykepengeperioderHenter,
+                personPseudoIdProvider = personPseudoIdProvider,
             )
 
         kafkaModule.kobleOppRivers()

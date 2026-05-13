@@ -5,6 +5,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.medMdcOgAttribute
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Behandling
@@ -26,6 +27,7 @@ class KallKontekst(
     val tilganger: Set<Tilgang>,
     val transaksjon: SessionContext,
     val outbox: Outbox,
+    val personPseudoIdProvider: PersonPseudoIdDao,
     private val ktorCall: RoutingCall,
 ) {
     fun <RESPONSE, ERROR : ApiErrorCode> medOppgave(

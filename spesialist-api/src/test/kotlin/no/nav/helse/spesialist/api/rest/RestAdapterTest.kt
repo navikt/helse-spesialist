@@ -30,19 +30,19 @@ class RestAdapterTest {
         val call =
             mockk<RoutingCall>(relaxed = true) {
                 every { attributes } returns
-                        Attributes().apply {
-                            put(
-                                AttributeKey<AuthenticationContext>("AuthContext"),
-                                mockk<AuthenticationContext> {
-                                    every { principal<SaksbehandlerPrincipal>() } returns
-                                            SaksbehandlerPrincipal(
-                                                saksbehandler = lagSaksbehandler(),
-                                                brukerroller = Brukerrolle.entries.toSet(),
-                                                tilganger = Tilgang.entries.toSet(),
-                                            )
-                                },
-                            )
-                        }
+                    Attributes().apply {
+                        put(
+                            AttributeKey<AuthenticationContext>("AuthContext"),
+                            mockk<AuthenticationContext> {
+                                every { principal<SaksbehandlerPrincipal>() } returns
+                                    SaksbehandlerPrincipal(
+                                        saksbehandler = lagSaksbehandler(),
+                                        brukerroller = Brukerrolle.entries.toSet(),
+                                        tilganger = Tilgang.entries.toSet(),
+                                    )
+                            },
+                        )
+                    }
                 coEvery { receive<String>() } returns ""
                 coEvery { respond(capture(responseTextSlot), any()) } returns Unit
             }
@@ -52,6 +52,7 @@ class RestAdapterTest {
                 sessionFactory = sessionFactory,
                 meldingPubliserer = integrationTestFixture.meldingPubliserer,
                 versjonAvKode = "0.0.0",
+                personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider,
             )
 
         runBlocking {

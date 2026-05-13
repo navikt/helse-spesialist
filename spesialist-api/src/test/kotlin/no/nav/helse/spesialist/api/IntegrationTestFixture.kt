@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
+import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdDao
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
@@ -58,6 +59,7 @@ class IntegrationTestFixture {
     val daos = inMemoryRepositoriesAndDaos.daos
     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
     val meldingPubliserer = InMemoryMeldingPubliserer()
+    val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
 
     companion object {
         val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
@@ -123,6 +125,7 @@ class IntegrationTestFixture {
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
             personinfoHenter = personinfoHenterMock,
             infotrygdperiodeHenter = infotrygdperiodeHenterMock,
+            personPseudoIdProvider = personPseudoIdProvider,
         )
 
     class Response(

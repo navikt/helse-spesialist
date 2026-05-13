@@ -102,6 +102,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.logg
@@ -136,6 +137,7 @@ class PersonQueryHandler(
     private val personhåndterer: Personhåndterer,
     private val snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
+    private val personPseudoIdProvider: PersonPseudoIdDao,
 ) : PersonQuerySchema {
     override fun person(
         personPseudoId: String,

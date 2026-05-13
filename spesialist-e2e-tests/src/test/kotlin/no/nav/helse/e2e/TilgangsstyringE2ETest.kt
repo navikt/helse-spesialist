@@ -173,6 +173,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                         },
                     snapshothenter = snapshothenter,
                     sessionFactory = sessionFactory,
+                    personPseudoIdProvider = personPseudoIdProvider,
                 ),
         )
 }

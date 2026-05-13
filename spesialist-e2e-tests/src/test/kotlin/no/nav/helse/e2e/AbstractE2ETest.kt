@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdDao
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.SpleisClient
@@ -89,6 +90,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         private set
     val spleisClient = mockk<SpleisClient>()
     val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
     private val testRapid = TestRapid()
     val inspektør get() = testRapid.inspektør
     private val meldingssender = Meldingssender(testRapid)
