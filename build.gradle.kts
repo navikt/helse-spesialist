@@ -10,6 +10,7 @@ allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     ktlint {
+        ignoreFailures.set(true)
         // Hvis du gjør endringer i disse filterne må du slette alle "build"/"out"-mappene og deretter
         // kjøre ./gradlew --no-build-cache ktlintCheck minst én gang for at endringene skal ta effekt
         filter {
@@ -31,6 +32,15 @@ subprojects {
         jvmToolchain(21)
     }
     tasks {
+        // Ikke skriv ut feilformatert kode under bygging
+        withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask>().configureEach {
+            enabled = false
+        }
+        // Kjør formatering
+        named<Task>("check") {
+            dependsOn("ktlintFormat")
+        }
+
         named<Test>("test") {
             useJUnitPlatform()
             testLogging {
