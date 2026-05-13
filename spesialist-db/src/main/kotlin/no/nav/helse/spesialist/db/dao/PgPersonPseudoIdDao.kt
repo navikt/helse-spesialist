@@ -3,15 +3,19 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.db.DataSourceDbQuery
+import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.time.Duration
 import java.time.Instant
+import javax.sql.DataSource
 
-class PgPersonPseudoIdDao(
-    session: Session,
+class PgPersonPseudoIdDao private constructor(
+    private val dbQuery: DbQuery,
 ) : PersonPseudoIdDao {
-    private val dbQuery = SessionDbQuery(session)
+    constructor(session: Session) : this(SessionDbQuery(session))
+    constructor(dataSource: DataSource) : this(DataSourceDbQuery(dataSource))
 
     override fun nyPersonPseudoId(identitetsnummer: Identitetsnummer): PersonPseudoId {
         val personPseudoId = PersonPseudoId.ny()
