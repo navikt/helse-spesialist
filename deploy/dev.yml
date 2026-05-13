@@ -109,6 +109,8 @@ spec:
   valkey:
     - instance: spesialist-cache
       access: readwrite
+    - instance: personpseudoid
+      access: readwrite
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
