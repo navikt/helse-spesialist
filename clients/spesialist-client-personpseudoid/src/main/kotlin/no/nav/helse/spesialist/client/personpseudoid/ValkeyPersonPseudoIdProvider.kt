@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.personpseudoid.ValkeyConfig
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import java.time.Duration
 
 class ValkeyPersonPseudoIdProvider(
     configuration: ClientPersonPseudoIdModule.Configuration,
@@ -28,8 +27,4 @@ class ValkeyPersonPseudoIdProvider(
     override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId): Identitetsnummer? =
         client.finnIdentitetsnummer(personPseudoId.value)?.let { Identitetsnummer.fraString(it) }
             ?: fallbackPersonPseudoIdDao.hentIdentitetsnummer(personPseudoId)
-
-    override fun slettPseudoIderEldreEnn(alder: Duration): Int {
-        TODO("Not implemented")
-    }
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.oppgaver
 
-import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
 import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.spesialist.api.rest.ApiBehandletOppgaveProjeksjon
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.BehandledeOppgaver
+import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 
@@ -30,29 +30,29 @@ class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehan
                     tom = resource.tom,
                     sidetall = resource.sidetall,
                     sidestørrelse = resource.sidestoerrelse,
-                ).tilApiType(kallKontekst.transaksjon)
+                ).tilApiType(kallKontekst.personPseudoIdProvider)
 
         loggInfo("Hentet ${oppgaver.elementer.size} oppgaver (av totalt ${oppgaver.totaltAntall})")
 
         return RestResponse.OK(oppgaver)
     }
 
-    private fun Side<BehandletOppgaveProjeksjon>.tilApiType(transaksjon: SessionContext) =
+    private fun Side<BehandletOppgaveProjeksjon>.tilApiType(personPseudoIdProvider: PersonPseudoIdDao) =
         ApiBehandletOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
             sidetall = sidetall,
             sidestoerrelse = sidestørrelse,
             elementer =
                 elementer.map { oppgave: BehandletOppgaveProjeksjon ->
-                    oppgave.tilApiType(transaksjon)
+                    oppgave.tilApiType(personPseudoIdProvider)
                 },
         )
 
     private fun BehandletOppgaveProjeksjon.tilApiType(
-        transaksjon: SessionContext,
+        personPseudoIdProvider: PersonPseudoIdDao,
     ): ApiBehandletOppgaveProjeksjon {
         val personPseudoId =
-            transaksjon.personPseudoIdDao.nyPersonPseudoId(
+            personPseudoIdProvider.nyPersonPseudoId(
                 identitetsnummer =
                     Identitetsnummer.fraString(
                         fødselsnummer,

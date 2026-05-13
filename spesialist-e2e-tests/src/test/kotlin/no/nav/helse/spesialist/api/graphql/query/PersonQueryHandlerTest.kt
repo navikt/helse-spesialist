@@ -562,10 +562,9 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         )
 
     private fun opprettPersonPseudoId(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)): UUID =
-        sessionFactory
-            .transactionalSessionScope {
-                it.personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
-            }.value
+        personPseudoIdProvider
+            .nyPersonPseudoId(identitetsnummer)
+            .value
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {
         val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]

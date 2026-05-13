@@ -16,9 +16,10 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
-    private fun lagPersonOgPseudoId() = lagPerson()
-        .also(sessionContext.personRepository::lagre)
-        .let { person -> person to sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id) }
+    private fun lagPersonOgPseudoId() =
+        lagPerson()
+            .also(sessionContext.personRepository::lagre)
+            .let { person -> person to integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id) }
 
     @Test
     fun `returnerer tom liste når person ikke har noen notater`() {
@@ -33,8 +34,9 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
     @Test
     fun `returnerer ett element med riktig vedtaksperiodeId og notattype`() {
         val (person, pseudoId) = lagPersonOgPseudoId()
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
         lagNotat(type = NotatType.Generelt, vedtaksperiodeId = vedtaksperiode.id.value)
             .also(sessionContext.notatRepository::lagre)
 
@@ -57,8 +59,9 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
     @Test
     fun `returnerer begge notattyper når en vedtaksperiode har notater av to ulike typer`() {
         val (person, pseudoId) = lagPersonOgPseudoId()
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
         lagNotat(type = NotatType.Generelt, vedtaksperiodeId = vedtaksperiode.id.value)
             .also(sessionContext.notatRepository::lagre)
         lagNotat(type = NotatType.OpphevStans, vedtaksperiodeId = vedtaksperiode.id.value)
@@ -111,10 +114,12 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
     fun `returnerer ikke notater tilhørende en annen person`() {
         val (person, pseudoId) = lagPersonOgPseudoId()
         val (annenPerson, _) = lagPersonOgPseudoId()
-        val vedtaksperiodeForPerson = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-        val vedtaksperiodeForAnnenPerson = lagVedtaksperiode(identitetsnummer = annenPerson.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiodeForPerson =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiodeForAnnenPerson =
+            lagVedtaksperiode(identitetsnummer = annenPerson.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
         lagNotat(type = NotatType.Generelt, vedtaksperiodeId = vedtaksperiodeForPerson.id.value)
             .also(sessionContext.notatRepository::lagre)
         lagNotat(type = NotatType.Generelt, vedtaksperiodeId = vedtaksperiodeForAnnenPerson.id.value)
@@ -161,7 +166,7 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
         val person =
             lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
                 .also(sessionContext.personRepository::lagre)
-        val pseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val pseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val response = integrationTestFixture.get("/api/personer/${pseudoId.value}/notat-vedtaksperiode-ider")
 

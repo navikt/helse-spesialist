@@ -17,7 +17,7 @@ class GetSøknadBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
 
     @Test
     fun `får hentet søknad hvis man har tilgang til person`() {
@@ -27,7 +27,7 @@ class GetSøknadBehandlerIntegrationTest {
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value))
+            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value)),
         )
 
         val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
@@ -35,10 +35,11 @@ class GetSøknadBehandlerIntegrationTest {
         val saksbehandler = lagSaksbehandler()
 
         // When:
-        val response = integrationTestFixture.get(
-            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/soknad",
-            saksbehandler = saksbehandler
-        )
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/soknad",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -54,7 +55,7 @@ class GetSøknadBehandlerIntegrationTest {
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value))
+            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value)),
         )
 
         val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
@@ -62,10 +63,11 @@ class GetSøknadBehandlerIntegrationTest {
         val saksbehandler = lagSaksbehandler()
 
         // When:
-        val response = integrationTestFixture.get(
-            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/soknad",
-            saksbehandler = saksbehandler
-        )
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/soknad",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -73,7 +75,8 @@ class GetSøknadBehandlerIntegrationTest {
 }
 
 @Language("JSON")
-fun lagSøknadJson(fnr: String) = """
+fun lagSøknadJson(fnr: String) =
+    """
     {
           "id": "63b6913a-ce95-30d8-9b6e-6123f5262b05",
           "type": "SELVSTENDIGE_OG_FRILANSERE",
@@ -433,4 +436,4 @@ fun lagSøknadJson(fnr: String) = """
                   ],
                   "metadata": null
                 }],"metadata":null},{"id":"59031543-5352-3d00-9a51-c8a07d0f427c","tag":"OPPHOLD_UTENFOR_EOS","sporsmalstekst":"Var du på reise utenfor EU/EØS mens du var sykmeldt 1. - 31. juli 2025?","undertekst":null,"min":null,"max":null,"svartype":"JA_NEI","kriterieForVisningAvUndersporsmal":"JA","svar":[{"verdi":"NEI"}],"undersporsmal":[{"id":"c38e4726-afe8-369a-a7ff-3906266cdf98","tag":"OPPHOLD_UTENFOR_EOS_NAR","sporsmalstekst":"Når var du utenfor EU/EØS?","undertekst":null,"min":"2025-07-01","max":"2025-07-31","svartype":"PERIODER","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null}],"metadata":null},{"id":"30f324ce-3366-3f26-bbb8-b3cd5f9c722d","tag":"INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET","sporsmalstekst":"Har du avviklet virksomheten din før du ble sykmeldt?","undertekst":null,"min":null,"max":null,"svartype":"RADIO_GRUPPE","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[{"id":"8733154a-201a-3b73-adf0-fcf42e0bc2c3","tag":"INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET_JA","sporsmalstekst":"Ja","undertekst":null,"min":null,"max":null,"svartype":"RADIO","kriterieForVisningAvUndersporsmal":"CHECKED","svar":[],"undersporsmal":[{"id":"79793653-6fbc-3cec-844e-421210745e12","tag":"INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET_NAR","sporsmalstekst":"Når ble virksomheten avviklet?","undertekst":null,"min":null,"max":"2025-06-30","svartype":"DATO","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null}],"metadata":null},{"id":"ada55eda-e14f-359e-ac59-b5a17a207d8c","tag":"INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET_NEI","sporsmalstekst":"Nei","undertekst":null,"min":null,"max":null,"svartype":"RADIO","kriterieForVisningAvUndersporsmal":"CHECKED","svar":[{"verdi":"CHECKED"}],"undersporsmal":[{"id":"5fed7ea5-a3ff-336e-99b1-b800ef8019d5","tag":"INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET","sporsmalstekst":"Er du ny i arbeidslivet etter 1. januar 2022?","undertekst":null,"min":null,"max":null,"svartype":"RADIO_GRUPPE","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[{"id":"b3fe50b3-1adc-3185-8cc2-7f602ba4a8b1","tag":"INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET_JA","sporsmalstekst":"Ja","undertekst":null,"min":null,"max":null,"svartype":"RADIO","kriterieForVisningAvUndersporsmal":"CHECKED","svar":[],"undersporsmal":[{"id":"ec6b1169-c956-30e4-be47-31d56b0c6358","tag":"INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET_DATO","sporsmalstekst":"Når begynte du i arbeidslivet?","undertekst":null,"min":"2022-01-01","max":"2025-06-30","svartype":"DATO","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null}],"metadata":null},{"id":"4d218996-7b75-3297-99c0-bd45d837938c","tag":"INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET_NEI","sporsmalstekst":"Nei","undertekst":null,"min":null,"max":null,"svartype":"RADIO","kriterieForVisningAvUndersporsmal":"CHECKED","svar":[{"verdi":"CHECKED"}],"undersporsmal":[{"id":"5f3430d0-80d1-3351-9e55-425f130f6462","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING","sporsmalstekst":"Har det skjedd en varig endring i arbeidssituasjonen eller virksomheten din i mellom 1. januar 2022 og frem tilsykmeldingstidspunktet?","undertekst":null,"min":null,"max":null,"svartype":"JA_NEI","kriterieForVisningAvUndersporsmal":"JA","svar":[{"verdi":"NEI"}],"undersporsmal":[{"id":"588e0293-4082-381f-a761-f769e9d6d6e5","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_BEGRUNNELSE","sporsmalstekst":"Hvilken endring har skjedd i din arbeidssituasjon eller virksomhet?","undertekst":"Du kan velge ett eller flere alternativer","min":null,"max":null,"svartype":"CHECKBOX_GRUPPE","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[{"id":"4d73578d-81dd-3e32-9bd1-70cc1536de7f","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_BEGRUNNELSE_OPPRETTELSE_NEDLEGGELSE","sporsmalstekst":"Opprettelse eller nedleggelse av næringsvirksomhet","undertekst":null,"min":null,"max":null,"svartype":"CHECKBOX","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null},{"id":"a5f864f8-9003-3048-a6d7-ab06c512b10e","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_BEGRUNNELSE_ENDRET_INNSATS","sporsmalstekst":"Økt eller redusert innsats","undertekst":null,"min":null,"max":null,"svartype":"CHECKBOX","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null},{"id":"2932c514-5690-328b-9fd7-305c920078ee","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_BEGRUNNELSE_OMLEGGING_AV_VIRKSOMHETEN","sporsmalstekst":"Omlegging av virksomheten","undertekst":null,"min":null,"max":null,"svartype":"CHECKBOX","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null},{"id":"700f13e4-c332-37b8-b507-1a3739d6fdb2","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_BEGRUNNELSE_ENDRET_MARKEDSSITUASJON","sporsmalstekst":"Endret markedssituasjon","undertekst":null,"min":null,"max":null,"svartype":"CHECKBOX","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null},{"id":"c95aca0e-6730-3ca8-968f-4ea0dd34b22e","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_BEGRUNNELSE_ANNET","sporsmalstekst":"Annet","undertekst":null,"min":null,"max":null,"svartype":"CHECKBOX","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null}],"metadata":null},{"id":"5621c659-ff15-3b25-a73e-248966470fd0","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_25_PROSENT","sporsmalstekst":"Har du hatt mer enn 25 prosent endring i årsinntekten din som følge av den varige endringen?","undertekst":null,"min":null,"max":null,"svartype":"JA_NEI","kriterieForVisningAvUndersporsmal":"JA","svar":[],"undersporsmal":[{"id":"551d8684-7f24-3965-b37c-92fbb7951d33","tag":"INNTEKTSOPPLYSNINGER_VARIG_ENDRING_DATO","sporsmalstekst":"Når skjedde den siste varige endringen?","undertekst":null,"min":"2022-01-01","max":"2025-07-01","svartype":"DATO","kriterieForVisningAvUndersporsmal":null,"svar":[],"undersporsmal":[],"metadata":null}],"metadata":{"sigrunInntekt":{"inntekter":[{"aar":"2024","verdi":709238},{"aar":"2023","verdi":772630},{"aar":"2022","verdi":787400}],"g-verdier":[{"aar":"2024","verdi":122225},{"aar":"2023","verdi":116239},{"aar":"2022","verdi":109784}],"g-sykmelding":130160,"beregnet":{"snitt":756422,"p25":945528,"m25":567317},"original-inntekt":[{"inntektsaar":"2024","pensjonsgivendeInntekt":[{"datoForFastsetting":"2025-09-26T05:32:49.946Z","skatteordning":"FASTLAND","loenn":0,"loenn-bare-pensjon":0,"naering":666000,"fiske-fangst-familiebarnehage":0}],"totalInntekt":666000},{"inntektsaar":"2023","pensjonsgivendeInntekt":[{"datoForFastsetting":"2025-09-26T05:34:01.182Z","skatteordning":"FASTLAND","loenn":0,"loenn-bare-pensjon":0,"naering":689995,"fiske-fangst-familiebarnehage":0}],"totalInntekt":689995},{"inntektsaar":"2022","pensjonsgivendeInntekt":[{"datoForFastsetting":"2025-09-26T05:34:16.259Z","skatteordning":"FASTLAND","loenn":0,"loenn-bare-pensjon":0,"naering":674999,"fiske-fangst-familiebarnehage":0}],"totalInntekt":674999}]}}}],"metadata":null}],"metadata":null}],"metadata":null}],"metadata":null}],"metadata":null},{"id":"351d2a33-a434-3467-8032-584c6bb33e1e","tag":"TIL_SLUTT","sporsmalstekst":null,"undertekst":null,"min":null,"max":null,"svartype":"OPPSUMMERING","kriterieForVisningAvUndersporsmal":null,"svar":[{"verdi":"true"}],"undersporsmal":[],"metadata":null}],"avsendertype":"BRUKER","ettersending":false,"mottaker":null,"egenmeldtSykmelding":false,"yrkesskade":null,"arbeidUtenforNorge":false,"harRedusertVenteperiode":false,"behandlingsdager":[],"permitteringer":[],"merknaderFraSykmelding":null,"egenmeldingsdagerFraSykmelding":null,"merknader":null,"sendTilGosys":null,"utenlandskSykmelding":false,"medlemskapVurdering":null,"forstegangssoknad":true,"tidligereArbeidsgiverOrgnummer":null,"fiskerBlad":null,"inntektFraNyttArbeidsforhold":[],"selvstendigNaringsdrivende":{"roller":[],"inntekt":{"norskPersonidentifikator":"29419408008","inntektsAar":[{"aar":"2024","pensjonsgivendeInntekt":{"pensjonsgivendeInntektAvLoennsinntekt":0,"pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel":0,"pensjonsgivendeInntektAvNaeringsinntekt":666000,"pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage":0},"erFerdigLignet":true},{"aar":"2023","pensjonsgivendeInntekt":{"pensjonsgivendeInntektAvLoennsinntekt":0,"pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel":0,"pensjonsgivendeInntektAvNaeringsinntekt":689995,"pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage":0},"erFerdigLignet":true},{"aar":"2022","pensjonsgivendeInntekt":{"pensjonsgivendeInntektAvLoennsinntekt":0,"pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel":0,"pensjonsgivendeInntektAvNaeringsinntekt":674999,"pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage":0},"erFerdigLignet":true}]},"ventetid":{"fom":"2025-07-01","tom":"2025-07-16"},"syketilfelleHistorikk":null,"hovedSporsmalSvar":{"FRAVAR_FOR_SYKMELDINGEN_V2":false,"TILBAKE_I_ARBEID":false,"ARBEID_UNDERVEIS_100_PROSENT_0":false,"ARBEID_UTENFOR_NORGE":false,"ANDRE_INNTEKTSKILDER":false,"OPPHOLD_UTENFOR_EOS":false,"INNTEKTSOPPLYSNINGER_VIRKSOMHETEN_AVVIKLET":false,"INNTEKTSOPPLYSNINGER_NY_I_ARBEIDSLIVET":false,"INNTEKTSOPPLYSNINGER_VARIG_ENDRING":false},"harForsikring":false},"friskTilArbeidVedtakId":null,"friskTilArbeidVedtakPeriode":null,"fortsattArbeidssoker":null,"inntektUnderveis":null,"ignorerArbeidssokerregister":null}
-""".trimIndent()
+    """.trimIndent()

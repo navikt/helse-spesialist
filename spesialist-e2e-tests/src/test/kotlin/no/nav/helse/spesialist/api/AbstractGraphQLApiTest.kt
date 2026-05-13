@@ -59,7 +59,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
-    private val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
+    val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
 
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()

@@ -26,7 +26,7 @@ class PutTildelingBehandlerTest {
         // given
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId =
-            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+            integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
@@ -64,7 +64,7 @@ class PutTildelingBehandlerTest {
         // given
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId =
-            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+            integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
@@ -104,7 +104,7 @@ class PutTildelingBehandlerTest {
         // given
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId =
-            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+            integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
@@ -145,7 +145,7 @@ class PutTildelingBehandlerTest {
         // given
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId =
-            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+            integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)

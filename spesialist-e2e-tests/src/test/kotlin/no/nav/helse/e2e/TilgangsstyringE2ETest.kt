@@ -112,10 +112,9 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     private fun fetchPerson() =
         personQuery.person(
             personPseudoId =
-                sessionFactory
-                    .transactionalSessionScope {
-                        it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-                    }.value
+                personPseudoIdProvider
+                    .nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                    .value
                     .toString(),
             env = dataFetchingEnvironment,
         )

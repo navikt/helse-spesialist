@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 
 class GetKrrRegistrertStatusForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
@@ -107,14 +107,14 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         assertNotNull(body)
         assertJsonEquals(
             """
-              {
-                "type" : "about:blank",
-                "status" : 404,
-                "title" : "PersonPseudoId har utløpt (eller aldri eksistert)",
-                "code" : "PERSON_PSEUDO_ID_IKKE_FUNNET"
-              }
-        """.trimIndent(),
-            body
+            {
+              "type" : "about:blank",
+              "status" : 404,
+              "title" : "PersonPseudoId har utløpt (eller aldri eksistert)",
+              "code" : "PERSON_PSEUDO_ID_IKKE_FUNNET"
+            }
+            """.trimIndent(),
+            body,
         )
 
         verify { integrationTestFixture.krrRegistrertStatusHenterMock wasNot Called }
@@ -143,14 +143,14 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         assertNotNull(body)
         assertJsonEquals(
             """
-              {
-                "type" : "about:blank",
-                "status" : 403,
-                "title" : "Mangler tilgang til person",
-                "code" : "MANGLER_TILGANG_TIL_PERSON"
-              }
-        """.trimIndent(),
-            body
+            {
+              "type" : "about:blank",
+              "status" : 403,
+              "title" : "Mangler tilgang til person",
+              "code" : "MANGLER_TILGANG_TIL_PERSON"
+            }
+            """.trimIndent(),
+            body,
         )
 
         verify { integrationTestFixture.krrRegistrertStatusHenterMock wasNot Called }
@@ -179,13 +179,13 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         assertNotNull(body)
         assertJsonEquals(
             """
-              {
-                "type" : "about:blank",
-                "status" : 500,
-                "title" : "Internal Server Error"
-              }
-        """.trimIndent(),
-            body
+            {
+              "type" : "about:blank",
+              "status" : 500,
+              "title" : "Internal Server Error"
+            }
+            """.trimIndent(),
+            body,
         )
     }
 }

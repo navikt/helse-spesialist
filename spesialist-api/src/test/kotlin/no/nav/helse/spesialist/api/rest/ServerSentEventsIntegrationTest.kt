@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.seconds
 class ServerSentEventsIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val opptegnelseRepository = integrationTestFixture.sessionFactory.sessionContext.opptegnelseRepository
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test

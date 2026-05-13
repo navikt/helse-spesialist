@@ -60,7 +60,7 @@ internal fun Route.sse(
                 val (identitetsnummer, sisteSekvensnummerVedInitiering) =
                     sessionFactory.transactionalSessionScope {
                         val identitetsnummer =
-                            it.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+                            personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
                         val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
                         identitetsnummer to sisteSekvensnummer
                     }

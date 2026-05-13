@@ -19,7 +19,7 @@ class GetInntektsmeldingBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
 
     @Test
     fun `kan hente inntektsmelding hvis man har tilgang til person`() {
@@ -30,14 +30,15 @@ class GetInntektsmeldingBehandlerTest {
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(
-                lagInntektsmeldingJson(
-                    id = dokumentId,
-                    fødselsnummer = person.id.value,
-                    aktørId = person.aktørId,
-                    organisasjonsnummer = organisasjonsnummer
-                )
-            )
+            dokument =
+                objectMapper.readTree(
+                    lagInntektsmeldingJson(
+                        id = dokumentId,
+                        fødselsnummer = person.id.value,
+                        aktørId = person.aktørId,
+                        organisasjonsnummer = organisasjonsnummer,
+                    ),
+                ),
         )
 
         val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
@@ -45,10 +46,11 @@ class GetInntektsmeldingBehandlerTest {
         val saksbehandler = lagSaksbehandler()
 
         // When:
-        val response = integrationTestFixture.get(
-            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
-            saksbehandler = saksbehandler
-        )
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -64,14 +66,15 @@ class GetInntektsmeldingBehandlerTest {
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(
-                lagInntektsmeldingJson(
-                    id = dokumentId,
-                    fødselsnummer = "",
-                    aktørId = person.aktørId,
-                    organisasjonsnummer = organisasjonsnummer
-                )
-            )
+            dokument =
+                objectMapper.readTree(
+                    lagInntektsmeldingJson(
+                        id = dokumentId,
+                        fødselsnummer = "",
+                        aktørId = person.aktørId,
+                        organisasjonsnummer = organisasjonsnummer,
+                    ),
+                ),
         )
 
         val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
@@ -79,10 +82,11 @@ class GetInntektsmeldingBehandlerTest {
         val saksbehandler = lagSaksbehandler()
 
         // When:
-        val response = integrationTestFixture.get(
-            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
-            saksbehandler = saksbehandler
-        )
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -98,14 +102,15 @@ class GetInntektsmeldingBehandlerTest {
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(
-                lagInntektsmeldingJson(
-                    id = dokumentId,
-                    fødselsnummer = "",
-                    aktørId = "",
-                    organisasjonsnummer = organisasjonsnummer
-                )
-            )
+            dokument =
+                objectMapper.readTree(
+                    lagInntektsmeldingJson(
+                        id = dokumentId,
+                        fødselsnummer = "",
+                        aktørId = "",
+                        organisasjonsnummer = organisasjonsnummer,
+                    ),
+                ),
         )
 
         val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
@@ -113,10 +118,11 @@ class GetInntektsmeldingBehandlerTest {
         val saksbehandler = lagSaksbehandler()
 
         // When:
-        val response = integrationTestFixture.get(
-            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
-            saksbehandler = saksbehandler
-        )
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
@@ -126,20 +132,22 @@ class GetInntektsmeldingBehandlerTest {
     fun `kan ikke hente inntektsmelding hvis man ikke har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
-            .also(personRepository::lagre)
+        val person =
+            lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
+                .also(personRepository::lagre)
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(
-                lagInntektsmeldingJson(
-                    id = dokumentId,
-                    fødselsnummer = person.id.value,
-                    aktørId = person.aktørId,
-                    organisasjonsnummer = organisasjonsnummer
-                )
-            )
+            dokument =
+                objectMapper.readTree(
+                    lagInntektsmeldingJson(
+                        id = dokumentId,
+                        fødselsnummer = person.id.value,
+                        aktørId = person.aktørId,
+                        organisasjonsnummer = organisasjonsnummer,
+                    ),
+                ),
         )
 
         val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
@@ -147,10 +155,11 @@ class GetInntektsmeldingBehandlerTest {
         val saksbehandler = lagSaksbehandler()
 
         // When:
-        val response = integrationTestFixture.get(
-            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
-            saksbehandler = saksbehandler
-        )
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -210,4 +219,4 @@ fun lagInntektsmeldingJson(
       "format": "Inntektsmelding",
       "forespurt": false
     }
-""".trimIndent()
+    """.trimIndent()

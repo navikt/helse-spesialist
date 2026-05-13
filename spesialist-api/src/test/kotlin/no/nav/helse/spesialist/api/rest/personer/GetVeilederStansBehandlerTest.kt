@@ -29,7 +29,7 @@ class GetVeilederStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val opprettet = Instant.now()
         val veilederStans =
@@ -72,7 +72,7 @@ class GetVeilederStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
         val response =
@@ -101,7 +101,7 @@ class GetVeilederStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val veilederStans =
             VeilederStans.ny(

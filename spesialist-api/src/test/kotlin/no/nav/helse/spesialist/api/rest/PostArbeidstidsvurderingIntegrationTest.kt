@@ -292,7 +292,7 @@ class PostArbeidstidsvurderingIntegrationTest {
             adressebeskyttelse = adressebeskyttelse,
         ).also(sessionContext.personRepository::lagre)
             .id
-            .let(sessionContext.personPseudoIdDao::nyPersonPseudoId)
+            .let(integrationTestFixture.personPseudoIdProvider::nyPersonPseudoId)
 
     private fun lagPublisertSubsumsjon(
         utfall: String,
@@ -321,15 +321,15 @@ class PostArbeidstidsvurderingIntegrationTest {
                 sporing =
                     mapOf(
                         "vedtaksperiode" to
-                                listOf(
-                                    arbeidsgiver1BerortVedtaksperiodeId,
-                                    arbeidsgiver2BerortVedtaksperiodeId,
-                                ).map(UUID::toString),
+                            listOf(
+                                arbeidsgiver1BerortVedtaksperiodeId,
+                                arbeidsgiver2BerortVedtaksperiodeId,
+                            ).map(UUID::toString),
                         "organisasjonsnummer" to
-                                listOf(
-                                    arbeidsgiver1Organisasjonsnummer,
-                                    arbeidsgiver2Organisasjonsnummer,
-                                ),
+                            listOf(
+                                arbeidsgiver1Organisasjonsnummer,
+                                arbeidsgiver2Organisasjonsnummer,
+                            ),
                         "saksbehandler" to listOf(saksbehandler.epost),
                         "vurdertMinimumSykdomsgrad" to listOf(overstyring.eksternHendelseId.toString()),
                     ),

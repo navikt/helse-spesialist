@@ -42,7 +42,7 @@ class PatchSaksbehandlerStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         lagVedtaksperiode(
             id = vedtaksperiodeId,
@@ -114,7 +114,7 @@ class PatchSaksbehandlerStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         lagVedtaksperiode(
             id = vedtaksperiodeId,

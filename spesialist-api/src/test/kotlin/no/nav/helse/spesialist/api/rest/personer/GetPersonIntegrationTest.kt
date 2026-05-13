@@ -17,26 +17,28 @@ import kotlin.test.assertNotNull
 
 class GetPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
     fun `henter person uten mellomnavn som forventet`() {
         // Given:
         val fødselsdato = LocalDate.now().minusYears(45)
-        val person = lagPerson(
-            fornavn = "Ola",
-            mellomnavn = null,
-            etternavn = "Nordmann",
-            kjønn = Personinfo.Kjønn.Mann,
-            fødselsdato = fødselsdato,
-        ).also(personRepository::lagre)
+        val person =
+            lagPerson(
+                fornavn = "Ola",
+                mellomnavn = null,
+                etternavn = "Nordmann",
+                kjønn = Personinfo.Kjønn.Mann,
+                fødselsdato = fødselsdato,
+            ).also(personRepository::lagre)
         val personinfo = person.info!!
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
-        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns listOf(
-            AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
-            AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
-        )
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns
+            listOf(
+                AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+            )
 
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
@@ -70,19 +72,21 @@ class GetPersonIntegrationTest {
     fun `henter person med mellomnavn som separat felt`() {
         // Given:
         val fødselsdato = LocalDate.now().minusYears(29).plusDays(1)
-        val person = lagPerson(
-            fornavn = "Kari",
-            mellomnavn = "Midtre",
-            etternavn = "Nordmann",
-            kjønn = Personinfo.Kjønn.Kvinne,
-            fødselsdato = fødselsdato,
-        ).also(personRepository::lagre)
+        val person =
+            lagPerson(
+                fornavn = "Kari",
+                mellomnavn = "Midtre",
+                etternavn = "Nordmann",
+                kjønn = Personinfo.Kjønn.Kvinne,
+                fødselsdato = fødselsdato,
+            ).also(personRepository::lagre)
         val personinfo = person.info!!
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
-        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns listOf(
-            AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
-            AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
-        )
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns
+            listOf(
+                AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+            )
 
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
@@ -122,12 +126,13 @@ class GetPersonIntegrationTest {
         val andreIdent2 = lagPerson().id.value
 
         every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
-        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns listOf(
-            AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
-            AlleIdenterHenter.Ident(andreIdent1, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
-            AlleIdenterHenter.Ident(andreIdent2, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
-            AlleIdenterHenter.Ident(aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
-        )
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns
+            listOf(
+                AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(andreIdent1, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(andreIdent2, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+            )
 
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
@@ -230,4 +235,3 @@ class GetPersonIntegrationTest {
         )
     }
 }
-

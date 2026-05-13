@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 class GetInfotrygdperioderForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
-    private val personPseudoIdDao = sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = sessionContext.personRepository
     private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
     private val behandlingRepository = sessionContext.behandlingRepository

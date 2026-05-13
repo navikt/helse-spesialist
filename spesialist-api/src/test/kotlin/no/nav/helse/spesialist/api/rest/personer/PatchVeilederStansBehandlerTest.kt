@@ -37,7 +37,7 @@ class PatchVeilederStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
         val response =
@@ -67,7 +67,7 @@ class PatchVeilederStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         lagVedtaksperiode(
             id = vedtaksperiodeId,

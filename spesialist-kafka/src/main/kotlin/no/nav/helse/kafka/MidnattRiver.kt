@@ -8,15 +8,10 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.loggInfo
-import java.time.Duration
 
 class MidnattRiver(
     private val sessionFactory: SessionFactory,
 ) : SpesialistRiver {
-    private companion object {
-        private val EN_UKE = Duration.ofDays(7)
-    }
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireAny("@event_name", listOf("midnatt", "slett_gamle_dokumenter_spesialist"))
@@ -38,11 +33,6 @@ class MidnattRiver(
 
         sessionFactory.transactionalSessionScope {
             val antallSlettet = it.dokumentDao.slettGamleDokumenter()
-            loggInfo("Slettet $antallSlettet dokumenter")
-        }
-
-        sessionFactory.transactionalSessionScope {
-            val antallSlettet = it.personPseudoIdDao.slettPseudoIderEldreEnn(EN_UKE)
             loggInfo("Slettet $antallSlettet dokumenter")
         }
     }

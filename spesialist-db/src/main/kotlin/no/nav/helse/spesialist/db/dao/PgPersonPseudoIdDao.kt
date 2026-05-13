@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import java.time.Duration
 import java.time.Instant
 import javax.sql.DataSource
 
@@ -36,10 +35,4 @@ class PgPersonPseudoIdDao private constructor(
             val identitetsnummer = it.string("identitetsnummer")
             Identitetsnummer.fraString(identitetsnummer)
         }
-
-    override fun slettPseudoIderEldreEnn(alder: Duration): Int =
-        dbQuery.update(
-            """DELETE FROM personpseudoid WHERE opprettet_tidspunkt < :cutOff""",
-            "cutOff" to Instant.now().minus(alder),
-        )
 }

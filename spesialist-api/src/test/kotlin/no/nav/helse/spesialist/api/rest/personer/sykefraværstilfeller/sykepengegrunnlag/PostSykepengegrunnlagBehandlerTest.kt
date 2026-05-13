@@ -32,7 +32,7 @@ class PostSykepengegrunnlagBehandlerTest {
         // given
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId =
-            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+            integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)
         val organisasjonsnummer1 = lagOrganisasjonsnummer()
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
@@ -260,7 +260,7 @@ class PostSykepengegrunnlagBehandlerTest {
                 personRepository.lagre(it)
             }
         val personPseudoId =
-            integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+            integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)
 
         // when

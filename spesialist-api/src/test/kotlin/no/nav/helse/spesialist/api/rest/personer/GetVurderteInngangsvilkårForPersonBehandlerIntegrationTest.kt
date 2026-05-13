@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 
 class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @BeforeEach
@@ -42,7 +42,6 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
-
 
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(any(), skjæringstidspunkt)
@@ -69,23 +68,25 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val vurderingId = UUID.randomUUID()
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(listOf(person.id.value, person.id.value.reversed()), skjæringstidspunkt)
-        } returns listOf(
-            SamlingAvVurderteInngangsvilkår(
-                samlingAvVurderteInngangsvilkårId = samlingId,
-                versjon = 1,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vurderteInngangsvilkår = listOf(
-                    VurdertInngangsvilkår.ManueltVurdertInngangsvilkår(
-                        vilkårskode = "8-2",
-                        vurderingskode = "OPPFYLT",
-                        tidspunkt = tidspunkt,
-                        navident = "A123456",
-                        begrunnelse = "Begrunnelse for vurdering",
-                        id = vurderingId,
-                    ),
+        } returns
+            listOf(
+                SamlingAvVurderteInngangsvilkår(
+                    samlingAvVurderteInngangsvilkårId = samlingId,
+                    versjon = 1,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vurderteInngangsvilkår =
+                        listOf(
+                            VurdertInngangsvilkår.ManueltVurdertInngangsvilkår(
+                                vilkårskode = "8-2",
+                                vurderingskode = "OPPFYLT",
+                                tidspunkt = tidspunkt,
+                                navident = "A123456",
+                                begrunnelse = "Begrunnelse for vurdering",
+                                id = vurderingId,
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         // When:
         val response = integrationTestFixture.get("/api/personer/${personPseudoId.value}/vurderte-inngangsvilkar/$skjæringstidspunkt")
@@ -131,26 +132,29 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         val vurderingId = UUID.randomUUID()
         every {
             integrationTestFixture.inngangsvilkårHenterMock.hentInngangsvilkår(any(), skjæringstidspunkt)
-        } returns listOf(
-            SamlingAvVurderteInngangsvilkår(
-                samlingAvVurderteInngangsvilkårId = samlingId,
-                versjon = 2,
-                skjæringstidspunkt = skjæringstidspunkt,
-                vurderteInngangsvilkår = listOf(
-                    VurdertInngangsvilkår.AutomatiskVurdertInngangsvilkår(
-                        vilkårskode = "8-4",
-                        vurderingskode = null,
-                        tidspunkt = tidspunkt,
-                        id = vurderingId,
-                        automatiskVurdering = AutomatiskVurdering(
-                            system = "spleis",
-                            versjon = "1.0",
-                            grunnlagsdata = mapOf("nøkkel" to "verdi"),
+        } returns
+            listOf(
+                SamlingAvVurderteInngangsvilkår(
+                    samlingAvVurderteInngangsvilkårId = samlingId,
+                    versjon = 2,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vurderteInngangsvilkår =
+                        listOf(
+                            VurdertInngangsvilkår.AutomatiskVurdertInngangsvilkår(
+                                vilkårskode = "8-4",
+                                vurderingskode = null,
+                                tidspunkt = tidspunkt,
+                                id = vurderingId,
+                                automatiskVurdering =
+                                    AutomatiskVurdering(
+                                        system = "spleis",
+                                        versjon = "1.0",
+                                        grunnlagsdata = mapOf("nøkkel" to "verdi"),
+                                    ),
+                            ),
                         ),
-                    ),
                 ),
-            ),
-        )
+            )
 
         // When:
         val response = integrationTestFixture.get("/api/personer/${personPseudoId.value}/vurderte-inngangsvilkar/$skjæringstidspunkt")

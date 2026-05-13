@@ -28,7 +28,7 @@ class GetSaksbehandlerStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
         val begrunnelse = "Begrunnelse"
 
         val stans =
@@ -68,7 +68,7 @@ class GetSaksbehandlerStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
         val response =
@@ -98,7 +98,7 @@ class GetSaksbehandlerStansBehandlerTest {
                 id = Identitetsnummer.fraString(fødselsnummer),
             ).also(sessionContext.personRepository::lagre)
 
-        val personPseudoId = sessionContext.personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val stans =
             SaksbehandlerStans.ny(

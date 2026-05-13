@@ -20,7 +20,7 @@ class GetListeOppgaverBehandler : GetBehandler<ListeOppgaver, ApiOppgaveProjeksj
                 .finnListeOppgaveProjeksjoner(
                     sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
                     sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
-                ).tilApiType(kallKontekst.transaksjon)
+                ).tilApiType(kallKontekst.transaksjon, kallKontekst.personPseudoIdProvider)
 
         loggInfo("Hentet ${oppgaver.elementer.size} liste-oppgaver (av totalt ${oppgaver.totaltAntall})")
 

@@ -165,7 +165,7 @@ class PersonQueryHandler(
         brukerroller: Set<Brukerrolle>,
     ): DataFetcherResult<ApiPerson?> {
         val identitetsnummer = (
-            transaction.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+            personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
                 ?: run {
                     loggInfo("Fant ikke person basert på personPseudoId: ${personPseudoId.value}")
                     notFound("PseudoId er ugyldig eller utgått")
@@ -255,7 +255,7 @@ class PersonQueryHandler(
                     .map {
                         ApiAnnetFodselsnummer(
                             fodselsnummer = it.value,
-                            personPseudoId = transaction.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = it).value,
+                            personPseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer = it).value,
                         )
                     }.toList(),
             dodsdato = snapshot.dodsdato,

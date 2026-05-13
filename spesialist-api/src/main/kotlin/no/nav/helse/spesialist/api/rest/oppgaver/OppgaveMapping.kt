@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjon
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
 import no.nav.helse.spesialist.api.rest.ApiPersonnavn
 import no.nav.helse.spesialist.api.rest.ApiTildeling
+import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
@@ -17,7 +18,10 @@ import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.ZoneId
 
-internal fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
+internal fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(
+    transaksjon: SessionContext,
+    personPseudoIdProvider: PersonPseudoIdDao,
+): ApiOppgaveProjeksjonSide {
     val personer =
         transaksjon.personRepository
             .finnAlle(elementer.map { it.identitetsnummer }.toSet())
@@ -50,7 +54,7 @@ internal fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiT
             elementer.map { oppgave ->
                 val person = personer.getRequired(oppgave.identitetsnummer)
                 val personPseudoId =
-                    transaksjon.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = person.id)
+                    personPseudoIdProvider.nyPersonPseudoId(identitetsnummer = person.id)
                 ApiOppgaveProjeksjon(
                     id = oppgave.id.toString(),
                     aktorId = person.aktørId,

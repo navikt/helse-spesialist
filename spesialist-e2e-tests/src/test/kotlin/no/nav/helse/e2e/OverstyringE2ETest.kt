@@ -191,10 +191,9 @@ class OverstyringE2ETest : AbstractE2ETest() {
 
         mockSnapshot()
         val personPseudoId =
-            sessionFactory
-                .transactionalSessionScope {
-                    it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-                }.value
+            personPseudoIdProvider
+                .nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                .value
                 .toString()
 
         val snapshot: ApiPerson =

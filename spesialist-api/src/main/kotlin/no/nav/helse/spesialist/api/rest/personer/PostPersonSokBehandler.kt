@@ -53,7 +53,7 @@ class PostPersonSokBehandler : PostBehandler<Personer.Sok, ApiPersonSokRequest, 
         }
 
         return kallKontekst.medMdcOgAttribute(MdcKey.IDENTITETSNUMMER to person.id.value) {
-            val personPseudoId = kallKontekst.transaksjon.personPseudoIdDao.nyPersonPseudoId(person.id)
+            val personPseudoId = kallKontekst.personPseudoIdProvider.nyPersonPseudoId(person.id)
             kallKontekst.medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
                 val klarForVisning = person.harDataNødvendigForVisning()
                 if (!klarForVisning) {

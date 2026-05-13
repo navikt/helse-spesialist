@@ -134,7 +134,7 @@ class KallKontekst(
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
-            val identitetsnummer = transaksjon.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+            val identitetsnummer = personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
 
             if (identitetsnummer == null) {
                 loggWarn("Identitetsnummeret ble ikke funnet", "personPseudoId" to personPseudoId)

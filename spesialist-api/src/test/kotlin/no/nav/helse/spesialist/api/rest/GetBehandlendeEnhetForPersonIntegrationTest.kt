@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 
 class GetBehandlendeEnhetForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test

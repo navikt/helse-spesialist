@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 
 class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
+    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
@@ -54,7 +54,7 @@ class PostVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
                         vurderinger.vurderinger[0].vilkårskode == "8-2" &&
                         vurderinger.vurderinger[0].vurderingskode == "OPPFYLT" &&
                         vurderinger.vurderinger[0].begrunnelse == "Begrunnelse for vurdering"
-                }
+                },
             )
         }
     }

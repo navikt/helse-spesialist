@@ -14,19 +14,20 @@ import java.time.YearMonth
 import java.util.UUID
 
 class GraphQLApiTest : AbstractGraphQLApiTest() {
-
     @Test
     fun `henter refusjonsopplysninger`() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson())
-        val pseudoId = sessionFactory.transactionalSessionScope {
-            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-        }.value
+        val pseudoId =
+            personPseudoIdProvider
+                .nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                .value
         opprettAvviksvurdering(vilkårsgrunnlagId = vilkårsgrunnlagId)
 
-        val body = runQuery(
-            """
+        val body =
+            runQuery(
+                """
             {
                 person(personPseudoId:"$pseudoId") {
                     vilkarsgrunnlagV2 {
@@ -44,15 +45,17 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
                 }
                 }
             }
-        """
-        )
+        """,
+            )
         val refusjonsopplysning =
-            body["data"]["person"]["vilkarsgrunnlagV2"].first()["arbeidsgiverrefusjoner"].first()
-                .get("refusjonsopplysninger").first()
+            body["data"]["person"]["vilkarsgrunnlagV2"]
+                .first()["arbeidsgiverrefusjoner"]
+                .first()
+                .get("refusjonsopplysninger")
+                .first()
         assertEquals("2020-01-01", refusjonsopplysning["fom"].asText())
         assertTrue(refusjonsopplysning["tom"].isNull)
         assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
-
     }
 
     @Test
@@ -61,12 +64,14 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 26.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson())
-        val pseudoId = sessionFactory.transactionalSessionScope {
-            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-        }.value
+        val pseudoId =
+            personPseudoIdProvider
+                .nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                .value
 
-        val body = runQuery(
-            """
+        val body =
+            runQuery(
+                """
             {
                 person(personPseudoId:"$pseudoId") {
                     vilkarsgrunnlagV2 {
@@ -90,8 +95,8 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
                 }
                 }
             }
-        """
-        )
+        """,
+            )
 
         val vilkårsgrunnlag = body["data"]["person"]["vilkarsgrunnlagV2"].first()
         assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["beregningsgrunnlag"].asText())
@@ -134,12 +139,14 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 0.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson())
-        val pseudoId = sessionFactory.transactionalSessionScope {
-            it.personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
-        }.value
+        val pseudoId =
+            personPseudoIdProvider
+                .nyPersonPseudoId(Identitetsnummer.fraString(FØDSELSNUMMER))
+                .value
 
-        val body = runQuery(
-            """
+        val body =
+            runQuery(
+                """
             {
                 person(personPseudoId:"$pseudoId") {
                     vilkarsgrunnlagV2 {
@@ -154,8 +161,8 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
                     }
                 }
             }
-        """
-        )
+        """,
+            )
         val sykepengegrunnlagsgrense =
             body["data"]["person"]["vilkarsgrunnlagV2"].first()["sykepengegrunnlagsgrense"]
 
