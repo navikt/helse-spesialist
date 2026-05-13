@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
@@ -12,7 +12,7 @@ import javax.sql.DataSource
 
 class PgPersonPseudoIdDao private constructor(
     private val dbQuery: DbQuery,
-) : PersonPseudoIdDao {
+) : PersonPseudoIdProvider {
     constructor(session: Session) : this(SessionDbQuery(session))
     constructor(dataSource: DataSource) : this(DataSourceDbQuery(dataSource))
 

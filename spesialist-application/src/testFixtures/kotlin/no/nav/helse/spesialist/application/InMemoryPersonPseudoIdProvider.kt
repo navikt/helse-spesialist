@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.time.Instant
 
-class InMemoryPersonPseudoIdDao : PersonPseudoIdDao {
+class InMemoryPersonPseudoIdProvider : PersonPseudoIdProvider {
     private val mapping = mutableMapOf<PersonPseudoId, Pair<Identitetsnummer, Instant>>()
 
     override fun nyPersonPseudoId(identitetsnummer: Identitetsnummer): PersonPseudoId {

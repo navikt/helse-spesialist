@@ -36,13 +36,13 @@ import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringHenter
-import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdDao
+import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -74,7 +74,7 @@ object TestRunner {
 
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
 
-    private val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
+    private val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
 
     private fun token(
         saksbehandler: Saksbehandler,
@@ -227,6 +227,6 @@ object TestRunner {
         val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,
-        val personPseudoIdProvider: PersonPseudoIdDao,
+        val personPseudoIdProvider: PersonPseudoIdProvider,
     )
 }

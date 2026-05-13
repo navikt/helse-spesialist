@@ -39,7 +39,7 @@ import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.OpptegnelseListener
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
@@ -64,7 +64,7 @@ fun configureKtorApplication(
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     infotrygdperiodeHenter: InfotrygdperiodeHenter,
-    personPseudoIdProvider: PersonPseudoIdDao,
+    personPseudoIdProvider: PersonPseudoIdProvider,
 ) {
     with(ktorApplication) {
         install(CallId) { configureCallIdPlugin() }

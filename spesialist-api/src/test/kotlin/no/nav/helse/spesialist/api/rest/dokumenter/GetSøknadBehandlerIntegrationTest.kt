@@ -17,7 +17,7 @@ class GetSøknadBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
 
     @Test
     fun `får hentet søknad hvis man har tilgang til person`() {
@@ -30,7 +30,7 @@ class GetSøknadBehandlerIntegrationTest {
             dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value)),
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val pseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val saksbehandler = lagSaksbehandler()
 
@@ -58,7 +58,7 @@ class GetSøknadBehandlerIntegrationTest {
             dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value)),
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
+        val pseudoId = personPseudoIdProvider.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 

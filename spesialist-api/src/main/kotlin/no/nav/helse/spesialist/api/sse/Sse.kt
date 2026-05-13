@@ -12,7 +12,7 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.coMedMdc
 import no.nav.helse.spesialist.application.logg.loggDebug
@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
 internal fun Route.sse(
     sessionFactory: SessionFactory,
     opptegnelseListener: OpptegnelseListener,
-    personPseudoIdProvider: PersonPseudoIdDao,
+    personPseudoIdProvider: PersonPseudoIdProvider,
 ) {
     install(HttpRequestLifecycle) {
         cancelCallOnClose = true

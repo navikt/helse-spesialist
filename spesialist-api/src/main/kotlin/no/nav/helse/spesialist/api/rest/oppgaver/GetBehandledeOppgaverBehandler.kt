@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.BehandledeOppgaver
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 
@@ -37,7 +37,7 @@ class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehan
         return RestResponse.OK(oppgaver)
     }
 
-    private fun Side<BehandletOppgaveProjeksjon>.tilApiType(personPseudoIdProvider: PersonPseudoIdDao) =
+    private fun Side<BehandletOppgaveProjeksjon>.tilApiType(personPseudoIdProvider: PersonPseudoIdProvider) =
         ApiBehandletOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
             sidetall = sidetall,
@@ -49,7 +49,7 @@ class GetBehandledeOppgaverBehandler : GetBehandler<BehandledeOppgaver, ApiBehan
         )
 
     private fun BehandletOppgaveProjeksjon.tilApiType(
-        personPseudoIdProvider: PersonPseudoIdDao,
+        personPseudoIdProvider: PersonPseudoIdProvider,
     ): ApiBehandletOppgaveProjeksjon {
         val personPseudoId =
             personPseudoIdProvider.nyPersonPseudoId(

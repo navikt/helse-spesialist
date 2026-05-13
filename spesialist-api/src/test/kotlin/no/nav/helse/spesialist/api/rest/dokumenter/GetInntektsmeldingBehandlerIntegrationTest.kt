@@ -19,7 +19,7 @@ class GetInntektsmeldingBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
 
     @Test
     fun `kan hente inntektsmelding hvis man har tilgang til person`() {
@@ -41,7 +41,7 @@ class GetInntektsmeldingBehandlerTest {
                 ),
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val pseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val saksbehandler = lagSaksbehandler()
 
@@ -77,7 +77,7 @@ class GetInntektsmeldingBehandlerTest {
                 ),
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
+        val pseudoId = personPseudoIdProvider.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -113,7 +113,7 @@ class GetInntektsmeldingBehandlerTest {
                 ),
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
+        val pseudoId = personPseudoIdProvider.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -150,7 +150,7 @@ class GetInntektsmeldingBehandlerTest {
                 ),
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
+        val pseudoId = personPseudoIdProvider.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 

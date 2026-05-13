@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 
 class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @BeforeEach
@@ -40,7 +40,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
 
         every {
@@ -60,7 +60,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
         val samlingId = UUID.randomUUID()
         val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
@@ -124,7 +124,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
         val samlingId = UUID.randomUUID()
         val tidspunkt = LocalDateTime.of(2024, 1, 2, 10, 0, 0).toInstant(ZoneOffset.UTC)
@@ -220,7 +220,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         // Given:
         val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
 
         // When:
@@ -247,7 +247,7 @@ class GetVurderteInngangsvilkårForPersonBehandlerIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
         val skjæringstidspunkt = LocalDate.of(2024, 1, 1)
 
         every {

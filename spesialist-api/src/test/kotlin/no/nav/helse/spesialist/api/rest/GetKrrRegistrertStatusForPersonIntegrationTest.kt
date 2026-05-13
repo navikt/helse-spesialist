@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 
 class GetKrrRegistrertStatusForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
@@ -23,7 +23,7 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         coEvery {
             integrationTestFixture.krrRegistrertStatusHenterMock.hentForPerson(person.id.value)
@@ -47,7 +47,7 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         coEvery {
             integrationTestFixture.krrRegistrertStatusHenterMock.hentForPerson(person.id.value)
@@ -71,7 +71,7 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         coEvery {
             integrationTestFixture.krrRegistrertStatusHenterMock.hentForPerson(person.id.value)
@@ -125,7 +125,7 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         // Given:
         val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         coEvery {
             integrationTestFixture.krrRegistrertStatusHenterMock.hentForPerson(person.id.value)
@@ -161,7 +161,7 @@ class GetKrrRegistrertStatusForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         coEvery {
             integrationTestFixture.krrRegistrertStatusHenterMock.hentForPerson(person.id.value)

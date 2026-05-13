@@ -37,7 +37,7 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandl
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
-import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdDao
+import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
@@ -59,7 +59,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
-    val personPseudoIdProvider = InMemoryPersonPseudoIdDao()
+    val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
 
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()

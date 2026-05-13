@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 class GetInfotrygdperioderForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
     private val personRepository = sessionContext.personRepository
     private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
     private val behandlingRepository = sessionContext.behandlingRepository
@@ -28,7 +28,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val behandlingFom = LocalDate.of(2022, 1, 1)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -68,7 +68,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val behandlingFom = LocalDate.of(2022, 1, 1)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -99,7 +99,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
         val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/infotrygdperioder")
@@ -115,7 +115,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val tidligsteBehandlingFom = LocalDate.of(2020, 3, 15)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -165,7 +165,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
         val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/infotrygdperioder")
@@ -191,7 +191,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val behandlingFom = LocalDate.of(2022, 1, 1)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -223,7 +223,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val behandlingFom = LocalDate.of(2022, 1, 1)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -254,7 +254,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val behandlingFom = LocalDate.of(2022, 1, 1)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
@@ -282,7 +282,7 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)

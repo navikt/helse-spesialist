@@ -67,7 +67,7 @@ import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.OpptegnelseListener
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.PersoninfoHenter
 
 fun Routing.restRoutes(
@@ -85,7 +85,7 @@ fun Routing.restRoutes(
     personinfoHenter: PersoninfoHenter,
     sessionFactory: SessionFactory,
     opptegnelseListener: OpptegnelseListener,
-    personPseudoIdProvider: PersonPseudoIdDao,
+    personPseudoIdProvider: PersonPseudoIdProvider,
 ) {
     route("/api") {
         if (configuration.eksponerOpenApi) {

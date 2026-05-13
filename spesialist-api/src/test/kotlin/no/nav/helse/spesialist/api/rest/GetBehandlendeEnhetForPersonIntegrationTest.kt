@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 
 class GetBehandlendeEnhetForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
@@ -22,7 +22,7 @@ class GetBehandlendeEnhetForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         every {
             integrationTestFixture.behandlendeEnhetHenterMock.hentFor(person.id)
@@ -50,7 +50,7 @@ class GetBehandlendeEnhetForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         every {
             integrationTestFixture.behandlendeEnhetHenterMock.hentFor(person.id)
@@ -104,7 +104,7 @@ class GetBehandlendeEnhetForPersonIntegrationTest {
         // Given:
         val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
         val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/behandlende-enhet")
@@ -131,7 +131,7 @@ class GetBehandlendeEnhetForPersonIntegrationTest {
         // Given:
         val person = lagPerson()
         personRepository.lagre(person)
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         every {
             integrationTestFixture.behandlendeEnhetHenterMock.hentFor(person.id)

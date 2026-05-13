@@ -15,14 +15,14 @@ import kotlin.time.Duration.Companion.seconds
 class ServerSentEventsIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val opptegnelseRepository = integrationTestFixture.sessionFactory.sessionContext.opptegnelseRepository
-    private val personPseudoIdDao = integrationTestFixture.personPseudoIdProvider
+    private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
     @Test
     fun `mottar server sent events som forventet`() {
         // Given:
         val identitetsnummer = lagPerson().also(personRepository::lagre).id
-        val personPseudoId = personPseudoIdDao.nyPersonPseudoId(identitetsnummer)
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer)
 
         opptegnelseRepository.lagre(
             Opptegnelse.ny(

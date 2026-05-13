@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjon
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
 import no.nav.helse.spesialist.api.rest.ApiPersonnavn
 import no.nav.helse.spesialist.api.rest.ApiTildeling
-import no.nav.helse.spesialist.application.PersonPseudoIdDao
+import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
@@ -20,7 +20,7 @@ import java.time.ZoneId
 
 internal fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(
     transaksjon: SessionContext,
-    personPseudoIdProvider: PersonPseudoIdDao,
+    personPseudoIdProvider: PersonPseudoIdProvider,
 ): ApiOppgaveProjeksjonSide {
     val personer =
         transaksjon.personRepository
