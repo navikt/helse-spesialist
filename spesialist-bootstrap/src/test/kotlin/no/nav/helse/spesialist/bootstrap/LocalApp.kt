@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.personpseudoid.PersonPseudoIdTestFixture
 import no.nav.helse.spesialist.client.sparkel.norg.testfixtures.ClientSparkelNorgModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.testfixtures.ClientSparkelSykepengeperioderModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
@@ -25,6 +26,7 @@ fun main() {
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
     val apiModuleIntegrationTestFixture =
         ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
+    val personPseudoidIntegrationTestFixture = PersonPseudoIdTestFixture("local-app")
     rapidApp.start(
         configuration =
             Configuration(
@@ -37,6 +39,7 @@ fun main() {
                 clientSpeed = ClientSpeedModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
+                clientPersonPseudoId = personPseudoidIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,
                 kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
                 valkey = ValkeyModule.Configuration(valkey = null),

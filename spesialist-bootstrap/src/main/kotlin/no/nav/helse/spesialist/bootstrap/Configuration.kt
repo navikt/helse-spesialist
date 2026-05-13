@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
+import no.nav.helse.spesialist.client.personpseudoid.ClientPersonPseudoIdModule
 import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSykepengeperioderModule
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
@@ -27,6 +28,7 @@ data class Configuration(
     val clientSpillkar: ClientSpillkarModule.Configuration,
     val clientSpiskammerset: ClientSpiskammersetModule.Configuration,
     val clientSpleis: ClientSpleisModule.Configuration,
+    val clientPersonPseudoId: ClientPersonPseudoIdModule.Configuration,
     val db: DBModule.Configuration,
     val kafka: KafkaModule.Configuration,
     val valkey: ValkeyModule.Configuration,

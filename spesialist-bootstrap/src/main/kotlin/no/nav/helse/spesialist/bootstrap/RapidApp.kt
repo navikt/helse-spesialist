@@ -13,6 +13,8 @@ import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBr
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
+import no.nav.helse.spesialist.client.personpseudoid.ClientPersonPseudoIdModule
+import no.nav.helse.spesialist.client.personpseudoid.ValkeyPersonPseudoIdProvider
 import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSykepengeperioderModule
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
@@ -84,6 +86,12 @@ fun main() {
                         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
                         spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
                         loggRespons = env.getBoolean("SPLEIS_CLIENT_LOGG_RESPONS"),
+                    ),
+                clientPersonPseudoId =
+                    ClientPersonPseudoIdModule.Configuration(
+                        connectionString = env.getValue("VALKEY_URI_PERSONPSEUDOID"),
+                        brukernavn = env.getValue("VALKEY_USERNAME_PERSONPSEUDOID"),
+                        passord = env.getValue("VALKEY_PASSWORD_PERSONPSEUDOID"),
                     ),
                 db =
                     DBModule.Configuration(
@@ -218,6 +226,12 @@ class RapidApp {
             )
 
         val dbModule = DBModule(configuration.db)
+
+        val personPseudoIdProvider =
+            ValkeyPersonPseudoIdProvider(
+                configuration = configuration.clientPersonPseudoId,
+                fallbackPersonPseudoIdDao = dbModule.daos.personPseudoIdDao,
+            )
 
         val kafkaModule =
             KafkaModule(

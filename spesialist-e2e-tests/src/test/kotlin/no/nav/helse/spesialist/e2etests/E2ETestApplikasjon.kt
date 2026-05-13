@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.personpseudoid.PersonPseudoIdTestFixture
 import no.nav.helse.spesialist.client.sparkel.norg.testfixtures.ClientSparkelNorgModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.testfixtures.ClientSparkelSykepengeperioderModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
@@ -38,6 +39,7 @@ object E2ETestApplikasjon {
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
     val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupperTilTilganger, tilgangsgrupperTilBrukerroller)
+    val personPseudoidIntegrationTestFixture = PersonPseudoIdTestFixture("e2e-tests")
     private val rapidApp = RapidApp()
     private val modules =
         rapidApp.start(
@@ -50,9 +52,8 @@ object E2ETestApplikasjon {
                     clientSparkelSykepengeperioder = ClientSparkelSykepengeperioderModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
-            db = DBTestFixture.database.dbModuleConfiguration,
-            kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
-
+                    db = DBTestFixture.database.dbModuleConfiguration,
+                    kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
                     environmentToggles =
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker = false
@@ -83,6 +84,7 @@ object E2ETestApplikasjon {
                     clientSpeed = ClientSpeedModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
                     valkey = ValkeyModule.Configuration(valkey = null),
+                    clientPersonPseudoId = personPseudoidIntegrationTestFixture.moduleConfiguration,
                 ),
             rapidsConnection = testRapid,
         )
