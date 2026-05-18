@@ -5,6 +5,17 @@ schema {
     mutation: Mutation
 }
 
+"This directive allows results to be deferred during execution"
+directive @defer(
+    "Deferred behaviour is controlled by this argument"
+    if: Boolean! = true,
+    "A unique label that represents the fragment being deferred"
+    label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"This directive disables error propagation when a non nullable field returns null for the given operation."
+directive @experimental_disableErrorPropagation on QUERY | MUTATION | SUBSCRIPTION
+
 "Indicates an Input Object is a OneOf Input Object."
 directive @oneOf on INPUT_OBJECT
 
@@ -87,11 +98,6 @@ type Antall {
     tilgjengelig: Int!
 }
 
-type AntallOppgaver {
-    antallMineSaker: Int!
-    antallMineSakerPaVent: Int!
-}
-
 type Arbeidsforhold {
     sluttdato: LocalDate
     startdato: LocalDate!
@@ -147,25 +153,6 @@ type Avslag {
     opprettet: LocalDateTime!
     saksbehandlerIdent: String!
     type: Avslagstype!
-}
-
-type BehandledeOppgaver {
-    oppgaver: [BehandletOppgave!]!
-    totaltAntallOppgaver: Int!
-}
-
-type BehandletOppgave {
-    aktorId: String!
-    antallArbeidsforhold: AntallArbeidsforhold!
-    beslutter: String
-    ferdigstiltAv: String
-    ferdigstiltTidspunkt: LocalDateTime!
-    id: String!
-    oppgavetype: Oppgavetype!
-    periodetype: Periodetype!
-    personPseudoId: UUID!
-    personnavn: Personnavn!
-    saksbehandler: String
 }
 
 type Behandling {
@@ -355,20 +342,12 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 }
 
 type Mutation {
-    endrePaVent(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
-    fjernPaVent(oppgaveId: String!): Boolean
-    fjernTildeling(oppgaveId: String!): Boolean!
-    leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
-    oppdaterPerson(fodselsnummer: String!): Boolean!
-    opphevStansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
-    opprettTildeling(oppgaveId: String!): Tildeling
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean
-    stansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
 }
 
 type OmregnetArsinntekt {
@@ -467,25 +446,15 @@ type Person {
 
 type Personinfo {
     adressebeskyttelse: Adressebeskyttelse!
-    automatiskBehandlingStansetAvSaksbehandler: Boolean
     etternavn: String!
     fodselsdato: LocalDate!
     fornavn: String!
     fullmakt: Boolean
     kjonn: Kjonn!
     mellomnavn: String
-    unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning
-}
-
-type Personnavn {
-    etternavn: String!
-    fornavn: String!
-    mellomnavn: String
 }
 
 type Query {
-    antallOppgaver: AntallOppgaver!
-    behandledeOppgaverFeed(fom: LocalDate!, limit: Int!, offset: Int!, tom: LocalDate!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
     person(personPseudoId: String!): Person
 }
@@ -716,12 +685,6 @@ type UberegnetPeriode implements Periode {
     vedtaksperiodeId: UUID!
 }
 
-type UnntattFraAutomatiskGodkjenning {
-    arsaker: [String!]!
-    erUnntatt: Boolean!
-    tidspunkt: LocalDateTime
-}
-
 type Utbetaling {
     arbeidsgiverFagsystemId: String!
     arbeidsgiverNettoBelop: Int!
@@ -815,11 +778,6 @@ enum Adressebeskyttelse {
     StrengtFortroligUtland
     Ugradert
     Ukjent
-}
-
-enum AntallArbeidsforhold {
-    ET_ARBEIDSFORHOLD
-    FLERE_ARBEIDSFORHOLD
 }
 
 enum Avslagstype {
@@ -947,18 +905,6 @@ enum Kjonn {
     Kvinne
     Mann
     Ukjent
-}
-
-enum Oppgavetype {
-    DELVIS_REFUSJON
-    FORTROLIG_ADRESSE
-    INGEN_UTBETALING
-    REVURDERING
-    RISK_QA
-    SOKNAD
-    STIKKPROVE
-    UTBETALING_TIL_ARBEIDSGIVER
-    UTBETALING_TIL_SYKMELDT
 }
 
 enum Periodehandling {
@@ -1171,11 +1117,6 @@ input OverstyringRefusjonselementInput {
     belop: Float!
     fom: LocalDate!
     tom: LocalDate
-}
-
-input PaVentArsakInput {
-    _key: String!
-    arsak: String!
 }
 
 input SkjonnsfastsettelseArbeidsgiverInput {
