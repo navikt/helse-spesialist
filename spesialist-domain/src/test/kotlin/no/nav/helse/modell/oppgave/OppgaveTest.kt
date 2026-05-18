@@ -2,7 +2,6 @@ package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
-import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
@@ -123,7 +122,7 @@ internal class OppgaveTest {
     @Test
     fun `Forsøk avmelding av oppgave`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildeling(
+        oppgave.tildelTil(
             saksbehandler = saksbehandlerUtenTilgang,
             brukerroller = emptySet(),
         )
@@ -139,7 +138,7 @@ internal class OppgaveTest {
     @Test
     fun `Forsøk avmelding av oppgave når oppgaven er tildelt noen andre`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildeling(
+        oppgave.tildelTil(
             saksbehandler = lagSaksbehandler(),
             brukerroller = emptySet(),
         )
@@ -182,7 +181,7 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {
-            oppgave.forsøkTildeling(
+            oppgave.tildelTil(
                 saksbehandler = saksbehandlerUtenTilgang,
                 brukerroller = emptySet(),
             )
@@ -199,7 +198,7 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         val saksbehandlerMedTilgang = lagSaksbehandler()
-        oppgave.forsøkTildeling(
+        oppgave.tildelTil(
             saksbehandler = saksbehandlerMedTilgang,
             brukerroller = Brukerrolle.entries.toSet(),
         )
@@ -208,27 +207,6 @@ internal class OppgaveTest {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
             assertEquals(saksbehandlerMedTilgang.id, tildeltTil)
-        }
-    }
-
-    @Test
-    fun `Forsøker tildeling når oppgaven er tildelt noen andre`() {
-        val oppgave = nyOppgave()
-        oppgave.forsøkTildeling(
-            saksbehandler = saksbehandlerUtenTilgang,
-            brukerroller = emptySet(),
-        )
-        assertThrows<OppgaveTildeltNoenAndre> {
-            oppgave.forsøkTildeling(
-                saksbehandler = lagSaksbehandler(),
-                brukerroller = emptySet(),
-            )
-        }
-
-        inspektør(oppgave) {
-            assertEquals(true, tildelt)
-            assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang.id, tildeltTil)
         }
     }
 

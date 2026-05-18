@@ -116,7 +116,7 @@ class PutTildelingBehandlerTest {
                 godkjenningsbehovId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiode.id,
             ).also {
-                it.forsøkTildeling(saksbehandler, emptySet())
+                it.tildelTil(saksbehandler, emptySet())
                 oppgaveRepository.lagre(it)
                 it.konsumerHendelser() // nullstill hendelser som ikke er relevante for testen
             }
@@ -157,7 +157,7 @@ class PutTildelingBehandlerTest {
                 godkjenningsbehovId = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiode.id,
             ).also {
-                it.forsøkTildeling(saksbehandlerSomErTildeltOppgaven, emptySet())
+                it.tildelTil(saksbehandlerSomErTildeltOppgaven, emptySet())
                 oppgaveRepository.lagre(it)
                 it.konsumerHendelser() // nullstill hendelser som ikke er relevante for testen
             }

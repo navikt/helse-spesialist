@@ -14,7 +14,6 @@ import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
@@ -28,7 +27,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -321,25 +319,6 @@ class SaksbehandlerMediator(
         when (this) {
             is no.nav.helse.modell.OppgaveIkkeTildelt -> {
                 OppgaveIkkeTildelt(oppgaveId)
-            }
-
-            is OppgaveTildeltNoenAndre -> {
-                val saksbehandler =
-                    SaksbehandlerWrapper(
-                        saksbehandler =
-                            checkNotNull(
-                                sessionFactory.transactionalSessionScope { session ->
-                                    session.saksbehandlerRepository.finn(SaksbehandlerOid(saksbehandlerOid))
-                                },
-                            ),
-                    )
-                OppgaveTildeltNoenAndre(
-                    TildelingApiDto(
-                        saksbehandler.saksbehandler.navn,
-                        saksbehandler.saksbehandler.epost,
-                        saksbehandler.saksbehandler.id.value,
-                    ),
-                )
             }
 
             is OppgaveAlleredeSendtBeslutter -> {

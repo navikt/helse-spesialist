@@ -93,7 +93,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `tildel oppgave`() {
         val oppgave = lagOppgave()
-        oppgave.forsøkTildeling(saksbehandler, emptySet())
+        oppgave.tildelTil(saksbehandler, emptySet())
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
@@ -104,7 +104,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `avmeld oppgave`() {
         val oppgave = lagOppgave()
-        oppgave.forsøkTildeling(saksbehandler, emptySet())
+        oppgave.tildelTil(saksbehandler, emptySet())
         repository.lagre(oppgave)
 
         oppgave.forsøkAvmelding(saksbehandler)

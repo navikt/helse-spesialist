@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.domain.oppgave
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
-import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.NAVIdent
@@ -85,21 +84,6 @@ class Oppgave private constructor(
         brukerroller: Set<Brukerrolle>,
     ) {
         sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
-        tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
-    }
-
-    fun forsøkTildeling(
-        saksbehandler: Saksbehandler,
-        brukerroller: Set<Brukerrolle>,
-    ) {
-        logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id.value))
-        val tildelt = tildeltTil
-        if (tildelt != null && tildelt != saksbehandler.id) {
-            logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id.value))
-            throw OppgaveTildeltNoenAndre(tildelt.value, false)
-        }
-        sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
-
         tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
     }
 

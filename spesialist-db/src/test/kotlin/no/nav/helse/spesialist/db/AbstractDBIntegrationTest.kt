@@ -505,7 +505,7 @@ abstract class AbstractDBIntegrationTest {
         brukerroller: Set<Brukerrolle> = emptySet(),
     ): Oppgave {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
-        this.forsøkTildeling(saksbehandler, brukerroller)
+        this.tildelTil(saksbehandler, brukerroller)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }

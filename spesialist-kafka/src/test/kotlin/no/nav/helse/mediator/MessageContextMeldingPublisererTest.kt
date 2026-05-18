@@ -194,7 +194,7 @@ internal class MessageContextMeldingPublisererTest {
 
         val saksbehandler = lagSaksbehandler()
         val beslutter = lagSaksbehandler()
-        oppgave.forsøkTildeling(
+        oppgave.tildelTil(
             saksbehandler = saksbehandler,
             brukerroller = emptySet(),
         )

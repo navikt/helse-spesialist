@@ -34,7 +34,7 @@ class DeleteTildelingBehandlerTest {
         val saksbehandler = lagSaksbehandler().also(saksbehandlerRepository::lagre)
         val oppgave =
             lagOppgave(spleisBehandlingId, UUID.randomUUID(), vedtaksperiode.id).also {
-                it.forsøkTildeling(saksbehandler, brukerroller = setOf())
+                it.tildelTil(saksbehandler, brukerroller = setOf())
                 oppgaveRepository.lagre(it)
                 it.konsumerHendelser() // nullstill hendelser som ikke er relevante for testen
             }

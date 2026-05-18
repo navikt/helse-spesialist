@@ -8,11 +8,6 @@ class OppgaveIkkeTildelt(
     val oppgaveId: Long,
 ) : Modellfeil()
 
-class OppgaveTildeltNoenAndre(
-    val saksbehandlerOid: UUID,
-    val påVent: Boolean,
-) : Modellfeil()
-
 class OppgaveAlleredeSendtBeslutter(
     val oppgaveId: Long,
 ) : Modellfeil()

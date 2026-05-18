@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.feilhåndtering.FeilDto
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
@@ -29,21 +28,6 @@ class OppgaveIkkeTildelt(
         loggInfo(
             "Returnerer ${httpkode.value} for $feilkode for oppgave",
             "oppgaveId" to oppgaveId,
-        )
-    }
-}
-
-class OppgaveTildeltNoenAndre(
-    val tildeling: TildelingApiDto,
-) : Modellfeil() {
-    override val eksternKontekst: Map<String, Any> = mapOf("tildeling" to tildeling)
-    override val httpkode = HttpStatusCode.Conflict
-    override val feilkode: String = "oppgave_tildelt_noen_andre"
-
-    override fun logger() {
-        loggInfo(
-            "Returnerer ${httpkode.value} for $feilkode for tildeling",
-            "tildelingsinfo" to eksternKontekst,
         )
     }
 }

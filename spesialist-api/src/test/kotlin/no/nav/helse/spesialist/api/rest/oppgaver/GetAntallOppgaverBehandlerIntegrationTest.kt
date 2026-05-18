@@ -42,16 +42,16 @@ class GetAntallOppgaverBehandlerIntegrationTest {
         val annenSaksbehandler = lagSaksbehandler()
 
         lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
-            .also { it.forsøkTildeling(saksbehandler, emptySet()) }
+            .also { it.tildelTil(saksbehandler, emptySet()) }
             .also(sessionContext.oppgaveRepository::lagre)
 
         lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
-            .also { it.forsøkTildeling(saksbehandler, emptySet()) }
+            .also { it.tildelTil(saksbehandler, emptySet()) }
             .also(sessionContext.oppgaveRepository::lagre)
 
         lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
             .also {
-                it.forsøkTildeling(annenSaksbehandler, emptySet())
+                it.tildelTil(annenSaksbehandler, emptySet())
                 it.leggPåVent(skalTildeles = true, saksbehandler = saksbehandler)
             }.also(sessionContext.oppgaveRepository::lagre)
 
@@ -74,7 +74,7 @@ class GetAntallOppgaverBehandlerIntegrationTest {
 
         val oppgave = lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
             .also {
-                it.forsøkTildeling(saksbehandler, emptySet())
+                it.tildelTil(saksbehandler, emptySet())
                 it.leggPåVent(skalTildeles = true, saksbehandler = saksbehandler)
             }.also(sessionContext.oppgaveRepository::lagre)
 
