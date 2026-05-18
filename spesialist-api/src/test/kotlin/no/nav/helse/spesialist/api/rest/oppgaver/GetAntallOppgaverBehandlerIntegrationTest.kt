@@ -3,8 +3,11 @@ package no.nav.helse.spesialist.api.rest.oppgaver
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagDialog
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
+import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,6 +32,7 @@ class GetAntallOppgaverBehandlerIntegrationTest {
 
         assertEquals(0, body["antallMineSaker"].asInt())
         assertEquals(0, body["antallMineSakerPåVent"].asInt())
+        assertEquals(0, body["antallMineSakerPåVentNåddFrist"].asInt())
     }
 
     @Test
@@ -62,4 +66,38 @@ class GetAntallOppgaverBehandlerIntegrationTest {
         assertEquals(2, body["antallMineSaker"].asInt())
         assertEquals(1, body["antallMineSakerPåVent"].asInt())
     }
+
+    @Test
+    fun `returnerer antall mine saker på vent med nådd frist`() {
+        // given
+        val saksbehandler = lagSaksbehandler()
+
+        val oppgave = lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
+            .also {
+                it.forsøkTildeling(saksbehandler, emptySet())
+                it.leggPåVent(skalTildeles = true, saksbehandler = saksbehandler)
+            }.also(sessionContext.oppgaveRepository::lagre)
+
+        val dialog = lagDialog().also(sessionContext.dialogRepository::lagre)
+        val påVent = lagPåVent(
+            vedtaksperiodeId = oppgave.vedtaksperiodeId,
+            saksbehandlerOid = saksbehandler.id,
+            frist = LocalDate.now(),
+            dialogId = dialog.id(),
+        )
+        sessionContext.påVentRepository.lagre(påVent)
+
+        // when
+        val response = integrationTestFixture.get("/api/antall-oppgaver", saksbehandler = saksbehandler)
+
+        // then
+        assertEquals(HttpStatusCode.OK.value, response.status)
+        val body = response.bodyAsJsonNode
+        assertNotNull(body) { "Body er tom eller ugyldig JSON" }
+
+        assertEquals(0, body["antallMineSaker"].asInt())
+        assertEquals(1, body["antallMineSakerPåVent"].asInt())
+        assertEquals(1, body["antallMineSakerPåVentNåddFrist"].asInt())
+    }
+
 }

@@ -20,4 +20,5 @@ import java.util.UUID
 data class ApiAntallOppgaver(
     val antallMineSaker: Int,
     val antallMineSakerPåVent: Int,
+    val antallMineSakerPåVentNåddFrist: Int,
 )

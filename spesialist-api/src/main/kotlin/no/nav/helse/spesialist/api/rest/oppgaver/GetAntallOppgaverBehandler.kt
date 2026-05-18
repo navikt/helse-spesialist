@@ -24,6 +24,7 @@ class GetAntallOppgaverBehandler : GetBehandler<AntallOppgaver, ApiAntallOppgave
             ApiAntallOppgaver(
                 antallMineSaker = antallOppgaver.antallMineSaker,
                 antallMineSakerPåVent = antallOppgaver.antallMineSakerPåVent,
+                antallMineSakerPåVentNåddFrist = antallOppgaver.antallMineSakerPåVentNåddFrist,
             ),
         )
     }

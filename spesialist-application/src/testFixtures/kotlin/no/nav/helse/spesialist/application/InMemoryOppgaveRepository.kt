@@ -20,6 +20,7 @@ import java.util.UUID
 
 class InMemoryOppgaveRepository(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val påVentRepository: PåVentRepository,
 ) : OppgaveRepository {
     private val oppgaver = mutableMapOf<OppgaveId, Oppgave>()
     private val oppdatertTidspunkt = mutableMapOf<OppgaveId, LocalDateTime>()
@@ -92,11 +93,19 @@ class InMemoryOppgaveRepository(
         elementer = oppgaver.values.map { it.toBehandletOppgaveProjeksjon() },
     )
 
-    override fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): OppgaveRepository.AntallOppgaverProjeksjon =
-        OppgaveRepository.AntallOppgaverProjeksjon(
-            antallMineSaker = oppgaver.values.count { it.tildeltTil == saksbehandlersOid && Egenskap.PÅ_VENT !in it.egenskaper },
-            antallMineSakerPåVent = oppgaver.values.count { it.tildeltTil == saksbehandlersOid && Egenskap.PÅ_VENT in it.egenskaper },
+    override fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): OppgaveRepository.AntallOppgaverProjeksjon {
+        val mineTildelteOppgaver = oppgaver.values.filter { it.tildeltTil == saksbehandlersOid }
+        val mineSakerPåVent = mineTildelteOppgaver.filter { Egenskap.PÅ_VENT in it.egenskaper }
+        val mineSakerPåVentNåddFrist = mineSakerPåVent.filter { oppgave ->
+            val påVent = påVentRepository.finnFor(oppgave.vedtaksperiodeId)
+            påVent != null && påVent.frist <= LocalDate.now()
+        }
+        return OppgaveRepository.AntallOppgaverProjeksjon(
+            antallMineSaker = mineTildelteOppgaver.count { Egenskap.PÅ_VENT !in it.egenskaper },
+            antallMineSakerPåVent = mineSakerPåVent.size,
+            antallMineSakerPåVentNåddFrist = mineSakerPåVentNåddFrist.size,
         )
+    }
 }
 
 private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {

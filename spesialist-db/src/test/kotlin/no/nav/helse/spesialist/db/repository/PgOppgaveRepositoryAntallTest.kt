@@ -4,6 +4,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository.AntallOppgaverProjeksjon
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
@@ -17,7 +18,7 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
@@ -29,19 +30,19 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 2, antallMineSakerPåVent = 0), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 2, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
-    fun `teller mine saker på vent riktig`() {
+    fun `teller mine saker på vent riktig der frist er nådd`() {
         val saksbehandler = lagSaksbehandler()
 
         nyOppgaveForNyPerson().tildelOgLagre(saksbehandler).leggPåVentOgLagre(saksbehandler)
-        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler).leggPåVentOgLagre(saksbehandler)
+        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler).leggPåVentOgLagre(saksbehandler, frist = LocalDate.now())
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 2), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 2, antallMineSakerPåVentNåddFrist = 1), antall)
     }
 
     @Test
@@ -54,7 +55,7 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 2, antallMineSakerPåVent = 1), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 2, antallMineSakerPåVent = 1, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
@@ -67,7 +68,7 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
@@ -82,7 +83,7 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 1, antallMineSakerPåVent = 1), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 1, antallMineSakerPåVent = 1, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
@@ -93,7 +94,7 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
@@ -104,7 +105,7 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 
     @Test
@@ -113,6 +114,6 @@ class PgOppgaveRepositoryAntallTest : AbstractDBIntegrationTest() {
 
         val antall = repository.finnAntallOppgaverProjeksjon(saksbehandler.id)
 
-        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0), antall)
+        assertEquals(AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0), antall)
     }
 }

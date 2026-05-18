@@ -89,5 +89,6 @@ interface OppgaveRepository {
     data class AntallOppgaverProjeksjon(
         val antallMineSaker: Int,
         val antallMineSakerPåVent: Int,
+        val antallMineSakerPåVentNåddFrist: Int,
     )
 }

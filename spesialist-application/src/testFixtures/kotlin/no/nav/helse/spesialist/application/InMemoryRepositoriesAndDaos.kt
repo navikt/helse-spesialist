@@ -22,7 +22,7 @@ class InMemoryRepositoriesAndDaos {
     private val varselRepository = InMemoryVarselRepository()
     private val varseldefinisjonRepository = InMemoryVarseldefinisjonRepository()
     private val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
-    private val oppgaveRepository = InMemoryOppgaveRepository(vedtaksperiodeRepository)
+    private val oppgaveRepository = InMemoryOppgaveRepository(vedtaksperiodeRepository, påVentRepository)
     private val vedtakBegrunnelseRepository = InMemoryIndividuellBegrunnelseRepository()
     private val vedtakRepository = InMemoryVedtakRepository()
     private val saksbehandlerStansRepository = InMemorySaksbehandlerStansRepository()

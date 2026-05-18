@@ -484,9 +484,12 @@ class PgOppgaveRepository private constructor(
             """
             SELECT
                 count(*) FILTER ( WHERE NOT 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker,
-                count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker_på_vent
+                count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker_på_vent,
+                count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) AND pv.frist <= current_date) AS antall_mine_saker_på_vent_nådd_frist
             from oppgave o
                 INNER JOIN tildeling t ON o.id = t.oppgave_id_ref
+                INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+                LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
             WHERE o.status = 'AvventerSaksbehandler'
                 AND t.saksbehandler_ref = :oid 
             """,
@@ -495,8 +498,9 @@ class PgOppgaveRepository private constructor(
             AntallOppgaverProjeksjon(
                 antallMineSaker = row.int("antall_mine_saker"),
                 antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
+                antallMineSakerPåVentNåddFrist = row.int("antall_mine_saker_på_vent_nådd_frist"),
             )
-        } ?: AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0)
+        } ?: AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0)
 
     private fun Collection<Enum<*>>.tilDatabaseArray(): String = joinToString(prefix = "{", postfix = "}") { it.name }
 
