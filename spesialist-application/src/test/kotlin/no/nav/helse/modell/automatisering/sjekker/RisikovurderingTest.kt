@@ -1,6 +1,5 @@
-package no.nav.helse.spesialist.application.modell
+package no.nav.helse.modell.automatisering.sjekker
 
-import no.nav.helse.modell.risiko.Risikovurdering
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

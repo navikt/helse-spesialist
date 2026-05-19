@@ -13,12 +13,13 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Automatiseringsresultat
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.sjekker.Risikovurdering
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver.Configuration
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
-import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansSubsumsjonmelder
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -92,7 +93,7 @@ internal class AutomatiseringTest {
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
     private var stikkprøveSelvstendigNæringsdrivendeForlengelse = false
     private val stikkprøver =
-        object : Stikkprøver {
+        Stikkprøver(object : Configuration {
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
             override fun utsFlereArbeidsgivereForlengelse() = false
@@ -108,7 +109,7 @@ internal class AutomatiseringTest {
             override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
 
             override fun fullRefusjonEnArbeidsgiver() = stikkprøveFullRefusjonEnArbeidsgiver
-        }
+        })
 
     private val automatisering =
         Automatisering(

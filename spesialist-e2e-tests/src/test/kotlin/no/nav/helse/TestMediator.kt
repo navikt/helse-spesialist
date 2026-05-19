@@ -8,7 +8,7 @@ import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -45,7 +45,7 @@ class TestMediator(
         )
 
     private val stikkprøver =
-        object : Stikkprøver {
+        Stikkprøver(object : Stikkprøver.Configuration {
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
             override fun utsFlereArbeidsgivereForlengelse() = false
@@ -61,7 +61,7 @@ class TestMediator(
             override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
 
             override fun fullRefusjonEnArbeidsgiver() = false
-        }
+        })
 
     private val kommandofabrikk =
         Kommandofabrikk(

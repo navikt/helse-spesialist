@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Session
 import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.modell.risiko.Risikovurdering
+import no.nav.helse.modell.automatisering.sjekker.Risikovurdering
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner

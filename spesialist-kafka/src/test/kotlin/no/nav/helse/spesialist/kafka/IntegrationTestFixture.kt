@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.MockForsikringHenter
@@ -27,7 +27,7 @@ class IntegrationTestFixture(val testRapid: TestRapid) {
             rapidsConnection = testRapid,
             sessionFactory = sessionFactory,
             daos = daos,
-            stikkprøver = object : Stikkprøver {
+            stikkprøver = object : Stikkprøver.Configuration {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
                 override fun utsFlereArbeidsgivereForlengelse() = false
                 override fun selvstendigNæringsdrivendeForlengelse() = false

@@ -9,7 +9,7 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext

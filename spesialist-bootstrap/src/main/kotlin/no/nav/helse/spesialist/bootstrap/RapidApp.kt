@@ -6,7 +6,7 @@ import io.ktor.server.application.ApplicationStopped
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
@@ -135,7 +135,7 @@ fun main() {
                         lesetilgang = env.getUUIDList("TILGANG_LES"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
-                stikkprøver = Stikkprøver.fraEnv(env),
+                stikkprøver = Stikkprøver.Configuration.fromEnv(env),
             ),
         rapidsConnection =
             RapidApplication.create(

@@ -1,4 +1,4 @@
-package no.nav.helse.modell.risiko
+package no.nav.helse.modell.automatisering.sjekker
 
 import no.nav.helse.modell.automatisering.AutomatiseringValidering
 

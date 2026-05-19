@@ -11,13 +11,16 @@ import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
+import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
+import no.nav.helse.modell.automatisering.sjekker.AutomatiserRevurderinger
+import no.nav.helse.modell.automatisering.sjekker.IkkeAutomatiserNåddMaksdatoOgRefusjonAG
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansSubsumsjonmelder
-import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -29,13 +32,11 @@ import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.teamLogs
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.random.Random
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
@@ -113,15 +114,15 @@ internal class Automatisering(
                 maksdato = maksdato,
                 tags = tags,
             )
-        val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
-        val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
-        val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
-
         if (sjekkerSomHindrerAutomatisering.isNotEmpty()) {
             return Automatiseringsresultat.KanIkkeAutomatiseres(
                 sjekkerSomHindrerAutomatisering.map(AutomatiseringValidering::årsakTilIkkeAutomatiserbar),
             )
         }
+
+        val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
+        val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
+        val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
         when (
             val resultat =
@@ -130,13 +131,13 @@ internal class Automatisering(
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
             -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
 
-            is AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad,
+            is SkyldesIkkeKorrigertSøknad,
             is SkyldesKorrigertSøknad.KanAutomatiseres,
-            -> {}
+            -> Unit
         }
 
         if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
-            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling, yrkesaktivitetstype)?.let {
+            stikkprøver.avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling, yrkesaktivitetstype)?.let {
                 return Automatiseringsresultat.Stikkprøve(it)
             }
         } else {
@@ -176,7 +177,7 @@ internal class Automatisering(
     ): AutomatiserKorrigertSøknadResultat {
         val behandlingOpprettetKorrigertSøknad =
             finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
-                ?: return AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad
+                ?: return SkyldesIkkeKorrigertSøknad
 
         return kanKorrigertSøknadAutomatiseres(behandlingOpprettetKorrigertSøknad, sykefraværstilfelle)
     }
@@ -211,57 +212,6 @@ internal class Automatisering(
         }
 
         return SkyldesKorrigertSøknad.KanAutomatiseres
-    }
-
-    private fun avgjørStikkprøve(
-        UTS: Boolean,
-        flereArbeidsgivere: Boolean,
-        førstegangsbehandling: Boolean,
-        yrkesaktivitetstype: Yrkesaktivitetstype,
-    ): String? {
-        when (yrkesaktivitetstype) {
-            Yrkesaktivitetstype.ARBEIDSTAKER -> {
-                when {
-                    UTS -> {
-                        when {
-                            flereArbeidsgivere -> {
-                                when {
-                                    førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
-                                    !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
-                                }
-                            }
-
-                            !flereArbeidsgivere -> {
-                                when {
-                                    førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
-                                    !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
-                                }
-                            }
-                        }
-                    }
-
-                    flereArbeidsgivere -> {
-                        when {
-                            førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
-                            !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
-                        }
-                    }
-
-                    stikkprøver.fullRefusjonEnArbeidsgiver() -> {
-                        return "Refusjon, en arbeidsgiver"
-                    }
-                }
-            }
-
-            Yrkesaktivitetstype.SELVSTENDIG -> {
-                if (!førstegangsbehandling && stikkprøver.selvstendigNæringsdrivendeForlengelse()) return "Forlengelse, selvstendig næringsdrivende"
-            }
-
-            else -> {
-                error("Støtter ikke behandling av personer med yrkesaktivitetstype $yrkesaktivitetstype")
-            }
-        }
-        return null
     }
 
     private fun vurder(
@@ -329,99 +279,10 @@ internal class Automatisering(
         override fun årsakTilIkkeAutomatiserbar() = årsakHvisIkkeAutomatiserbar
     }
 
-    private class AutomatiserRevurderinger(
-        private val utbetaling: Utbetaling,
-        private val fødselsnummer: String,
-        private val vedtaksperiodeId: UUID,
-    ) : AutomatiseringValidering {
-        override fun erAutomatiserbar() =
-            !utbetaling.erRevurdering() ||
-                (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
-                    if (it) {
-                        teamLogs.info(
-                            "Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering",
-                        )
-                    }
-                }
-
-        override fun årsakTilIkkeAutomatiserbar() = "Utbetalingen er revurdering med negativt beløp"
-    }
-
-    private class IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
-        maksdato: LocalDate,
-        tags: List<String>,
-        private val sykefraværstilfelle: Sykefraværstilfelle,
-        private val vedtaksperiodeId: UUID,
-    ) : AutomatiseringValidering {
-        private val harNåddMaksdato = maksdato < sykefraværstilfelle.skjæringstidspunkt
-        private val arbeidsgiverØnskerRefusjon = tags.contains("ArbeidsgiverØnskerRefusjon")
-
-        override fun erAutomatiserbar(): Boolean {
-            val stopperAutomatisering = harNåddMaksdato && arbeidsgiverØnskerRefusjon
-            if (stopperAutomatisering) {
-                sykefraværstilfelle.håndter(Varselkode.RV_OV_5.nyttVarsel(vedtaksperiodeId))
-            }
-            return !stopperAutomatisering
-        }
-
-        override fun årsakTilIkkeAutomatiserbar() = "Nådd maksdato og har refusjon til arbeidsgiver"
-    }
-
     fun erStikkprøve(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
     ) = automatiseringDao.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
-}
-
-typealias PlukkTilManuell<String> = (String?) -> Boolean
-
-interface Stikkprøver {
-    fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean
-
-    fun utsFlereArbeidsgivereForlengelse(): Boolean
-
-    fun selvstendigNæringsdrivendeForlengelse(): Boolean
-
-    fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean
-
-    fun utsEnArbeidsgiverForlengelse(): Boolean
-
-    fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean
-
-    fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean
-
-    fun fullRefusjonEnArbeidsgiver(): Boolean
-
-    companion object {
-        fun fraEnv(env: Map<String, String>) =
-            object : Stikkprøver {
-                override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
-
-                override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
-
-                override fun selvstendigNæringsdrivendeForlengelse() = plukkTilManuell(env["STIKKPROEVER_SN_FORLENGELSE_DIVISOR"])
-
-                override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
-
-                override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
-
-                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
-
-                override fun fullRefusjonFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
-
-                override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
-            }
-
-        private val plukkTilManuell: PlukkTilManuell<String> = (
-            {
-                it?.let {
-                    val divisor = it.toInt()
-                    require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-                    Random.nextInt(divisor) == 0
-                } == true
-            }
-        )
-    }
 }
 
 internal interface AutomatiseringValidering {

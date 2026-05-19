@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.e2etests
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
@@ -62,7 +62,7 @@ object E2ETestApplikasjon {
                             override val devGcp = false
                         },
                     stikkprøver =
-                        object : Stikkprøver {
+                        object : Stikkprøver.Configuration {
                             override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
 
                             override fun utsFlereArbeidsgivereForlengelse(): Boolean = false

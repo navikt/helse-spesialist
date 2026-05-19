@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.bootstrap
 
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
@@ -51,7 +51,7 @@ fun main() {
                         override val devGcp = false
                     },
                 stikkprøver =
-                    object : Stikkprøver {
+                    object : Stikkprøver.Configuration {
                         override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
 
                         override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
