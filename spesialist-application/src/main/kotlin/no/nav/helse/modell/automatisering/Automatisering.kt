@@ -317,14 +317,14 @@ internal class Automatisering(
     private fun valider(vararg valideringer: AutomatiseringValidering) =
         valideringer
             .toList()
-            .filterNot(AutomatiseringValidering::erAautomatiserbar)
+            .filterNot(AutomatiseringValidering::erAutomatiserbar)
             .map(AutomatiseringValidering::error)
 
     private fun validering(
         error: String,
         automatiserbar: () -> Boolean,
     ) = object : AutomatiseringValidering {
-        override fun erAautomatiserbar() = automatiserbar()
+        override fun erAutomatiserbar() = automatiserbar()
 
         override fun error() = error
     }
@@ -334,7 +334,7 @@ internal class Automatisering(
         private val fødselsnummer: String,
         private val vedtaksperiodeId: UUID,
     ) : AutomatiseringValidering {
-        override fun erAautomatiserbar() =
+        override fun erAutomatiserbar() =
             !utbetaling.erRevurdering() ||
                 (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
                     if (it) {
@@ -356,7 +356,7 @@ internal class Automatisering(
         private val harNåddMaksdato = maksdato < sykefraværstilfelle.skjæringstidspunkt
         private val arbeidsgiverØnskerRefusjon = tags.contains("ArbeidsgiverØnskerRefusjon")
 
-        override fun erAautomatiserbar(): Boolean {
+        override fun erAutomatiserbar(): Boolean {
             val stopperAutomatisering = harNåddMaksdato && arbeidsgiverØnskerRefusjon
             if (stopperAutomatisering) {
                 sykefraværstilfelle.håndter(Varselkode.RV_OV_5.nyttVarsel(vedtaksperiodeId))
@@ -425,7 +425,7 @@ interface Stikkprøver {
 }
 
 internal interface AutomatiseringValidering {
-    fun erAautomatiserbar(): Boolean
+    fun erAutomatiserbar(): Boolean
 
     fun error(): String
 }

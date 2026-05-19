@@ -10,12 +10,12 @@ internal class RisikovurderingTest {
     @Test
     fun `Vurdering kan behandles automatisk`() {
         val risikovurdering = Risikovurdering.restore(true)
-        assertTrue(risikovurdering.erAautomatiserbar())
+        assertTrue(risikovurdering.erAutomatiserbar())
     }
 
     @Test
     fun `Vurdering kan ikke behandles automatisk`() {
         val risikovurdering = Risikovurdering.restore(false)
-        assertFalse(risikovurdering.erAautomatiserbar())
+        assertFalse(risikovurdering.erAutomatiserbar())
     }
 }
