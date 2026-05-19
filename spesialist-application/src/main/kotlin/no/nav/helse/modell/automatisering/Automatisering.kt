@@ -101,7 +101,7 @@ internal class Automatisering(
             return Automatiseringsresultat.KanAutomatiseres
         }
 
-        val problemer =
+        val sjekkerSomHindrerAutomatisering =
             vurder(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -117,21 +117,22 @@ internal class Automatisering(
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
-        if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
+        if (sjekkerSomHindrerAutomatisering.isNotEmpty()) {
+            return Automatiseringsresultat.KanIkkeAutomatiseres(
+                sjekkerSomHindrerAutomatisering.map(AutomatiseringValidering::årsakTilIkkeAutomatiserbar),
+            )
+        }
 
         when (
             val resultat =
                 vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)
         ) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
-            -> {
-                return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
-            }
+            -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
 
             is AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad,
             is SkyldesKorrigertSøknad.KanAutomatiseres,
-            -> {
-            }
+            -> {}
         }
 
         if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
@@ -273,7 +274,7 @@ internal class Automatisering(
         yrkesaktivitetstype: Yrkesaktivitetstype,
         maksdato: LocalDate,
         tags: List<String>,
-    ): List<String> {
+    ): List<AutomatiseringValidering> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler risikovurdering") { false }
@@ -318,15 +319,14 @@ internal class Automatisering(
         valideringer
             .toList()
             .filterNot(AutomatiseringValidering::erAutomatiserbar)
-            .map(AutomatiseringValidering::error)
 
     private fun validering(
-        error: String,
+        årsakHvisIkkeAutomatiserbar: String,
         automatiserbar: () -> Boolean,
     ) = object : AutomatiseringValidering {
         override fun erAutomatiserbar() = automatiserbar()
 
-        override fun error() = error
+        override fun årsakTilIkkeAutomatiserbar() = årsakHvisIkkeAutomatiserbar
     }
 
     private class AutomatiserRevurderinger(
@@ -344,7 +344,7 @@ internal class Automatisering(
                     }
                 }
 
-        override fun error() = "Utbetalingen er revurdering med negativt beløp"
+        override fun årsakTilIkkeAutomatiserbar() = "Utbetalingen er revurdering med negativt beløp"
     }
 
     private class IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
@@ -364,7 +364,7 @@ internal class Automatisering(
             return !stopperAutomatisering
         }
 
-        override fun error() = "Nådd maksdato og har refusjon til arbeidsgiver"
+        override fun årsakTilIkkeAutomatiserbar() = "Nådd maksdato og har refusjon til arbeidsgiver"
     }
 
     fun erStikkprøve(
@@ -427,5 +427,5 @@ interface Stikkprøver {
 internal interface AutomatiseringValidering {
     fun erAutomatiserbar(): Boolean
 
-    fun error(): String
+    fun årsakTilIkkeAutomatiserbar(): String
 }

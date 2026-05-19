@@ -11,5 +11,5 @@ class Risikovurdering private constructor(
 
     override fun erAutomatiserbar() = kanGodkjennesAutomatisk
 
-    override fun error() = "Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er ikke oppfylt"
+    override fun årsakTilIkkeAutomatiserbar() = "Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er ikke oppfylt"
 }
