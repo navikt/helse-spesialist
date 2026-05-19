@@ -54,6 +54,7 @@ data class ApiSoknadsperioder(
 @Serializable
 data class ApiSoknadSelvstendigNaringsdrivende(
     val inntekt: List<ApiInntektsar>,
+    val meldingTilNavDager: List<ApiDatoPeriode>?,
 ) {
     @Serializable
     data class ApiInntektsar(

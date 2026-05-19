@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
 import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiAvsenderSystem
+import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.rest.ApiEndringIRefusjon
 import no.nav.helse.spesialist.api.rest.ApiGjenopptakelseNaturalytelse
@@ -150,7 +151,10 @@ fun JsonNode.tilSøknad() =
         egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.map { it.asLocalDate() },
         soknadsperioder = getIfNotNull("soknadsperioder")?.map { it.tilSøknadsperioder() },
         sporsmal = getIfNotNull("sporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises() },
-        selvstendigNaringsdrivende = getIfNotNull("selvstendigNaringsdrivende")?.tilSelvstendigNæringsdrivende(),
+        selvstendigNaringsdrivende =
+            getIfNotNull("selvstendigNaringsdrivende")?.let {
+                tilSelvstendigNæringsdrivende(it, getIfNotNull("meldingTilNavDagerFraSykmelding"))
+            },
     )
 
 private fun String.tilSoknadstype(): ApiSoknadstype =
@@ -181,21 +185,27 @@ private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder =
         faktiskGrad = getIfNotNull("faktiskGrad")?.asInt(),
     )
 
-private fun JsonNode.tilSelvstendigNæringsdrivende(): ApiSoknadSelvstendigNaringsdrivende =
-    ApiSoknadSelvstendigNaringsdrivende(
-        inntekt =
-            get("inntekt")["inntektsAar"].map { inntektsår ->
-                val pensjonsgivendeInntekt = inntektsår.get("pensjonsgivendeInntekt")
-                ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
-                    ar = inntektsår.get("aar").asText(),
-                    pensjonsgivendeInntektAvLonnsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntekt"].asInt(),
-                    pensjonsgivendeInntektAvLonnsinntektBarePensjonsdel = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel"].asInt(),
-                    pensjonsgivendeInntektAvNaringsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntekt"].asInt(),
-                    pensjonsgivendeInntektAvNaringsinntektFraFiskeFangstEllerFamiliebarnehage = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage"].asInt(),
-                    erFerdigLignet = inntektsår.get("erFerdigLignet").asBoolean(),
-                )
-            },
-    )
+private fun tilSelvstendigNæringsdrivende(
+    selvstendigNæringsdrivende: JsonNode,
+    meldingTilNavDager: JsonNode?,
+) = ApiSoknadSelvstendigNaringsdrivende(
+    inntekt =
+        selvstendigNæringsdrivende.get("inntekt")["inntektsAar"].map { inntektsår ->
+            val pensjonsgivendeInntekt = inntektsår.get("pensjonsgivendeInntekt")
+            ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
+                ar = inntektsår.get("aar").asText(),
+                pensjonsgivendeInntektAvLonnsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntekt"].asInt(),
+                pensjonsgivendeInntektAvLonnsinntektBarePensjonsdel = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel"].asInt(),
+                pensjonsgivendeInntektAvNaringsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntekt"].asInt(),
+                pensjonsgivendeInntektAvNaringsinntektFraFiskeFangstEllerFamiliebarnehage = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage"].asInt(),
+                erFerdigLignet = inntektsår.get("erFerdigLignet").asBoolean(),
+            )
+        },
+    meldingTilNavDager =
+        meldingTilNavDager?.map {
+            ApiDatoPeriode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
+        },
+)
 
 private fun JsonNode.tilSpørsmål(): ApiSporsmal {
     val svar = getIfNotNull("svar")?.map { ApiSvar(it.getIfNotNull("verdi")?.asText()) }
@@ -267,6 +277,7 @@ private fun String.tilSvartype(): ApiSvartype =
         "AAR_MANED",
         "AAR_MAANED",
         -> ApiSvartype.AAR_MAANED
+
         else -> {
             teamLogs.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
             ApiSvartype.UKJENT
