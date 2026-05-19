@@ -1,5 +1,6 @@
 package no.nav.helse.modell.automatisering
 
+import io.opentelemetry.api.trace.Span
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
@@ -116,5 +117,6 @@ internal class VurderAutomatiskInnvilgelse(
         automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
         godkjenningMediator.automatiskUtbetaling(commandContext, godkjenningsbehov)
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
+        Span.current().setAttribute("speil.saksbehandling.spesialist", "vedtak_fattet_automatisk")
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import io.opentelemetry.api.trace.Span
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
@@ -150,6 +151,7 @@ internal class OpprettSaksbehandleroppgave(
                 identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                 type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
             )
+        Span.current().setAttribute("speil.saksbehandling.spesialist", "oppgave_opprettet")
         opptegnelseRepository.lagre(opptegnelse)
         return true
     }

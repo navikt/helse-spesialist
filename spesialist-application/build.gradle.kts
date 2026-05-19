@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.logback.syslog4j)
     api(libs.bundles.kotlinx.coroutines)
     implementation(libs.micrometer.prometheus)
+    implementation(libs.opentelemetry.instrumentation.annotations)
 
     testImplementation(testFixtures(project(":spesialist-domain")))
 
