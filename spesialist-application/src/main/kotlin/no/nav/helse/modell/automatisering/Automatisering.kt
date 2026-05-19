@@ -309,7 +309,7 @@ internal class Automatisering(
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
-            validering("Vedtaksperioden har et krav om totrinnsvurdering") { !harKravOmTotrinnsvurdering },
+            validering("Perioden skal til totrinnskontroll") { !harKravOmTotrinnsvurdering },
             IkkeAutomatiserNåddMaksdatoOgRefusjonAG(maksdato, tags, sykefraværstilfelle, vedtaksperiodeId),
         )
     }
