@@ -355,7 +355,7 @@ class PgOppgaveRepository private constructor(
                 FROM oppgave AS o
                 JOIN aktiv_utildelt_oppgave auo ON auo.id = o.id
                 JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
-                JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
+                LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
                 WHERE o.egenskaper @> ARRAY['SØKNAD']::varchar[]
                 AND (o.egenskaper && ARRAY['FORSTEGANGSBEHANDLING', 'FORLENGELSE']::varchar[])
                 AND NOT o.egenskaper && ARRAY[
@@ -368,7 +368,7 @@ class PgOppgaveRepository private constructor(
             ), har_ekskludert_varsler AS (
                 SELECT id
                 FROM varsel
-                WHERE NOT varsler && ARRAY[
+                WHERE varsler IS NULL OR NOT varsler && ARRAY[
                     'RV_MV_3', 'RV_IM_4', 'RV_VV_1', 'RV_VV_4', 'RV_VV_8', 'RV_IV_1', 'RV_IV_3', 'RV_OV_3', 'RV_OV_5',
                     'RV_AY_3', 'RV_AY_4', 'RV_AY_5', 'RV_AY_6', 'RV_AY_7', 'RV_AY_8', 'RV_AY_9', 'RV_AY_11', 'RV_AY_12',
                     'RV_SØ_2', 'RV_SØ_10', 'RV_SØ_44', 'RV_IT_3', 'RV_IT_38'
