@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mapping
 
 import no.nav.helse.db.AvviksvurderingRepository
-import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
@@ -311,14 +310,7 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteBehandling: Boolean) =
         SnapshotPeriodetilstand.TILGODKJENNING -> ApiPeriodetilstand.TilGodkjenning
         SnapshotPeriodetilstand.UTBETALINGFEILET -> ApiPeriodetilstand.UtbetalingFeilet
         SnapshotPeriodetilstand.VENTERPAANNENPERIODE -> ApiPeriodetilstand.VenterPaEnAnnenPeriode
-        SnapshotPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
-            if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteBehandling) {
-                ApiPeriodetilstand.VenterPaEnAnnenPeriode
-            } else {
-                ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode
-            }
-        }
-
+        SnapshotPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode
         SnapshotPeriodetilstand.AVVENTERANNULLERING -> ApiPeriodetilstand.AvventerAnnullering
         SnapshotPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
         SnapshotPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
