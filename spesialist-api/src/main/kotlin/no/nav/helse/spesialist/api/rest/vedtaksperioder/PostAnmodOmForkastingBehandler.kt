@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.AnmodningOmForkastingEvent
+import no.nav.helse.spesialist.api.rest.ApiAnmodOmForkastingRequest
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.PostBehandler
@@ -14,29 +15,32 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
-class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting, Unit, Unit, ApiPostAnmodOmForkastingErrorCode> {
+class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting, ApiAnmodOmForkastingRequest, Unit, ApiPostAnmodOmForkastingErrorCode> {
     override val påkrevdTilgang = Tilgang.Skriv
     override val påkrevdeBrukerroller = setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta)
     override val tag = Tags.VEDTAKSPERIODER
 
     override fun behandle(
         resource: Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting,
-        request: Unit,
+        request: ApiAnmodOmForkastingRequest,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostAnmodOmForkastingErrorCode> =
         kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { ApiPostAnmodOmForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostAnmodOmForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { vedtaksperiode, _ -> behandleForVedtaksperiode(vedtaksperiode, kallKontekst) }
+        ) { vedtaksperiode, _ -> behandleForVedtaksperiode(request, vedtaksperiode, kallKontekst) }
 
     private fun behandleForVedtaksperiode(
+        request: ApiAnmodOmForkastingRequest,
         vedtaksperiode: Vedtaksperiode,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostAnmodOmForkastingErrorCode> {
         val behandling =
             kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id)
                 ?: return RestResponse.Error(ApiPostAnmodOmForkastingErrorCode.BEHANDLING_IKKE_FUNNET)
+
+        if (request.årsaker.isEmpty()) return RestResponse.Error(ApiPostAnmodOmForkastingErrorCode.MANGLER_ÅRSAKER)
 
         kallKontekst.outbox.leggTil(
             identitetsnummer = vedtaksperiode.identitetsnummer,
@@ -46,6 +50,8 @@ class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.Vedtaksperi
                     vedtaksperiodeId = vedtaksperiode.id.value.toString(),
                     organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     yrkesaktivitetstype = behandling.yrkesaktivitetstype.toString(),
+                    årsaker = request.årsaker.map { it.årsak },
+                    kommentar = request.kommentar,
                 ),
             årsak = "anmodning om forkasting av vedtaksperiode",
         )
@@ -69,4 +75,5 @@ enum class ApiPostAnmodOmForkastingErrorCode(
         HttpStatusCode.NotFound,
     ),
     BEHANDLING_IKKE_FUNNET("Fant ikke tilhørende behandling", HttpStatusCode.NotFound),
+    MANGLER_ÅRSAKER("Årsaker kan ikke være tom", HttpStatusCode.BadRequest),
 }

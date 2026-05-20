@@ -305,6 +305,8 @@ private fun AnmodningOmForkastingEvent.detaljer(): Map<String, Any> =
         "organisasjonsnummer" to organisasjonsnummer,
         "yrkesaktivitetstype" to yrkesaktivitetstype,
         "vedtaksperiodeId" to vedtaksperiodeId,
+        "årsaker" to årsaker,
+        kommentar?.let { "kommentar" to it },
     ).toMap()
 
 private fun LagtPåVentEvent.detaljer(): Map<String, Any> =

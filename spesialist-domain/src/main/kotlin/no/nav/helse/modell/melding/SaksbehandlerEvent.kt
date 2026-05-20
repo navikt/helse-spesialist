@@ -123,6 +123,8 @@ data class AnmodningOmForkastingEvent(
     val vedtaksperiodeId: String,
     val organisasjonsnummer: String,
     val yrkesaktivitetstype: String,
+    val årsaker: List<String>,
+    val kommentar: String?,
 ) : UtgåendeHendelse
 
 data class LagtPåVentEvent(
