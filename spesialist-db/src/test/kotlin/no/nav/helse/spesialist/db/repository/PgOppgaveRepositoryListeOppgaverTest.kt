@@ -23,12 +23,12 @@ class PgOppgaveRepositoryListeOppgaverTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `inkluderer oppgave uten varsler`() {
+    fun `ekskluderer oppgaver uten varsler`() {
         opprettOppgaveUtenVarsler()
 
         val resultat = repository.finnListeOppgaveProjeksjoner(sidetall = 1, sidestørrelse = 10)
 
-        assertEquals(1, resultat.totaltAntall)
+        assertEquals(0, resultat.totaltAntall)
     }
 
     @Test

@@ -1,5 +1,9 @@
 package no.nav.helse.spesialist.db.repository
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -36,13 +40,9 @@ import no.nav.helse.spesialist.domain.oppgave.Mottaker.UtbetalingTilSykmeldt
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
-import javax.sql.DataSource
 
 class PgOppgaveRepository private constructor(
-    queryRunner: QueryRunner,
+    queryRunner: QueryRunner
 ) : QueryRunner by queryRunner,
     OppgaveRepository {
     constructor(session: Session) : this(MedSession(session))
@@ -94,7 +94,7 @@ class PgOppgaveRepository private constructor(
             AND status = 'AvventerSaksbehandler'
             ORDER BY o.id DESC LIMIT 1
             """,
-            "fodselsnummer" to identitetsnummer.value,
+            "fodselsnummer" to identitetsnummer.value
         ).singleOrNull { row ->
             row.rowTilOppgave()
         }
@@ -129,7 +129,7 @@ class PgOppgaveRepository private constructor(
             AND status in ('AvventerSaksbehandler', 'AvventerSystem')
             ORDER BY o.id DESC LIMIT 1
             """,
-            "fodselsnummer" to identitetsnummer.value,
+            "fodselsnummer" to identitetsnummer.value
         ).singleOrNull { row ->
             row.rowTilOppgave()
         }
@@ -209,14 +209,14 @@ class PgOppgaveRepository private constructor(
             "oppgavetype" to oppgave.type.dbVerdi(),
             "inntektskilde" to oppgave.inntektskilde.dbVerdi(),
             "inntektsforhold" to oppgave.inntektsforhold.dbVerdi(),
-            "periodetype" to oppgave.periodetype.dbVerdi(),
+            "periodetype" to oppgave.periodetype.dbVerdi()
         ).update()
     }
 
     override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? =
         asSQL(
             "SELECT min(opprettet) FROM oppgave WHERE behandling_id = :behandling_id",
-            "behandling_id" to behandlingId,
+            "behandling_id" to behandlingId
         ).singleOrNull { it.localDateTimeOrNull(1) }
 
     override fun finnOppgaveProjeksjoner(
@@ -229,7 +229,7 @@ class PgOppgaveRepository private constructor(
         sorterPå: SorteringsnøkkelForDatabase,
         sorteringsrekkefølge: Sorteringsrekkefølge,
         sidetall: Int,
-        sidestørrelse: Int,
+        sidestørrelse: Int
     ): Side<OppgaveProjeksjon> {
         val parameterMap = mutableMapOf<String, Any>()
         val sql =
@@ -252,7 +252,7 @@ class PgOppgaveRepository private constructor(
                     INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                     LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-                    """,
+                    """
                 )
                 if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
                     append("LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid\n")
@@ -261,7 +261,7 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
-                        """,
+                        """
                     )
                 }
                 append("WHERE o.status = 'AvventerSaksbehandler'\n")
@@ -297,7 +297,7 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND ${if (erTildelt) "" else "NOT"} EXISTS (SELECT 1 FROM tildeling WHERE oppgave_id_ref = o.id)
-                        """,
+                        """
                     )
                 }
                 append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
@@ -324,21 +324,21 @@ class PgOppgaveRepository private constructor(
                         tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
                         opprettetTidspunkt = row.instant("første_opprettet"),
                         behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
-                        påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
+                        påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId)
                     )
             }.let { listeMedTotaltAntallOgElement ->
                 Side(
                     totaltAntall = listeMedTotaltAntallOgElement.firstOrNull()?.first ?: 0L,
                     sidetall = sidetall,
                     sidestørrelse = sidestørrelse,
-                    elementer = listeMedTotaltAntallOgElement.map(Pair<Long, OppgaveProjeksjon>::second),
+                    elementer = listeMedTotaltAntallOgElement.map(Pair<Long, OppgaveProjeksjon>::second)
                 )
             }
     }
 
     override fun finnListeOppgaveProjeksjoner(
         sidetall: Int,
-        sidestørrelse: Int,
+        sidestørrelse: Int
     ): Side<OppgaveProjeksjon> =
         asSQL(
             """
@@ -355,7 +355,7 @@ class PgOppgaveRepository private constructor(
                 FROM oppgave AS o
                 JOIN aktiv_utildelt_oppgave auo ON auo.id = o.id
                 JOIN behandling AS b ON o.behandling_id = b.spleis_behandling_id
-                LEFT JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
+                JOIN selve_varsel AS sv ON b.id = sv.behandling_ref
                 WHERE o.egenskaper @> ARRAY['SØKNAD']::varchar[]
                 AND (o.egenskaper && ARRAY['FORSTEGANGSBEHANDLING', 'FORLENGELSE']::varchar[])
                 AND NOT o.egenskaper && ARRAY[
@@ -368,7 +368,7 @@ class PgOppgaveRepository private constructor(
             ), har_ekskludert_varsler AS (
                 SELECT id
                 FROM varsel
-                WHERE varsler IS NULL OR NOT varsler && ARRAY[
+                WHERE NOT varsler && ARRAY[
                     'RV_MV_3', 'RV_IM_4', 'RV_VV_1', 'RV_VV_4', 'RV_VV_8', 'RV_IV_1', 'RV_IV_3', 'RV_OV_3', 'RV_OV_5',
                     'RV_AY_3', 'RV_AY_4', 'RV_AY_5', 'RV_AY_6', 'RV_AY_7', 'RV_AY_8', 'RV_AY_9', 'RV_AY_11', 'RV_AY_12',
                     'RV_SØ_2', 'RV_SØ_10', 'RV_SØ_44', 'RV_IT_3', 'RV_IT_38'
@@ -391,7 +391,7 @@ class PgOppgaveRepository private constructor(
             LIMIT :limit
             """,
             "offset" to (sidetall - 1) * sidestørrelse,
-            "limit" to sidestørrelse,
+            "limit" to sidestørrelse
         ).list { row ->
             row.long("filtered_count") to
                 OppgaveProjeksjon(
@@ -405,14 +405,14 @@ class PgOppgaveRepository private constructor(
                     tildeltTilOid = null,
                     opprettetTidspunkt = row.instant("første_opprettet"),
                     behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
-                    påVentId = null,
+                    påVentId = null
                 )
         }.let { listeMedTotaltAntallOgElement ->
             Side(
                 totaltAntall = listeMedTotaltAntallOgElement.firstOrNull()?.first ?: 0L,
                 sidetall = sidetall,
                 sidestørrelse = sidestørrelse,
-                elementer = listeMedTotaltAntallOgElement.map(Pair<Long, OppgaveProjeksjon>::second),
+                elementer = listeMedTotaltAntallOgElement.map(Pair<Long, OppgaveProjeksjon>::second)
             )
         }
 
@@ -421,7 +421,7 @@ class PgOppgaveRepository private constructor(
         tom: LocalDate,
         sidetall: Int,
         sidestørrelse: Int,
-        behandletAvOid: UUID,
+        behandletAvOid: UUID
     ): Side<BehandletOppgaveProjeksjon> =
         asSQL(
             """
@@ -454,7 +454,7 @@ class PgOppgaveRepository private constructor(
             "fom" to fom,
             "tom" to tom,
             "offset" to (sidetall - 1) * sidestørrelse,
-            "limit" to sidestørrelse,
+            "limit" to sidestørrelse
         ).list { row ->
             row.long("filtered_count") to
                 BehandletOppgaveProjeksjon(
@@ -467,15 +467,15 @@ class PgOppgaveRepository private constructor(
                         PersonnavnFraDatabase(
                             row.string("fornavn"),
                             row.stringOrNull("mellomnavn"),
-                            row.string("etternavn"),
-                        ),
+                            row.string("etternavn")
+                        )
                 )
         }.let { liste ->
             Side(
                 totaltAntall = liste.firstOrNull()?.first ?: 0L,
                 sidetall = sidetall,
                 sidestørrelse = sidestørrelse,
-                elementer = liste.map { it.second },
+                elementer = liste.map { it.second }
             )
         }
 
@@ -493,12 +493,12 @@ class PgOppgaveRepository private constructor(
             WHERE o.status = 'AvventerSaksbehandler'
                 AND t.saksbehandler_ref = :oid 
             """,
-            "oid" to saksbehandlersOid.value,
+            "oid" to saksbehandlersOid.value
         ).singleOrNull { row ->
             AntallOppgaverProjeksjon(
                 antallMineSaker = row.int("antall_mine_saker"),
                 antallMineSakerPåVent = row.int("antall_mine_saker_på_vent"),
-                antallMineSakerPåVentNåddFrist = row.int("antall_mine_saker_på_vent_nådd_frist"),
+                antallMineSakerPåVentNåddFrist = row.int("antall_mine_saker_på_vent_nådd_frist")
             )
         } ?: AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0)
 
@@ -506,7 +506,7 @@ class PgOppgaveRepository private constructor(
 
     private fun tilOrderBy(
         sorterPå: SorteringsnøkkelForDatabase,
-        sorteringsrekkefølge: Sorteringsrekkefølge,
+        sorteringsrekkefølge: Sorteringsrekkefølge
     ): String =
         buildString {
             append("${sorterPå.tilOrderByKolonne()} ${sorteringsrekkefølge.tilAscEllerDesc()} NULLS LAST")
@@ -614,7 +614,7 @@ class PgOppgaveRepository private constructor(
 
     private fun finnesAnnenAktivOppgavePåPerson(
         oppgaveId: OppgaveId,
-        vedtaksperiodeId: VedtaksperiodeId,
+        vedtaksperiodeId: VedtaksperiodeId
     ): Boolean =
         asSQL(
             """
@@ -630,7 +630,7 @@ class PgOppgaveRepository private constructor(
             AND o.status = 'AvventerSaksbehandler'
             """.trimIndent(),
             "oppgave_id" to oppgaveId.value,
-            "vedtaksperiode_id" to vedtaksperiodeId.value,
+            "vedtaksperiode_id" to vedtaksperiodeId.value
         ).singleOrNull { it.boolean(1) } ?: false
 
     private fun finnOppgave(id: Long): Oppgave? =
@@ -661,7 +661,7 @@ class PgOppgaveRepository private constructor(
             WHERE o.id = :oppgaveId
             ORDER BY o.id DESC LIMIT 1
             """,
-            "oppgaveId" to id,
+            "oppgaveId" to id
         ).singleOrNull { row ->
             row.rowTilOppgave()
         }
@@ -694,7 +694,7 @@ class PgOppgaveRepository private constructor(
             WHERE o.behandling_id = :spleisBehandlingId
             ORDER BY o.id DESC LIMIT 1
             """,
-            "spleisBehandlingId" to id.value,
+            "spleisBehandlingId" to id.value
         ).singleOrNull { row ->
             row.rowTilOppgave()
         }
@@ -719,7 +719,7 @@ class PgOppgaveRepository private constructor(
             mottaker = tilMottaker(egenskaper),
             inntektskilde = tilInntektskilde(egenskaper),
             inntektsforhold = tilInntektsforhold(egenskaper),
-            periodetype = tilPeriodetype(egenskaper),
+            periodetype = tilPeriodetype(egenskaper)
         )
     }
 
