@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 
 class InMemoryOppgaveRepository(
@@ -70,17 +69,6 @@ class InMemoryOppgaveRepository(
         error("Not implemented for test")
     }
 
-    override fun finnListeOppgaveProjeksjoner(
-        sidetall: Int,
-        sidestørrelse: Int,
-    ): Side<OppgaveProjeksjon> =
-        Side(
-            totaltAntall = oppgaver.size.toLong(),
-            sidetall = sidetall,
-            sidestørrelse = sidestørrelse,
-            elementer = oppgaver.values.map { it.toOppgaveProjeksjon() },
-        )
-
     override fun finnBehandledeOppgaveProjeksjoner(
         fom: LocalDate,
         tom: LocalDate,
@@ -123,18 +111,5 @@ private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
                 mellomnavn = "til",
                 etternavn = "personen",
             ),
-    )
-}
-
-private fun Oppgave.toOppgaveProjeksjon(): OppgaveProjeksjon {
-    // Denne skal egentlig hente data fra oppgave, men det blir for knotete siden oppgave ikke er skrevet om til DDD ennå.
-    return OppgaveProjeksjon(
-        id = id.value,
-        identitetsnummer = Identitetsnummer.fraString("42"),
-        egenskaper = emptySet(),
-        tildeltTilOid = null,
-        opprettetTidspunkt = LocalDateTime.of(2020, 2, 2, 12, 30).toInstant(ZoneOffset.UTC),
-        behandlingOpprettetTidspunkt = LocalDateTime.of(2020, 2, 2, 12, 30).toInstant(ZoneOffset.UTC),
-        påVentId = null,
     )
 }

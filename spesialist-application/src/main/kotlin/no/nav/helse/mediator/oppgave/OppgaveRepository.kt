@@ -46,11 +46,6 @@ interface OppgaveRepository {
         ekskluderVarsler: Set<String>,
     ): Side<OppgaveProjeksjon>
 
-    fun finnListeOppgaveProjeksjoner(
-        sidetall: Int,
-        sidestørrelse: Int,
-    ): Side<OppgaveProjeksjon>
-
     fun finnBehandledeOppgaveProjeksjoner(
         fom: LocalDate,
         tom: LocalDate,

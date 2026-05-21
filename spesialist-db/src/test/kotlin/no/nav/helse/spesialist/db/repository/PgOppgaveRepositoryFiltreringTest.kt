@@ -237,8 +237,6 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         assertEquals(matchendeOppgave.id.value, resultat.elementer.single().id)
     }
 
-
-
     @Test
     fun `returnerer tom liste når ingen oppgaver matcher`() {
         val resultat = finnOppgaveProjeksjoner(

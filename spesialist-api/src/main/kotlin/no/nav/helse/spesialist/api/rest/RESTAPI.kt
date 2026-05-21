@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetAntallOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetBehandledeOppgaverBehandler
-import no.nav.helse.spesialist.api.rest.oppgaver.GetListeOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.DeletePåVentBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.PutPåVentBehandler
@@ -104,7 +103,6 @@ fun Routing.restRoutes(
             get(GetOppgaverBehandler(), restAdapter)
             get(GetAntallOppgaverBehandler(), restAdapter)
             get(GetBehandledeOppgaverBehandler(), restAdapter)
-            get(GetListeOppgaverBehandler(), restAdapter)
 
             put(PutPåVentBehandler(), restAdapter)
             delete(DeletePåVentBehandler(), restAdapter)
