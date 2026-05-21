@@ -50,6 +50,7 @@ class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.Vedtaksperi
                     vedtaksperiodeId = vedtaksperiode.id.value.toString(),
                     organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     yrkesaktivitetstype = behandling.yrkesaktivitetstype.toString(),
+                    saksbehandlerIdent = kallKontekst.saksbehandler.ident.value,
                     årsaker = request.årsaker.map { it.årsak },
                     kommentar = request.kommentar,
                 ),
@@ -66,14 +67,8 @@ enum class ApiPostAnmodOmForkastingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON(
-        "Mangler tilgang til person",
-        HttpStatusCode.Forbidden,
-    ),
-    VEDTAKSPERIODE_IKKE_FUNNET(
-        "Fant ikke vedtaksperiode",
-        HttpStatusCode.NotFound,
-    ),
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     BEHANDLING_IKKE_FUNNET("Fant ikke tilhørende behandling", HttpStatusCode.NotFound),
     MANGLER_ÅRSAKER("Årsaker kan ikke være tom", HttpStatusCode.BadRequest),
 }
