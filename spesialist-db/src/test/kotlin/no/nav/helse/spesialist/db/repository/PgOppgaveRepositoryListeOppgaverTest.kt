@@ -86,6 +86,18 @@ class PgOppgaveRepositoryListeOppgaverTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `ekskluderer revurderinger`() {
+        opprettOppgaveMedVarsel(
+            varselkode = "SB_EX_1",
+            egenskaper = setOf(Egenskap.REVURDERING),
+        )
+
+        val resultat = repository.finnListeOppgaveProjeksjoner(sidetall = 1, sidestørrelse = 10)
+
+        assertEquals(0, resultat.totaltAntall)
+    }
+
+    @Test
     fun `inkluderer oppgave med FORLENGELSE periodetype`() {
         val (_, _, oppgave) = opprettOppgaveMedVarsel(
             varselkode = "SB_EX_1",

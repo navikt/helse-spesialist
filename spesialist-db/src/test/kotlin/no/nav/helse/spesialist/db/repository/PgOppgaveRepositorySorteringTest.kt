@@ -140,6 +140,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             sorteringsrekkefølge = rekkefølge,
             sidetall = side,
             sidestørrelse = antallRader,
+            ekskluderVarsler = emptySet(),
         )
 
     fun opprettOppgave(): Oppgave {

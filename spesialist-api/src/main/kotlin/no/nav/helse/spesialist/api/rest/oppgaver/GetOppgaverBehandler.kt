@@ -51,6 +51,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                         },
                     sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
                     sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
+                    ekskluderVarsler = resource.ekskluderVarsler?.tilStringSet() ?: emptySet(),
                 ).tilApiType(kallKontekst.transaksjon, kallKontekst.personPseudoIdProvider)
 
         loggInfo("Hentet ${oppgaver.elementer.size} oppgaver (av totalt ${oppgaver.totaltAntall})")
@@ -66,6 +67,13 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             .orEmpty()
             .map { it.tilEgenskap() }
             .toSet()
+
+    private fun String.tilStringSet(): Set<String> =
+        takeUnless { it.isEmpty() }
+            ?.split(',')
+            ?.map { it.trim() }
+            ?.toSet()
+            ?: emptySet()
 
     private fun String.tilEgenskap(): Egenskap =
         when (enumValueOf<ApiEgenskap>(this)) {

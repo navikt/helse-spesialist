@@ -65,6 +65,7 @@ class InMemoryOppgaveRepository(
         sorteringsrekkefølge: Sorteringsrekkefølge,
         sidetall: Int,
         sidestørrelse: Int,
+        ekskluderVarsler: Set<String>,
     ): Side<OppgaveProjeksjon> {
         error("Not implemented for test")
     }

@@ -29,6 +29,7 @@ data class Oppgaver(
     val sorteringsrekkefoelge: ApiSorteringsrekkefølge? = null,
     val sidetall: Int? = null,
     val sidestoerrelse: Int? = null,
+    val ekskluderVarsler: String? = null, // Kommaseparert
 )
 
 @Resource("oppgaver")
