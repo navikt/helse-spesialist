@@ -52,8 +52,8 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                     sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
                     sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
                     ekskluderVarsler = resource.ekskluderVarsler?.tilStringSet() ?: emptySet(),
-                    behandlingOpprettetFom = null,
-                    behandlingOpprettetTom = null,
+                    behandlingOpprettetFom = resource.behandlingOpprettetFom,
+                    behandlingOpprettetTom = resource.behandlingOpprettetTom
                 ).tilApiType(kallKontekst.transaksjon, kallKontekst.personPseudoIdProvider)
 
         loggInfo("Hentet ${oppgaver.elementer.size} oppgaver (av totalt ${oppgaver.totaltAntall})")
