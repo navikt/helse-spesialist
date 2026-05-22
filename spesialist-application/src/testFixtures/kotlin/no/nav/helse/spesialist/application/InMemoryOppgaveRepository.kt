@@ -65,6 +65,8 @@ class InMemoryOppgaveRepository(
         sidetall: Int,
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
+        behandlingOpprettetFom: LocalDate?,
+        behandlingOpprettetTom: LocalDate?,
     ): Side<OppgaveProjeksjon> {
         error("Not implemented for test")
     }

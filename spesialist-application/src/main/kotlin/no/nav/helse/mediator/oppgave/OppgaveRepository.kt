@@ -44,6 +44,8 @@ interface OppgaveRepository {
         sidetall: Int,
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
+        behandlingOpprettetFom: LocalDate?,
+        behandlingOpprettetTom: LocalDate?,
     ): Side<OppgaveProjeksjon>
 
     fun finnBehandledeOppgaveProjeksjoner(
