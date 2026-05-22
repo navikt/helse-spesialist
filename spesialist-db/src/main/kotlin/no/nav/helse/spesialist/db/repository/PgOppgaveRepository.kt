@@ -305,15 +305,13 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND EXISTS (
-                            SELECT 1 FROM selve_varsel sv3
-                            JOIN behandling b3 ON b3.id = sv3.behandling_ref
-                            WHERE b3.spleis_behandling_id = o.behandling_id
+                            SELECT 1 FROM selve_varsel sv2
+                            WHERE sv2.behandling_ref = b.id
                         )
                         AND NOT EXISTS (
-                            SELECT 1 FROM selve_varsel sv2
-                            JOIN behandling b2 ON b2.id = sv2.behandling_ref
-                            WHERE b2.spleis_behandling_id = o.behandling_id
-                            AND sv2.kode = ANY(:ekskluderVarsler::varchar[])
+                            SELECT 1 FROM selve_varsel sv3
+                            WHERE sv2.behandling_ref = b.id
+                            AND sv3.kode = ANY(:ekskluderVarsler::varchar[])
                         )
                         """,
                     )
