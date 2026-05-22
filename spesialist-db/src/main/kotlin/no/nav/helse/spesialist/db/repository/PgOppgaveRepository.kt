@@ -310,7 +310,7 @@ class PgOppgaveRepository private constructor(
                         )
                         AND NOT EXISTS (
                             SELECT 1 FROM selve_varsel sv3
-                            WHERE sv2.behandling_ref = b.id
+                            WHERE sv3.behandling_ref = b.id
                             AND sv3.kode = ANY(:ekskluderVarsler::varchar[])
                         )
                         """,
