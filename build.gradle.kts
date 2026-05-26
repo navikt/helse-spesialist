@@ -20,7 +20,7 @@ allprojects {
     }
 
     dependencies {
-        testImplementation(platform("org.junit:junit-bom:6.0.3"))
+        testImplementation(platform("org.junit:junit-bom:6.1.0"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation(kotlin("test"))
         testImplementation("io.mockk:mockk:1.14.9")
