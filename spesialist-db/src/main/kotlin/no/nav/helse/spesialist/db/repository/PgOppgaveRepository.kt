@@ -233,6 +233,8 @@ class PgOppgaveRepository private constructor(
         ekskluderVarsler: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
+        oppgaveKlarFom: LocalDate?,
+        oppgaveKlarTom: LocalDate?,
     ): Side<OppgaveProjeksjon> {
         val parameterMap = mutableMapOf<String, Any>()
         val sql =
@@ -330,10 +332,26 @@ class PgOppgaveRepository private constructor(
                 if (behandlingOpprettetTom != null) {
                     append(
                         """
-                        AND b.opprettet_tidspunkt::date <= :behandlingOpprettetTom
+                        AND b.opprettet_tidspunkt <= :behandlingOpprettetTom
                         """
                     )
                     parameterMap["behandlingOpprettetTom"] = behandlingOpprettetTom
+                }
+                if (oppgaveKlarFom != null) {
+                    append(
+                        """
+                        AND o.første_opprettet::date >= :oppgaveKlarFom
+                        """
+                    )
+                    parameterMap["oppgaveKlarFom"] = oppgaveKlarFom
+                }
+                if (oppgaveKlarTom != null) {
+                    append(
+                        """
+                        AND o.første_opprettet::date <= :oppgaveKlarTom
+                        """
+                    )
+                    parameterMap["oppgaveKlarTom"] = oppgaveKlarTom
                 }
                 append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
 

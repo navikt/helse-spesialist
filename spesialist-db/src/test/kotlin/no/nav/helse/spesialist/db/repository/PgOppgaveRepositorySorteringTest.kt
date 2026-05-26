@@ -143,6 +143,8 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             ekskluderVarsler = emptySet(),
             behandlingOpprettetFom = null,
             behandlingOpprettetTom = null,
+            oppgaveKlarFom = null,
+            oppgaveKlarTom = null,
         )
 
     fun opprettOppgave(): Oppgave {

@@ -292,6 +292,36 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `inkluderer eldre behandling når kun behandlingOpprettetTom er satt`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        settBehandlingOpprettet(behandling, LocalDate.now().minusDays(10))
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+
+        val resultat = finnOppgaveProjeksjoner(behandlingOpprettetTom = LocalDate.now())
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `inkluderer nyere behandling når kun behandlingOpprettetFom er satt`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        settBehandlingOpprettet(behandling, LocalDate.now())
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+
+        val resultat = finnOppgaveProjeksjoner(behandlingOpprettetFom = LocalDate.now().minusDays(10))
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
     fun `ekskluderer oppgave som er nyere enn behandlingOpprettetTom`() {
         val person = opprettPerson()
         val arbeidsgiver = opprettArbeidsgiver()
@@ -366,6 +396,92 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         assertEquals(0, resultat.totaltAntall)
     }
 
+    @Test
+    fun `inkluderer nyere oppgave når kun oppgaveKlarFom er satt`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        val oppgave = opprettOppgave(vedtaksperiode, behandling, førsteOpprettet = LocalDate.now().atStartOfDay())
+
+        val resultat = finnOppgaveProjeksjoner(oppgaveKlarFom = LocalDate.now().minusDays(10))
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `inkluderer eldre oppgave når kun oppgaveKlarTom er satt`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        val oppgave = opprettOppgave(vedtaksperiode, behandling, førsteOpprettet = LocalDate.now().minusDays(10).atStartOfDay())
+
+        val resultat = finnOppgaveProjeksjoner(oppgaveKlarTom = LocalDate.now())
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `ekskluderer oppgave som er nyere enn oppgaveKlarTom`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        opprettOppgave(vedtaksperiode, behandling, førsteOpprettet = LocalDate.now().atStartOfDay())
+
+        val resultat = finnOppgaveProjeksjoner(oppgaveKlarTom = LocalDate.now().minusDays(1))
+
+        assertEquals(0, resultat.totaltAntall)
+    }
+
+    @Test
+    fun `inkluderer oppgave der første_opprettet er samme dag som oppgaveKlarTom`() {
+        val dato = LocalDate.now()
+
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        val oppgave = opprettOppgave(vedtaksperiode, behandling, førsteOpprettet = dato.atStartOfDay())
+
+        val resultat = finnOppgaveProjeksjoner(oppgaveKlarTom = dato)
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `ekskluderer oppgave som er eldre enn oppgaveKlarFom`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        opprettOppgave(vedtaksperiode, behandling, førsteOpprettet = LocalDate.now().minusDays(2).atStartOfDay())
+
+        val resultat = finnOppgaveProjeksjoner(oppgaveKlarFom = LocalDate.now())
+
+        assertEquals(0, resultat.totaltAntall)
+    }
+
+    @Test
+    fun `inkluderer oppgave der første_opprettet er samme dag som oppgaveKlarFom`() {
+        val dato = LocalDate.now()
+
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        val oppgave = opprettOppgave(vedtaksperiode, behandling, førsteOpprettet = dato.atStartOfDay())
+
+        val resultat = finnOppgaveProjeksjoner(oppgaveKlarFom = dato)
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
     private fun settBehandlingOpprettet(behandling: Behandling, dato: LocalDate) {
         val tidspunkt = dato.atStartOfDay()
         dbQuery.update(
@@ -387,6 +503,8 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         ekskluderVarsler: Set<String> = emptySet(),
         behandlingOpprettetFom: LocalDate? = null,
         behandlingOpprettetTom: LocalDate? = null,
+        oppgaveKlarFom: LocalDate? = null,
+        oppgaveKlarTom: LocalDate? = null,
     ) = repository.finnOppgaveProjeksjoner(
         minstEnAvEgenskapene = minstEnAvEgenskapene,
         ingenAvEgenskapene = ingenAvEgenskapene,
@@ -401,6 +519,8 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         ekskluderVarsler = ekskluderVarsler,
         behandlingOpprettetFom = behandlingOpprettetFom,
         behandlingOpprettetTom = behandlingOpprettetTom,
+        oppgaveKlarFom = oppgaveKlarFom,
+        oppgaveKlarTom = oppgaveKlarTom,
     )
 }
 

@@ -67,6 +67,8 @@ class InMemoryOppgaveRepository(
         ekskluderVarsler: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
+        oppgaveKlarFom: LocalDate?,
+        oppgaveKlarTom: LocalDate?,
     ): Side<OppgaveProjeksjon> {
         error("Not implemented for test")
     }

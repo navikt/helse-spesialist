@@ -32,6 +32,8 @@ data class Oppgaver(
     val ekskluderVarsler: String? = null, // Kommaseparert
     val behandlingOpprettetFom: LocalDate? = null,
     val behandlingOpprettetTom: LocalDate? = null,
+    val oppgaveKlarFom: LocalDate? = null,
+    val oppgaveKlarTom: LocalDate? = null,
 )
 
 @Resource("oppgaver")
