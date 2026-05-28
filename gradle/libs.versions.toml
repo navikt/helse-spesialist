@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.21"
-flyway = "12.6.1"
+flyway = "12.6.2"
 openApiGenerator = "7.22.0"
 graphqlKotlin = "9.2.0"
 jackson = "2.21.3"
