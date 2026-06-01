@@ -399,8 +399,10 @@ class PersonQueryHandler(
                                                                     ),
                                                                 historikkinnslag =
                                                                     daos.periodehistorikkApiDao
-                                                                        .finn(periode.utbetaling.id)
-                                                                        .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
+                                                                        .finn(
+                                                                            utbetalingId = periode.utbetaling.id,
+                                                                            spleisBehandlingId = periode.behandlingId,
+                                                                        ).map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
                                                                 forbrukteSykedager = periode.forbrukteSykedager,
                                                                 gjenstaendeSykedager = periode.gjenstaendeSykedager,
                                                                 maksdato = periode.maksdato,
@@ -698,7 +700,7 @@ class PersonQueryHandler(
                                                                 ),
                                                             historikkinnslag =
                                                                 daos.periodehistorikkApiDao
-                                                                    .finn(periode.utbetaling.id)
+                                                                    .finn(utbetalingId = periode.utbetaling.id, spleisBehandlingId = periode.behandlingId)
                                                                     .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
                                                             forbrukteSykedager = periode.forbrukteSykedager,
                                                             gjenstaendeSykedager = periode.gjenstaendeSykedager,

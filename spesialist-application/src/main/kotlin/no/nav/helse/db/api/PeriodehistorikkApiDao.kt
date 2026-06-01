@@ -4,5 +4,8 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import java.util.UUID
 
 interface PeriodehistorikkApiDao {
-    fun finn(utbetalingId: UUID): List<PeriodehistorikkDto>
+    fun finn(
+        utbetalingId: UUID,
+        spleisBehandlingId: UUID,
+    ): List<PeriodehistorikkDto>
 }

@@ -5,7 +5,10 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import java.util.UUID
 
 class UnimplementedPeriodehistorikkApiDao : PeriodehistorikkApiDao {
-    override fun finn(utbetalingId: UUID): List<PeriodehistorikkDto> {
+    override fun finn(
+        utbetalingId: UUID,
+        spleisBehandlingId: UUID,
+    ): List<PeriodehistorikkDto> {
         TODO("Not yet implemented")
     }
 }
