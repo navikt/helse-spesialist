@@ -318,6 +318,7 @@ sealed interface ApiPeriode {
     val skjaeringstidspunkt: LocalDate
     val varsler: List<ApiVarselDTO>
     val hendelser: List<ApiHendelse>
+    val historikkinnslag: List<ApiHistorikkinnslag>
 }
 
 @GraphQLName("UberegnetPeriode")
@@ -336,6 +337,7 @@ data class ApiUberegnetPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val varsler: List<ApiVarselDTO>,
     override val hendelser: List<ApiHendelse>,
+    override val historikkinnslag: List<ApiHistorikkinnslag>,
 ) : ApiPeriode
 
 @GraphQLName("Periodehandling")
@@ -367,10 +369,10 @@ class ApiBeregnetPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val varsler: List<ApiVarselDTO>,
     override val hendelser: List<ApiHendelse>,
+    override val historikkinnslag: List<ApiHistorikkinnslag>,
     val oppgave: ApiOppgaveForPeriodevisning?,
     val handlinger: List<ApiHandling>,
     val egenskaper: List<ApiOppgaveegenskap>,
-    val historikkinnslag: List<ApiHistorikkinnslag>,
     val forbrukteSykedager: Int?,
     val gjenstaendeSykedager: Int?,
     val maksdato: LocalDate,

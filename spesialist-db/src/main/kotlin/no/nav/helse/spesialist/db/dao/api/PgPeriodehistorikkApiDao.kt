@@ -15,7 +15,7 @@ class PgPeriodehistorikkApiDao internal constructor(
 ) : QueryRunner by MedDataSource(dataSource),
     PeriodehistorikkApiDao {
     override fun finn(
-        utbetalingId: UUID,
+        utbetalingId: UUID?,
         spleisBehandlingId: UUID,
     ) = asSQL(
         // Fiklete greier, for å unngå sequential scan. Spørringen gjøres mange ganger når GraphQL skal bygge

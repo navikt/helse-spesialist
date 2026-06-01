@@ -301,6 +301,7 @@ class PersonQueryHandler(
                                                             periode.tilUberegnetPeriode(
                                                                 behandlingIndex = behandlingIndex,
                                                                 perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
+                                                                transaction,
                                                             )
                                                         }
 
@@ -602,6 +603,7 @@ class PersonQueryHandler(
                                                         periode.tilUberegnetPeriode(
                                                             behandlingIndex = behandlingIndex,
                                                             perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
+                                                            transaction,
                                                         )
                                                     }
 
@@ -988,6 +990,7 @@ class PersonQueryHandler(
     private fun SnapshotUberegnetPeriode.tilUberegnetPeriode(
         behandlingIndex: Int,
         perioderSomSkalViseAktiveVarsler: Set<UUID>,
+        transaction: SessionContext,
     ): ApiUberegnetPeriode =
         ApiUberegnetPeriode(
             behandlingId = behandlingId,
@@ -1013,6 +1016,12 @@ class PersonQueryHandler(
                         .map { it.toVarselDto() }
                 },
             hendelser = hendelser.map { it.tilApiHendelse() },
+            historikkinnslag =
+                daos.periodehistorikkApiDao
+                    .finn(
+                        utbetalingId = null,
+                        spleisBehandlingId = behandlingId,
+                    ).map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
         )
 
     private fun finnArbeidsgivernavn(

@@ -5,7 +5,7 @@ import java.util.UUID
 
 interface PeriodehistorikkApiDao {
     fun finn(
-        utbetalingId: UUID,
+        utbetalingId: UUID?,
         spleisBehandlingId: UUID,
     ): List<PeriodehistorikkDto>
 }

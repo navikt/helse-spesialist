@@ -6,7 +6,7 @@ import java.util.UUID
 
 class UnimplementedPeriodehistorikkApiDao : PeriodehistorikkApiDao {
     override fun finn(
-        utbetalingId: UUID,
+        utbetalingId: UUID?,
         spleisBehandlingId: UUID,
     ): List<PeriodehistorikkDto> {
         TODO("Not yet implemented")
