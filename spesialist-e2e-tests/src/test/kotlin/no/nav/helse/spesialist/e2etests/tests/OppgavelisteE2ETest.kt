@@ -42,7 +42,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
               },
               "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
               "tildeling": null,
-              "påVentInfo": null
+              "paVentInfo": null
             }
             """.trimIndent()
         assertJsonEquals(
@@ -63,9 +63,9 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
-        assertIsNumber(oppgave["påVentInfo"]["dialogRef"])
-        assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["påVentInfo"]["opprettet"].asText()))
-        oppgave["påVentInfo"]["kommentarer"].forEach { kommentar ->
+        assertIsNumber(oppgave["paVentInfo"]["dialogRef"])
+        assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["paVentInfo"]["opprettet"].asText()))
+        oppgave["paVentInfo"]["kommentarer"].forEach { kommentar ->
             assertIsNumber(kommentar["id"])
             assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(kommentar["opprettet"].asText()))
         }
@@ -88,7 +88,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                 "epost" : "${saksbehandler.epost}",
                 "oid" : "${saksbehandler.id.value}"
               },
-              "påVentInfo": {
+              "paVentInfo": {
                 "arsaker" : [ "Min første årsak", "Min andre årsak" ],
                 "tekst" : "Min notattekst",
                 "saksbehandler" : "${saksbehandler.ident.value}",
@@ -115,10 +115,10 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             "opprettetTidspunkt",
             "opprinneligSoeknadstidspunkt",
             "behandlingOpprettetTidspunkt",
-            "påVentInfo.dialogRef",
-            "påVentInfo.opprettet",
-            "påVentInfo.kommentarer.id",
-            "påVentInfo.kommentarer.opprettet",
+            "paVentInfo.dialogRef",
+            "paVentInfo.opprettet",
+            "paVentInfo.kommentarer.id",
+            "paVentInfo.kommentarer.opprettet",
             "personPseudoId",
         )
     }

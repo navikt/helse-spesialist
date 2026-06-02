@@ -27,10 +27,10 @@ data class ApiOppgaveProjeksjon(
     val tildeling: ApiTildeling?,
     val opprettetTidspunkt: Instant,
     val behandlingOpprettetTidspunkt: Instant,
-    val påVentInfo: PåVentInfo?,
+    val paVentInfo: PaaVentInfo?,
 ) {
     @Serializable
-    data class PåVentInfo(
+    data class PaaVentInfo(
         val arsaker: List<String>,
         val tekst: String?,
         val dialogRef: Long,
