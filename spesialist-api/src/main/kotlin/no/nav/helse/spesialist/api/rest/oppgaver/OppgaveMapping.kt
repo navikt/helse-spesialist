@@ -83,20 +83,20 @@ internal fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiT
                             },
                     opprettetTidspunkt = oppgave.opprettetTidspunkt,
                     behandlingOpprettetTidspunkt = oppgave.behandlingOpprettetTidspunkt,
-                    paVentInfo =
+                    påVentInfo =
                         oppgave.påVentId
                             ?.let { påVentId -> påVenter[påVentId] }
-                            ?.tilPaaVent(saksbehandlere, dialoger),
+                            ?.tilPåVent(saksbehandlere, dialoger),
                 )
             },
     )
 }
 
-internal fun PåVent.tilPaaVent(
+internal fun PåVent.tilPåVent(
     saksbehandlere: Map<SaksbehandlerOid, Saksbehandler>,
     dialoger: Map<DialogId, Dialog>,
-): ApiOppgaveProjeksjon.PaaVentInfo =
-    ApiOppgaveProjeksjon.PaaVentInfo(
+): ApiOppgaveProjeksjon.PåVentInfo =
+    ApiOppgaveProjeksjon.PåVentInfo(
         arsaker = årsaker,
         tekst = notattekst,
         dialogRef = dialogRef?.value ?: error("LagtPåVent ${id()} har ingen dialogRef"),
@@ -113,7 +113,7 @@ internal fun PåVent.tilPaaVent(
                         .getRequired(it)
                         .kommentarer
                         .map { kommentar ->
-                            ApiOppgaveProjeksjon.PaaVentInfo.Kommentar(
+                            ApiOppgaveProjeksjon.PåVentInfo.Kommentar(
                                 id = kommentar.id().value,
                                 tekst = kommentar.tekst,
                                 opprettet = kommentar.opprettetTidspunkt,
