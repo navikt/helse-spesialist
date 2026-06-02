@@ -1,3 +1,4 @@
+ROOT = true
 [*.{kt,kts}]
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_max-line-length = disabled

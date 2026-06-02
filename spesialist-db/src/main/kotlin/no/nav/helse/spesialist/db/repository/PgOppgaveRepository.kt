@@ -325,7 +325,7 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND b.opprettet_tidspunkt::date >= :behandlingOpprettetFom
-                        """
+                        """,
                     )
                     parameterMap["behandlingOpprettetFom"] = behandlingOpprettetFom
                 }
@@ -333,7 +333,7 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND b.opprettet_tidspunkt <= :behandlingOpprettetTom
-                        """
+                        """,
                     )
                     parameterMap["behandlingOpprettetTom"] = behandlingOpprettetTom
                 }
@@ -341,7 +341,7 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND o.første_opprettet::date >= :oppgaveKlarFom
-                        """
+                        """,
                     )
                     parameterMap["oppgaveKlarFom"] = oppgaveKlarFom
                 }
@@ -349,7 +349,7 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND o.første_opprettet::date <= :oppgaveKlarTom
-                        """
+                        """,
                     )
                     parameterMap["oppgaveKlarTom"] = oppgaveKlarTom
                 }
