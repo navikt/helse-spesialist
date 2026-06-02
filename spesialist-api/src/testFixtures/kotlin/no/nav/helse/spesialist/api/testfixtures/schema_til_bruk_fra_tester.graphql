@@ -45,6 +45,7 @@ interface Periode {
     erForkastet: Boolean!
     fom: LocalDate!
     hendelser: [Hendelse!]!
+    historikkinnslag: [Historikkinnslag!]!
     id: UUID!
     inntektstype: Inntektstype!
     opprettet: LocalDateTime!
@@ -673,6 +674,7 @@ type UberegnetPeriode implements Periode {
     erForkastet: Boolean!
     fom: LocalDate!
     hendelser: [Hendelse!]!
+    historikkinnslag: [Historikkinnslag!]!
     id: UUID!
     inntektstype: Inntektstype!
     opprettet: LocalDateTime!
