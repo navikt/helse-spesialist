@@ -9,7 +9,6 @@ import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
-import no.nav.helse.modell.FinnerIkkePåVent
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
@@ -363,10 +362,6 @@ class SaksbehandlerMediator(
 
             is ManglerTilgang -> {
                 IkkeTilgang(oid, oppgaveId)
-            }
-
-            is FinnerIkkePåVent -> {
-                FinnerIkkeLagtPåVent(oppgaveId)
             }
         }
 

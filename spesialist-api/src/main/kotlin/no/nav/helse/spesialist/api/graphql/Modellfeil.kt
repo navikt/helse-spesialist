@@ -63,21 +63,6 @@ class ManglerVurderingAvVarsler(
     }
 }
 
-class FinnerIkkeLagtPåVent(
-    private val oppgaveId: Long,
-) : Modellfeil() {
-    override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
-    override val httpkode = HttpStatusCode.BadRequest
-    override val feilkode: String = "finner_ikke_paa_vent"
-
-    override fun logger() {
-        loggInfo(
-            "Finner ikke påvent-innslag for oppgave",
-            "oppgaveId" to oppgaveId,
-        )
-    }
-}
-
 class IkkeTilgang(
     private val oid: UUID,
     private val oppgaveId: Long,
