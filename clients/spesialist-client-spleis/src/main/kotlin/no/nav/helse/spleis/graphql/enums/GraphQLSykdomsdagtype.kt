@@ -51,6 +51,9 @@ public enum class GraphQLSykdomsdagtype {
     @JsonProperty("MeldingTilNavDag")
     MELDINGTILNAVDAG,
 
+    @JsonProperty("AvslattMeldingTilNavDag")
+    AVSLATTMELDINGTILNAVDAG,
+
     @JsonProperty("Permisjonsdag")
     PERMISJONSDAG,
 

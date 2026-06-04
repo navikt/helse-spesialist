@@ -21,5 +21,6 @@ enum class SnapshotSykdomsdagtype {
     SYKEDAGNAV,
     UBESTEMTDAG,
     MELDINGTILNAVDAG,
+    AVSLATTMELDINGTILNAVDAG,
     UNKNOWN_VALUE,
 }

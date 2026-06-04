@@ -119,6 +119,7 @@ private fun SnapshotSykdomsdagtype.tilApiSykdomsdagtype() =
         SnapshotSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
         SnapshotSykdomsdagtype.MELDINGTILNAVDAG -> ApiSykdomsdagtype.MELDINGTILNAVDAG
+        SnapshotSykdomsdagtype.AVSLATTMELDINGTILNAVDAG -> ApiSykdomsdagtype.AVSLATTMELDINGTILNAVDAG
         SnapshotSykdomsdagtype.UNKNOWN_VALUE -> ApiSykdomsdagtype.UKJENT
     }
 
@@ -161,6 +162,8 @@ private fun SnapshotBegrunnelse.tilApiBegrunnelse() =
         SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT
         SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT_OVER_67
         SnapshotBegrunnelse.ANDREYTELSER -> ApiBegrunnelse.ANDREYTELSER
+        SnapshotBegrunnelse.AVSLATTMELDINGTILNAVDAG -> ApiBegrunnelse.AVSLATT_MELDING_TIL_NAV_DAG
+        SnapshotBegrunnelse.MELDINGTILNAVDAGUTENFORVENTETID -> ApiBegrunnelse.MELDING_TIL_NAV_DAG_UTENFOR_VENTETID
         SnapshotBegrunnelse.UNKNOWN_VALUE -> ApiBegrunnelse.UKJENT
     }
 

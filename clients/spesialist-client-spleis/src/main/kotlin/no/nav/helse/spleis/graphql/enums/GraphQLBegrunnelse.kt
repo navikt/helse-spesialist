@@ -39,6 +39,12 @@ public enum class GraphQLBegrunnelse {
     @JsonProperty("SykepengedagerOppbruktOver67")
     SYKEPENGEDAGEROPPBRUKTOVER67,
 
+    @JsonProperty("AvslattMeldingTilNavDag")
+    AVSLATTMELDINGTILNAVDAG,
+
+    @JsonProperty("MeldingTilNavDagUtenforVentetid")
+    MELDINGTILNAVDAGUTENFORVENTETID,
+
     /**
      * This is a default enum value that will be used when attempting to deserialize unknown value.
      */

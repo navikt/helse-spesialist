@@ -813,6 +813,7 @@ enum Dagtype {
     Foreldrepengerdag
     Helg
     MeldingTilNavdag
+    AvslattMeldingTilNavdag
     Omsorgspengerdag
     Opplaringspengerdag
     Permisjonsdag
@@ -983,6 +984,7 @@ enum Sykdomsdagtype {
     FORELDET_SYKEDAG
     FRISK_HELGEDAG
     MELDINGTILNAVDAG
+    AVSLATTMELDINGTILNAVDAG
     PERMISJONSDAG
     SYKEDAG
     SYKEDAG_NAV

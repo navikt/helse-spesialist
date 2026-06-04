@@ -1123,6 +1123,7 @@ private fun Dagtype.tilApiDagtype() =
         Dagtype.Avvistdag -> ApiDagtype.Avvistdag
         Dagtype.Helg -> ApiDagtype.Helg
         Dagtype.MeldingTilNavdag -> ApiDagtype.MeldingTilNavdag
+        Dagtype.AvslattMeldingTilNavdag -> ApiDagtype.AvslattMeldingTilNavdag
     }
 
 private fun OverstyringInntektDto.tilInntektoverstyring() =

@@ -553,6 +553,8 @@ fun GraphQLBegrunnelse.tilSnapshotBegrunnelse() =
         GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKT
         GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67
         GraphQLBegrunnelse.__UNKNOWN_VALUE -> SnapshotBegrunnelse.UNKNOWN_VALUE
+        GraphQLBegrunnelse.AVSLATTMELDINGTILNAVDAG -> SnapshotBegrunnelse.AVSLATTMELDINGTILNAVDAG
+        GraphQLBegrunnelse.MELDINGTILNAVDAGUTENFORVENTETID -> SnapshotBegrunnelse.MELDINGTILNAVDAGUTENFORVENTETID
     }
 
 fun GraphQLHendelsetype.tilSnapshotHendelsetype() =
@@ -649,6 +651,7 @@ fun GraphQLSykdomsdagtype.tilSnapshotSykdomsdagtype() =
         GraphQLSykdomsdagtype.SYKEDAGNAV -> SnapshotSykdomsdagtype.SYKEDAGNAV
         GraphQLSykdomsdagtype.UBESTEMTDAG -> SnapshotSykdomsdagtype.UBESTEMTDAG
         GraphQLSykdomsdagtype.MELDINGTILNAVDAG -> SnapshotSykdomsdagtype.MELDINGTILNAVDAG
+        GraphQLSykdomsdagtype.AVSLATTMELDINGTILNAVDAG -> SnapshotSykdomsdagtype.AVSLATTMELDINGTILNAVDAG
         GraphQLSykdomsdagtype.__UNKNOWN_VALUE -> SnapshotSykdomsdagtype.UNKNOWN_VALUE
     }
 
