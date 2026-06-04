@@ -14,7 +14,12 @@ data class VedtaksperiodeDbDto(
 ) {
     fun vedtaksperiodeId() = this.vedtaksperiodeId
 
-    fun tidligereEnnOgSammenhengende(other: VedtaksperiodeDbDto): Boolean = this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
+    fun tidligereEnnOgSammenhengende(other: VedtaksperiodeDbDto): Boolean {
+        val overlapperEllerKantIKant = this.fom <= other.tom
+        val sammeSkjæringstidspunkt = this.skjæringstidspunkt == other.skjæringstidspunkt
+        val oppholdInntil16Dager = this.tom in other.fom.minusDays(18)..other.fom
+        return (overlapperEllerKantIKant && sammeSkjæringstidspunkt) || oppholdInntil16Dager
+    }
 
     // I stedet for å logge her, kunne man ha bygget opp et feilresponsobjekt og returnert det i stedet for en boolean,
     // og så logge på høyere nivå og med mer info, for eksempel organisasjonsnummer (og kanskje sende med detaljer i

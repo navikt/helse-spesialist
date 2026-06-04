@@ -16,7 +16,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VedtaksperiodeTest {
-
     @Test
     fun `sammenhengende - samme periode`() {
         val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
@@ -37,6 +36,38 @@ internal class VedtaksperiodeTest {
     fun `sammenhengende - ligger tidligere enn og har opphold og har samme skjæringstidspunkt`() {
         val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
         val behandling12 = opprettApiVedtaksperiode(1 mar 2018, 31 mar 2018, 1 jan 2018)
+
+        assertTrue(behandling1.tidligereEnnOgSammenhengende(behandling12))
+    }
+
+    @Test
+    fun `sammenhengende - opphold pa 18 dager og samme skjæringstidspunkt`() {
+        val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
+        val behandling12 = opprettApiVedtaksperiode(18 feb 2018, 28 feb 2018, 1 jan 2018)
+
+        assertTrue(behandling1.tidligereEnnOgSammenhengende(behandling12))
+    }
+
+    @Test
+    fun `sammenhengende - opphold pa 18 dager selv med ulikt skjæringstidspunkt`() {
+        val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
+        val behandling12 = opprettApiVedtaksperiode(18 feb 2018, 28 feb 2018, 1 feb 2018)
+
+        assertTrue(behandling1.tidligereEnnOgSammenhengende(behandling12))
+    }
+
+    @Test
+    fun `sammenhengende - opphold pa 19 dager selv med ulikt skjæringstidspunkt`() {
+        val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
+        val behandling12 = opprettApiVedtaksperiode(19 feb 2018, 28 feb 2018, 1 feb 2018)
+
+        assertFalse(behandling1.tidligereEnnOgSammenhengende(behandling12))
+    }
+
+    @Test
+    fun `sammenhengende - opphold pa mer enn 18 dager og samme skjæringstidspunkt`() {
+        val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
+        val behandling12 = opprettApiVedtaksperiode(19 feb 2018, 28 feb 2018, 1 jan 2018)
 
         assertTrue(behandling1.tidligereEnnOgSammenhengende(behandling12))
     }
@@ -92,22 +123,27 @@ internal class VedtaksperiodeTest {
         assertFalse(setOf(behandling1).harAktiveVarsler())
     }
 
-    private fun opprettApiVedtaksperiode(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<VarselDbDto> = emptyList()): VedtaksperiodeDbDto {
-        return VedtaksperiodeDbDto(UUID.randomUUID(), fom, tom, skjæringstidspunkt, emptySet(),  varsler.toSet())
-    }
+    private fun opprettApiVedtaksperiode(
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+        varsler: List<VarselDbDto> = emptyList(),
+    ): VedtaksperiodeDbDto = VedtaksperiodeDbDto(UUID.randomUUID(), fom, tom, skjæringstidspunkt, emptySet(), varsler.toSet())
 
-    private fun opprettVarsel(status: Varselstatus) = VarselDbDto(
-        varselId = UUID.randomUUID(),
-        behandlingId = UUID.randomUUID(),
-        opprettet = LocalDateTime.now(),
-        kode = "SB_EX_1",
-        status = status,
-        varseldefinisjon = VarselDbDto.VarseldefinisjonDbDto(
-            definisjonId = UUID.randomUUID(),
-            tittel = "EN_TITTEL",
-            forklaring = null,
-            handling = null,
-        ),
-        varselvurdering = null,
-    )
+    private fun opprettVarsel(status: Varselstatus) =
+        VarselDbDto(
+            varselId = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            kode = "SB_EX_1",
+            status = status,
+            varseldefinisjon =
+                VarselDbDto.VarseldefinisjonDbDto(
+                    definisjonId = UUID.randomUUID(),
+                    tittel = "EN_TITTEL",
+                    forklaring = null,
+                    handling = null,
+                ),
+            varselvurdering = null,
+        )
 }
