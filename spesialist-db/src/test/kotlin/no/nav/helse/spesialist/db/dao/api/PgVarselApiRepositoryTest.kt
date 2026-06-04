@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.dao.api
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -75,11 +76,11 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Uberegnet periode skal ikke vise varsler når den ikke er tilstøtende perioden med oppgave`() {
+    fun `Uberegnet periode skal ikke vise varsler når den ikke er tilstøtende perioden med oppgave (utenom 18-dagers opphold)`() {
         val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
         val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
         opprettBehandling(vedtaksperiode1, fom = 2 jan 2023, tom = 3 jan 2023, utbetalingId = null)
-        val behandling = opprettBehandling(vedtaksperiode2, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = 5 jan 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
+        val behandling = opprettBehandling(vedtaksperiode2, fom = 1 mar 2023, tom = 2 mar 2023, skjæringstidspunkt = 1 mar 2023, utbetalingId = UtbetalingId(UUID.randomUUID()))
         val oppgave = opprettOppgave(vedtaksperiode2, behandling)
 
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
@@ -128,13 +129,13 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Ingen uberegnede perioder skal vise varsler fordi de ikke henger sammen med perioden med oppgave`() {
+    fun `Ingen uberegnede perioder skal vise varsler fordi de ikke henger sammen innenfor 18 dagers opphold`() {
         val uberegnetPeriode1 = opprettVedtaksperiode(person, arbeidsgiver)
         val uberegnetPeriode2 = opprettVedtaksperiode(person, arbeidsgiver)
         val periodeMedOppgave = opprettVedtaksperiode(person, arbeidsgiver)
         opprettBehandling(uberegnetPeriode1, fom = 1 jan 2023, tom = 2 jan 2023)
         opprettBehandling(uberegnetPeriode2, fom = 3 jan 2023, tom = 4 jan 2023)
-        val behandling3 = opprettBehandling(periodeMedOppgave, fom = 6 jan 2023, tom = 7 jan 2023)
+        val behandling3 = opprettBehandling(periodeMedOppgave, fom = 1 mar 2023, tom = 2 mar 2023)
         val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
@@ -142,13 +143,28 @@ internal class PgVarselApiRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Bare den tilstøtende uberegnede perioden skal vise varsler`() {
+    fun `Bare den tilstøtende uberegnede perioden skal vise varsler innenfor 18-dagers opphold`() {
         val uberegnetPeriode1 = opprettVedtaksperiode(person, arbeidsgiver)
         val uberegnetPeriode2 = opprettVedtaksperiode(person, arbeidsgiver)
         val periodeMedOppgave = opprettVedtaksperiode(person, arbeidsgiver)
         opprettBehandling(uberegnetPeriode1, fom = 1 jan 2023, tom = 2 jan 2023)
         val behandling2 = opprettBehandling(uberegnetPeriode2, fom = 3 jan 2023, tom = 4 jan 2023)
         val behandling3 = opprettBehandling(periodeMedOppgave, fom = 5 jan 2023, tom = 6 jan 2023, skjæringstidspunkt = behandling2.skjæringstidspunkt)
+        val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
+
+        val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)
+
+        assertEquals(setOf(periodeMedOppgave.id.value, uberegnetPeriode2.id.value, uberegnetPeriode1.id.value), perioderSomSkalViseVarsler)
+    }
+
+    @Test
+    fun `Bare den tilstøtende uberegnede perioden skal vise varsler når andre er mer enn 18 dager unna`() {
+        val uberegnetPeriode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val uberegnetPeriode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        val periodeMedOppgave = opprettVedtaksperiode(person, arbeidsgiver)
+        opprettBehandling(uberegnetPeriode1, fom = 1 jan 2023, tom = 2 jan 2023)
+        val behandling2 = opprettBehandling(uberegnetPeriode2, fom = 3 jan 2023, tom = 4 jan 2023)
+        val behandling3 = opprettBehandling(periodeMedOppgave, fom = 1 mar 2023, tom = 2 mar 2023, skjæringstidspunkt = behandling2.skjæringstidspunkt)
         val oppgave = opprettOppgave(periodeMedOppgave, behandling3)
 
         val perioderSomSkalViseVarsler = apiVarselRepository.perioderSomSkalViseVarsler(oppgave.id.value)

@@ -17,8 +17,8 @@ data class VedtaksperiodeDbDto(
     fun tidligereEnnOgSammenhengende(other: VedtaksperiodeDbDto): Boolean {
         val overlapperEllerKantIKant = this.fom <= other.tom
         val sammeSkjæringstidspunkt = this.skjæringstidspunkt == other.skjæringstidspunkt
-        val oppholdInntil16Dager = this.tom in other.fom.minusDays(18)..other.fom
-        return (overlapperEllerKantIKant && sammeSkjæringstidspunkt) || oppholdInntil16Dager
+        val oppholdInntil18Dager = this.tom in other.fom.minusDays(18)..other.fom
+        return (overlapperEllerKantIKant && sammeSkjæringstidspunkt) || oppholdInntil18Dager
     }
 
     // I stedet for å logge her, kunne man ha bygget opp et feilresponsobjekt og returnert det i stedet for en boolean,

@@ -57,7 +57,7 @@ internal class VedtaksperiodeTest {
     }
 
     @Test
-    fun `sammenhengende - opphold pa 19 dager selv med ulikt skjæringstidspunkt`() {
+    fun `ikke sammenhengende - opphold pa 19 dager selv med ulikt skjæringstidspunkt`() {
         val behandling1 = opprettApiVedtaksperiode(1 jan 2018, 31 jan 2018, 1 jan 2018)
         val behandling12 = opprettApiVedtaksperiode(19 feb 2018, 28 feb 2018, 1 feb 2018)
 
