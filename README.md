@@ -77,6 +77,10 @@ En selvstendig app for å slette testpersoner, kjører kun i dev.
 
 Spleis-testdata fyrer av et kafka-event som spesialist-opprydding-dev lytter på og sletter testpersoner.
 
+## Spleis snapshot-API
+
+Spleis-typene genereres ikke, men vedlikeholdes manuelt. Nye typer fra Spleis sitt snapshot-API må legges til i de tilsvarende GraphQL-filene i `clients/spesialist-client-spleis`-modulen.
+
 ## Henvendelser
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
