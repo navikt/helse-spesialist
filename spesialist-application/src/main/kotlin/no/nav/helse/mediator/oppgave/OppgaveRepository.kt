@@ -60,6 +60,8 @@ interface OppgaveRepository {
 
     fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): AntallOppgaverProjeksjon
 
+    fun finnFødselsnumreForÅpneOppgaverMedAktivtVarsel(varselkode: String): Set<String>
+
     data class Side<T>(
         val totaltAntall: Long,
         val sidetall: Int,

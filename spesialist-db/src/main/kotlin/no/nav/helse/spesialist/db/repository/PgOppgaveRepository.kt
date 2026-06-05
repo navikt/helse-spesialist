@@ -475,6 +475,25 @@ class PgOppgaveRepository private constructor(
             )
         } ?: AntallOppgaverProjeksjon(antallMineSaker = 0, antallMineSakerPåVent = 0, antallMineSakerPåVentNåddFrist = 0)
 
+    override fun finnFødselsnumreForÅpneOppgaverMedAktivtVarsel(varselkode: String): Set<String> =
+        asSQL(
+            """
+            SELECT p.fødselsnummer
+            FROM oppgave o
+            JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+            JOIN selve_varsel sv ON sv.vedtaksperiode_id = v.vedtaksperiode_id
+            JOIN person p ON v.person_ref = p.id
+--            JOIN behandling b ON b.unik_id = o.spesialist_behandling_id
+--            JOIN selve_varsel sv ON sv.behandling_ref = b.id
+--            JOIN vedtaksperiode v ON o.vedtak_ref = v.id
+--            JOIN person p ON v.person_ref = p.id
+            WHERE o.status = 'AvventerSaksbehandler'
+              AND sv.kode = :varselkode
+              AND sv.status = 'AKTIV'
+            """,
+            "varselkode" to varselkode,
+        ).list { it.string("fødselsnummer") }.toSet()
+
     private fun Collection<Enum<*>>.tilDatabaseArray(): String = joinToString(prefix = "{", postfix = "}") { it.name }
 
     private fun tilOrderBy(

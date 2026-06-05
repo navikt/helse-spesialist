@@ -10,6 +10,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
@@ -20,6 +21,7 @@ import java.util.UUID
 class InMemoryOppgaveRepository(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val påVentRepository: PåVentRepository,
+    private val varselRepository: VarselRepository,
 ) : OppgaveRepository {
     private val oppgaver = mutableMapOf<OppgaveId, Oppgave>()
     private val oppdatertTidspunkt = mutableMapOf<OppgaveId, LocalDateTime>()
@@ -99,6 +101,17 @@ class InMemoryOppgaveRepository(
             antallMineSakerPåVentNåddFrist = mineSakerPåVentNåddFrist.size,
         )
     }
+
+    override fun finnFødselsnumreForÅpneOppgaverMedAktivtVarsel(varselkode: String): Set<String> =
+        oppgaver.values
+            .filter { it.tilstand is Oppgave.AvventerSaksbehandler }
+            .filter { oppgave ->
+                varselRepository.finnVarsler(listOf(oppgave.behandlingId))
+                    .any { it.kode == varselkode && it.status == Varsel.Status.AKTIV }
+            }
+            .mapNotNull { oppgave -> vedtaksperiodeRepository.finn(oppgave.vedtaksperiodeId)?.identitetsnummer?.value }
+            .distinct()
+            .toSet()
 }
 
 private fun Oppgave.toBehandletOppgaveProjeksjon(): BehandletOppgaveProjeksjon {
