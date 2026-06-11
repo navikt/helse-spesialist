@@ -15,7 +15,7 @@ class UnimplementedLegacyBehandlingDao : LegacyBehandlingDao {
         TODO("Not yet implemented")
     }
 
-    override fun finnLegacyBehandling(behandlingDto: BehandlingDto) {
+    override fun lagreLegacyBehandling(behandlingDto: BehandlingDto) {
         TODO("Not yet implemented")
     }
 

@@ -55,7 +55,7 @@ class PgLegacyBehandlingDao private constructor(
             )
         }
 
-    override fun finnLegacyBehandling(behandlingDto: BehandlingDto) {
+    override fun lagreLegacyBehandling(behandlingDto: BehandlingDto) {
         lagre(behandlingDto)
         slettVarsler(behandlingDto.id, behandlingDto.varsler.map { it.id })
         behandlingDto.varsler.forEach { varselDto ->

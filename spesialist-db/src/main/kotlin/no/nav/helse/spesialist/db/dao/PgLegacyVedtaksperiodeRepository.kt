@@ -43,7 +43,7 @@ class PgLegacyVedtaksperiodeRepository(
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeBehandlinger.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.behandlinger.forEach { behandlingDto ->
-            legacyBehandlingDao.finnLegacyBehandling(behandlingDto)
+            legacyBehandlingDao.lagreLegacyBehandling(behandlingDto)
         }
     }
 

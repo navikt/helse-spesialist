@@ -66,7 +66,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 status = VarselStatusDto.AKTIV,
             )
-        behandlingDao.finnLegacyBehandling(
+        behandlingDao.lagreLegacyBehandling(
             BehandlingDto(
                 id = behandlingId,
                 vedtaksperiodeId = vedtaksperiodeId,
