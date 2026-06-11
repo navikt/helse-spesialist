@@ -148,8 +148,9 @@ class PgLegacyBehandlingDao private constructor(
     override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> =
         asSQL(
             """
-            SELECT vedtaksperiode_id FROM vedtaksperiode
-            INNER JOIN person p on p.id = person_ref
+            SELECT b.vedtaksperiode_id FROM behandling b 
+            INNER JOIN vedtaksperiode v on b.vedtaksperiode_id = v.vedtaksperiode_id
+            INNER JOIN person p on p.id = v.person_ref
             WHERE fødselsnummer = :fodselsnummer
             """,
             "fodselsnummer" to fødselsnummer,
