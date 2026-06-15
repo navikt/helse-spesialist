@@ -7,4 +7,5 @@ enum class ApiBrukerrolle {
     KODE_7,
     STIKKPRØVE,
     UTVIKLER,
+    DIALOGMELDING,
 }

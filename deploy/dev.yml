@@ -134,6 +134,8 @@ spec:
       value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
     - name: ROLLE_UTVIKLER
       value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+    - name: ROLLE_DIALOGMELDING
+      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL

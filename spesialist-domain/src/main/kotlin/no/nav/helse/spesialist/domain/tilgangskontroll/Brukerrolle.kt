@@ -7,4 +7,5 @@ enum class Brukerrolle {
     Kode7,
     Stikkprøve,
     Utvikler,
+    Dialogmelding,
 }

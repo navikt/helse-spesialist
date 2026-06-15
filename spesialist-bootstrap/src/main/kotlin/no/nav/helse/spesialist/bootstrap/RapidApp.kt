@@ -128,6 +128,7 @@ fun main() {
                         kode7 = env.getUUIDList("ROLLE_KODE_7"),
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
                         utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
+                        dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
                     ),
                 tilgangsgrupperTilTilganger =
                     TilgangsgrupperTilTilganger(

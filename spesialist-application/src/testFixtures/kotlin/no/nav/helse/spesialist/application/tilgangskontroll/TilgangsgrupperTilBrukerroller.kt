@@ -9,6 +9,7 @@ fun tilgangsgrupperTilBrukerroller(
     kode7: List<UUID> = listOf(UUID.randomUUID()),
     stikkprøve: List<UUID> = listOf(UUID.randomUUID()),
     utvikler: List<UUID> = listOf(UUID.randomUUID()),
+    dialogmelding: List<UUID> = listOf(UUID.randomUUID()),
 ): TilgangsgrupperTilBrukerroller =
     TilgangsgrupperTilBrukerroller(
         næringsdrivendeBeta = næringsdrivendeBeta,
@@ -17,4 +18,5 @@ fun tilgangsgrupperTilBrukerroller(
         kode7 = kode7,
         stikkprøve = stikkprøve,
         utvikler = utvikler,
+        dialogmelding = dialogmelding,
     )

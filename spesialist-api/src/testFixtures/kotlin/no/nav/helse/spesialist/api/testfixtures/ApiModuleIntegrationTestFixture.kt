@@ -125,6 +125,9 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     if (Brukerrolle.Utvikler in brukerroller) {
         uuider.addAll(utvikler)
     }
+    if (Brukerrolle.Dialogmelding in brukerroller) {
+        uuider.addAll(dialogmelding)
+    }
     return uuider
 }
 
