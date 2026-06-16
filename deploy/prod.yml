@@ -149,7 +149,7 @@ spec:
     - name: ROLLE_UTVIKLER
       value: {{ENTRAID_UUID_NAIS_TBD}}
     - name: ROLLE_DIALOGMELDING
-      value: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}}
+      value: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}},{{ENTRAID_UUID_TBD}}
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
