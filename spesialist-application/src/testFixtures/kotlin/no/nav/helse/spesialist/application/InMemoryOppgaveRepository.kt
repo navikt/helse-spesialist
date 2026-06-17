@@ -67,6 +67,7 @@ class InMemoryOppgaveRepository(
         sidetall: Int,
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
+        tillatteVarsler: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
         oppgaveKlarFom: LocalDate?,

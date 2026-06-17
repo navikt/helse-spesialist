@@ -30,6 +30,7 @@ data class Oppgaver(
     val sidetall: Int? = null,
     val sidestoerrelse: Int? = null,
     val ekskluderVarsler: String? = null, // Kommaseparert
+    val tillatteVarsler: String? = null, // Kommaseparert
     val behandlingOpprettetFom: LocalDate? = null,
     val behandlingOpprettetTom: LocalDate? = null,
     val oppgaveKlarFom: LocalDate? = null,

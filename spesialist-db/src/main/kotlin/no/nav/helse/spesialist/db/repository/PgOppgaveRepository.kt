@@ -231,6 +231,7 @@ class PgOppgaveRepository private constructor(
         sidetall: Int,
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
+        tillatteVarsler: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
         oppgaveKlarFom: LocalDate?,
@@ -320,6 +321,25 @@ class PgOppgaveRepository private constructor(
                         """,
                     )
                     parameterMap["ekskluderVarsler"] = ekskluderVarsler.joinToString(prefix = "{", postfix = "}")
+                }
+                if (tillatteVarsler.isNotEmpty()) {
+                    append(
+                        """
+                        AND EXISTS (
+                            SELECT 1 FROM selve_varsel sv_inc
+                            WHERE sv_inc.behandling_ref = b.id
+                            AND sv_inc.status = 'AKTIV'
+                            AND sv_inc.kode = ANY(:tillatteVarsler::varchar[])
+                        )
+                        AND NOT EXISTS (
+                            SELECT 1 FROM selve_varsel sv_exc
+                            WHERE sv_exc.behandling_ref = b.id
+                            AND sv_exc.status = 'AKTIV'
+                            AND NOT (sv_exc.kode = ANY(:tillatteVarsler::varchar[]))
+                        )
+                        """,
+                    )
+                    parameterMap["tillatteVarsler"] = tillatteVarsler.joinToString(prefix = "{", postfix = "}")
                 }
                 if (behandlingOpprettetFom != null) {
                     append(

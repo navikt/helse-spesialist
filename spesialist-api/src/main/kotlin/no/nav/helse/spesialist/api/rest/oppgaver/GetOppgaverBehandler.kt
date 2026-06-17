@@ -52,6 +52,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                     sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
                     sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
                     ekskluderVarsler = resource.ekskluderVarsler?.tilStringSet() ?: emptySet(),
+                    tillatteVarsler = resource.tillatteVarsler?.tilStringSet() ?: emptySet(),
                     behandlingOpprettetFom = resource.behandlingOpprettetFom,
                     behandlingOpprettetTom = resource.behandlingOpprettetTom,
                     oppgaveKlarFom = resource.oppgaveKlarFom,
