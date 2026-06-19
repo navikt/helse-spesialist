@@ -145,6 +145,7 @@ class PgLegacyBehandlingDao private constructor(
         }
     }
 
+    // Kobler via behandling fordi det fins innslag i vedtaksperiode-tabellen som vi *ikke* er interesserte i (gamle data)
     override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> =
         asSQL(
             """
