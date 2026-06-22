@@ -41,7 +41,7 @@ class MeldingMediator(
     private val ignorerMeldingerForUkjentePersoner: Boolean,
     private val versjonAvKode: String,
     poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
-) {
+) : Meldingmottaker {
     private val poisonPillsCache: LoadingCache<Unit, PoisonPills> =
         Caffeine
             .newBuilder()
@@ -216,7 +216,7 @@ class MeldingMediator(
         }
     }
 
-    fun mottaMelding(
+    override fun mottaMelding(
         melding: Personmelding,
         kontekstbasertPubliserer: MeldingPubliserer,
     ) {

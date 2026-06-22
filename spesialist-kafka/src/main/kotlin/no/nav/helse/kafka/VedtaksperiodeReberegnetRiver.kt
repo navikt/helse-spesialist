@@ -5,13 +5,13 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.Meldingmottaker
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 
 class VedtaksperiodeReberegnetRiver(
-    private val mediator: MeldingMediator,
+    private val mediator: Meldingmottaker,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
