@@ -137,6 +137,15 @@ class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `avbryter ikke om forrige tilstand er SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er SELVSTENDIG_TIL_UTBETALING`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        håndterGodkjenningsbehov()
+        håndterVedtaksperiodeEndret(forrigeTilstand = "SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "SELVSTENDIG_TIL_UTBETALING")
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
+    }
+
+    @Test
     fun `avbryter ikke om gjeldende tilstand er TIL_INFOTRYGD`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
