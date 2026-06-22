@@ -19,7 +19,13 @@ class VedtaksperiodeReberegnetRiver(
             it.require("forrigeTilstand") { node -> check(node.asText().contains("AVVENTER_GODKJENNING")) }
             it.forbidValues(
                 "gjeldendeTilstand",
-                listOf("AVSLUTTET", "TIL_UTBETALING", "SELVSTENDIG_TIL_UTBETALING", "TIL_INFOTRYGD"),
+                listOf(
+                    "AVSLUTTET",
+                    "SELVSTENDIG_AVSLUTTET",
+                    "TIL_UTBETALING",
+                    "SELVSTENDIG_TIL_UTBETALING",
+                    "TIL_INFOTRYGD",
+                ),
             )
         }
 
