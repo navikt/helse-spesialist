@@ -18,6 +18,7 @@ import io.ktor.server.sse.SSE
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.auth.configureJwtAuthentication
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.configureGraphQLPlugin
@@ -65,6 +66,7 @@ fun configureKtorApplication(
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     infotrygdperiodeHenter: InfotrygdperiodeHenter,
     personPseudoIdProvider: PersonPseudoIdProvider,
+    behandlingsstatistikkService: BehandlingsstatistikkService,
 ) {
     with(ktorApplication) {
         install(CallId) { configureCallIdPlugin() }
@@ -115,6 +117,7 @@ fun configureKtorApplication(
                 personinfoHenter = personinfoHenter,
                 infotrygdperiodeHenter = infotrygdperiodeHenter,
                 personPseudoIdProvider = personPseudoIdProvider,
+                behandlingsstatistikkService = behandlingsstatistikkService,
             )
         }
     }

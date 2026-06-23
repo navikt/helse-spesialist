@@ -7,23 +7,20 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
-import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import java.time.LocalDate
 
 class BehandlingsstatistikkService(
     private val behandlingsstatistikkDao: BehandlingsstatistikkDao,
-) : IBehandlingsstatistikkService {
-    override fun getBehandlingsstatistikk(fom: LocalDate): BehandlingsstatistikkResponse {
+) {
+    fun getBehandlingsstatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkResponse {
         val automatisertPerKombinasjon = behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(fom)
         val manueltUtførteOppgaver = behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(fom)
         val tilgjengeligeOppgaver = behandlingsstatistikkDao.getTilgjengeligeOppgaverPerInntektOgPeriodetype()
 
         val enArbeidsgiver = {
             Statistikk(
-                automatisk =
-                    automatisertPerKombinasjon.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER]
-                        ?: 0,
+                automatisk = automatisertPerKombinasjon.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0,
                 manuelt = manueltUtførteOppgaver.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER] ?: 0,
             )
@@ -39,9 +36,7 @@ class BehandlingsstatistikkService(
 
         val forstegangsbehandling = {
             Statistikk(
-                automatisk =
-                    automatisertPerKombinasjon.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING]
-                        ?: 0,
+                automatisk = automatisertPerKombinasjon.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0,
                 manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING] ?: 0,
             )
@@ -50,25 +45,26 @@ class BehandlingsstatistikkService(
         val forlengelser = {
             Statistikk(
                 automatisk =
-                    (automatisertPerKombinasjon.perPeriodetype[Periodetype.FORLENGELSE] ?: 0) +
-                        (
-                            automatisertPerKombinasjon.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
-                                ?: 0
-                        ),
+                    (
+                        automatisertPerKombinasjon.perPeriodetype[Periodetype.FORLENGELSE]
+                            ?: 0
+                    ) + (automatisertPerKombinasjon.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
                 manuelt =
-                    (manueltUtførteOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0) +
-                        (manueltUtførteOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
+                    (
+                        manueltUtførteOppgaver.perPeriodetype[Periodetype.FORLENGELSE]
+                            ?: 0
+                    ) + (manueltUtførteOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
                 tilgjengelig =
-                    (tilgjengeligeOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0) +
-                        (tilgjengeligeOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
+                    (
+                        tilgjengeligeOppgaver.perPeriodetype[Periodetype.FORLENGELSE]
+                            ?: 0
+                    ) + (tilgjengeligeOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
             )
         }
 
         val forlengelseIt = {
             Statistikk(
-                automatisk =
-                    automatisertPerKombinasjon.perPeriodetype[Periodetype.OVERGANG_FRA_IT]
-                        ?: 0,
+                automatisk = automatisertPerKombinasjon.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
                 manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
                 tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
             )

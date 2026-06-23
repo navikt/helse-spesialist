@@ -10,6 +10,7 @@ enum class Tags(
     val value: String,
 ) {
     BEHANDLINGER("Behandlinger"),
+    BEHANDLINGSSTATISTIKK("Behandlingsstatistikk"),
     DIALOGER("Dialoger"),
     DOKUMENTER("Dokumenter"),
     NOTATER("Notater"),

@@ -6,7 +6,7 @@ class InMemoryDaos(
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val arbeidsgiverApiDao: UnimplementedArbeidsgiverApiDao,
     override val behandlingApiRepository: UnimplementedBehandlingApiRepository,
-    override val behandlingsstatistikkDao: UnimplementedBehandlingsstatistikkDao,
+    override val behandlingsstatistikkDao: InMemoryBehandlingsstatistikkDao,
     override val commandContextDao: InMemoryCommandContextDao,
     override val definisjonDao: UnimplementedDefinisjonDao,
     override val dialogDao: DelegatingDialogDao,

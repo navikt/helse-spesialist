@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
-import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -79,6 +78,8 @@ class ApiModule(
             sessionFactory = sessionFactory,
         )
 
+    private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao)
+
     private val spesialistSchema =
         run {
             val personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
@@ -93,10 +94,6 @@ class ApiModule(
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
-                            ),
-                        behandlingsstatistikk =
-                            BehandlingsstatistikkQueryHandler(
-                                behandlingsstatistikkMediator = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
                             ),
                     ),
                 mutationHandlers =
@@ -135,6 +132,7 @@ class ApiModule(
             personinfoHenter = personinfoHenter,
             infotrygdperiodeHenter = infotrygdperiodeHenter,
             personPseudoIdProvider = personPseudoIdProvider,
+            behandlingsstatistikkService = behandlingsstatistikkService,
         )
     }
 }

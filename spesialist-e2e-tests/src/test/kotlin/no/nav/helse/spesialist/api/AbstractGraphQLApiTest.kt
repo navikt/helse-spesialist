@@ -21,7 +21,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.graphQLSpleisVilkarsgrunnlag
@@ -33,7 +32,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
-import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
@@ -53,7 +51,6 @@ import java.time.Duration.ofNanos
 import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-    private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
 
@@ -66,9 +63,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val apiTesting =
         ApiTesting(
             jwtStub = jwtStub,
-            applicationBuilder = {
-                graphQL()
-            },
+            applicationBuilder = { graphQL() },
             routeBuilder = {
                 route("graphql") {
                     this.post {
@@ -108,22 +103,12 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
                             ),
-                        behandlingsstatistikk =
-                            BehandlingsstatistikkQueryHandler(
-                                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                            ),
                     ),
                 mutationHandlers =
                     SpesialistSchema.MutationHandlers(
-                        overstyring =
-                            OverstyringMutationHandler(
-                                saksbehandlerMediator = saksbehandlerMediator,
-                            ),
+                        overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                         skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                        totrinnsvurdering =
-                            TotrinnsvurderingMutationHandler(
-                                saksbehandlerMediator = saksbehandlerMediator,
-                            ),
+                        totrinnsvurdering = TotrinnsvurderingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     ),
             )
 

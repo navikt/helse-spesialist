@@ -66,7 +66,7 @@ class InMemoryRepositoriesAndDaos {
     private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
     private val automatiseringDao = InMemoryAutomatiseringDao()
     private val behandlingApiRepository = UnimplementedBehandlingApiRepository()
-    private val behandlingsstatistikkDao = UnimplementedBehandlingsstatistikkDao()
+    private val behandlingsstatistikkDao = InMemoryBehandlingsstatistikkDao()
     private val definisjonDao = UnimplementedDefinisjonDao()
     private val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
     private val legacyVarselDao = UnimplementedLegacyVarselDao()

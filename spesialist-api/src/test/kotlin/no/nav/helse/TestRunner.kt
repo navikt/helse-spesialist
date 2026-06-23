@@ -16,9 +16,9 @@ import io.mockk.mockk
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.configureKtorApplication
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
-import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
@@ -139,10 +138,6 @@ object TestRunner {
                                         sessionFactory = avhengigheter.sessionFactory,
                                         personPseudoIdProvider = personPseudoIdProvider,
                                     ),
-                                behandlingsstatistikk =
-                                    BehandlingsstatistikkQueryHandler(
-                                        behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
-                                    ),
                             ),
                         mutationHandlers =
                             MutationHandlers(
@@ -183,6 +178,7 @@ object TestRunner {
                     tilgangsgrupperTilTilganger = avhengigheter.tilgangsgrupperTilTilganger,
                     infotrygdperiodeHenter = avhengigheter.infotrygdperiodeHenter,
                     personPseudoIdProvider = avhengigheter.personPseudoIdProvider,
+                    behandlingsstatistikkService = avhengigheter.behandlingstatistikk,
                 )
             }
 
@@ -214,7 +210,7 @@ object TestRunner {
         val apiOppgaveService: ApiOppgaveService,
         val personhåndterer: Personhåndterer,
         val dokumentMediator: DokumentMediator,
-        val behandlingstatistikk: IBehandlingsstatistikkService,
+        val behandlingstatistikk: BehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
         val behandlendeEnhetHenter: BehandlendeEnhetHenter,

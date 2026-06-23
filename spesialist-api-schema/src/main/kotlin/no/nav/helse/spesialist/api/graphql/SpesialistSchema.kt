@@ -7,8 +7,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationSchema
-import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
-import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuerySchema
 
@@ -18,7 +16,6 @@ class SpesialistSchema(
 ) {
     class QueryHandlers(
         val person: PersonQuerySchema,
-        val behandlingsstatistikk: BehandlingsstatistikkQuerySchema,
     )
 
     class MutationHandlers(
@@ -33,7 +30,6 @@ class SpesialistSchema(
         schemaConfiguration.queries =
             listOf(
                 PersonQuery(handler = queryHandlers.person),
-                BehandlingsstatistikkQuery(handler = queryHandlers.behandlingsstatistikk),
             )
 
         schemaConfiguration.mutations =

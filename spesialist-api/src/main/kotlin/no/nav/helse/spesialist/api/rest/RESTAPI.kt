@@ -13,10 +13,12 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.GetForsikringForPersonBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
+import no.nav.helse.spesialist.api.rest.behandlingsstatistikk.GetBehandlingsstatistikkBehandler
 import no.nav.helse.spesialist.api.rest.dialoger.PatchKommentarBehandler
 import no.nav.helse.spesialist.api.rest.dialoger.PostKommentarBehandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
@@ -85,6 +87,7 @@ fun Routing.restRoutes(
     sessionFactory: SessionFactory,
     opptegnelseListener: OpptegnelseListener,
     personPseudoIdProvider: PersonPseudoIdProvider,
+    behandlingsstatistikkService: BehandlingsstatistikkService,
 ) {
     route("/api") {
         if (configuration.eksponerOpenApi) {
@@ -103,6 +106,8 @@ fun Routing.restRoutes(
             get(GetOppgaverBehandler(), restAdapter)
             get(GetAntallOppgaverBehandler(), restAdapter)
             get(GetBehandledeOppgaverBehandler(), restAdapter)
+
+            get(GetBehandlingsstatistikkBehandler(behandlingsstatistikkService), restAdapter)
 
             put(PutPåVentBehandler(), restAdapter)
             delete(DeletePåVentBehandler(), restAdapter)
