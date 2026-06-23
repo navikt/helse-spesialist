@@ -89,7 +89,11 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
                 )
             transaksjon.behandlingRepository.lagre(behandling)
         } else {
-            if (eksisterendeVedtaksperiode.forkastet) return
+            if (eksisterendeVedtaksperiode.forkastet) {
+                loggInfo("Oppretter ikke ny behandling for $spleisBehandlingId, vedtaksperioden er forkastet")
+                return
+            }
+
             val tidligereBehandling =
                 transaksjon.behandlingRepository
                     .finnNyesteForVedtaksperiode(vedtaksperiodeId)
@@ -110,13 +114,9 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
                     .finnVarslerFor(tidligereBehandling.id)
                     .filter { it.kanVurderes() }
 
-            if (aktiveVarslerForTidligereBehandling.isNotEmpty()) {
-                aktiveVarslerForTidligereBehandling
-                    .onEach {
-                        it.flyttTil(behandling.id, behandling.spleisBehandlingId)
-                    }.also {
-                        transaksjon.varselRepository.lagre(it)
-                    }
+            aktiveVarslerForTidligereBehandling.forEach {
+                it.flyttTil(behandling.id, behandling.spleisBehandlingId)
+                transaksjon.varselRepository.lagre(it)
             }
         }
     }
