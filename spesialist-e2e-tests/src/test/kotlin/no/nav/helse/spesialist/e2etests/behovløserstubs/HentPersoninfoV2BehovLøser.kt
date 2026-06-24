@@ -8,7 +8,7 @@ class HentPersoninfoV2BehovLøser(private val person: Person) : AbstractBehovLø
     var adressebeskyttelse = "Ugradert"
 
     override fun løsning(behovJson: JsonNode): Any =
-        if (behovJson != null && behovJson.has("ident")) {
+        if (behovJson.has("ident")) {
             // Enkeltpersonforetak: svar med array slik at FlerePersoninfoRiver håndterer det
             behovJson["ident"].map { ident ->
                 personinfoMap() + mapOf("ident" to ident.asText())
