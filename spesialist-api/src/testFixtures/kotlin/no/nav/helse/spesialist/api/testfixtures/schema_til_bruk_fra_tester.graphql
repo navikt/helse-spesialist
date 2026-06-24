@@ -323,7 +323,6 @@ type Mutation {
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
-    skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean
 }
 
 type OmregnetArsinntekt {
@@ -932,12 +931,6 @@ enum Periodetype {
     OVERGANG_FRA_IT
 }
 
-enum SkjonnsfastsettelseType {
-    ANNET
-    OMREGNET_ARSINNTEKT
-    RAPPORTERT_ARSINNTEKT
-}
-
 enum Skjonnsfastsettingstype {
     ANNET
     OMREGNET_ARSINNTEKT
@@ -1097,27 +1090,6 @@ input OverstyringRefusjonselementInput {
     belop: Float!
     fom: LocalDate!
     tom: LocalDate
-}
-
-input SkjonnsfastsettelseArbeidsgiverInput {
-    arlig: Float!
-    arsak: String!
-    begrunnelseFritekst: String
-    begrunnelseKonklusjon: String
-    begrunnelseMal: String
-    fraArlig: Float!
-    initierendeVedtaksperiodeId: String
-    lovhjemmel: LovhjemmelInput
-    organisasjonsnummer: String!
-    type: SkjonnsfastsettelseType!
-}
-
-input SkjonnsfastsettelseInput {
-    aktorId: String!
-    arbeidsgivere: [SkjonnsfastsettelseArbeidsgiverInput!]!
-    fodselsnummer: String!
-    skjaringstidspunkt: LocalDate!
-    vedtaksperiodeId: UUID!
 }
 
 input TidslinjeOverstyringInput {

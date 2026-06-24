@@ -159,31 +159,6 @@ data class ApiKommentar(
     val feilregistrert_tidspunkt: LocalDateTime?,
 )
 
-@GraphQLName("Notat")
-data class ApiNotat(
-    val id: Int,
-    val dialogRef: Int,
-    val tekst: String,
-    val opprettet: LocalDateTime,
-    val saksbehandlerOid: UUID,
-    val saksbehandlerNavn: String,
-    val saksbehandlerEpost: String,
-    val saksbehandlerIdent: String,
-    val vedtaksperiodeId: UUID,
-    val feilregistrert: Boolean,
-    val feilregistrert_tidspunkt: LocalDateTime?,
-    val type: ApiNotatType,
-    val kommentarer: List<ApiKommentar>,
-)
-
-@GraphQLName("NotatType")
-enum class ApiNotatType {
-    Retur,
-    Generelt,
-    PaaVent,
-    OpphevStans,
-}
-
 @GraphQLName("Historikkinnslag")
 sealed interface ApiHistorikkinnslag {
     val id: Int

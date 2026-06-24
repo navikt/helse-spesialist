@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
@@ -107,8 +106,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     private val SAKSBEHANDLER_NAVN = "ET_NAVN"
     private val SAKSBEHANDLER_IDENT = lagSaksbehandler().ident
     private val SAKSBEHANDLER_EPOST = "epost@nav.no"
-
-    private val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
     private var vedtakId: Long = -1
     private var oppgaveId = nextLong().absoluteValue
@@ -363,12 +360,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 "tittel" to tittel,
                 "opprettet" to LocalDateTime.now(),
             ).let(::requireNotNull)
-
-    private data class Periode(
-        val id: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
 
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
@@ -1008,68 +999,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             assertEquals("2018-01-31", it["refusjonsopplysninger"].first()["tom"].asText())
             assertEquals(21000.0, it["refusjonsopplysninger"].first()["beløp"].asDouble())
             assertEquals(22000.0, it["fraRefusjonsopplysninger"].first()["beløp"].asDouble())
-        }
-    }
-
-    @Test
-    fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
-        val skjønnsfastsetting =
-            ApiSkjonnsfastsettelse(
-                fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR_ID,
-                skjaringstidspunkt = 1.januar,
-                arbeidsgivere =
-                    listOf(
-                        ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
-                            organisasjonsnummer = ORGANISASJONSNUMMER,
-                            arlig = 25000.0,
-                            fraArlig = 25001.0,
-                            lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
-                            arsak = "En årsak",
-                            type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
-                            begrunnelseMal = "En begrunnelsemal",
-                            begrunnelseFritekst = "begrunnelsefritekst",
-                            begrunnelseKonklusjon = "begrunnelseKonklusjon",
-                            initierendeVedtaksperiodeId = PERIODE.id.toString(),
-                        ),
-                        ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
-                            organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
-                            arlig = 21000.0,
-                            fraArlig = 25001.0,
-                            lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
-                            arsak = "En årsak",
-                            type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
-                            begrunnelseMal = "En begrunnelsemal",
-                            begrunnelseFritekst = "begrunnelsefritekst",
-                            begrunnelseKonklusjon = "begrunnelseKonklusjon",
-                            initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
-                        ),
-                    ),
-                vedtaksperiodeId = PERIODE.id,
-            )
-
-        mediator.håndter(skjønnsfastsetting, saksbehandler)
-
-        val hendelse = testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").first()
-
-        assertNotNull(hendelse["@id"].asText())
-        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT.value, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
-        assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
-        hendelse["arbeidsgivere"].first().let {
-            assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
-            assertEquals(25000.0, it["årlig"].asDouble())
-            assertEquals(25001.0, it["fraÅrlig"].asDouble())
-        }
-        hendelse["arbeidsgivere"].last().let {
-            assertEquals(ORGANISASJONSNUMMER_GHOST, it["organisasjonsnummer"].asText())
-            assertEquals(21000.0, it["årlig"].asDouble())
-            assertEquals(25001.0, it["fraÅrlig"].asDouble())
         }
     }
 

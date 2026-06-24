@@ -21,10 +21,6 @@ import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.ANNET
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.logg.MdcKey
@@ -44,8 +40,6 @@ import no.nav.helse.spesialist.domain.overstyringer.OverstyrtInntektOgRefusjon
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.overstyringer.Refusjonselement
-import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
-import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.tell
 import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.Modellfeil as ApiModellfeil
@@ -351,7 +345,6 @@ class SaksbehandlerMediator(
             is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandlerOid)
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
-            is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
 
@@ -376,39 +369,6 @@ class SaksbehandlerMediator(
                     )
                 },
         )
-
-    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): SkjønnsfastsattSykepengegrunnlag {
-        val enArbeidsgiver = arbeidsgivere.first()
-        return SkjønnsfastsattSykepengegrunnlag.ny(
-            aktørId = aktorId,
-            fødselsnummer = fodselsnummer,
-            skjæringstidspunkt = skjaringstidspunkt,
-            vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandlerOid = saksbehandlerOid,
-            arbeidsgivere =
-                arbeidsgivere.map { ag ->
-                    SkjønnsfastsattArbeidsgiver(
-                        organisasjonsnummer = ag.organisasjonsnummer,
-                        årlig = ag.arlig,
-                        fraÅrlig = ag.fraArlig,
-                    )
-                },
-            årsak = enArbeidsgiver.arsak,
-            type =
-                when (enArbeidsgiver.type) {
-                    OMREGNET_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
-                    RAPPORTERT_ARSINNTEKT -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
-                    ANNET -> SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET
-                },
-            begrunnelseMal = enArbeidsgiver.begrunnelseMal,
-            begrunnelseFritekst = enArbeidsgiver.begrunnelseFritekst,
-            begrunnelseKonklusjon = enArbeidsgiver.begrunnelseKonklusjon,
-            lovhjemmel =
-                enArbeidsgiver.lovhjemmel!!.let {
-                    Lovhjemmel(it.paragraf, it.ledd, it.bokstav, it.lovverk, it.lovverksversjon)
-                },
-        )
-    }
 
     private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon.ny(
