@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   build:
-    uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
+    uses: ./.github/workflows/build-image.yml
     with:
       gradle_command: :spesialist-db-migrations:installDist
       dockerfile: Dockerfile-db-migrations

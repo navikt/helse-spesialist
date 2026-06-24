@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   build:
-    uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
+    uses: ./.github/workflows/build-image.yml
     with:
       gradle_command: :spesialist-opprydding-dev:installDist
       dockerfile: Dockerfile-opprydding-dev
