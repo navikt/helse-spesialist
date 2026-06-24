@@ -52,12 +52,6 @@ enum class ApiKategori {
     Status,
 }
 
-@GraphQLName("AntallOppgaver")
-data class ApiAntallOppgaver(
-    val antallMineSaker: Int,
-    val antallMineSakerPaVent: Int,
-)
-
 @GraphQLName("Oppgaveegenskap")
 data class ApiOppgaveegenskap(
     val egenskap: ApiEgenskap,

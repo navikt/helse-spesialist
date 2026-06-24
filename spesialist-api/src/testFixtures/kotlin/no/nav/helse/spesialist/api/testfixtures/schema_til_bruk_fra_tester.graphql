@@ -93,12 +93,6 @@ type Annulleringskandidat {
     vedtaksperiodeId: UUID!
 }
 
-type Antall {
-    automatisk: Int!
-    manuelt: Int!
-    tilgjengelig: Int!
-}
-
 type Arbeidsforhold {
     sluttdato: LocalDate
     startdato: LocalDate!
@@ -159,25 +153,6 @@ type Avslag {
 type Behandling {
     id: UUID!
     perioder: [Periode!]!
-}
-
-type Behandlingsstatistikk {
-    antallAnnulleringer: Int!
-    antallAvvisninger: Int!
-    beslutter: Antall!
-    delvisRefusjon: Antall!
-    egenAnsatt: Antall!
-    enArbeidsgiver: Antall!
-    faresignaler: Antall!
-    flereArbeidsgivere: Antall!
-    forlengelseIt: Antall!
-    forlengelser: Antall!
-    forstegangsbehandling: Antall!
-    fortroligAdresse: Antall!
-    revurdering: Antall!
-    stikkprover: Antall!
-    utbetalingTilArbeidsgiver: Antall!
-    utbetalingTilSykmeldt: Antall!
 }
 
 type BeregnetPeriode implements Periode {
@@ -456,7 +431,6 @@ type Personinfo {
 }
 
 type Query {
-    behandlingsstatistikk: Behandlingsstatistikk!
     person(personPseudoId: String!): Person
 }
 
@@ -789,10 +763,12 @@ enum Avslagstype {
 
 enum Begrunnelse {
     ANDREYTELSER
+    AVSLATT_MELDING_TIL_NAV_DAG
     EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
     ETTER_DODSDATO
     MANGLER_MEDLEMSKAP
     MANGLER_OPPTJENING
+    MELDING_TIL_NAV_DAG_UTENFOR_VENTETID
     MINIMUM_INNTEKT
     MINIMUM_INNTEKT_OVER_67
     MINIMUM_SYKDOMSGRAD
@@ -806,6 +782,7 @@ enum Dagtype {
     AAPdag
     ArbeidIkkeGjenopptattDag
     Arbeidsdag
+    AvslattMeldingTilNavdag
     Avvistdag
     Dagpengerdag
     Egenmeldingsdag
@@ -813,7 +790,6 @@ enum Dagtype {
     Foreldrepengerdag
     Helg
     MeldingTilNavdag
-    AvslattMeldingTilNavdag
     Omsorgspengerdag
     Opplaringspengerdag
     Permisjonsdag
@@ -980,11 +956,11 @@ enum Sykdomsdagtype {
     ARBEIDSDAG
     ARBEIDSGIVERDAG
     AVSLATT
+    AVSLATTMELDINGTILNAVDAG
     FERIEDAG
     FORELDET_SYKEDAG
     FRISK_HELGEDAG
     MELDINGTILNAVDAG
-    AVSLATTMELDINGTILNAVDAG
     PERMISJONSDAG
     SYKEDAG
     SYKEDAG_NAV
