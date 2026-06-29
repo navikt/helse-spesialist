@@ -151,7 +151,10 @@ class Godkjenningsbehov(
                 utbetalingId = jsonNode["utbetalingId"].asUUID(),
                 spleisBehandlingId = godkjenning["behandlingId"].asUUID(),
                 vilkårsgrunnlagId = godkjenning["vilkårsgrunnlagId"].asUUID(),
-                forsikringsvurderingId = godkjenning["forsikringsvurderingId"]?.takeUnless { it.isNull }?.asUUID(),
+                forsikringsvurderingId = godkjenning["forsikringsvurderingId"]
+                    ?.takeUnless { it.isNull }
+                    ?.takeUnless { it.asText() == "null" } // Serialisert feil én gang, nå et evig kompatibilitetsbehov...
+                    ?.asUUID(),
                 tags = godkjenning["tags"].map { it.asText() },
                 periodeFom = godkjenning["periodeFom"].asLocalDate(),
                 periodeTom = godkjenning["periodeTom"].asLocalDate(),
