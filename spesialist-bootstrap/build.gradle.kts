@@ -36,16 +36,20 @@ tasks.withType<AbstractTestTask>().configureEach {
 }
 
 tasks {
-    val copyDeps by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        exclude("spesialist-*")
-        into("build/deps")
-    }
-    val copyLibs by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        include("spesialist-*")
-        into("build/libs")
-    }
+    val copyDeps =
+        register<Sync>("copyDeps") {
+            description = "Kopierer runtime-avhengigheter til deps-mappa"
+            from(configurations.runtimeClasspath)
+            exclude("spesialist-*")
+            into(layout.buildDirectory.dir("deps"))
+        }
+    val copyLibs =
+        register<Sync>("copyLibs") {
+            description = "Kopierer appens egne jar-filer til libs-mappa"
+            from(configurations.runtimeClasspath)
+            include("spesialist-*")
+            into(layout.buildDirectory.dir("libs"))
+        }
 
     named<Jar>("jar") {
         dependsOn(copyDeps, copyLibs)
