@@ -111,6 +111,8 @@ public data class GraphQLSpleisVilkarsgrunnlag(
     public val opptjeningFra: LocalDate,
     @get:JsonProperty(value = "beregningsgrunnlag")
     public val beregningsgrunnlag: Double,
+    @get:JsonProperty(value = "forsikringsvurderingId")
+    public val forsikringsvurderingId: UUID?,
 ) : GraphQLVilkarsgrunnlag
 
 /**

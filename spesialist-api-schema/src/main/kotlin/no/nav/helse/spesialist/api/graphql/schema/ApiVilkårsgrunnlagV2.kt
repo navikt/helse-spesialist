@@ -41,6 +41,7 @@ data class ApiVilkårsgrunnlagSpleisV2(
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
     val beregningsgrunnlag: BigDecimal,
+    val forsikringsvurderingId: UUID?,
 ) : ApiVilkårsgrunnlagV2
 
 @GraphQLName("VilkarsgrunnlagAvviksvurdering")

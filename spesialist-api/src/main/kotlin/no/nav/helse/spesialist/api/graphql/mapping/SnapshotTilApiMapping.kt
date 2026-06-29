@@ -406,6 +406,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                         )
                     },
                 beregningsgrunnlag = beregingsgrunnlag,
+                forsikringsvurderingId = forsikringsvurderingId,
             )
         }
 
