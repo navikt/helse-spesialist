@@ -11,6 +11,7 @@ include(
     ":clients:spesialist-client-speed",
     ":clients:spesialist-client-spillkar",
     ":clients:spesialist-client-spiskammerset",
+    ":clients:spesialist-client-sp-forsikring",
     ":clients:spesialist-client-spleis",
     ":clients:spesialist-client-personpseudoid",
     "spesialist-valkey",

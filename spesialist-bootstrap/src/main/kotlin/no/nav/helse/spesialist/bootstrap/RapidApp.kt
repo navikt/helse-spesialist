@@ -9,6 +9,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
@@ -20,8 +21,13 @@ import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSyk
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
+import no.nav.helse.spesialist.client.spforsikring.ClientSpForsikringModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
+import no.nav.helse.spesialist.domain.Forsikringsvurdering
+import no.nav.helse.spesialist.domain.ForsikringsvurderingId
+import no.nav.helse.spesialist.domain.ResultatAvForsikring
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.kafka.KafkaModule
 import no.nav.helse.spesialist.valkey.ValkeyModule
 import java.net.URI
@@ -80,6 +86,11 @@ fun main() {
                     ClientSpiskammersetModule.Configuration(
                         apiUrl = env.getValue("SPISKAMMERSET_API_URL"),
                         scope = env.getValue("SPISKAMMERSET_SCOPE"),
+                    ),
+                clientSpForsikring =
+                    ClientSpForsikringModule.Configuration(
+                        apiUrl = env.getValue("SP_FORSIKRING_API_URL"),
+                        scope = env.getValue("SP_FORSIKRING_SCOPE"),
                     ),
                 clientSpleis =
                     ClientSpleisModule.Configuration(
@@ -220,6 +231,12 @@ class RapidApp {
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
             )
 
+        val clientSpForsikringModule =
+            ClientSpForsikringModule(
+                configuration = configuration.clientSpForsikring,
+                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+            )
+
         val clientSpleisModule =
             ClientSpleisModule(
                 configuration = configuration.clientSpleis,
@@ -234,6 +251,16 @@ class RapidApp {
                 fallbackPersonPseudoIdProvider = dbModule.personPseudoIdDao,
             )
 
+        val forsikringHenter = object: ForsikringHenter {
+            override fun hentForsikringsinformasjon(spleisBehandlingId: SpleisBehandlingId): ResultatAvForsikring {
+                return clientSpiskammersetModule.spiskammersetClientForsikringHenter.hentForsikringsinformasjon(spleisBehandlingId)
+            }
+
+            override fun hentForsikringsvurdering(forsikringsvurderingId: ForsikringsvurderingId): Forsikringsvurdering? {
+                return clientSpForsikringModule.spForsikringClientForsikringHenter.hentForsikringsvurdering(forsikringsvurderingId)
+            }
+        }
+
         val kafkaModule =
             KafkaModule(
                 configuration = configuration.kafka,
@@ -242,7 +269,7 @@ class RapidApp {
                 daos = dbModule.daos,
                 stikkprøver = configuration.stikkprøver,
                 brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
-                forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
+                forsikringHenter = forsikringHenter,
                 environmentToggles = configuration.environmentToggles,
             )
 
@@ -257,7 +284,7 @@ class RapidApp {
                 snapshothenter = clientSpleisModule.snapshothenter,
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
                 behandlendeEnhetHenter = clientSparkelNorgModule.behandlendeEnhetHenter,
-                forsikringHenter = clientSpiskammersetModule.spiskammersetClientForsikringHenter,
+                forsikringHenter = forsikringHenter,
                 inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
                 inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 alleIdenterHenter = clientSpeedModule.alleIdenterHenter,

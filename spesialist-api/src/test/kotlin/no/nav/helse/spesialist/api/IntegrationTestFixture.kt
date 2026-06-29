@@ -85,7 +85,7 @@ class IntegrationTestFixture {
     val krrRegistrertStatusHenterMock: KrrRegistrertStatusHenter = mockk(relaxed = true)
     val behandlendeEnhetHenterMock: BehandlendeEnhetHenter = mockk(relaxed = true)
     val personinfoHenterMock: PersoninfoHenter = mockk(relaxed = true)
-    val spiskammersetForsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
+    val forsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
     val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
     val alleIdenterHenterMock: AlleIdenterHenter = mockk(relaxed = true)
@@ -117,7 +117,7 @@ class IntegrationTestFixture {
             snapshothenter = mockk(relaxed = true),
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
             behandlendeEnhetHenter = behandlendeEnhetHenterMock,
-            forsikringHenter = spiskammersetForsikringHenterMock,
+            forsikringHenter = forsikringHenterMock,
             inngangsvilkårHenter = inngangsvilkårHenterMock,
             inngangsvilkårInnsender = inngangsvilkårInnsenderMock,
             alleIdenterHenter = alleIdenterHenterMock,

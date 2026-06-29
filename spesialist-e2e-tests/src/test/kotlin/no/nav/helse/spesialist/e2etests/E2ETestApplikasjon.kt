@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.testfixtures.Cli
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.spforsikring.testfixtures.ClientSpForsikringModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
@@ -52,6 +53,7 @@ object E2ETestApplikasjon {
                     clientSparkelSykepengeperioder = ClientSparkelSykepengeperioderModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                     clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
+                    clientSpForsikring = ClientSpForsikringModuleIntegrationTestFixture.moduleConfiguration,
                     db = DBTestFixture.database.dbModuleConfiguration,
                     kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
                     environmentToggles =

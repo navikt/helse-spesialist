@@ -178,6 +178,10 @@ spec:
       value: "http://spiskammerset"
     - name: SPISKAMMERSET_SCOPE
       value: "api://prod-gcp.tbd.spiskammerset/.default"
+    - name: SP_FORSIKRING_API_URL
+      value: "http://sp-forsikring"
+    - name: SP_FORSIKRING_SCOPE
+      value: "api://prod-gcp.tbd.sp-forsikring/.default"
     - name: SPILLKAR_API_URL
       value: "http://spillkar"
     - name: SPILLKAR_SCOPE

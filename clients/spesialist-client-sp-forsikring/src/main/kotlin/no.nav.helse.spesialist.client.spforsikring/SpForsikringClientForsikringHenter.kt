@@ -1,28 +1,27 @@
-package no.nav.helse.spesialist.client.spiskammerset
+package no.nav.helse.spesialist.client.spforsikring
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
-import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.client.spiskammerset.ClientUtils.Companion.retryMedBackoff
-import no.nav.helse.spesialist.domain.Forsikring
-import no.nav.helse.spesialist.domain.ResultatAvForsikring
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.client.spforsikring.ClientUtils.Companion.retryMedBackoff
+import no.nav.helse.spesialist.domain.Forsikringsvurdering
+import no.nav.helse.spesialist.domain.ForsikringsvurderingId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.util.UUID
 
-class SpiskammersetClientForsikringHenter(
-    private val configuration: ClientSpiskammersetModule.Configuration,
+class SpForsikringClientForsikringHenter(
+    private val configuration: ClientSpForsikringModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) {
-    fun hentForsikringsinformasjon(spleisBehandlingId: SpleisBehandlingId): ResultatAvForsikring {
+    fun hentForsikringsvurdering(forsikringsvurderingId: ForsikringsvurderingId): Forsikringsvurdering? {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
         val callId = UUID.randomUUID().toString()
-        val uri = "${configuration.apiUrl}/behandling/${spleisBehandlingId.value}/forsikring"
+        val uri = "${configuration.apiUrl}/forsikringsvurderinger/${forsikringsvurderingId.value}"
         loggInfo("Utfører HTTP GET $uri med header Call-Id: $callId")
 
         return timer.recordCallable {
@@ -35,18 +34,22 @@ class SpiskammersetClientForsikringHenter(
                     .execute()
                     .handleResponse { response ->
                         when (response.code) {
-                            204 -> ResultatAvForsikring.IngenForsikring
                             200 -> {
                                 val responseBody = EntityUtils.toString(response.entity)
                                 val responseJson = objectMapper.readTree(responseBody)
-                                ResultatAvForsikring.MottattForsikring(
-                                    forsikring =
-                                        Forsikring.Factory.ny(
-                                            gjelderFraDag = responseJson["dag1Eller17"].asInt(),
-                                            dekningsgrad = responseJson["dekningsgrad"].asInt(),
-                                        ),
+                                Forsikringsvurdering(
+                                    identitetsnummer = Identitetsnummer.fraString(responseJson["identitetsnummer"].asText()),
+                                    harForsikring = responseJson["harForsikring"].asBoolean(),
+                                    dekning = responseJson["dekning"]?.takeUnless { it.isNull }?.let { dekning ->
+                                        Forsikringsvurdering.Dekning(
+                                            grad = dekning["grad"].asInt(),
+                                            fraDag = dekning["fraDag"].asInt()
+                                        )
+                                    }
                                 )
                             }
+
+                            404 -> { null }
 
                             in 500..599 -> {
                                 val responseBody = EntityUtils.toString(response.entity).orEmpty()
@@ -68,7 +71,7 @@ class SpiskammersetClientForsikringHenter(
         Metrics.timer(
             "spesialist.client.call.timer",
             "client",
-            "spiskammerset",
+            "sp-forsikring",
             "operation",
             "hent-forsikring",
         )

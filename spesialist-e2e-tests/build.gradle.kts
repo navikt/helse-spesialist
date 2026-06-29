@@ -29,6 +29,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:spesialist-client-sparkel-norg")))
     testImplementation(testFixtures(project(":clients:spesialist-client-sparkel-sykepengeperioder")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spiskammerset")))
+    testImplementation(testFixtures(project(":clients:spesialist-client-sp-forsikring")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spleis")))
     testImplementation(testFixtures(project(":clients:spesialist-client-speed")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spillkar")))

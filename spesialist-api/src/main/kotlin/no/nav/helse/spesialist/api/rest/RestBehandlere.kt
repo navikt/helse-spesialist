@@ -13,6 +13,7 @@ enum class Tags(
     BEHANDLINGSSTATISTIKK("Behandlingsstatistikk"),
     DIALOGER("Dialoger"),
     DOKUMENTER("Dokumenter"),
+    FORSIKRINGER("Forsikringer"),
     NOTATER("Notater"),
     OPPGAVER("Oppgaver"),
     PERSONER("Personer"),

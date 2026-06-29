@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.application.ForsikringHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.client.spiskammerset.ClientSpiskammersetModule
 import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
@@ -35,14 +36,19 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Forsikringsvurdering
+import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.ResultatAvForsikring
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsning
@@ -100,11 +106,21 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         TestMediator(
             testRapid = testRapid,
             dataSource = dataSource,
-            forsikringHenter =
-                ClientSpiskammersetModule(
-                    configuration = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
-                    accessTokenGenerator = { "tull" },
-                ).spiskammersetClientForsikringHenter,
+            forsikringHenter = object : ForsikringHenter {
+                override fun hentForsikringsinformasjon(spleisBehandlingId: SpleisBehandlingId): ResultatAvForsikring =
+                    ClientSpiskammersetModule(
+                        configuration = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
+                        accessTokenGenerator = { "tull" },
+                    ).spiskammersetClientForsikringHenter
+                        .hentForsikringsinformasjon(spleisBehandlingId)
+
+                override fun hentForsikringsvurdering(forsikringsvurderingId: ForsikringsvurderingId) =
+                    Forsikringsvurdering(
+                        identitetsnummer = lagIdentitetsnummer(),
+                        harForsikring = false,
+                        dekning = null,
+                    )
+            },
             environmentToggles =
                 object : EnvironmentToggles {
                     override val kanBeslutteEgneSaker: Boolean = false

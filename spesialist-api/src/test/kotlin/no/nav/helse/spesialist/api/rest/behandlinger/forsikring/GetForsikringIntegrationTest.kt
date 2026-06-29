@@ -33,7 +33,7 @@ class GetForsikringIntegrationTest {
 
         val forsikring = lagForsikring()
         coEvery {
-            integrationTestFixture.spiskammersetForsikringHenterMock.hentForsikringsinformasjon(SpleisBehandlingId(behandling.spleisBehandlingId!!.value))
+            integrationTestFixture.forsikringHenterMock.hentForsikringsinformasjon(SpleisBehandlingId(behandling.spleisBehandlingId!!.value))
         } returns ResultatAvForsikring.MottattForsikring(forsikring)
 
 
@@ -72,7 +72,7 @@ class GetForsikringIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
 
         coEvery {
-            integrationTestFixture.spiskammersetForsikringHenterMock.hentForsikringsinformasjon(SpleisBehandlingId(behandling.spleisBehandlingId!!.value))
+            integrationTestFixture.forsikringHenterMock.hentForsikringsinformasjon(SpleisBehandlingId(behandling.spleisBehandlingId!!.value))
         } returns ResultatAvForsikring.IngenForsikring
 
 

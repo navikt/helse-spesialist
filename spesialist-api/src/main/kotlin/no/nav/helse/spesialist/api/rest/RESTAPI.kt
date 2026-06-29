@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.rest.dialoger.PostKommentarBehandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.api.rest.dokumenter.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokumenter.GetSoknadBehandler
+import no.nav.helse.spesialist.api.rest.forsikringer.GetForsikringsvurderingForPersonBehandler
 import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandler
 import no.nav.helse.spesialist.api.rest.notater.GetNotatVedtaksperiodeIderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.notater.GetNotaterForVedtaksperiodeBehandler
@@ -165,6 +166,7 @@ fun Routing.restRoutes(
             get(GetInfotrygdperioderForPersonBehandler(infotrygdperiodeHenter), restAdapter)
 
             get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
+            get(GetForsikringsvurderingForPersonBehandler(forsikringHenter), restAdapter)
         }
     }
 }

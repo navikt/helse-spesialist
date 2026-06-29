@@ -130,5 +130,16 @@ class Personer {
         class Infotrygdperioder(
             val parent: PersonPseudoId,
         )
+
+        @Resource("forsikringsvurderinger")
+        class Forsikringsvurderinger(
+            val parent: PersonPseudoId,
+        ) {
+            @Resource("{forsikringvurderingId}")
+            class ForsikringvurderingId(
+                val parent: Forsikringsvurderinger,
+                val forsikringvurderingId: UUID,
+            )
+        }
     }
 }
