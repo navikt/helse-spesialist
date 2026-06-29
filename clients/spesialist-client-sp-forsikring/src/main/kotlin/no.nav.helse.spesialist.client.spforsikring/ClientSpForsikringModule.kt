@@ -11,8 +11,8 @@ class ClientSpForsikringModule(
         val scope: String,
     )
 
-    val spForsikringClientForsikringHenter =
-        SpForsikringClientForsikringHenter(
+    val spForsikringClientForsikringsvurderingHenter =
+        SpForsikringClientForsikringsvurderingHenter(
             configuration = configuration,
             accessTokenGenerator = accessTokenGenerator,
         )

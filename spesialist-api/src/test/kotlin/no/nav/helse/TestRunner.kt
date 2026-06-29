@@ -33,7 +33,7 @@ import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
@@ -111,7 +111,7 @@ object TestRunner {
                 snapshothenter = mockk(relaxed = true),
                 krrRegistrertStatusHenter = mockk(relaxed = true),
                 behandlendeEnhetHenter = mockk(relaxed = true),
-                forsikringHenter = mockk(relaxed = true),
+                forsikringsvurderingHenter = mockk(relaxed = true),
                 inngangsvilkårHenter = mockk(relaxed = true),
                 inngangsvilkårInnsender = mockk(relaxed = true),
                 alleIdenterHenter = mockk<AlleIdenterHenter>(relaxed = true),
@@ -158,7 +158,7 @@ object TestRunner {
                     opptegnelseListener = mockk(relaxed = true),
                     meldingPubliserer = avhengigheter.meldingPubliserer,
                     dokumentMediator = avhengigheter.dokumentMediator,
-                    forsikringHenter = avhengigheter.forsikringHenter,
+                    forsikringsvurderingHenter = avhengigheter.forsikringsvurderingHenter,
                     inngangsvilkårHenter = avhengigheter.inngangsvilkårHenter,
                     inngangsvilkårInnsender = avhengigheter.inngangsvilkårInnsender,
                     alleIdenterHenter = avhengigheter.alleIdenterHenter,
@@ -212,7 +212,7 @@ object TestRunner {
         val snapshothenter: Snapshothenter,
         val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
         val behandlendeEnhetHenter: BehandlendeEnhetHenter,
-        val forsikringHenter: ForsikringHenter,
+        val forsikringsvurderingHenter: ForsikringsvurderingHenter,
         val inngangsvilkårHenter: InngangsvilkårHenter,
         val inngangsvilkårInnsender: InngangsvilkårInnsender,
         val alleIdenterHenter: AlleIdenterHenter,

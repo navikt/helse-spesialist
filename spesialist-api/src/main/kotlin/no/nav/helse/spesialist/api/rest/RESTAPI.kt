@@ -15,7 +15,6 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.rest.behandlinger.GetForsikringForPersonBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.behandlingsstatistikk.GetBehandlingsstatistikkBehandler
@@ -63,7 +62,7 @@ import no.nav.helse.spesialist.api.rest.vurderinger.PostVurderteInngangsvilkårF
 import no.nav.helse.spesialist.api.sse.sse
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
@@ -79,7 +78,7 @@ fun Routing.restRoutes(
     environmentToggles: EnvironmentToggles,
     krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     behandlendeEnhetHenter: BehandlendeEnhetHenter,
-    forsikringHenter: ForsikringHenter,
+    forsikringsvurderingHenter: ForsikringsvurderingHenter,
     infotrygdperiodeHenter: InfotrygdperiodeHenter,
     inngangsvilkårHenter: InngangsvilkårHenter,
     inngangsvilkårInnsender: InngangsvilkårInnsender,
@@ -165,8 +164,7 @@ fun Routing.restRoutes(
 
             get(GetInfotrygdperioderForPersonBehandler(infotrygdperiodeHenter), restAdapter)
 
-            get(GetForsikringForPersonBehandler(forsikringHenter), restAdapter)
-            get(GetForsikringsvurderingForPersonBehandler(forsikringHenter), restAdapter)
+            get(GetForsikringsvurderingForPersonBehandler(forsikringsvurderingHenter), restAdapter)
         }
     }
 }

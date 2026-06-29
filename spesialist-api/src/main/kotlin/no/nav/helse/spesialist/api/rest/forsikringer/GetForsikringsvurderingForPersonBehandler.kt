@@ -9,15 +9,15 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.domain.Forsikringsvurdering
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.Person
 import java.util.UUID
 
 class GetForsikringsvurderingForPersonBehandler(
-    private val forsikringHenter: ForsikringHenter,
+    private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : GetBehandler<Personer.PersonPseudoId.Forsikringsvurderinger.ForsikringvurderingId, ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> {
     override val tag = Tags.FORSIKRINGER
 
@@ -40,7 +40,7 @@ class GetForsikringsvurderingForPersonBehandler(
     ): RestResponse<ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> {
         val forsikringsvurdering =
             runCatching {
-                forsikringHenter.hentForsikringsvurdering(ForsikringsvurderingId(forsikringsvurderingId))
+                forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
             }.getOrElse {
                 return RestResponse.Error(ApiGetForsikringsvurderingForPersonErrorCode.FEIL_VED_VIDERE_KALL)
             }

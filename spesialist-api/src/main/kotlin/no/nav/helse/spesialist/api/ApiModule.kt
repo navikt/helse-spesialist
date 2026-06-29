@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
@@ -40,7 +40,7 @@ class ApiModule(
     snapshothenter: Snapshothenter,
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     private val behandlendeEnhetHenter: BehandlendeEnhetHenter,
-    private val forsikringHenter: ForsikringHenter,
+    private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
     private val inngangsvilkårHenter: InngangsvilkårHenter,
     private val inngangsvilkårInnsender: InngangsvilkårInnsender,
     private val alleIdenterHenter: AlleIdenterHenter,
@@ -118,7 +118,7 @@ class ApiModule(
             opptegnelseListener = opptegnelseListener,
             meldingPubliserer = meldingPubliserer,
             dokumentMediator = dokumentMediator,
-            forsikringHenter = forsikringHenter,
+            forsikringsvurderingHenter = forsikringsvurderingHenter,
             inngangsvilkårHenter = inngangsvilkårHenter,
             inngangsvilkårInnsender = inngangsvilkårInnsender,
             environmentToggles = environmentToggles,

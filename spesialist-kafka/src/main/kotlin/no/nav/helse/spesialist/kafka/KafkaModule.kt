@@ -13,7 +13,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 
 class KafkaModule(
@@ -23,7 +23,7 @@ class KafkaModule(
     daos: Daos,
     stikkprøver: Stikkprøver.Configuration,
     brukerrollehenter: Brukerrollehenter,
-    forsikringHenter: ForsikringHenter,
+    forsikringsvurderingHenter: ForsikringsvurderingHenter,
     environmentToggles: EnvironmentToggles,
 ) {
     data class Configuration(
@@ -74,7 +74,7 @@ class KafkaModule(
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
             versjonAvKode = configuration.versjonAvKode,
-            forsikringHenter = forsikringHenter,
+            forsikringsvurderingHenter = forsikringsvurderingHenter,
             environmentToggles = environmentToggles,
         )
 

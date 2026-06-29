@@ -9,13 +9,13 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 
 class AvsluttetMedVedtakRiver(
-    private val forsikringHenter: ForsikringHenter,
+    private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
     private val environmentToggles: EnvironmentToggles,
 ) : TransaksjonellRiver() {
     private val eventName = "avsluttet_med_vedtak"
@@ -54,7 +54,7 @@ class AvsluttetMedVedtakRiver(
                 sessionContext = transaksjon,
                 behandlingId = spleisBehandlingId,
                 packet = packet,
-                forsikringHenter = forsikringHenter,
+                forsikringsvurderingHenter = forsikringsvurderingHenter,
                 environmentToggles = environmentToggles,
             )
         val erSelvstendig = packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE

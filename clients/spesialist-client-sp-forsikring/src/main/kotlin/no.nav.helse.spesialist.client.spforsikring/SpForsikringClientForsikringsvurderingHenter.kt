@@ -3,10 +3,11 @@ package no.nav.helse.spesialist.client.spforsikring
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.objectMapper
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.client.spforsikring.ClientUtils.Companion.retryMedBackoff
-import no.nav.helse.spesialist.domain.Forsikringsvurdering
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.apache.hc.client5.http.fluent.Request
@@ -14,11 +15,11 @@ import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.util.UUID
 
-class SpForsikringClientForsikringHenter(
+class SpForsikringClientForsikringsvurderingHenter(
     private val configuration: ClientSpForsikringModule.Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
-) {
-    fun hentForsikringsvurdering(forsikringsvurderingId: ForsikringsvurderingId): Forsikringsvurdering? {
+): ForsikringsvurderingHenter {
+    override fun hent(forsikringsvurderingId: ForsikringsvurderingId): Forsikringsvurdering? {
         val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
         val callId = UUID.randomUUID().toString()
         val uri = "${configuration.apiUrl}/forsikringsvurderinger/${forsikringsvurderingId.value}"

@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.api.rest.forsikringer
 import io.ktor.http.HttpStatusCode
 import io.mockk.coEvery
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
-import no.nav.helse.spesialist.domain.Forsikringsvurdering
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -28,7 +28,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         coEvery {
-            integrationTestFixture.forsikringHenterMock.hentForsikringsvurdering(forsikringsvurderingId)
+            integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
         } returns Forsikringsvurdering(
             identitetsnummer = person.id,
             harForsikring = true,
@@ -71,7 +71,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         coEvery {
-            integrationTestFixture.forsikringHenterMock.hentForsikringsvurdering(forsikringsvurderingId)
+            integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
         } returns Forsikringsvurdering(
             identitetsnummer = person.id,
             harForsikring = false,
@@ -139,7 +139,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         coEvery {
-            integrationTestFixture.forsikringHenterMock.hentForsikringsvurdering(forsikringsvurderingId)
+            integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
         } returns null
 
         // When:
@@ -174,7 +174,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         coEvery {
-            integrationTestFixture.forsikringHenterMock.hentForsikringsvurdering(forsikringsvurderingId)
+            integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
         } returns Forsikringsvurdering(
             identitetsnummer = lagIdentitetsnummer(),
             harForsikring = true,

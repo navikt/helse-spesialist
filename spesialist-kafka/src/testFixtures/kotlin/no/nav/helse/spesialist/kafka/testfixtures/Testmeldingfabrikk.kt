@@ -320,6 +320,7 @@ object Testmeldingfabrikk {
             ),
         arbeidssituasjon: Arbeidssituasjon? = null,
         relevanteSøknader: List<UUID> = listOf(UUID.randomUUID()),
+        forsikringsvurderingId: UUID? = UUID.randomUUID(),
     ) = nyHendelse(
         id,
         "behov",
@@ -343,6 +344,7 @@ object Testmeldingfabrikk {
                     "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                     "kanAvvises" to kanAvvises,
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+                    "forsikringsvurderingId" to forsikringsvurderingId,
                     "behandlingId" to spleisBehandlingId,
                     "tags" to tags,
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,

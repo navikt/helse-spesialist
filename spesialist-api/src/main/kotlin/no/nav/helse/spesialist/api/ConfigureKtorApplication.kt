@@ -34,7 +34,7 @@ import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.InngangsvilkårHenter
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
@@ -54,7 +54,7 @@ fun configureKtorApplication(
     opptegnelseListener: OpptegnelseListener,
     meldingPubliserer: MeldingPubliserer,
     dokumentMediator: DokumentMediator,
-    forsikringHenter: ForsikringHenter,
+    forsikringsvurderingHenter: ForsikringsvurderingHenter,
     inngangsvilkårHenter: InngangsvilkårHenter,
     inngangsvilkårInnsender: InngangsvilkårInnsender,
     alleIdenterHenter: AlleIdenterHenter,
@@ -110,7 +110,7 @@ fun configureKtorApplication(
                 environmentToggles = environmentToggles,
                 krrRegistrertStatusHenter = krrRegistrertStatusHenter,
                 behandlendeEnhetHenter = behandlendeEnhetHenter,
-                forsikringHenter = forsikringHenter,
+                forsikringsvurderingHenter = forsikringsvurderingHenter,
                 inngangsvilkårHenter = inngangsvilkårHenter,
                 inngangsvilkårInnsender = inngangsvilkårInnsender,
                 alleIdenterHenter = alleIdenterHenter,

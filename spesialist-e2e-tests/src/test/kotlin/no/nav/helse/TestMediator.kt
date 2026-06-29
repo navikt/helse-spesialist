@@ -13,7 +13,7 @@ import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.Either
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -22,7 +22,7 @@ import javax.sql.DataSource
 class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
-    forsikringHenter: ForsikringHenter,
+    forsikringsvurderingHenter: ForsikringsvurderingHenter,
     environmentToggles: EnvironmentToggles,
 ) {
     private val daos = DBDaos(dataSource)
@@ -95,7 +95,7 @@ class TestMediator(
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
             versjonAvKode = "en_versjon",
-            forsikringHenter = forsikringHenter,
+            forsikringsvurderingHenter = forsikringsvurderingHenter,
             environmentToggles = environmentToggles,
         ).registrerRivers(testRapid)
     }

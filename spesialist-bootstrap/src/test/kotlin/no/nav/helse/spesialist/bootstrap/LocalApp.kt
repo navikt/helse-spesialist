@@ -11,9 +11,8 @@ import no.nav.helse.spesialist.client.personpseudoid.PersonPseudoIdTestFixture
 import no.nav.helse.spesialist.client.sparkel.norg.testfixtures.ClientSparkelNorgModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.testfixtures.ClientSparkelSykepengeperioderModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.spiskammerset.testfixtures.ClientSpiskammersetModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spforsikring.testfixtures.ClientSpForsikringModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
@@ -39,7 +38,6 @@ fun main() {
                 clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpeed = ClientSpeedModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
-                clientSpiskammerset = ClientSpiskammersetModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpForsikring = ClientSpForsikringModuleIntegrationTestFixture.moduleConfiguration,
                 clientPersonPseudoId = personPseudoidIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,

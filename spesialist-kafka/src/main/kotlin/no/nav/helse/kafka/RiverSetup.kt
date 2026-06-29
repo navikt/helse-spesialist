@@ -13,7 +13,7 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggDebug
@@ -27,7 +27,7 @@ class RiverSetup(
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
     sessionFactory: SessionFactory,
     versjonAvKode: String,
-    forsikringHenter: ForsikringHenter,
+    forsikringsvurderingHenter: ForsikringsvurderingHenter,
     environmentToggles: EnvironmentToggles,
 ) {
     private val rivers =
@@ -59,7 +59,7 @@ class RiverSetup(
             VedtaksperiodeNyUtbetalingRiver(mediator),
             BehovtidsbrukMetrikkRiver(),
             AvsluttetMedVedtakRiver(
-                forsikringHenter,
+                forsikringsvurderingHenter,
                 environmentToggles,
             ),
             AvsluttetUtenVedtakRiver(),

@@ -14,15 +14,14 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.ResultatAvForsikring
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
 import java.math.BigDecimal
@@ -33,7 +32,7 @@ class VedtakFattetMeldingBuilder(
     private val sessionContext: SessionContext,
     private val behandlingId: SpleisBehandlingId,
     private val packet: JsonMessage,
-    private val forsikringHenter: ForsikringHenter,
+    private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
     private val environmentToggles: EnvironmentToggles,
 ) {
     companion object {
@@ -49,7 +48,8 @@ class VedtakFattetMeldingBuilder(
     private val person = sessionContext.personRepository.finn(identitetsnummer) ?: error("Fant ikke person")
     private val behandling = sessionContext.behandlingRepository.finn(behandlingId) ?: error("Fant ikke behandling")
     private val vedtak = sessionContext.vedtakRepository.finn(behandlingId) ?: error("Fant ikke vedtaksinformasjon")
-    private val godkjenningsbehov = sessionContext.meldingDao.finnSisteGodkjenningsbehov(behandlingId.value) ?: error("Fant ikke siste godkjenningsbehov")
+    private val godkjenningsbehov = sessionContext.meldingDao.finnSisteGodkjenningsbehov(behandlingId.value)
+        ?: error("Fant ikke siste godkjenningsbehov")
     private val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
 
     private fun byggFellesdel(
@@ -156,35 +156,12 @@ class VedtakFattetMeldingBuilder(
         )
     }
 
-    private fun dekning(): VedtakFattetMelding.Dekning? {
-        fun defaultDekning(): VedtakFattetMelding.Dekning =
-            VedtakFattetMelding.Dekning(
-                dekningsgrad = if (godkjenningsbehov.arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) 100 else 80,
-                gjelderFraDag = 17,
-            )
-
-        if (!environmentToggles.kanSeForsikring) return defaultDekning()
-
-        return when (val resultatAvForsikring = forsikringHenter.hentForsikringsinformasjon(behandlingId)) {
-            is ResultatAvForsikring.MottattForsikring -> {
-                VedtakFattetMelding.Dekning(
-                    resultatAvForsikring.forsikring.dekningsgrad,
-                    resultatAvForsikring.forsikring.gjelderFraDag,
-                )
-            }
-
-            ResultatAvForsikring.IngenForsikring -> {
-                defaultDekning()
-            }
-        }
-    }
-
     private fun byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
     ): VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta {
         check(fastsatt == FASTSATT_ETTER_HOVEDREGEL) {
             "Ustøttet verdi sykepengegrunnlagsfakta.fastsatt for selvstendig næringsdrivende: \"$fastsatt\"." +
-                " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes."
+                    " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes."
         }
         return VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
             beregningsgrunnlag =
@@ -204,7 +181,6 @@ class VedtakFattetMeldingBuilder(
     }
 
     fun byggVedtakFattetMeldingForSelvstendig(): VedtakFattetMelding {
-        val dekning = dekning()
         val sykepengegrunnlagsfakta =
             byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
                 sykepengegrunnlagsfakta = godkjenningsbehov.sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
@@ -213,10 +189,22 @@ class VedtakFattetMeldingBuilder(
             organisasjonsnummer = ORGANISASJONSNUMMER_SELVSTENDIG_NÆRINGSDRIVENDE,
             yrkesaktivitetstype = YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            dekning = dekning,
+            dekning = finnDekning(),
             begrunnelser = emptyList(),
         )
     }
+
+    private fun finnDekning(): VedtakFattetMelding.Dekning =
+        godkjenningsbehov.forsikringsvurderingId
+            ?.takeIf { environmentToggles.kanSeForsikring }
+            ?.let { forsikringsvurderingId ->
+                forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
+                    ?: error("Fant ikke forsikringsvurdering med id $forsikringsvurderingId")
+            }
+            ?.takeIf { it.harForsikring }
+            ?.dekning
+            ?.let { VedtakFattetMelding.Dekning(dekningsgrad = it.grad, gjelderFraDag = it.fraDag) }
+            ?: VedtakFattetMelding.Dekning(dekningsgrad = 80, gjelderFraDag = 17)
 
     private fun byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
         packet: JsonMessage,
@@ -297,7 +285,8 @@ class VedtakFattetMeldingBuilder(
     fun byggVedtakFattetMeldingForArbeidstaker(
         skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
     ): VedtakFattetMelding {
-        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId) ?: error("Fant ikke vedtaksperiode")
+        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
+            ?: error("Fant ikke vedtaksperiode")
         val sykepengegrunnlagsfakta =
             when (fastsatt) {
                 FASTSATT_I_INFOTRYGD -> {

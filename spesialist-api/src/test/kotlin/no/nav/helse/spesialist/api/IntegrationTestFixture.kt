@@ -30,7 +30,7 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringHenter
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
@@ -85,7 +85,7 @@ class IntegrationTestFixture {
     val krrRegistrertStatusHenterMock: KrrRegistrertStatusHenter = mockk(relaxed = true)
     val behandlendeEnhetHenterMock: BehandlendeEnhetHenter = mockk(relaxed = true)
     val personinfoHenterMock: PersoninfoHenter = mockk(relaxed = true)
-    val forsikringHenterMock: ForsikringHenter = mockk(relaxed = true)
+    val forsikringsvurderingHenterMock: ForsikringsvurderingHenter = mockk(relaxed = true)
     val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
     val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
     val alleIdenterHenterMock: AlleIdenterHenter = mockk(relaxed = true)
@@ -117,7 +117,7 @@ class IntegrationTestFixture {
             snapshothenter = mockk(relaxed = true),
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
             behandlendeEnhetHenter = behandlendeEnhetHenterMock,
-            forsikringHenter = forsikringHenterMock,
+            forsikringsvurderingHenter = forsikringsvurderingHenterMock,
             inngangsvilkårHenter = inngangsvilkårHenterMock,
             inngangsvilkårInnsender = inngangsvilkårInnsenderMock,
             alleIdenterHenter = alleIdenterHenterMock,
