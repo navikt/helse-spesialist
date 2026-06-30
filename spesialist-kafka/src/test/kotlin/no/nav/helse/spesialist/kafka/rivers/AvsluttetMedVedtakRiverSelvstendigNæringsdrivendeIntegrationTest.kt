@@ -54,7 +54,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
-        initGodkjenningsbehov()
+        val forsikringsvurderingId = UUID.randomUUID()
+        initGodkjenningsbehov(forsikringsvurderingId = forsikringsvurderingId)
 
         // When:
         testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = beregningsgrunnlag))
@@ -120,7 +121,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "dekning" : {
                 "dekningsgrad" : 80,
                 "gjelderFraDag" : 17
-              }
+              },
+              "forsikringsvurderingId": "$forsikringsvurderingId"
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -139,7 +141,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
-        initGodkjenningsbehov(erJordbruker = true)
+        val forsikringsvurderingId = UUID.randomUUID()
+        initGodkjenningsbehov(erJordbruker = true, forsikringsvurderingId = forsikringsvurderingId)
 
         // When:
         testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = beregningsgrunnlag))
@@ -205,7 +208,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "dekning" : {
                 "dekningsgrad" : 100,
                 "gjelderFraDag" : 17
-              }
+              },
+              "forsikringsvurderingId": "$forsikringsvurderingId"
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -224,7 +228,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
-        initGodkjenningsbehov()
+        val forsikringsvurderingId = UUID.randomUUID()
+        initGodkjenningsbehov(forsikringsvurderingId = forsikringsvurderingId)
 
         // When:
         testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = seksG))
@@ -290,7 +295,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "dekning" : {
                 "dekningsgrad" : 80,
                 "gjelderFraDag" : 17
-              }
+              },
+              "forsikringsvurderingId": "$forsikringsvurderingId"
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -332,7 +338,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
             ).also(sessionContext.individuellBegrunnelseRepository::lagre)
     }
 
-    private fun initGodkjenningsbehov(erJordbruker: Boolean = false) {
+    private fun initGodkjenningsbehov(
+        erJordbruker: Boolean = false,
+        forsikringsvurderingId: UUID?
+    ) {
         val godkjenningsbehovId = UUID.randomUUID()
         val godkjenningsbehovJson =
             lagGodkjenningsbehov(
@@ -349,6 +358,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                         beregningsgrunnlag = BigDecimal(600000),
                         pensjonsgivendeInntekter = (2022..2024).map { år -> år to BigDecimal(200000) },
                     ),
+                forsikringsvurderingId = forsikringsvurderingId,
             )
         sessionContext.meldingDao.godkjenningsbehov.add(Godkjenningsbehov.fraJson(godkjenningsbehovJson))
     }

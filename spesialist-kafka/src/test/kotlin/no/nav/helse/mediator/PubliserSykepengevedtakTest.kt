@@ -86,6 +86,7 @@ internal class PubliserSykepengevedtakTest {
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
                 dekning = null,
+                forsikringsvurderingId = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -158,6 +159,7 @@ internal class PubliserSykepengevedtakTest {
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
                 dekning = null,
+                forsikringsvurderingId = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -244,6 +246,7 @@ internal class PubliserSykepengevedtakTest {
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
                 dekning = null,
+                forsikringsvurderingId = null,
             )
         utgåendeMeldingerMediator.hendelse(spleis)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -349,6 +352,7 @@ internal class PubliserSykepengevedtakTest {
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
                 dekning = null,
+                forsikringsvurderingId = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -476,6 +480,7 @@ internal class PubliserSykepengevedtakTest {
                 saksbehandler = saksbehandlerIdentOgNavn,
                 automatiskFattet = false,
                 dekning = null,
+                forsikringsvurderingId = null,
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)

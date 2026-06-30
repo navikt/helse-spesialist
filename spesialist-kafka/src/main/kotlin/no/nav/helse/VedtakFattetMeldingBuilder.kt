@@ -58,6 +58,7 @@ class VedtakFattetMeldingBuilder(
         sykepengegrunnlagsfakta: VedtakFattetMelding.Sykepengegrunnlagsfakta,
         dekning: VedtakFattetMelding.Dekning?,
         begrunnelser: List<VedtakFattetMelding.Begrunnelse>,
+        forsikringsvurderingId: UUID?,
     ): VedtakFattetMelding =
         when (vedtak) {
             is Vedtak.Automatisk -> {
@@ -70,6 +71,7 @@ class VedtakFattetMeldingBuilder(
                     beslutterIdentOgNavn = null,
                     automatiskFattet = true,
                     begrunnelser = begrunnelser,
+                    forsikringsvurderingId = forsikringsvurderingId,
                 )
             }
 
@@ -89,6 +91,7 @@ class VedtakFattetMeldingBuilder(
                     beslutterIdentOgNavn = SaksbehandlerIdentOgNavn(beslutter.ident.value, beslutter.navn),
                     automatiskFattet = false,
                     begrunnelser = begrunnelser,
+                    forsikringsvurderingId = forsikringsvurderingId,
                 )
             }
 
@@ -105,6 +108,7 @@ class VedtakFattetMeldingBuilder(
                     beslutterIdentOgNavn = null,
                     automatiskFattet = false,
                     begrunnelser = begrunnelser,
+                    forsikringsvurderingId = forsikringsvurderingId,
                 )
             }
         }
@@ -118,6 +122,7 @@ class VedtakFattetMeldingBuilder(
         beslutterIdentOgNavn: SaksbehandlerIdentOgNavn?,
         automatiskFattet: Boolean,
         begrunnelser: List<VedtakFattetMelding.Begrunnelse>,
+        forsikringsvurderingId: UUID?,
     ): VedtakFattetMelding {
         val utbetalingId = checkNotNull(behandling.utbetalingId)
         val individuellBegrunnelse =
@@ -153,6 +158,7 @@ class VedtakFattetMeldingBuilder(
             automatiskFattet = automatiskFattet,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             dekning = dekning,
+            forsikringsvurderingId = forsikringsvurderingId,
         )
     }
 
@@ -191,6 +197,7 @@ class VedtakFattetMeldingBuilder(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             dekning = finnDekning(),
             begrunnelser = emptyList(),
+            forsikringsvurderingId = godkjenningsbehov.forsikringsvurderingId,
         )
     }
 
@@ -351,6 +358,7 @@ class VedtakFattetMeldingBuilder(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             dekning = null,
             begrunnelser = begrunnelser,
+            forsikringsvurderingId = godkjenningsbehov.forsikringsvurderingId,
         )
     }
 }

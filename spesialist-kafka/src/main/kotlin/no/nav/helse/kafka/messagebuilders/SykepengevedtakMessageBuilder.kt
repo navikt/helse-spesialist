@@ -40,6 +40,7 @@ internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
                 mapOf("dekningsgrad" to it.dekningsgrad, "gjelderFraDag" to it.gjelderFraDag),
             )
         }
+        forsikringsvurderingId?.let { put("forsikringsvurderingId", it) }
     }
 
 private fun VedtakFattetMelding.Sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =

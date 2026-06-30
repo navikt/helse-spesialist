@@ -31,6 +31,7 @@ data class VedtakFattetMelding(
     val beslutter: SaksbehandlerIdentOgNavn?,
     val automatiskFattet: Boolean,
     val dekning: Dekning?,
+    val forsikringsvurderingId: UUID?,
 ) : UtgåendeHendelse {
     sealed interface Sykepengegrunnlagsfakta
 
