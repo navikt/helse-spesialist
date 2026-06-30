@@ -414,6 +414,7 @@ class PostForkastingBehandlerIntegrationTest {
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
             arbeidssituasjon = null,
             relevanteSøknader = listOf(UUID.randomUUID()),
+            utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             json = "{}",
         )
 }

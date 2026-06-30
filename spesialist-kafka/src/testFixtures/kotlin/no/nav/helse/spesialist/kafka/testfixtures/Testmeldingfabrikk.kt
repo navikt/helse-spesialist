@@ -352,6 +352,7 @@ object Testmeldingfabrikk {
                     "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1).toString(),
                     "relevanteSøknader" to relevanteSøknader,
                     "arbeidssituasjon" to arbeidssituasjon,
+                    "utbetalingsdager" to listOf(mapOf("utbetaling" to "medFriStruktur")),
                 ),
         ),
     )

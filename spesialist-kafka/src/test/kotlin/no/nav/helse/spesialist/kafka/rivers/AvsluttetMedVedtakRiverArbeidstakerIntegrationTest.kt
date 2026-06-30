@@ -112,7 +112,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -184,7 +187,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -256,7 +262,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -365,7 +374,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -474,7 +486,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -535,7 +550,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                   ]
                 }
               ],
-              "automatiskFattet": true
+              "automatiskFattet": true,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -616,7 +634,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 "ident": "${beslutter.ident.value}",
                 "navn": "${normaliserNavn(beslutter.navn)}"
               },
-              "automatiskFattet": false
+              "automatiskFattet": false,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -692,7 +713,10 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 "ident": "${saksbehandler.ident.value}",
                 "navn": "${normaliserNavn(saksbehandler.navn)}"
               },
-              "automatiskFattet": false
+              "automatiskFattet": false,
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)

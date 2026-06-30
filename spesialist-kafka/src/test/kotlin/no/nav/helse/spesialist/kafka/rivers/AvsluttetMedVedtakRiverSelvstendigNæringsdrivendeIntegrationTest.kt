@@ -122,7 +122,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 "dekningsgrad" : 80,
                 "gjelderFraDag" : 17
               },
-              "forsikringsvurderingId": "$forsikringsvurderingId"
+              "forsikringsvurderingId": "$forsikringsvurderingId",
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -209,7 +212,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 "dekningsgrad" : 100,
                 "gjelderFraDag" : 17
               },
-              "forsikringsvurderingId": "$forsikringsvurderingId"
+              "forsikringsvurderingId": "$forsikringsvurderingId",
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
@@ -296,7 +302,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 "dekningsgrad" : 80,
                 "gjelderFraDag" : 17
               },
-              "forsikringsvurderingId": "$forsikringsvurderingId"
+              "forsikringsvurderingId": "$forsikringsvurderingId",
+              "utbetalingsdager" : [ {
+                "utbetaling" : "medFriStruktur"
+              } ]
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)

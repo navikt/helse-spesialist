@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.db.ArbeidsforholdDao
@@ -86,6 +87,7 @@ class Godkjenningsbehov(
     val foreløpigBeregnetSluttPåSykepenger: LocalDate,
     val arbeidssituasjon: Arbeidssituasjon?,
     val relevanteSøknader: List<UUID>,
+    val utbetalingsdager: List<Map<String, Any?>>?,
     private val json: String,
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
@@ -173,6 +175,9 @@ class Godkjenningsbehov(
                 foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
                 arbeidssituasjon = if (godkjenning["arbeidssituasjon"].asText() == "JORDBRUKER") godkjenning["arbeidssituasjon"].asEnum<Arbeidssituasjon>() else null,
                 relevanteSøknader = godkjenning["relevanteSøknader"].map { it.asUUID() },
+                utbetalingsdager = godkjenning["utbetalingsdager"]
+                    ?.takeUnless { it.isNull }
+                    ?.let { objectMapper.convertValue(it, object : TypeReference<List<Map<String, Any?>>>() {}) },
                 json = json,
             )
         }

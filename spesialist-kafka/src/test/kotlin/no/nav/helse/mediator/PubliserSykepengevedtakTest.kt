@@ -87,6 +87,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -160,6 +161,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -247,6 +249,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(spleis)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -353,6 +356,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -481,6 +485,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)

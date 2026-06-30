@@ -41,6 +41,7 @@ internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
             )
         }
         forsikringsvurderingId?.let { put("forsikringsvurderingId", it) }
+        utbetalingsdager?.let { put("utbetalingsdager", it) }
     }
 
 private fun VedtakFattetMelding.Sykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =

@@ -32,6 +32,7 @@ data class VedtakFattetMelding(
     val automatiskFattet: Boolean,
     val dekning: Dekning?,
     val forsikringsvurderingId: UUID?,
+    val utbetalingsdager: List<Map<String, Any?>>?,
 ) : UtgåendeHendelse {
     sealed interface Sykepengegrunnlagsfakta
 
