@@ -64,6 +64,21 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `henter antall manuelt ferdigstilte oppgaver`() {
+        nyOppgaveForNyPerson()
+            .avventSystemOgLagre(opprettSaksbehandler())
+            .ferdigstillOgLagre()
+        nyPersonMedAutomatiskVedtak(utbetalingtype = Utbetalingtype.REVURDERING)
+
+        val dto = behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(NOW)
+        assertEquals(1, dto.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER])
+        assertEquals(0, dto.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE])
+        assertEquals(1, dto.perPeriodetype[Periodetype.FØRSTEGANGSBEHANDLING])
+        assertTrue(dto.perMottakertype.isEmpty())
+        assertTrue(dto.perUtbetalingtype.isEmpty())
+    }
+
+    @Test
     fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
             .avventSystemOgLagre(opprettSaksbehandler())

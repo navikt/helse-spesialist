@@ -73,7 +73,7 @@ class PgBehandlingsstatistikkDao internal constructor(
                         ELSE '${Mottakertype.ARBEIDSGIVER}'
                     END AS mottakertype,
                     ui.type AS utbetaling_type,
-                    count(distinct a.id)
+                    count(distinct a.id) as antall
                 FROM automatisering a
                          INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
                          INNER JOIN vedtaksperiode v ON v.id = a.vedtaksperiode_ref
@@ -90,7 +90,7 @@ class PgBehandlingsstatistikkDao internal constructor(
                     periodetype = Periodetype.valueOf(it.string("type")),
                     mottakertype = Mottakertype.valueOf(it.string("mottakertype")),
                     utbetalingtype = Utbetalingtype.valueOf(it.string("utbetaling_type")),
-                    antall = it.int("count"),
+                    antall = it.int("antall"),
                 )
             }
 
@@ -101,7 +101,7 @@ class PgBehandlingsstatistikkDao internal constructor(
         val rader =
             asSQL(
                 """
-                SELECT s.type, s.inntektskilde, count(distinct o.id)
+                SELECT s.type, s.inntektskilde, count(*) AS antall
                 FROM oppgave o
                 INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
                 WHERE o.status = 'AvventerSaksbehandler'
@@ -113,7 +113,7 @@ class PgBehandlingsstatistikkDao internal constructor(
                     periodetype = Periodetype.valueOf(it.string("type")),
                     mottakertype = null,
                     utbetalingtype = null,
-                    antall = it.int("count"),
+                    antall = it.int("antall"),
                 )
             }
 
@@ -124,7 +124,7 @@ class PgBehandlingsstatistikkDao internal constructor(
         val rader =
             asSQL(
                 """
-                SELECT s.type, s.inntektskilde, count(distinct o.id)
+                SELECT s.type, s.inntektskilde, count(*) AS antall
                 FROM oppgave o
                 INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
                 WHERE o.status = 'Ferdigstilt'
@@ -138,7 +138,7 @@ class PgBehandlingsstatistikkDao internal constructor(
                     periodetype = Periodetype.valueOf(it.string("type")),
                     mottakertype = null,
                     utbetalingtype = null,
-                    antall = it.int("count"),
+                    antall = it.int("antall"),
                 )
             }
 
@@ -148,7 +148,7 @@ class PgBehandlingsstatistikkDao internal constructor(
     override fun antallTilgjengeligeOppgaverFor(egenskap: EgenskapForDatabase): Int =
         asSQL(
             """
-            SELECT count(distinct o.id) FROM oppgave o 
+            SELECT count(*) FROM oppgave o 
             WHERE o.status = 'AvventerSaksbehandler'
             AND :egenskap = ANY (o.egenskaper)
             """.trimIndent(),
@@ -161,7 +161,7 @@ class PgBehandlingsstatistikkDao internal constructor(
     ): Int =
         asSQL(
             """
-            SELECT count(distinct o.id) FROM oppgave o 
+            SELECT count(*) FROM oppgave o 
             WHERE o.status = 'Ferdigstilt'
             AND o.oppdatert >= :fom
             AND :egenskap = ANY (o.egenskaper)
@@ -210,7 +210,7 @@ class PgBehandlingsstatistikkDao internal constructor(
     override fun getAntallAnnulleringer(fom: LocalDate) =
         asSQL(
             """
-            SELECT count(distinct u.id) as annulleringer
+            SELECT count(*) AS annulleringer
             FROM utbetaling u
             WHERE u.status = 'ANNULLERT'
               AND u.opprettet >= :fom;
