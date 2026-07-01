@@ -63,10 +63,6 @@ class OppgaveTilgangskontrollTest {
                     Egenskap.EGEN_ANSATT,
                     setOf(Brukerrolle.EgenAnsatt),
                 ),
-                Arguments.of(
-                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta),
-                ),
             )
 
         @JvmStatic
@@ -78,10 +74,6 @@ class OppgaveTilgangskontrollTest {
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
-                    emptySet<Brukerrolle>(),
-                ),
-                Arguments.of(
-                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
                     emptySet<Brukerrolle>(),
                 ),
                 Arguments.of(

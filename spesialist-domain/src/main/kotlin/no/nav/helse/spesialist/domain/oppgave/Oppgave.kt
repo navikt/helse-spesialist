@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.ddd.Entity
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle.SelvstendigNæringsdrivendeBeta
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -511,10 +510,6 @@ class Oppgave private constructor(
 
                 Egenskap.FORTROLIG_ADRESSE -> {
                     Brukerrolle.Kode7 in brukerroller
-                }
-
-                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> {
-                    SelvstendigNæringsdrivendeBeta in brukerroller
                 }
 
                 else -> {
