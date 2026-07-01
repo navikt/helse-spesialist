@@ -24,7 +24,7 @@ flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.
 graphqlKotlin-client-jackson = { module = "com.expediagroup:graphql-kotlin-client-jackson", version.ref = "graphqlKotlin" }
 graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphqlKotlin" }
 
-hikari = "com.zaxxer:HikariCP:7.0.2"
+hikari = "com.zaxxer:HikariCP:7.1.0"
 
 jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
