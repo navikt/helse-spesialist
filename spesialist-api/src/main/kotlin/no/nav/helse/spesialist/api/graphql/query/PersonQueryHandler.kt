@@ -233,7 +233,27 @@ class PersonQueryHandler(
             }
 
         if (snapshot == null) {
-            notFound("Fant ikke data for person")
+            loggInfo("Fant ikke snapshot fra Spleis, returnerer en minimal person")
+            return ApiPerson(
+                versjon = 0,
+                aktorId = personEntity.aktørId,
+                fodselsnummer = personEntity.id.value,
+                andreFodselsnummer = andreFødselsnumre(transaction, personEntity, personEntity.id),
+                dodsdato = null,
+                personinfo = personEntity.tilApiPersoninfo(),
+                enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),
+                tildeling = null,
+                tilleggsinfoForInntektskilder = emptyList(),
+                arbeidsgivere = emptyList(),
+                selvstendigNaering = null,
+                vilkarsgrunnlagV2 = emptyList(),
+            ).let {
+                AuditLogger.loggOk(
+                    saksbehandler = saksbehandler,
+                    identitetsnummer = identitetsnummer,
+                )
+                byggRespons(it)
+            }
         }
 
         if (snapshot.fodselsnummer != identitetsnummer.value) {
