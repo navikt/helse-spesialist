@@ -1,9 +1,13 @@
 package no.nav.helse.spesialist.api.rest
 
+import io.mockk.every
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.AlleIdenterHenter
+import no.nav.helse.spesialist.application.AlleIdenterHenter.IdentType
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -23,10 +27,11 @@ class PostPersonSokIntegrationTest {
         val identitetsnummer = person.id.value
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ "identitetsnummer": "$identitetsnummer" }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "identitetsnummer": "$identitetsnummer" }""",
+            )
 
         // Then:
         assertEquals(200, response.status)
@@ -50,10 +55,11 @@ class PostPersonSokIntegrationTest {
         val aktørId = person.aktørId
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ "aktørId": "$aktørId" }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "aktørId": "$aktørId" }""",
+            )
 
         // Then:
         assertEquals(200, response.status)
@@ -77,10 +83,11 @@ class PostPersonSokIntegrationTest {
         val identitetsnummer = person.id.value
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ "identitetsnummer": "$identitetsnummer" }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "identitetsnummer": "$identitetsnummer" }""",
+            )
 
         // Then:
         assertEquals(200, response.status)
@@ -110,10 +117,11 @@ class PostPersonSokIntegrationTest {
         val aktørId = person.aktørId
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ "aktørId": "$aktørId" }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "aktørId": "$aktørId" }""",
+            )
 
         // Then:
         assertEquals(200, response.status)
@@ -144,23 +152,27 @@ class PostPersonSokIntegrationTest {
         val identitetsnummer = person.id.value
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ "aktørId": "$aktørId", "identitetsnummer": "$identitetsnummer" }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "aktørId": "$aktørId", "identitetsnummer": "$identitetsnummer" }""",
+            )
 
         // Then:
         assertEquals(400, response.status)
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
-        assertJsonEquals("""
+        assertJsonEquals(
+            """
             {
               "type" : "about:blank",
               "status" : 400,
               "title" : "Enten aktørId eller identitetsnummer må spesifiseres, ikke begge",
               "code" : "FOR_MANGE_INPUTPARAMETERE"
             }
-        """.trimIndent(), actualJson)
+            """.trimIndent(),
+            actualJson,
+        )
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -174,23 +186,27 @@ class PostPersonSokIntegrationTest {
         // Given:
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ }""",
+            )
 
         // Then:
         assertEquals(400, response.status)
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
-        assertJsonEquals("""
+        assertJsonEquals(
+            """
             {
               "type" : "about:blank",
               "status" : 400,
               "title" : "Enten aktørId eller identitetsnummer må spesifiseres, begge manglet",
               "code" : "MANGLER_INPUTPARAMETERE"
             }
-        """.trimIndent(), actualJson)
+            """.trimIndent(),
+            actualJson,
+        )
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -200,34 +216,33 @@ class PostPersonSokIntegrationTest {
     }
 
     @Test
-    fun `Gir feilmelding når person ikke finnes`() {
+    fun `Oppretter ny person og klargjør personen når Spesialist ikke kjenner til den fra før`() {
         // Given:
-        val identitetsnummer = lagIdentitetsnummer().value
+        val identitetsnummer = lagIdentitetsnummer()
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(identitetsnummer) } returns
+            listOf(
+                AlleIdenterHenter.Ident(lagAktørId(), IdentType.AKTORID, true),
+            )
 
         // When:
-        val response = integrationTestFixture.post(
-            "/api/personer/sok",
-            body = """{ "identitetsnummer": "$identitetsnummer" }"""
-        )
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "identitetsnummer": "${identitetsnummer.value}" }""",
+            )
 
         // Then:
-        assertEquals(404, response.status)
+        assertEquals(200, response.status)
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
-        assertJsonEquals("""
-            {
-              "type" : "about:blank",
-              "status" : 404,
-              "title" : "Person ikke funnet",
-              "code" : "PERSON_IKKE_FUNNET"
-            }
-        """.trimIndent(), actualJson)
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+        integrationTestFixture.assertPubliserteUtgåendeHendelser(
+            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(identitetsnummer.value, hendelse = KlargjørPersonForVisning, årsak = "klargjørPersonForVisning"),
+        )
     }
 
     @Test
@@ -240,7 +255,7 @@ class PostPersonSokIntegrationTest {
         repeat(3) {
             integrationTestFixture.post(
                 "/api/personer/sok",
-                body = """{ "identitetsnummer": "$identitetsnummer" }"""
+                body = """{ "identitetsnummer": "$identitetsnummer" }""",
             )
         }
 

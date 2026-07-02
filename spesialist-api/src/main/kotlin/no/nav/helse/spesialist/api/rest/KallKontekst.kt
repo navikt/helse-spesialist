@@ -171,7 +171,7 @@ class KallKontekst(
             when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, person.id.value)) {
                 TilgangskontrollResultat.IdentIkkeFunnet -> return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
                 is TilgangskontrollResultat.ManglerTilgang -> {
-                    loggWarn("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer)
+                    loggWarn("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer, "tilgang_som_mangler" to resultat.tilgangSomMangler.name)
                     return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
                 }
                 is TilgangskontrollResultat.UventetFeil -> error("Uventet feil fra Tilgangsmaskinen: ${resultat.menneskeligLesbarForklaring}")

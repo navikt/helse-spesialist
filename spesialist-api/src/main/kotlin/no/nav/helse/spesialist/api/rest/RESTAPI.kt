@@ -152,7 +152,7 @@ fun Routing.restRoutes(
             post(PostNotatBehandler(), restAdapter)
             patch(PatchNotatBehandler(), restAdapter)
 
-            post(PostPersonSokBehandler(), restAdapter)
+            post(PostPersonSokBehandler(alleIdenterHenter, personinfoHenter), restAdapter)
 
             get(GetKrrRegistrertStatusForPersonBehandler(krrRegistrertStatusHenter), restAdapter)
 
