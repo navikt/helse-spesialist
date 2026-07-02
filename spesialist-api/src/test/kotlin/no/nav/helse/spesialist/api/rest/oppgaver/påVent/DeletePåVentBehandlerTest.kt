@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest.oppgaver.påVent
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
@@ -83,7 +85,11 @@ class DeletePåVentBehandlerTest {
     @Test
     fun `error hvis saksbehandler ikke har tilgang til personen`() {
         // given
-        val person = lagPerson(erEgenAnsatt = true).also(personRepository::lagre)
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.EgenAnsatt,
+            )
+        val person = lagPerson().also(personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
         val spleisBehandlingId = behandling.spleisBehandlingId!!

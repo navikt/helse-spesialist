@@ -86,6 +86,8 @@ spec:
           cluster: prod-gcp
         - application: logging
           namespace: nais-system
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
       external:
         - host: sykepengeperioder-api.prod-fss-pub.nais.io
   gcp:
@@ -194,5 +196,9 @@ spec:
       value: "https://sykepengeperioder-api.prod-fss-pub.nais.io"
     - name: SPARKEL_SYKEPENGEPERIODER_SCOPE
       value: "api://prod-fss.tbd.sparkel-sykepengeperioder-api/.default"
+    - name: TILGANGSMASKINEN_BASE_URL
+      value: "http://populasjonstilgangskontroll.tilgangsmaskin"
+    - name: TILGANGSMASKINEN_SCOPE
+      value: "api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-prod-eacd

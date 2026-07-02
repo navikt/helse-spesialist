@@ -13,6 +13,7 @@ include(
     ":clients:spesialist-client-sp-forsikring",
     ":clients:spesialist-client-spleis",
     ":clients:spesialist-client-personpseudoid",
+    ":clients:spesialist-client-tilgangsmaskinen",
     "spesialist-valkey",
     "spesialist-db-migrations",
     "spesialist-db",

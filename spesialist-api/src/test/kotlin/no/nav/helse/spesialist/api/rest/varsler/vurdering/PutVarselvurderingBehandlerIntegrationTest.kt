@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest.varsler.vurdering
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -48,13 +50,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -63,7 +66,11 @@ class PutVarselvurderingBehandlerIntegrationTest {
     @Test
     fun `Forbidden om saksbehandler ikke har tilgang til personen`() {
         // given
-        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig, erEgenAnsatt = false)
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.FortroligAdresse,
+            )
+        val person = lagPerson()
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val definisjon = lagVarseldefinisjon()
@@ -76,13 +83,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -93,7 +101,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
                 "title": "Mangler tilgang til person",
                 "code": "MANGLER_TILGANG_TIL_PERSON"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -107,13 +115,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         varselRepository.lagre(varsel)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -123,7 +132,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
                 "status": 500,
                 "title": "Internal Server Error"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -139,13 +148,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         behandlingRepository.lagre(behandling)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -155,7 +165,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
                 "status": 500,
                 "title": "Internal Server Error"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -175,13 +185,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -191,7 +202,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
                 "status": 500,
                 "title": "Internal Server Error"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -203,16 +214,18 @@ class PutVarselvurderingBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val enAnnenSaksbehandler = lagSaksbehandler()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                enAnnenSaksbehandler.id,
-                tidspunkt = LocalDateTime.now(),
-                definisjon.id
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        enAnnenSaksbehandler.id,
+                        tidspunkt = LocalDateTime.now(),
+                        definisjon.id,
+                    ),
             )
-        )
         val saksbehandler = lagSaksbehandler()
         saksbehandlerRepository.lagre(enAnnenSaksbehandler)
         varseldefinisjonRepository.lagre(definisjon)
@@ -222,13 +235,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.Conflict.value, response.status)
@@ -239,7 +253,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
                 "title": "Varsel har blitt vurdert av en annen saksbehandler",
                 "code": "VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -252,16 +266,18 @@ class PutVarselvurderingBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandler.id,
-                tidspunkt = LocalDateTime.now(),
-                enAnnenDefinisjonId.id
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandler.id,
+                        tidspunkt = LocalDateTime.now(),
+                        enAnnenDefinisjonId.id,
+                    ),
             )
-        )
         varseldefinisjonRepository.lagre(definisjon)
         varselRepository.lagre(varsel)
         behandlingRepository.lagre(behandling)
@@ -269,13 +285,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.Conflict.value, response.status)
@@ -286,7 +303,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
                 "title": "Varsel har blitt vurdert basert på en annen definisjon",
                 "code": "VARSEL_VURDERT_MED_ANNEN_DEFINISJON"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -298,16 +315,18 @@ class PutVarselvurderingBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandler.id,
-                tidspunkt = LocalDateTime.now(),
-                definisjon.id
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandler.id,
+                        tidspunkt = LocalDateTime.now(),
+                        definisjon.id,
+                    ),
             )
-        )
         varseldefinisjonRepository.lagre(definisjon)
         varselRepository.lagre(varsel)
         behandlingRepository.lagre(behandling)
@@ -315,13 +334,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.NoContent.value, response.status)
@@ -335,24 +355,26 @@ class PutVarselvurderingBehandlerIntegrationTest {
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val definisjon = lagVarseldefinisjon()
         val saksbehandler = lagSaksbehandler()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = status,
-        )
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = status,
+            )
         vedtaksperiodeRepository.lagre(vedtaksperiode)
         behandlingRepository.lagre(behandling)
         varseldefinisjonRepository.lagre(definisjon)
         varselRepository.lagre(varsel)
         personRepository.lagre(person)
 
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         assertEquals(HttpStatusCode.Conflict.value, response.status)
     }
@@ -362,13 +384,14 @@ class PutVarselvurderingBehandlerIntegrationTest {
         val definisjon = lagVarseldefinisjon()
         val saksbehandler = lagSaksbehandler()
 
-        val response = integrationTestFixture.put(
-            url = "/api/varsler/${UUID.randomUUID()}/vurdering",
-            body = """{
+        val response =
+            integrationTestFixture.put(
+                url = "/api/varsler/${UUID.randomUUID()}/vurdering",
+                body = """{
                           "definisjonId": "${definisjon.id.value}"
                         }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         assertEquals(HttpStatusCode.NotFound.value, response.status)
     }

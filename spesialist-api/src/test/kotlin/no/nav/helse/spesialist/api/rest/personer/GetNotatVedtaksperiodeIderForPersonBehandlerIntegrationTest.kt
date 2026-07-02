@@ -1,11 +1,12 @@
 package no.nav.helse.spesialist.api.rest.personer
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagNotat
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -163,8 +164,12 @@ class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
 
     @Test
     fun `returnerer 403 når saksbehandler ikke har tilgang til person`() {
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
         val person =
-            lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
+            lagPerson()
                 .also(sessionContext.personRepository::lagre)
         val pseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
 

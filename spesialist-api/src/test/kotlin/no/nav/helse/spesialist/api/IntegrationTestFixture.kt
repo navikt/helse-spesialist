@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
+import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
@@ -60,6 +61,7 @@ class IntegrationTestFixture {
     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
     val meldingPubliserer = InMemoryMeldingPubliserer()
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
+    val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
 
     companion object {
         val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
@@ -126,6 +128,7 @@ class IntegrationTestFixture {
             personinfoHenter = personinfoHenterMock,
             infotrygdperiodeHenter = infotrygdperiodeHenterMock,
             personPseudoIdProvider = personPseudoIdProvider,
+            populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
         )
 
     class Response(

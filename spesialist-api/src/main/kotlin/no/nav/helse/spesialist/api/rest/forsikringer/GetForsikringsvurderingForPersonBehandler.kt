@@ -24,15 +24,14 @@ class GetForsikringsvurderingForPersonBehandler(
     override fun behandle(
         resource: Personer.PersonPseudoId.Forsikringsvurderinger.ForsikringvurderingId,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> {
-        return kallKontekst.medPerson(
+    ): RestResponse<ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> =
+        kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetForsikringsvurderingForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetForsikringsvurderingForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             behandleForPerson(person, resource.forsikringvurderingId)
         }
-    }
 
     private fun behandleForPerson(
         person: Person,
@@ -56,12 +55,13 @@ class GetForsikringsvurderingForPersonBehandler(
 private fun Forsikringsvurdering.tilApiForsikring(): ApiForsikring =
     ApiForsikring(
         eksisterer = harForsikring,
-        forsikringInnhold = dekning?.let {
-            ForsikringInnhold(
-                dekningsgrad = it.grad,
-                gjelderFraDag = it.fraDag,
-            )
-        },
+        forsikringInnhold =
+            dekning?.let {
+                ForsikringInnhold(
+                    dekningsgrad = it.grad,
+                    gjelderFraDag = it.fraDag,
+                )
+            },
     )
 
 enum class ApiGetForsikringsvurderingForPersonErrorCode(

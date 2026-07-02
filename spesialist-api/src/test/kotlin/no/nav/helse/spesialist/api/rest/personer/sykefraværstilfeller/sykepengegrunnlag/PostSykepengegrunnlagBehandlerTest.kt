@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest.personer.sykefraværstilfeller.sykepengegrunnlag
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
@@ -14,7 +16,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -254,11 +255,12 @@ class PostSykepengegrunnlagBehandlerTest {
     @Test
     fun `Forbidden hvis saksbehandler ikke har tilgang`() {
         // given
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
         val person =
-            lagPerson().also {
-                it.oppdaterEgenAnsattStatus(true, Instant.now())
-                personRepository.lagre(it)
-            }
+            lagPerson().also(personRepository::lagre)
         val personPseudoId =
             integrationTestFixture.personPseudoIdProvider
                 .nyPersonPseudoId(person.id)

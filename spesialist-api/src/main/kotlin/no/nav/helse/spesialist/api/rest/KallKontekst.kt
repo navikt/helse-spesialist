@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.api.rest
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.server.routing.RoutingCall
 import no.nav.helse.db.SessionContext
+import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.medMdcOgAttribute
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -28,6 +31,8 @@ class KallKontekst(
     val transaksjon: SessionContext,
     val outbox: Outbox,
     val personPseudoIdProvider: PersonPseudoIdProvider,
+    val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    val accessToken: AccessToken,
     private val ktorCall: RoutingCall,
 ) {
     fun <RESPONSE, ERROR : ApiErrorCode> medOppgave(
@@ -163,22 +168,15 @@ class KallKontekst(
                 return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
             }
 
-            if (!person.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
-                loggWarn("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer)
-                return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
+            when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, person.id.value)) {
+                TilgangskontrollResultat.IdentIkkeFunnet -> return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
+                is TilgangskontrollResultat.ManglerTilgang -> {
+                    loggWarn("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer)
+                    return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
+                }
+                is TilgangskontrollResultat.UventetFeil -> error("Uventet feil fra Tilgangsmaskinen: ${resultat.menneskeligLesbarForklaring}")
+                TilgangskontrollResultat.Ok -> block(person)
             }
-
-            // Best effort for å finne ut om saksbehandler har tilgang til oppgaven som gjelder
-            // Litt vanskelig å få pent så lenge vi har dynamisk resolving av resten, og tilsynelatende "mange" oppgaver
-            val harTilgangTilOppgave =
-                transaksjon.oppgaveRepository.finnAktivForPerson(identitetsnummer)?.kanSeesAv(brukerroller) ?: true
-
-            if (!harTilgangTilOppgave) {
-                loggWarn("Saksbehandler har ikke tilgang til aktiv oppgave på personen", "identitetsnummer" to identitetsnummer)
-                return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
-            }
-
-            block(person)
         }
 
     fun <T> medMdcOgAttribute(

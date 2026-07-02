@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.expediagroup.graphql.server.ktor.GraphQL
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -66,6 +67,7 @@ fun configureKtorApplication(
     tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     infotrygdperiodeHenter: InfotrygdperiodeHenter,
     personPseudoIdProvider: PersonPseudoIdProvider,
+    populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     behandlingsstatistikkService: BehandlingsstatistikkService,
 ) {
     with(ktorApplication) {
@@ -102,6 +104,7 @@ fun configureKtorApplication(
                         meldingPubliserer = meldingPubliserer,
                         versjonAvKode = apiModuleConfiguration.versjonAvKode,
                         personPseudoIdProvider = personPseudoIdProvider,
+                        populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                     ),
                 opptegnelseListener = opptegnelseListener,
                 sessionFactory = sessionFactory,

@@ -13,6 +13,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -39,6 +40,7 @@ class RestAdapterTest {
                                         saksbehandler = lagSaksbehandler(),
                                         brukerroller = Brukerrolle.entries.toSet(),
                                         tilganger = Tilgang.entries.toSet(),
+                                        accessToken = AccessToken("test_token"),
                                     )
                             },
                         )
@@ -53,6 +55,7 @@ class RestAdapterTest {
                 meldingPubliserer = integrationTestFixture.meldingPubliserer,
                 versjonAvKode = "0.0.0",
                 personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider,
+                populasjonstilgangskontrollProvider = integrationTestFixture.populasjonstilgangskontrollProvider,
             )
 
         runBlocking {

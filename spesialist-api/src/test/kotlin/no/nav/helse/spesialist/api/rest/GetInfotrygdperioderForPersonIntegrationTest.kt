@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.verify
@@ -7,7 +9,6 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Infotrygdperiode
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -163,8 +164,11 @@ class GetInfotrygdperioderForPersonIntegrationTest {
     @Test
     fun `gir feilmelding om saksbehandler ikke har tilgang til personen`() {
         // Given:
-        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
-        personRepository.lagre(person)
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
+        val person = lagPerson().also(personRepository::lagre)
         val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:

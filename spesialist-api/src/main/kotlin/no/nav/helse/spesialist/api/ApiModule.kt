@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.ktor.server.application.Application
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
@@ -49,6 +50,7 @@ class ApiModule(
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
     private val personPseudoIdProvider: PersonPseudoIdProvider,
+    private val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
 ) {
     data class Configuration(
         val clientId: String,
@@ -131,6 +133,7 @@ class ApiModule(
             infotrygdperiodeHenter = infotrygdperiodeHenter,
             personPseudoIdProvider = personPseudoIdProvider,
             behandlingsstatistikkService = behandlingsstatistikkService,
+            populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
         )
     }
 }

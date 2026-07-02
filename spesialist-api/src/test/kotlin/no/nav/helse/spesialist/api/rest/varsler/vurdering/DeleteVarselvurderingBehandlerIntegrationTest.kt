@@ -1,9 +1,10 @@
 package no.nav.helse.spesialist.api.rest.varsler.vurdering
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varselvurdering
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -38,16 +39,18 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varseldefinisjon = lagVarseldefinisjon()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(
-                saksbehandlerId = saksbehandler.id,
-                vurdertDefinisjonId = varseldefinisjon.id,
-                tidspunkt = LocalDateTime.now()
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = Varsel.Status.VURDERT,
+                vurdering =
+                    Varselvurdering(
+                        saksbehandlerId = saksbehandler.id,
+                        vurdertDefinisjonId = varseldefinisjon.id,
+                        tidspunkt = LocalDateTime.now(),
+                    ),
             )
-        )
         vedtaksperiodeRepository.lagre(vedtaksperiode)
         behandlingRepository.lagre(behandling)
         varseldefinisjonRepository.lagre(varseldefinisjon)
@@ -55,10 +58,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.delete(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.delete(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                saksbehandler = saksbehandler,
+            )
 
         assertEquals(HttpStatusCode.NoContent.value, response.status)
     }
@@ -66,7 +70,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
     @Test
     fun `Forbidden om saksbehandler ikke har tilgang til personen`() {
         // given
-        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig)
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.FortroligAdresse,
+            )
+        val person = lagPerson()
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val definisjon = lagVarseldefinisjon()
@@ -79,10 +87,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.delete(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.delete(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -93,7 +102,7 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
                 "title": "Mangler tilgang til person",
                 "code": "MANGLER_TILGANG_TIL_PERSON"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -107,10 +116,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         varselRepository.lagre(varsel)
 
         // when
-        val response = integrationTestFixture.delete(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.delete(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -120,7 +130,7 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
                 "status": 500,
                 "title": "Internal Server Error"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -136,10 +146,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         behandlingRepository.lagre(behandling)
 
         // when
-        val response = integrationTestFixture.delete(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.delete(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -149,7 +160,7 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
                 "status": 500,
                 "title": "Internal Server Error"
             }""",
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -162,11 +173,12 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varseldefinisjon = lagVarseldefinisjon()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = status,
-        )
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = status,
+            )
         vedtaksperiodeRepository.lagre(vedtaksperiode)
         behandlingRepository.lagre(behandling)
         varseldefinisjonRepository.lagre(varseldefinisjon)
@@ -174,10 +186,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.delete(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.delete(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.Conflict.value, response.status)
@@ -191,12 +204,13 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varseldefinisjon = lagVarseldefinisjon()
-        val varsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = Varsel.Status.AKTIV,
-            vurdering = null
-        )
+        val varsel =
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = Varsel.Status.AKTIV,
+                vurdering = null,
+            )
         vedtaksperiodeRepository.lagre(vedtaksperiode)
         behandlingRepository.lagre(behandling)
         varseldefinisjonRepository.lagre(varseldefinisjon)
@@ -204,10 +218,11 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
         personRepository.lagre(person)
 
         // when
-        val response = integrationTestFixture.delete(
-            url = "/api/varsler/${varsel.id.value}/vurdering",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.delete(
+                url = "/api/varsler/${varsel.id.value}/vurdering",
+                saksbehandler = saksbehandler,
+            )
 
         // then
         assertEquals(HttpStatusCode.NoContent.value, response.status)

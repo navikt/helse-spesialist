@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.api.auth
 
 import com.auth0.jwk.JwkProvider
+import io.ktor.http.HttpHeaders
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.request.uri
@@ -10,6 +12,7 @@ import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
+import kotlin.text.removePrefix
 
 fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
     jwkProvider: JwkProvider,
@@ -27,9 +30,16 @@ fun JWTAuthenticationProvider.Config.configureJwtAuthentication(
             saksbehandler = credentials.tilSaksbehandler(),
             brukerroller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(credentials.groupsAsUuids()),
             tilganger = tilgangsgrupperTilTilganger.finnTilgangerFraTilgangsgrupper(credentials.groupsAsUuids()),
+            accessToken = accessToken() ?: return@validate null,
         )
     }
 }
+
+private fun ApplicationCall.accessToken(): AccessToken? =
+    request.headers[HttpHeaders.Authorization]
+        ?.removePrefix("Bearer ")
+        ?.trim()
+        ?.let { AccessToken(it) }
 
 private fun JWTCredential.groupsAsUuids(): List<UUID> =
     payload
