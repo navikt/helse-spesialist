@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegr
 import no.nav.helse.spesialist.client.spforsikring.testfixtures.ClientSpForsikringModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.tilgangsmaskinen.testfixtures.ClientTilgangsmaskinenModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
@@ -85,6 +86,7 @@ object E2ETestApplikasjon {
                     clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
                     valkey = ValkeyModule.Configuration(valkey = null),
                     clientPersonPseudoId = personPseudoidIntegrationTestFixture.moduleConfiguration,
+                    clientTilgangsmaskinen = ClientTilgangsmaskinenModuleIntegrationTestFixture.moduleConfiguration,
                 ),
             rapidsConnection = testRapid,
         )

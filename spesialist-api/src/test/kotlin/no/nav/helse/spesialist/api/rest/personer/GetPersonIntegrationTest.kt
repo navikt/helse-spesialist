@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest.personer
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.verify
@@ -180,7 +182,11 @@ class GetPersonIntegrationTest {
     @Test
     fun `gir feilmelding om saksbehandler ikke har tilgang til personen`() {
         // Given:
-        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
+        val person = lagPerson()
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 

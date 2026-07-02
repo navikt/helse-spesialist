@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.api.rest.notater
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagNotat
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -26,15 +27,21 @@ class GetNotatBehandlerIntegrationTest {
         val identitetsnummer = lagPerson().also(sessionContext.personRepository::lagre).id
         val vedtaksperiodeId =
             lagVedtaksperiode(identitetsnummer = identitetsnummer)
-                .also(sessionContext.vedtaksperiodeRepository::lagre).id
-        val dialogId = Dialog.Factory.ny().also(sessionContext.dialogRepository::lagre).id()
-        val notat = lagNotat(
-            tekst = "jeg er en notattekst",
-            type = NotatType.Generelt,
-            dialogRef = dialogId,
-            vedtaksperiodeId = vedtaksperiodeId.value,
-            saksbehandlerOid = saksbehandler.id
-        ).also(sessionContext.notatRepository::lagre)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+                .id
+        val dialogId =
+            Dialog.Factory
+                .ny()
+                .also(sessionContext.dialogRepository::lagre)
+                .id()
+        val notat =
+            lagNotat(
+                tekst = "jeg er en notattekst",
+                type = NotatType.Generelt,
+                dialogRef = dialogId,
+                vedtaksperiodeId = vedtaksperiodeId.value,
+                saksbehandlerOid = saksbehandler.id,
+            ).also(sessionContext.notatRepository::lagre)
 
         // when
         val response =
@@ -71,21 +78,32 @@ class GetNotatBehandlerIntegrationTest {
     @Test
     fun `gir 403 dersom saksbehandler ikke har tilgang til den aktuelle personen`() {
         // given
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.FortroligAdresse,
+            )
         val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
         val identitetsnummer =
-            lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig)
-                .also(sessionContext.personRepository::lagre).id
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
+                .id
         val vedtaksperiodeId =
             lagVedtaksperiode(identitetsnummer = identitetsnummer)
-                .also(sessionContext.vedtaksperiodeRepository::lagre).id
-        val dialogId = Dialog.Factory.ny().also(sessionContext.dialogRepository::lagre).id()
-        val notat = lagNotat(
-            tekst = "jeg er en notattekst",
-            type = NotatType.Generelt,
-            dialogRef = dialogId,
-            vedtaksperiodeId = vedtaksperiodeId.value,
-            saksbehandlerOid = saksbehandler.id
-        ).also(sessionContext.notatRepository::lagre)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+                .id
+        val dialogId =
+            Dialog.Factory
+                .ny()
+                .also(sessionContext.dialogRepository::lagre)
+                .id()
+        val notat =
+            lagNotat(
+                tekst = "jeg er en notattekst",
+                type = NotatType.Generelt,
+                dialogRef = dialogId,
+                vedtaksperiodeId = vedtaksperiodeId.value,
+                saksbehandlerOid = saksbehandler.id,
+            ).also(sessionContext.notatRepository::lagre)
 
         // when
         val response =

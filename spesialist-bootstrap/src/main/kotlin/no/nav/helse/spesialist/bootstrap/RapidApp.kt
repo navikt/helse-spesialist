@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spforsikring.ClientSpForsikringModule
 import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
+import no.nav.helse.spesialist.client.tilgangsmaskinen.ClientTilgangsmaskinenModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
 import no.nav.helse.spesialist.valkey.ValkeyModule
@@ -90,6 +91,11 @@ fun main() {
                         connectionString = env.getValue("VALKEY_URI_PERSONPSEUDOID"),
                         brukernavn = env.getValue("VALKEY_USERNAME_PERSONPSEUDOID"),
                         passord = env.getValue("VALKEY_PASSWORD_PERSONPSEUDOID"),
+                    ),
+                clientTilgangsmaskinen =
+                    ClientTilgangsmaskinenModule.Configuration(
+                        baseUrl = env.getValue("TILGANGSMASKINEN_BASE_URL"),
+                        scope = env.getValue("TILGANGSMASKINEN_SCOPE"),
                     ),
                 db =
                     DBModule.Configuration(
@@ -224,6 +230,12 @@ class RapidApp {
                 accessTokenProvider = clientEntraIdModule.accessTokenProvider,
             )
 
+        val clientTilgangsmaskinenModule =
+            ClientTilgangsmaskinenModule(
+                configuration = configuration.clientTilgangsmaskinen,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
+            )
+
         val dbModule = DBModule(configuration.db)
 
         val personPseudoIdProvider =
@@ -264,6 +276,7 @@ class RapidApp {
                 personinfoHenter = clientSpeedModule.personinfoHenter,
                 infotrygdperiodeHenter = clientSparkelSykepengeperioderModule.sykepengeperioderHenter,
                 personPseudoIdProvider = personPseudoIdProvider,
+                populasjonstilgangskontrollProvider = clientTilgangsmaskinenModule.tilgangsmaskinenClient,
             )
 
         kafkaModule.kobleOppRivers()

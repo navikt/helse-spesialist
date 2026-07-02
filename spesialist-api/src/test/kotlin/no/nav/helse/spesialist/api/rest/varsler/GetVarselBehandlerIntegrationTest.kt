@@ -1,11 +1,12 @@
 package no.nav.helse.spesialist.api.rest.varsler
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.BehandlingUnikId
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -175,6 +176,10 @@ class GetVarselBehandlerIntegrationTest {
     @Test
     fun `gir 403 dersom saksbehandler ikke har tilgang til den aktuelle personen`() {
         // given
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.FortroligAdresse,
+            )
         val vedtaksperiode = lagVedtaksperiode(id = lagVedtaksperiodeId())
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varsel =
@@ -187,7 +192,6 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         lagPerson(
             id = vedtaksperiode.identitetsnummer,
-            adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig,
         ).also(sessionContext.personRepository::lagre)
 
         // when

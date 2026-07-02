@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.principal
@@ -32,6 +33,7 @@ class RestAdapter(
     private val meldingPubliserer: MeldingPubliserer,
     private val versjonAvKode: String,
     private val personPseudoIdProvider: PersonPseudoIdProvider,
+    private val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
 ) {
     private val problemObjectMapper = objectMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
 
@@ -110,6 +112,8 @@ class RestAdapter(
                                     transaksjon = transaksjon,
                                     outbox = outbox,
                                     personPseudoIdProvider = personPseudoIdProvider,
+                                    populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
+                                    accessToken = principal.accessToken,
                                     ktorCall = call,
                                 )
                             val response = behandler.invoke(kallKontekst)

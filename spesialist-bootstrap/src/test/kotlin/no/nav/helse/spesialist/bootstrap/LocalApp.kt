@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.client.speed.testfixtures.ClientSpeedModuleIntegr
 import no.nav.helse.spesialist.client.spforsikring.testfixtures.ClientSpForsikringModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spillkar.testfixtures.ClientSpillkarModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.tilgangsmaskinen.testfixtures.ClientTilgangsmaskinenModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
 import no.nav.helse.spesialist.valkey.ValkeyModule
@@ -40,6 +41,7 @@ fun main() {
                 clientSpillkar = ClientSpillkarModuleIntegrationTestFixture.moduleConfiguration,
                 clientSpForsikring = ClientSpForsikringModuleIntegrationTestFixture.moduleConfiguration,
                 clientPersonPseudoId = personPseudoidIntegrationTestFixture.moduleConfiguration,
+                clientTilgangsmaskinen = ClientTilgangsmaskinenModuleIntegrationTestFixture.moduleConfiguration,
                 db = DBTestFixture.database.dbModuleConfiguration,
                 kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
                 valkey = ValkeyModule.Configuration(valkey = null),

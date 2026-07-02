@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
@@ -31,6 +32,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
+import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
@@ -73,6 +75,8 @@ object TestRunner {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
 
     private val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
+
+    private val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
 
     private fun token(
         saksbehandler: Saksbehandler,
@@ -121,6 +125,7 @@ object TestRunner {
                 tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(),
                 tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger(),
                 personPseudoIdProvider = personPseudoIdProvider,
+                populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
             )
         testApplication {
             application {
@@ -177,6 +182,7 @@ object TestRunner {
                     infotrygdperiodeHenter = avhengigheter.infotrygdperiodeHenter,
                     personPseudoIdProvider = avhengigheter.personPseudoIdProvider,
                     behandlingsstatistikkService = avhengigheter.behandlingstatistikk,
+                    populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                 )
             }
 
@@ -222,5 +228,6 @@ object TestRunner {
         val tilgangsgrupperTilTilganger: TilgangsgrupperTilTilganger,
         val meldingPubliserer: MeldingPubliserer,
         val personPseudoIdProvider: PersonPseudoIdProvider,
+        val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     )
 }

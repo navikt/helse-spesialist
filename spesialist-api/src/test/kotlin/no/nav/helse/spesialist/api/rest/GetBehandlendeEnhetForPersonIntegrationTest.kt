@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.verify
@@ -7,7 +9,6 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Enhet
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -102,7 +103,11 @@ class GetBehandlendeEnhetForPersonIntegrationTest {
     @Test
     fun `gir feilmelding om saksbehandler ikke har tilgang til personen`() {
         // Given:
-        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
+        val person = lagPerson()
         personRepository.lagre(person)
         val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 

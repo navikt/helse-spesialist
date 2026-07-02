@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.logback.syslog4j)
     api(libs.bundles.kotlinx.coroutines)
     api(libs.tbdLibs.accessTokenProviderApi)
+    api(libs.tbdLibs.populasjonstilgangskontroll.api)
     implementation(libs.micrometer.prometheus)
     implementation(libs.opentelemetry.instrumentation.annotations)
 

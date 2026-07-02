@@ -83,6 +83,8 @@ spec:
           cluster: dev-gcp
         - application: logging
           namespace: nais-system
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
       external:
         - host: sykepengeperioder-api.dev-fss-pub.nais.io
   gcp:
@@ -166,6 +168,10 @@ spec:
       value: "https://sykepengeperioder-api.dev-fss-pub.nais.io"
     - name: SPARKEL_SYKEPENGEPERIODER_SCOPE
       value: "api://dev-fss.tbd.sparkel-sykepengeperioder-api/.default"
+    - name: TILGANGSMASKINEN_BASE_URL
+      value: "http://populasjonstilgangskontroll.tilgangsmaskin"
+    - name: TILGANGSMASKINEN_SCOPE
+      value: "api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK

@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest.behandlinger.forkasting
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -166,8 +168,12 @@ class PostForkastingBehandlerIntegrationTest {
     @Test
     fun `gir forbidden hvis saksbehandler ikke har tilgang til personen`() {
         // Given:
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.EgenAnsatt,
+            )
         val person =
-            lagPerson(erEgenAnsatt = true)
+            lagPerson()
                 .also(personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)

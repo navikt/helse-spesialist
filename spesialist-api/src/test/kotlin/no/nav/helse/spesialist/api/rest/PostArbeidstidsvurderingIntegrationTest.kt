@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.IntegrationTestFixture
@@ -41,8 +43,12 @@ class PostArbeidstidsvurderingIntegrationTest {
 
     @Test
     fun `Forbidden dersom personen har adressebeskyttelse som saksbehandler ikke har tilgang til`() {
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.FortroligAdresse,
+            )
         // Given:
-        val personPseudoId = lagrePerson(Personinfo.Adressebeskyttelse.Fortrolig)
+        val personPseudoId = lagrePerson()
 
         // When:
         val response =

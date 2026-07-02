@@ -1,10 +1,11 @@
 package no.nav.helse.spesialist.api.rest.dokumenter
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -131,9 +132,13 @@ class GetInntektsmeldingBehandlerTest {
     @Test
     fun `kan ikke hente inntektsmelding hvis man ikke har tilgang til person`() {
         // Given:
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
         val dokumentId = UUID.randomUUID()
         val person =
-            lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
+            lagPerson()
                 .also(personRepository::lagre)
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(

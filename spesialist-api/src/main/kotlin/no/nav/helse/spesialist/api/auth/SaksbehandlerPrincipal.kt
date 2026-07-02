@@ -8,4 +8,5 @@ data class SaksbehandlerPrincipal(
     val saksbehandler: Saksbehandler,
     val brukerroller: Set<Brukerrolle>,
     val tilganger: Set<Tilgang>,
+    val accessToken: AccessToken,
 )

@@ -1,11 +1,12 @@
 package no.nav.helse.spesialist.api.rest.dokumenter
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.ApiSoknadstype
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.intellij.lang.annotations.Language
@@ -50,8 +51,12 @@ class GetSøknadBehandlerIntegrationTest {
     fun `får ikke hente søknad hvis man ikke har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
         val person =
-            lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig).also(personRepository::lagre)
+            lagPerson().also(personRepository::lagre)
         dokumentDao.lagre(
             fødselsnummer = person.id.value,
             dokumentId = dokumentId,
