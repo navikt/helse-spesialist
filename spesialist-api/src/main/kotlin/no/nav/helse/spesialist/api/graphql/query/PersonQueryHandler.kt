@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
+import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.utils.io.core.toByteArray
@@ -14,6 +16,7 @@ import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.AuditLogger
 import no.nav.helse.spesialist.api.Personhåndterer
+import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
@@ -105,7 +108,6 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.MdcKey
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
@@ -127,7 +129,6 @@ import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.LocalDate
 import java.util.UUID
 
@@ -138,6 +139,7 @@ class PersonQueryHandler(
     private val snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
     private val personPseudoIdProvider: PersonPseudoIdProvider,
+    private val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
 ) : PersonQuerySchema {
     override fun person(
         personPseudoId: String,
@@ -152,7 +154,7 @@ class PersonQueryHandler(
                     personPseudoId = personPseudoId,
                     transaction = transaction,
                     saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
-                    brukerroller = env.graphQlContext.get(ContextValues.BRUKERROLLER),
+                    accessToken = env.graphQlContext.get(ContextValues.ACCESS_TOKEN),
                 )
             }
         }
@@ -162,7 +164,7 @@ class PersonQueryHandler(
         personPseudoId: PersonPseudoId,
         transaction: SessionContext,
         saksbehandler: Saksbehandler,
-        brukerroller: Set<Brukerrolle>,
+        accessToken: AccessToken,
     ): DataFetcherResult<ApiPerson?> {
         val identitetsnummer = (
             personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
@@ -173,7 +175,7 @@ class PersonQueryHandler(
         )
 
         return medMdc(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
-            hentPerson(identitetsnummer, transaction, saksbehandler, brukerroller)
+            hentPerson(identitetsnummer, transaction, saksbehandler, accessToken)
         }
     }
 
@@ -181,7 +183,7 @@ class PersonQueryHandler(
         identitetsnummer: Identitetsnummer,
         transaction: SessionContext,
         saksbehandler: Saksbehandler,
-        brukerroller: Set<Brukerrolle>,
+        accessToken: AccessToken,
     ): DataFetcherResult<ApiPerson?> {
         loggInfo("Personoppslag på person", "identitetsnummer" to identitetsnummer)
 
@@ -189,6 +191,26 @@ class PersonQueryHandler(
             transaction.personRepository.finn(identitetsnummer)
                 ?: notFound("Fant ikke data for person")
 
+        return when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, personEntity.id.value)) {
+            TilgangskontrollResultat.IdentIkkeFunnet -> internalServerError("Tilgangsmaskinen fant ikke saksbehandlers ident")
+            is TilgangskontrollResultat.ManglerTilgang -> manglerTilgangTilPerson(saksbehandler, identitetsnummer)
+
+            TilgangskontrollResultat.Ok -> {
+                hentPerson(personEntity, transaction, identitetsnummer, saksbehandler)
+            }
+            is TilgangskontrollResultat.UventetFeil -> {
+                loggError("Uventet feil fra Tilgangsmaskinen", "feil" to resultat.menneskeligLesbarForklaring)
+                internalServerError("Uventet feil fra Tilgangsmaskinen")
+            }
+        }
+    }
+
+    private fun hentPerson(
+        personEntity: Person,
+        transaction: SessionContext,
+        identitetsnummer: Identitetsnummer,
+        saksbehandler: Saksbehandler,
+    ): DataFetcherResult<ApiPerson?> {
         if (!personEntity.harDataNødvendigForVisning()) {
             if (!transaction.personKlargjoresDao.klargjøringPågår(identitetsnummer.value)) {
                 personhåndterer.klargjørPersonForVisning(identitetsnummer.value)
@@ -198,25 +220,7 @@ class PersonQueryHandler(
             personIkkeKlarTilVisning(saksbehandler, identitetsnummer)
         }
 
-        if (!personEntity.kanSeesAvSaksbehandlerMedGrupper(brukerroller)) {
-            manglerTilgangTilPerson(saksbehandler, identitetsnummer)
-        }
-
-        val oppgaveId = daos.oppgaveApiDao.finnOppgaveId(identitetsnummer.value)
-
-        // Best effort for å finne ut om saksbehandler har tilgang til oppgaven som gjelder
-        // Litt vanskelig å få pent så lenge vi har dynamisk resolving av resten, og tilsynelatende "mange" oppgaver
-        val harTilgangTilOppgave =
-            oppgaveId?.let { oppgaveId ->
-                transaction.oppgaveRepository
-                    .finn(oppgaveId)
-                    ?.kanSeesAv(brukerroller)
-            } ?: true
-
-        if (!harTilgangTilOppgave) {
-            logg.warn("Saksbehandler mangler tilgang til aktiv oppgave på denne personen")
-            manglerTilgangTilPerson(saksbehandler, identitetsnummer)
-        }
+        val oppgave = transaction.oppgaveRepository.finnAktivForPerson(identitetsnummer)
 
         val snapshot =
             try {
@@ -236,7 +240,7 @@ class PersonQueryHandler(
             error("Fikk snapshot for et annet identitetsnummer enn det som ble etterspurt")
         }
 
-        val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgaveId)
+        val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgave?.id?.value)
         val alleOverstyringer = daos.overstyringApiDao.finnOverstyringer(identitetsnummer.value)
         val risikovurderinger = daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
         val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value)
@@ -245,19 +249,7 @@ class PersonQueryHandler(
             versjon = snapshot.versjon,
             aktorId = snapshot.aktorId,
             fodselsnummer = identitetsnummer.value,
-            andreFodselsnummer =
-                transaction.personRepository
-                    .finnAlleMedAktørId(personEntity.aktørId)
-                    .asSequence()
-                    .map(Person::id)
-                    .filterNot { it == identitetsnummer }
-                    .distinct()
-                    .map {
-                        ApiAnnetFodselsnummer(
-                            fodselsnummer = it.value,
-                            personPseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer = it).value,
-                        )
-                    }.toList(),
+            andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
             dodsdato = snapshot.dodsdato,
             personinfo = personEntity.tilApiPersoninfo(),
             enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),
@@ -702,8 +694,10 @@ class PersonQueryHandler(
                                                                 ),
                                                             historikkinnslag =
                                                                 daos.periodehistorikkApiDao
-                                                                    .finn(utbetalingId = periode.utbetaling.id, spleisBehandlingId = periode.behandlingId)
-                                                                    .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
+                                                                    .finn(
+                                                                        utbetalingId = periode.utbetaling.id,
+                                                                        spleisBehandlingId = periode.behandlingId,
+                                                                    ).map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
                                                             forbrukteSykedager = periode.forbrukteSykedager,
                                                             gjenstaendeSykedager = periode.gjenstaendeSykedager,
                                                             maksdato = periode.maksdato,
@@ -867,6 +861,24 @@ class PersonQueryHandler(
             byggRespons(it)
         }
     }
+
+    private fun andreFødselsnumre(
+        transaction: SessionContext,
+        personEntity: Person,
+        identitetsnummer: Identitetsnummer,
+    ): List<ApiAnnetFodselsnummer> =
+        transaction.personRepository
+            .finnAlleMedAktørId(personEntity.aktørId)
+            .asSequence()
+            .map(Person::id)
+            .filterNot { it == identitetsnummer }
+            .distinct()
+            .map {
+                ApiAnnetFodselsnummer(
+                    fodselsnummer = it.value,
+                    personPseudoId = personPseudoIdProvider.nyPersonPseudoId(identitetsnummer = it).value,
+                )
+            }.toList()
 
     private fun PeriodehistorikkDto.toApiHistorikkinnslag(dialogRepository: DialogRepository): ApiHistorikkinnslag =
         when (type) {

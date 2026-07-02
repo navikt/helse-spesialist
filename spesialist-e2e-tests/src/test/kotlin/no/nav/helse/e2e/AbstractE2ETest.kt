@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
@@ -93,6 +94,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     val spleisClient = mockk<SpleisClient>()
     val snapshothenter = SpleisClientSnapshothenter(spleisClient)
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
+    val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
     private val testRapid = TestRapid()
     val inspektør get() = testRapid.inspektør
     private val meldingssender = Meldingssender(testRapid)
@@ -102,14 +104,15 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         TestMediator(
             testRapid = testRapid,
             dataSource = dataSource,
-            forsikringsvurderingHenter = object : ForsikringsvurderingHenter {
-                override fun hent(forsikringsvurderingId: ForsikringsvurderingId) =
-                    Forsikringsvurdering(
-                        identitetsnummer = lagIdentitetsnummer(),
-                        harForsikring = false,
-                        dekning = null,
-                    )
-            },
+            forsikringsvurderingHenter =
+                object : ForsikringsvurderingHenter {
+                    override fun hent(forsikringsvurderingId: ForsikringsvurderingId) =
+                        Forsikringsvurdering(
+                            identitetsnummer = lagIdentitetsnummer(),
+                            harForsikring = false,
+                            dekning = null,
+                        )
+                },
             environmentToggles =
                 object : EnvironmentToggles {
                     override val kanBeslutteEgneSaker: Boolean = false

@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.application.logg.loggError
 enum class ContextValues {
     BRUKERROLLER,
     SAKSBEHANDLER,
+    ACCESS_TOKEN,
 }
 
 class ContextFactory : KtorGraphQLContextFactory() {
@@ -26,6 +27,7 @@ class ContextFactory : KtorGraphQLContextFactory() {
         return mapOf(
             SAKSBEHANDLER to principal.saksbehandler,
             BRUKERROLLER to principal.brukerroller,
+            ContextValues.ACCESS_TOKEN to principal.accessToken,
         ).toGraphQLContext()
     }
 }

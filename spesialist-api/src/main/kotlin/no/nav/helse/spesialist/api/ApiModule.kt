@@ -95,6 +95,7 @@ class ApiModule(
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
+                                populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                             ),
                     ),
                 mutationHandlers =
