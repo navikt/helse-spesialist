@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.client.speed
 
-import no.nav.helse.spesialist.application.AccessTokenGenerator
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import no.nav.helse.spesialist.application.Cache
 
 class ClientSpeedModule(
     configuration: Configuration,
-    accessTokenGenerator: AccessTokenGenerator,
+    accessTokenProvider: AccessTokenProvider,
     cache: Cache,
 ) {
     data class Configuration(
@@ -16,14 +16,14 @@ class ClientSpeedModule(
     val alleIdenterHenter =
         SpeedClientAlleIdenterHenter(
             configuration = configuration,
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
             cache = cache,
         )
 
     val personinfoHenter =
         SpeedClientPersoninfoHenter(
             configuration = configuration,
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
             cache = cache,
         )
 }

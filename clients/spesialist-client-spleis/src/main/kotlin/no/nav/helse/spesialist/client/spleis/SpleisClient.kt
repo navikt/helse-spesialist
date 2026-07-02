@@ -4,8 +4,8 @@ import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.teamLogs
@@ -22,7 +22,7 @@ import java.net.URI
 import java.util.UUID
 
 class SpleisClient(
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
     private val spleisUrl: URI,
     private val spleisClientId: String,
     private val loggRespons: Boolean,
@@ -49,7 +49,7 @@ class SpleisClient(
             timer.recordCallable {
                 Request
                     .post(uri)
-                    .setHeader("Authorization", "Bearer ${accessTokenGenerator.hentAccessToken(spleisClientId)}")
+                    .setHeader("Authorization", "Bearer ${accessTokenProvider.machineToken(spleisClientId)}")
                     .setHeader("callId", callId)
                     .bodyString(requestBody, ContentType.APPLICATION_JSON)
                     .execute(client)

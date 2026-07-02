@@ -6,15 +6,13 @@ graphqlKotlin = "9.2.0"
 jackson = "2.21.4"
 kotlinx-coroutines = "1.11.0"
 ktor = "3.5.0"
-tbdLibs = "20260513.1703"
+tbdLibs = "20260701.2248"
 testcontainers = "2.0.5"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
 
 [libraries]
 apache-httpclient5-fluent = "org.apache.httpcomponents.client5:httpclient5-fluent:5.6.1"
-
-auth0-jwt = "com.auth0:java-jwt:4.5.2"
 
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.4"
 
@@ -77,6 +75,8 @@ smiley4-schema-kenerator-swagger = { module = "io.github.smiley4:schema-kenerato
 tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
 tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdLibs" }
 tbdLibs-personspeudoid = { module = "com.github.navikt.tbd-libs:person-pseudo-id", version.ref = "tbdLibs" }
+tbdLibs-accessTokenProviderApi = { module = "com.github.navikt.tbd-libs:access-token-provider-api", version.ref = "tbdLibs" }
+tbdLibs-accessTokenProviderTexas = { module = "com.github.navikt.tbd-libs:access-token-provider-texas", version.ref = "tbdLibs" }
 
 testcontainers-kafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
 testcontainers-postgres = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }

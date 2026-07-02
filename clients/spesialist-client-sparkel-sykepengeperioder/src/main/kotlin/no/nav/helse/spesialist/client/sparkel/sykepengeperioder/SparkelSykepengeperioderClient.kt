@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
 import no.nav.helse.spesialist.application.hentGjennomCache
@@ -23,7 +23,7 @@ import java.util.UUID
 
 class SparkelSykepengeperioderClient(
     private val configuration: ClientSparkelSykepengeperioderModule.Configuration,
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
     private val cache: Cache,
 ) : InfotrygdperiodeHenter {
     private val objectMapper =
@@ -49,7 +49,7 @@ class SparkelSykepengeperioderClient(
         identitetsnummer: Identitetsnummer,
         fom: LocalDate,
     ): List<Infotrygdperiode> {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+        val accessToken = accessTokenProvider.machineToken(configuration.scope)
         val callId = UUID.randomUUID().toString()
 
         val requestBody =

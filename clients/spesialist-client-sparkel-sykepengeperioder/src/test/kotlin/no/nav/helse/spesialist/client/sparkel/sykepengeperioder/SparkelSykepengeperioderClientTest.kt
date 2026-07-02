@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.sparkel.sykepengeperioder
 
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -153,7 +154,7 @@ class SparkelSykepengeperioderClientTest {
                     apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                     scope = "scoap",
                 ),
-            accessTokenGenerator = { "gief axess plz" },
+            accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz"),
             cache =
                 object : Cache {
                     override fun <T> hentGjennomCache(

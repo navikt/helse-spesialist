@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.client.krr
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus
@@ -20,7 +20,7 @@ import java.util.UUID
 
 class KRRClientKrrRegistrertStatusHenter(
     private val configuration: ClientKrrModule.Configuration,
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
     private val cache: Cache,
 ) : KrrRegistrertStatusHenter {
     private val objectMapper = jacksonObjectMapper()
@@ -36,7 +36,7 @@ class KRRClientKrrRegistrertStatusHenter(
 
     private fun hentFraKrr(fødselsnummer: String): KrrRegistrertStatus =
         timer.recordCallable {
-            val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+            val accessToken = accessTokenProvider.machineToken(configuration.scope)
             val callId = UUID.randomUUID().toString()
 
             val uri = "${configuration.apiUrl}/rest/v1/personer"

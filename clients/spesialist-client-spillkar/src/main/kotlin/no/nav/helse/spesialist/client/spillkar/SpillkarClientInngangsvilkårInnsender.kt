@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.client.spillkar
 
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggError
@@ -16,10 +16,10 @@ import java.time.ZoneOffset
 
 class SpillkarClientInngangsvilkårInnsender(
     private val configuration: ClientSpillkarModule.Configuration,
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
 ) : InngangsvilkårInnsender {
     override fun sendManuelleVurderinger(vurderinger: ManuelleInngangsvilkårVurderinger) {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+        val accessToken = accessTokenProvider.machineToken(configuration.scope)
         val uri = "${configuration.apiUrl}/vurderte-inngangsvilkar/manuelle-vurderinger"
         loggDebug("Utfører HTTP POST $uri")
 

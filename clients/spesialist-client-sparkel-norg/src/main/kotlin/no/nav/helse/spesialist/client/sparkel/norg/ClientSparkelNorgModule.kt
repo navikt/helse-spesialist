@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.client.sparkel.norg
 
-import no.nav.helse.spesialist.application.AccessTokenGenerator
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import no.nav.helse.spesialist.application.Cache
 
 class ClientSparkelNorgModule(
     configuration: Configuration,
-    accessTokenGenerator: AccessTokenGenerator,
+    accessTokenProvider: AccessTokenProvider,
     cache: Cache,
 ) {
     data class Configuration(
@@ -16,7 +16,7 @@ class ClientSparkelNorgModule(
     val behandlendeEnhetHenter =
         SparkelNorgClientBehandlendeEnhetHenter(
             configuration = configuration,
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
             cache = cache,
         )
 }

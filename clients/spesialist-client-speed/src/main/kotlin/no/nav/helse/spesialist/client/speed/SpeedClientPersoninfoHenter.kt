@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.client.speed
 
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.hentGjennomCache
@@ -20,7 +20,7 @@ import java.util.UUID
 
 class SpeedClientPersoninfoHenter(
     private val configuration: ClientSpeedModule.Configuration,
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
     private val cache: Cache,
 ) : PersoninfoHenter {
     override fun hentPersoninfo(identitetsnummer: Identitetsnummer): Personinfo? =
@@ -34,7 +34,7 @@ class SpeedClientPersoninfoHenter(
             }?.tilPersoninfo()
 
     private fun hentFraSpeed(identitetsnummer: Identitetsnummer): PersonResponse? {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+        val accessToken = accessTokenProvider.machineToken(configuration.scope)
 
         val uri = "${configuration.apiUrl}/api/person"
         loggDebug("Utfører HTTP POST $uri")

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -21,7 +21,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val msGraphUrl: String,
 ) : Brukerrollehenter {
@@ -38,7 +38,7 @@ class MsGraphTilgangsgruppehenter(
                 .post(msGraphUrl + "/v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
                 .setHeader(
                     "Authorization",
-                    "Bearer ${accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")}",
+                    "Bearer ${accessTokenProvider.machineToken("https://graph.microsoft.com/.default")}",
                 ).setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
                 .bodyString(
                     objectMapper.writeValueAsString(

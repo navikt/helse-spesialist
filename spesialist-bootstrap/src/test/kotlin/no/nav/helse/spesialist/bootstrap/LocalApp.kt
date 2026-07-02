@@ -31,7 +31,7 @@ fun main() {
         configuration =
             Configuration(
                 api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
-                clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).moduleConfiguration,
+                clientEntraID = ClientEntraIDModuleIntegrationTestFixture().moduleConfiguration,
                 clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                 clientSparkelNorg = ClientSparkelNorgModuleIntegrationTestFixture.moduleConfiguration,
                 clientSparkelSykepengeperioder = ClientSparkelSykepengeperioderModuleIntegrationTestFixture.moduleConfiguration,

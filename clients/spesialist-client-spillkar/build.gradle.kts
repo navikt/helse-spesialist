@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)
 
+    testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-domain")))
     testImplementation(libs.wiremock)
 

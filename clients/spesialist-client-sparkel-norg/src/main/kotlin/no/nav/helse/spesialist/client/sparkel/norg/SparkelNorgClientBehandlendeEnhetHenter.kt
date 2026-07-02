@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.client.sparkel.norg
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.hentGjennomCache
@@ -18,7 +18,7 @@ import java.util.UUID
 
 class SparkelNorgClientBehandlendeEnhetHenter(
     private val configuration: ClientSparkelNorgModule.Configuration,
-    private val accessTokenGenerator: AccessTokenGenerator,
+    private val accessTokenProvider: AccessTokenProvider,
     private val cache: Cache,
 ) : BehandlendeEnhetHenter {
     private val objectMapper = jacksonObjectMapper()
@@ -35,7 +35,7 @@ class SparkelNorgClientBehandlendeEnhetHenter(
         }
 
     private fun hentFraSparkelNorg(identitetsnummer: Identitetsnummer): Enhet? {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+        val accessToken = accessTokenProvider.machineToken(configuration.scope)
         val callId = UUID.randomUUID().toString()
 
         val uri = "${configuration.apiUrl}/api/behandlende-enhet"

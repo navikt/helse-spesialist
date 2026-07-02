@@ -10,6 +10,7 @@ dependencies {
     // Nødvendig for audit logging, men dette biblioteket har ikke blitt oppdatert siden august 2014 (!)
     implementation(libs.logback.syslog4j)
     api(libs.bundles.kotlinx.coroutines)
+    api(libs.tbdLibs.accessTokenProviderApi)
     implementation(libs.micrometer.prometheus)
     implementation(libs.opentelemetry.instrumentation.annotations)
 

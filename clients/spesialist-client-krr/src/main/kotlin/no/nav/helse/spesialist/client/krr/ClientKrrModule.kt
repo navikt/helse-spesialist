@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.client.krr
 
-import no.nav.helse.spesialist.application.AccessTokenGenerator
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import no.nav.helse.spesialist.application.Cache
 
 class ClientKrrModule(
     configuration: Configuration,
-    accessTokenGenerator: AccessTokenGenerator,
+    accessTokenProvider: AccessTokenProvider,
     cache: Cache,
 ) {
     data class Configuration(
@@ -16,7 +16,7 @@ class ClientKrrModule(
     val krrRegistrertStatusHenter =
         KRRClientKrrRegistrertStatusHenter(
             configuration = configuration,
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
             cache = cache,
         )
 }

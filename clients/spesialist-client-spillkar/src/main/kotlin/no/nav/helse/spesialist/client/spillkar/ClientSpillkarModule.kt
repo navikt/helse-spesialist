@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.client.spillkar
 
-import no.nav.helse.spesialist.application.AccessTokenGenerator
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 
 class ClientSpillkarModule(
     configuration: Configuration,
-    accessTokenGenerator: AccessTokenGenerator,
+    accessTokenProvider: AccessTokenProvider,
 ) {
     data class Configuration(
         val apiUrl: String,
@@ -14,12 +14,12 @@ class ClientSpillkarModule(
     val inngangsvilkårHenter =
         SpillkarClientInngangsvilkårHenter(
             configuration = configuration,
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
         )
 
     val inngangsvilkårInnsender =
         SpillkarClientInngangsvilkårInnsender(
             configuration = configuration,
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
         )
 }

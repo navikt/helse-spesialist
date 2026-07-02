@@ -45,11 +45,9 @@ fun main() {
                     ),
                 clientEntraID =
                     ClientEntraIDModule.Configuration(
-                        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-                        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-                        privateJwk = env.getValue("AZURE_APP_JWK"),
+                        tokenEndpoint = env.getValue("NAIS_TOKEN_ENDPOINT"),
+                        tokenExchangeEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
                         msGraphUrl = "https://graph.microsoft.com",
-                        oboTokenEndpoint = env.getValue("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
                     ),
                 clientKrr =
                     ClientKrrModule.Configuration(
@@ -183,47 +181,47 @@ class RapidApp {
         val clientKrrModule =
             ClientKrrModule(
                 configuration = configuration.clientKrr,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
                 cache = valkeyModule.cache,
             )
 
         val clientSparkelNorgModule =
             ClientSparkelNorgModule(
                 configuration = configuration.clientSparkelNorg,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
                 cache = valkeyModule.cache,
             )
 
         val clientSparkelSykepengeperioderModule =
             ClientSparkelSykepengeperioderModule(
                 configuration = configuration.clientSparkelSykepengeperioder,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
                 cache = valkeyModule.cache,
             )
 
         val clientSpeedModule =
             ClientSpeedModule(
                 configuration = configuration.clientSpeed,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
                 cache = valkeyModule.cache,
             )
 
         val clientSpillkarModule =
             ClientSpillkarModule(
                 configuration = configuration.clientSpillkar,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
             )
 
         val clientSpForsikringModule =
             ClientSpForsikringModule(
                 configuration = configuration.clientSpForsikring,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
             )
 
         val clientSpleisModule =
             ClientSpleisModule(
                 configuration = configuration.clientSpleis,
-                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
             )
 
         val dbModule = DBModule(configuration.db)

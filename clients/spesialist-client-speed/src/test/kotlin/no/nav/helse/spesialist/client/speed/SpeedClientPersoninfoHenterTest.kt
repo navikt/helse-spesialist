@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.speed
 
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
@@ -79,7 +80,7 @@ class SpeedClientPersoninfoHenterTest {
                     apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                     scope = "scoap",
                 ),
-            accessTokenGenerator = { "test-token" },
+            accessTokenProvider = InMemoryAccessTokenProvider("test-token"),
             cache =
                 object : Cache {
                     override fun <T> hentGjennomCache(

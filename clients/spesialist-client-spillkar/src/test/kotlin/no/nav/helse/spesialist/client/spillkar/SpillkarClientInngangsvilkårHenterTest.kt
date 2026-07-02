@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.spillkar
 
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -8,7 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering
-import no.nav.helse.spesialist.application.spillkar.`VurdertInngangsvilkår`
+import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
 import java.time.LocalDate
@@ -157,6 +158,6 @@ class SpillkarClientInngangsvilkårHenterTest {
                     apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                     scope = "scoap",
                 ),
-            accessTokenGenerator = { "test-token" },
+            accessTokenProvider = InMemoryAccessTokenProvider("test-token"),
         )
 }

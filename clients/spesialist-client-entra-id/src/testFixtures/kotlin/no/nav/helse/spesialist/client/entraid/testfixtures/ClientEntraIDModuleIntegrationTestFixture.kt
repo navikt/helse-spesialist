@@ -8,12 +8,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.token.KeyProvider
 import java.util.UUID
 
 class ClientEntraIDModuleIntegrationTestFixture(
-    val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
     val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller =
         TilgangsgrupperTilBrukerroller(
             næringsdrivendeBeta = (1..2).map { UUID.randomUUID() },
@@ -37,25 +34,28 @@ class ClientEntraIDModuleIntegrationTestFixture(
                 )
             }
 
-    val oboTokenWireMockServer: WireMockServer =
+    val texasWireMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.options().dynamicPort())
             .also(
                 WireMockServer::start,
             ).also {
                 it.stubFor(
-                    post(urlPathEqualTo("/")).willReturn(
-                        okJson("""{ "access_token": "obo-test-token", "expires_in": 3599, "token_type": "Bearer" }"""),
+                    post(urlPathEqualTo("/token")).willReturn(
+                        okJson("""{ "access_token": "stub-access-token", "expires_in": 3599, "token_type": "Bearer" }"""),
+                    ),
+                )
+                it.stubFor(
+                    post(urlPathEqualTo("/token/exchange")).willReturn(
+                        okJson("""{ "access_token": "stub-obo-token", "expires_in": 3599, "token_type": "Bearer" }"""),
                     ),
                 )
             }
 
     val moduleConfiguration =
         ClientEntraIDModule.Configuration(
-            clientId = "123abc",
-            tokenEndpoint = mockOAuth2Server.tokenEndpointUrl("default").toString(),
-            privateJwk = KeyProvider().signingKey("blabla").toJSONString().also { println("JWK: $it") },
+            tokenEndpoint = "${texasWireMockServer.baseUrl()}/token",
+            tokenExchangeEndpoint = "${texasWireMockServer.baseUrl()}/token/exchange",
             msGraphUrl = msGraphWireMockServer.baseUrl(),
-            oboTokenEndpoint = "${oboTokenWireMockServer.baseUrl()}/",
         )
 
     val module =

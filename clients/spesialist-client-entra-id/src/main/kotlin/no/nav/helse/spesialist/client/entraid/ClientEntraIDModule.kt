@@ -1,32 +1,29 @@
 package no.nav.helse.spesialist.client.entraid
 
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
+import com.github.navikt.tbd_libs.access_token.TexasClient
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
+import java.net.URI
 
 class ClientEntraIDModule(
     configuration: Configuration,
     tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
 ) {
     data class Configuration(
-        val clientId: String,
         val tokenEndpoint: String,
-        val privateJwk: String,
+        val tokenExchangeEndpoint: String,
         val msGraphUrl: String,
-        val oboTokenEndpoint: String,
     )
 
-    val accessTokenGenerator =
-        EntraIDAccessTokenGenerator(
-            clientId = configuration.clientId,
-            tokenEndpoint = configuration.tokenEndpoint,
-            privateJwk = configuration.privateJwk,
-            oboTokenEndpoint = configuration.oboTokenEndpoint,
+    val accessTokenProvider: AccessTokenProvider =
+        TexasClient(
+            tokenEndpoint = URI(configuration.tokenEndpoint),
+            tokenExchangeEndpoint = URI(configuration.tokenExchangeEndpoint),
         )
-
-    val oboAccessTokenGenerator = accessTokenGenerator
 
     val tilgangsgruppehenter =
         MsGraphTilgangsgruppehenter(
-            accessTokenGenerator = accessTokenGenerator,
+            accessTokenProvider = accessTokenProvider,
             msGraphUrl = configuration.msGraphUrl,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
         )

@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.client.spleis
 
-import no.nav.helse.spesialist.application.AccessTokenGenerator
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import java.net.URI
 
 class ClientSpleisModule(
     configuration: Configuration,
-    accessTokenGenerator: AccessTokenGenerator,
+    accessTokenProvider: AccessTokenProvider,
 ) {
     data class Configuration(
         val spleisUrl: URI,
@@ -16,7 +16,7 @@ class ClientSpleisModule(
     val snapshothenter =
         SpleisClientSnapshothenter(
             SpleisClient(
-                accessTokenGenerator = accessTokenGenerator,
+                accessTokenProvider = accessTokenProvider,
                 spleisUrl = configuration.spleisUrl,
                 spleisClientId = configuration.spleisClientId,
                 loggRespons = configuration.loggRespons,

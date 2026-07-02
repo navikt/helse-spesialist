@@ -5,19 +5,13 @@ plugins {
 dependencies {
     api(project(":spesialist-application"))
 
+    implementation(libs.tbdLibs.accessTokenProviderTexas)
     implementation(libs.apache.httpclient5.fluent)
-    implementation(libs.caffeine)
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)
 
-    // TODO: Trenger vi kanskje bare én av disse?
-    implementation(libs.nimbus.joseJwt)
-    implementation(libs.auth0.jwt)
-
     testImplementation(testFixtures(project(":spesialist-domain")))
-    testImplementation(libs.mockOauth2Server)
     testImplementation(libs.wiremock)
 
-    testFixturesImplementation(libs.mockOauth2Server)
     testFixturesImplementation(libs.wiremock)
 }

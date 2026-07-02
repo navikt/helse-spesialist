@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.client.spforsikring
 
+import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.logg.loggError
@@ -17,10 +17,10 @@ import java.util.UUID
 
 class SpForsikringClientForsikringsvurderingHenter(
     private val configuration: ClientSpForsikringModule.Configuration,
-    private val accessTokenGenerator: AccessTokenGenerator,
-): ForsikringsvurderingHenter {
+    private val accessTokenProvider: AccessTokenProvider,
+) : ForsikringsvurderingHenter {
     override fun hent(forsikringsvurderingId: ForsikringsvurderingId): Forsikringsvurdering? {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
+        val accessToken = accessTokenProvider.machineToken(configuration.scope)
         val callId = UUID.randomUUID().toString()
         val uri = "${configuration.apiUrl}/forsikringsvurderinger/${forsikringsvurderingId.value}"
         loggInfo("Utfører HTTP GET $uri med header Call-Id: $callId")
@@ -41,16 +41,19 @@ class SpForsikringClientForsikringsvurderingHenter(
                                 Forsikringsvurdering(
                                     identitetsnummer = Identitetsnummer.fraString(responseJson["identitetsnummer"].asText()),
                                     harForsikring = responseJson["harForsikring"].asBoolean(),
-                                    dekning = responseJson["dekning"]?.takeUnless { it.isNull }?.let { dekning ->
-                                        Forsikringsvurdering.Dekning(
-                                            grad = dekning["grad"].asInt(),
-                                            fraDag = dekning["fraDag"].asInt()
-                                        )
-                                    }
+                                    dekning =
+                                        responseJson["dekning"]?.takeUnless { it.isNull }?.let { dekning ->
+                                            Forsikringsvurdering.Dekning(
+                                                grad = dekning["grad"].asInt(),
+                                                fraDag = dekning["fraDag"].asInt(),
+                                            )
+                                        },
                                 )
                             }
 
-                            404 -> { null }
+                            404 -> {
+                                null
+                            }
 
                             in 500..599 -> {
                                 val responseBody = EntityUtils.toString(response.entity).orEmpty()

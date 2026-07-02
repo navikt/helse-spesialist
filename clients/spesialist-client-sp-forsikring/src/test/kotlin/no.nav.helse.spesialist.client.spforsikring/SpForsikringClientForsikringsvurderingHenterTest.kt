@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.spforsikring
 
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -146,7 +147,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                 apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                 scope = "scoap"
             ),
-            accessTokenGenerator = { "gief axess plz" }
+            accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz")
         )
 
         // When:
@@ -194,7 +195,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                 apiUrl = wireMock.runtimeInfo.httpBaseUrl,
                 scope = "scoap"
             ),
-            accessTokenGenerator = { "gief axess plz" }
+            accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz")
         )
     }
 }
