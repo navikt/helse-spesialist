@@ -15,7 +15,6 @@ allprojects {
         // kjøre ./gradlew --no-build-cache ktlintCheck minst én gang for at endringene skal ta effekt
         filter {
             exclude { it.file.path.contains("generated") }
-            exclude { it.file.path.contains("test") }
         }
     }
 
@@ -57,19 +56,9 @@ tasks {
         enabled = false
     }
     build {
-        doLast {
-            val erLokaltBygg = !System.getenv().containsKey("GITHUB_ACTION")
-            val manglerPreCommitHook = !File(".git/hooks/pre-commit").isFile
-            if (erLokaltBygg && manglerPreCommitHook) {
-                println(
-                    """
-                    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ¯\_(⊙︿⊙)_/¯ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    !            Hei du! Det ser ut til at du mangler en pre-commit-hook :/         !
-                    ! Du kan installere den ved å kjøre './gradlew addKtlintFormatGitPreCommitHook' !
-                    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    """.trimIndent(),
-                )
-            }
+        val erCiBygg = providers.environmentVariable("GITHUB_ACTIONS").orNull == "true"
+        if (!erCiBygg) {
+            dependsOn("addKtlintFormatGitPreCommitHook")
         }
     }
 }
