@@ -72,7 +72,7 @@ spec:
         - application: sp-forsikring
           namespace: tbd
           cluster: dev-gcp
-        - application: speed-api-dev-proxy
+        - application: speed-api
           namespace: tbd
           cluster: dev-gcp
         - application: digdir-krr-proxy
