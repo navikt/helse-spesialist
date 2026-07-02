@@ -78,8 +78,6 @@ class PostPersonSokBehandler(
 
             val body = ApiPersonSokResponse(personPseudoId = personPseudoId.value, klarForVisning = klarForVisning)
 
-            loggInfo("Fant person ved søk")
-
             RestResponse.OK(body)
         }
     }
