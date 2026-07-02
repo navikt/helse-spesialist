@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.GraphQLException
 import io.mockk.every
 import no.nav.helse.modell.vedtak.Utfall
@@ -30,7 +32,6 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
-import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
@@ -139,7 +140,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
-        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig))
+        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse)
+        opprettVedtaksperiode(opprettPerson())
 
         val logglytter = Logglytter()
         val pseudoId = opprettPersonPseudoId()
@@ -178,7 +180,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av skjermede personer`() {
-        opprettVedtaksperiode(opprettPerson(erEgenAnsatt = true))
+        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.EgenAnsatt)
+        opprettVedtaksperiode(opprettPerson())
 
         val logglytter = Logglytter()
         val pseudoId = opprettPersonPseudoId()
@@ -377,18 +380,17 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
             lagPerson()
                 .also { sessionFactory.transactionalSessionScope { transaction -> transaction.personRepository.lagre(it) } }
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val arbeidsgiver1 =
-            Arbeidsgiver.Factory
-                .ny(
-                    id = ArbeidsgiverIdentifikator.Organisasjonsnummer(organisasjonsnummer),
-                    navnString = lagOrganisasjonsnavn(),
-                ).also {
-                    sessionFactory.transactionalSessionScope { transaction ->
-                        transaction.arbeidsgiverRepository.lagre(
-                            it,
-                        )
-                    }
+        Arbeidsgiver.Factory
+            .ny(
+                id = ArbeidsgiverIdentifikator.Organisasjonsnummer(organisasjonsnummer),
+                navnString = lagOrganisasjonsnavn(),
+            ).also {
+                sessionFactory.transactionalSessionScope { transaction ->
+                    transaction.arbeidsgiverRepository.lagre(
+                        it,
+                    )
                 }
+            }
         val vedtaksperiode =
             lagVedtaksperiode(identitetsnummer = person.id, organisasjonsnummer = organisasjonsnummer)
                 .also {
@@ -401,25 +403,23 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val behandling =
             lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
                 .also { sessionFactory.transactionalSessionScope { transaction -> transaction.behandlingRepository.lagre(it) } }
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, UUID.randomUUID())
         val saksbehandler =
             lagSaksbehandler().also {
                 sessionFactory.transactionalSessionScope { transaction ->
                     transaction.saksbehandlerRepository.lagre(it)
                 }
             }
-        val individuellBegrunnelse =
-            IndividuellBegrunnelse
-                .ny(
-                    spleisBehandlingId = behandling.spleisBehandlingId!!,
-                    tekst = avslagsbegrunnelse,
-                    utfall = Utfall.AVSLAG,
-                    saksbehandlerOid = saksbehandler.id,
-                ).also {
-                    sessionFactory.transactionalSessionScope { transaction ->
-                        transaction.individuellBegrunnelseRepository.lagre(it)
-                    }
+        IndividuellBegrunnelse
+            .ny(
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                tekst = avslagsbegrunnelse,
+                utfall = Utfall.AVSLAG,
+                saksbehandlerOid = saksbehandler.id,
+            ).also {
+                sessionFactory.transactionalSessionScope { transaction ->
+                    transaction.individuellBegrunnelseRepository.lagre(it)
                 }
+            }
 
         mockSnapshot(
             fødselsnummer = person.id.value,

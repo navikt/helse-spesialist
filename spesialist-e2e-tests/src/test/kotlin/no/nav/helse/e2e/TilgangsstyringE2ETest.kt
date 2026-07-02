@@ -1,11 +1,14 @@
 package no.nav.helse.e2e
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.GraphQLError
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.Personhåndterer
+import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -49,50 +52,31 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     @Test
     fun `Kan ikke hente person som er egen ansatt dersom saksbehandler mangler tilgang til egen ansatte`() {
         settOppDefaultDataOgTilganger()
+        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.EgenAnsatt)
         sendMeldingerOppTilEgenAnsatt()
         mockSnapshot()
-
-        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
-
-        håndterEgenansattløsning(erEgenAnsatt = true)
-        assertKanIkkeHentePerson("Har ikke tilgang til person")
-    }
-
-    @Test
-    fun `Kan ikke hente person som er kode6 dersom saksbehandler mangler tilgang til kode6`() {
-        settOppDefaultDataOgTilganger()
-        sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-        mockSnapshot()
-
-        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
-
         håndterEgenansattløsning()
         assertKanIkkeHentePerson("Har ikke tilgang til person")
     }
 
     @Test
-    fun `Kan hente person som er kode7 dersom saksbehandler har tilgang til kode7`() {
+    fun `Kan ikke hente person som er kode7 dersom saksbehandler mangler tilgang til kode7`() {
         settOppDefaultDataOgTilganger()
-        sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
+        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse)
+        sendMeldingerOppTilEgenAnsatt()
         mockSnapshot()
-
-        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
         håndterEgenansattløsning()
-        saksbehandlertilgangTilKode7(true)
-        assertKanHentePerson()
+        assertKanIkkeHentePerson("Har ikke tilgang til person")
     }
 
     @ParameterizedTest
-    @EnumSource(Adressebeskyttelse::class, names = ["Ugradert", "Fortrolig"], mode = EnumSource.Mode.EXCLUDE)
-    fun `Kan ikke hente kode7-personer`(adressebeskyttelse: Adressebeskyttelse) {
+    @EnumSource(TilgangSomMangler::class, names = ["StrengtFortroligAdresse", "StrengtFortroligAdresseUtland"], mode = EnumSource.Mode.INCLUDE)
+    fun `Kan ikke hente kode6-personer`(tilgangSomMangler: TilgangSomMangler) {
         settOppDefaultDataOgTilganger()
-        sendMeldingerOppTilEgenAnsatt(adressebeskyttelse = adressebeskyttelse)
+        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(tilgangSomMangler)
+        sendMeldingerOppTilEgenAnsatt()
         mockSnapshot()
-
-        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
         håndterEgenansattløsning()
-        saksbehandlertilgangTilKode7(true)
-        saksbehandlertilgangTilSkjermede(true)
         assertKanIkkeHentePerson("Har ikke tilgang til person")
     }
 
@@ -143,19 +127,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                 ident = NAVIdent("A123456"),
             )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns emptySet()
-        saksbehandlertilgangTilSkjermede(harTilgang = false)
-    }
-
-    private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
-        every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
-            setOfNotNull(Brukerrolle.EgenAnsatt.takeIf { harTilgang })
-    }
-
-    private fun saksbehandlertilgangTilKode7(
-        @Suppress("SameParameterValue") harTilgang: Boolean,
-    ) {
-        every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns
-            setOfNotNull(Brukerrolle.Kode7.takeIf { harTilgang })
+        every { dataFetchingEnvironment.graphQlContext.get<AccessToken>(ContextValues.ACCESS_TOKEN) } returns AccessToken("token")
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
@@ -173,6 +145,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                     snapshothenter = snapshothenter,
                     sessionFactory = sessionFactory,
                     personPseudoIdProvider = personPseudoIdProvider,
+                    populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                 ),
         )
 }

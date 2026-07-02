@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.Personhåndterer
+import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -181,6 +182,8 @@ class OverstyringE2ETest : AbstractE2ETest() {
                 ident = NAVIdent("A123456"),
             )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Brukerrolle>>(ContextValues.BRUKERROLLER) } returns emptySet()
+        every { dataFetchingEnvironment.graphQlContext.get<AccessToken>(ContextValues.ACCESS_TOKEN) } returns AccessToken("token")
+
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
@@ -322,6 +325,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
                     snapshothenter = snapshothenter,
                     sessionFactory = sessionFactory,
                     personPseudoIdProvider = personPseudoIdProvider,
+                    populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                 ),
         )
 }

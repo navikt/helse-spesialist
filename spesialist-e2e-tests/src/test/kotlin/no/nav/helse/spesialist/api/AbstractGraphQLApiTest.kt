@@ -33,6 +33,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
+import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.logg.logg
@@ -56,6 +57,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
+    val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
 
     val tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller()
     val tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger()
@@ -101,6 +103,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
+                                populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                             ),
                     ),
                 mutationHandlers =

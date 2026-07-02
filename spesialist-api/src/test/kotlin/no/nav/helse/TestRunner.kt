@@ -141,6 +141,7 @@ object TestRunner {
                                         snapshothenter = avhengigheter.snapshothenter,
                                         sessionFactory = avhengigheter.sessionFactory,
                                         personPseudoIdProvider = personPseudoIdProvider,
+                                        populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                                     ),
                             ),
                         mutationHandlers =
