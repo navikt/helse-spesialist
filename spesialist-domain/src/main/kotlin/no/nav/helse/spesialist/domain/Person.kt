@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.time.Instant
 import java.time.LocalDate
 
@@ -71,24 +70,6 @@ class Person private constructor(
                 oppdatertTidspunkt = oppdatertTidspunkt,
             )
     }
-
-    fun kanSeesAvSaksbehandlerMedGrupper(brukerroller: Set<Brukerrolle>): Boolean =
-        girTilgangTilEgenAnsattStatus(brukerroller) &&
-            girTilgangTilAdressebeskyttelse(brukerroller)
-
-    private fun girTilgangTilEgenAnsattStatus(brukerroller: Set<Brukerrolle>): Boolean =
-        when (egenAnsattStatus?.erEgenAnsatt) {
-            true -> Brukerrolle.EgenAnsatt in brukerroller
-            false -> true
-            null -> false
-        }
-
-    private fun girTilgangTilAdressebeskyttelse(brukerroller: Set<Brukerrolle>): Boolean =
-        when (info?.adressebeskyttelse) {
-            Personinfo.Adressebeskyttelse.Ugradert -> true
-            Personinfo.Adressebeskyttelse.Fortrolig -> Brukerrolle.Kode7 in brukerroller
-            else -> false
-        }
 
     fun harDataNødvendigForVisning() = info != null && egenAnsattStatus != null && enhetRef != null
 

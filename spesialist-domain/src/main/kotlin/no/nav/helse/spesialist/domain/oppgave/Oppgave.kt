@@ -239,16 +239,6 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
-    fun kanSeesAv(
-        brukerroller: Set<Brukerrolle>,
-    ): Boolean =
-        egenskaper.all {
-            harTilgangTilEgenskap(
-                egenskap = it,
-                brukerroller = brukerroller,
-            )
-        }
-
     fun kanTildelesTil(
         brukerroller: Set<Brukerrolle>,
     ): Boolean =
