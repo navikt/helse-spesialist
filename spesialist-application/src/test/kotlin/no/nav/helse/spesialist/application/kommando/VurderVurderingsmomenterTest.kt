@@ -85,16 +85,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(
-            Behov.Risikovurdering(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                organisasjonsnummer = testperson.orgnummer,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                førstegangsbehandling = true,
-                kunRefusjon = false,
-                inntekt = inntekt(),
-                periode = legacyBehandling.periode,
-                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
-            ),
+            risikovurdering(kunRefusjon = false),
             observer.behov.single(),
         )
     }
@@ -107,16 +98,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         assertTrue(observer.behov.isNotEmpty())
 
         assertEquals(
-            Behov.Risikovurdering(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                organisasjonsnummer = testperson.orgnummer,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                førstegangsbehandling = true,
-                kunRefusjon = false,
-                inntekt = inntekt(),
-                periode = legacyBehandling.periode,
-                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
-            ),
+            risikovurdering(kunRefusjon = false),
             observer.behov.single(),
         )
     }
@@ -128,16 +110,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         assertFalse(risikoCommand().execute(commandContext, sessionContext, outbox))
 
         assertEquals(
-            Behov.Risikovurdering(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                organisasjonsnummer = testperson.orgnummer,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                førstegangsbehandling = true,
-                kunRefusjon = true,
-                inntekt = inntekt(),
-                periode = legacyBehandling.periode,
-                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
-            ),
+            risikovurdering(kunRefusjon = true),
             observer.behov.single(),
         )
     }
@@ -149,16 +122,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         assertFalse(risikoCommand().execute(commandContext, sessionContext, outbox))
 
         assertEquals(
-            Behov.Risikovurdering(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                organisasjonsnummer = testperson.orgnummer,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                førstegangsbehandling = true,
-                kunRefusjon = false,
-                inntekt = inntekt(),
-                periode = legacyBehandling.periode,
-                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
-            ),
+            risikovurdering(kunRefusjon = false),
             observer.behov.single(),
         )
     }
@@ -194,16 +158,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
         assertFalse(risikoCommand().execute(commandContext, sessionContext, outbox))
         assertEquals(
-            Behov.Risikovurdering(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                organisasjonsnummer = testperson.orgnummer,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                førstegangsbehandling = true,
-                kunRefusjon = true,
-                inntekt = inntekt(),
-                periode = legacyBehandling.periode,
-                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
-            ),
+            risikovurdering(kunRefusjon = true),
             observer.behov.single(),
         )
 
@@ -211,16 +166,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
         assertFalse(risikoCommand().resume(commandContext, sessionContext, outbox))
         assertEquals(
-            Behov.Risikovurdering(
-                vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                organisasjonsnummer = testperson.orgnummer,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                førstegangsbehandling = true,
-                kunRefusjon = true,
-                inntekt = inntekt(),
-                periode = legacyBehandling.periode,
-                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
-            ),
+            risikovurdering(kunRefusjon = true),
             observer.behov.single(),
         )
     }
@@ -267,6 +213,18 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 sykepengegrunnlag = BigDecimal("123456.7"),
             ),
     )
+
+    private fun risikovurdering(kunRefusjon: Boolean) =
+        Behov.Risikovurdering(
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            organisasjonsnummer = testperson.orgnummer,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            førstegangsbehandling = true,
+            kunRefusjon = kunRefusjon,
+            inntekt = inntekt(),
+            periode = legacyBehandling.periode,
+            skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+        )
 
     private fun inntekt() =
         InntektTilRisk(
