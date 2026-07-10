@@ -6,6 +6,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -86,6 +87,8 @@ class BehovMessageBuilderTest {
                             omregnetÅrsinntekt = 123456.7,
                             inntektskilde = "Arbeidsgiver",
                         ),
+                    periode = Periode(fom = LocalDate.of(2026, 7, 1), tom = LocalDate.of(2026, 7, 31)),
+                    skjæringstidspunkt = LocalDate.of(2026, 7, 1),
                 ).somJson()
         behov.assertBehov(
             "Risikovurdering",
@@ -99,6 +102,12 @@ class BehovMessageBuilderTest {
                         "omregnetÅrsinntekt" to 123456.7,
                         "inntektskilde" to "Arbeidsgiver",
                     ),
+                "periode" to
+                    mapOf(
+                        "fom" to LocalDate.of(2026, 7, 1),
+                        "tom" to LocalDate.of(2026, 7, 31),
+                    ),
+                "skjæringstidspunkt" to LocalDate.of(2026, 7, 1),
             ),
         )
     }

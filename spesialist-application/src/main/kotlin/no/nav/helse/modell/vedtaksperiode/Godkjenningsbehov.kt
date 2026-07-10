@@ -56,6 +56,7 @@ import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VedtakRepository
+import no.nav.helse.spesialist.domain.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -447,6 +448,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVurderingsmomenter(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
+                periode = Periode(godkjenningsbehovData.periodeFom, godkjenningsbehovData.periodeTom),
                 risikovurderingDao = risikovurderingDao,
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,

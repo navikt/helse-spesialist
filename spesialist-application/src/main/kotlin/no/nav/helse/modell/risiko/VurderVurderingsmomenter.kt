@@ -14,10 +14,12 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Periode
 import java.util.UUID
 
 internal class VurderVurderingsmomenter(
     private val vedtaksperiodeId: UUID,
+    private val periode: Periode,
     private val risikovurderingDao: RisikovurderingDao,
     private val organisasjonsnummer: String,
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
@@ -75,6 +77,8 @@ internal class VurderVurderingsmomenter(
                                 )
                             }
                         },
+                    periode = periode,
+                    skjæringstidspunkt = sykefraværstilfelle.skjæringstidspunkt,
                 ),
             )
             return false

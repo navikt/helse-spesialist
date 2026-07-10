@@ -2,6 +2,7 @@ package no.nav.helse.modell.melding
 
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.domain.Periode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -56,6 +57,8 @@ sealed interface Behov : UtgåendeMelding {
         val førstegangsbehandling: Boolean,
         val kunRefusjon: Boolean,
         val inntekt: InntektTilRisk?,
+        val periode: Periode,
+        val skjæringstidspunkt: LocalDate,
     ) : Behov
 }
 

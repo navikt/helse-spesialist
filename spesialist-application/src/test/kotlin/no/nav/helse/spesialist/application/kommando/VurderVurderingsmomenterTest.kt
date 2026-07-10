@@ -72,7 +72,6 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
 
-
     @BeforeEach
     fun setup() {
         every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns null
@@ -93,6 +92,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 førstegangsbehandling = true,
                 kunRefusjon = false,
                 inntekt = inntekt(),
+                periode = legacyBehandling.periode,
+                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
             ),
             observer.behov.single(),
         )
@@ -113,6 +114,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 førstegangsbehandling = true,
                 kunRefusjon = false,
                 inntekt = inntekt(),
+                periode = legacyBehandling.periode,
+                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
             ),
             observer.behov.single(),
         )
@@ -132,6 +135,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 førstegangsbehandling = true,
                 kunRefusjon = true,
                 inntekt = inntekt(),
+                periode = legacyBehandling.periode,
+                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
             ),
             observer.behov.single(),
         )
@@ -151,6 +156,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 førstegangsbehandling = true,
                 kunRefusjon = false,
                 inntekt = inntekt(),
+                periode = legacyBehandling.periode,
+                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
             ),
             observer.behov.single(),
         )
@@ -194,6 +201,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 førstegangsbehandling = true,
                 kunRefusjon = true,
                 inntekt = inntekt(),
+                periode = legacyBehandling.periode,
+                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
             ),
             observer.behov.single(),
         )
@@ -209,6 +218,8 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 førstegangsbehandling = true,
                 kunRefusjon = true,
                 inntekt = inntekt(),
+                periode = legacyBehandling.periode,
+                skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
             ),
             observer.behov.single(),
         )
@@ -235,6 +246,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         førstegangsbehandling: Boolean = true,
     ) = VurderVurderingsmomenter(
         vedtaksperiodeId = vedtaksperiodeId,
+        periode = legacyBehandling.periode,
         risikovurderingDao = risikovurderingDao,
         organisasjonsnummer = organisasjonsnummer,
         yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
