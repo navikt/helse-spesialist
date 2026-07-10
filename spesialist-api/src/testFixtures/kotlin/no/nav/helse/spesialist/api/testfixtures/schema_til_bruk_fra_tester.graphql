@@ -727,6 +727,7 @@ type VilkarsgrunnlagSpleisV2 implements VilkarsgrunnlagV2 {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     avviksvurdering: VilkarsgrunnlagAvviksvurdering
     beregningsgrunnlag: BigDecimal!
+    forsikringsvurderingId: UUID
     grunnbelop: Int!
     id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
