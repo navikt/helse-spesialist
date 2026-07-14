@@ -85,6 +85,7 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
                 )
             },
         foersteFravaersdag = getIfNotNull("foersteFravaersdag")?.asLocalDate(),
+        inntektsdato = getIfNotNull("inntektsdato")?.asLocalDate(),
         naerRelasjon = getIfNotNull("naerRelasjon")?.asBoolean(),
         innsenderFulltNavn = getIfNotNull("innsenderFulltNavn")?.asText(),
         innsenderTelefon = getIfNotNull("innsenderTelefon")?.asText(),

@@ -138,6 +138,7 @@ data class ApiDokumentInntektsmelding(
     val arbeidsgiverperioder: List<ApiIMPeriode>?,
     val ferieperioder: List<ApiIMPeriode>?,
     val foersteFravaersdag: LocalDate?,
+    val inntektsdato: LocalDate?,
     val naerRelasjon: Boolean?,
     val innsenderFulltNavn: String?,
     val innsenderTelefon: String?,
