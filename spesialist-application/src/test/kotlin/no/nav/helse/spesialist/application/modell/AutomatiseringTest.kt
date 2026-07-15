@@ -70,9 +70,10 @@ internal class AutomatiseringTest {
         mockk<VeilederStansRepository>(relaxed = true) {
             every { finnAktiv(any()) } returns null
         }
-    private val saksbehandlerStansRepositoryMock = mockk<SaksbehandlerStansRepository>(relaxed = true) {
-        every { finnAktiv(any()) } returns null
-    }
+    private val saksbehandlerStansRepositoryMock =
+        mockk<SaksbehandlerStansRepository>(relaxed = true) {
+            every { finnAktiv(any()) } returns null
+        }
     private val veilederStansSubsumsjonmelder = VeilederStansSubsumsjonmelder { mockk(relaxed = true) }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val personRepository =
@@ -93,23 +94,25 @@ internal class AutomatiseringTest {
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
     private var stikkprøveSelvstendigNæringsdrivendeForlengelse = false
     private val stikkprøver =
-        Stikkprøver(object : Configuration {
-            override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+        Stikkprøver(
+            object : Configuration {
+                override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
-            override fun utsFlereArbeidsgivereForlengelse() = false
+                override fun utsFlereArbeidsgivereForlengelse() = false
 
-            override fun selvstendigNæringsdrivendeForlengelse() = stikkprøveSelvstendigNæringsdrivendeForlengelse
+                override fun selvstendigNæringsdrivendeForlengelse() = stikkprøveSelvstendigNæringsdrivendeForlengelse
 
-            override fun utsEnArbeidsgiverFørstegangsbehandling() = stikkprøveUtsEnArbeidsgiverFørstegangsbehandling
+                override fun utsEnArbeidsgiverFørstegangsbehandling() = stikkprøveUtsEnArbeidsgiverFørstegangsbehandling
 
-            override fun utsEnArbeidsgiverForlengelse() = stikkprøveUtsEnArbeidsgiverForlengelse
+                override fun utsEnArbeidsgiverForlengelse() = stikkprøveUtsEnArbeidsgiverForlengelse
 
-            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
 
-            override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+                override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
 
-            override fun fullRefusjonEnArbeidsgiver() = stikkprøveFullRefusjonEnArbeidsgiver
-        })
+                override fun fullRefusjonEnArbeidsgiver() = stikkprøveFullRefusjonEnArbeidsgiver
+            },
+        )
 
     private val automatisering =
         Automatisering(
@@ -366,11 +369,12 @@ internal class AutomatiseringTest {
 
     @Test
     fun `saksbehandler har stanset automatisk behandling`() {
-        every { saksbehandlerStansRepositoryMock.finnAktiv(any()) } returns SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = lagSaksbehandler().ident,
-            begrunnelse = "Begrunnelse",
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
-        )
+        every { saksbehandlerStansRepositoryMock.finnAktiv(any()) } returns
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = lagSaksbehandler().ident,
+                begrunnelse = "Begrunnelse",
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+            )
         blirManuellOppgave()
     }
 

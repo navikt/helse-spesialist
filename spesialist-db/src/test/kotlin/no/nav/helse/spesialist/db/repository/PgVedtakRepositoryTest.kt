@@ -77,8 +77,10 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(vedtak)
 
         // when
-        val oppdatertVedtak = Vedtak.manueltUtenTotrinnskontroll(vedtak.id, lagSaksbehandler().ident)
-            .also { it.markerSomBehandletAvSpleis() }
+        val oppdatertVedtak =
+            Vedtak
+                .manueltUtenTotrinnskontroll(vedtak.id, lagSaksbehandler().ident)
+                .also { it.markerSomBehandletAvSpleis() }
         repository.lagre(oppdatertVedtak)
 
         // then
@@ -88,7 +90,6 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         assertEqualsByMicrosecond(oppdatertVedtak.tidspunkt, funnet.tidspunkt)
         assertEquals(true, funnet.behandletAvSpleis)
         assertEquals(false, vedtak.behandletAvSpleis)
-
     }
 
     @Test

@@ -47,11 +47,12 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         this.beregningsgrunnlag = BigDecimal("600000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
-        integrationTestFixture.forsikringHenter.forsikringsvurdering = Forsikringsvurdering(
-            identitetsnummer = person.id,
-            harForsikring = false,
-            dekning = null,
-        )
+        integrationTestFixture.forsikringHenter.forsikringsvurdering =
+            Forsikringsvurdering(
+                identitetsnummer = person.id,
+                harForsikring = false,
+                dekning = null,
+            )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         val forsikringsvurderingId = UUID.randomUUID()
@@ -137,11 +138,12 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         this.beregningsgrunnlag = BigDecimal("600000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
-        integrationTestFixture.forsikringHenter.forsikringsvurdering = Forsikringsvurdering(
-            identitetsnummer = person.id,
-            harForsikring = true,
-            dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
-        )
+        integrationTestFixture.forsikringHenter.forsikringsvurdering =
+            Forsikringsvurdering(
+                identitetsnummer = person.id,
+                harForsikring = true,
+                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+            )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         val forsikringsvurderingId = UUID.randomUUID()
@@ -227,11 +229,12 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         this.beregningsgrunnlag = BigDecimal("800000.00")
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2", "6GBegrenset")
         setup()
-        integrationTestFixture.forsikringHenter.forsikringsvurdering = Forsikringsvurdering(
-            identitetsnummer = person.id,
-            harForsikring = false,
-            dekning = null,
-        )
+        integrationTestFixture.forsikringHenter.forsikringsvurdering =
+            Forsikringsvurdering(
+                identitetsnummer = person.id,
+                harForsikring = false,
+                dekning = null,
+            )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         val forsikringsvurderingId = UUID.randomUUID()
@@ -349,7 +352,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
 
     private fun initGodkjenningsbehov(
         erJordbruker: Boolean = false,
-        forsikringsvurderingId: UUID?
+        forsikringsvurderingId: UUID?,
     ) {
         val godkjenningsbehovId = UUID.randomUUID()
         val godkjenningsbehovJson =

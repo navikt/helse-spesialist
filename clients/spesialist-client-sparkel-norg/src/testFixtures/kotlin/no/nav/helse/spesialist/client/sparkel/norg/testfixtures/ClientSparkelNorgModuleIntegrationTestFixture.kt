@@ -8,23 +8,24 @@ import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
 
 object ClientSparkelNorgModuleIntegrationTestFixture {
     private val wireMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
-            WireMockServer::start,
-        ).also {
-            it.stubFor(
-                post("/api/behandlende-enhet").willReturn(
-                    okJson(
-                        """
-                        {
-                          "enhetNr": "0101",
-                          "navn": "Nav Halden",
-                          "type": "LOKAL"
-                        }
-                        """.trimIndent(),
+        WireMockServer(WireMockConfiguration.options().dynamicPort())
+            .also(
+                WireMockServer::start,
+            ).also {
+                it.stubFor(
+                    post("/api/behandlende-enhet").willReturn(
+                        okJson(
+                            """
+                            {
+                              "enhetNr": "0101",
+                              "navn": "Nav Halden",
+                              "type": "LOKAL"
+                            }
+                            """.trimIndent(),
+                        ),
                     ),
-                ),
-            )
-        }
+                )
+            }
 
     val moduleConfiguration =
         ClientSparkelNorgModule.Configuration(

@@ -7,5 +7,4 @@ class UnimplementedBehandlingApiRepository : BehandlingApiRepository {
     override fun perioderTilBehandling(oppgaveId: Long): Set<VedtaksperiodeDbDto> {
         TODO("Not yet implemented")
     }
-
 }

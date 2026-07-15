@@ -26,7 +26,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 periode = (2 jan 2021) tilOgMed (31 jan 2021),
                 periodebeløp = BigDecimal("1111.11"),
                 ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021),
-                notatTilBeslutter = "notat"
+                notatTilBeslutter = "notat",
             )
 
             // Then:
@@ -41,10 +41,11 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `tilkommen inntekt regnes ikke som del av aktiv totrinnsvurdering etter at totrinnsvurderingen blir godkjent`() {
         // Given:
-        val vedtaksperiode = førsteVedtaksperiode().apply {
-            fom = 1 jan 2021
-            tom = 31 jan 2021
-        }
+        val vedtaksperiode =
+            førsteVedtaksperiode().apply {
+                fom = 1 jan 2021
+                tom = 31 jan 2021
+            }
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
 
@@ -56,7 +57,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 periode = (2 jan 2021) tilOgMed (31 jan 2021),
                 periodebeløp = BigDecimal("1111.11"),
                 ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021),
-                notatTilBeslutter = "notat"
+                notatTilBeslutter = "notat",
             )
             saksbehandlerGodkjennerAlleVarsler()
             saksbehandlerSenderTilGodkjenning()

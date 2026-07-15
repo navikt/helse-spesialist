@@ -10,7 +10,7 @@ data class Sykepengegrunnlagsfakta(
 ) {
     enum class FastsattType {
         EtterHovedregel,
-        EtterSkjønn
+        EtterSkjønn,
     }
 
     open class Arbeidsgiver(
@@ -24,5 +24,5 @@ data class Sykepengegrunnlagsfakta(
         organisasjonsnummer: String,
         omregnetÅrsinntekt: Double,
         val skjønnsfastsatt: Double,
-    ): Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt)
+    ) : Arbeidsgiver(organisasjonsnummer, omregnetÅrsinntekt)
 }

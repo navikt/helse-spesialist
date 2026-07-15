@@ -92,10 +92,11 @@ class InMemoryOppgaveRepository(
     override fun finnAntallOppgaverProjeksjon(saksbehandlersOid: SaksbehandlerOid): OppgaveRepository.AntallOppgaverProjeksjon {
         val mineTildelteOppgaver = oppgaver.values.filter { it.tildeltTil == saksbehandlersOid }
         val mineSakerPåVent = mineTildelteOppgaver.filter { Egenskap.PÅ_VENT in it.egenskaper }
-        val mineSakerPåVentNåddFrist = mineSakerPåVent.filter { oppgave ->
-            val påVent = påVentRepository.finnFor(oppgave.vedtaksperiodeId)
-            påVent != null && påVent.frist <= LocalDate.now()
-        }
+        val mineSakerPåVentNåddFrist =
+            mineSakerPåVent.filter { oppgave ->
+                val påVent = påVentRepository.finnFor(oppgave.vedtaksperiodeId)
+                påVent != null && påVent.frist <= LocalDate.now()
+            }
         return OppgaveRepository.AntallOppgaverProjeksjon(
             antallMineSaker = mineTildelteOppgaver.count { Egenskap.PÅ_VENT !in it.egenskaper },
             antallMineSakerPåVent = mineSakerPåVent.size,
@@ -107,10 +108,10 @@ class InMemoryOppgaveRepository(
         oppgaver.values
             .filter { it.tilstand is Oppgave.AvventerSaksbehandler }
             .filter { oppgave ->
-                varselRepository.finnVarsler(listOf(oppgave.behandlingId))
+                varselRepository
+                    .finnVarsler(listOf(oppgave.behandlingId))
                     .any { it.kode == varselkode && it.status == Varsel.Status.AKTIV }
-            }
-            .mapNotNull { oppgave -> vedtaksperiodeRepository.finn(oppgave.vedtaksperiodeId)?.identitetsnummer?.value }
+            }.mapNotNull { oppgave -> vedtaksperiodeRepository.finn(oppgave.vedtaksperiodeId)?.identitetsnummer?.value }
             .distinct()
             .toSet()
 }

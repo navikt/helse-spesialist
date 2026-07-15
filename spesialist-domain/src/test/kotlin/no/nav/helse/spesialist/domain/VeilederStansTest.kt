@@ -14,7 +14,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class VeilederStansTest {
-
     @Test
     fun `kan opprette veileder stans`() {
         // Given
@@ -24,12 +23,13 @@ class VeilederStansTest {
         val originalMeldingId = UUID.randomUUID()
 
         // When
-        val stans = VeilederStans.ny(
-            identitetsnummer = identitetsnummer,
-            årsaker = årsaker,
-            opprettet = opprettet,
-            originalMeldingId = originalMeldingId,
-        )
+        val stans =
+            VeilederStans.ny(
+                identitetsnummer = identitetsnummer,
+                årsaker = årsaker,
+                opprettet = opprettet,
+                originalMeldingId = originalMeldingId,
+            )
 
         // Then
         assertEquals(identitetsnummer, stans.identitetsnummer)
@@ -47,12 +47,13 @@ class VeilederStansTest {
         val saksbehandler = lagSaksbehandler()
         val begrunnelse = "Stans opphevet fordi situasjonen er avklart"
 
-        val stans = VeilederStans.ny(
-            identitetsnummer = identitetsnummer,
-            årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val stans =
+            VeilederStans.ny(
+                identitetsnummer = identitetsnummer,
+                årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
 
         // When
         stans.opphevStans(
@@ -69,11 +70,11 @@ class VeilederStansTest {
             val now = Instant.now()
             assertTrue(
                 isBefore(now) || this == now,
-                "Forventet at opphevetTidspunkt var før eller lik nå ($now), men den var $this"
+                "Forventet at opphevetTidspunkt var før eller lik nå ($now), men den var $this",
             )
             assertTrue(
                 isAfter(now.minusSeconds(5)),
-                "Forventet at opphevetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
+                "Forventet at opphevetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this",
             )
         }
     }
@@ -88,14 +89,15 @@ class VeilederStansTest {
         val originalMeldingId = UUID.randomUUID()
 
         // When
-        val stans = VeilederStans.fraLagring(
-            id = id,
-            identitetsnummer = identitetsnummer,
-            årsaker = årsaker,
-            opprettet = opprettet,
-            originalMeldingId = originalMeldingId,
-            stansOpphevet = null,
-        )
+        val stans =
+            VeilederStans.fraLagring(
+                id = id,
+                identitetsnummer = identitetsnummer,
+                årsaker = årsaker,
+                opprettet = opprettet,
+                originalMeldingId = originalMeldingId,
+                stansOpphevet = null,
+            )
 
         // Then
         assertEquals(id, stans.id)
@@ -119,18 +121,20 @@ class VeilederStansTest {
         val opphevetTidspunkt = Instant.now().minusSeconds(1800)
 
         // When
-        val stans = VeilederStans.fraLagring(
-            id = id,
-            identitetsnummer = identitetsnummer,
-            årsaker = årsaker,
-            opprettet = opprettet,
-            originalMeldingId = originalMeldingId,
-            stansOpphevet = VeilederStans.StansOpphevet(
-                opphevetAvSaksbehandlerIdent = saksbehandler.ident,
-                begrunnelse = begrunnelse,
-                opphevetTidspunkt = opphevetTidspunkt,
-            ),
-        )
+        val stans =
+            VeilederStans.fraLagring(
+                id = id,
+                identitetsnummer = identitetsnummer,
+                årsaker = årsaker,
+                opprettet = opprettet,
+                originalMeldingId = originalMeldingId,
+                stansOpphevet =
+                    VeilederStans.StansOpphevet(
+                        opphevetAvSaksbehandlerIdent = saksbehandler.ident,
+                        begrunnelse = begrunnelse,
+                        opphevetTidspunkt = opphevetTidspunkt,
+                    ),
+            )
 
         // Then
         assertEquals(id, stans.id)
@@ -147,18 +151,20 @@ class VeilederStansTest {
         val identitetsnummer = lagIdentitetsnummer()
 
         // When
-        val stans1 = VeilederStans.ny(
-            identitetsnummer = identitetsnummer,
-            årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
-        val stans2 = VeilederStans.ny(
-            identitetsnummer = identitetsnummer,
-            årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val stans1 =
+            VeilederStans.ny(
+                identitetsnummer = identitetsnummer,
+                årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
+        val stans2 =
+            VeilederStans.ny(
+                identitetsnummer = identitetsnummer,
+                årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
 
         // Then
         assertTrue(stans1.id != stans2.id, "Forventet at to nye VeilederStans fikk ulike id-er")
@@ -168,12 +174,13 @@ class VeilederStansTest {
     fun `kan ikke oppheve stans som allerede er opphevet`() {
         // Given
         val saksbehandler = lagSaksbehandler()
-        val stans = VeilederStans.ny(
-            identitetsnummer = lagIdentitetsnummer(),
-            årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val stans =
+            VeilederStans.ny(
+                identitetsnummer = lagIdentitetsnummer(),
+                årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
         stans.opphevStans(
             opphevetAvSaksbehandlerIdent = saksbehandler.ident,
             begrunnelse = "Første oppheving",

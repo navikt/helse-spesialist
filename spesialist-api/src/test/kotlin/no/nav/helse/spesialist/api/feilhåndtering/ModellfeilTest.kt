@@ -9,15 +9,14 @@ import org.junit.jupiter.api.Test
 internal class ModellfeilTest {
     @Test
     fun testfeil() {
-
-        val exception = assertThrows(
-            Testfeil::class.java,
-            { throw Testfeil() },
-            "Testfeil"
-        )
+        val exception =
+            assertThrows(
+                Testfeil::class.java,
+                { throw Testfeil() },
+                "Testfeil",
+            )
         assertEquals("testmelding", exception.message)
         assertEquals(HttpStatusCode.NotFound, exception.httpkode)
-
     }
 
     private class Testfeil : Modellfeil() {

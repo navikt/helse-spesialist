@@ -19,18 +19,20 @@ class PgVeilederStansRepositoryTest : AbstractDBIntegrationTest() {
     fun `kan lagre og finne alle veileder stanser for person`() {
         // Given
         val person = opprettPerson()
-        val stans1 = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
-            opprettet = Instant.now().minusSeconds(3600),
-            originalMeldingId = UUID.randomUUID(),
-        )
-        val stans2 = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val stans1 =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now().minusSeconds(3600),
+                originalMeldingId = UUID.randomUUID(),
+            )
+        val stans2 =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
         repository.lagre(stans1)
         repository.lagre(stans2)
 
@@ -50,19 +52,21 @@ class PgVeilederStansRepositoryTest : AbstractDBIntegrationTest() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val aktivStans = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val aktivStans =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
 
-        val opphevetStans = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
-            opprettet = Instant.now().minusSeconds(3600),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val opphevetStans =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.AKTIVITETSKRAV),
+                opprettet = Instant.now().minusSeconds(3600),
+                originalMeldingId = UUID.randomUUID(),
+            )
         opphevetStans.opphevStans(
             opphevetAvSaksbehandlerIdent = saksbehandler.ident,
             begrunnelse = "Situasjonen er avklart",
@@ -91,12 +95,13 @@ class PgVeilederStansRepositoryTest : AbstractDBIntegrationTest() {
     fun `kan finne aktiv stans for person`() {
         // Given
         val person = opprettPerson()
-        val veilederStans = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val veilederStans =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
         repository.lagre(veilederStans)
 
         // When
@@ -112,12 +117,13 @@ class PgVeilederStansRepositoryTest : AbstractDBIntegrationTest() {
         // Given
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
-        val veilederStans = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val veilederStans =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.MEDISINSK_VILKAR),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
         repository.lagre(veilederStans)
 
         veilederStans.opphevStans(
@@ -138,12 +144,13 @@ class PgVeilederStansRepositoryTest : AbstractDBIntegrationTest() {
         // Given
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
-        val veilederStans = VeilederStans.ny(
-            identitetsnummer = person.id,
-            årsaker = setOf(StansÅrsak.MANGLENDE_MEDVIRKING),
-            opprettet = Instant.now(),
-            originalMeldingId = UUID.randomUUID(),
-        )
+        val veilederStans =
+            VeilederStans.ny(
+                identitetsnummer = person.id,
+                årsaker = setOf(StansÅrsak.MANGLENDE_MEDVIRKING),
+                opprettet = Instant.now(),
+                originalMeldingId = UUID.randomUUID(),
+            )
         repository.lagre(veilederStans)
 
         // When
@@ -188,5 +195,3 @@ class PgVeilederStansRepositoryTest : AbstractDBIntegrationTest() {
         assertNull(aktivStans)
     }
 }
-
-

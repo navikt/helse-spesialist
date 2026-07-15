@@ -10,10 +10,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class LegacyVarselRepositoryTest : AbstractDBIntegrationTest() {
-    private val legacyVarselRepository  = LegacyVarselRepository(
-        legacyVarselDao = daos.legacyVarselDao,
-        definisjonDao = daos.definisjonDao
-    )
+    private val legacyVarselRepository =
+        LegacyVarselRepository(
+            legacyVarselDao = daos.legacyVarselDao,
+            definisjonDao = daos.definisjonDao,
+        )
     private val definisjonDao = daos.definisjonDao
 
     @Test

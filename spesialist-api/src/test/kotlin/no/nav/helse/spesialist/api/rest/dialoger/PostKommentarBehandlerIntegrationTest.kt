@@ -22,16 +22,19 @@ class PostKommentarBehandlerIntegrationTest {
         // Given:
         val saksbehandler = lagSaksbehandler()
 
-        val dialogId = Dialog.Factory.ny()
-            .also(sessionContext.dialogRepository::lagre)
-            .id()
+        val dialogId =
+            Dialog.Factory
+                .ny()
+                .also(sessionContext.dialogRepository::lagre)
+                .id()
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/dialoger/${dialogId.value}/kommentarer",
-            body = """{"tekst" :  "Dette er en kommentar"}""",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.post(
+                url = "/api/dialoger/${dialogId.value}/kommentarer",
+                body = """{"tekst" :  "Dette er en kommentar"}""",
+                saksbehandler = saksbehandler,
+            )
 
         val body = response.bodyAsJsonNode
 
@@ -55,17 +58,16 @@ class PostKommentarBehandlerIntegrationTest {
             val now = LocalDateTime.now()
             assertTrue(
                 isBefore(now),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this",
             )
             assertTrue(
                 isAfter(now.minusSeconds(5)),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this",
             )
         }
         assertNull(kommentar.feilregistrertTidspunkt, "feilregistrertTidspunkt ble lagret selv om kommentaren er ny")
 
         // Bekreft at svaret ikke inneholdt noe mer
         assertJsonEquals("""{ "id" : ${kommentarId.value} }""", body)
-
     }
 }

@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
-
     @Test
     fun `lagrer risikovurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -21,14 +20,14 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
             kanGodkjennesAutomatisk = false,
-            data = data
+            data = data,
         )
 
         risikovurdering(vedtaksperiodeId).first().assertEquals(
             forventetVedtaksperiodeId = vedtaksperiodeId,
             forventetKanGodkjennesAutomatisk = false,
             forventetData = data,
-            forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay()
+            forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
         )
     }
 
@@ -40,13 +39,13 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
             kanGodkjennesAutomatisk = false,
-            data = data
+            data = data,
         )
         risikovurderingDao.lagre(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 23).atStartOfDay(),
             kanGodkjennesAutomatisk = false,
-            data = data
+            data = data,
         )
 
         risikovurdering(vedtaksperiodeId).also {
@@ -55,42 +54,46 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
                 forventetVedtaksperiodeId = vedtaksperiodeId,
                 forventetKanGodkjennesAutomatisk = false,
                 forventetData = data,
-                forventetOpprettet = LocalDate.of(2020, 9, 23).atStartOfDay()
+                forventetOpprettet = LocalDate.of(2020, 9, 23).atStartOfDay(),
             )
             it[1].assertEquals(
                 forventetVedtaksperiodeId = vedtaksperiodeId,
                 forventetKanGodkjennesAutomatisk = false,
                 forventetData = data,
-                forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay()
+                forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
             )
         }
     }
 
     private fun risikovurdering(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use {
-            @Language("PostgreSQL") val statement =
+            @Language("PostgreSQL")
+            val statement =
                 "SELECT * FROM risikovurdering_2021 WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC"
-            it.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { row ->
-                RisikovurderingAssertions(
-                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                    kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
-                    data = objectMapper.readTree(row.string("data")),
-                    opprettet = row.localDateTime("opprettet")
-                )
-            }.asList)
+            it.run(
+                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
+                    .map { row ->
+                        RisikovurderingAssertions(
+                            vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                            kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
+                            data = objectMapper.readTree(row.string("data")),
+                            opprettet = row.localDateTime("opprettet"),
+                        )
+                    }.asList,
+            )
         }
 
     private class RisikovurderingAssertions(
         private val vedtaksperiodeId: UUID,
         private val kanGodkjennesAutomatisk: Boolean,
         private val data: JsonNode,
-        private val opprettet: LocalDateTime
+        private val opprettet: LocalDateTime,
     ) {
         fun assertEquals(
             forventetVedtaksperiodeId: UUID,
             forventetKanGodkjennesAutomatisk: Boolean,
             forventetData: JsonNode,
-            forventetOpprettet: LocalDateTime
+            forventetOpprettet: LocalDateTime,
         ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetKanGodkjennesAutomatisk, kanGodkjennesAutomatisk)

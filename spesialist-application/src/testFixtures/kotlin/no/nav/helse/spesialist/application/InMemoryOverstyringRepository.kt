@@ -8,13 +8,12 @@ class InMemoryOverstyringRepository : OverstyringRepository {
 
     override fun lagre(
         overstyringer: List<Overstyring>,
-        totrinnsvurderingId: TotrinnsvurderingId
+        totrinnsvurderingId: TotrinnsvurderingId,
     ) {
         val list = data.getOrPut(totrinnsvurderingId) { mutableListOf() }
         list.removeIf { it.id() in overstyringer.map(Overstyring::id).toSet() }
         list.addAll(overstyringer)
     }
 
-    override fun finnAktive(totrinnsvurderingId: TotrinnsvurderingId): List<Overstyring> =
-        data[totrinnsvurderingId].orEmpty().filter { !it.ferdigstilt }
+    override fun finnAktive(totrinnsvurderingId: TotrinnsvurderingId): List<Overstyring> = data[totrinnsvurderingId].orEmpty().filter { !it.ferdigstilt }
 }

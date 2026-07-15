@@ -19,21 +19,25 @@ class PatchKommentarBehandlerIntegrationTest {
         // Given:
         val saksbehandler = lagSaksbehandler()
 
-        val dialog = Dialog.Factory.ny()
-            .also(sessionContext.dialogRepository::lagre)
-        val kommentar = dialog.leggTilKommentar(
-            tekst = "Dette er en kommentar",
-            saksbehandlerident = saksbehandler.ident,
-        )
+        val dialog =
+            Dialog.Factory
+                .ny()
+                .also(sessionContext.dialogRepository::lagre)
+        val kommentar =
+            dialog.leggTilKommentar(
+                tekst = "Dette er en kommentar",
+                saksbehandlerident = saksbehandler.ident,
+            )
 
         sessionContext.dialogRepository.lagre(dialog)
 
         // When:
-        val response = integrationTestFixture.patch(
-            url = "/api/dialoger/${dialog.id().value}/kommentarer/${kommentar.id().value}",
-            body = """{ "feilregistrert":  true }""",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.patch(
+                url = "/api/dialoger/${dialog.id().value}/kommentarer/${kommentar.id().value}",
+                body = """{ "feilregistrert":  true }""",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -55,11 +59,11 @@ class PatchKommentarBehandlerIntegrationTest {
             val now = LocalDateTime.now()
             assertTrue(
                 isBefore(now),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this",
             )
             assertTrue(
                 isAfter(now.minusSeconds(5)),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this",
             )
         }
     }

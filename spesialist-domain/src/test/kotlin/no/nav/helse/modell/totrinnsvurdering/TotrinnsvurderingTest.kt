@@ -27,7 +27,6 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 internal class TotrinnsvurderingTest {
-
     @Test
     fun `send til beslutter`() {
         val totrinnsvurdering = nyTotrinnsvurdering()
@@ -77,27 +76,30 @@ internal class TotrinnsvurderingTest {
 
     @Test
     fun `ferdigstiller alle overstyringer for person`() {
-        val totrinnsvurdering = nyTotrinnsvurdering(
-            overstyringer = listOf(
-                OverstyrtTidslinje.ny(
-                    vedtaksperiodeId = UUID.randomUUID(),
-                    aktørId = "123",
-                    fødselsnummer = "1234",
-                    organisasjonsnummer = "12345",
-                    dager = overstyrteDager(),
-                    begrunnelse = "begrunnelse",
-                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-                ), OverstyrtTidslinje.ny(
-                    vedtaksperiodeId = UUID.randomUUID(),
-                    aktørId = "123",
-                    fødselsnummer = "1234",
-                    organisasjonsnummer = "12345",
-                    dager = overstyrteDager(),
-                    begrunnelse = "begrunnelse",
-                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-                )
+        val totrinnsvurdering =
+            nyTotrinnsvurdering(
+                overstyringer =
+                    listOf(
+                        OverstyrtTidslinje.ny(
+                            vedtaksperiodeId = UUID.randomUUID(),
+                            aktørId = "123",
+                            fødselsnummer = "1234",
+                            organisasjonsnummer = "12345",
+                            dager = overstyrteDager(),
+                            begrunnelse = "begrunnelse",
+                            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+                        ),
+                        OverstyrtTidslinje.ny(
+                            vedtaksperiodeId = UUID.randomUUID(),
+                            aktørId = "123",
+                            fødselsnummer = "1234",
+                            organisasjonsnummer = "12345",
+                            dager = overstyrteDager(),
+                            begrunnelse = "begrunnelse",
+                            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+                        ),
+                    ),
             )
-        )
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         totrinnsvurdering.ferdigstill()
@@ -111,27 +113,30 @@ internal class TotrinnsvurderingTest {
     @Test
     fun `ferdigstill ferdigstiller også overstyringer`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val totrinnsvurdering = nyTotrinnsvurdering(
-            overstyringer = listOf(
-                OverstyrtTidslinje.ny(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    aktørId = "123",
-                    fødselsnummer = "1234",
-                    organisasjonsnummer = "12345",
-                    dager = overstyrteDager(),
-                    begrunnelse = "begrunnelse",
-                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-                ), OverstyrtTidslinje.ny(
-                    vedtaksperiodeId = UUID.randomUUID(),
-                    aktørId = "123",
-                    fødselsnummer = "1234",
-                    organisasjonsnummer = "12345",
-                    dager = overstyrteDager(),
-                    begrunnelse = "begrunnelse",
-                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-                )
+        val totrinnsvurdering =
+            nyTotrinnsvurdering(
+                overstyringer =
+                    listOf(
+                        OverstyrtTidslinje.ny(
+                            vedtaksperiodeId = vedtaksperiodeId,
+                            aktørId = "123",
+                            fødselsnummer = "1234",
+                            organisasjonsnummer = "12345",
+                            dager = overstyrteDager(),
+                            begrunnelse = "begrunnelse",
+                            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+                        ),
+                        OverstyrtTidslinje.ny(
+                            vedtaksperiodeId = UUID.randomUUID(),
+                            aktørId = "123",
+                            fødselsnummer = "1234",
+                            organisasjonsnummer = "12345",
+                            dager = overstyrteDager(),
+                            begrunnelse = "begrunnelse",
+                            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+                        ),
+                    ),
             )
-        )
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         totrinnsvurdering.ferdigstill()
@@ -198,7 +203,7 @@ internal class TotrinnsvurderingTest {
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
                 saksbehandlerOid = nySaksbehandler(),
-            )
+            ),
         )
         assertEquals(1, totrinnsvurdering.overstyringer.size)
     }
@@ -218,24 +223,25 @@ internal class TotrinnsvurderingTest {
     }
 
     private fun nySaksbehandler(
-        oid: UUID = UUID.randomUUID()
+        oid: UUID = UUID.randomUUID(),
     ) = SaksbehandlerOid(oid)
 
-    private fun nyOverstyring(vedtaksperiodeId: UUID = UUID.randomUUID()) = OverstyrtTidslinje.ny(
-        vedtaksperiodeId = vedtaksperiodeId,
-        aktørId = "123",
-        fødselsnummer = "1234",
-        organisasjonsnummer = "12345",
-        dager = overstyrteDager(),
-        begrunnelse = "begrunnelse",
-        saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-    )
+    private fun nyOverstyring(vedtaksperiodeId: UUID = UUID.randomUUID()) =
+        OverstyrtTidslinje.ny(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123",
+            fødselsnummer = "1234",
+            organisasjonsnummer = "12345",
+            dager = overstyrteDager(),
+            begrunnelse = "begrunnelse",
+            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+        )
 
     private fun nyTotrinnsvurdering(
         tilstand: TotrinnsvurderingTilstand = AVVENTER_SAKSBEHANDLER,
         saksbehandler: SaksbehandlerOid? = null,
         beslutter: SaksbehandlerOid? = null,
-        overstyringer: List<Overstyring> = emptyList()
+        overstyringer: List<Overstyring> = emptyList(),
     ) = Totrinnsvurdering.fraLagring(
         id = TotrinnsvurderingId(nextLong()),
         fødselsnummer = "1234",
@@ -248,54 +254,58 @@ internal class TotrinnsvurderingTest {
         vedtaksperiodeForkastet = false,
     )
 
-    private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(
-        OverstyrtTidslinjedag(
-            dato = 1 jan 2018,
-            type = "Sykedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "22-13",
-                ledd = "7",
-                lovverk = "folketrygdloven",
-                lovverksversjon = "2019-06-21",
-            )
-        ),
-        OverstyrtTidslinjedag(
-            dato = 2 jan 2018,
-            type = "Sykedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "22-13",
-                ledd = "7",
-                lovverk = "folketrygdloven",
-                lovverksversjon = "2019-06-21",
-            )
-        ),
-        OverstyrtTidslinjedag(
-            dato = 3 jan 2018,
-            type = "Sykedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = Lovhjemmel(
-                paragraf = "ANNEN PARAGRAF",
-                ledd = "ANNET LEDD",
-                bokstav = "EN BOKSTAV",
-                lovverk = "ANNEN LOV",
-                lovverksversjon = "1970-01-01",
-            )
-        ),
-        OverstyrtTidslinjedag(
-            dato = 4 jan 2018,
-            type = "Feriedag",
-            fraType = "Sykedag",
-            grad = 100,
-            fraGrad = 100,
-            lovhjemmel = null,
+    private fun overstyrteDager(): List<OverstyrtTidslinjedag> =
+        listOf(
+            OverstyrtTidslinjedag(
+                dato = 1 jan 2018,
+                type = "Sykedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "22-13",
+                        ledd = "7",
+                        lovverk = "folketrygdloven",
+                        lovverksversjon = "2019-06-21",
+                    ),
+            ),
+            OverstyrtTidslinjedag(
+                dato = 2 jan 2018,
+                type = "Sykedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "22-13",
+                        ledd = "7",
+                        lovverk = "folketrygdloven",
+                        lovverksversjon = "2019-06-21",
+                    ),
+            ),
+            OverstyrtTidslinjedag(
+                dato = 3 jan 2018,
+                type = "Sykedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "ANNEN PARAGRAF",
+                        ledd = "ANNET LEDD",
+                        bokstav = "EN BOKSTAV",
+                        lovverk = "ANNEN LOV",
+                        lovverksversjon = "1970-01-01",
+                    ),
+            ),
+            OverstyrtTidslinjedag(
+                dato = 4 jan 2018,
+                type = "Feriedag",
+                fraType = "Sykedag",
+                grad = 100,
+                fraGrad = 100,
+                lovhjemmel = null,
+            ),
         )
-    )
 }

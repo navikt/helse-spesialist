@@ -25,18 +25,23 @@ class GetNotaterForVedtaksperiodeBehandlerIntegrationTest {
         val identitetsnummer = lagPerson().also(sessionContext.personRepository::lagre).id
         val vedtaksperiodeId =
             lagVedtaksperiode(identitetsnummer = identitetsnummer)
-                .also(sessionContext.vedtaksperiodeRepository::lagre).id
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+                .id
         val kommentartekst = "Kommentar"
-        val dialogId = Dialog.Factory.ny()
-            .also { it.leggTilKommentar(kommentartekst, saksbehandler.ident) }
-            .also(sessionContext.dialogRepository::lagre).id()
-        val notat = lagNotat(
-            tekst = "jeg er en notattekst",
-            type = NotatType.Generelt,
-            dialogRef = dialogId,
-            vedtaksperiodeId = vedtaksperiodeId.value,
-            saksbehandlerOid = saksbehandler.id
-        ).also(sessionContext.notatRepository::lagre)
+        val dialogId =
+            Dialog.Factory
+                .ny()
+                .also { it.leggTilKommentar(kommentartekst, saksbehandler.ident) }
+                .also(sessionContext.dialogRepository::lagre)
+                .id()
+        val notat =
+            lagNotat(
+                tekst = "jeg er en notattekst",
+                type = NotatType.Generelt,
+                dialogRef = dialogId,
+                vedtaksperiodeId = vedtaksperiodeId.value,
+                saksbehandlerOid = saksbehandler.id,
+            ).also(sessionContext.notatRepository::lagre)
 
         // when
         val response =

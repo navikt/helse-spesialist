@@ -3,17 +3,19 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 
-class InMemoryPersonRepository : PersonRepository, AbstractInMemoryRepository<Identitetsnummer, Person>() {
-    override fun finnAlleMedAktørId(aktørId: String): List<Person> =
-        alle().filter { it.aktørId == aktørId }
+class InMemoryPersonRepository :
+    AbstractInMemoryRepository<Identitetsnummer, Person>(),
+    PersonRepository {
+    override fun finnAlleMedAktørId(aktørId: String): List<Person> = alle().filter { it.aktørId == aktørId }
 
-    override fun deepCopy(original: Person): Person = Person.Factory.fraLagring(
-        id = original.id,
-        aktørId = original.aktørId,
-        info = original.info,
-        infoOppdatert = original.infoOppdatert,
-        enhetRef = original.enhetRef,
-        enhetRefOppdatert = original.enhetRefOppdatert,
-        egenAnsattStatus = original.egenAnsattStatus,
-    )
+    override fun deepCopy(original: Person): Person =
+        Person.Factory.fraLagring(
+            id = original.id,
+            aktørId = original.aktørId,
+            info = original.info,
+            infoOppdatert = original.infoOppdatert,
+            enhetRef = original.enhetRef,
+            enhetRefOppdatert = original.enhetRefOppdatert,
+            egenAnsattStatus = original.egenAnsattStatus,
+        )
 }

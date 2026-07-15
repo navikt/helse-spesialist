@@ -18,57 +18,69 @@ import java.time.Instant
 import java.util.Properties
 
 object KafkaModuleIntegrationTestFixture {
-    private val kafka = ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.7.1")).apply {
-        withReuse(true)
-        start()
-    }
+    private val kafka =
+        ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.7.1")).apply {
+            withReuse(true)
+            start()
+        }
 
     private val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     private val kafkaRapid =
         KafkaRapid(
-            factory = ConsumerProducerFactory(
-                LocalKafkaConfig(
-                    mapOf(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers).toProperties()
-                )
-            ),
+            factory =
+                ConsumerProducerFactory(
+                    LocalKafkaConfig(
+                        mapOf(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers).toProperties(),
+                    ),
+                ),
             groupId = "localApp-groupId",
             rapidTopic = "tbd.rapid.v1",
-            meterRegistry = meterRegistry
+            meterRegistry = meterRegistry,
         )
 
-    fun createRapidApplication(ktorModule: (Application) -> Unit): RapidsConnection = RapidApplication.Builder(
-        appName = "spesialist-local",
-        instanceId = "spesialist-instance-${Instant.now().epochSecond % 100}",
-        rapid = kafkaRapid,
-        meterRegistry = meterRegistry,
-    ).apply {
-        withKtorModule(ktorModule)
-    }.build()
+    fun createRapidApplication(ktorModule: (Application) -> Unit): RapidsConnection =
+        RapidApplication
+            .Builder(
+                appName = "spesialist-local",
+                instanceId = "spesialist-instance-${Instant.now().epochSecond % 100}",
+                rapid = kafkaRapid,
+                meterRegistry = meterRegistry,
+            ).apply {
+                withKtorModule(ktorModule)
+            }.build()
 
-    private class LocalKafkaConfig(private val connectionProperties: Properties) : Config {
+    private class LocalKafkaConfig(
+        private val connectionProperties: Properties,
+    ) : Config {
         // Kopiert fra tbd-libs
-        override fun producerConfig(properties: Properties) = properties.apply {
-            putAll(connectionProperties)
-            put(ProducerConfig.ACKS_CONFIG, "all")
-            put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
-            put(ProducerConfig.LINGER_MS_CONFIG, "0")
-            put(ProducerConfig.RETRIES_CONFIG, "0")
-        }
+        override fun producerConfig(properties: Properties) =
+            properties.apply {
+                putAll(connectionProperties)
+                put(ProducerConfig.ACKS_CONFIG, "all")
+                put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+                put(ProducerConfig.LINGER_MS_CONFIG, "0")
+                put(ProducerConfig.RETRIES_CONFIG, "0")
+            }
 
-        override fun consumerConfig(groupId: String, properties: Properties) = properties.apply {
+        override fun consumerConfig(
+            groupId: String,
+            properties: Properties,
+        ) = properties.apply {
             putAll(connectionProperties)
             put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
             put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
         }
 
-        override fun adminConfig(properties: Properties) = properties.apply {
-            putAll(connectionProperties)
-        }
+        override fun adminConfig(properties: Properties) =
+            properties.apply {
+                putAll(connectionProperties)
+            }
     }
 
-    val moduleConfiguration = KafkaModule.Configuration(
-        versjonAvKode = "versjon_1",
-        ignorerMeldingerForUkjentePersoner = false,
-    )
+    val moduleConfiguration =
+        KafkaModule.Configuration(
+            versjonAvKode = "versjon_1",
+            ignorerMeldingerForUkjentePersoner = false,
+        )
 }

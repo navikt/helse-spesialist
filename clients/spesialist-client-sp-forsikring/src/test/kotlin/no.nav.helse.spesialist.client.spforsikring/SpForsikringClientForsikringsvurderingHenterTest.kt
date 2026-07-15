@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.spforsikring
 
-import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -11,6 +10,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -20,12 +20,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-
 class SpForsikringClientForsikringsvurderingHenterTest {
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
-        WireMockExtension.newInstance()
+        WireMockExtension
+            .newInstance()
             .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
             .build()
 
@@ -35,30 +35,33 @@ class SpForsikringClientForsikringsvurderingHenterTest {
     fun `mapper svar som forventet ved mottatt forsikring`() {
         // Given:
         val identitetsnummer = lagIdentitetsnummer()
-        val client = setupStubAndClient(
-            forsikringProxyResponse = okJson(
-                """
-                    {
-                        "identitetsnummer": "${identitetsnummer.value}",
-                        "harForsikring": true,
-                        "dekning": { "grad": 100, "fraDag": 17 }
-                    }
-                """.trimIndent()
-            ),
-            forsikringsvurderingId = forsikringsvurderingId
-        )
+        val client =
+            setupStubAndClient(
+                forsikringProxyResponse =
+                    okJson(
+                        """
+                        {
+                            "identitetsnummer": "${identitetsnummer.value}",
+                            "harForsikring": true,
+                            "dekning": { "grad": 100, "fraDag": 17 }
+                        }
+                        """.trimIndent(),
+                    ),
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
 
         // When:
         val actualForsikring = client.hent(forsikringsvurderingId = forsikringsvurderingId)
 
         // Then:
         assertEquals(
-            expected = Forsikringsvurdering(
-                identitetsnummer = identitetsnummer,
-                harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
-            ),
-            actual = actualForsikring
+            expected =
+                Forsikringsvurdering(
+                    identitetsnummer = identitetsnummer,
+                    harForsikring = true,
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                ),
+            actual = actualForsikring,
         )
     }
 
@@ -66,30 +69,33 @@ class SpForsikringClientForsikringsvurderingHenterTest {
     fun `mapper svar som forventet ved ingen forsikring`() {
         // Given:
         val identitetsnummer = lagIdentitetsnummer()
-        val client = setupStubAndClient(
-            forsikringProxyResponse = okJson(
-                """
-                    {
-                        "identitetsnummer": "${identitetsnummer.value}",
-                        "harForsikring": false,
-                        "dekning": null
-                    }
-                """.trimIndent()
-            ),
-            forsikringsvurderingId = forsikringsvurderingId
-        )
+        val client =
+            setupStubAndClient(
+                forsikringProxyResponse =
+                    okJson(
+                        """
+                        {
+                            "identitetsnummer": "${identitetsnummer.value}",
+                            "harForsikring": false,
+                            "dekning": null
+                        }
+                        """.trimIndent(),
+                    ),
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
 
         // When:
         val actualForsikring = client.hent(forsikringsvurderingId = forsikringsvurderingId)
 
         // Then:
         assertEquals(
-            expected = Forsikringsvurdering(
-                identitetsnummer = identitetsnummer,
-                harForsikring = false,
-                dekning = null
-            ),
-            actual = actualForsikring
+            expected =
+                Forsikringsvurdering(
+                    identitetsnummer = identitetsnummer,
+                    harForsikring = false,
+                    dekning = null,
+                ),
+            actual = actualForsikring,
         )
     }
 
@@ -98,17 +104,18 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         testMedForventningOmFeiletKall(
             stubResponse = WireMock.serverError().withBody("Her står det en feilmelding som ikke engang er JSON"),
             expectedException = RuntimeException("Feil fra forsikringstjeneste: 500"),
-            forsikringsvurderingId = forsikringsvurderingId
+            forsikringsvurderingId = forsikringsvurderingId,
         )
     }
 
     @Test
     fun `gir null om sp-forsikring gir tilbake HTTP 404`() {
         // Given:
-        val client = setupStubAndClient(
-            forsikringProxyResponse = WireMock.notFound().withBody("""{ "feil": "Finnes ikke" }"""),
-            forsikringsvurderingId = forsikringsvurderingId
-        )
+        val client =
+            setupStubAndClient(
+                forsikringProxyResponse = WireMock.notFound().withBody("""{ "feil": "Finnes ikke" }"""),
+                forsikringsvurderingId = forsikringsvurderingId,
+            )
 
         // When:
         val forsikringsvurdering = client.hent(forsikringsvurderingId = forsikringsvurderingId)
@@ -122,33 +129,37 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         val identitetsnummer = lagIdentitetsnummer()
         // Given:
         wireMock.stubFor(
-            get("/forsikringsvurderinger/${forsikringsvurderingId.value}").inScenario("scenario")
+            get("/forsikringsvurderinger/${forsikringsvurderingId.value}")
+                .inScenario("scenario")
                 .whenScenarioStateIs(Scenario.STARTED)
                 .willReturn(WireMock.serverError().withBody("Her står det en feilmelding som ikke engang er JSON"))
-                .willSetStateTo("har feilet én gang")
+                .willSetStateTo("har feilet én gang"),
         )
         wireMock.stubFor(
-            get("/forsikringsvurderinger/${forsikringsvurderingId.value}").inScenario("scenario")
+            get("/forsikringsvurderinger/${forsikringsvurderingId.value}")
+                .inScenario("scenario")
                 .whenScenarioStateIs("har feilet én gang")
                 .willReturn(
                     okJson(
                         """
-                            {
-                                "identitetsnummer": "${identitetsnummer.value}",
-                                "harForsikring": true,
-                                "dekning": { "grad": 100, "fraDag": 17 }
-                            }
-                        """.trimIndent()
-                    )
-                )
+                        {
+                            "identitetsnummer": "${identitetsnummer.value}",
+                            "harForsikring": true,
+                            "dekning": { "grad": 100, "fraDag": 17 }
+                        }
+                        """.trimIndent(),
+                    ),
+                ),
         )
-        val client = SpForsikringClientForsikringsvurderingHenter(
-            configuration = ClientSpForsikringModule.Configuration(
-                apiUrl = wireMock.runtimeInfo.httpBaseUrl,
-                scope = "scoap"
-            ),
-            accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz")
-        )
+        val client =
+            SpForsikringClientForsikringsvurderingHenter(
+                configuration =
+                    ClientSpForsikringModule.Configuration(
+                        apiUrl = wireMock.runtimeInfo.httpBaseUrl,
+                        scope = "scoap",
+                    ),
+                accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz"),
+            )
 
         // When:
         val actualForsikring = client.hent(forsikringsvurderingId)
@@ -156,24 +167,26 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         // Then:
         wireMock.verify(2, getRequestedFor(urlEqualTo("/forsikringsvurderinger/${forsikringsvurderingId.value}")))
         assertEquals(
-            expected = Forsikringsvurdering(
-                identitetsnummer = identitetsnummer,
-                harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17)
-            ),
-            actual = actualForsikring
+            expected =
+                Forsikringsvurdering(
+                    identitetsnummer = identitetsnummer,
+                    harForsikring = true,
+                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                ),
+            actual = actualForsikring,
         )
     }
 
     private fun testMedForventningOmFeiletKall(
         stubResponse: ResponseDefinitionBuilder?,
         forsikringsvurderingId: ForsikringsvurderingId,
-        expectedException: Exception
+        expectedException: Exception,
     ) {
         val client = setupStubAndClient(stubResponse, forsikringsvurderingId)
-        val actualException = runCatching {
-            client.hent(forsikringsvurderingId)
-        }.exceptionOrNull()
+        val actualException =
+            runCatching {
+                client.hent(forsikringsvurderingId)
+            }.exceptionOrNull()
 
         assertNotNull(actualException)
         assertEquals(expectedException::class, actualException::class)
@@ -182,20 +195,21 @@ class SpForsikringClientForsikringsvurderingHenterTest {
 
     private fun setupStubAndClient(
         forsikringProxyResponse: ResponseDefinitionBuilder?,
-        forsikringsvurderingId: ForsikringsvurderingId
+        forsikringsvurderingId: ForsikringsvurderingId,
     ): SpForsikringClientForsikringsvurderingHenter {
         wireMock.stubFor(
             get("/forsikringsvurderinger/${forsikringsvurderingId.value}").willReturn(
-                forsikringProxyResponse
-            )
+                forsikringProxyResponse,
+            ),
         )
 
         return SpForsikringClientForsikringsvurderingHenter(
-            configuration = ClientSpForsikringModule.Configuration(
-                apiUrl = wireMock.runtimeInfo.httpBaseUrl,
-                scope = "scoap"
-            ),
-            accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz")
+            configuration =
+                ClientSpForsikringModule.Configuration(
+                    apiUrl = wireMock.runtimeInfo.httpBaseUrl,
+                    scope = "scoap",
+                ),
+            accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz"),
         )
     }
 }

@@ -4,7 +4,8 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStansId
 
-class InMemorySaksbehandlerStansRepository : AbstractInMemoryRepository<SaksbehandlerStansId, SaksbehandlerStans>(),
+class InMemorySaksbehandlerStansRepository :
+    AbstractInMemoryRepository<SaksbehandlerStansId, SaksbehandlerStans>(),
     SaksbehandlerStansRepository {
     override fun deepCopy(original: SaksbehandlerStans): SaksbehandlerStans =
         SaksbehandlerStans.fraLagring(

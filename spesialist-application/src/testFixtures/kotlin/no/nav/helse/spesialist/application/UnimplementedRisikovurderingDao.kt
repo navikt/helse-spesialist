@@ -19,7 +19,7 @@ class UnimplementedRisikovurderingDao : RisikovurderingDao {
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean,
         data: JsonNode,
-        opprettet: LocalDateTime
+        opprettet: LocalDateTime,
     ) {
         TODO("Not yet implemented")
     }

@@ -15,11 +15,11 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         val nyTittel = "Ny varseldefinisjon"
         opprettVarseldefinisjon(
             tittel = "Gammel varseldefinisjon",
-            kode = kode
+            kode = kode,
         )
         opprettVarseldefinisjon(
             tittel = nyTittel,
-            kode = kode
+            kode = kode,
         )
 
         // when

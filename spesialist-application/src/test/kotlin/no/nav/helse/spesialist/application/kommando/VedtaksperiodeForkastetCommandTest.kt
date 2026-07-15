@@ -14,7 +14,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
-
     @Test
     fun `avbryter kommandokjede for godkjenningsbehov når perioden forkastes`() {
         // given
@@ -29,19 +28,20 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         val hendelseId = randomUUID()
         sessionContext.meldingDao.lagre(hendelseId, "{}", VEDTAKSPERIODE_FORKASTET, vedtaksperiode.id.value)
         sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
-        val kommandoFerdig = VedtaksperiodeForkastetCommand(
-            fødselsnummer = person.id.value,
-            vedtaksperiodeId = vedtaksperiode.id.value,
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            alleForkastedeVedtaksperiodeIder = emptyList(),
-            oppgaveRepository = sessionContext.oppgaveRepository,
-        ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
+        val kommandoFerdig =
+            VedtaksperiodeForkastetCommand(
+                fødselsnummer = person.id.value,
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                alleForkastedeVedtaksperiodeIder = emptyList(),
+                oppgaveRepository = sessionContext.oppgaveRepository,
+            ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
         assertTrue(kommandoFerdig)
         assertEquals(
             mapOf(commandContextIdForGodkjenningsbehov to hendelseId),
-            sessionContext.commandContextDao.avbrutteKommandokjeder
+            sessionContext.commandContextDao.avbrutteKommandokjeder,
         )
     }
 
@@ -58,18 +58,23 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         val hendelseId = randomUUID()
         sessionContext.meldingDao.lagre(hendelseId, "{}", VEDTAKSPERIODE_FORKASTET, vedtaksperiode.id.value)
         sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
-        val kommandoFerdig = VedtaksperiodeForkastetCommand(
-            fødselsnummer = person.id.value,
-            vedtaksperiodeId = vedtaksperiode.id.value,
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            alleForkastedeVedtaksperiodeIder = emptyList(),
-            oppgaveRepository = sessionContext.oppgaveRepository,
-        ).execute(CommandContext(randomUUID()), sessionContext, outbox)
+        val kommandoFerdig =
+            VedtaksperiodeForkastetCommand(
+                fødselsnummer = person.id.value,
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                alleForkastedeVedtaksperiodeIder = emptyList(),
+                oppgaveRepository = sessionContext.oppgaveRepository,
+            ).execute(CommandContext(randomUUID()), sessionContext, outbox)
 
         // then
         assertTrue(kommandoFerdig)
         assertEquals(
-            Opptegnelse.Type.PERSONDATA_OPPDATERT, sessionContext.opptegnelseRepository.alle().single().type
+            Opptegnelse.Type.PERSONDATA_OPPDATERT,
+            sessionContext.opptegnelseRepository
+                .alle()
+                .single()
+                .type,
         )
     }
 
@@ -81,11 +86,12 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         val vedtaksperiode =
             lagVedtaksperiode(identitetsnummer = person.id).also(sessionContext.vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val oppgave = lagOppgave(
-            vedtaksperiodeId = vedtaksperiode.id,
-            behandlingId = behandling.spleisBehandlingId!!,
-            godkjenningsbehovId = randomUUID()
-        )
+        val oppgave =
+            lagOppgave(
+                vedtaksperiodeId = vedtaksperiode.id,
+                behandlingId = behandling.spleisBehandlingId!!,
+                godkjenningsbehovId = randomUUID(),
+            )
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // when
@@ -93,19 +99,20 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         val hendelseId = randomUUID()
         sessionContext.meldingDao.lagre(hendelseId, "{}", VEDTAKSPERIODE_FORKASTET, vedtaksperiode.id.value)
         sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
-        val kommandoFerdig = VedtaksperiodeForkastetCommand(
-            fødselsnummer = person.id.value,
-            vedtaksperiodeId = vedtaksperiode.id.value,
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            alleForkastedeVedtaksperiodeIder = emptyList(),
-            oppgaveRepository = sessionContext.oppgaveRepository,
-        ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
+        val kommandoFerdig =
+            VedtaksperiodeForkastetCommand(
+                fødselsnummer = person.id.value,
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                alleForkastedeVedtaksperiodeIder = emptyList(),
+                oppgaveRepository = sessionContext.oppgaveRepository,
+            ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
         assertTrue(kommandoFerdig)
         assertEquals(
             mapOf(commandContextIdForGodkjenningsbehov to hendelseId),
-            sessionContext.commandContextDao.avbrutteKommandokjeder
+            sessionContext.commandContextDao.avbrutteKommandokjeder,
         )
     }
 
@@ -116,11 +123,12 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         val vedtaksperiode =
             lagVedtaksperiode(identitetsnummer = person.id).also(sessionContext.vedtaksperiodeRepository::lagre)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-        val oppgave = lagOppgave(
-            vedtaksperiodeId = vedtaksperiode.id,
-            behandlingId = behandling.spleisBehandlingId!!,
-            godkjenningsbehovId = randomUUID()
-        )
+        val oppgave =
+            lagOppgave(
+                vedtaksperiodeId = vedtaksperiode.id,
+                behandlingId = behandling.spleisBehandlingId!!,
+                godkjenningsbehovId = randomUUID(),
+            )
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // when
@@ -129,13 +137,14 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         val vedtaksperiodeIdForkastetVedtaksperiode = randomUUID()
         sessionContext.meldingDao.lagre(hendelseId, "{}", VEDTAKSPERIODE_FORKASTET, vedtaksperiodeIdForkastetVedtaksperiode)
         sessionContext.commandContextDao.opprett(hendelseId, randomUUID())
-        val kommandoFerdig = VedtaksperiodeForkastetCommand(
-            fødselsnummer = person.id.value,
-            vedtaksperiodeId = vedtaksperiode.id.value,
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            alleForkastedeVedtaksperiodeIder = emptyList(),
-            oppgaveRepository = sessionContext.oppgaveRepository,
-        ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
+        val kommandoFerdig =
+            VedtaksperiodeForkastetCommand(
+                fødselsnummer = person.id.value,
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                alleForkastedeVedtaksperiodeIder = emptyList(),
+                oppgaveRepository = sessionContext.oppgaveRepository,
+            ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
         assertTrue(kommandoFerdig)

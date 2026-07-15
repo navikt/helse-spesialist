@@ -84,7 +84,11 @@ abstract class AbstractE2EIntegrationTest {
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
 
     protected fun sisteSendteBehovnavn(): String =
-        meldinger().mapNotNull { it["@behov"] }.filterNot { it.hasNonNull("@løsning") }.last()[0].asText()
+        meldinger()
+            .mapNotNull { it["@behov"] }
+            .filterNot { it.hasNonNull("@løsning") }
+            .last()[0]
+            .asText()
 
     protected fun vedtakFattetMelding(): JsonNode =
         meldinger().find { it["@event_name"].asText() == "vedtak_fattet" }
@@ -261,7 +265,10 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(expectedForkastet, actualForkastet)
     }
 
-    protected fun assertGjeldendeOppgavestatus(expectedStatus: String, vedtaksperiode: Vedtaksperiode = førsteVedtaksperiode()) {
+    protected fun assertGjeldendeOppgavestatus(
+        expectedStatus: String,
+        vedtaksperiode: Vedtaksperiode = førsteVedtaksperiode(),
+    ) {
         val actualStatus =
             sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
                 session.run(
@@ -315,9 +322,10 @@ abstract class AbstractE2EIntegrationTest {
         vedtaksperiode: Vedtaksperiode,
         forventedeTags: List<String>,
     ) {
-        val spleisBehandlingId = requireNotNull(vedtaksperiode.spleisBehandlingId) {
-            "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
-        }
+        val spleisBehandlingId =
+            requireNotNull(vedtaksperiode.spleisBehandlingId) {
+                "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
+            }
         val tags =
             sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
                 session.run(
@@ -335,9 +343,10 @@ abstract class AbstractE2EIntegrationTest {
         vedtaksperiode: Vedtaksperiode,
         forventetSkjæringstidspunkt: LocalDate,
     ) {
-        val spleisBehandlingId = requireNotNull(vedtaksperiode.spleisBehandlingId) {
-            "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
-        }
+        val spleisBehandlingId =
+            requireNotNull(vedtaksperiode.spleisBehandlingId) {
+                "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
+            }
         val lagretSkjæringstidspunkt =
             sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
                 session.run(
@@ -477,5 +486,4 @@ abstract class AbstractE2EIntegrationTest {
         tilganger = tilganger,
         brukerroller = brukerroller,
     )
-
 }

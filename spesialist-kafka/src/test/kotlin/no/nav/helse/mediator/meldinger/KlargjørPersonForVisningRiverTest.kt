@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class KlargjørPersonForVisningRiverTest {
-
     @Test
     fun `leser melding`() {
         val mediator = mockk<MeldingMediator>(relaxed = true)

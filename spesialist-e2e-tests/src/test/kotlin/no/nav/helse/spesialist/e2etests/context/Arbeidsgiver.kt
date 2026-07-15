@@ -5,5 +5,5 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 
 data class Arbeidsgiver(
     val organisasjonsnummer: String = lagOrganisasjonsnummer(),
-    val navn: String = lagOrganisasjonsnavn()
+    val navn: String = lagOrganisasjonsnavn(),
 )

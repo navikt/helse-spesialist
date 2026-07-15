@@ -11,11 +11,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
-
     @Test
     fun `send oppgave til godkjenning med V2`() {
         every { saksbehandlerMediator.håndterTotrinnsvurdering(any(), any(), any()) }.returns(
-            SendTilGodkjenningResult.Ok
+            SendTilGodkjenningResult.Ok,
         )
         opprettSaksbehandler()
         opprettVedtaksperiode(opprettPerson())
@@ -31,12 +30,13 @@ class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `send oppgave i retur`() {
         every { saksbehandlerMediator.sendIRetur(any(), any(), any()) }.returns(
-            SendIReturResult.Ok
+            SendIReturResult.Ok,
         )
 
-        val body = runQuery(
-            sendIReturMutation(1, """Retur""")
-        )
+        val body =
+            runQuery(
+                sendIReturMutation(1, """Retur"""),
+            )
 
         assertTrue(body["data"]["sendIRetur"].asBoolean()) { body.toString() }
     }

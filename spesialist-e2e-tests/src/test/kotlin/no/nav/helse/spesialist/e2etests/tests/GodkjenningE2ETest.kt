@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
-
     @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {
         søknadOgGodkjenningbehovKommerInn()
@@ -152,16 +151,18 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
         leggTilVedtaksperiode()
         personSenderSøknad()
 
-        val periode1 = førsteVedtaksperiode().also {
-            it.fom = 1 jan 2018
-            it.tom = 15 jan 2018
-            it.skjæringstidspunkt = 1 jan 2018
-        }
-        val periode2 = andreVedtaksperiode().also {
-            it.fom = 1 jan 2018
-            it.tom = 31 jan 2018
-            it.skjæringstidspunkt = 1 jan 2018
-        }
+        val periode1 =
+            førsteVedtaksperiode().also {
+                it.fom = 1 jan 2018
+                it.tom = 15 jan 2018
+                it.skjæringstidspunkt = 1 jan 2018
+            }
+        val periode2 =
+            andreVedtaksperiode().also {
+                it.fom = 1 jan 2018
+                it.tom = 31 jan 2018
+                it.skjæringstidspunkt = 1 jan 2018
+            }
 
         spleisForberederBehandling(periode1) {}
         spleisForberederBehandling(periode2) {
@@ -207,16 +208,18 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
         leggTilVedtaksperiode()
         personSenderSøknad()
 
-        val periode1 = førsteVedtaksperiode().also {
-            it.fom = 10 jan 2018
-            it.tom = 19 jan 2018
-            it.skjæringstidspunkt = 10 jan 2018
-        }
-        val periode2 = andreVedtaksperiode().also {
-            it.fom = 20 jan 2018
-            it.tom = 29 jan 2018
-            it.skjæringstidspunkt = 15 jan 2018
-        }
+        val periode1 =
+            førsteVedtaksperiode().also {
+                it.fom = 10 jan 2018
+                it.tom = 19 jan 2018
+                it.skjæringstidspunkt = 10 jan 2018
+            }
+        val periode2 =
+            andreVedtaksperiode().also {
+                it.fom = 20 jan 2018
+                it.tom = 29 jan 2018
+                it.skjæringstidspunkt = 15 jan 2018
+            }
 
         spleisForberederBehandling(periode1) {}
         spleisAvslutterUtenVedtak(periode1)
@@ -235,16 +238,18 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
         leggTilVedtaksperiode()
         personSenderSøknad()
 
-        val periode1 = førsteVedtaksperiode().also {
-            it.fom = 10 jan 2018
-            it.tom = 19 jan 2018
-            it.skjæringstidspunkt = 10 jan 2018
-        }
-        val periode2 = andreVedtaksperiode().also {
-            it.fom = 20 jan 2018
-            it.tom = 29 jan 2018
-            it.skjæringstidspunkt = 15 jan 2018
-        }
+        val periode1 =
+            førsteVedtaksperiode().also {
+                it.fom = 10 jan 2018
+                it.tom = 19 jan 2018
+                it.skjæringstidspunkt = 10 jan 2018
+            }
+        val periode2 =
+            andreVedtaksperiode().also {
+                it.fom = 20 jan 2018
+                it.tom = 29 jan 2018
+                it.skjæringstidspunkt = 15 jan 2018
+            }
 
         spleisForberederBehandling(periode1) {
             aktivitetsloggNyAktivitet(listOf("RV_YS_1"))

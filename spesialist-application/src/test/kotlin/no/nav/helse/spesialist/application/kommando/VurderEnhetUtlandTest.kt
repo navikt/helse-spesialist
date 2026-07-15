@@ -20,7 +20,6 @@ internal class VurderEnhetUtlandTest : ApplicationTest() {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
-
     @Test
     fun `skal legge på varsel om utland`() {
         val slot = slot<LegacyVarsel>()

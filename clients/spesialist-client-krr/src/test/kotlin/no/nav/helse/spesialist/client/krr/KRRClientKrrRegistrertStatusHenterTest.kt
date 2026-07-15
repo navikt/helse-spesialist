@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.krr
 
-import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -11,6 +10,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter.KrrRegistrertStatus.RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
@@ -19,14 +19,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-
 class KRRClientKrrRegistrertStatusHenterTest {
     private val identitetsnummer = lagIdentitetsnummer().value
 
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
-        WireMockExtension.newInstance()
+        WireMockExtension
+            .newInstance()
             .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
             .build()
 
@@ -35,16 +35,17 @@ class KRRClientKrrRegistrertStatusHenterTest {
         "false,false,RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING",
         "false,true,RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING",
         "true,false,IKKE_RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING",
-        "true,true,RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING"
+        "true,true,RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING",
     )
     fun `mapper svar som forventet`(
         kanVarsles: Boolean,
         reservert: Boolean,
-        expectedRegistrertStatus: KrrRegistrertStatusHenter.KrrRegistrertStatus
+        expectedRegistrertStatus: KrrRegistrertStatusHenter.KrrRegistrertStatus,
     ) {
         testMedForventningOmVellykketKall(
-            stubResponse = okJson(
-                """
+            stubResponse =
+                okJson(
+                    """
                     {
                       "personer": {
                         "$identitetsnummer": {
@@ -55,9 +56,9 @@ class KRRClientKrrRegistrertStatusHenterTest {
                       },
                       "feil": {}
                     }
-                """.trimIndent()
-            ),
-            expectedRegistrertStatus = expectedRegistrertStatus
+                    """.trimIndent(),
+                ),
+            expectedRegistrertStatus = expectedRegistrertStatus,
         )
     }
 
@@ -65,15 +66,16 @@ class KRRClientKrrRegistrertStatusHenterTest {
     fun `mapper inaktiv person som at den ikke finnes i KRR`() {
         testMedForventningOmVellykketKall(
             stubResponse = okJson("""{ "personer": { "$identitetsnummer": { "aktiv": false } } }"""),
-            expectedRegistrertStatus = KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR
+            expectedRegistrertStatus = KrrRegistrertStatusHenter.KrrRegistrertStatus.IKKE_REGISTRERT_I_KRR,
         )
     }
 
     @Test
     fun `tåler svar med ekstra felter`() {
         testMedForventningOmVellykketKall(
-            stubResponse = okJson(
-                """
+            stubResponse =
+                okJson(
+                    """
                     {
                       "personer": {
                         "$identitetsnummer": {
@@ -85,17 +87,18 @@ class KRRClientKrrRegistrertStatusHenterTest {
                         }
                       }
                     }
-                """.trimIndent()
-            ),
-            expectedRegistrertStatus = RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING
+                    """.trimIndent(),
+                ),
+            expectedRegistrertStatus = RESERVERT_MOT_DIGITAL_KOMMUNIKASJON_ELLER_VARSLING,
         )
     }
 
     @Test
     fun `feiler om ett felt mangler`() {
         testMedForventningOmFeiletKall(
-            stubResponse = okJson(
-                """
+            stubResponse =
+                okJson(
+                    """
                     {
                       "personer": {
                         "$identitetsnummer": {
@@ -105,17 +108,18 @@ class KRRClientKrrRegistrertStatusHenterTest {
                       },
                       "feil": {}
                     }
-                """.trimIndent()
-            ),
-            expectedException = IllegalStateException("Fant ikke boolean-verdi for feltet kanVarsles")
+                    """.trimIndent(),
+                ),
+            expectedException = IllegalStateException("Fant ikke boolean-verdi for feltet kanVarsles"),
         )
     }
 
     @Test
     fun `feiler om ett felt har feil type`() {
         testMedForventningOmFeiletKall(
-            stubResponse = okJson(
-                """
+            stubResponse =
+                okJson(
+                    """
                     {
                       "personer": {
                         "$identitetsnummer": {
@@ -126,17 +130,18 @@ class KRRClientKrrRegistrertStatusHenterTest {
                       },
                       "feil": {}
                     }
-                """.trimIndent()
-            ),
-            expectedException = IllegalStateException("Fant ikke boolean-verdi for feltet kanVarsles")
+                    """.trimIndent(),
+                ),
+            expectedException = IllegalStateException("Fant ikke boolean-verdi for feltet kanVarsles"),
         )
     }
 
     @Test
     fun `feiler om personen ikke dukker opp i svaret`() {
         testMedForventningOmFeiletKall(
-            stubResponse = okJson(
-                """
+            stubResponse =
+                okJson(
+                    """
                     {
                       "personer": {
                         "${lagIdentitetsnummer().value}": {
@@ -147,17 +152,18 @@ class KRRClientKrrRegistrertStatusHenterTest {
                       },
                       "feil": {}
                     }
-                """.trimIndent()
-            ),
-            expectedException = IllegalStateException("Fant ikke igjen personen i responsen fra KRR")
+                    """.trimIndent(),
+                ),
+            expectedException = IllegalStateException("Fant ikke igjen personen i responsen fra KRR"),
         )
     }
 
     @Test
     fun `feiler om feil-objektet inneholder noe`() {
         testMedForventningOmFeiletKall(
-            stubResponse = okJson(
-                """
+            stubResponse =
+                okJson(
+                    """
                     {
                       "personer": {
                         "$identitetsnummer": {
@@ -170,9 +176,9 @@ class KRRClientKrrRegistrertStatusHenterTest {
                         "noe": "skjedde galt"
                       }
                     }
-                """.trimIndent()
-            ),
-            expectedException = IllegalStateException("Fikk feil tilbake fra KRR")
+                    """.trimIndent(),
+                ),
+            expectedException = IllegalStateException("Fikk feil tilbake fra KRR"),
         )
     }
 
@@ -180,13 +186,13 @@ class KRRClientKrrRegistrertStatusHenterTest {
     fun `feiler om KRR gir tilbake HTTP 500`() {
         testMedForventningOmFeiletKall(
             stubResponse = WireMock.serverError().withBody("Her står det en feilmelding som ikke engang er JSON"),
-            expectedException = IllegalStateException("Fikk HTTP 500 tilbake fra KRR")
+            expectedException = IllegalStateException("Fikk HTTP 500 tilbake fra KRR"),
         )
     }
 
     private fun testMedForventningOmVellykketKall(
         stubResponse: ResponseDefinitionBuilder?,
-        expectedRegistrertStatus: KrrRegistrertStatusHenter.KrrRegistrertStatus
+        expectedRegistrertStatus: KrrRegistrertStatusHenter.KrrRegistrertStatus,
     ) {
         // Given:
         val client = setupStubAndClient(stubResponse)
@@ -200,15 +206,16 @@ class KRRClientKrrRegistrertStatusHenterTest {
 
     private fun testMedForventningOmFeiletKall(
         stubResponse: ResponseDefinitionBuilder?,
-        expectedException: Exception
+        expectedException: Exception,
     ) {
         // Given:
         val client = setupStubAndClient(stubResponse)
 
         // When:
-        val actualException = runCatching {
-            client.hentForPerson(identitetsnummer)
-        }.exceptionOrNull()
+        val actualException =
+            runCatching {
+                client.hentForPerson(identitetsnummer)
+            }.exceptionOrNull()
 
         // Then:
         assertNotNull(actualException)
@@ -220,10 +227,11 @@ class KRRClientKrrRegistrertStatusHenterTest {
         wireMock.stubFor(post("/rest/v1/personer").willReturn(krrProxyResponse))
 
         return KRRClientKrrRegistrertStatusHenter(
-            configuration = ClientKrrModule.Configuration(
-                apiUrl = wireMock.runtimeInfo.httpBaseUrl,
-                scope = "scoap"
-            ),
+            configuration =
+                ClientKrrModule.Configuration(
+                    apiUrl = wireMock.runtimeInfo.httpBaseUrl,
+                    scope = "scoap",
+                ),
             accessTokenProvider = InMemoryAccessTokenProvider("gief axess plz"),
             cache =
                 object : Cache {
@@ -237,5 +245,4 @@ class KRRClientKrrRegistrertStatusHenterTest {
                 },
         )
     }
-
 }

@@ -18,41 +18,49 @@ class UtbetalingTest {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = 0, personbeløp = 0, Utbetalingtype.UTBETALING)
         assertEquals(INGEN_UTBETALING, utbetaling.refusjonstype())
     }
+
     @Test
     fun `ingen refusjon`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = 0, personbeløp = 1, Utbetalingtype.UTBETALING)
         assertEquals(INGEN_REFUSJON, utbetaling.refusjonstype())
     }
+
     @Test
     fun `full refusjon`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = 1, personbeløp = 0, Utbetalingtype.UTBETALING)
         assertEquals(FULL_REFUSJON, utbetaling.refusjonstype())
     }
+
     @Test
     fun `delvis refusjon`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = 1, personbeløp = 1, Utbetalingtype.UTBETALING)
         assertEquals(DELVIS_REFUSJON, utbetaling.refusjonstype())
     }
+
     @Test
     fun `negativt beløp begge`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = -1, personbeløp = -1, Utbetalingtype.UTBETALING)
         assertEquals(NEGATIVT_BELØP, utbetaling.refusjonstype())
     }
+
     @Test
     fun `negativt beløp arbeidsgiver`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = -1, personbeløp = 0, Utbetalingtype.UTBETALING)
         assertEquals(NEGATIVT_BELØP, utbetaling.refusjonstype())
     }
+
     @Test
     fun `negativt beløp person`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = 0, personbeløp = -1, Utbetalingtype.UTBETALING)
         assertEquals(NEGATIVT_BELØP, utbetaling.refusjonstype())
     }
+
     @Test
     fun `negativt beløp arbeidsgiver, positivt beløp person`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = -1, personbeløp = 1, Utbetalingtype.UTBETALING)
         assertEquals(NEGATIVT_BELØP, utbetaling.refusjonstype())
     }
+
     @Test
     fun `positivt beløp arbeidsgiver, negativt beløp person`() {
         val utbetaling = Utbetaling(UUID.randomUUID(), arbeidsgiverbeløp = 1, personbeløp = -1, Utbetalingtype.UTBETALING)

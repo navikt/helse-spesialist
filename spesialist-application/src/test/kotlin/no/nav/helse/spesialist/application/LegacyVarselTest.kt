@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class LegacyVarselTest {
-
     @ParameterizedTest
     @EnumSource(value = VarselDbDto.Varselstatus::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `er ikke aktiv`(status: VarselDbDto.Varselstatus) {
@@ -36,7 +35,7 @@ internal class LegacyVarselTest {
             "FNR",
             UUID.randomUUID(),
             UUID.randomUUID(),
-            "ident"
+            "ident",
         ) { _: String, _: UUID, _: UUID, _: UUID, _: String, _: String, _: VarselDbDto.Varselstatus, gjeldendeStatus: VarselDbDto.Varselstatus, _: String ->
             godkjent = true
             nyStatus = gjeldendeStatus
@@ -57,7 +56,7 @@ internal class LegacyVarselTest {
             "FNR",
             UUID.randomUUID(),
             UUID.randomUUID(),
-            "ident"
+            "ident",
         ) { _: String, _: UUID, _: UUID, _: UUID, _: String, _: String, _: VarselDbDto.Varselstatus, gjeldendeStatus: VarselDbDto.Varselstatus, _: String ->
             vurdert = true
             status = gjeldendeStatus
@@ -77,7 +76,7 @@ internal class LegacyVarselTest {
             "FNR",
             UUID.randomUUID(),
             UUID.randomUUID(),
-            "ident"
+            "ident",
         ) { _: String, _: UUID, _: UUID, _: UUID, _: String, _: String, _: VarselDbDto.Varselstatus, gjeldendeStatus: VarselDbDto.Varselstatus, _: String ->
             vurdert = true
             status = gjeldendeStatus
@@ -87,18 +86,20 @@ internal class LegacyVarselTest {
         assertEquals(VarselDbDto.Varselstatus.AVVIST, status)
     }
 
-    private fun opprettVarsel(status: VarselDbDto.Varselstatus) = VarselDbDto(
-        varselId = UUID.randomUUID(),
-        behandlingId = UUID.randomUUID(),
-        opprettet = LocalDateTime.now(),
-        kode = "SB_EX_1",
-        status = status,
-        varseldefinisjon = VarselDbDto.VarseldefinisjonDbDto(
-            definisjonId = UUID.randomUUID(),
-            tittel = "EN_TITTEL",
-            forklaring = null,
-            handling = null,
-        ),
-        varselvurdering = null,
-    )
+    private fun opprettVarsel(status: VarselDbDto.Varselstatus) =
+        VarselDbDto(
+            varselId = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            kode = "SB_EX_1",
+            status = status,
+            varseldefinisjon =
+                VarselDbDto.VarseldefinisjonDbDto(
+                    definisjonId = UUID.randomUUID(),
+                    tittel = "EN_TITTEL",
+                    forklaring = null,
+                    handling = null,
+                ),
+            varselvurdering = null,
+        )
 }

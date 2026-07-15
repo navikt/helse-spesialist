@@ -11,7 +11,7 @@ import org.junit.jupiter.api.TestInstance
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AppTest: AbstractDatabaseTest() {
+internal class AppTest : AbstractDatabaseTest() {
     private lateinit var testRapid: TestRapid
     private val commandContextDao = CommandContextDao(dataSource)
 
@@ -59,11 +59,12 @@ internal class AppTest: AbstractDatabaseTest() {
     }
 
     @Language("JSON")
-    private fun slettemelding(fødselsnummer: String) = """
+    private fun slettemelding(fødselsnummer: String) =
+        """
         {
           "@event_name": "slett_person",
           "@id": "${UUID.randomUUID()}",
           "fødselsnummer": "$fødselsnummer"
         }
-    """.trimIndent()
+        """.trimIndent()
 }

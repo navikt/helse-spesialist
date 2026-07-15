@@ -21,7 +21,6 @@ import kotlin.test.assertEquals
 
 @Isolated
 class PgOppgaveRepositoryVarselOppslagTest : AbstractDBIntegrationTest() {
-
     @BeforeEach
     fun tømTabeller() {
         dbQuery.execute("TRUNCATE oppgave CASCADE")

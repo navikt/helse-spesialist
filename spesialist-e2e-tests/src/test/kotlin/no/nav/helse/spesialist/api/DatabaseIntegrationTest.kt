@@ -355,7 +355,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "adressebeskyttelse" to adressebeskyttelse.name,
         )
 
-    private fun oppdaterPersonpekere(fødselsnummer: String, personinfoId: Long? = null) {
+    private fun oppdaterPersonpekere(
+        fødselsnummer: String,
+        personinfoId: Long? = null,
+    ) {
         dbQuery.update(
             """
             update person

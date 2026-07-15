@@ -17,11 +17,12 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val stans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            identitetsnummer = person.id,
-            begrunnelse = "begrunnelse",
-        )
+        val stans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandler.ident,
+                identitetsnummer = person.id,
+                begrunnelse = "begrunnelse",
+            )
         repository.lagre(stans)
 
         val lagretStans = repository.finnAktiv(person.id)
@@ -40,11 +41,12 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val stans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            identitetsnummer = person.id,
-            begrunnelse = "Oppretter stans",
-        )
+        val stans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandler.ident,
+                identitetsnummer = person.id,
+                begrunnelse = "Oppretter stans",
+            )
         repository.lagre(stans)
 
         stans.opphevStans(
@@ -69,21 +71,23 @@ class PgSaksbehandlerStansRepositoryTest : AbstractDBIntegrationTest() {
         val person = opprettPerson()
         val saksbehandler = opprettSaksbehandler()
 
-        val førstStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            identitetsnummer = person.id,
-            begrunnelse = "Første stans",
-        )
+        val førstStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandler.ident,
+                identitetsnummer = person.id,
+                begrunnelse = "Første stans",
+            )
         repository.lagre(førstStans)
 
         førstStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandler.ident, begrunnelse = "Opphever")
         repository.lagre(førstStans)
 
-        val andreStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandler.ident,
-            identitetsnummer = person.id,
-            begrunnelse = "Andre stans",
-        )
+        val andreStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandler.ident,
+                identitetsnummer = person.id,
+                begrunnelse = "Andre stans",
+            )
         repository.lagre(andreStans)
 
         val aktiv = repository.finnAktiv(person.id)

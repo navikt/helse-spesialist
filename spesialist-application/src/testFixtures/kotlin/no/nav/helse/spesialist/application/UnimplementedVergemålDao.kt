@@ -7,7 +7,7 @@ class UnimplementedVergemålDao : VergemålDao {
     override fun lagre(
         fødselsnummer: String,
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,
-        fullmakt: Boolean
+        fullmakt: Boolean,
     ) {
         TODO("Not yet implemented")
     }

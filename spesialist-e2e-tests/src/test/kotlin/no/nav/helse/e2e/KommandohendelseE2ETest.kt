@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class KommandohendelseE2ETest : AbstractE2ETest() {
-
     @Test
     fun `lagrer melding som starter en command context`() {
         vedtaksløsningenMottarNySøknad()
@@ -34,8 +33,9 @@ class KommandohendelseE2ETest : AbstractE2ETest() {
         assertEquals(1, antallHendelser(hendelseId))
     }
 
-    private fun antallHendelser(hendelseId: UUID) = dbQuery.single(
-        "select count(1) from hendelse where id = :hendelseId",
-        "hendelseId" to hendelseId
-    ) { it.int(1) }
+    private fun antallHendelser(hendelseId: UUID) =
+        dbQuery.single(
+            "select count(1) from hendelse where id = :hendelseId",
+            "hendelseId" to hendelseId,
+        ) { it.int(1) }
 }

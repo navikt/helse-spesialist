@@ -11,12 +11,13 @@ import org.junit.jupiter.api.Test
 internal class OppgaveMapperTest {
     @Test
     fun `map EgenskapForDatabase til OppgaveEgenskap (api)`() {
-        val egenskaperForDatabase = setOf(
-            EgenskapForDatabase.SØKNAD,
-            EgenskapForDatabase.DELVIS_REFUSJON,
-            EgenskapForDatabase.FORSTEGANGSBEHANDLING,
-            EgenskapForDatabase.EN_ARBEIDSGIVER
-        )
+        val egenskaperForDatabase =
+            setOf(
+                EgenskapForDatabase.SØKNAD,
+                EgenskapForDatabase.DELVIS_REFUSJON,
+                EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+                EgenskapForDatabase.EN_ARBEIDSGIVER,
+            )
         val oppgaveEgenskaper = egenskaperForDatabase.tilEgenskaperForVisning()
 
         assertEquals(

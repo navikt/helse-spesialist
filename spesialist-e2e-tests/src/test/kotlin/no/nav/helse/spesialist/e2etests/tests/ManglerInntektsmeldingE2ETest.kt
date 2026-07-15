@@ -13,7 +13,7 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn(
             tilleggsmeldinger = {
                 aktivitetsloggNyAktivitet(varselkoder = listOf("RV_IV_10"))
-            }
+            },
         )
 
         // Then:

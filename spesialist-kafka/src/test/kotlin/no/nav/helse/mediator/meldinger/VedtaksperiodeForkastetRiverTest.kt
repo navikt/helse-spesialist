@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VedtaksperiodeForkastetRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val rapid = TestRapid().medRivers(VedtaksperiodeForkastetRiver(mediator))
 
@@ -25,11 +24,12 @@ internal class VedtaksperiodeForkastetRiverTest {
         rapid.sendTestMessage(Testmeldingfabrikk.lagVedtaksperiodeForkastet("aktørId", fødselsnummer, vedtaksperiodeId))
         verify(exactly = 1) {
             mediator.mottaMelding(
-                melding = withArg<VedtaksperiodeForkastet> {
-                    assertEquals(fødselsnummer, it.fødselsnummer())
-                    assertEquals(vedtaksperiodeId, it.vedtaksperiodeId())
-                },
-                kontekstbasertPubliserer = any()
+                melding =
+                    withArg<VedtaksperiodeForkastet> {
+                        assertEquals(fødselsnummer, it.fødselsnummer())
+                        assertEquals(vedtaksperiodeId, it.vedtaksperiodeId())
+                    },
+                kontekstbasertPubliserer = any(),
             )
         }
     }

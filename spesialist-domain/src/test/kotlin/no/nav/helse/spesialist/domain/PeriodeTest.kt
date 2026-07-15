@@ -11,7 +11,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class PeriodeTest {
-
     @Test
     fun `fom etter tom`() {
         assertThrows<IllegalArgumentException> {
@@ -78,13 +77,23 @@ internal class PeriodeTest {
 
     @Test
     fun `dager til perioder`() {
-        val dager = listOf(
-            1 jan 2018, 2 jan 2018, 3 jan 2018, 4 jan 2018,
-            8 jan 2018, 9 jan 2018,
-            11 jan 2018,
-            13 jan 2018, 14 jan 2018, 15 jan 2018, 16 jan 2018,
-            30 jan 2018, 31 jan 2018, 1 feb 2018
-        )
+        val dager =
+            listOf(
+                1 jan 2018,
+                2 jan 2018,
+                3 jan 2018,
+                4 jan 2018,
+                8 jan 2018,
+                9 jan 2018,
+                11 jan 2018,
+                13 jan 2018,
+                14 jan 2018,
+                15 jan 2018,
+                16 jan 2018,
+                30 jan 2018,
+                31 jan 2018,
+                1 feb 2018,
+            )
         assertEquals(
             listOf(
                 Periode(1 jan 2018, 4 jan 2018),
@@ -93,7 +102,7 @@ internal class PeriodeTest {
                 Periode(13 jan 2018, 16 jan 2018),
                 Periode(30 jan 2018, 1 feb 2018),
             ),
-            dager.tilPerioder()
+            dager.tilPerioder(),
         )
     }
 }

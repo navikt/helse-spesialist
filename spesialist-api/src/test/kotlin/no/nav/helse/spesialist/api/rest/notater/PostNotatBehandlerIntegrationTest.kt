@@ -25,19 +25,22 @@ class PostNotatÏBehandlerIntegrationTest {
         // Given:
         val saksbehandler = lagSaksbehandler()
 
-        val identitetsnummer = lagPerson()
-            .also(sessionContext.personRepository::lagre)
-            .id
-        val vedtaksperiodeId = lagVedtaksperiode(identitetsnummer = identitetsnummer)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-            .id
+        val identitetsnummer =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
+                .id
+        val vedtaksperiodeId =
+            lagVedtaksperiode(identitetsnummer = identitetsnummer)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+                .id
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/notater",
-            body = """{ "tekst": "Dette er et notat", "vedtaksperiodeId": "${vedtaksperiodeId.value}" }""",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.post(
+                url = "/api/notater",
+                body = """{ "tekst": "Dette er et notat", "vedtaksperiodeId": "${vedtaksperiodeId.value}" }""",
+                saksbehandler = saksbehandler,
+            )
         val body = response.bodyAsJsonNode
 
         // Then:
@@ -61,11 +64,11 @@ class PostNotatÏBehandlerIntegrationTest {
             val now = LocalDateTime.now()
             assertTrue(
                 isBefore(now),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this",
             )
             assertTrue(
                 isAfter(now.minusSeconds(5)),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this",
             )
         }
         assertFalse(lagretNotat.feilregistrert)

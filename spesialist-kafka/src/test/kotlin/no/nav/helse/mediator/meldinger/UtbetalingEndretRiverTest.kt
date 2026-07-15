@@ -14,7 +14,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class UtbetalingEndretRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(UtbetalingEndretRiver(mediator))
 
@@ -33,7 +32,8 @@ internal class UtbetalingEndretRiverTest {
     }
 
     @Language("JSON")
-    private fun event(gjeldendeStatus: String = "UTBETALT") = """
+    private fun event(gjeldendeStatus: String = "UTBETALT") =
+        """
     {
       "utbetalingId": "${UUID.randomUUID()}",
       "type": "UTBETALING",

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class KommandokjedePåminnelseRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(KommandokjedePåminnelseRiver(mediator))
 
@@ -28,11 +27,12 @@ class KommandokjedePåminnelseRiverTest {
     }
 
     @Language("JSON")
-    private fun event() = """
-    {
-      "@event_name": "kommandokjede_påminnelse",
-      "commandContextId": "${UUID.randomUUID()}",
-      "meldingId": "${UUID.randomUUID()}"
-    }
-    """.trimIndent()
+    private fun event() =
+        """
+        {
+          "@event_name": "kommandokjede_påminnelse",
+          "commandContextId": "${UUID.randomUUID()}",
+          "meldingId": "${UUID.randomUUID()}"
+        }
+        """.trimIndent()
 }

@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ClientUtilsTest {
-
     val backoffDelay = 0L
 
     @Test
@@ -24,7 +23,9 @@ class ClientUtilsTest {
             if (count == 0) {
                 count += 1
                 throw RetryableException("Retryable")
-            } else count += 1
+            } else {
+                count += 1
+            }
         }
         assertEquals(2, count)
     }

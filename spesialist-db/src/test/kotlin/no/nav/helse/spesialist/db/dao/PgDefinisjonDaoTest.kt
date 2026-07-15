@@ -11,8 +11,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Isolated
-internal class PgDefinisjonDaoTest: AbstractDBIntegrationTest() {
-
+internal class PgDefinisjonDaoTest : AbstractDBIntegrationTest() {
     private val definisjonDao = PgDefinisjonDao(dataSource)
 
     @BeforeEach
@@ -49,9 +48,9 @@ internal class PgDefinisjonDaoTest: AbstractDBIntegrationTest() {
                 forklaring = "EN_FORKLARING",
                 handling = "EN_HANDLING",
                 avviklet = false,
-                opprettet = LocalDateTime.now()
+                opprettet = LocalDateTime.now(),
             ),
-            definisjonDao.definisjonFor(definisjonId1)
+            definisjonDao.definisjonFor(definisjonId1),
         )
     }
 
@@ -68,9 +67,9 @@ internal class PgDefinisjonDaoTest: AbstractDBIntegrationTest() {
                 forklaring = "EN_FORKLARING",
                 handling = "EN_HANDLING",
                 avviklet = false,
-                opprettet = LocalDateTime.now()
+                opprettet = LocalDateTime.now(),
             ),
-            definisjonDao.definisjonFor(definisjonId1)
+            definisjonDao.definisjonFor(definisjonId1),
         )
     }
 
@@ -115,8 +114,7 @@ internal class PgDefinisjonDaoTest: AbstractDBIntegrationTest() {
                 forklaring = it.stringOrNull("forklaring"),
                 handling = it.stringOrNull("handling"),
                 avviklet = it.boolean("avviklet"),
-                opprettet = it.localDateTime("opprettet")
+                opprettet = it.localDateTime("opprettet"),
             )
         }
-
 }

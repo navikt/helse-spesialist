@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.speed
 
-import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
@@ -10,6 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.Cache
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -24,7 +24,8 @@ class SpeedClientPersoninfoHenterTest {
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
-        WireMockExtension.newInstance()
+        WireMockExtension
+            .newInstance()
             .options(wireMockConfig().dynamicPort())
             .build()
 
@@ -49,7 +50,10 @@ class SpeedClientPersoninfoHenterTest {
 
     @Test
     fun `returnerer null ved 404`() {
-        setupStub(com.github.tomakehurst.wiremock.client.WireMock.notFound())
+        setupStub(
+            com.github.tomakehurst.wiremock.client.WireMock
+                .notFound(),
+        )
 
         val result = lagKlient().hentPersoninfo(Identitetsnummer.fraString("11111111111"))
 

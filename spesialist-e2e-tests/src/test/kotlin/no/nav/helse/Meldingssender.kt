@@ -667,5 +667,4 @@ class Meldingssender(
                 Testmeldingfabrikk.lagAdressebeskyttelseEndret(aktørId, fødselsnummer, id),
             )
         }
-
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class PgPoisonPillDaoTest: AbstractDBIntegrationTest() {
+class PgPoisonPillDaoTest : AbstractDBIntegrationTest() {
     private val poisonPillDao = daos.poisonPillDao
 
     @Test
@@ -31,14 +31,20 @@ class PgPoisonPillDaoTest: AbstractDBIntegrationTest() {
 
     private fun Pair<String, String>.somJsonNode() = objectMapper.valueToTree<JsonNode>(mapOf(first to second))
 
-    private fun insertPoisonPills(vararg meldinger: Pair<String, String>) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """ INSERT INTO poison_pill(feltnavn, identifikator) VALUES (:feltnavn, :identifikator) """
-        meldinger.forEach { (feltnavn, identifikator) ->
-            session.run(queryOf(query, mapOf(
-                "feltnavn" to feltnavn,
-                "identifikator" to identifikator,
-            )).asUpdate)
+    private fun insertPoisonPills(vararg meldinger: Pair<String, String>) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """ INSERT INTO poison_pill(feltnavn, identifikator) VALUES (:feltnavn, :identifikator) """
+            meldinger.forEach { (feltnavn, identifikator) ->
+                session.run(
+                    queryOf(
+                        query,
+                        mapOf(
+                            "feltnavn" to feltnavn,
+                            "identifikator" to identifikator,
+                        ),
+                    ).asUpdate,
+                )
+            }
         }
-    }
 }

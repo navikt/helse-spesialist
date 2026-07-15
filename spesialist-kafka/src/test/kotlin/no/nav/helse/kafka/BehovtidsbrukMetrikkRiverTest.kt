@@ -9,38 +9,46 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 internal class BehovtidsbrukMetrikkRiverTest {
-
     val rapid = TestRapid().medRivers(BehovtidsbrukMetrikkRiver())
 
     @Test
     fun `sanity check`() {
         rapid.sendTestMessage(
             testmelding(
-                "et behov", mapOf(
+                "et behov",
+                mapOf(
                     "@final" to true,
                     "@besvart" to LocalDateTime.now(),
                     "@løsning" to emptyMap<String, Any>(),
-                    "system_participating_services" to listOf(
-                        mapOf(
-                            "service" to "spesialist",
-                            "time" to LocalDateTime.now().minusSeconds(3)
-                        )
-                    ),
-                )
-            )
+                    "system_participating_services" to
+                        listOf(
+                            mapOf(
+                                "service" to "spesialist",
+                                "time" to LocalDateTime.now().minusSeconds(3),
+                            ),
+                        ),
+                ),
+            ),
         )
         assertMetrikkHarData("behov_tidsbruk")
     }
 
     private fun assertMetrikkHarData(metrikknavn: String) {
-        assertEquals(1, Metrics.globalRegistry.get(metrikknavn).summary().count())
+        assertEquals(
+            1,
+            Metrics.globalRegistry
+                .get(metrikknavn)
+                .summary()
+                .count(),
+        )
     }
 
-    private fun testmelding(behov: String, innhold: Map<String, Any>) = JsonMessage.newNeed(
-        behov = listOf(behov),
-        map = innhold,
-    ).toJson()
-
+    private fun testmelding(
+        behov: String,
+        innhold: Map<String, Any>,
+    ) = JsonMessage
+        .newNeed(
+            behov = listOf(behov),
+            map = innhold,
+        ).toJson()
 }
-
-

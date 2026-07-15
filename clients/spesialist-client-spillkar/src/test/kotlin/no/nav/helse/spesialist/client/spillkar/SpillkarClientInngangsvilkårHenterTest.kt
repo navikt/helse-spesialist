@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.spillkar
 
-import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -10,6 +9,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.spillkar.AutomatiskVurdering
 import no.nav.helse.spesialist.application.spillkar.VurdertInngangsvilkår
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
 import java.time.LocalDate
@@ -23,7 +23,8 @@ class SpillkarClientInngangsvilkårHenterTest {
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
-        WireMockExtension.newInstance()
+        WireMockExtension
+            .newInstance()
             .options(wireMockConfig().dynamicPort())
             .build()
 
@@ -59,8 +60,8 @@ class SpillkarClientInngangsvilkårHenterTest {
                     }
                   ]
                 }
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
 
         val result = lagKlient().hentInngangsvilkår(personidentifikatorer, skjæringstidspunkt)
@@ -112,8 +113,8 @@ class SpillkarClientInngangsvilkårHenterTest {
                     }
                   ]
                 }
-                """.trimIndent()
-            )
+                """.trimIndent(),
+            ),
         )
 
         val result = lagKlient().hentInngangsvilkår(personidentifikatorer, skjæringstidspunkt)
@@ -127,7 +128,7 @@ class SpillkarClientInngangsvilkårHenterTest {
     @Test
     fun `returnerer tom liste ved tomt svar`() {
         setupStub(
-            okJson("""{ "samlingAvVurderteInngangsvilkår": [] }""")
+            okJson("""{ "samlingAvVurderteInngangsvilkår": [] }"""),
         )
 
         val result = lagKlient().hentInngangsvilkår(personidentifikatorer, skjæringstidspunkt)
@@ -139,9 +140,10 @@ class SpillkarClientInngangsvilkårHenterTest {
     fun `feiler ved HTTP 500`() {
         setupStub(serverError().withBody("Intern feil"))
 
-        val exception = runCatching {
-            lagKlient().hentInngangsvilkår(personidentifikatorer, skjæringstidspunkt)
-        }.exceptionOrNull()
+        val exception =
+            runCatching {
+                lagKlient().hentInngangsvilkår(personidentifikatorer, skjæringstidspunkt)
+            }.exceptionOrNull()
 
         assertNotNull(exception)
         assertIs<RuntimeException>(exception)

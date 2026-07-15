@@ -8,7 +8,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class PgPåVentApiDaoTest : AbstractDBIntegrationTest() {
-
     private val påVentApiDao = PgPåVentApiDao(dataSource)
 
     @Test
@@ -31,5 +30,4 @@ internal class PgPåVentApiDaoTest : AbstractDBIntegrationTest() {
         "frist" to frist,
         "oid" to saksbehandlerOid,
     )
-
 }

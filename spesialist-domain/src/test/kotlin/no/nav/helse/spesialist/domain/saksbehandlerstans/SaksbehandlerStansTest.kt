@@ -12,18 +12,18 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SaksbehandlerStansTest {
-
     @Test
     fun `kan opprette saksbehandlerstans`() {
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
         val begrunnelse = "begrunnelse"
 
-        val saksbehandlerStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            identitetsnummer = identitetsnummer,
-            begrunnelse = begrunnelse,
-        )
+        val saksbehandlerStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                identitetsnummer = identitetsnummer,
+                begrunnelse = begrunnelse,
+            )
 
         assertTrue(saksbehandlerStans.erStanset)
         assertNull(saksbehandlerStans.stansOpphevet)
@@ -43,11 +43,12 @@ class SaksbehandlerStansTest {
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
 
-        val saksbehandlerStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            identitetsnummer = identitetsnummer,
-            begrunnelse = "begrunnelse en",
-        )
+        val saksbehandlerStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                identitetsnummer = identitetsnummer,
+                begrunnelse = "begrunnelse en",
+            )
 
         val opphevBegrunnelse = "begrunnelse to"
         saksbehandlerStans.opphevStans(
@@ -73,18 +74,20 @@ class SaksbehandlerStansTest {
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
 
-        val førstStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            identitetsnummer = identitetsnummer,
-            begrunnelse = "begrunnelse en",
-        )
+        val førstStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                identitetsnummer = identitetsnummer,
+                begrunnelse = "begrunnelse en",
+            )
         førstStans.opphevStans(utførtAvSaksbehandlerIdent = saksbehandlerIdent, begrunnelse = "begrunnelse to")
 
-        val andreStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            identitetsnummer = identitetsnummer,
-            begrunnelse = "begrunnelse tre",
-        )
+        val andreStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                identitetsnummer = identitetsnummer,
+                begrunnelse = "begrunnelse tre",
+            )
 
         assertTrue(andreStans.erStanset)
         assertNull(andreStans.stansOpphevet)
@@ -97,11 +100,12 @@ class SaksbehandlerStansTest {
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
 
-        val saksbehandlerStans = SaksbehandlerStans.ny(
-            utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-            identitetsnummer = identitetsnummer,
-            begrunnelse = "begrunnelse",
-        )
+        val saksbehandlerStans =
+            SaksbehandlerStans.ny(
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                identitetsnummer = identitetsnummer,
+                begrunnelse = "begrunnelse",
+            )
         saksbehandlerStans.opphevStans(
             utførtAvSaksbehandlerIdent = saksbehandlerIdent,
             begrunnelse = "begrunnelse",

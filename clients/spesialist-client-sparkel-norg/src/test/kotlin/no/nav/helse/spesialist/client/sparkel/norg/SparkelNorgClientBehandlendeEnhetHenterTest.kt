@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.sparkel.norg
 
-import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -9,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.Cache
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.Enhet
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -23,7 +23,8 @@ class SparkelNorgClientBehandlendeEnhetHenterTest {
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
-        WireMockExtension.newInstance()
+        WireMockExtension
+            .newInstance()
             .options(wireMockConfig().dynamicPort().dynamicHttpsPort())
             .build()
 

@@ -29,14 +29,16 @@ class GetForsikringsvurderingForPersonIntegrationTest {
 
         coEvery {
             integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
-        } returns Forsikringsvurdering(
-            identitetsnummer = person.id,
-            harForsikring = true,
-            dekning = Forsikringsvurdering.Dekning(
-                grad = 100,
-                fraDag = 17
+        } returns
+            Forsikringsvurdering(
+                identitetsnummer = person.id,
+                harForsikring = true,
+                dekning =
+                    Forsikringsvurdering.Dekning(
+                        grad = 100,
+                        fraDag = 17,
+                    ),
             )
-        )
 
         // When:
         val response =
@@ -72,12 +74,12 @@ class GetForsikringsvurderingForPersonIntegrationTest {
 
         coEvery {
             integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
-        } returns Forsikringsvurdering(
-            identitetsnummer = person.id,
-            harForsikring = false,
-            dekning = null
-        )
-
+        } returns
+            Forsikringsvurdering(
+                identitetsnummer = person.id,
+                harForsikring = false,
+                dekning = null,
+            )
 
         // When:
         val response =
@@ -175,14 +177,16 @@ class GetForsikringsvurderingForPersonIntegrationTest {
 
         coEvery {
             integrationTestFixture.forsikringsvurderingHenterMock.hent(forsikringsvurderingId)
-        } returns Forsikringsvurdering(
-            identitetsnummer = lagIdentitetsnummer(),
-            harForsikring = true,
-            dekning = Forsikringsvurdering.Dekning(
-                grad = 100,
-                fraDag = 17
+        } returns
+            Forsikringsvurdering(
+                identitetsnummer = lagIdentitetsnummer(),
+                harForsikring = true,
+                dekning =
+                    Forsikringsvurdering.Dekning(
+                        grad = 100,
+                        fraDag = 17,
+                    ),
             )
-        )
 
         // When:
         val response =
@@ -205,5 +209,4 @@ class GetForsikringsvurderingForPersonIntegrationTest {
             response.bodyAsJsonNode!!,
         )
     }
-
 }

@@ -45,23 +45,25 @@ class TestMediator(
         )
 
     private val stikkprøver =
-        Stikkprøver(object : Stikkprøver.Configuration {
-            override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+        Stikkprøver(
+            object : Stikkprøver.Configuration {
+                override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
-            override fun utsFlereArbeidsgivereForlengelse() = false
+                override fun utsFlereArbeidsgivereForlengelse() = false
 
-            override fun selvstendigNæringsdrivendeForlengelse() = false
+                override fun selvstendigNæringsdrivendeForlengelse() = false
 
-            override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+                override fun utsEnArbeidsgiverFørstegangsbehandling() = false
 
-            override fun utsEnArbeidsgiverForlengelse() = false
+                override fun utsEnArbeidsgiverForlengelse() = false
 
-            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
 
-            override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+                override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
 
-            override fun fullRefusjonEnArbeidsgiver() = false
-        })
+                override fun fullRefusjonEnArbeidsgiver() = false
+            },
+        )
 
     private val kommandofabrikk =
         Kommandofabrikk(

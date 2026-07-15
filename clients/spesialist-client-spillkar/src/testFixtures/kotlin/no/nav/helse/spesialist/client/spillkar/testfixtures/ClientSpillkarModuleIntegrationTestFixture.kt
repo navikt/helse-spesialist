@@ -10,33 +10,37 @@ import java.util.UUID
 
 object ClientSpillkarModuleIntegrationTestFixture {
     val wireMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
-            WireMockServer::start,
-        ).also { server ->
-            val samlingId = UUID.randomUUID()
-            server.stubFor(
-                post(urlEqualTo("/vurderte-inngangsvilkår/alle")).willReturn(
-                    okJson(
-                        """
-                        {
-                          "samlingAvVurderteInngangsvilkår": [
+        WireMockServer(WireMockConfiguration.options().dynamicPort())
+            .also(
+                WireMockServer::start,
+            ).also { server ->
+                val samlingId = UUID.randomUUID()
+                server.stubFor(
+                    post(urlEqualTo("/vurderte-inngangsvilkår/alle")).willReturn(
+                        okJson(
+                            """
                             {
-                              "samlingAvVurderteInngangsvilkårId": "$samlingId",
-                              "versjon": 1,
-                              "skjæringstidspunkt": "2021-01-01",
-                              "vurderteInngangsvilkår": []
+                              "samlingAvVurderteInngangsvilkår": [
+                                {
+                                  "samlingAvVurderteInngangsvilkårId": "$samlingId",
+                                  "versjon": 1,
+                                  "skjæringstidspunkt": "2021-01-01",
+                                  "vurderteInngangsvilkår": []
+                                }
+                              ]
                             }
-                          ]
-                        }
-                        """.trimIndent(),
+                            """.trimIndent(),
+                        ),
                     ),
-                ),
-            )
-            server.stubFor(
-                post(urlEqualTo("/vurderte-inngangsvilkår/manuelle-vurderinger"))
-                    .willReturn(com.github.tomakehurst.wiremock.client.WireMock.noContent()),
-            )
-        }
+                )
+                server.stubFor(
+                    post(urlEqualTo("/vurderte-inngangsvilkår/manuelle-vurderinger"))
+                        .willReturn(
+                            com.github.tomakehurst.wiremock.client.WireMock
+                                .noContent(),
+                        ),
+                )
+            }
 
     val moduleConfiguration =
         ClientSpillkarModule.Configuration(

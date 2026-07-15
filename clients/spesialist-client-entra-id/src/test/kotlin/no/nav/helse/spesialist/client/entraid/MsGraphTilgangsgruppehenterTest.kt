@@ -31,9 +31,9 @@ class MsGraphTilgangsgruppehenterTest {
                         "${integrationTestFixture.tilgangsgrupperTilBrukerroller.egenAnsatt.last()}"
                       ]
                     }
-                    """.trimIndent()
-                )
-            )
+                    """.trimIndent(),
+                ),
+            ),
         )
 
         // When:
@@ -49,8 +49,8 @@ class MsGraphTilgangsgruppehenterTest {
         // Given:
         integrationTestFixture.msGraphWireMockServer.stubFor(
             post(urlPathTemplate("/v1.0/users/{oid}/checkMemberGroups")).willReturn(
-                okJson("""{ "value": [] }""")
-            )
+                okJson("""{ "value": [] }"""),
+            ),
         )
 
         // When:
@@ -66,8 +66,8 @@ class MsGraphTilgangsgruppehenterTest {
         // Given:
         integrationTestFixture.msGraphWireMockServer.stubFor(
             post(urlPathTemplate("/v1.0/users/{oid}/checkMemberGroups")).willReturn(
-                WireMock.notFound().withBody("""{ "error": {"code": "Request_ResourceNotFound" } }""")
-            )
+                WireMock.notFound().withBody("""{ "error": {"code": "Request_ResourceNotFound" } }"""),
+            ),
         )
 
         // When:
@@ -83,8 +83,8 @@ class MsGraphTilgangsgruppehenterTest {
         // Given:
         integrationTestFixture.msGraphWireMockServer.stubFor(
             post(urlPathTemplate("/v1.0/users/{oid}/checkMemberGroups")).willReturn(
-                WireMock.serverError().withBody("Feilmelding som ikke engang er JSON")
-            )
+                WireMock.serverError().withBody("Feilmelding som ikke engang er JSON"),
+            ),
         )
 
         // Then:

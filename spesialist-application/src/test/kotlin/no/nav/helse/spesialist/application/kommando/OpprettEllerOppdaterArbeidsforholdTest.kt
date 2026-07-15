@@ -63,6 +63,7 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
             }
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
+
     private fun enCommand() =
         OpprettEllerOppdaterArbeidsforhold(
             fødselsnummer = FØDSELSNUMMER,

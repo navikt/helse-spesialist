@@ -14,27 +14,27 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class TilkommenInntektTest {
-
     @Test
     fun `kan opprette tilkommen Inntekt`() {
-        //given
+        // given
         val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
 
-        //when
-        val tilkommenInntekt = TilkommenInntekt.ny(
-            periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
-            periodebeløp = BigDecimal("10000"),
-            identitetsnummer = identitetsnummer,
-            saksbehandlerIdent = saksbehandlerIdent,
-            notatTilBeslutter = "et notat til beslutter",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            organisasjonsnummer = organisasjonsnummer
-        )
+        // when
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                periode = (1 jan 2018) tilOgMed (31 jan 2018),
+                ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
+                periodebeløp = BigDecimal("10000"),
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = saksbehandlerIdent,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                organisasjonsnummer = organisasjonsnummer,
+            )
 
-        //then
+        // then
         assertEquals(1, tilkommenInntekt.events.size)
         assertEquals(TilkommenInntektOpprettetEvent::class, tilkommenInntekt.events.last()::class)
         val opprettetEvent = tilkommenInntekt.events.last() as TilkommenInntektOpprettetEvent
@@ -58,21 +58,22 @@ class TilkommenInntektTest {
 
     @Test
     fun `kan endre tilkommen inntekt`() {
-        //given
+        // given
         val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val tilkommenInntekt = TilkommenInntekt.ny(
-            periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
-            periodebeløp = BigDecimal("10000"),
-            identitetsnummer = identitetsnummer,
-            saksbehandlerIdent = lagSaksbehandler().ident,
-            notatTilBeslutter = "et notat til beslutter",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            organisasjonsnummer = organisasjonsnummer
-        )
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                periode = (1 jan 2018) tilOgMed (31 jan 2018),
+                ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
+                periodebeløp = BigDecimal("10000"),
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                organisasjonsnummer = organisasjonsnummer,
+            )
 
-        //when
+        // when
         val endretOrganisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
         tilkommenInntekt.endreTil(
@@ -82,10 +83,10 @@ class TilkommenInntektTest {
             ekskluderteUkedager = emptySet(),
             saksbehandlerIdent = saksbehandlerIdent,
             notatTilBeslutter = "nytt notat",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong())
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
         )
 
-        //then
+        // then
         assertEquals(2, tilkommenInntekt.events.size)
         assertEquals(TilkommenInntektEndretEvent::class, tilkommenInntekt.events.last()::class)
         val endretEvent = tilkommenInntekt.events.last() as TilkommenInntektEndretEvent
@@ -108,28 +109,28 @@ class TilkommenInntektTest {
         assertEquals(emptySet(), tilkommenInntekt.ekskluderteUkedager)
         assertEquals(BigDecimal("100"), tilkommenInntekt.periodebeløp)
         assertFalse(tilkommenInntekt.fjernet)
-
     }
 
     @Test
     fun `kan gjenoprette tilkommen inntekt`() {
-        //given
+        // given
         val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val tilkommenInntekt = TilkommenInntekt.ny(
-            periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
-            periodebeløp = BigDecimal("10000"),
-            identitetsnummer = identitetsnummer,
-            saksbehandlerIdent = lagSaksbehandler().ident,
-            notatTilBeslutter = "et notat til beslutter",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            organisasjonsnummer = organisasjonsnummer
-        )
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                periode = (1 jan 2018) tilOgMed (31 jan 2018),
+                ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
+                periodebeløp = BigDecimal("10000"),
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                organisasjonsnummer = organisasjonsnummer,
+            )
 
         tilkommenInntekt.fjern(lagSaksbehandler().ident, "fjern", TotrinnsvurderingId(Random.nextLong()))
 
-        //when
+        // when
         val endretOrganisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
         tilkommenInntekt.gjenopprett(
@@ -139,10 +140,10 @@ class TilkommenInntektTest {
             ekskluderteUkedager = emptySet(),
             saksbehandlerIdent = saksbehandlerIdent,
             notatTilBeslutter = "nytt notat",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong())
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
         )
 
-        //then
+        // then
         assertEquals(3, tilkommenInntekt.events.size)
         assertEquals(TilkommenInntektGjenopprettetEvent::class, tilkommenInntekt.events.last()::class)
         val gjenopprettetEvent = tilkommenInntekt.events.last() as TilkommenInntektGjenopprettetEvent
@@ -165,7 +166,6 @@ class TilkommenInntektTest {
         assertEquals(emptySet(), tilkommenInntekt.ekskluderteUkedager)
         assertEquals(BigDecimal("100"), tilkommenInntekt.periodebeløp)
         assertFalse(tilkommenInntekt.fjernet)
-
     }
 
     @Test
@@ -173,16 +173,17 @@ class TilkommenInntektTest {
         // given
         val identitetsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val tilkommenInntekt = TilkommenInntekt.ny(
-            periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
-            periodebeløp = BigDecimal("10000"),
-            identitetsnummer = identitetsnummer,
-            saksbehandlerIdent = lagSaksbehandler().ident,
-            notatTilBeslutter = "et notat til beslutter",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            organisasjonsnummer = organisasjonsnummer
-        )
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                periode = (1 jan 2018) tilOgMed (31 jan 2018),
+                ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
+                periodebeløp = BigDecimal("10000"),
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                organisasjonsnummer = organisasjonsnummer,
+            )
 
         // when
         val saksbehandlerIdent = lagSaksbehandler().ident

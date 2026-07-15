@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.spillkar
 
-import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import com.github.tomakehurst.wiremock.client.WireMock.noContent
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.serverError
@@ -9,6 +8,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.helse.spesialist.application.spillkar.ManuellInngangsvilkårVurdering
 import no.nav.helse.spesialist.application.spillkar.ManuelleInngangsvilkårVurderinger
+import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -21,7 +21,8 @@ class SpillkarClientInngangsvilkårInnsenderTest {
     @Suppress("JUnitMalformedDeclaration")
     @RegisterExtension
     private val wireMock: WireMockExtension =
-        WireMockExtension.newInstance()
+        WireMockExtension
+            .newInstance()
             .options(wireMockConfig().dynamicPort())
             .build()
 

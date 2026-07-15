@@ -21,7 +21,7 @@ class UnimplementedDefinisjonDao : DefinisjonDao {
         forklaring: String?,
         handling: String?,
         avviklet: Boolean,
-        opprettet: LocalDateTime
+        opprettet: LocalDateTime,
     ) {
         TODO("Not yet implemented")
     }

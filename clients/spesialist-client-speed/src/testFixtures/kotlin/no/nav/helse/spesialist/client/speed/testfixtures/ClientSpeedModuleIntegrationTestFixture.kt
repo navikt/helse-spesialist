@@ -9,24 +9,25 @@ import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 
 object ClientSpeedModuleIntegrationTestFixture {
     val wireMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
-            WireMockServer::start,
-        ).also { server ->
-            server.stubFor(
-                post(urlEqualTo("/api/alle_identer")).willReturn(
-                    okJson(
-                        """{ "identer": [], "kilde": "PDL" }""",
+        WireMockServer(WireMockConfiguration.options().dynamicPort())
+            .also(
+                WireMockServer::start,
+            ).also { server ->
+                server.stubFor(
+                    post(urlEqualTo("/api/alle_identer")).willReturn(
+                        okJson(
+                            """{ "identer": [], "kilde": "PDL" }""",
+                        ),
                     ),
-                ),
-            )
-            server.stubFor(
-                post(urlEqualTo("/api/person")).willReturn(
-                    okJson(
-                        """{ "fødselsdato": "1990-01-01", "dødsdato": null, "fornavn": "Test", "mellomnavn": null, "etternavn": "Testesen", "adressebeskyttelse": "UGRADERT", "kjønn": "UKJENT", "kilde": "PDL" }""",
+                )
+                server.stubFor(
+                    post(urlEqualTo("/api/person")).willReturn(
+                        okJson(
+                            """{ "fødselsdato": "1990-01-01", "dødsdato": null, "fornavn": "Test", "mellomnavn": null, "etternavn": "Testesen", "adressebeskyttelse": "UGRADERT", "kjønn": "UKJENT", "kilde": "PDL" }""",
+                        ),
                     ),
-                ),
-            )
-        }
+                )
+            }
 
     val moduleConfiguration =
         ClientSpeedModule.Configuration(

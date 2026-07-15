@@ -14,19 +14,23 @@ object GraphQL {
         brukerroller: Set<Brukerrolle>,
         variables: Map<String, Any>,
     ): JsonNode =
-        REST.post(
-            relativeUrl = "graphql",
-            saksbehandler = saksbehandler,
-            tilganger = tilganger,
-            brukerroller = brukerroller,
-            request = mapOf(
-                "query" to (
-                        this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
-                            ?.use { it.reader().readText() }
-                            ?: error("Fant ikke $operationName.graphql")
+        REST
+            .post(
+                relativeUrl = "graphql",
+                saksbehandler = saksbehandler,
+                tilganger = tilganger,
+                brukerroller = brukerroller,
+                request =
+                    mapOf(
+                        "query" to (
+                            this::class.java
+                                .getResourceAsStream("/graphql/$operationName.graphql")
+                                ?.use { it.reader().readText() }
+                                ?: error("Fant ikke $operationName.graphql")
                         ),
-                "operationName" to operationName,
-                "variables" to variables,
-            ),
-        )!!.also { assertNull(it["errors"], "Fikk feil i GraphQL-response") }
+                        "operationName" to operationName,
+                        "variables" to variables,
+                    ),
+            )!!
+            .also { assertNull(it["errors"], "Fikk feil i GraphQL-response") }
 }

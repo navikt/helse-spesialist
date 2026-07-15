@@ -7,8 +7,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 class InMemoryVedtaksperiodeRepository :
     AbstractInMemoryRepository<VedtaksperiodeId, Vedtaksperiode>(),
     VedtaksperiodeRepository {
-    override fun finnAlleIderForPerson(identitetsnummer: Identitetsnummer): Set<VedtaksperiodeId> =
-        alle().filter { it.identitetsnummer == identitetsnummer }.map { it.id }.toSet()
+    override fun finnAlleIderForPerson(identitetsnummer: Identitetsnummer): Set<VedtaksperiodeId> = alle().filter { it.identitetsnummer == identitetsnummer }.map { it.id }.toSet()
 
     override fun deepCopy(original: Vedtaksperiode): Vedtaksperiode =
         Vedtaksperiode(

@@ -6,10 +6,16 @@ import java.time.LocalDate
 class InMemoryInntektRepository {
     private val inntekter = mutableMapOf<Pair<String, LocalDate>, List<Inntekter>>()
 
-    fun lagre(fødselsnummer: String, skjæringstidspunkt: LocalDate, inntekterListe: List<Inntekter>) {
+    fun lagre(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        inntekterListe: List<Inntekter>,
+    ) {
         inntekter[fødselsnummer to skjæringstidspunkt] = inntekterListe
     }
 
-    fun finn(fødselsnummer: String, skjæringstidspunkt: LocalDate): List<Inntekter>? =
-        inntekter[fødselsnummer to skjæringstidspunkt]
+    fun finn(
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate,
+    ): List<Inntekter>? = inntekter[fødselsnummer to skjæringstidspunkt]
 }

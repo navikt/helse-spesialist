@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class EndretSkjermetinfoRiverTest {
-
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(EndretSkjermetinfoRiver(mediator))
 
@@ -22,6 +21,7 @@ internal class EndretSkjermetinfoRiverTest {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagEndretSkjermetinfo(lagFødselsnummer(), true, UUID.randomUUID()))
         verify(exactly = 1) { mediator.mottaMelding(any<EndretEgenAnsattStatus>(), any()) }
     }
+
     @Test
     fun `leser ikke endret_skjermetinfo hvis fødselsnummer ikke er gyldig`() {
         testRapid.sendTestMessage(Testmeldingfabrikk.lagEndretSkjermetinfo("ugyldig", true, UUID.randomUUID()))

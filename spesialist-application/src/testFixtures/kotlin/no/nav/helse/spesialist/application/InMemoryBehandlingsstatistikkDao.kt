@@ -14,30 +14,36 @@ class InMemoryBehandlingsstatistikkDao : BehandlingsstatistikkDao {
 
     override fun getAntallFullførteBeslutteroppgaver(fom: LocalDate) = 4
 
-    override fun getAutomatiseringPerKombinasjon(fom: LocalDate) = StatistikkPerKombinasjon(
-        perInntekttype = emptyMap(),
-        perPeriodetype = emptyMap(),
-        perMottakertype = emptyMap(),
-        perUtbetalingtype = emptyMap(),
-    )
+    override fun getAutomatiseringPerKombinasjon(fom: LocalDate) =
+        StatistikkPerKombinasjon(
+            perInntekttype = emptyMap(),
+            perPeriodetype = emptyMap(),
+            perMottakertype = emptyMap(),
+            perUtbetalingtype = emptyMap(),
+        )
 
-    override fun getTilgjengeligeOppgaverPerInntektOgPeriodetype() = StatistikkPerKombinasjon(
-        perInntekttype = emptyMap(),
-        perPeriodetype = emptyMap(),
-        perMottakertype = emptyMap(),
-        perUtbetalingtype = emptyMap(),
-    )
+    override fun getTilgjengeligeOppgaverPerInntektOgPeriodetype() =
+        StatistikkPerKombinasjon(
+            perInntekttype = emptyMap(),
+            perPeriodetype = emptyMap(),
+            perMottakertype = emptyMap(),
+            perUtbetalingtype = emptyMap(),
+        )
 
-    override fun getManueltUtførteOppgaverPerInntektOgPeriodetype(fom: LocalDate) = StatistikkPerKombinasjon(
-        perInntekttype = emptyMap(),
-        perPeriodetype = emptyMap(),
-        perMottakertype = emptyMap(),
-        perUtbetalingtype = emptyMap(),
-    )
+    override fun getManueltUtførteOppgaverPerInntektOgPeriodetype(fom: LocalDate) =
+        StatistikkPerKombinasjon(
+            perInntekttype = emptyMap(),
+            perPeriodetype = emptyMap(),
+            perMottakertype = emptyMap(),
+            perUtbetalingtype = emptyMap(),
+        )
 
     override fun antallTilgjengeligeOppgaverFor(egenskap: EgenskapForDatabase) = 5
 
-    override fun antallFerdigstilteOppgaverFor(egenskap: EgenskapForDatabase, fom: LocalDate) = 6
+    override fun antallFerdigstilteOppgaverFor(
+        egenskap: EgenskapForDatabase,
+        fom: LocalDate,
+    ) = 6
 
     override fun getAntallAnnulleringer(fom: LocalDate) = 7
 

@@ -29,16 +29,15 @@ class TestPerson {
     val utbetalingId1 = vedtaksperiode1.utbetalingId
     private val utbetalingId2 = vedtaksperiode2.utbetalingId
 
-    override fun toString(): String {
-        return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
-    }
+    override fun toString(): String = "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
 
     val Int.arbeidsgiver
         get() = arbeidsgivere[this - 1] ?: throw IllegalArgumentException("Arbeidsgiver med index $this finnes ikke")
 
-    fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer, aktørId).also {
-        arbeidsgivere[arbeidsgivere.size] = it
-    }
+    fun nyArbeidsgiver() =
+        TestArbeidsgiver(fødselsnummer, aktørId).also {
+            arbeidsgivere[arbeidsgivere.size] = it
+        }
 }
 
 class TestArbeidsgiver(
@@ -49,14 +48,16 @@ class TestArbeidsgiver(
     val organisasjonsnummer = lagOrganisasjonsnummer()
     val organisasjonsnavn = lagOrganisasjonsnavn()
 
-    fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
-        vedtaksperioder[vedtaksperioder.size] = it
-    }
+    fun nyVedtaksperiode() =
+        TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
+            vedtaksperioder[vedtaksperioder.size] = it
+        }
 
     val Int.vedtaksperiode
-        get() = vedtaksperioder[this] ?: throw IllegalArgumentException(
-            "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
-        )
+        get() =
+            vedtaksperioder[this] ?: throw IllegalArgumentException(
+                "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
+            )
 }
 
 class TestVedtaksperiode(

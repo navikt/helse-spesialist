@@ -10,17 +10,15 @@ class InMemoryDokumentDao : DokumentDao {
     override fun lagre(
         fødselsnummer: String,
         dokumentId: UUID,
-        dokument: JsonNode
+        dokument: JsonNode,
     ) {
         dokumenter[fødselsnummer to dokumentId] = dokument
     }
 
     override fun hent(
         fødselsnummer: String,
-        dokumentId: UUID
-    ): JsonNode? {
-        return dokumenter[fødselsnummer to dokumentId]
-    }
+        dokumentId: UUID,
+    ): JsonNode? = dokumenter[fødselsnummer to dokumentId]
 
     override fun slettGamleDokumenter(): Int {
         TODO("Not yet implemented")

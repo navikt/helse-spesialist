@@ -10,8 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class PgVenterPåKvitteringForOverstyringRepositoryTest: AbstractDBIntegrationTest() {
-
+class PgVenterPåKvitteringForOverstyringRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.venterPåKvitteringForOverstyringRepository
 
     @Test

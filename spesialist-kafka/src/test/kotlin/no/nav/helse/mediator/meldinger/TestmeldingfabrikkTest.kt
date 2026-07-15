@@ -11,9 +11,10 @@ import java.util.UUID
 
 internal class TestmeldingfabrikkTest {
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val objectMapper =
+            jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         private val FNR = "${UUID.randomUUID()}"
         private val AKTØR = "${UUID.randomUUID()}"
@@ -43,9 +44,14 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun `vedtaksperiode forkastet`() {
-        val melding = Testmeldingfabrikk.lagVedtaksperiodeForkastet(
-            AKTØR, FNR, VEDTAKSPERIODE_ID, organisasjonsnummer = "orgnr", id = HENDELSE_ID
-        )
+        val melding =
+            Testmeldingfabrikk.lagVedtaksperiodeForkastet(
+                AKTØR,
+                FNR,
+                VEDTAKSPERIODE_ID,
+                organisasjonsnummer = "orgnr",
+                id = HENDELSE_ID,
+            )
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)
@@ -72,7 +78,11 @@ internal class TestmeldingfabrikkTest {
         }
     }
 
-    private fun assertFelt(felt: String, forventet: String, melding: String) {
+    private fun assertFelt(
+        felt: String,
+        forventet: String,
+        melding: String,
+    ) {
         objectMapper.readTree(melding).also { json ->
             assertEquals(forventet, json.path(felt).asText())
         }

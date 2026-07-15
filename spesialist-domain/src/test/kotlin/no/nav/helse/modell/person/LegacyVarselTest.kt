@@ -179,9 +179,7 @@ internal class LegacyVarselTest {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kode: String = "EN_KODE",
         status: LegacyVarsel.Status = LegacyVarsel.Status.AKTIV,
-    ): LegacyVarsel {
-        return LegacyVarsel(varselId, kode, LocalDateTime.now(), vedtaksperiodeId, status)
-    }
+    ): LegacyVarsel = LegacyVarsel(varselId, kode, LocalDateTime.now(), vedtaksperiodeId, status)
 
     private fun LegacyVarsel.assertOpprettelse(
         forventetVedtaksperiodeId: UUID,

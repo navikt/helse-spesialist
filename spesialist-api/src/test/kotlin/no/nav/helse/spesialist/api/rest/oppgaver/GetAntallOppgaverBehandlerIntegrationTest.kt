@@ -72,19 +72,21 @@ class GetAntallOppgaverBehandlerIntegrationTest {
         // given
         val saksbehandler = lagSaksbehandler()
 
-        val oppgave = lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
-            .also {
-                it.tildelTil(saksbehandler, emptySet())
-                it.leggPåVent(skalTildeles = true, saksbehandler = saksbehandler)
-            }.also(sessionContext.oppgaveRepository::lagre)
+        val oppgave =
+            lagOppgave(SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID())
+                .also {
+                    it.tildelTil(saksbehandler, emptySet())
+                    it.leggPåVent(skalTildeles = true, saksbehandler = saksbehandler)
+                }.also(sessionContext.oppgaveRepository::lagre)
 
         val dialog = lagDialog().also(sessionContext.dialogRepository::lagre)
-        val påVent = lagPåVent(
-            vedtaksperiodeId = oppgave.vedtaksperiodeId,
-            saksbehandlerOid = saksbehandler.id,
-            frist = LocalDate.now(),
-            dialogId = dialog.id(),
-        )
+        val påVent =
+            lagPåVent(
+                vedtaksperiodeId = oppgave.vedtaksperiodeId,
+                saksbehandlerOid = saksbehandler.id,
+                frist = LocalDate.now(),
+                dialogId = dialog.id(),
+            )
         sessionContext.påVentRepository.lagre(påVent)
 
         // when
@@ -99,5 +101,4 @@ class GetAntallOppgaverBehandlerIntegrationTest {
         assertEquals(1, body["antallMineSakerPåVent"].asInt())
         assertEquals(1, body["antallMineSakerPåVentNåddFrist"].asInt())
     }
-
 }

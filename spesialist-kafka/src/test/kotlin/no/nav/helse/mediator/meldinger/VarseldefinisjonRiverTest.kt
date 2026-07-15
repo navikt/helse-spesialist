@@ -36,7 +36,8 @@ internal class VarseldefinisjonRiverTest {
     }
 
     @Language("JSON")
-    private fun varseldefinisjon(id: UUID) = """
+    private fun varseldefinisjon(id: UUID) =
+        """
     {
       "@event_name": "varselkode_ny_definisjon",
       "varselkode": "XX_YY_1",
@@ -62,7 +63,8 @@ internal class VarseldefinisjonRiverTest {
     """
 
     @Language("JSON")
-    private fun varseldefinisjonUtenForklaringOgHandling(id: UUID) = """
+    private fun varseldefinisjonUtenForklaringOgHandling(id: UUID) =
+        """
     {
       "@event_name": "varselkode_ny_definisjon",
       "varselkode": "XX_YY_1",

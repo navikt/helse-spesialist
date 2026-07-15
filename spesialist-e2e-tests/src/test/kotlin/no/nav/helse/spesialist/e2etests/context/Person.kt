@@ -14,8 +14,7 @@ data class Person(
     val kjønn: Kjønn = Kjønn.entries.toTypedArray().random(),
     val fødselsnummer: String = lagFødselsnummer(fødselsdato = fødselsdato, mann = kjønn == Kjønn.Mann),
     val aktørId: String = lagAktørId(),
-
     val fornavn: String = lagFornavn(),
     val mellomnavn: String? = lagMellomnavnOrNull(),
-    val etternavn: String = lagEtternavn()
+    val etternavn: String = lagEtternavn(),
 )

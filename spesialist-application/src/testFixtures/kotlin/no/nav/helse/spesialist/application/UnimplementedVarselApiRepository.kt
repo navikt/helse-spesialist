@@ -7,14 +7,14 @@ import java.util.UUID
 class UnimplementedVarselApiRepository : VarselApiRepository {
     override fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ): Set<VarselDbDto> {
         TODO("Not yet implemented")
     }
 
     override fun finnVarslerSomIkkeErInaktiveForSisteBehandling(
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID
+        utbetalingId: UUID,
     ): Set<VarselDbDto> {
         TODO("Not yet implemented")
     }

@@ -753,7 +753,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             endret = endret,
             varseldefinisjonKode = varseldefinisjon.kode,
             varseldefinisjon = varseldefinisjon.dto,
-            behandlingId= behandlingId,
+            behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiodeId,
         )
 

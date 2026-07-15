@@ -17,18 +17,25 @@ class VedtaksperiodeReberegnetRiverTest {
     // sendt videre = "tatt inn," altså at preconditions og validations i riveren "aksepterer" meldingen
     var meldingenBleSendtVidere = false
 
-    val meldingmottaker = object : Meldingmottaker {
-        override fun mottaMelding(melding: Personmelding, kontekstbasertPubliserer: MeldingPubliserer) {
-            meldingenBleSendtVidere = true
+    val meldingmottaker =
+        object : Meldingmottaker {
+            override fun mottaMelding(
+                melding: Personmelding,
+                kontekstbasertPubliserer: MeldingPubliserer,
+            ) {
+                meldingenBleSendtVidere = true
+            }
         }
-    }
 
     @ParameterizedTest
     @CsvSource(
         "AVVENTER_GODKJENNING, AVVENTER_HISTORIKK",
         "SELVSTENDIG_AVVENTER_GODKJENNING, AVVENTER_HISTORIKK",
     )
-    fun `riveren tar inn aktuelle meldinger`(forrigeTilstand: String, gjeldendeTilstand: String) {
+    fun `riveren tar inn aktuelle meldinger`(
+        forrigeTilstand: String,
+        gjeldendeTilstand: String,
+    ) {
         sendMelding(forrigeTilstand, gjeldendeTilstand)
         assertTrue { meldingenBleSendtVidere }
     }
@@ -44,7 +51,10 @@ class VedtaksperiodeReberegnetRiverTest {
         "TIL_UTBETALING, AVVENTER_GODKJENNING",
         "AVSLUTTET, AVVENTER_GODKJENNING",
     )
-    fun `riveren tar ikke inn ikke-aktuelle meldinger`(forrigeTilstand: String, gjeldendeTilstand: String) {
+    fun `riveren tar ikke inn ikke-aktuelle meldinger`(
+        forrigeTilstand: String,
+        gjeldendeTilstand: String,
+    ) {
         sendMelding(forrigeTilstand, gjeldendeTilstand)
         assertFalse { meldingenBleSendtVidere }
     }
@@ -61,15 +71,18 @@ class VedtaksperiodeReberegnetRiverTest {
         assertTrue(meldingenBleSendtVidere)
     }
 
-    private fun sendMelding(forrigeTilstand: String, gjeldendeTilstand: String) {
+    private fun sendMelding(
+        forrigeTilstand: String,
+        gjeldendeTilstand: String,
+    ) {
         TestRapid().medRivers(VedtaksperiodeReberegnetRiver(meldingmottaker)).sendTestMessage(
             Testmeldingfabrikk.lagVedtaksperiodeEndret(
                 id = UUID.randomUUID(),
                 aktørId = "aktørId",
                 fødselsnummer = "fødselsnummer",
                 forrigeTilstand = forrigeTilstand,
-                gjeldendeTilstand = gjeldendeTilstand
-            )
+                gjeldendeTilstand = gjeldendeTilstand,
+            ),
         )
     }
 }

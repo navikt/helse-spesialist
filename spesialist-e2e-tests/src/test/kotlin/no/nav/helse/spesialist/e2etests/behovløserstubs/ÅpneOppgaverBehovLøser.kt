@@ -6,8 +6,9 @@ class ÅpneOppgaverBehovLøser : AbstractBehovLøser("ÅpneOppgaver") {
     var antall = 0
     var oppslagFeilet = false
 
-    override fun løsning(behovJson: JsonNode) = mapOf(
-        "antall" to antall,
-        "oppslagFeilet" to oppslagFeilet
-    )
+    override fun løsning(behovJson: JsonNode) =
+        mapOf(
+            "antall" to antall,
+            "oppslagFeilet" to oppslagFeilet,
+        )
 }

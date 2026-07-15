@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.domain.VeilederStansId
 class InMemoryVeilederStansRepository :
     AbstractInMemoryRepository<VeilederStansId, VeilederStans>(),
     VeilederStansRepository {
-
     override fun deepCopy(original: VeilederStans): VeilederStans =
         VeilederStans.fraLagring(
             id = original.id,
@@ -28,4 +27,3 @@ class InMemoryVeilederStansRepository :
             .filter { it.identitetsnummer == identitetsnummer && it.erStansett }
             .maxByOrNull { it.opprettet }
 }
-

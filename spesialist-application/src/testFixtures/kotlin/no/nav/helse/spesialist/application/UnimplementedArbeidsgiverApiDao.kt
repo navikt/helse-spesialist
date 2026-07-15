@@ -6,14 +6,14 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsforholdApiDto
 class UnimplementedArbeidsgiverApiDao : ArbeidsgiverApiDao {
     override fun finnArbeidsforhold(
         fødselsnummer: String,
-        arbeidsgiverIdentifikator: String
+        arbeidsgiverIdentifikator: String,
     ): List<ArbeidsforholdApiDto> {
         TODO("Not yet implemented")
     }
 
     override fun finnArbeidsgiverInntekterFraAordningen(
         fødselsnummer: String,
-        orgnummer: String
+        orgnummer: String,
     ): List<ArbeidsgiverApiDao.ArbeidsgiverInntekterFraAOrdningen> {
         TODO("Not yet implemented")
     }

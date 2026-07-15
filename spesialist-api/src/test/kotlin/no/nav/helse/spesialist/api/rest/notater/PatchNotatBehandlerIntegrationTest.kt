@@ -22,27 +22,33 @@ class PatchNotatBehandlerIntegrationTest {
         // Given:
         val saksbehandler = lagSaksbehandler()
 
-        val identitetsnummer = lagPerson()
-            .also(sessionContext.personRepository::lagre)
-            .id
-        val vedtaksperiodeId = lagVedtaksperiode(identitetsnummer = identitetsnummer)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-            .id
-        val dialogId = Dialog.Factory.ny()
-            .also(sessionContext.dialogRepository::lagre)
-            .id()
-        val notatId = lagNotat(
-            dialogRef = dialogId,
-            saksbehandlerOid = saksbehandler.id,
-            vedtaksperiodeId = vedtaksperiodeId.value
-        ).also(sessionContext.notatRepository::lagre).id()
+        val identitetsnummer =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
+                .id
+        val vedtaksperiodeId =
+            lagVedtaksperiode(identitetsnummer = identitetsnummer)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+                .id
+        val dialogId =
+            Dialog.Factory
+                .ny()
+                .also(sessionContext.dialogRepository::lagre)
+                .id()
+        val notatId =
+            lagNotat(
+                dialogRef = dialogId,
+                saksbehandlerOid = saksbehandler.id,
+                vedtaksperiodeId = vedtaksperiodeId.value,
+            ).also(sessionContext.notatRepository::lagre).id()
 
         // When:
-        val response = integrationTestFixture.patch(
-            url = "/api/notater/${notatId.value}",
-            body = """{ "feilregistrert": true }""",
-            saksbehandler = saksbehandler,
-        )
+        val response =
+            integrationTestFixture.patch(
+                url = "/api/notater/${notatId.value}",
+                body = """{ "feilregistrert": true }""",
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -60,11 +66,11 @@ class PatchNotatBehandlerIntegrationTest {
             val now = LocalDateTime.now()
             assertTrue(
                 isBefore(now),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var før nå ($now), men den var $this",
             )
             assertTrue(
                 isAfter(now.minusSeconds(5)),
-                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this"
+                "Forventet at den lagrede verdien av opprettetTidspunkt var mindre enn fem sekunder før nå ($now), men den var $this",
             )
         }
     }

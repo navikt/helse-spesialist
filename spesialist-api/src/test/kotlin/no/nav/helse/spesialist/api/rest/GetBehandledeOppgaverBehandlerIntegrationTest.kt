@@ -21,7 +21,8 @@ class GetBehandledeOppgaverBehandlerIntegrationTest {
     fun `returnerer behandlede oppgaver for saksbehandler som gjør kallet`() {
         // given
         lagOppgave(
-            SpleisBehandlingId(UUID.randomUUID()), UUID.randomUUID()
+            SpleisBehandlingId(UUID.randomUUID()),
+            UUID.randomUUID(),
         ).also(sessionContext.oppgaveRepository::lagre)
 
         // when
@@ -43,5 +44,4 @@ class GetBehandledeOppgaverBehandlerIntegrationTest {
             // .. flere asserts her en gang i fremtiden
         }
     }
-
 }

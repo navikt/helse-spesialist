@@ -20,10 +20,12 @@ internal class MinuttRiverTest {
     @Test
     fun `publiserer gosys_oppgave_endret for oppgaver med aktivt SB_EX_3-varsel`() {
         val person = lagPerson().also(sessionContext.personRepository::lagre)
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-            .also(sessionContext.behandlingRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val behandling =
+            lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+                .also(sessionContext.behandlingRepository::lagre)
         lagOppgave(
             behandlingId = behandling.spleisBehandlingId!!,
             godkjenningsbehovId = UUID.randomUUID(),
@@ -41,9 +43,10 @@ internal class MinuttRiverTest {
 
         testRapid.sendTestMessage(minutt())
 
-        val publiserteMeldinger = (0 until testRapid.inspektør.size)
-            .map { testRapid.inspektør.message(it) }
-            .filter { it["@event_name"].asText() == "gosys_oppgave_endret" }
+        val publiserteMeldinger =
+            (0 until testRapid.inspektør.size)
+                .map { testRapid.inspektør.message(it) }
+                .filter { it["@event_name"].asText() == "gosys_oppgave_endret" }
         assertEquals(1, publiserteMeldinger.size)
         assertEquals(person.id.value, publiserteMeldinger.single()["fødselsnummer"].asText())
     }
@@ -51,10 +54,12 @@ internal class MinuttRiverTest {
     @Test
     fun `publiserer ingen meldinger når ingen oppgaver har aktivt SB_EX_3-varsel`() {
         val person = lagPerson().also(sessionContext.personRepository::lagre)
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
-        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-            .also(sessionContext.behandlingRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val behandling =
+            lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+                .also(sessionContext.behandlingRepository::lagre)
         lagOppgave(
             behandlingId = behandling.spleisBehandlingId!!,
             godkjenningsbehovId = UUID.randomUUID(),
@@ -63,9 +68,10 @@ internal class MinuttRiverTest {
 
         testRapid.sendTestMessage(minutt())
 
-        val gosysOppgaveEndretMeldinger = (0 until testRapid.inspektør.size)
-            .map { testRapid.inspektør.message(it) }
-            .filter { it["@event_name"].asText() == "gosys_oppgave_endret" }
+        val gosysOppgaveEndretMeldinger =
+            (0 until testRapid.inspektør.size)
+                .map { testRapid.inspektør.message(it) }
+                .filter { it["@event_name"].asText() == "gosys_oppgave_endret" }
         assertEquals(0, gosysOppgaveEndretMeldinger.size)
     }
 

@@ -4,7 +4,10 @@ import no.nav.helse.db.LegacyVarselDao
 import java.util.UUID
 
 class UnimplementedLegacyVarselDao : LegacyVarselDao {
-    override fun avvikleVarsel(varselkode: String, definisjonId: UUID) {
+    override fun avvikleVarsel(
+        varselkode: String,
+        definisjonId: UUID,
+    ) {
         TODO("Not yet implemented")
     }
 }

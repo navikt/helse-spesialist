@@ -24,8 +24,9 @@ internal class OvervåkOverstyringerRiverTest {
     fun `overstyringer i blå perioder gir innslag i venter-tabellen`() {
         // Given
         val person = lagPerson().also(sessionContext.personRepository::lagre)
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
         lagBehandling(
             vedtaksperiodeId = vedtaksperiode.id,
             tilstand = Behandling.Tilstand.VidereBehandlingAvklares,
@@ -38,7 +39,7 @@ internal class OvervåkOverstyringerRiverTest {
         // Then
         assertEquals(
             person.id,
-            sessionContext.venterPåKvitteringForOverstyringRepository.finn(MeldingId(meldingId))?.identitetsnummer
+            sessionContext.venterPåKvitteringForOverstyringRepository.finn(MeldingId(meldingId))?.identitetsnummer,
         )
     }
 
@@ -46,8 +47,9 @@ internal class OvervåkOverstyringerRiverTest {
     fun `gjør ikke noe med overstyringer i oransje perioder`() {
         // Given
         val person = lagPerson().also(sessionContext.personRepository::lagre)
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
         lagBehandling(
             vedtaksperiodeId = vedtaksperiode.id,
             tilstand = Behandling.Tilstand.KlarTilBehandling,
@@ -59,13 +61,16 @@ internal class OvervåkOverstyringerRiverTest {
 
         // Then
         assertNull(
-            sessionContext.venterPåKvitteringForOverstyringRepository.finn(MeldingId(meldingId))?.identitetsnummer
+            sessionContext.venterPåKvitteringForOverstyringRepository.finn(MeldingId(meldingId))?.identitetsnummer,
         )
     }
 
     @Language("JSON")
-    private fun overstyrInntektOgRefusjon(meldingId: UUID, vedtaksperiodeId: UUID, fødselsnummer: Identitetsnummer) =
-        """
+    private fun overstyrInntektOgRefusjon(
+        meldingId: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: Identitetsnummer,
+    ) = """
         {
           "@event_name": "overstyr_tidslinje",
           "fødselsnummer": "${fødselsnummer.value}",

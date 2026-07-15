@@ -145,8 +145,7 @@ fun lagFødselsdato(): LocalDate {
     return LocalDate.ofEpochDay(randomDayInEpoch)
 }
 
-fun lagDødsdato(fødselsdato: LocalDate): LocalDate =
-    LocalDate.ofEpochDay(Random.nextLong(fødselsdato.toEpochDay(), LocalDate.now().toEpochDay()))
+fun lagDødsdato(fødselsdato: LocalDate): LocalDate = LocalDate.ofEpochDay(Random.nextLong(fødselsdato.toEpochDay(), LocalDate.now().toEpochDay()))
 
 // Generer syntetisk fødselsnummer slik som Skattetaten også gjør - med 8 plusset på måneden i fødselsdatoen
 // Ref. https://skatteetaten.github.io/folkeregisteret-api-dokumentasjon/test-for-konsumenter/

@@ -9,7 +9,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VarseldefinisjonTest {
-
     @Test
     fun toDto() {
         val id = UUID.randomUUID()
@@ -88,5 +87,4 @@ internal class VarseldefinisjonTest {
         assertNotEquals(definisjon1, definisjon2)
         assertNotEquals(definisjon1.hashCode(), definisjon2.hashCode())
     }
-
 }

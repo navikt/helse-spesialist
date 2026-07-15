@@ -6,7 +6,7 @@ import no.nav.helse.modell.KomplettArbeidsforholdDto
 class UnimplementedArbeidsforholdDao : ArbeidsforholdDao {
     override fun findArbeidsforhold(
         fødselsnummer: String,
-        arbeidsgiverIdentifikator: String
+        arbeidsgiverIdentifikator: String,
     ): List<KomplettArbeidsforholdDto> {
         TODO("Not yet implemented")
     }
@@ -14,7 +14,7 @@ class UnimplementedArbeidsforholdDao : ArbeidsforholdDao {
     override fun upsertArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
-        arbeidsforhold: List<KomplettArbeidsforholdDto>
+        arbeidsforhold: List<KomplettArbeidsforholdDto>,
     ) {
         TODO("Not yet implemented")
     }

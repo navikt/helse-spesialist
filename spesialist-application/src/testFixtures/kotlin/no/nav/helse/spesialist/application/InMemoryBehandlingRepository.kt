@@ -6,29 +6,32 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
-class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepository<BehandlingUnikId, Behandling>() {
+class InMemoryBehandlingRepository :
+    AbstractInMemoryRepository<BehandlingUnikId, Behandling>(),
+    BehandlingRepository {
     override fun finn(id: SpleisBehandlingId): Behandling? = alle().firstOrNull { it.spleisBehandlingId == id }
+
     override fun finnAndreBehandlingerISykefraværstilfelle(
         behandling: Behandling,
-        fødselsnummer: String
+        fødselsnummer: String,
     ): Set<Behandling> =
         alle()
             .filter { it.skjæringstidspunkt.isEqual(behandling.skjæringstidspunkt) }
             .toSet()
 
-    override fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling? =
-        alle().lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }
+    override fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling? = alle().lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }
 
-    override fun deepCopy(original: Behandling): Behandling = Behandling.fraLagring(
-        id = original.id,
-        spleisBehandlingId = original.spleisBehandlingId,
-        vedtaksperiodeId = original.vedtaksperiodeId,
-        utbetalingId = original.utbetalingId,
-        tags = original.tags.toSet(),
-        tilstand = original.tilstand,
-        fom = original.fom,
-        tom = original.tom,
-        skjæringstidspunkt = original.skjæringstidspunkt,
-        yrkesaktivitetstype = original.yrkesaktivitetstype,
-    )
+    override fun deepCopy(original: Behandling): Behandling =
+        Behandling.fraLagring(
+            id = original.id,
+            spleisBehandlingId = original.spleisBehandlingId,
+            vedtaksperiodeId = original.vedtaksperiodeId,
+            utbetalingId = original.utbetalingId,
+            tags = original.tags.toSet(),
+            tilstand = original.tilstand,
+            fom = original.fom,
+            tom = original.tom,
+            skjæringstidspunkt = original.skjæringstidspunkt,
+            yrkesaktivitetstype = original.yrkesaktivitetstype,
+        )
 }

@@ -13,23 +13,23 @@ class InMemoryAvviksvurderingRepository : AvviksvurderingRepository {
         avviksvurdering.vilkårsgrunnlagId?.let { vilkårsgrunnlagId ->
             opprettKobling(
                 avviksvurderingId = avviksvurdering.unikId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
             )
         }
     }
 
-    override fun opprettKobling(avviksvurderingId: UUID, vilkårsgrunnlagId: UUID) {
+    override fun opprettKobling(
+        avviksvurderingId: UUID,
+        vilkårsgrunnlagId: UUID,
+    ) {
         avviksvurderinger[avviksvurderingId]?.let { avviksvurdering ->
             vilkarsgrunnlagIdAvviksvurderingIderMap[vilkårsgrunnlagId] = avviksvurdering
         }
     }
 
-    override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID) =
-        vilkarsgrunnlagIdAvviksvurderingIderMap[vilkårsgrunnlagId]
+    override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID) = vilkarsgrunnlagIdAvviksvurderingIderMap[vilkårsgrunnlagId]
 
-    override fun hentAvviksvurderingFor(avviksvurderingId: UUID) =
-        avviksvurderinger[avviksvurderingId]
+    override fun hentAvviksvurderingFor(avviksvurderingId: UUID) = avviksvurderinger[avviksvurderingId]
 
-    override fun finnAvviksvurderinger(fødselsnummer: String) =
-        avviksvurderinger.values.filter { it.fødselsnummer == fødselsnummer }
+    override fun finnAvviksvurderinger(fødselsnummer: String) = avviksvurderinger.values.filter { it.fødselsnummer == fødselsnummer }
 }

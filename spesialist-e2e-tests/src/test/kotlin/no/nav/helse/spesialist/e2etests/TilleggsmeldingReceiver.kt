@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 class TilleggsmeldingReceiver(
     private val rapidsConnection: RapidsConnection,
     private val testContext: TestContext,
-    private val vedtaksperiode: Vedtaksperiode
+    private val vedtaksperiode: Vedtaksperiode,
 ) {
     fun aktivitetsloggNyAktivitet(varselkoder: List<String>) {
         rapidsConnection.publish(
@@ -16,8 +16,8 @@ class TilleggsmeldingReceiver(
                 varselkoder = varselkoder,
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
-                vedtaksperiode = vedtaksperiode
-            )
+                vedtaksperiode = vedtaksperiode,
+            ),
         )
     }
 }

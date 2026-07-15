@@ -15,6 +15,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class DelegatedRapidTest : River.PacketListener {
     private val testRapid = TestRapid()
+
     init {
         DelegatedRapid(testRapid, ::beforeRiver, ::shouldProcess, ::afterRiver, ::errorHandler).apply {
             River(this).register(this@DelegatedRapidTest)
@@ -48,7 +49,8 @@ internal class DelegatedRapidTest : River.PacketListener {
     private fun beforeRiver() {
         order.add("BEFORE")
     }
-    private fun shouldProcess(message: String): Boolean{
+
+    private fun shouldProcess(message: String): Boolean {
         order.add("SHOULD_PROCESS")
         return true
     }
@@ -57,7 +59,7 @@ internal class DelegatedRapidTest : River.PacketListener {
         packet: JsonMessage,
         context: MessageContext,
         metadata: MessageMetadata,
-        meterRegistry: MeterRegistry
+        meterRegistry: MeterRegistry,
     ) {
         order.add("PACKET")
     }
@@ -68,12 +70,18 @@ internal class DelegatedRapidTest : River.PacketListener {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun errorHandler(exception: Exception, message: String) {
+    private fun errorHandler(
+        exception: Exception,
+        message: String,
+    ) {
         error = true
         order.add("ERROR")
     }
 
-    override fun onSevere(error: MessageProblems.MessageException, context: MessageContext) {
+    override fun onSevere(
+        error: MessageProblems.MessageException,
+        context: MessageContext,
+    ) {
         // rethrow to blow up the river
         throw error
     }

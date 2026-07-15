@@ -4,7 +4,10 @@ import no.nav.helse.db.MeldingDuplikatkontrollDao
 import java.util.UUID
 
 class NoopMeldingDuplikatkontrollDao : MeldingDuplikatkontrollDao {
-    override fun lagre(meldingId: UUID, type: String) {}
+    override fun lagre(
+        meldingId: UUID,
+        type: String,
+    ) {}
 
     override fun erBehandlet(meldingId: UUID) = false
 }

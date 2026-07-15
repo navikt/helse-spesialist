@@ -38,7 +38,7 @@ class GosysOppgaveEndretE2ETest : AbstractE2EIntegrationTest() {
         E2ETestApplikasjon.behovLøserStub.svarerPåBehov = false
         detPubliseresEnGosysOppgaveEndretMelding()
 
-        val commandContextId = meldinger().filter { it["command"]?.asText() == "GosysOppgaveEndretCommand" }.last{ it["@event_name"].asText() == "kommandokjede_suspendert" }["commandContextId"].asText()
+        val commandContextId = meldinger().filter { it["command"]?.asText() == "GosysOppgaveEndretCommand" }.last { it["@event_name"].asText() == "kommandokjede_suspendert" }["commandContextId"].asText()
 
         medPersonISpeil {
             saksbehandlerGodkjennerAlleVarsler()

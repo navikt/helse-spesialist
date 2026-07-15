@@ -7,12 +7,9 @@ import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepo
 class InMemoryVenterPåKvitteringForOverstyringRepository :
     AbstractInMemoryRepository<MeldingId, VenterPåKvitteringForOverstyring>(),
     VenterPåKvitteringForOverstyringRepository {
-
     override fun deepCopy(original: VenterPåKvitteringForOverstyring): VenterPåKvitteringForOverstyring =
         VenterPåKvitteringForOverstyring.fraLagring(
             meldingId = original.id,
             identitetsnummer = original.identitetsnummer,
         )
-
 }
-

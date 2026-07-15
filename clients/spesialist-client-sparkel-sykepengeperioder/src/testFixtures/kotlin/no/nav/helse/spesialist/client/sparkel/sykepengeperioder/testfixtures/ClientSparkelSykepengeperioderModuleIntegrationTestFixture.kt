@@ -8,21 +8,22 @@ import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSyk
 
 object ClientSparkelSykepengeperioderModuleIntegrationTestFixture {
     private val wireMockServer: WireMockServer =
-        WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
-            WireMockServer::start,
-        ).also {
-            it.stubFor(
-                post("/").willReturn(
-                    okJson(
-                        """
-                        {
-                          "utbetaltePerioder": []
-                        }
-                        """.trimIndent(),
+        WireMockServer(WireMockConfiguration.options().dynamicPort())
+            .also(
+                WireMockServer::start,
+            ).also {
+                it.stubFor(
+                    post("/").willReturn(
+                        okJson(
+                            """
+                            {
+                              "utbetaltePerioder": []
+                            }
+                            """.trimIndent(),
+                        ),
                     ),
-                ),
-            )
-        }
+                )
+            }
 
     val moduleConfiguration =
         ClientSparkelSykepengeperioderModule.Configuration(

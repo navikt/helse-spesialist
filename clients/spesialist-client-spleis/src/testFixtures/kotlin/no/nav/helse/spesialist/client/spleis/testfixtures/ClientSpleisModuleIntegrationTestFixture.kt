@@ -6,13 +6,15 @@ import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import java.net.URI
 
 object ClientSpleisModuleIntegrationTestFixture {
-    val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
-        WireMockServer::start
-    )
+    val wireMockServer: WireMockServer =
+        WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
+            WireMockServer::start,
+        )
 
-    val moduleConfiguration = ClientSpleisModule.Configuration(
-        spleisUrl = URI.create(wireMockServer.baseUrl()),
-        spleisClientId = "local-app",
-        loggRespons = true,
-    )
+    val moduleConfiguration =
+        ClientSpleisModule.Configuration(
+            spleisUrl = URI.create(wireMockServer.baseUrl()),
+            spleisClientId = "local-app",
+            loggRespons = true,
+        )
 }

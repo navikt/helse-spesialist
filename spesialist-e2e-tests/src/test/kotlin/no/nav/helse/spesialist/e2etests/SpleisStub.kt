@@ -210,8 +210,7 @@ class SpleisStub(
         rapidsConnection.publish(person.fødselsnummer, vedtaksperiodeNyUtbetaling)
     }
 
-    private fun skalSvarePåMeldinger(jsonNode: JsonNode) =
-        !denylisteForPersoner.contains(jsonNode["fødselsnummer"].asText())
+    private fun skalSvarePåMeldinger(jsonNode: JsonNode) = !denylisteForPersoner.contains(jsonNode["fødselsnummer"].asText())
 
     fun ikkeSvarPåMeldingerFor(person: Person) {
         denylisteForPersoner.add(person.fødselsnummer)
@@ -294,11 +293,11 @@ class SpleisStub(
 
         private fun spleisLukkerBehandlingen(
             vedtaksperiode: Vedtaksperiode,
-            person: Person
+            person: Person,
         ) {
             rapidsConnection.publish(
                 person.fødselsnummer,
-                Meldingsbygger.byggBehandlingLukket(person, vedtaksperiode)
+                Meldingsbygger.byggBehandlingLukket(person, vedtaksperiode),
             )
         }
     }
@@ -374,6 +373,9 @@ class SpleisStub(
         }
     }
 
-    private fun contextForPerson(fødselsnummer: String): TestContext = (contextsForFødselsnummer[fødselsnummer]
-        ?: error("Ikke initialisert med context for person $fødselsnummer"))
+    private fun contextForPerson(fødselsnummer: String): TestContext =
+        (
+            contextsForFødselsnummer[fødselsnummer]
+                ?: error("Ikke initialisert med context for person $fødselsnummer")
+        )
 }

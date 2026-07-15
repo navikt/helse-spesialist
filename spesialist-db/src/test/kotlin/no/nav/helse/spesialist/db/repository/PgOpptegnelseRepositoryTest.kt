@@ -18,10 +18,11 @@ class PgOpptegnelseRepositoryTest : AbstractDBIntegrationTest() {
 
         // WHEN:
         repository.lagre(opptegnelse)
-        val hentedeOpptegnelser = repository.finnAlleForPersonEtter(
-            opptegnelseId = Sekvensnummer(value = 0),
-            personIdentitetsnummer = person.id
-        )
+        val hentedeOpptegnelser =
+            repository.finnAlleForPersonEtter(
+                opptegnelseId = Sekvensnummer(value = 0),
+                personIdentitetsnummer = person.id,
+            )
 
         // THEN:
         assertEquals(person.id, hentedeOpptegnelser.first().identitetsnummer)

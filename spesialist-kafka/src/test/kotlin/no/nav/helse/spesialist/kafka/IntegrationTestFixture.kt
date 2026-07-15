@@ -8,17 +8,20 @@ import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.MockForsikringsvurderingHenter
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 
-class IntegrationTestFixture(val testRapid: TestRapid) {
+class IntegrationTestFixture(
+    val testRapid: TestRapid,
+) {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
     val daos = inMemoryRepositoriesAndDaos.daos
     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
     val forsikringHenter = MockForsikringsvurderingHenter()
-    val environmentToggles = object : EnvironmentToggles {
-        override val kanBeslutteEgneSaker: Boolean = false
-        override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-        override val kanSeForsikring: Boolean get() = true
-        override val devGcp: Boolean = false
-    }
+    val environmentToggles =
+        object : EnvironmentToggles {
+            override val kanBeslutteEgneSaker: Boolean = false
+            override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+            override val kanSeForsikring: Boolean get() = true
+            override val devGcp: Boolean = false
+        }
 
     init {
         KafkaModule(
@@ -26,20 +29,27 @@ class IntegrationTestFixture(val testRapid: TestRapid) {
             rapidsConnection = testRapid,
             sessionFactory = sessionFactory,
             daos = daos,
-            stikkprøver = object : Stikkprøver.Configuration {
-                override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
-                override fun utsFlereArbeidsgivereForlengelse() = false
-                override fun selvstendigNæringsdrivendeForlengelse() = false
-                override fun utsEnArbeidsgiverFørstegangsbehandling() = false
-                override fun utsEnArbeidsgiverForlengelse() = false
-                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
-                override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
-                override fun fullRefusjonEnArbeidsgiver() = false
-            },
+            stikkprøver =
+                object : Stikkprøver.Configuration {
+                    override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
+
+                    override fun utsFlereArbeidsgivereForlengelse() = false
+
+                    override fun selvstendigNæringsdrivendeForlengelse() = false
+
+                    override fun utsEnArbeidsgiverFørstegangsbehandling() = false
+
+                    override fun utsEnArbeidsgiverForlengelse() = false
+
+                    override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
+
+                    override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
+
+                    override fun fullRefusjonEnArbeidsgiver() = false
+                },
             brukerrollehenter = { Either.Success(emptySet()) },
             forsikringsvurderingHenter = forsikringHenter,
             environmentToggles = environmentToggles,
         ).also(KafkaModule::kobleOppRivers)
     }
 }
-

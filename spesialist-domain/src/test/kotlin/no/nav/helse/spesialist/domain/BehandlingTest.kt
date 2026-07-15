@@ -13,10 +13,12 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class BehandlingTest {
-
     @ParameterizedTest()
     @MethodSource("utfallGittTagsSource")
-    fun `tags gir utfall`(tags: Set<String>, expected: Utfall) {
+    fun `tags gir utfall`(
+        tags: Set<String>,
+        expected: Utfall,
+    ) {
         val behandling = lagBehandling(tags = tags)
         assertEquals(expected, behandling.utfall())
     }
@@ -46,22 +48,21 @@ class BehandlingTest {
 
     private companion object {
         @JvmStatic
-        fun utfallGittTagsSource(): Stream<Arguments> {
-            return Stream.of(
+        fun utfallGittTagsSource(): Stream<Arguments> =
+            Stream.of(
                 Arguments.of(setOf("Innvilget"), Utfall.INNVILGELSE),
                 Arguments.of(setOf("DelvisInnvilget"), Utfall.DELVIS_INNVILGELSE),
                 Arguments.of(setOf("Avslag"), Utfall.AVSLAG),
             )
-        }
+
         @JvmStatic
-        fun exceptionGittTagsSource(): Stream<Arguments> {
-            return Stream.of(
+        fun exceptionGittTagsSource(): Stream<Arguments> =
+            Stream.of(
                 Arguments.of(setOf("Innvilget", "DelvisInnvilget")),
                 Arguments.of(setOf("Innvilget", "Avslag")),
                 Arguments.of(setOf("DelvisInnvilget", "Avslag")),
                 Arguments.of(emptySet<String>()),
                 Arguments.of(setOf("Foobar")),
             )
-        }
     }
 }

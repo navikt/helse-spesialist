@@ -17,9 +17,10 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre og hente opp arbeidsgiver`() {
         // Given:
-        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
-            organisasjonsnummer = lagOrganisasjonsnummer()
-        )
+        val identifikator =
+            ArbeidsgiverIdentifikator.Organisasjonsnummer(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+            )
         val organisasjonsnavn = lagOrganisasjonsnavn()
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = organisasjonsnavn)
 
@@ -37,9 +38,10 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre arbeidsgiver, oppdatere med nytt navn, og hente opp`() {
         // Given:
-        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
-            organisasjonsnummer = lagOrganisasjonsnummer()
-        )
+        val identifikator =
+            ArbeidsgiverIdentifikator.Organisasjonsnummer(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+            )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = lagOrganisasjonsnavn())
         arbeidsgiverRepository.lagre(arbeidsgiver)
         val lagretArbeidsgiver = arbeidsgiverRepository.finn(identifikator)
@@ -61,9 +63,10 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre og hente opp arbeidsgiver basert på identifikator`() {
         // Given:
-        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
-            organisasjonsnummer = lagOrganisasjonsnummer()
-        )
+        val identifikator =
+            ArbeidsgiverIdentifikator.Organisasjonsnummer(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+            )
         val organisasjonsnavn = lagOrganisasjonsnavn()
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = organisasjonsnavn)
 
@@ -81,9 +84,10 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre og hente opp arbeidsgiver basert på identifikator i liste`() {
         // Given:
-        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
-            organisasjonsnummer = lagOrganisasjonsnummer()
-        )
+        val identifikator =
+            ArbeidsgiverIdentifikator.Organisasjonsnummer(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+            )
         val organisasjonsnavn = lagOrganisasjonsnavn()
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = organisasjonsnavn)
 
@@ -102,9 +106,10 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `når arbeidsgiver har fødselsnummer som id og starter med tallet 0 får vi riktig fødselsnummer ut igjen`() {
         // Given:
-        val identifikator = ArbeidsgiverIdentifikator.Fødselsnummer(
-            fødselsnummer = lagFødselsnummer().replaceFirstChar { "0" }
-        )
+        val identifikator =
+            ArbeidsgiverIdentifikator.Fødselsnummer(
+                fødselsnummer = lagFødselsnummer().replaceFirstChar { "0" },
+            )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = lagOrganisasjonsnavn())
 
         // When:
@@ -119,9 +124,10 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `når arbeidsgiver har fødselsnummer som id og starter med annet siffer enn 0 får vi riktig fødselsnummer ut igjen`() {
         // Given:
-        val identifikator = ArbeidsgiverIdentifikator.Fødselsnummer(
-            fødselsnummer = lagFødselsnummer().replaceFirstChar { "1" }
-        )
+        val identifikator =
+            ArbeidsgiverIdentifikator.Fødselsnummer(
+                fødselsnummer = lagFødselsnummer().replaceFirstChar { "1" },
+            )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = lagOrganisasjonsnavn())
 
         // When:

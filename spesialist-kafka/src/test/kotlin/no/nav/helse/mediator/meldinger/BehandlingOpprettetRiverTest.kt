@@ -49,7 +49,7 @@ internal class BehandlingOpprettetRiverTest {
                 organisasjonsnummer = null,
                 vedtaksperiodeId = vedtaksperiodeId.value,
                 spleisBehandlingId = spleisBehandlingId.value,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSLEDIG
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSLEDIG,
             ),
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
@@ -69,7 +69,7 @@ internal class BehandlingOpprettetRiverTest {
                 organisasjonsnummer = null,
                 vedtaksperiodeId = vedtaksperiodeId.value,
                 spleisBehandlingId = spleisBehandlingId.value,
-                yrkesaktivitetstype = Yrkesaktivitetstype.FRILANS
+                yrkesaktivitetstype = Yrkesaktivitetstype.FRILANS,
             ),
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {

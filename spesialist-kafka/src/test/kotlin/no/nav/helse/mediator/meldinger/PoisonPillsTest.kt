@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PoisonPillsTest {
-
     @Test
     fun `Er poison pill`() {
         val poisonPills = PoisonPills(mapOf("key1" to setOf("redpill"), "key2" to setOf("bluepill")))
@@ -32,6 +31,8 @@ class PoisonPillsTest {
         assertFalse(poisonPills.erPoisonPill(lagJsonNode("key", "bluepill")))
     }
 
-    private fun lagJsonNode(key: String, identifikator: String): JsonNode =
-        objectMapper.valueToTree(mapOf(key to identifikator))
+    private fun lagJsonNode(
+        key: String,
+        identifikator: String,
+    ): JsonNode = objectMapper.valueToTree(mapOf(key to identifikator))
 }

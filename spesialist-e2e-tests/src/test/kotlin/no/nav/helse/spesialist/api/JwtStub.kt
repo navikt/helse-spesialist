@@ -12,16 +12,20 @@ import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
 class JwtStub {
-    private val keyPair = KeyPairGenerator.getInstance("RSA").apply {
-        initialize(2048, SecureRandom())
-    }.generateKeyPair()
+    private val keyPair =
+        KeyPairGenerator
+            .getInstance("RSA")
+            .apply {
+                initialize(2048, SecureRandom())
+            }.generateKeyPair()
     private val jwkAlgorithm = Algorithm.RSA256(keyPair.public as RSAPublicKey, keyPair.private as RSAPrivateKey)
 
     fun getJwkProviderMock(): JwkProvider {
-        val jwk = mockk<Jwk>().apply {
-            every { algorithm } returns jwkAlgorithm.name
-            every { publicKey } returns keyPair.public
-        }
+        val jwk =
+            mockk<Jwk>().apply {
+                every { algorithm } returns jwkAlgorithm.name
+                every { publicKey } returns keyPair.public
+            }
         return mockk<JwkProvider>().apply {
             every { this@apply.get(any()) } returns jwk
         }
@@ -34,8 +38,9 @@ class JwtStub {
         clientId: String,
         issuer: String,
         navn: String = "navn",
-        navIdent: String = "X999999"
-    ) = JWT.create()
+        navIdent: String = "X999999",
+    ) = JWT
+        .create()
         .withArrayClaim("groups", groups.toTypedArray())
         .withSubject(navIdent)
         .withClaim("oid", oid)

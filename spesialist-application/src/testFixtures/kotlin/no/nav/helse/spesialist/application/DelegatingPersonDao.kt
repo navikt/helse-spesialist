@@ -31,10 +31,11 @@ class DelegatingPersonDao(
     }
 
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
-        if (personRepository.alle().any { it.id.value == fødselsnummer })
+        if (personRepository.alle().any { it.id.value == fødselsnummer }) {
             fødselsnummer.hashCode().toLong()
-        else
+        } else {
             null
+        }
 
     override fun finnEnhetId(fødselsnummer: String): String {
         val enhetRef = personRepository.alle().find { it.id.value == fødselsnummer }?.enhetRef
@@ -53,4 +54,3 @@ class DelegatingPersonDao(
             }
         }
 }
-

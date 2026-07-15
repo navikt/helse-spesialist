@@ -19,12 +19,13 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     fun `varsel om faresignaler ved risikovurdering`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        risikovurderingBehovLøser.funn = listOf(
-            mapOf(
-                "kategori" to listOf("EN_KATEGORI"),
-                "beskrivelse" to "EN_BESKRIVELSE",
+        risikovurderingBehovLøser.funn =
+            listOf(
+                mapOf(
+                    "kategori" to listOf("EN_KATEGORI"),
+                    "beskrivelse" to "EN_BESKRIVELSE",
+                ),
             )
-        )
 
         // When:
         søknadOgGodkjenningbehovKommerInn()
@@ -136,7 +137,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn(
             tilleggsmeldinger = {
                 aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
-            }
+            },
         )
 
         // Then:
@@ -171,7 +172,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn(
             tilleggsmeldinger = {
                 aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE", "EN_ANNEN_KODE"))
-            }
+            },
         )
 
         // Then:
@@ -188,7 +189,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
             tilleggsmeldinger = {
                 aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
                 aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
-            }
+            },
         )
 
         // Then:
@@ -208,13 +209,13 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
             vedtaksperiode = førsteVedtaksperiode(),
             tilleggsmeldinger = {
                 aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
-            }
+            },
         )
         spleisForberederBehandling(
             vedtaksperiode = andreVedtaksperiode(),
             tilleggsmeldinger = {
                 aktivitetsloggNyAktivitet(varselkoder = listOf("EN_ANNEN_KODE"))
-            }
+            },
         )
         spleisSenderGodkjenningsbehov(førsteVedtaksperiode())
 

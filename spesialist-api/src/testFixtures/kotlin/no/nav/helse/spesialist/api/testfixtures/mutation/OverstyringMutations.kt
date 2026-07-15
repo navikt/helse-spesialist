@@ -6,11 +6,12 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import org.intellij.lang.annotations.Language
 
 internal fun asGQL(
-    @Language("GraphQL") mutationString: String
+    @Language("GraphQL") mutationString: String,
 ): String = mutationString
 
-fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyring): String = asGQL(
-    """
+fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyring): String =
+    asGQL(
+        """
     mutation OverstyrInntektOgRefusjon {
         overstyrInntektOgRefusjon(overstyring: {
             aktorId: "${overstyring.aktorId}",
@@ -20,36 +21,39 @@ fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyri
             vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
         })
     }
-    """
-)
+    """,
+    )
 
-private fun arbeidsgivere(overstyring: ApiInntektOgRefusjonOverstyring): List<String> = overstyring.arbeidsgivere.map {
-    fun refusjonsopplysninger(): List<String>? = it.refusjonsopplysninger?.map { opplysning ->
-        asGQL(
-            """ 
+private fun arbeidsgivere(overstyring: ApiInntektOgRefusjonOverstyring): List<String> =
+    overstyring.arbeidsgivere.map {
+        fun refusjonsopplysninger(): List<String>? =
+            it.refusjonsopplysninger?.map { opplysning ->
+                asGQL(
+                    """ 
             {
                 belop: ${opplysning.belop},
                 fom: "${opplysning.fom}",
                 tom: ${opplysning.tom?.let { tom -> """"$tom"""" }}
             } 
-        """
-        )
-    }
+        """,
+                )
+            }
 
-    fun fraRefusjonsopplysninger(): List<String>? = it.fraRefusjonsopplysninger?.map { opplysning ->
-        asGQL(
-            """ 
+        fun fraRefusjonsopplysninger(): List<String>? =
+            it.fraRefusjonsopplysninger?.map { opplysning ->
+                asGQL(
+                    """ 
             {
                belop: ${opplysning.belop},
                fom: "${opplysning.fom}",
                tom: ${opplysning.tom?.let { tom -> """"$tom"""" }}
             } 
-        """
-        )
-    }
+        """,
+                )
+            }
 
-    asGQL(
-        """ 
+        asGQL(
+            """ 
         {
             forklaring: "${it.forklaring}",
             begrunnelse: "${it.begrunnelse}",
@@ -60,12 +64,13 @@ private fun arbeidsgivere(overstyring: ApiInntektOgRefusjonOverstyring): List<St
             refusjonsopplysninger: ${refusjonsopplysninger()},
             fraRefusjonsopplysninger: ${fraRefusjonsopplysninger()}
         } 
-    """
-    )
-}
+    """,
+        )
+    }
 
-fun overstyrArbeidsforholdMutation(overstyring: ApiArbeidsforholdOverstyringHandling): String = asGQL(
-    """
+fun overstyrArbeidsforholdMutation(overstyring: ApiArbeidsforholdOverstyringHandling): String =
+    asGQL(
+        """
     mutation OverstyrArbeidsforhold {
         overstyrArbeidsforhold(overstyring: {
             aktorId: "${overstyring.aktorId}",
@@ -75,8 +80,8 @@ fun overstyrArbeidsforholdMutation(overstyring: ApiArbeidsforholdOverstyringHand
             vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
         })
     }
-    """
-)
+    """,
+    )
 
 private fun overstyrteArbeidsforhold(overstyring: ApiArbeidsforholdOverstyringHandling): List<String> =
     overstyring.overstyrteArbeidsforhold.map {
@@ -88,12 +93,13 @@ private fun overstyrteArbeidsforhold(overstyring: ApiArbeidsforholdOverstyringHa
                 forklaring: "${it.forklaring}",
                 orgnummer: "${it.orgnummer}",
             }
-        """
+        """,
         )
     }
 
-fun overstyrTidslinjeMutation(overstyring: ApiTidslinjeOverstyring): String = asGQL(
-    """
+fun overstyrTidslinjeMutation(overstyring: ApiTidslinjeOverstyring): String =
+    asGQL(
+        """
     mutation OverstyrTidsline {
         overstyrDager(overstyring:{
             aktorId: "${overstyring.aktorId}", 
@@ -104,12 +110,13 @@ fun overstyrTidslinjeMutation(overstyring: ApiTidslinjeOverstyring): String = as
             dager: ${dager(overstyring)}
         })
     }
-    """
-)
+    """,
+    )
 
-private fun dager(overstyring: ApiTidslinjeOverstyring): List<String> = overstyring.dager.map {
-    asGQL(
-        """ 
+private fun dager(overstyring: ApiTidslinjeOverstyring): List<String> =
+    overstyring.dager.map {
+        asGQL(
+            """ 
         {
             dato: "${it.dato}",
             fraGrad: ${it.fraGrad},
@@ -118,6 +125,6 @@ private fun dager(overstyring: ApiTidslinjeOverstyring): List<String> = overstyr
             fraType: "${it.fraType}",
             lovhjemmel: {bokstav: "A", ledd: "Albue", lovverk: "Norske lover", lovverksversjon: "1803", paragraf: "8-30"}
         }
-    """
-    )
-}
+    """,
+        )
+    }

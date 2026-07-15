@@ -34,7 +34,7 @@ class MeldingOmMeldingHåndtertRiverTest {
     fun `lager ikke opptegnelse for kvitteringer for ikke-ventende overstyringer`() {
         // Given
         sessionContext.venterPåKvitteringForOverstyringRepository.lagre(
-            VenterPåKvitteringForOverstyring.ny(UUID.randomUUID().let(::MeldingId), lagIdentitetsnummer())
+            VenterPåKvitteringForOverstyring.ny(UUID.randomUUID().let(::MeldingId), lagIdentitetsnummer()),
         )
         val kvitteringForEnOverstyring = kvittering(UUID.randomUUID(), "overstyr_tidslinje")
 
@@ -50,7 +50,7 @@ class MeldingOmMeldingHåndtertRiverTest {
         // Given
         val meldingId = UUID.randomUUID().let(::MeldingId)
         sessionContext.venterPåKvitteringForOverstyringRepository.lagre(
-            VenterPåKvitteringForOverstyring.ny(meldingId, lagIdentitetsnummer())
+            VenterPåKvitteringForOverstyring.ny(meldingId, lagIdentitetsnummer()),
         )
         val kvitteringForVentendeOverstyring = kvittering(meldingId.value, "overstyr_tidslinje")
 
@@ -58,17 +58,27 @@ class MeldingOmMeldingHåndtertRiverTest {
         testRapid.sendTestMessage(kvitteringForVentendeOverstyring)
 
         // Then
-        assertEquals(Opptegnelse.Type.PERSONDATA_OPPDATERT, sessionContext.opptegnelseRepository.alle().single().type)
+        assertEquals(
+            Opptegnelse.Type.PERSONDATA_OPPDATERT,
+            sessionContext.opptegnelseRepository
+                .alle()
+                .single()
+                .type,
+        )
         assertNull(sessionContext.venterPåKvitteringForOverstyringRepository.finn(meldingId))
     }
 
     @Language("JSON")
-    private fun kvittering(meldingId: UUID, originaltEventName: String): String = """
+    private fun kvittering(
+        meldingId: UUID,
+        originaltEventName: String,
+    ): String =
+        """
         {
             "@event_name": "melding_om_melding_håndtert",
             "originalt_event_name" : "$originaltEventName",
             "original_id" : "$meldingId",
             "fødselsnummer" : "${lagIdentitetsnummer()}"
         }
-    """.trimIndent()
+        """.trimIndent()
 }
