@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.kafka.testfixtures
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -16,6 +15,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.Risikofunn.Companion.tilJson
 import org.intellij.lang.annotations.Language
+import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDate.now

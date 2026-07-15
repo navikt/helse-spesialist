@@ -2,10 +2,11 @@
 kotlin = "2.4.0"
 flyway = "12.10.0"
 openApiGenerator = "7.23.0"
-graphqlKotlin = "9.2.0"
-jackson = "2.22.1"
+graphqlKotlin = "10.1.2"
+jackson = "3.2.1"
 kotlinx-coroutines = "1.11.0"
 ktor = "3.5.1"
+rapidsAndRivers = "2026071513121784113927"
 tbdLibs = "20260702.1010"
 testcontainers = "2.0.5"
 smiley4KtorOpenapiTools = "5.7.0"
@@ -24,8 +25,7 @@ graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-ser
 
 hikari = "com.zaxxer:HikariCP:7.1.0"
 
-jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
-jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
 kotliquery = "com.github.seratch:kotliquery:1.9.1"
 
@@ -38,7 +38,7 @@ ktor-client-apache5 = { module = "io.ktor:ktor-client-apache5", version.ref = "k
 ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
-ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+ktor-serialization-jackson3 = { module = "io.ktor:ktor-serialization-jackson3", version.ref = "ktor" }
 ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
 ktor-server-authJwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-server-callId = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor" }
@@ -62,7 +62,10 @@ nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.9.1"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.13"
 postgresPgJdbcDriver = "com.impossibl.pgjdbc-ng:pgjdbc-ng:0.8.9"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.28.6"
-rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2026031212461773315969.b17173a21e7b"
+
+rapidsAndRivers = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsAndRivers" }
+rapidsAndRiversTest = { module = "com.github.navikt.rapids-and-rivers:rapids-and-rivers-test", version.ref = "rapidsAndRivers" }
+
 slf4jApi = "org.slf4j:slf4j-api:2.0.18"
 
 smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
@@ -72,8 +75,6 @@ smiley4-schema-kenerator-reflection = { module = "io.github.smiley4:schema-kener
 smiley4-schema-kenerator-serialization = { module = "io.github.smiley4:schema-kenerator-serialization", version.ref = "smiley4SchemaKenerator" }
 smiley4-schema-kenerator-swagger = { module = "io.github.smiley4:schema-kenerator-swagger", version.ref = "smiley4SchemaKenerator" }
 
-tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
-tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdLibs" }
 tbdLibs-personspeudoid = { module = "com.github.navikt.tbd-libs:person-pseudo-id", version.ref = "tbdLibs" }
 tbdLibs-accessTokenProviderApi = { module = "com.github.navikt.tbd-libs:access-token-provider-api", version.ref = "tbdLibs" }
 tbdLibs-accessTokenProviderTexas = { module = "com.github.navikt.tbd-libs:access-token-provider-texas", version.ref = "tbdLibs" }
@@ -93,11 +94,7 @@ flyway-postgres = [
     "flyway-core",
     "flyway-postgres"
 ]
-jackson = [
-    "jackson-jsr310",
-    "jackson-kotlin",
-    "tbdLibs-jackson"
-]
+jackson = ["jackson-kotlin"]
 kotlinx-coroutines = [
     "kotlinx-coroutines-core",
     "kotlinx-coroutines-slf4j",
@@ -106,11 +103,11 @@ ktor-client = [
     "ktor-client-apache5",
     "ktor-client-contentNegotiation",
     "ktor-client-core",
-    "ktor-serialization-jackson"
+    "ktor-serialization-jackson3"
 ]
 ktor-server = [
     "ktor-micrometer",
-    "ktor-serialization-jackson",
+    "ktor-serialization-jackson3",
     "ktor-server-auth",
     "ktor-server-authJwt",
     "ktor-server-callId",

@@ -38,7 +38,7 @@ class VeilederStansRiver(
         val id = packet["@id"].asUUID()
         val fødselsnummer = packet["fødselsnummer"].asText()
         val status = packet["status"].asText()
-        val årsaker = packet["årsaker"].map { enumValueOf<StoppknappÅrsak>(it.asText()) }.toSet()
+        val årsaker = packet["årsaker"].toList().map { enumValueOf<StoppknappÅrsak>(it.asText()) }.toSet()
         val opprettet = packet["opprettet"].asLocalDateTime()
         val originalMelding = packet["originalMelding"].asText()
 

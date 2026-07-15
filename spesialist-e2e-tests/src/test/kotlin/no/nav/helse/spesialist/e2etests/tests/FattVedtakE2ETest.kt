@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import com.github.navikt.tbd_libs.jackson.asLocalDateTime
+import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
@@ -336,7 +336,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                 .flatMap { arbeidsgiver ->
                     arbeidsgiver["behandlinger"].flatMap { behandling ->
                         behandling["perioder"].flatMap { periode ->
-                            periode["varsler"].map {
+                            periode["varsler"].toList().map {
                                 it["vurdering"]?.get("status")?.asText()
                             }
                         }

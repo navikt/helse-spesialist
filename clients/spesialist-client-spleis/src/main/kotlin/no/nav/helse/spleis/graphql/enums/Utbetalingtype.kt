@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.graphql.enums
 
 import com.expediagroup.graphql.client.Generated
-import com.fasterxml.jackson.`annotation`.JsonEnumDefaultValue
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 
 @Generated
 public enum class Utbetalingtype {

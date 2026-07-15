@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 class ÅpneOppgaverBehovLøser : AbstractBehovLøser("ÅpneOppgaver") {
     var antall = 0

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
@@ -9,6 +8,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.person.LegacyPerson
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class VedtaksperiodeNyUtbetaling(

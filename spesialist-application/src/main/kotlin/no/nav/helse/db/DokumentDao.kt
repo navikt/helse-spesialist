@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 interface DokumentDao {

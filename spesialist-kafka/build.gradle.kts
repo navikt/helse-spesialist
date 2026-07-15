@@ -9,14 +9,14 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(libs.caffeine)
 
-    testImplementation(libs.tbdLibs.rapidsAndRiversTest)
+    testImplementation(libs.rapidsAndRiversTest)
     testImplementation("io.github.optimumcode:json-schema-validator:0.5.5")
     testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
     testImplementation(testFixtures(project(":spesialist-domain")))
 
     testFixturesImplementation(testFixtures(project(":spesialist-domain")))
-    testFixturesImplementation(libs.tbdLibs.rapidsAndRiversTest)
+    testFixturesImplementation(libs.rapidsAndRiversTest)
     testFixturesImplementation(libs.rapidsAndRivers)
     testFixturesImplementation(libs.jackson.kotlin)
     testFixturesImplementation(libs.testcontainers.kafka)

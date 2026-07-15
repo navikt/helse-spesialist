@@ -1,9 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import com.fasterxml.jackson.core.JsonPointer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
@@ -22,6 +18,10 @@ import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
+import tools.jackson.core.JsonPointer
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -67,7 +67,7 @@ class SpleisStub(
                 // Opprett kopi av periodeelementer
                 val perioder =
                     data.at(JsonPointer.compile("/data/person/arbeidsgivere/0/generasjoner/0/perioder")) as ArrayNode
-                perioder.add(perioder[0].deepCopy<JsonNode>())
+                perioder.add(perioder[0].deepCopy())
             }
 
             sequenceOf(
@@ -353,7 +353,7 @@ class SpleisStub(
                     skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
                     fastsatt = Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn,
                     arbeidsgivere =
-                        skjønnsfastsatteArbeidsgivereJson.map {
+                        skjønnsfastsatteArbeidsgivereJson.toList().map {
                             Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver(
                                 organisasjonsnummer = it["organisasjonsnummer"].asText(),
                                 omregnetÅrsinntekt = 123456.7,

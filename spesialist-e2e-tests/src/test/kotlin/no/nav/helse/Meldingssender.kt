@@ -269,7 +269,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("Avviksvurdering", behov["@behov"].map { it.asText() }.single())
+            assertEquals("Avviksvurdering", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -283,7 +283,7 @@ class Meldingssender(
                     contextId = contextId,
                     id = id,
                     avviksvurderingId = avviksvurderingId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -295,10 +295,10 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("HentPersoninfoV2", behov["@behov"].map { it.asText() }.single())
+            assertEquals("HentPersoninfoV2", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-            val sti = behov["sti"].map { it.asInt() }
+            val sti = behov["sti"].toList().map { it.asInt() }
 
             testRapid.sendTestMessage(
                 Testmeldingfabrikk.lagPersoninfoløsning(
@@ -322,7 +322,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("HentEnhet", behov["@behov"].map { it.asText() }.single())
+            assertEquals("HentEnhet", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -336,7 +336,7 @@ class Meldingssender(
                     organisasjonsnummer = organisasjonsnummer,
                     enhet = enhet,
                     id = id,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -350,12 +350,12 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("Arbeidsgiverinformasjon", behov["@behov"].map { it.asText() }.single())
+            assertEquals("Arbeidsgiverinformasjon", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
             val arbeidsgivere =
-                arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
+                arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map {
                     ArbeidsgiverinformasjonJson(
                         it.asText(),
                         "Navn for ${it.asText()}",
@@ -372,7 +372,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -387,13 +387,13 @@ class Meldingssender(
             val behov = testRapid.inspektør.siste("behov")
             assertEquals(
                 setOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
-                behov["@behov"].map { it.asText() }.toSet(),
+                behov["@behov"].toList().map { it.asText() }.toSet(),
             )
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
             val organisasjoner =
-                behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
+                behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map {
                     ArbeidsgiverinformasjonJson(
                         it.asText(),
                         "Navn for ${it.asText()}",
@@ -401,7 +401,7 @@ class Meldingssender(
                 }
 
             val personer: List<Map<String, Any>> =
-                behov["HentPersoninfoV2"]["ident"].map {
+                behov["HentPersoninfoV2"]["ident"].toList().map {
                     mapOf(
                         "ident" to it.asText(),
                         "fornavn" to it.asText(),
@@ -423,7 +423,7 @@ class Meldingssender(
                     hendelseId = hendelseId,
                     contextId = contextId,
                     id = id,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -445,7 +445,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("Arbeidsforhold", behov["@behov"].map { it.asText() }.single())
+            assertEquals("Arbeidsforhold", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -459,7 +459,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -471,7 +471,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("EgenAnsatt", behov["@behov"].map { it.asText() }.single())
+            assertEquals("EgenAnsatt", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -483,7 +483,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -497,7 +497,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals(listOf("Vergemål", "Fullmakt"), behov["@behov"].map { it.asText() })
+            assertEquals(listOf("Vergemål", "Fullmakt"), behov["@behov"].toList().map { it.asText() })
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -511,7 +511,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -523,7 +523,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("InntekterForSykepengegrunnlag", behov["@behov"].map { it.asText() }.single())
+            assertEquals("InntekterForSykepengegrunnlag", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -535,7 +535,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -548,7 +548,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("ÅpneOppgaver", behov["@behov"].map { it.asText() }.single())
+            assertEquals("ÅpneOppgaver", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -561,7 +561,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }
@@ -576,7 +576,7 @@ class Meldingssender(
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
-            assertEquals("Risikovurdering", behov["@behov"].map { it.asText() }.single())
+            assertEquals("Risikovurdering", behov["@behov"].toList().map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
@@ -591,7 +591,7 @@ class Meldingssender(
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId,
-                    sti = behov["sti"].map { it.asInt() },
+                    sti = behov["sti"].toList().map { it.asInt() },
                 ),
             )
         }

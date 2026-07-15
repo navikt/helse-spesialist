@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
@@ -25,6 +24,7 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.kafka.objectMapper
+import tools.jackson.databind.JsonNode
 import java.time.Duration
 import java.util.UUID
 
@@ -314,7 +314,7 @@ class MeldingMediator(
                 commandContext.clear()
                 return
             }
-            val behov = jsonNode["@behov"].map(JsonNode::asText)
+            val behov = jsonNode["@behov"].toList().map(JsonNode::asText)
             loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger på $behov", "løsning-json" to jsonNode)
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }

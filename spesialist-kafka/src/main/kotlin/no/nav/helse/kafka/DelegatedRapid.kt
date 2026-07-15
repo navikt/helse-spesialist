@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -13,6 +12,7 @@ import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.kafka.objectMapper
+import tools.jackson.databind.JsonNode
 
 internal class DelegatedRapid(
     private val rapidsConnection: RapidsConnection,

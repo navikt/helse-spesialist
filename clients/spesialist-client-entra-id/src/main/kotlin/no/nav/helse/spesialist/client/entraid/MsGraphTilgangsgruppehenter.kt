@@ -1,10 +1,5 @@
 package no.nav.helse.spesialist.client.entraid
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.Either
@@ -18,6 +13,8 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
@@ -25,11 +22,7 @@ class MsGraphTilgangsgruppehenter(
     private val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller,
     private val msGraphUrl: String,
 ) : Brukerrollehenter {
-    private val objectMapper =
-        jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    private val objectMapper = jacksonObjectMapper()
 
     override fun hentBrukerroller(saksbehandlerOid: SaksbehandlerOid): Either<Set<Brukerrolle>, Brukerrollehenter.Feil> {
         loggInfo("Henter tilgangsgrupper for saksbehandler", "saksbehandlerOid" to saksbehandlerOid)
@@ -63,6 +56,7 @@ class MsGraphTilgangsgruppehenter(
                     val grupper =
                         objectMapper
                             .readTree(responseBody)["value"]
+                            .toList()
                             .map(JsonNode::asText)
                             .map(UUID::fromString)
                     logg.debug("Hentet ${grupper.size} grupper fra MS")

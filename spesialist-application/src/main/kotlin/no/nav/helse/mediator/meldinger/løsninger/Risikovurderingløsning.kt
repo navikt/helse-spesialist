@@ -1,8 +1,8 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.spesialist.application.logg.logg
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 

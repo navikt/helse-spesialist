@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
@@ -11,6 +10,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
+import tools.jackson.databind.JsonNode
 
 class InntektLøsningRiver(
     private val mediator: MeldingMediator,
@@ -47,10 +47,10 @@ class InntektLøsningRiver(
 
         val inntektsløsning =
             Inntektløsning(
-                packet["@løsning.InntekterForSykepengegrunnlag"].map { løsning ->
+                packet["@løsning.InntekterForSykepengegrunnlag"].toList().map { løsning ->
                     Inntekter(
                         løsning["årMåned"].asYearMonth(),
-                        løsning["inntektsliste"].map {
+                        løsning["inntektsliste"].toList().map {
                             Inntekter.Inntekt(
                                 it["beløp"].asDouble(),
                                 it["orgnummer"].asText(),
@@ -66,7 +66,7 @@ class InntektLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = inntektsløsning,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 }

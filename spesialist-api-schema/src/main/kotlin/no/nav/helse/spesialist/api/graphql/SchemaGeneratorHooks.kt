@@ -88,7 +88,7 @@ private object UuidCoercing : Coercing<UUID, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): String =
+    ): String? =
         when (dataFetcherResult) {
             is StringValue -> dataFetcherResult.value
             else -> dataFetcherResult.toString()
@@ -113,7 +113,7 @@ private object BigDecimalCoercing : Coercing<BigDecimal, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): String =
+    ): String? =
         when (dataFetcherResult) {
             is StringValue -> dataFetcherResult.value
             else -> dataFetcherResult.toString()
@@ -138,7 +138,7 @@ private object LocalDateTimeCoercing : Coercing<LocalDateTime, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): String =
+    ): String? =
         when (dataFetcherResult) {
             is StringValue -> dataFetcherResult.value
             else -> dataFetcherResult.toString()
@@ -148,14 +148,14 @@ private object LocalDateTimeCoercing : Coercing<LocalDateTime, String> {
         input: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): LocalDateTime = LocalDateTime.parse(serialize(input, graphQLContext, locale))
+    ): LocalDateTime? = serialize(input, graphQLContext, locale)?.let { LocalDateTime.parse(it) }
 
     override fun parseLiteral(
         input: Value<*>,
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): LocalDateTime = LocalDateTime.parse(serialize(input, graphQLContext, locale))
+    ): LocalDateTime? = serialize(input, graphQLContext, locale)?.let { LocalDateTime.parse(it) }
 }
 
 private object LocalDateCoercing : Coercing<LocalDate, String> {
@@ -163,7 +163,7 @@ private object LocalDateCoercing : Coercing<LocalDate, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): String =
+    ): String? =
         when (dataFetcherResult) {
             is StringValue -> dataFetcherResult.value
             else -> dataFetcherResult.toString()
@@ -173,14 +173,14 @@ private object LocalDateCoercing : Coercing<LocalDate, String> {
         input: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): LocalDate = LocalDate.parse(serialize(input, graphQLContext, locale))
+    ): LocalDate? = serialize(input, graphQLContext, locale)?.let { LocalDate.parse(it) }
 
     override fun parseLiteral(
         input: Value<*>,
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): LocalDate = LocalDate.parse(serialize(input, graphQLContext, locale))
+    ): LocalDate? = serialize(input, graphQLContext, locale)?.let { LocalDate.parse(it) }
 }
 
 private object YearMonthCoercing : Coercing<YearMonth, String> {
@@ -188,7 +188,7 @@ private object YearMonthCoercing : Coercing<YearMonth, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): String =
+    ): String? =
         when (dataFetcherResult) {
             is StringValue -> dataFetcherResult.value
             else -> dataFetcherResult.toString()
@@ -198,14 +198,14 @@ private object YearMonthCoercing : Coercing<YearMonth, String> {
         input: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): YearMonth = YearMonth.parse(serialize(input, graphQLContext, locale))
+    ): YearMonth? = serialize(input, graphQLContext, locale)?.let { YearMonth.parse(it) }
 
     override fun parseLiteral(
         input: Value<*>,
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): YearMonth = YearMonth.parse(serialize(input, graphQLContext, locale))
+    ): YearMonth? = serialize(input, graphQLContext, locale)?.let { YearMonth.parse(it) }
 }
 
 private object YearCoercing : Coercing<Year, String> {
@@ -213,7 +213,7 @@ private object YearCoercing : Coercing<Year, String> {
         dataFetcherResult: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): String =
+    ): String? =
         when (dataFetcherResult) {
             is StringValue -> dataFetcherResult.value
             else -> dataFetcherResult.toString()
@@ -223,12 +223,12 @@ private object YearCoercing : Coercing<Year, String> {
         input: Any,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): Year = Year.parse(serialize(input, graphQLContext, locale))
+    ): Year? = serialize(input, graphQLContext, locale)?.let { Year.parse(it) }
 
     override fun parseLiteral(
         input: Value<*>,
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): Year = Year.parse(serialize(input, graphQLContext, locale))
+    ): Year? = serialize(input, graphQLContext, locale)?.let { Year.parse(it) }
 }

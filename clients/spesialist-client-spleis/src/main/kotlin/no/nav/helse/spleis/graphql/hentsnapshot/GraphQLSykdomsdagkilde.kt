@@ -2,11 +2,11 @@ package no.nav.helse.spleis.graphql.hentsnapshot
 
 import com.expediagroup.graphql.client.Generated
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.scalars.AnyToUUIDConverter
 import no.nav.helse.spleis.graphql.scalars.UUIDToAnyConverter
+import tools.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.databind.annotation.JsonSerialize
 import java.util.UUID
 
 @Generated

@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
@@ -14,6 +13,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.typer.Kjønn
+import tools.jackson.databind.JsonNode
 
 class PersoninfoløsningRiver(
     private val mediator: MeldingMediator,
@@ -54,7 +54,7 @@ class PersoninfoløsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = parsePersoninfo(packet["@løsning.HentPersoninfoV2"]),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 }
@@ -94,14 +94,14 @@ class FlerePersoninfoRiver(
             behovId = packet["@id"].asUUID(),
             løsning =
                 HentPersoninfoløsninger(
-                    packet["@løsning.HentPersoninfoV2"].map {
+                    packet["@løsning.HentPersoninfoV2"].toList().map {
                         parsePersoninfo(
                             it,
                         )
                     },
                 ),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 }

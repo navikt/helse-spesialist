@@ -1,12 +1,10 @@
 package no.nav.helse.spesialist.application.testing
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.intellij.lang.annotations.Language
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -14,10 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-private val objectMapper: ObjectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+private val objectMapper: ObjectMapper = jacksonObjectMapper()
 private val objectMapperWriter = objectMapper.writerWithDefaultPrettyPrinter()
 
 fun assertJsonEquals(
@@ -32,7 +27,7 @@ fun assertJsonEquals(
     vararg ignorerStier: String,
 ) {
     val actualAsObjectNode =
-        actualJsonNode.deepCopy<JsonNode>().apply {
+        actualJsonNode.deepCopy().apply {
             ignorerStier.forEach { sti ->
                 val gjeldende: JsonNode = this
                 val segmenter = sti.split(".")

@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.e2etests
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
+import tools.jackson.databind.JsonNode
 import kotlin.test.assertNull
 
 object GraphQL {

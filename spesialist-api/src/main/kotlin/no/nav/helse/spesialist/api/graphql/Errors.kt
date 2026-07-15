@@ -7,13 +7,13 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import no.nav.helse.spesialist.application.logg.teamLogs
 
-internal fun <T> conflict(message: String) = dataFetcherError<T>(409, message)
+internal fun <T : Any> conflict(message: String): DataFetcherResult<T?> = dataFetcherError(409, message)
 
-private fun <T> dataFetcherError(
+private fun <T : Any> dataFetcherError(
     httpCode: Int,
     message: String,
     vararg extensions: Pair<String, Any>,
-): DataFetcherResult<T> {
+): DataFetcherResult<T?> {
     teamLogs.error("Returnerer $httpCode-feil for GraphQL-operasjon: $message")
     return byggFeilrespons(graphqlErrorException(httpCode, message, *extensions))
 }
@@ -24,4 +24,5 @@ internal fun graphqlErrorException(
     vararg extensions: Pair<String, Any>,
 ): GraphqlErrorException = newErrorException().message(message).extensions(mapOf("code" to httpCode, *extensions)).build()
 
-internal fun <T> byggFeilrespons(error: GraphQLError) = newResult<T>().error(error).build()
+@Suppress("UNCHECKED_CAST")
+internal fun <T : Any> byggFeilrespons(error: GraphQLError): DataFetcherResult<T?> = newResult<T>().error(error).build() as DataFetcherResult<T?>

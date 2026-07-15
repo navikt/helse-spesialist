@@ -1,10 +1,6 @@
 package no.nav.helse.spesialist.valkey
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.valkey.DefaultJedisClientConfig
@@ -13,6 +9,9 @@ import io.valkey.JedisPooled
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggWarn
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.time.Duration
 
 class ValkeyCache(
@@ -30,12 +29,12 @@ class ValkeyCache(
         )
 
     private val objectMapper =
-        jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
+        jacksonMapperBuilder()
             .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
             .enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
-            .setDefaultPropertyInclusion(JsonInclude.Include.ALWAYS)
+            .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.ALWAYS) }
+            .changeDefaultPropertyInclusion { incl -> incl.withContentInclusion(JsonInclude.Include.ALWAYS) }
+            .build()
 
     private fun <T> hentFraValkey(
         key: String,

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.db.objectMapper
 import org.intellij.lang.annotations.Language
+import tools.jackson.module.kotlin.readValue
 import javax.sql.DataSource
 
 class PgOverstyringApiDao internal constructor(

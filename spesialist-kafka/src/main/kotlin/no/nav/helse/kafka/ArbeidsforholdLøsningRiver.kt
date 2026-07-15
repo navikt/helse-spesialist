@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
@@ -12,6 +11,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.spesialist.application.logg.loggInfo
+import tools.jackson.databind.JsonNode
 
 class ArbeidsforholdLøsningRiver(
     private val mediator: MeldingMediator,
@@ -48,12 +48,12 @@ class ArbeidsforholdLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = packet.toArbeidsforholdløsninger(),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 
     private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning {
-        val løsninger = this["@løsning.Arbeidsforhold"].map(::toArbeidsforholdløsning)
+        val løsninger = this["@løsning.Arbeidsforhold"].toList().map(::toArbeidsforholdløsning)
 
         if (løsninger.isEmpty()) {
             loggInfo("Ingen arbeidsforhold i løsningen")

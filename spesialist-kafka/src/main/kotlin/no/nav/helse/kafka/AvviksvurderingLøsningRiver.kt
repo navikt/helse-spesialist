@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -16,6 +15,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
+import tools.jackson.databind.JsonNode
 
 class AvviksvurderingLøsningRiver(
     private val mediator: MeldingMediator,
@@ -66,7 +66,7 @@ class AvviksvurderingLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = løsning(packet),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 
@@ -88,7 +88,7 @@ class AvviksvurderingLøsningRiver(
         )
 
     private fun omregnedeÅrsinntekter(json: JsonNode): List<OmregnetÅrsinntekt> =
-        json.map {
+        json.toList().map {
             OmregnetÅrsinntekt(
                 arbeidsgiverreferanse = it["arbeidsgiverreferanse"].asText(),
                 beløp = it["beløp"].asDouble(),
@@ -102,7 +102,7 @@ class AvviksvurderingLøsningRiver(
         )
 
     private fun innrapporterteInntekter(json: JsonNode): List<InnrapportertInntekt> =
-        json.map {
+        json.toList().map {
             InnrapportertInntekt(
                 arbeidsgiverreferanse = it["arbeidsgiverreferanse"].asText(),
                 inntekter = inntekter(it["inntekter"]),
@@ -110,7 +110,7 @@ class AvviksvurderingLøsningRiver(
         }
 
     private fun inntekter(json: JsonNode): List<Inntekt> =
-        json.map {
+        json.toList().map {
             Inntekt(
                 årMåned = it["årMåned"].asYearMonth(),
                 beløp = it["beløp"].asDouble(),

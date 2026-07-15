@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -67,7 +67,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(ekskluderteUkedager.size, opprettetEvent["ekskluderteUkedager"].size())
             assertEquals(
                 ekskluderteUkedager.map(LocalDate::toString),
-                opprettetEvent["ekskluderteUkedager"].map(JsonNode::asText),
+                opprettetEvent["ekskluderteUkedager"].toList().map(JsonNode::asText),
             )
         }
 
@@ -653,7 +653,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedEkskluderteUkedager.size, inntekt["ekskluderteUkedager"].size())
         assertEquals(
             expectedEkskluderteUkedager.map(LocalDate::toString),
-            inntekt["ekskluderteUkedager"].map(JsonNode::asText),
+            inntekt["ekskluderteUkedager"].toList().map(JsonNode::asText),
         )
         assertEquals(expectedFjernet, inntekt["fjernet"].asBoolean())
         assertEquals(expectedErDelAvAktivTotrinnsvurdering, inntekt["erDelAvAktivTotrinnsvurdering"].asBoolean())
@@ -684,11 +684,11 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedEkskluderteUkedagerTil.size, endringer["ekskluderteUkedager"]["til"].size())
         assertEquals(
             expectedEkskluderteUkedagerFra.map(LocalDate::toString),
-            endringer["ekskluderteUkedager"]["fra"].map(JsonNode::asText),
+            endringer["ekskluderteUkedager"]["fra"].toList().map(JsonNode::asText),
         )
         assertEquals(
             expectedEkskluderteUkedagerTil.map(LocalDate::toString),
-            endringer["ekskluderteUkedager"]["til"].map(JsonNode::asText),
+            endringer["ekskluderteUkedager"]["til"].toList().map(JsonNode::asText),
         )
     }
 

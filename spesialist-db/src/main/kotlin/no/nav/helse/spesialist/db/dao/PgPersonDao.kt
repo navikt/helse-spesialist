@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
@@ -11,6 +10,7 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import javax.sql.DataSource
 

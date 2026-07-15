@@ -893,7 +893,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals("en begrunnelse", overstyrtArbeidsforhold["begrunnelse"].asText())
         assertEquals("en forklaring", overstyrtArbeidsforhold["forklaring"].asText())
         assertEquals(ORGANISASJONSNUMMER_GHOST, overstyrtArbeidsforhold["orgnummer"].asText())
-        assertEquals(false, overstyrtArbeidsforhold["orgnummer"].asBoolean())
+        assertEquals(true, overstyrtArbeidsforhold["deaktivert"].asBoolean())
     }
 
     @Test

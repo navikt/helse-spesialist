@@ -2,7 +2,7 @@ dependencies {
     testImplementation(project(":spesialist-bootstrap"))
 
     testImplementation(libs.rapidsAndRivers)
-    testImplementation(libs.tbdLibs.rapidsAndRiversTest)
+    testImplementation(libs.rapidsAndRiversTest)
 
     testImplementation(libs.bundles.flyway.postgres)
     testImplementation(libs.hikari)

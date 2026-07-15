@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -14,6 +11,9 @@ import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.objectMapper
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -60,7 +60,7 @@ class BehovLøserStub(
         jsonMessage.require("@behov") { behov ->
             jsonMessage.interestedIn("fødselsnummer")
             val fødselsnummer = jsonMessage["fødselsnummer"].asText()
-            val behovIMelding = behov.map { it.asText() }.toSet()
+            val behovIMelding = behov.toList().map { it.asText() }.toSet()
             val behovViKanLøse = løserPerBehov(fødselsnummer).keys
             val behovIMeldingenViIkkeKanLøse = behovIMelding.filterNot { it in behovViKanLøse }
             if (behovIMeldingenViIkkeKanLøse.isNotEmpty()) error("Kan ikke løse behov $behovIMeldingenViIkkeKanLøse, ignorerer")
@@ -115,7 +115,7 @@ class BehovLøserStub(
         behov: String,
     ) {
         val sisteBehov =
-            behovliste(fødselsnummer).findLast { behov in it["@behov"].map { it.asText() } }
+            behovliste(fødselsnummer).findLast { behov in it["@behov"].toList().map { it.asText() } }
                 ?: error("Fant ikke behov $behov i behovliste")
         besvarMelding(
             fødselsnummer = fødselsnummer,
@@ -149,7 +149,7 @@ class BehovLøserStub(
                 "behov" to jsonNode["@behov"],
             ),
         "@løsning" to
-            jsonNode["@behov"].map { it.asText() }.associateWith { behov ->
+            jsonNode["@behov"].toList().map { it.asText() }.associateWith { behov ->
                 løserPerBehov[behov]?.løsning(jsonNode[behov])
                     ?: error("Skulle ikke kommet hit! Har ikke løser for behov: $behov")
             },

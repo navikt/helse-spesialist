@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -10,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.registrerTidsbrukForBehov
 import no.nav.helse.spesialist.application.logg.loggDebug
+import tools.jackson.databind.JsonNode
 import java.time.Duration
 import kotlin.time.toKotlinDuration
 
@@ -42,7 +42,7 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
         val besvart = packet["@besvart"].asLocalDateTime()
         val opprettet = opprinneligService.let { it["time"].asLocalDateTime() }
         val delay = Duration.between(opprettet, besvart).toKotlinDuration()
-        val behov = packet["@behov"].map(JsonNode::asText)
+        val behov = packet["@behov"].toList().map(JsonNode::asText)
         val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless { it.isMissingOrNull() }?.asBoolean()
         val automatisk: Boolean? = packet["@løsning.Godkjenning.automatiskBehandling"].takeUnless { it.isMissingOrNull() }?.asBoolean()
 

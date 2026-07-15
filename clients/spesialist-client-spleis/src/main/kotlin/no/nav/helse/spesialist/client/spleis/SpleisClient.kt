@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.client.spleis
 
 import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.logg.logg
@@ -18,6 +16,7 @@ import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.HttpRequest
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.util.TimeValue
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.net.URI
 import java.util.UUID
 
@@ -27,12 +26,7 @@ class SpleisClient(
     private val spleisClientId: String,
     private val loggRespons: Boolean,
 ) {
-    private val serializer: GraphQLClientSerializer =
-        GraphQLClientJacksonSerializer(
-            jacksonObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES),
-        )
+    private val serializer: GraphQLClientSerializer = GraphQLClientJacksonSerializer(jacksonMapperBuilder().build())
 
     class SpleisRetryStrategy : DefaultHttpRequestRetryStrategy(5, TimeValue.ofSeconds(1L)) {
         override fun handleAsIdempotent(request: HttpRequest) = true // Retry selv om det er POST

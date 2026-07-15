@@ -1,6 +1,5 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.bootstrap.EnvironmentToggles
@@ -25,7 +24,6 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
 import java.math.BigDecimal
-import java.util.UUID
 
 class VedtakFattetMeldingBuilder(
     private val identitetsnummer: Identitetsnummer,
@@ -144,7 +142,7 @@ class VedtakFattetMeldingBuilder(
             fom = behandling.fom,
             tom = behandling.tom,
             skjæringstidspunkt = behandling.skjæringstidspunkt,
-            hendelser = packet["hendelser"].map<JsonNode, UUID> { it.asUUID() },
+            hendelser = packet["hendelser"].toList().map { it.asUUID() },
             sykepengegrunnlag = packet["sykepengegrunnlagsfakta"]["sykepengegrunnlag"].asBigDecimal(),
             vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
             tags = behandling.tags.filterNot { it == TAG_6G_BEGRENSET }.toSet(),
@@ -218,7 +216,7 @@ class VedtakFattetMeldingBuilder(
         avviksprosent = avviksvurdering.avviksprosent.toBigDecimal(),
         innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),
         arbeidsgivere =
-            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
+            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].toList().map { arbeidsgiver ->
                 val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
@@ -257,7 +255,7 @@ class VedtakFattetMeldingBuilder(
                 Skjønnsfastsettingsårsak.TREDJE_AVSNITT -> VedtakFattetMelding.Skjønnsfastsettingsårsak.TREDJE_AVSNITT
             },
         arbeidsgivere =
-            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
+            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].toList().map { arbeidsgiver ->
                 val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = organisasjonsnummer,

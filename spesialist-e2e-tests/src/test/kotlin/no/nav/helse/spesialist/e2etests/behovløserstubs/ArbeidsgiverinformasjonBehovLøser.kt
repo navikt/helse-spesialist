@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 class ArbeidsgiverinformasjonBehovLøser : AbstractBehovLøser("Arbeidsgiverinformasjon") {
     override fun løsning(behovJson: JsonNode) =
-        behovJson["organisasjonsnummer"].map {
+        behovJson["organisasjonsnummer"].toList().map {
             mapOf(
                 "orgnummer" to it.asText(),
                 "navn" to "Navn for ${it.asText()}",

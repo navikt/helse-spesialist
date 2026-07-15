@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.rest.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.application.testing.assertAfter
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import tools.jackson.databind.JsonNode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

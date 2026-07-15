@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 
 class FullmaktBehovLøser : AbstractBehovLøser("Fullmakt") {

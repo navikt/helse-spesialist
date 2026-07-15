@@ -126,7 +126,7 @@ class PgLegacyBehandlingDao private constructor(
 
     private fun Row.toDto(): List<VarselDto> {
         val varsler = this.stringOrNull("varsler") ?: return emptyList()
-        return objectMapper.readTree(varsler).map { varsel ->
+        return objectMapper.readTree(varsler).toList().map { varsel ->
             VarselDto(
                 varsel["unik_id"].asUUID(),
                 varsel["kode"].asText(),

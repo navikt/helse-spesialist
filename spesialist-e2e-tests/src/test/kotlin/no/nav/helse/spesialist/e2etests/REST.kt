@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.encodeURLQueryComponent
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -12,6 +11,7 @@ import org.apache.hc.core5.http.Method
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.util.Timeout
 import org.junit.jupiter.api.Assertions.assertTrue
+import tools.jackson.databind.JsonNode
 import java.net.URI
 
 object REST {

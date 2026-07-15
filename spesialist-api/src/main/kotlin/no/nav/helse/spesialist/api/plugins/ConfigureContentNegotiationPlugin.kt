@@ -1,10 +1,9 @@
 package no.nav.helse.spesialist.api.plugins
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.ContentType
 import io.ktor.http.content.OutgoingContent
 import io.ktor.serialization.ContentConverter
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiationConfig
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
@@ -12,6 +11,7 @@ import io.ktor.utils.io.charsets.Charset
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readText
 import no.nav.helse.spesialist.api.objectMapper
+import tools.jackson.databind.ObjectMapper
 
 fun ContentNegotiationConfig.configureContentNegotiationPlugin() {
     register(ContentType.Application.Json, UnitFriendlyJacksonConverter(objectMapper))

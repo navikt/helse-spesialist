@@ -1,6 +1,5 @@
 package no.nav.helse.kafka.messagebuilders
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.melding.AnmodningOmForkastingEvent
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
@@ -30,6 +29,7 @@ import no.nav.helse.spesialist.domain.oppgave.Oppgave.AvventerSystem
 import no.nav.helse.spesialist.domain.oppgave.Oppgave.Ferdigstilt
 import no.nav.helse.spesialist.domain.oppgave.Oppgave.Invalidert
 import no.nav.helse.spesialist.kafka.objectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDateTime
 import java.util.UUID
 

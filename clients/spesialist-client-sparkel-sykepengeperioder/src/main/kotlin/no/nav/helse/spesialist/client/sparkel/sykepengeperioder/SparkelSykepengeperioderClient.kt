@@ -1,9 +1,5 @@
 package no.nav.helse.spesialist.client.sparkel.sykepengeperioder
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.Cache
@@ -16,6 +12,8 @@ import no.nav.helse.spesialist.domain.Infotrygdperiode
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.LocalDate
@@ -26,10 +24,7 @@ class SparkelSykepengeperioderClient(
     private val accessTokenProvider: AccessTokenProvider,
     private val cache: Cache,
 ) : InfotrygdperiodeHenter {
-    private val objectMapper =
-        jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    private val objectMapper = jacksonObjectMapper()
 
     override fun hentFor(
         identitetsnummer: Identitetsnummer,

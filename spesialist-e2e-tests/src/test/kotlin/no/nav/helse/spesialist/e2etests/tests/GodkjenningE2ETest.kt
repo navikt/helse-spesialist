@@ -53,7 +53,7 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
                     melding["@behov"].any { it.asText() == "Arbeidsgiverinformasjon" } &&
                     !melding.has("@løsning")
             }
-        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
+        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map { it.asText() }
         assertEquals(
             setOf(ekstraOrgnummer, organisasjonsnummer()),
             arbeidsgivere.toSet(),
@@ -75,7 +75,7 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
                     melding["@behov"].any { it.asText() == "Arbeidsgiverinformasjon" } &&
                     !melding.has("@løsning")
             }
-        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
+        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map { it.asText() }
         assertEquals(setOf(orgnummer2, organisasjonsnummer()), arbeidsgivere.toSet())
 
         val personinfoBehov =
@@ -85,7 +85,7 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
                     !melding.has("@løsning") &&
                     melding["HentPersoninfoV2"]?.has("ident") == true
             }
-        val enkeltpersonforetak2 = personinfoBehov["HentPersoninfoV2"]["ident"].map { it.asText() }
+        val enkeltpersonforetak2 = personinfoBehov["HentPersoninfoV2"]["ident"].toList().map { it.asText() }
         assertEquals(listOf(enkeltpersonforetak), enkeltpersonforetak2)
     }
 

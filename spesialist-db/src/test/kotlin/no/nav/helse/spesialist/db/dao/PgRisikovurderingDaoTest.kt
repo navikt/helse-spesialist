@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -15,7 +15,7 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagrer risikovurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val data = objectMapper.createObjectNode().set<JsonNode>("funn", objectMapper.createArrayNode())
+        val data = objectMapper.createObjectNode().set("funn", objectMapper.createArrayNode())
         risikovurderingDao.lagre(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
@@ -33,7 +33,7 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `dobbel insert medfører to innslag`() {
-        val data = objectMapper.createObjectNode().set<JsonNode>("funn", objectMapper.createArrayNode())
+        val data = objectMapper.createObjectNode().set("funn", objectMapper.createArrayNode())
         val vedtaksperiodeId = UUID.randomUUID()
         risikovurderingDao.lagre(
             vedtaksperiodeId = vedtaksperiodeId,

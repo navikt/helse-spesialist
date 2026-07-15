@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -8,6 +7,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 
 class PgPoisonPillDaoTest : AbstractDBIntegrationTest() {
     private val poisonPillDao = daos.poisonPillDao

@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -41,10 +39,4 @@ class PgRisikovurderingApiDao internal constructor(
                 kontrollertOk = it["kontrollertOk"].toList(),
             )
         }
-
-    private fun JsonNode.toList(): List<JsonNode> =
-        objectMapper.readValue(
-            traverse(),
-            object : TypeReference<List<JsonNode>>() {},
-        )
 }

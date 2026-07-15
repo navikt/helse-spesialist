@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.impossibl.postgres.api.jdbc.PGConnection
 import com.impossibl.postgres.api.jdbc.PGNotificationListener
 import kotlinx.coroutines.channels.awaitClose
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.intellij.lang.annotations.Language
+import tools.jackson.module.kotlin.readValue
 import java.sql.Connection
 
 typealias ConnectionProvider = () -> Connection

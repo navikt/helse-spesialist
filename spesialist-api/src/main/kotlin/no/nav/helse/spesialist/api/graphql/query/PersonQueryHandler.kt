@@ -1,9 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.asLocalDate
-import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.execution.DataFetcherResult
@@ -13,6 +9,8 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.mediator.asLocalDate
+import no.nav.helse.mediator.isMissingOrNull
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.AuditLogger
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -129,6 +127,7 @@ import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -1336,11 +1335,11 @@ private fun SnapshotOppdrag.tilSimulering(): ApiSimulering =
             },
     )
 
-private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { objectMapper.readValue(it.traverse(), object : TypeReference<ApiFaresignal>() {}) }
+private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { objectMapper.treeToValue(it, ApiFaresignal::class.java) }
 
 private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
     val node = objectMapper.readTree(json)
-    val påVentÅrsaker = node["årsaker"].map { it["årsak"].asText() }
+    val påVentÅrsaker = node["årsaker"].toList().map { it["årsak"].asText() }
     val frist =
         node["frist"]
             ?.takeUnless { it.isMissingOrNull() }
