@@ -35,7 +35,7 @@ class VeilederStansMediator(
                     identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer()),
                     årsaker = melding.årsaker.map { VeilederStans.StansÅrsak.valueOf(it.name) }.toSet(),
                     opprettet = melding.opprettet.toInstant(ZoneOffset.UTC),
-                    originalMeldingId = UUID.fromString(objectMapper.readTree(melding.originalMelding).path("uuid").asText()),
+                    originalMeldingId = UUID.fromString(objectMapper.readTree(melding.originalMelding).path("uuid").asString()),
                 ),
             )
         }

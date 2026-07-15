@@ -13,9 +13,9 @@ class SøknadSendt(
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode["@id"].asText()),
-        fødselsnummer = jsonNode["fnr"].asText(),
-        aktørId = jsonNode["aktorId"].asText(),
+        id = UUID.fromString(jsonNode["@id"].asString()),
+        fødselsnummer = jsonNode["fnr"].asString(),
+        aktørId = jsonNode["aktorId"].asString(),
         json = jsonNode.toString(),
     )
 

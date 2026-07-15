@@ -53,7 +53,7 @@ class OvervåkOverstyringerRiver(
                 sessionContext.venterPåKvitteringForOverstyringRepository.lagre(
                     VenterPåKvitteringForOverstyring.ny(
                         meldingId = MeldingId(packet["@id"].asUUID()),
-                        identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText()),
+                        identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asString()),
                     ),
                 )
                 logg.info("Avventer kvittering for overstyring av $vedtaksperiodeId")

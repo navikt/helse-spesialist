@@ -31,7 +31,7 @@ class GosysOppgaveEndretRiver(
         mediator.mottaMelding(
             GosysOppgaveEndret(
                 id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
+                fødselsnummer = packet["fødselsnummer"].asString(),
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

@@ -31,7 +31,7 @@ class VedtaksperiodeNyUtbetalingRiver(
         mediator.mottaMelding(
             VedtaksperiodeNyUtbetaling(
                 id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
+                fødselsnummer = packet["fødselsnummer"].asString(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                 utbetalingId = packet["utbetalingId"].asUUID(),
                 json = packet.toJson(),

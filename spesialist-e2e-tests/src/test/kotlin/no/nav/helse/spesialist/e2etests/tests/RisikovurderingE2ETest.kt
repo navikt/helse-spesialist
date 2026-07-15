@@ -56,14 +56,14 @@ class RisikovurderingE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         val risikovurderingBehov = finnRisikovurderingBehov()
-        assertEquals("Arbeidsgiver", risikovurderingBehov["Risikovurdering"]["inntekt"]["inntektskilde"].asText())
+        assertEquals("Arbeidsgiver", risikovurderingBehov["Risikovurdering"]["inntekt"]["inntektskilde"].asString())
         assertEquals(123456.7, risikovurderingBehov["Risikovurdering"]["inntekt"]["omregnetÅrsinntekt"].asDouble())
     }
 
     private fun finnRisikovurderingBehov(): JsonNode =
         meldinger()
             .first { melding ->
-                melding["@event_name"].asText() == "behov" &&
-                    melding["@behov"].any { it.asText() == "Risikovurdering" }
+                melding["@event_name"].asString() == "behov" &&
+                    melding["@behov"].any { it.asString() == "Risikovurdering" }
             }
 }

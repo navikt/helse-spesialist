@@ -49,11 +49,11 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
 
         val arbeidsgiverinformasjonBehov =
             meldinger().first { melding ->
-                melding["@event_name"].asText() == "behov" &&
-                    melding["@behov"].any { it.asText() == "Arbeidsgiverinformasjon" } &&
+                melding["@event_name"].asString() == "behov" &&
+                    melding["@behov"].any { it.asString() == "Arbeidsgiverinformasjon" } &&
                     !melding.has("@løsning")
             }
-        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map { it.asText() }
+        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map { it.asString() }
         assertEquals(
             setOf(ekstraOrgnummer, organisasjonsnummer()),
             arbeidsgivere.toSet(),
@@ -71,21 +71,21 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
 
         val arbeidsgiverinformasjonBehov =
             meldinger().first { melding ->
-                melding["@event_name"].asText() == "behov" &&
-                    melding["@behov"].any { it.asText() == "Arbeidsgiverinformasjon" } &&
+                melding["@event_name"].asString() == "behov" &&
+                    melding["@behov"].any { it.asString() == "Arbeidsgiverinformasjon" } &&
                     !melding.has("@løsning")
             }
-        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map { it.asText() }
+        val arbeidsgivere = arbeidsgiverinformasjonBehov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].toList().map { it.asString() }
         assertEquals(setOf(orgnummer2, organisasjonsnummer()), arbeidsgivere.toSet())
 
         val personinfoBehov =
             meldinger().first { melding ->
-                melding["@event_name"].asText() == "behov" &&
-                    melding["@behov"].any { it.asText() == "HentPersoninfoV2" } &&
+                melding["@event_name"].asString() == "behov" &&
+                    melding["@behov"].any { it.asString() == "HentPersoninfoV2" } &&
                     !melding.has("@løsning") &&
                     melding["HentPersoninfoV2"]?.has("ident") == true
             }
-        val enkeltpersonforetak2 = personinfoBehov["HentPersoninfoV2"]["ident"].toList().map { it.asText() }
+        val enkeltpersonforetak2 = personinfoBehov["HentPersoninfoV2"]["ident"].toList().map { it.asString() }
         assertEquals(listOf(enkeltpersonforetak), enkeltpersonforetak2)
     }
 

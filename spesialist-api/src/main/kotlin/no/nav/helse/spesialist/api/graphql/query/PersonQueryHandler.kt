@@ -1339,7 +1339,7 @@ private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { object
 
 private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
     val node = objectMapper.readTree(json)
-    val påVentÅrsaker = node["årsaker"].toList().map { it["årsak"].asText() }
+    val påVentÅrsaker = node["årsaker"].toList().map { it["årsak"].asString() }
     val frist =
         node["frist"]
             ?.takeUnless { it.isMissingOrNull() }
@@ -1347,7 +1347,7 @@ private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, S
     val notattekst =
         node["notattekst"]
             ?.takeUnless { it.isMissingOrNull() }
-            ?.asText()
+            ?.asString()
     return Triple(påVentÅrsaker, frist, notattekst)
 }
 
@@ -1356,7 +1356,7 @@ private fun mapNotattekstJson(json: String): String? {
     val notattekst =
         node["notattekst"]
             ?.takeUnless { it.isMissingOrNull() }
-            ?.asText()
+            ?.asString()
     return notattekst
 }
 

@@ -29,7 +29,7 @@ class DokumentRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val fødselsnummer = packet["fødselsnummer"].asText()
+        val fødselsnummer = packet["fødselsnummer"].asString()
         val dokumentId = packet["dokumentId"].asUUID()
         val dokument = packet["@løsning.dokument"]
 

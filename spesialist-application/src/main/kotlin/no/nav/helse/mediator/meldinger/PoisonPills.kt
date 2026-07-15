@@ -8,7 +8,7 @@ class PoisonPills(
     fun erPoisonPill(melding: JsonNode) =
         poisonPills
             .any { (key, poisonPillValues) ->
-                melding[key]?.asText()?.let { verdiFraMelding ->
+                melding[key]?.asString()?.let { verdiFraMelding ->
                     poisonPillValues.contains(verdiFraMelding)
                 } ?: false
             }

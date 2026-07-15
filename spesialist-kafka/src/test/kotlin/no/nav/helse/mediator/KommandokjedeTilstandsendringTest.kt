@@ -38,10 +38,10 @@ class KommandokjedeTilstandsendringTest {
         mediator.tilstandEndret(event)
         mediator.publiserOppsamledeMeldinger(testmelding, publiserer)
         val melding = testRapid.inspektør.message(0)
-        assertEquals("kommandokjede_ferdigstilt", melding["@event_name"].asText())
+        assertEquals("kommandokjede_ferdigstilt", melding["@event_name"].asString())
         assertEquals(contextId, melding["commandContextId"].asUUID())
         assertEquals(hendelseId, melding["meldingId"].asUUID())
-        assertEquals(navn, melding["command"].asText())
+        assertEquals(navn, melding["command"].asString())
     }
 
     @Test
@@ -53,10 +53,10 @@ class KommandokjedeTilstandsendringTest {
         mediator.tilstandEndret(event)
         mediator.publiserOppsamledeMeldinger(testmelding, publiserer)
         val melding = testRapid.inspektør.message(0)
-        assertEquals("kommandokjede_suspendert", melding["@event_name"].asText())
+        assertEquals("kommandokjede_suspendert", melding["@event_name"].asString())
         assertEquals(contextId, melding["commandContextId"].asUUID())
         assertEquals(hendelseId, melding["meldingId"].asUUID())
-        assertEquals(navn, melding["command"].asText())
+        assertEquals(navn, melding["command"].asString())
         assertEquals(listOf(1, 2, 3), melding["sti"].toList().map { it.asInt() })
     }
 
@@ -68,7 +68,7 @@ class KommandokjedeTilstandsendringTest {
         mediator.tilstandEndret(event)
         mediator.publiserOppsamledeMeldinger(testmelding, publiserer)
         val melding = testRapid.inspektør.message(0)
-        assertEquals("kommandokjede_avbrutt", melding["@event_name"].asText())
+        assertEquals("kommandokjede_avbrutt", melding["@event_name"].asString())
         assertEquals(contextId, melding["commandContextId"].asUUID())
         assertEquals(hendelseId, melding["meldingId"].asUUID())
     }

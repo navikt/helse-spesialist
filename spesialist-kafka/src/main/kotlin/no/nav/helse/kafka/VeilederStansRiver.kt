@@ -36,11 +36,11 @@ class VeilederStansRiver(
         meterRegistry: MeterRegistry,
     ) {
         val id = packet["@id"].asUUID()
-        val fødselsnummer = packet["fødselsnummer"].asText()
-        val status = packet["status"].asText()
-        val årsaker = packet["årsaker"].toList().map { enumValueOf<StoppknappÅrsak>(it.asText()) }.toSet()
+        val fødselsnummer = packet["fødselsnummer"].asString()
+        val status = packet["status"].asString()
+        val årsaker = packet["årsaker"].toList().map { enumValueOf<StoppknappÅrsak>(it.asString()) }.toSet()
         val opprettet = packet["opprettet"].asLocalDateTime()
-        val originalMelding = packet["originalMelding"].asText()
+        val originalMelding = packet["originalMelding"].asString()
 
         mediator.mottaMelding(
             VeilederStansMelding(

@@ -22,8 +22,8 @@ class KlargjørTilgangsrelaterteData(
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode["@id"].asText()),
-        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        id = UUID.fromString(jsonNode["@id"].asString()),
+        fødselsnummer = jsonNode["fødselsnummer"].asString(),
         json = jsonNode.toString(),
     )
 

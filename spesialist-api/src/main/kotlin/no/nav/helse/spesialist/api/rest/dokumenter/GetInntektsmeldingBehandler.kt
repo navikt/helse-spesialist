@@ -43,13 +43,13 @@ class GetInntektsmeldingBehandler(
         val fødselsnummerForIM =
             dokument
                 .get("arbeidstakerFnr")
-                .asText()
+                .asString()
                 .takeUnless { it.isEmpty() }
                 ?.let { setOf(it) } ?: emptySet()
         val aktørIdForIM =
             dokument
                 .get("arbeidstakerAktorId")
-                .asText()
+                .asString()
                 .takeUnless { it.isEmpty() }
 
         val fødselsnumreForIM =

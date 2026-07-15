@@ -66,13 +66,13 @@ internal class MessageContextMeldingPublisererTest {
             årsak = årsak,
         )
 
-        assertEquals("vedtaksperiode_godkjent", testRapid.inspektør.field(0, "@event_name").asText())
-        assertEquals(fødselsnummer, testRapid.inspektør.field(0, "fødselsnummer").asText())
-        assertEquals(vedtaksperiodeId.toString(), testRapid.inspektør.field(0, "vedtaksperiodeId").asText())
-        assertEquals(behandlingId.toString(), testRapid.inspektør.field(0, "behandlingId").asText())
-        assertEquals(periodetype, testRapid.inspektør.field(0, "periodetype").asText())
-        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
-        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
+        assertEquals("vedtaksperiode_godkjent", testRapid.inspektør.field(0, "@event_name").asString())
+        assertEquals(fødselsnummer, testRapid.inspektør.field(0, "fødselsnummer").asString())
+        assertEquals(vedtaksperiodeId.toString(), testRapid.inspektør.field(0, "vedtaksperiodeId").asString())
+        assertEquals(behandlingId.toString(), testRapid.inspektør.field(0, "behandlingId").asString())
+        assertEquals(periodetype, testRapid.inspektør.field(0, "periodetype").asString())
+        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asString()) }
+        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asString()) }
     }
 
     @Test
@@ -89,11 +89,11 @@ internal class MessageContextMeldingPublisererTest {
             hendelseNavn = årsak,
         )
 
-        assertEquals("kommandokjede_avbrutt", testRapid.inspektør.field(0, "@event_name").asText())
-        assertEquals(contextId.toString(), testRapid.inspektør.field(0, "commandContextId").asText())
-        assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "meldingId").asText())
-        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
-        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
+        assertEquals("kommandokjede_avbrutt", testRapid.inspektør.field(0, "@event_name").asString())
+        assertEquals(contextId.toString(), testRapid.inspektør.field(0, "commandContextId").asString())
+        assertEquals(hendelseId.toString(), testRapid.inspektør.field(0, "meldingId").asString())
+        assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asString()) }
+        assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asString()) }
     }
 
     @ParameterizedTest
@@ -109,9 +109,9 @@ internal class MessageContextMeldingPublisererTest {
 
         assertEquals(1, testRapid.inspektør.size)
         testRapid.inspektør.message(0).let {
-            assertEquals("hent-dokument", it["@event_name"].asText())
-            assertEquals(dokumentId, UUID.fromString(it["dokumentId"].asText()))
-            assertEquals(dokumentType, it["dokumentType"].asText())
+            assertEquals("hent-dokument", it["@event_name"].asString())
+            assertEquals(dokumentId, UUID.fromString(it["dokumentId"].asString()))
+            assertEquals(dokumentType, it["dokumentType"].asString())
         }
     }
 
@@ -150,18 +150,18 @@ internal class MessageContextMeldingPublisererTest {
         // Then:
         assertEquals(1, testRapid.inspektør.size)
         testRapid.inspektør.message(index = 0).let {
-            assertEquals("oppgave_opprettet", it["@event_name"].asText())
+            assertEquals("oppgave_opprettet", it["@event_name"].asString())
 
             it["@forårsaket_av"]?.let { forårsaketAvObject ->
-                assertEquals(hendelseId, UUID.fromString(forårsaketAvObject["id"]?.asText()))
+                assertEquals(hendelseId, UUID.fromString(forårsaketAvObject["id"]?.asString()))
             } ?: fail("Mangler @forårsaket_av")
 
-            assertEquals(hendelseId, UUID.fromString(it["hendelseId"]?.asText()))
-            assertEquals(fødselsnummer, it["fødselsnummer"].asText())
+            assertEquals(hendelseId, UUID.fromString(it["hendelseId"]?.asString()))
+            assertEquals(fødselsnummer, it["fødselsnummer"].asString())
             assertEquals(oppgaveId, it["oppgaveId"]?.longValue())
-            assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
-            assertEquals(setOf("SØKNAD"), it["egenskaper"].toList().map(JsonNode::asText).toSet())
-            assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asText()))
+            assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asString()))
+            assertEquals(setOf("SØKNAD"), it["egenskaper"].toList().map(JsonNode::asString).toSet())
+            assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asString()))
             assertEquals(null, it["saksbehandler"])
             assertEquals(null, it["beslutter"])
         }
@@ -212,18 +212,18 @@ internal class MessageContextMeldingPublisererTest {
         // Then:
         assertEquals(1, testRapid.inspektør.size)
         testRapid.inspektør.message(index = 0).let {
-            assertEquals("oppgave_oppdatert", it["@event_name"].asText())
+            assertEquals("oppgave_oppdatert", it["@event_name"].asString())
 
             it["@forårsaket_av"]?.let { forårsaketAvObject ->
-                assertEquals(hendelseId, UUID.fromString(forårsaketAvObject["id"]?.asText()))
+                assertEquals(hendelseId, UUID.fromString(forårsaketAvObject["id"]?.asString()))
             } ?: fail("Mangler @forårsaket_av")
 
-            assertEquals(hendelseId, UUID.fromString(it["hendelseId"]?.asText()))
-            assertEquals(fødselsnummer, it["fødselsnummer"].asText())
+            assertEquals(hendelseId, UUID.fromString(it["hendelseId"]?.asString()))
+            assertEquals(fødselsnummer, it["fødselsnummer"].asString())
             assertEquals(oppgaveId, it["oppgaveId"]?.longValue())
-            assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
-            assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].toList().map(JsonNode::asText).toSet())
-            assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asText()))
+            assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asString()))
+            assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].toList().map(JsonNode::asString).toSet())
+            assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asString()))
             assertEquals(saksbehandler.id.value, it["saksbehandler"]?.asUUID())
         }
     }
@@ -257,23 +257,23 @@ internal class MessageContextMeldingPublisererTest {
         val melding = meldinger.single()
         val subsumsjon = melding.path("subsumsjon")
 
-        assertEquals("subsumsjon", melding["@event_name"].asText())
+        assertEquals("subsumsjon", melding["@event_name"].asString())
         assertNotNull(melding["@id"].asUUID())
         assertNotNull(melding["@opprettet"].asLocalDateTime())
         assertEquals(id, subsumsjon["id"].asUUID())
-        assertEquals(fødselsnummer, subsumsjon["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
-        assertEquals("1.0.0", subsumsjon["versjon"].asText())
-        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asText())
-        assertEquals("ET LEDD", subsumsjon["ledd"].asText())
-        assertEquals("EN BOKSTAV", subsumsjon["bokstav"].asText())
-        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
-        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asText())
-        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asText())
+        assertEquals(fødselsnummer, subsumsjon["fodselsnummer"].asString())
+        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asString())
+        assertEquals("1.0.0", subsumsjon["versjon"].asString())
+        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asString())
+        assertEquals("ET LEDD", subsumsjon["ledd"].asString())
+        assertEquals("EN BOKSTAV", subsumsjon["bokstav"].asString())
+        assertEquals("folketrygdloven", subsumsjon["lovverk"].asString())
+        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asString())
+        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asString())
         assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]))
         assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["output"]))
         assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
-        assertEquals("KILDE", subsumsjon["kilde"].asText())
+        assertEquals("KILDE", subsumsjon["kilde"].asString())
     }
 
     @Test
@@ -305,22 +305,22 @@ internal class MessageContextMeldingPublisererTest {
         val melding = meldinger.single()
         val subsumsjon = melding.path("subsumsjon")
 
-        assertEquals("subsumsjon", melding["@event_name"].asText())
+        assertEquals("subsumsjon", melding["@event_name"].asString())
         assertNotNull(melding["@id"].asUUID())
         assertNotNull(melding["@opprettet"].asLocalDateTime())
         assertEquals(id, subsumsjon["id"].asUUID())
-        assertEquals(fødselsnummer, subsumsjon["fodselsnummer"].asText())
-        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asText())
-        assertEquals("1.0.0", subsumsjon["versjon"].asText())
-        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asText())
+        assertEquals(fødselsnummer, subsumsjon["fodselsnummer"].asString())
+        assertEquals("versjonAvKode", subsumsjon["versjonAvKode"].asString())
+        assertEquals("1.0.0", subsumsjon["versjon"].asString())
+        assertEquals("EN PARAGRAF", subsumsjon["paragraf"].asString())
         assertNull(subsumsjon["ledd"])
         assertNull(subsumsjon["bokstav"])
-        assertEquals("folketrygdloven", subsumsjon["lovverk"].asText())
-        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asText())
-        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asText())
+        assertEquals("folketrygdloven", subsumsjon["lovverk"].asString())
+        assertEquals("1970-01-01", subsumsjon["lovverksversjon"].asString())
+        assertEquals("VILKAR_BEREGNET", subsumsjon["utfall"].asString())
         assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["input"]))
         assertEquals(mapOf("foo" to "bar"), objectMapper.convertValue<Map<String, Any>>(subsumsjon["output"]))
         assertEquals(tidsstempel, subsumsjon["tidsstempel"].asLocalDateTime())
-        assertEquals("KILDE", subsumsjon["kilde"].asText())
+        assertEquals("KILDE", subsumsjon["kilde"].asString())
     }
 }

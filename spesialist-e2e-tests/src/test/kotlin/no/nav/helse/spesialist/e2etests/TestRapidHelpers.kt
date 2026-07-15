@@ -11,34 +11,34 @@ import java.util.UUID
 object TestRapidHelpers {
     fun TestRapid.RapidInspector.meldinger() = (0 until size).map { index -> message(index) }
 
-    fun TestRapid.RapidInspector.hendelser(type: String) = meldinger().filter { it.path("@event_name").asText() == type }
+    fun TestRapid.RapidInspector.hendelser(type: String) = meldinger().filter { it.path("@event_name").asString() == type }
 
-    fun TestRapid.RapidInspector.hendelser() = meldinger().map { it.path("@event_name").asText() }
+    fun TestRapid.RapidInspector.hendelser() = meldinger().map { it.path("@event_name").asString() }
 
     fun TestRapid.RapidInspector.hendelser(forårsaketAv: UUID) =
         meldinger()
             .filterNot { it.path("@event_name").isMissingOrNull() }
-            .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
+            .filter { it.path("@forårsaket_av").path("id").asString() == forårsaketAv.toString() }
 
     fun TestRapid.RapidInspector.hendelser(
         type: String,
         forårsaketAv: UUID,
     ) = meldinger()
-        .filter { it.path("@event_name").asText() == type }
-        .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
+        .filter { it.path("@event_name").asString() == type }
+        .filter { it.path("@forårsaket_av").path("id").asString() == forårsaketAv.toString() }
 
     fun TestRapid.RapidInspector.siste(type: String) = hendelser(type).last()
 
     fun TestRapid.RapidInspector.behov() =
         hendelser("behov")
             .filterNot { it.hasNonNull("@løsning") }
-            .flatMap { it.path("@behov").toList().map(JsonNode::asText) }
+            .flatMap { it.path("@behov").toList().map(JsonNode::asString) }
 
     fun TestRapid.RapidInspector.behov(forårsaketAv: UUID) =
         hendelser("behov")
-            .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
+            .filter { it.path("@forårsaket_av").path("id").asString() == forårsaketAv.toString() }
             .filterNot { it.hasNonNull("@løsning") }
-            .flatMap { it.path("@behov").toList().map(JsonNode::asText) }
+            .flatMap { it.path("@behov").toList().map(JsonNode::asString) }
 
     fun TestRapid.RapidInspector.behov(behov: String) =
         hendelser("behov")
@@ -47,7 +47,7 @@ object TestRapidHelpers {
                 it
                     .path("@behov")
                     .toList()
-                    .map(JsonNode::asText)
+                    .map(JsonNode::asString)
                     .contains(behov)
             }
 
@@ -58,7 +58,7 @@ object TestRapidHelpers {
                 it
                     .path("@behov")
                     .toList()
-                    .map(JsonNode::asText)
+                    .map(JsonNode::asString)
                     .containsAll(behov.toList()) &&
                     !it.hasNonNull("@løsning")
             }
@@ -73,7 +73,7 @@ object TestRapidHelpers {
                 it
                     .path("@behov")
                     .toList()
-                    .map(JsonNode::asText)
+                    .map(JsonNode::asString)
                     .contains(behov)
             }?.path("@løsning")
             ?.path(behov)
@@ -84,7 +84,7 @@ object TestRapidHelpers {
                 it
                     .path("@behov")
                     .toList()
-                    .map(JsonNode::asText)
+                    .map(JsonNode::asString)
                     .contains(behov)
             }?.path("@løsning")
             ?.path(behov)
@@ -95,7 +95,7 @@ object TestRapidHelpers {
                 .lastOrNull { it.hasNonNull("contextId") }
                 ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut")
         ).path("contextId")
-            .asText()
+            .asString()
             .let(UUID::fromString)
 
     fun TestRapid.RapidInspector.hendelseId(): UUID =
@@ -104,7 +104,7 @@ object TestRapidHelpers {
                 .lastOrNull { it.hasNonNull("hendelseId") }
                 ?: error("Prøver å finne hendelseId fra siste behov, men ingen behov er sendt ut")
         ).path("hendelseId")
-            .asText()
+            .asString()
             .let(UUID::fromString)
 
     fun TestRapid.RapidInspector.oppgaveId() =
@@ -115,16 +115,16 @@ object TestRapidHelpers {
 
     fun TestRapid.RapidInspector.contextId(hendelseId: UUID): UUID =
         hendelser("behov")
-            .last { it.hasNonNull("contextId") && it.path("hendelseId").asText() == hendelseId.toString() }
+            .last { it.hasNonNull("contextId") && it.path("hendelseId").asString() == hendelseId.toString() }
             .path("contextId")
-            .asText()
+            .asString()
             .let(UUID::fromString)
 
     fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID): String =
         hendelser("oppgave_opprettet")
-            .last { it.path("hendelseId").asText() == hendelseId.toString() }
+            .last { it.path("hendelseId").asString() == hendelseId.toString() }
             .path("oppgaveId")
-            .asText()
+            .asString()
 
     fun TestRapid.RapidInspector.oppgaver(): Map<Int, OppgaveSnapshot> {
         val oppgaveider = mutableListOf<Long>()
@@ -142,8 +142,8 @@ object TestRapidHelpers {
         return oppgavemeldinger
             .mapValues { (_, oppgavemelding) ->
                 OppgaveSnapshot(
-                    type = oppgavemelding.first().path("type").asText(),
-                    statuser = oppgavemelding.map { Oppgavestatus.valueOf(it.path("status").asText()) },
+                    type = oppgavemelding.first().path("type").asString(),
+                    statuser = oppgavemelding.map { Oppgavestatus.valueOf(it.path("status").asString()) },
                 )
             }
     }

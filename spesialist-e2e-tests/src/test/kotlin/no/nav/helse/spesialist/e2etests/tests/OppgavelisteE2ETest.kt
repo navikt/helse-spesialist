@@ -24,10 +24,10 @@ import java.time.LocalDateTime
 class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
     fun assertMinimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
-        assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
+        assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isString == true)
         val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
-        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
-        assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asString()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asString()))
         assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
 
         @Language("JSON")
@@ -58,16 +58,16 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
 
     fun assertMaksimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
-        assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
+        assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isString == true)
         val tiMinutterSidenLocalDateTime = LocalDateTime.now().minusSeconds(60 * 10)
         val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
-        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
-        assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asString()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asString()))
         assertIsNumber(oppgave["påVentInfo"]["dialogRef"])
-        assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["påVentInfo"]["opprettet"].asText()))
+        assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["påVentInfo"]["opprettet"].asString()))
         oppgave["påVentInfo"]["kommentarer"].forEach { kommentar ->
             assertIsNumber(kommentar["id"])
-            assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(kommentar["opprettet"].asText()))
+            assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(kommentar["opprettet"].asString()))
         }
         assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
 
@@ -180,7 +180,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
 
         val oppgaverForPerson =
             response["elementer"]
-                .filter { it["aktorId"].asText() == aktørId }
+                .filter { it["aktorId"].asString() == aktørId }
         assertEquals(if (forventetDukketOpp) 1 else 0, oppgaverForPerson.size) {
             "Fikk uventet antall oppgaver for personen (aktørId: $aktørId)"
         }

@@ -13,7 +13,7 @@ class HentPersoninfoV2BehovLøser(
         if (behovJson.has("ident")) {
             // Enkeltpersonforetak: svar med array slik at FlerePersoninfoRiver håndterer det
             behovJson["ident"].toList().map { ident ->
-                personinfoMap() + mapOf("ident" to ident.asText())
+                personinfoMap() + mapOf("ident" to ident.asString())
             }
         } else {
             // Vanlig Personinfo-behov: svar med enkelt objekt slik at PersoninfoløsningRiver håndterer det

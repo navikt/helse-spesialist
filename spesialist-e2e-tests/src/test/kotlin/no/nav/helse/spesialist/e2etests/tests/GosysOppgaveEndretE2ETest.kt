@@ -38,7 +38,7 @@ class GosysOppgaveEndretE2ETest : AbstractE2EIntegrationTest() {
         E2ETestApplikasjon.behovLøserStub.svarerPåBehov = false
         detPubliseresEnGosysOppgaveEndretMelding()
 
-        val commandContextId = meldinger().filter { it["command"]?.asText() == "GosysOppgaveEndretCommand" }.last { it["@event_name"].asText() == "kommandokjede_suspendert" }["commandContextId"].asText()
+        val commandContextId = meldinger().filter { it["command"]?.asString() == "GosysOppgaveEndretCommand" }.last { it["@event_name"].asString() == "kommandokjede_suspendert" }["commandContextId"].asString()
 
         medPersonISpeil {
             saksbehandlerGodkjennerAlleVarsler()
@@ -47,6 +47,6 @@ class GosysOppgaveEndretE2ETest : AbstractE2EIntegrationTest() {
         E2ETestApplikasjon.behovLøserStub.svarerPåBehov = true
         besvarBehovIgjen("ÅpneOppgaver")
 
-        assertTrue(meldinger().filter { it["commandContextId"]?.asText() == commandContextId }.any { it["@event_name"].asText() == "kommandokjede_ferdigstilt" })
+        assertTrue(meldinger().filter { it["commandContextId"]?.asString() == commandContextId }.any { it["@event_name"].asString() == "kommandokjede_ferdigstilt" })
     }
 }

@@ -66,7 +66,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
 
         // Then
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
             Level.INFO,
@@ -81,7 +81,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
         assertEquals(
             "Exception while fetching data (/person) : PseudoId er ugyldig eller utgått",
-            body["errors"].first()["message"].asText(),
+            body["errors"].first()["message"].asString(),
         )
     }
 
@@ -93,7 +93,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
         assertEquals(
             "Exception while fetching data (/person) : Ugyldig format på personPseudoId",
-            body["errors"].first()["message"].asText(),
+            body["errors"].first()["message"].asString(),
         )
     }
 
@@ -111,7 +111,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery("""{ person(personPseudoId: "$pseudoId") { andreFodselsnummer { fodselsnummer } } }""")
 
         assertEquals(1, body["data"]["person"]["andreFodselsnummer"].size())
-        assertEquals(dNummer, body["data"]["person"]["andreFodselsnummer"][0]["fodselsnummer"].asText())
+        assertEquals(dNummer, body["data"]["person"]["andreFodselsnummer"][0]["fodselsnummer"].asString())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
             Level.INFO,
@@ -133,7 +133,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 brukerrolle = Brukerrolle.Kode7,
             )
 
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
         logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER", Level.INFO)
     }
 
@@ -170,7 +170,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 brukerrolle = Brukerrolle.EgenAnsatt,
             )
 
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
+        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
             Level.INFO,
@@ -496,7 +496,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runPersonQuery()
 
         assertContains(
-            body["data"]["person"]["andreFodselsnummer"].toList().map { it["fodselsnummer"].asText() },
+            body["data"]["person"]["andreFodselsnummer"].toList().map { it["fodselsnummer"].asString() },
             annetFødselsnummer,
         )
     }

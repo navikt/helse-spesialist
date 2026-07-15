@@ -36,7 +36,7 @@ class NyeVarslerRiver : TransaksjonellRiver() {
         }
 
     private val inneholderVarslerParser: (JsonNode) -> Any = { node ->
-        check((node as ArrayNode).any { element -> element.path("varselkode").isTextual }) { "Ingen av elementene har varselkode." }
+        check((node as ArrayNode).any { element -> element.path("varselkode").isString }) { "Ingen av elementene har varselkode." }
     }
 
     override fun transaksjonellOnPacket(
@@ -99,16 +99,16 @@ class NyeVarslerRiver : TransaksjonellRiver() {
 
     private companion object {
         private fun JsonNode.nyeVarsler(): List<NyttVarsel> =
-            filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
-                .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
+            filter { it["nivå"].asString() == "VARSEL" && it["varselkode"]?.asString() != null }
+                .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asString() == "Vedtaksperiode" } }
                 .map { jsonNode ->
                     val vedtaksperiodeId =
                         jsonNode["kontekster"]
-                            .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
+                            .find { it["konteksttype"].asString() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
                             .asUUID()
                     NyttVarsel(
                         id = jsonNode["id"].asUUID(),
-                        kode = jsonNode["varselkode"].asText(),
+                        kode = jsonNode["varselkode"].asString(),
                         opprettet = jsonNode["tidsstempel"].asLocalDateTime(),
                         vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
                     )

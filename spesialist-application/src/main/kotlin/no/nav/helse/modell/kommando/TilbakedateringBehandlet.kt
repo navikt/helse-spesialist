@@ -30,13 +30,13 @@ class TilbakedateringBehandlet(
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode["@id"].asText()),
-        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        id = UUID.fromString(jsonNode["@id"].asString()),
+        fødselsnummer = jsonNode["fødselsnummer"].asString(),
         perioder =
             jsonNode["perioder"].toList().map {
                 Periode(
-                    fom = it["fom"].asText().let(LocalDate::parse),
-                    tom = it["tom"].asText().let(LocalDate::parse),
+                    fom = it["fom"].asString().let(LocalDate::parse),
+                    tom = it["tom"].asString().let(LocalDate::parse),
                 )
             },
         json = jsonNode.toString(),

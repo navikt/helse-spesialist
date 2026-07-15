@@ -31,7 +31,7 @@ class EndretSkjermetinfoRiver(
         meterRegistry: MeterRegistry,
     ) {
         val fødselsnummer =
-            packet["fødselsnummer"].asText().also {
+            packet["fødselsnummer"].asString().also {
                 if (it.toLongOrNull() == null) {
                     teamLogs.warn("Mottok ugyldig fødselsnummer $it, skipper videre håndtering")
                     return

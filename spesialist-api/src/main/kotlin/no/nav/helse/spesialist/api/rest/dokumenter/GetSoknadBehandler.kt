@@ -43,7 +43,7 @@ class GetSoknadBehandler(
                 dokumentType = DokumentMediator.DokumentType.SØKNAD,
             ) ?: return RestResponse.Error(ApiGetSoknadErrorCode.FANT_IKKE_DOKUMENT)
 
-        val fødselsnummerForSøknad = dokument.get("fnr").asText()
+        val fødselsnummerForSøknad = dokument.get("fnr").asString()
 
         if (fødselsnummerForSøknad != person.id.value) {
             logg.error("Fødselsnummer i søknad-dokumentet samsvarer ikke med identitetsnummer hentet via pseudo-id")

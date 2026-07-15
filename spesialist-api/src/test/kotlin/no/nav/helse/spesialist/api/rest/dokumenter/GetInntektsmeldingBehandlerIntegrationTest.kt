@@ -55,7 +55,7 @@ class GetInntektsmeldingBehandlerTest {
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
-        assertEquals(organisasjonsnummer, response.bodyAsJsonNode?.get("virksomhetsnummer")?.asText())
+        assertEquals(organisasjonsnummer, response.bodyAsJsonNode?.get("virksomhetsnummer")?.asString())
     }
 
     @Test
@@ -91,7 +91,7 @@ class GetInntektsmeldingBehandlerTest {
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
-        assertEquals(organisasjonsnummer, response.bodyAsJsonNode?.get("virksomhetsnummer")?.asText())
+        assertEquals(organisasjonsnummer, response.bodyAsJsonNode?.get("virksomhetsnummer")?.asString())
     }
 
     @Test

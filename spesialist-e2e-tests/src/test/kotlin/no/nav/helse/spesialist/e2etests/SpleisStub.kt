@@ -210,7 +210,7 @@ class SpleisStub(
         rapidsConnection.publish(person.fødselsnummer, vedtaksperiodeNyUtbetaling)
     }
 
-    private fun skalSvarePåMeldinger(jsonNode: JsonNode) = !denylisteForPersoner.contains(jsonNode["fødselsnummer"].asText())
+    private fun skalSvarePåMeldinger(jsonNode: JsonNode) = !denylisteForPersoner.contains(jsonNode["fødselsnummer"].asString())
 
     fun ikkeSvarPåMeldingerFor(person: Person) {
         denylisteForPersoner.add(person.fødselsnummer)
@@ -240,10 +240,10 @@ class SpleisStub(
                 logg.warn("SpleisStub ignorerer melding:\n${packet.toJson()}")
                 return
             }
-            val fødselsnummer = jsonNode["fødselsnummer"].asText()
+            val fødselsnummer = jsonNode["fødselsnummer"].asString()
             val testContext =
                 contextForPerson(fødselsnummer)
-            val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
+            val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asString())
             val vedtaksperiode =
                 testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
                     ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
@@ -320,7 +320,7 @@ class SpleisStub(
             val jsonNode = objectMapper.readTree(packet.toJson())
             val skjønnsfastsatteArbeidsgivere = jsonNode["arbeidsgivere"]
             val skjæringstidspunkt = jsonNode["skjæringstidspunkt"].asLocalDate()
-            val fødselsnummer = jsonNode["fødselsnummer"].asText()
+            val fødselsnummer = jsonNode["fødselsnummer"].asString()
             val testContext =
                 contextForPerson(fødselsnummer)
             val vedtaksperiode =
@@ -355,7 +355,7 @@ class SpleisStub(
                     arbeidsgivere =
                         skjønnsfastsatteArbeidsgivereJson.toList().map {
                             Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver(
-                                organisasjonsnummer = it["organisasjonsnummer"].asText(),
+                                organisasjonsnummer = it["organisasjonsnummer"].asString(),
                                 omregnetÅrsinntekt = 123456.7,
                                 skjønnsfastsatt = it["årlig"].asDouble(),
                             )

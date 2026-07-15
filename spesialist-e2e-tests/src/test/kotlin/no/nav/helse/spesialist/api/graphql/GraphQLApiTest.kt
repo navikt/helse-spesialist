@@ -53,7 +53,7 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
                 .first()
                 .get("refusjonsopplysninger")
                 .first()
-        assertEquals("2020-01-01", refusjonsopplysning["fom"].asText())
+        assertEquals("2020-01-01", refusjonsopplysning["fom"].asString())
         assertTrue(refusjonsopplysning["tom"].isNull)
         assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
     }
@@ -99,9 +99,9 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
             )
 
         val vilkårsgrunnlag = body["data"]["person"]["vilkarsgrunnlagV2"].first()
-        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["beregningsgrunnlag"].asText())
-        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["sammenligningsgrunnlag"].asText())
-        assertEquals("26", vilkårsgrunnlag["avviksvurdering"]["avviksprosent"].asText())
+        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["beregningsgrunnlag"].asString())
+        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["sammenligningsgrunnlag"].asString())
+        assertEquals("26", vilkårsgrunnlag["avviksvurdering"]["avviksprosent"].asString())
         assertEquals(2, vilkårsgrunnlag["inntekter"].size())
 
         val sammenligningsgrunnlag1 = vilkårsgrunnlag["inntekter"][0]["sammenligningsgrunnlag"]
@@ -168,6 +168,6 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
 
         assertEquals(100_000, sykepengegrunnlagsgrense["grunnbelop"].asInt())
         assertEquals(600_000, sykepengegrunnlagsgrense["grense"].asInt())
-        assertEquals("2020-01-01", sykepengegrunnlagsgrense["virkningstidspunkt"].asText())
+        assertEquals("2020-01-01", sykepengegrunnlagsgrense["virkningstidspunkt"].asString())
     }
 }

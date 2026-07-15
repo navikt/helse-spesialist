@@ -53,7 +53,7 @@ class InntektLøsningRiver(
                         løsning["inntektsliste"].toList().map {
                             Inntekter.Inntekt(
                                 it["beløp"].asDouble(),
-                                it["orgnummer"].asText(),
+                                it["orgnummer"].asString(),
                             )
                         },
                     )

@@ -38,7 +38,7 @@ class EgenAnsattLøsningRiver(
         val opprettet = packet["@opprettet"].asLocalDateTime()
         val contextId = packet["contextId"].asUUID()
         val hendelseId = packet["hendelseId"].asUUID()
-        val fødselsnummer = packet["fødselsnummer"].asText()
+        val fødselsnummer = packet["fødselsnummer"].asString()
 
         val erEgenAnsatt = packet["@løsning.EgenAnsatt"].asBoolean()
 

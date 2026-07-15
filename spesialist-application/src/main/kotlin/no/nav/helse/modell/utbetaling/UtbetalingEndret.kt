@@ -27,17 +27,17 @@ class UtbetalingEndret(
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode["@id"].asText()),
-        fødselsnummer = jsonNode["fødselsnummer"].asText(),
-        organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
-        utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
-        type = jsonNode["type"].asText(),
-        gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode["gjeldendeStatus"].asText()),
-        opprettet = jsonNode["@opprettet"].asText().let(LocalDateTime::parse),
+        id = UUID.fromString(jsonNode["@id"].asString()),
+        fødselsnummer = jsonNode["fødselsnummer"].asString(),
+        organisasjonsnummer = jsonNode["organisasjonsnummer"].asString(),
+        utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asString()),
+        type = jsonNode["type"].asString(),
+        gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode["gjeldendeStatus"].asString()),
+        opprettet = jsonNode["@opprettet"].asString().let(LocalDateTime::parse),
         arbeidsgiverbeløp = jsonNode["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
         personbeløp = jsonNode["personOppdrag"]["nettoBeløp"].asInt(),
-        arbeidsgiverOppdrag = tilOppdrag(jsonNode["arbeidsgiverOppdrag"], jsonNode["organisasjonsnummer"].asText()),
-        personOppdrag = tilOppdrag(jsonNode["personOppdrag"], jsonNode["fødselsnummer"].asText()),
+        arbeidsgiverOppdrag = tilOppdrag(jsonNode["arbeidsgiverOppdrag"], jsonNode["organisasjonsnummer"].asString()),
+        personOppdrag = tilOppdrag(jsonNode["personOppdrag"], jsonNode["fødselsnummer"].asString()),
         json = jsonNode.toString(),
     )
 
@@ -59,8 +59,8 @@ class UtbetalingEndret(
             jsonNode: JsonNode,
             mottaker: String,
         ) = LagreOppdragCommand.Oppdrag(
-            fagsystemId = jsonNode.path("fagsystemId").asText(),
-            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
+            fagsystemId = jsonNode.path("fagsystemId").asString(),
+            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isString)?.asString() ?: mottaker,
         )
     }
 }

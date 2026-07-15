@@ -37,7 +37,7 @@ class HentEnhetLøsningRiver(
             hendelseId = hendelseId,
             contextId = contextId,
             behovId = packet["@id"].asUUID(),
-            løsning = HentEnhetløsning(packet["@løsning.HentEnhet"].asText()),
+            løsning = HentEnhetløsning(packet["@løsning.HentEnhet"].asString()),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
             sti = packet["sti"].toList().map { it.asInt() },
         )

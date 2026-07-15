@@ -49,7 +49,7 @@ class VedtakFattetMeldingBuilder(
     private val godkjenningsbehov =
         sessionContext.meldingDao.finnSisteGodkjenningsbehov(behandlingId.value)
             ?: error("Fant ikke siste godkjenningsbehov")
-    private val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
+    private val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asString()
 
     private fun byggFellesdel(
         organisasjonsnummer: String,
@@ -167,10 +167,10 @@ class VedtakFattetMeldingBuilder(
         return VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
             beregningsgrunnlag =
                 BigDecimal(
-                    packet["sykepengegrunnlagsfakta"]["selvstendig"]["beregningsgrunnlag"].asText(),
+                    packet["sykepengegrunnlagsfakta"]["selvstendig"]["beregningsgrunnlag"].asString(),
                 ),
             tags = behandling.tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-            seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
+            seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asString()),
             pensjonsgivendeInntekter =
                 sykepengegrunnlagsfakta.selvstendig.pensjonsgivendeInntekter.map { inntekt ->
                     PensjonsgivendeInntekt(
@@ -217,9 +217,9 @@ class VedtakFattetMeldingBuilder(
         innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),
         arbeidsgivere =
             packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].toList().map { arbeidsgiver ->
-                val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
+                val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asString()
                 VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
-                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asString(),
                     omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
                     innrapportertÅrsinntekt =
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter
@@ -256,7 +256,7 @@ class VedtakFattetMeldingBuilder(
             },
         arbeidsgivere =
             packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].toList().map { arbeidsgiver ->
-                val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
+                val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asString()
                 VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = organisasjonsnummer,
                     omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),

@@ -19,7 +19,7 @@ class AdressebeskyttelseEndret(
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
         id = jsonNode["@id"].asUUID(),
-        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        fødselsnummer = jsonNode["fødselsnummer"].asString(),
         json = jsonNode.toString(),
     )
 

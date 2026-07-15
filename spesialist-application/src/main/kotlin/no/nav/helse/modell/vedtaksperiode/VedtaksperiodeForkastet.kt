@@ -25,10 +25,10 @@ class VedtaksperiodeForkastet(
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
-        UUID.fromString(jsonNode["@id"].asText()),
-        UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
-        UUID.fromString(jsonNode["behandlingId"].asText()).takeUnless { it == null }?.let { SpleisBehandlingId(it) },
-        jsonNode["fødselsnummer"].asText(),
+        UUID.fromString(jsonNode["@id"].asString()),
+        UUID.fromString(jsonNode["vedtaksperiodeId"].asString()),
+        UUID.fromString(jsonNode["behandlingId"].asString()).takeUnless { it == null }?.let { SpleisBehandlingId(it) },
+        jsonNode["fødselsnummer"].asString(),
         json = jsonNode.toString(),
     )
 

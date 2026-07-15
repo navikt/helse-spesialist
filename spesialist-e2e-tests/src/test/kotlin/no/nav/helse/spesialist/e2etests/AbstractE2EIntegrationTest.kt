@@ -88,10 +88,10 @@ abstract class AbstractE2EIntegrationTest {
             .mapNotNull { it["@behov"] }
             .filterNot { it.hasNonNull("@løsning") }
             .last()[0]
-            .asText()
+            .asString()
 
     protected fun vedtakFattetMelding(): JsonNode =
-        meldinger().find { it["@event_name"].asText() == "vedtak_fattet" }
+        meldinger().find { it["@event_name"].asString() == "vedtak_fattet" }
             ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
     protected fun søknadOgGodkjenningbehovKommerInn(
@@ -185,7 +185,7 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(automatiskBehandlet, løsning["automatiskBehandling"].booleanValue())
         assertNotNull(løsning["godkjenttidspunkt"].asLocalDateTime())
         if (årsakerTilAvvist.isNotEmpty()) {
-            val begrunnelser = løsning["begrunnelser"].toList().map { it.asText() }
+            val begrunnelser = løsning["begrunnelser"].toList().map { it.asString() }
             assertEquals(begrunnelser, begrunnelser.distinct())
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }
@@ -205,27 +205,27 @@ abstract class AbstractE2EIntegrationTest {
         val vedtakFattet = vedtakFattetMelding()
 
         assertEquals(1, vedtakFattet["begrunnelser"].size())
-        assertEquals(utfall.name, vedtakFattet["begrunnelser"][0]["type"].asText())
-        assertEquals("EtterHovedregel", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+        assertEquals(utfall.name, vedtakFattet["begrunnelser"][0]["type"].asString())
+        assertEquals("EtterHovedregel", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asString())
     }
 
     protected fun assertVedtakFattetEtterSkjønn(begrunnelseFritekst: String = "skjønnsfastsetter tredje avsnitt") {
         val vedtakFattet = vedtakFattetMelding()
 
         assertEquals(4, vedtakFattet["begrunnelser"].size())
-        assertEquals("SkjønnsfastsattSykepengegrunnlagMal", vedtakFattet["begrunnelser"][0]["type"].asText())
-        assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", vedtakFattet["begrunnelser"][1]["type"].asText())
-        assertEquals(begrunnelseFritekst, vedtakFattet["begrunnelser"][1]["begrunnelse"].asText())
-        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", vedtakFattet["begrunnelser"][2]["type"].asText())
-        assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][3]["type"].asText())
-        assertEquals("EtterSkjønn", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagMal", vedtakFattet["begrunnelser"][0]["type"].asString())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", vedtakFattet["begrunnelser"][1]["type"].asString())
+        assertEquals(begrunnelseFritekst, vedtakFattet["begrunnelser"][1]["begrunnelse"].asString())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", vedtakFattet["begrunnelser"][2]["type"].asString())
+        assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][3]["type"].asString())
+        assertEquals("EtterSkjønn", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asString())
     }
 
     protected fun assertOppgaveTildeltSaksbehandlerEvent() {
         val oppgaveEvent =
             testRapid
                 .meldingslogg(testContext.person.fødselsnummer)
-                .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
+                .findLast { it["@event_name"].asString() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
                 ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
         assertEquals(saksbehandler.id.value, oppgaveEvent["saksbehandler"].asUUID())
     }
@@ -234,7 +234,7 @@ abstract class AbstractE2EIntegrationTest {
         val oppgaveEvent =
             testRapid
                 .meldingslogg(testContext.person.fødselsnummer)
-                .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
+                .findLast { it["@event_name"].asString() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
                 ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
         assertTrue(oppgaveEvent.path("saksbehandler").isMissingOrNull())
     }

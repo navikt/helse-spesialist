@@ -51,8 +51,8 @@ class GetNotatBehandlerIntegrationTest {
         assertEquals(HttpStatusCode.OK.value, response.status)
         val body = response.bodyAsJsonNode
         assertNotNull(body) { "Body er tom eller ugyldig JSON" }
-        assertEquals(notat.tekst, body["tekst"].asText())
-        assertEquals(notat.type.name, body["type"].asText())
+        assertEquals(notat.tekst, body["tekst"].asString())
+        assertEquals(notat.type.name, body["type"].asString())
         assertEquals(notat.dialogRef.value, body["dialogRef"].asLong())
         assertEquals(notat.vedtaksperiodeId, body["vedtaksperiodeId"].asUUID())
         assertEquals(notat.saksbehandlerOid.value, body["saksbehandlerOid"].asUUID())

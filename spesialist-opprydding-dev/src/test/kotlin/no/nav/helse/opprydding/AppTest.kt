@@ -44,7 +44,7 @@ internal class AppTest : AbstractDatabaseTest() {
         assertTabellinnhold(AT_LEAST, 1)
         testRapid.sendTestMessage(slettemelding("123"))
         val sendtMelding = testRapid.inspektør.message(0)
-        assertEquals("kommandokjede_avbrutt", sendtMelding["@event_name"].asText())
+        assertEquals("kommandokjede_avbrutt", sendtMelding["@event_name"].asString())
     }
 
     @Test
@@ -53,8 +53,8 @@ internal class AppTest : AbstractDatabaseTest() {
         assertTabellinnhold(AT_LEAST, 1)
         testRapid.sendTestMessage(slettemelding("123"))
         testRapid.inspektør.message(1).run {
-            assertEquals("person_slettet", path("@event_name").asText())
-            assertEquals("123", path("fødselsnummer").asText())
+            assertEquals("person_slettet", path("@event_name").asString())
+            assertEquals("123", path("fødselsnummer").asString())
         }
     }
 

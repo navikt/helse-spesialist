@@ -27,7 +27,7 @@ class PersonhåndtererImplTest : AbstractDatabaseTest() {
         val fødselsnummer = lagFødselsnummer()
         personhåndterer.klargjørPersonForVisning(fødselsnummer)
         val sisteMelding = testRapid.inspektør.meldinger().last()
-        assertEquals("klargjør_person_for_visning", sisteMelding["@event_name"].asText())
-        assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
+        assertEquals("klargjør_person_for_visning", sisteMelding["@event_name"].asString())
+        assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asString())
     }
 }

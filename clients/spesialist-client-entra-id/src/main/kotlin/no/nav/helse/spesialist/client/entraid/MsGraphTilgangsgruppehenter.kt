@@ -45,7 +45,7 @@ class MsGraphTilgangsgruppehenter(
                     if (responseStatus !in 200..299) {
                         teamLogs.warn("Fikk kode $responseStatus fra MS Graph: $responseBody")
                         if (responseStatus == 404) {
-                            val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
+                            val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asString()
                             if (errorCode == "Request_ResourceNotFound") {
                                 return@handleResponse Either.Failure(Brukerrollehenter.Feil.SaksbehandlerFinnesIkke)
                             }
@@ -57,7 +57,7 @@ class MsGraphTilgangsgruppehenter(
                         objectMapper
                             .readTree(responseBody)["value"]
                             .toList()
-                            .map(JsonNode::asText)
+                            .map(JsonNode::asString)
                             .map(UUID::fromString)
                     logg.debug("Hentet ${grupper.size} grupper fra MS")
                     val uuider = grupper.toSet()

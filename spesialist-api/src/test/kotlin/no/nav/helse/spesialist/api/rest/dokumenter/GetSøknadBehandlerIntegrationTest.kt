@@ -44,7 +44,7 @@ class GetSøknadBehandlerIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
-        assertEquals(ApiSoknadstype.Selvstendig_og_frilanser.name, response.bodyAsJsonNode?.get("type")?.asText())
+        assertEquals(ApiSoknadstype.Selvstendig_og_frilanser.name, response.bodyAsJsonNode?.get("type")?.asString())
     }
 
     @Test

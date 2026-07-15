@@ -189,9 +189,9 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                         }
                     }.single()
 
-            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
-            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
-            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asString())
+            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asString())
+            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asString())
         }
     }
 
@@ -237,9 +237,9 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                         }
                     }.single()
 
-            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
-            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
-            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asString())
+            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asString())
+            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asString())
 
             val historikkinnslag =
                 person["arbeidsgivere"].flatMap { arbeidsgiver ->
@@ -249,26 +249,26 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                         }
                     }
                 }
-            assertContains(historikkinnslag.map { it["type"].asText() }, "TOTRINNSVURDERING_ATTESTERT")
+            assertContains(historikkinnslag.map { it["type"].asString() }, "TOTRINNSVURDERING_ATTESTERT")
         }
 
         assertGjeldendeOppgavestatus("Ferdigstilt")
 
         val meldinger = meldinger()
-        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
-        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asText() == "oppgave_oppdatert" }
-        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asText())
-        assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asText())
+        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asString() == "oppgave_oppdatert" }.dropLast(1).last()
+        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asString() == "oppgave_oppdatert" }
+        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asString())
+        assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asString())
 
-        val varselEndret = meldinger.single { it["@event_name"].asText() == "varsel_endret" }
-        assertEquals("VURDERT", varselEndret["forrige_status"].asText())
-        assertEquals("GODKJENT", varselEndret["gjeldende_status"].asText())
+        val varselEndret = meldinger.single { it["@event_name"].asString() == "varsel_endret" }
+        assertEquals("VURDERT", varselEndret["forrige_status"].asString())
+        assertEquals("GODKJENT", varselEndret["gjeldende_status"].asString())
 
         // Sjekk at saksbehandlerløsning ikke blir publisert
-        assertTrue(meldinger.none { it["@event_name"].asText() == "saksbehandler_løsning" })
+        assertTrue(meldinger.none { it["@event_name"].asString() == "saksbehandler_løsning" })
 
         // Sjekk at løsning på godkjenningsbehov ble publisert
-        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
+        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asString() == "behov" && it["@behov"].first().asString() == "Godkjenning" && it["@løsning"] != null }
         assertJsonEquals(
             """
             {
@@ -287,7 +287,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
 
         // Sjekk at vedtaksperiode_godkjent ble publisert
-        val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_godkjent" }
+        val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asString() == "vedtaksperiode_godkjent" }
         assertJsonEquals(
             """
             {
@@ -337,7 +337,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                     arbeidsgiver["behandlinger"].flatMap { behandling ->
                         behandling["perioder"].flatMap { periode ->
                             periode["varsler"].toList().map {
-                                it["vurdering"]?.get("status")?.asText()
+                                it["vurdering"]?.get("status")?.asString()
                             }
                         }
                     }
@@ -356,29 +356,29 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                         }
                     }.single()
 
-            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
-            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
-            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asString())
+            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asString())
+            assertEquals(saksbehandler.ident.value, vedtakBegrunnelse["saksbehandlerIdent"].asString())
         }
 
         // Then:
         assertGjeldendeOppgavestatus("Ferdigstilt")
 
         val meldinger = meldinger()
-        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
-        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asText() == "oppgave_oppdatert" }
-        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asText())
-        assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asText())
+        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asString() == "oppgave_oppdatert" }.dropLast(1).last()
+        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asString() == "oppgave_oppdatert" }
+        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asString())
+        assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asString())
 
-        val varselEndret = meldinger.single { it["@event_name"].asText() == "varsel_endret" }
-        assertEquals("VURDERT", varselEndret["forrige_status"].asText())
-        assertEquals("GODKJENT", varselEndret["gjeldende_status"].asText())
+        val varselEndret = meldinger.single { it["@event_name"].asString() == "varsel_endret" }
+        assertEquals("VURDERT", varselEndret["forrige_status"].asString())
+        assertEquals("GODKJENT", varselEndret["gjeldende_status"].asString())
 
         // Sjekk at saksbehandlerløsning ikke blir publisert
-        assertTrue(meldinger.none { it["@event_name"].asText() == "saksbehandler_løsning" })
+        assertTrue(meldinger.none { it["@event_name"].asString() == "saksbehandler_løsning" })
 
         // Sjekk at løsning på godkjenningsbehov ble publisert
-        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
+        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asString() == "behov" && it["@behov"].first().asString() == "Godkjenning" && it["@løsning"] != null }
         assertJsonEquals(
             """
             {
@@ -397,7 +397,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
 
         // Sjekk at vedtaksperiode_godkjent ble publisert
-        val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_godkjent" }
+        val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asString() == "vedtaksperiode_godkjent" }
         assertJsonEquals(
             """
             {
@@ -448,8 +448,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         }
 
         // Then:
-        assertEquals(1, meldinger().filter { it["@event_name"].asText() == "vedtak_fattet" }.size)
-        assertEquals("begrunnelse nummer to", vedtakFattetMelding()["begrunnelser"][0]["begrunnelse"].asText())
+        assertEquals(1, meldinger().filter { it["@event_name"].asString() == "vedtak_fattet" }.size)
+        assertEquals("begrunnelse nummer to", vedtakFattetMelding()["begrunnelser"][0]["begrunnelse"].asString())
     }
 
     @ParameterizedTest

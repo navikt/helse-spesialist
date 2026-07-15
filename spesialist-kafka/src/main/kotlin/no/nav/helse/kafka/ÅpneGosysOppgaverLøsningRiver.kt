@@ -39,7 +39,7 @@ class ÅpneGosysOppgaverLøsningRiver(
         val åpneGosysOppgaver =
             ÅpneGosysOppgaverløsning(
                 opprettet = packet["@opprettet"].asLocalDateTime(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
+                fødselsnummer = packet["fødselsnummer"].asString(),
                 antall = packet["@løsning.ÅpneOppgaver.antall"].takeUnless { it.isMissingOrNull() }?.asInt(),
                 oppslagFeilet = packet["@løsning.ÅpneOppgaver.oppslagFeilet"].asBoolean(),
             )

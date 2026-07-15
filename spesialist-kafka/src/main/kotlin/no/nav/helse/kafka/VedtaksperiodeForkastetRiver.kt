@@ -38,7 +38,7 @@ class VedtaksperiodeForkastetRiver(
                 packet["@id"].asUUID(),
                 packet["vedtaksperiodeId"].asUUID(),
                 packet["behandlingId"].asUUIDOrNull()?.let { SpleisBehandlingId(it) },
-                packet["fødselsnummer"].asText(),
+                packet["fødselsnummer"].asString(),
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

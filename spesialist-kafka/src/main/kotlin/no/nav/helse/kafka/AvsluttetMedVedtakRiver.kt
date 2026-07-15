@@ -47,7 +47,7 @@ class AvsluttetMedVedtakRiver(
         eventMetadata: EventMetadata,
     ) {
         val spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID())
-        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText())
+        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asString())
         val vedtakFattetMeldingBuilder =
             VedtakFattetMeldingBuilder(
                 identitetsnummer = identitetsnummer,
@@ -57,7 +57,7 @@ class AvsluttetMedVedtakRiver(
                 forsikringsvurderingHenter = forsikringsvurderingHenter,
                 environmentToggles = environmentToggles,
             )
-        val erSelvstendig = packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
+        val erSelvstendig = packet["yrkesaktivitetstype"].asString() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
 
         lateinit var vedtakFattetMelding: VedtakFattetMelding
         transaksjon.legacyPersonRepository.brukPersonHvisFinnes(identitetsnummer.value) {

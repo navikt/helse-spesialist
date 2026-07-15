@@ -26,20 +26,20 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         assertGjeldendeOppgavestatus("Invalidert")
 
         val meldinger = meldinger()
-        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
-        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asText() == "oppgave_oppdatert" }
-        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asText())
-        assertEquals("Invalidert", sisteOppgaveOppdatert["tilstand"].asText())
+        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asString() == "oppgave_oppdatert" }.dropLast(1).last()
+        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asString() == "oppgave_oppdatert" }
+        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asString())
+        assertEquals("Invalidert", sisteOppgaveOppdatert["tilstand"].asString())
 
-        val varselEndret = meldinger.single { it["@event_name"].asText() == "varsel_endret" }
-        assertEquals("VURDERT", varselEndret["forrige_status"].asText())
-        assertEquals("AVVIST", varselEndret["gjeldende_status"].asText())
+        val varselEndret = meldinger.single { it["@event_name"].asString() == "varsel_endret" }
+        assertEquals("VURDERT", varselEndret["forrige_status"].asString())
+        assertEquals("AVVIST", varselEndret["gjeldende_status"].asString())
 
         // Sjekk at saksbehandlerløsning ikke blir publisert
-        assertTrue(meldinger.none { it["@event_name"].asText() == "saksbehandler_løsning" })
+        assertTrue(meldinger.none { it["@event_name"].asString() == "saksbehandler_løsning" })
 
         // Sjekk at løsning på godkjenningsbehov ble publisert
-        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
+        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asString() == "behov" && it["@behov"].first().asString() == "Godkjenning" && it["@løsning"] != null }
         assertJsonEquals(
             """
             {
@@ -61,7 +61,7 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
 
         // Sjekk at vedtaksperiode_avvist ble publisert
-        val vedtaksperiodeAvvist = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_avvist" }
+        val vedtaksperiodeAvvist = meldinger.single { it["@event_name"].asString() == "vedtaksperiode_avvist" }
         assertJsonEquals(
             """
             {

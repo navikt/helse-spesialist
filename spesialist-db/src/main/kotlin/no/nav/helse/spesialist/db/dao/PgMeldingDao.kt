@@ -140,8 +140,8 @@ class PgMeldingDao private constructor(
                 val data = objectMapper.readTree(it)
 
                 BehandlingOpprettetKorrigertSøknad(
-                    meldingId = UUID.fromString(data["@id"].asText()),
-                    vedtaksperiodeId = UUID.fromString(data["vedtaksperiodeId"].asText()),
+                    meldingId = UUID.fromString(data["@id"].asString()),
+                    vedtaksperiodeId = UUID.fromString(data["vedtaksperiodeId"].asString()),
                 )
             }
         }

@@ -20,8 +20,8 @@ internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
         val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurderinger(person.id.value)[vedtaksperiode.id.value])
         assertEquals(1, risikovurdering.funn.size)
         assertEquals(1, risikovurdering.kontrollertOk.size)
-        assertEquals("En beskrivelse", risikovurdering.funn.first()["beskrivelse"].asText())
-        assertEquals("En annen beskrivelse", risikovurdering.kontrollertOk.first()["beskrivelse"].asText())
+        assertEquals("En beskrivelse", risikovurdering.funn.first()["beskrivelse"].asString())
+        assertEquals("En annen beskrivelse", risikovurdering.kontrollertOk.first()["beskrivelse"].asString())
         assertNotNull(risikovurdering.kontrollertOk.first()["kategori"])
     }
 
@@ -45,12 +45,12 @@ internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
         risikovurdering.also { dto ->
             assertEquals(
                 listOf("Eierandel i selskap (0 prosent)"),
-                dto.kontrollertOk.map { it["beskrivelse"].asText() },
+                dto.kontrollertOk.map { it["beskrivelse"].asString() },
             )
-            assertEquals(listOf("REL"), dto.kontrollertOk.flatMap { it["kategori"].toList().map(JsonNode::asText) })
+            assertEquals(listOf("REL"), dto.kontrollertOk.flatMap { it["kategori"].toList().map(JsonNode::asString) })
 
-            assertEquals(listOf("Liten bedrift (2 ansatte)"), dto.funn.map { it["beskrivelse"].asText() })
-            assertEquals(emptyList<String>(), dto.funn.flatMap { it["kategori"].toList().map(JsonNode::asText) })
+            assertEquals(listOf("Liten bedrift (2 ansatte)"), dto.funn.map { it["beskrivelse"].asString() })
+            assertEquals(emptyList<String>(), dto.funn.flatMap { it["kategori"].toList().map(JsonNode::asString) })
         }
     }
 
