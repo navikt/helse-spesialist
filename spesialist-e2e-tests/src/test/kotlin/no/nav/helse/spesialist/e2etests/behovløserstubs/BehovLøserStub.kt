@@ -59,8 +59,8 @@ class BehovLøserStub(
     private fun precondition(jsonMessage: JsonMessage) {
         jsonMessage.require("@behov") { behov ->
             jsonMessage.interestedIn("fødselsnummer")
-            val fødselsnummer = jsonMessage["fødselsnummer"].asText()
-            val behovIMelding = behov.toList().map { it.asText() }.toSet()
+            val fødselsnummer = jsonMessage["fødselsnummer"].asString()
+            val behovIMelding = behov.toList().map { it.asString() }.toSet()
             val behovViKanLøse = løserPerBehov(fødselsnummer).keys
             val behovIMeldingenViIkkeKanLøse = behovIMelding.filterNot { it in behovViKanLøse }
             if (behovIMeldingenViIkkeKanLøse.isNotEmpty()) error("Kan ikke løse behov $behovIMeldingenViIkkeKanLøse, ignorerer")
@@ -75,7 +75,7 @@ class BehovLøserStub(
         meterRegistry: MeterRegistry,
     ) {
         val jsonNode = objectMapper.readTree(packet.toJson())
-        val fødselsnummer = jsonNode["fødselsnummer"].asText()
+        val fødselsnummer = jsonNode["fødselsnummer"].asString()
         behovliste(fødselsnummer).add(jsonNode)
         besvarMelding(
             fødselsnummer = fødselsnummer,
@@ -115,12 +115,12 @@ class BehovLøserStub(
         behov: String,
     ) {
         val sisteBehov =
-            behovliste(fødselsnummer).findLast { behov in it["@behov"].toList().map { it.asText() } }
+            behovliste(fødselsnummer).findLast { behov in it["@behov"].toList().map { it.asString() } }
                 ?: error("Fant ikke behov $behov i behovliste")
         besvarMelding(
             fødselsnummer = fødselsnummer,
             jsonNode = sisteBehov,
-            løserPerBehov = løserPerBehov(fødselsnummer = sisteBehov["fødselsnummer"].asText()),
+            løserPerBehov = løserPerBehov(fødselsnummer = sisteBehov["fødselsnummer"].asString()),
             context = rapidsConnection,
         )
     }
@@ -149,7 +149,7 @@ class BehovLøserStub(
                 "behov" to jsonNode["@behov"],
             ),
         "@løsning" to
-            jsonNode["@behov"].toList().map { it.asText() }.associateWith { behov ->
+            jsonNode["@behov"].toList().map { it.asString() }.associateWith { behov ->
                 løserPerBehov[behov]?.løsning(jsonNode[behov])
                     ?: error("Skulle ikke kommet hit! Har ikke løser for behov: $behov")
             },

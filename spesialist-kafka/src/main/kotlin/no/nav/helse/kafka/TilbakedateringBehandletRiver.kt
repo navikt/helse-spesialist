@@ -41,7 +41,7 @@ class TilbakedateringBehandletRiver(
         mediator.mottaMelding(
             TilbakedateringBehandlet(
                 id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
+                fødselsnummer = packet["fødselsnummer"].asString(),
                 perioder =
                     packet["perioder"].toList().map {
                         Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())

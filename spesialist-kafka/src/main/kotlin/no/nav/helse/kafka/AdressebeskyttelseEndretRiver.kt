@@ -32,7 +32,7 @@ class AdressebeskyttelseEndretRiver(
             melding =
                 AdressebeskyttelseEndret(
                     id = packet["@id"].asUUID(),
-                    fødselsnummer = packet["fødselsnummer"].asText(),
+                    fødselsnummer = packet["fødselsnummer"].asString(),
                     json = packet.toJson(),
                 ),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),

@@ -90,7 +90,7 @@ class AvviksvurderingLøsningRiver(
     private fun omregnedeÅrsinntekter(json: JsonNode): List<OmregnetÅrsinntekt> =
         json.toList().map {
             OmregnetÅrsinntekt(
-                arbeidsgiverreferanse = it["arbeidsgiverreferanse"].asText(),
+                arbeidsgiverreferanse = it["arbeidsgiverreferanse"].asString(),
                 beløp = it["beløp"].asDouble(),
             )
         }
@@ -104,7 +104,7 @@ class AvviksvurderingLøsningRiver(
     private fun innrapporterteInntekter(json: JsonNode): List<InnrapportertInntekt> =
         json.toList().map {
             InnrapportertInntekt(
-                arbeidsgiverreferanse = it["arbeidsgiverreferanse"].asText(),
+                arbeidsgiverreferanse = it["arbeidsgiverreferanse"].asString(),
                 inntekter = inntekter(it["inntekter"]),
             )
         }

@@ -65,7 +65,7 @@ class ArbeidsforholdLøsningRiver(
         Arbeidsforholdløsning.Løsning(
             løsning["startdato"].asLocalDate(),
             løsning["sluttdato"].asOptionalLocalDate(),
-            løsning["stillingstittel"].asText(),
+            løsning["stillingstittel"].asString(),
             løsning["stillingsprosent"].asInt(),
         )
 }

@@ -528,7 +528,7 @@ class UtgåendeHendelseMessageBuilderTest {
         assertNotNull(løsningNode)
         assertNotEquals(`opprinnelig@id`, jsonNode["@id"].asUUID())
         assertNotEquals(`opprinnelig@opprettet`, jsonNode["@opprettet"].asLocalDateTime())
-        assertEquals("behov", jsonNode.get("@event_name").asText())
+        assertEquals("behov", jsonNode.get("@event_name").asString())
         assertEquals(objectMapper.valueToTree(mapOf("Godkjenning" to payload)), løsningNode)
     }
 }

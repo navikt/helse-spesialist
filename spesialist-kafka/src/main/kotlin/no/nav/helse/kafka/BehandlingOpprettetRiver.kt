@@ -46,17 +46,17 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
         transaksjon: SessionContext,
         eventMetadata: EventMetadata,
     ) {
-        val yrkesaktivitetstype = packet["yrkesaktivitetstype"].asText()
+        val yrkesaktivitetstype = packet["yrkesaktivitetstype"].asString()
 
         if (yrkesaktivitetstype !in listOf("ARBEIDSTAKER", "SELVSTENDIG")) {
             behandlerIkke(yrkesaktivitetstype)
             return
         }
-        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText())
+        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asString())
         val vedtaksperiodeId = VedtaksperiodeId(packet["vedtaksperiodeId"].asUUID())
         val spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID())
 
-        val organisasjonsnummer = packet["organisasjonsnummer"].takeUnless { it.isMissingOrNull() }?.asText() ?: yrkesaktivitetstype
+        val organisasjonsnummer = packet["organisasjonsnummer"].takeUnless { it.isMissingOrNull() }?.asString() ?: yrkesaktivitetstype
 
         transaksjon.meldingDao.lagre(
             id = packet["@id"].asUUID(),

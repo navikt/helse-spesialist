@@ -141,8 +141,8 @@ class Godkjenningsbehov(
             return Godkjenningsbehov(
                 id = jsonNode["@id"].asUUID(),
                 opprettet = jsonNode["@opprettet"].asLocalDateTime(),
-                fødselsnummer = jsonNode["fødselsnummer"].asText(),
-                organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
+                fødselsnummer = jsonNode["fødselsnummer"].asString(),
+                organisasjonsnummer = jsonNode["organisasjonsnummer"].asString(),
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
                 spleisVedtaksperioder =
@@ -157,9 +157,9 @@ class Godkjenningsbehov(
                 forsikringsvurderingId =
                     godkjenning["forsikringsvurderingId"]
                         ?.takeUnless { it.isNull }
-                        ?.takeUnless { it.asText() == "null" } // Serialisert feil én gang, nå et evig kompatibilitetsbehov...
+                        ?.takeUnless { it.asString() == "null" } // Serialisert feil én gang, nå et evig kompatibilitetsbehov...
                         ?.asUUID(),
-                tags = godkjenning["tags"].toList().map { it.asText() },
+                tags = godkjenning["tags"].toList().map { it.asString() },
                 periodeFom = godkjenning["periodeFom"].asLocalDate(),
                 periodeTom = godkjenning["periodeTom"].asLocalDate(),
                 periodetype = godkjenning["periodetype"].asEnum<Periodetype>(),
@@ -170,13 +170,13 @@ class Godkjenningsbehov(
                 orgnummereMedRelevanteArbeidsforhold =
                     godkjenning["orgnummereMedRelevanteArbeidsforhold"]
                         ?.toList()
-                        ?.map(JsonNode::asText)
+                        ?.map(JsonNode::asString)
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
                 sykepengegrunnlagsfakta =
                     godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
                 foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
-                arbeidssituasjon = if (godkjenning["arbeidssituasjon"].asText() == "JORDBRUKER") godkjenning["arbeidssituasjon"].asEnum<Arbeidssituasjon>() else null,
+                arbeidssituasjon = if (godkjenning["arbeidssituasjon"].asString() == "JORDBRUKER") godkjenning["arbeidssituasjon"].asEnum<Arbeidssituasjon>() else null,
                 relevanteSøknader = godkjenning["relevanteSøknader"].toList().map { it.asUUID() },
                 utbetalingsdager =
                     godkjenning["utbetalingsdager"]
@@ -197,7 +197,7 @@ class Godkjenningsbehov(
 
         private fun JsonNode.asSykepengegrunnlagsfakta(yrkesaktivitetstype: Yrkesaktivitetstype): Sykepengegrunnlagsfakta =
             if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) {
-                when (val fastsatt = this["fastsatt"].asText()) {
+                when (val fastsatt = this["fastsatt"].asString()) {
                     "EtterHovedregel" -> {
                         check(this["arbeidsgivere"] == null || this["arbeidsgivere"].isEmpty) {
                             "Selvstendig næringsdrivende har arbeidsgiver(e)"
@@ -214,7 +214,7 @@ class Godkjenningsbehov(
                     }
                 }
             } else {
-                when (val fastsatt = this["fastsatt"].asText()) {
+                when (val fastsatt = this["fastsatt"].asString()) {
                     "IInfotrygd" -> {
                         Sykepengegrunnlagsfakta.Infotrygd(
                             this["sykepengegrunnlag"].asBigDecimal(),
@@ -227,7 +227,7 @@ class Godkjenningsbehov(
                             arbeidsgivere =
                                 this["arbeidsgivere"].toList().map { arbeidsgiver ->
                                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                        organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                                        organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asString(),
                                         omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                                         skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
                                         inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
@@ -244,7 +244,7 @@ class Godkjenningsbehov(
                             arbeidsgivere =
                                 this["arbeidsgivere"].toList().map { arbeidsgiver ->
                                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                        organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                                        organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asString(),
                                         omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                                         inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
                                     )
@@ -271,7 +271,7 @@ class Godkjenningsbehov(
             )
 
         private fun JsonNode.asInntektskilde(): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
-            when (val inntektskilde = asText()) {
+            when (val inntektskilde = asString()) {
                 "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                 "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
                 "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler

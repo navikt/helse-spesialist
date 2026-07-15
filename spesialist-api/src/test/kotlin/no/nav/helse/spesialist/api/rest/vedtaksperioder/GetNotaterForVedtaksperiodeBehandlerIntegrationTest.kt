@@ -51,18 +51,18 @@ class GetNotaterForVedtaksperiodeBehandlerIntegrationTest {
         assertEquals(HttpStatusCode.OK.value, response.status)
         val body = response.bodyAsJsonNode
         assertNotNull(body) { "Body er tom eller ugyldig JSON" }
-        assertEquals(notat.tekst, body.first()["tekst"].asText())
-        assertEquals(notat.type.name, body.first()["type"].asText())
+        assertEquals(notat.tekst, body.first()["tekst"].asString())
+        assertEquals(notat.type.name, body.first()["type"].asString())
         assertEquals(notat.dialogRef.value, body.first()["dialogRef"].asLong())
         assertEquals(notat.vedtaksperiodeId, body.first()["vedtaksperiodeId"].asUUID())
         assertEquals(notat.saksbehandlerOid.value, body.first()["saksbehandlerOid"].asUUID())
-        assertEquals(saksbehandler.navn, body.first()["saksbehandlerNavn"].asText())
-        assertEquals(saksbehandler.ident.value, body.first()["saksbehandlerIdent"].asText())
-        assertEquals(saksbehandler.epost, body.first()["saksbehandlerEpost"].asText())
+        assertEquals(saksbehandler.navn, body.first()["saksbehandlerNavn"].asString())
+        assertEquals(saksbehandler.ident.value, body.first()["saksbehandlerIdent"].asString())
+        assertEquals(saksbehandler.epost, body.first()["saksbehandlerEpost"].asString())
         assertEquals(notat.feilregistrert, body.first()["feilregistrert"].asBoolean())
         assertEquals(notat.feilregistrertTidspunkt, body.first()["feilregistrert_tidspunkt"].asLocalDateTimeOrNull())
-        assertEquals(notat.type.name, body.first()["type"].asText())
-        val kommentarer = body.first()["kommentarer"].toList().map { it["tekst"].asText() to it["saksbehandlerident"].asText() }
+        assertEquals(notat.type.name, body.first()["type"].asString())
+        val kommentarer = body.first()["kommentarer"].toList().map { it["tekst"].asString() to it["saksbehandlerident"].asString() }
         assertEquals(1, kommentarer.size)
         assertEquals(kommentartekst, kommentarer.first().first)
         assertEquals(saksbehandler.ident.value, kommentarer.first().second)

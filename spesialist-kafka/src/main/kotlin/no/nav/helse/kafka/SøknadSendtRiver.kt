@@ -34,7 +34,7 @@ class SøknadSendtRiver : TransaksjonellRiver() {
             json = packet.toJson(),
             meldingtype = MeldingDao.Meldingtype.SØKNAD_SENDT,
         )
-        val identitetsnummer = Identitetsnummer.fraString(packet["fnr"].asText())
+        val identitetsnummer = Identitetsnummer.fraString(packet["fnr"].asString())
         if (transaksjon.personRepository.finn(identitetsnummer) != null) {
             loggInfo("Person finnes fra før", "identitetsnummer" to identitetsnummer)
             return
@@ -42,7 +42,7 @@ class SøknadSendtRiver : TransaksjonellRiver() {
         val person =
             Person.Factory.ny(
                 identitetsnummer,
-                packet["aktorId"].asText(),
+                packet["aktorId"].asString(),
                 null,
                 null,
             )

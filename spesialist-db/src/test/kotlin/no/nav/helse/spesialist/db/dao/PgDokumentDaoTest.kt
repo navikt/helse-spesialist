@@ -23,7 +23,7 @@ internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
         assertNotNull(dokumentFraDB)
 
         if (dokumentFraDB != null) {
-            assertEquals("hei", dokumentFraDB["testsøknad"].asText())
+            assertEquals("hei", dokumentFraDB["testsøknad"].asString())
         }
     }
 
@@ -38,7 +38,7 @@ internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
         val dokumentFraDB = dokumentDao.hent(person.id.value, dokumentId)
 
         if (dokumentFraDB != null) {
-            assertEquals("hade", dokumentFraDB["testsøknad"].asText())
+            assertEquals("hade", dokumentFraDB["testsøknad"].asString())
         }
     }
 

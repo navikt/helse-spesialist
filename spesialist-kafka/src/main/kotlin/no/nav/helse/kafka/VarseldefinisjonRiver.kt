@@ -42,13 +42,13 @@ class VarseldefinisjonRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        loggInfo("Mottok melding om ny definisjon for varselkode: ${packet["varselkode"].asText()}")
+        loggInfo("Mottok melding om ny definisjon for varselkode: ${packet["varselkode"].asString()}")
 
         val message =
             VarseldefinisjonMessage(
                 id = packet["gjeldende_definisjon.id"].asUUID(),
-                varselkode = packet["varselkode"].asText(),
-                tittel = packet["gjeldende_definisjon.tittel"].asText(),
+                varselkode = packet["varselkode"].asString(),
+                tittel = packet["gjeldende_definisjon.tittel"].asString(),
                 forklaring = packet["gjeldende_definisjon.forklaring"].takeUnless(JsonNode::isMissingOrNull)?.textValue(),
                 handling = packet["gjeldende_definisjon.handling"].takeUnless(JsonNode::isMissingOrNull)?.textValue(),
                 avviklet = packet["gjeldende_definisjon.avviklet"].asBoolean(),

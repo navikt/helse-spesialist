@@ -33,7 +33,7 @@ class SpeilPersonReceiver(
     private val brukerroller: Set<Brukerrolle>,
     private val tilganger: Set<Tilgang>,
 ) {
-    val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asText()
+    val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asString()
     var person: JsonNode = fetchPerson(personPseudoId)
     var tilkomneInntektskilder: JsonNode = callGetTilkomneInntektskilder()
 
@@ -56,12 +56,12 @@ class SpeilPersonReceiver(
                     }
                 }
             }.forEach { varsel ->
-                val varselId = varsel["id"].asText()
+                val varselId = varsel["id"].asString()
                 callHttpPut(
                     relativeUrl = "api/varsler/$varselId/vurdering",
                     request =
                         mapOf(
-                            "definisjonId" to varsel["definisjonId"].asText(),
+                            "definisjonId" to varsel["definisjonId"].asString(),
                         ),
                 )
             }
@@ -140,7 +140,7 @@ class SpeilPersonReceiver(
                 .flatMap { it["behandlinger"] }
                 .flatMap { it["perioder"] }
                 .flatMap { it["historikkinnslag"] }
-                .find { it["__typename"].asText() == "LagtPaVent" }
+                .find { it["__typename"].asString() == "LagtPaVent" }
                 ?.get("dialogRef")
                 ?.asInt()
                 ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
@@ -161,7 +161,7 @@ class SpeilPersonReceiver(
                 .flatMap { it["historikkinnslag"] }
         val dialogRef =
             historikkinnslag
-                .find { it["__typename"].asText() == "LagtPaVent" }
+                .find { it["__typename"].asString() == "LagtPaVent" }
                 ?.get("dialogRef")
                 ?.asInt()
                 ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
@@ -419,8 +419,8 @@ class SpeilPersonReceiver(
             person["tildeling"]
         assertFalse(tildelingNode.isMissingOrNull(), "Forventer at tildeling ikke er null")
         assertEquals(saksbehandler.id.value, tildelingNode["oid"].asUUID())
-        assertEquals(saksbehandler.navn, tildelingNode["navn"].asText())
-        assertEquals(saksbehandler.epost, tildelingNode["epost"].asText())
+        assertEquals(saksbehandler.navn, tildelingNode["navn"].asString())
+        assertEquals(saksbehandler.epost, tildelingNode["epost"].asString())
     }
 
     fun assertIkkeTildelt() {
@@ -430,13 +430,13 @@ class SpeilPersonReceiver(
 
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {
         val egenskaper =
-            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].toList().map { it["egenskap"].asText() }
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].toList().map { it["egenskap"].asString() }
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toSet())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
     fun assertHarIkkeOppgaveegenskap(vararg egenskaperSomSkalMangle: String) {
         val egenskaper =
-            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].toList().map { it["egenskap"].asText() }
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].toList().map { it["egenskap"].asString() }
         assertTrue(egenskaper.none { it in egenskaperSomSkalMangle.toSet() }) { "Forventet å ikke finne ${egenskaperSomSkalMangle.toSet()} i $egenskaper" }
     }
 
@@ -457,13 +457,13 @@ class SpeilPersonReceiver(
                     arbeidsgiver["behandlinger"].flatMap { behandling ->
                         behandling["perioder"]
                     }
-                }.find { it["behandlingId"].asText() == behandlingId.toString() }
+                }.find { it["behandlingId"].asString() == behandlingId.toString() }
                 ?: error("Fant ikke periode med behandlingId $behandlingId i FetchPerson-svaret")
 
         assertTrue(
             vedtaksperiodeFraFetchPerson["varsler"]
                 .toList()
-                .map { it["vurdering"]["status"].asText() }
+                .map { it["vurdering"]["status"].asString() }
                 .sorted()
                 .all { it == status },
         )
@@ -479,17 +479,17 @@ class SpeilPersonReceiver(
                     arbeidsgiver["behandlinger"].flatMap { behandling ->
                         behandling["perioder"]
                     }
-                }.find { it["vedtaksperiodeId"].asText() == vedtaksperiode.vedtaksperiodeId.toString() }
+                }.find { it["vedtaksperiodeId"].asString() == vedtaksperiode.vedtaksperiodeId.toString() }
                 ?: error("Fant ikke periode med vedtaksperiodeId ${vedtaksperiode.vedtaksperiodeId} i FetchPerson-svaret")
 
         assertEquals(
             expected.sorted(),
-            vedtaksperiodeFraFetchPerson["varsler"].toList().map { it["kode"].asText() }.sorted(),
+            vedtaksperiodeFraFetchPerson["varsler"].toList().map { it["kode"].asString() }.sorted(),
         )
     }
 
     fun assertAdressebeskyttelse(expected: String) {
-        assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asText())
+        assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asString())
     }
 
     private fun fetchPerson(personPseudoId: String): JsonNode {
@@ -513,7 +513,7 @@ class SpeilPersonReceiver(
             request = mapOf("identitetsnummer" to fødselsnummer),
         )!!
 
-    private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asText()
+    private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asString()
 
     private fun callGraphQL(
         operationName: String,

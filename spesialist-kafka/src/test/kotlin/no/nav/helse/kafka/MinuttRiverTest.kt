@@ -46,9 +46,9 @@ internal class MinuttRiverTest {
         val publiserteMeldinger =
             (0 until testRapid.inspektør.size)
                 .map { testRapid.inspektør.message(it) }
-                .filter { it["@event_name"].asText() == "gosys_oppgave_endret" }
+                .filter { it["@event_name"].asString() == "gosys_oppgave_endret" }
         assertEquals(1, publiserteMeldinger.size)
-        assertEquals(person.id.value, publiserteMeldinger.single()["fødselsnummer"].asText())
+        assertEquals(person.id.value, publiserteMeldinger.single()["fødselsnummer"].asString())
     }
 
     @Test
@@ -71,7 +71,7 @@ internal class MinuttRiverTest {
         val gosysOppgaveEndretMeldinger =
             (0 until testRapid.inspektør.size)
                 .map { testRapid.inspektør.message(it) }
-                .filter { it["@event_name"].asText() == "gosys_oppgave_endret" }
+                .filter { it["@event_name"].asString() == "gosys_oppgave_endret" }
         assertEquals(0, gosysOppgaveEndretMeldinger.size)
     }
 

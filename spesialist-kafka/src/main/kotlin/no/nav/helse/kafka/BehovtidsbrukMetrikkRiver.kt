@@ -35,14 +35,14 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
         meterRegistry: MeterRegistry,
     ) {
         val opprinneligService = packet["system_participating_services"].takeUnless { it.isMissingOrNull() }?.firstOrNull()
-        if (opprinneligService == null || opprinneligService["service"]?.asText() != "spesialist") {
+        if (opprinneligService == null || opprinneligService["service"]?.asString() != "spesialist") {
             return
         }
 
         val besvart = packet["@besvart"].asLocalDateTime()
         val opprettet = opprinneligService.let { it["time"].asLocalDateTime() }
         val delay = Duration.between(opprettet, besvart).toKotlinDuration()
-        val behov = packet["@behov"].toList().map(JsonNode::asText)
+        val behov = packet["@behov"].toList().map(JsonNode::asString)
         val godkjent: Boolean? = packet["@løsning.Godkjenning.godkjent"].takeUnless { it.isMissingOrNull() }?.asBoolean()
         val automatisk: Boolean? = packet["@løsning.Godkjenning.automatiskBehandling"].takeUnless { it.isMissingOrNull() }?.asBoolean()
 

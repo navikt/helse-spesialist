@@ -79,7 +79,7 @@ internal class TestmeldingfabrikkTest {
         melding: String,
     ) {
         objectMapper.readTree(melding).also { json ->
-            assertEquals(forventet, json.path(felt).asText())
+            assertEquals(forventet, json.path(felt).asString())
         }
     }
 }

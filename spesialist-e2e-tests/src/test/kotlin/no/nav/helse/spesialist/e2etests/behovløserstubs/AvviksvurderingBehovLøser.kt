@@ -20,7 +20,7 @@ class AvviksvurderingBehovLøser : AbstractBehovLøser("Avviksvurdering") {
                     "omregnedeÅrsinntekter" to
                         listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to behovJson["organisasjonsnummer"].asText(),
+                                "arbeidsgiverreferanse" to behovJson["organisasjonsnummer"].asString(),
                                 "beløp" to 600000.0,
                             ),
                         ),
@@ -31,7 +31,7 @@ class AvviksvurderingBehovLøser : AbstractBehovLøser("Avviksvurdering") {
                     "innrapporterteInntekter" to
                         listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to behovJson["organisasjonsnummer"].asText(),
+                                "arbeidsgiverreferanse" to behovJson["organisasjonsnummer"].asString(),
                                 "inntekter" to
                                     listOf(
                                         mapOf<String, Any>(

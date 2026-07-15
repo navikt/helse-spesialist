@@ -26,7 +26,7 @@ class VurderingsmomenterLøsningRiver(
         River.PacketValidation {
             it.requireKey("@id")
             it.require("@opprettet") { message -> message.asLocalDateTime() }
-            it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
+            it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asString()) }
             it.requireKey("@løsning.Risikovurdering")
             it.requireKey(
                 "@løsning.Risikovurdering.kanGodkjennesAutomatisk",

@@ -53,7 +53,7 @@ class MeldingMediator(
         val jsonNode = objectMapper.readTree(melding)
         if (poisonPillsCache.get(Unit).erPoisonPill(jsonNode)) {
             loggInfo(
-                "Hopper over melding med @id: ${jsonNode["@id"].asText()}",
+                "Hopper over melding med @id: ${jsonNode["@id"].asString()}",
                 "json" to jsonNode,
             )
 
@@ -67,7 +67,7 @@ class MeldingMediator(
     }
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {
-        val eventName = jsonNode["@event_name"]?.asText()
+        val eventName = jsonNode["@event_name"]?.asString()
         if (eventName in
             setOf(
                 "sendt_søknad_arbeidsgiver",
@@ -77,7 +77,7 @@ class MeldingMediator(
         ) {
             return true
         }
-        val fødselsnummer = jsonNode["fødselsnummer"]?.asText() ?: return true
+        val fødselsnummer = jsonNode["fødselsnummer"]?.asString() ?: return true
         if (fødselsnummer.toLongOrNull() == null) return true
         val harPerson = personDao.finnPersonMedFødselsnummer(fødselsnummer) != null
         if (!harPerson) {
@@ -195,9 +195,9 @@ class MeldingMediator(
         if (meldingenHarBlittBehandletAvEnRiver.get()) {
             jsonNode["@id"]?.asUUID()?.let { id ->
                 val type =
-                    when (val eventName = jsonNode["@event_name"]?.asText()) {
+                    when (val eventName = jsonNode["@event_name"]?.asString()) {
                         null -> "ukjent"
-                        "behov" -> "behov: " + jsonNode["@behov"].joinToString { it.asText() }
+                        "behov" -> "behov: " + jsonNode["@behov"].joinToString { it.asString() }
                         else -> eventName
                     }
                 loggInfo("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")
@@ -314,7 +314,7 @@ class MeldingMediator(
                 commandContext.clear()
                 return
             }
-            val behov = jsonNode["@behov"].toList().map(JsonNode::asText)
+            val behov = jsonNode["@behov"].toList().map(JsonNode::asString)
             loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger på $behov", "løsning-json" to jsonNode)
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }

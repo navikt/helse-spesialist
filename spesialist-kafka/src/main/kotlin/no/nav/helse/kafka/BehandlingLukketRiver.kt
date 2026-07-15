@@ -36,7 +36,7 @@ class BehandlingLukketRiver : TransaksjonellRiver() {
     ) {
         val vedtaksperiodeId = VedtaksperiodeId(packet["vedtaksperiodeId"].asUUID())
         val spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID())
-        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asText())
+        val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asString())
 
         transaksjon.meldingDao.lagre(
             id = packet["@id"].asUUID(),

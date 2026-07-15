@@ -23,10 +23,10 @@ class EndretEgenAnsattStatus(
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode["@id"].asText()),
-        fødselsnummer = jsonNode["fødselsnummer"].asText(),
+        id = UUID.fromString(jsonNode["@id"].asString()),
+        fødselsnummer = jsonNode["fødselsnummer"].asString(),
         erEgenAnsatt = jsonNode["skjermet"].asBoolean(),
-        opprettet = jsonNode["@opprettet"].asText().let(LocalDateTime::parse),
+        opprettet = jsonNode["@opprettet"].asString().let(LocalDateTime::parse),
         json = jsonNode.toString(),
     )
 

@@ -39,7 +39,7 @@ class SpForsikringClientForsikringsvurderingHenter(
                                 val responseBody = EntityUtils.toString(response.entity)
                                 val responseJson = objectMapper.readTree(responseBody)
                                 Forsikringsvurdering(
-                                    identitetsnummer = Identitetsnummer.fraString(responseJson["identitetsnummer"].asText()),
+                                    identitetsnummer = Identitetsnummer.fraString(responseJson["identitetsnummer"].asString()),
                                     harForsikring = responseJson["harForsikring"].asBoolean(),
                                     dekning =
                                         responseJson["dekning"]?.takeUnless { it.isNull }?.let { dekning ->

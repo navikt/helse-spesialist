@@ -107,10 +107,10 @@ class FlerePersoninfoRiver(
 }
 
 private fun parsePersoninfo(node: JsonNode): HentPersoninfoløsning {
-    val ident = node.path("ident").asText()
-    val fornavn = node.path("fornavn").asText()
-    val mellomnavn = node.path("mellomnavn").takeUnless(JsonNode::isMissingOrNull)?.asText()
-    val etternavn = node.path("etternavn").asText()
+    val ident = node.path("ident").asString()
+    val fornavn = node.path("fornavn").asString()
+    val mellomnavn = node.path("mellomnavn").takeUnless(JsonNode::isMissingOrNull)?.asString()
+    val etternavn = node.path("etternavn").asString()
     val fødselsdato = node.path("fødselsdato").asLocalDate()
     val kjønn = Kjønn.valueOf(node.path("kjønn").textValue())
     val adressebeskyttelse = Adressebeskyttelse.valueOf(node.path("adressebeskyttelse").textValue())

@@ -70,7 +70,7 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             assertAdressebeskyttelse("Fortrolig")
         }
-        val vedtaksperiodeAvvistMelding = meldinger().find { it["@event_name"].asText() == "vedtaksperiode_avvist" }
+        val vedtaksperiodeAvvistMelding = meldinger().find { it["@event_name"].asString() == "vedtaksperiode_avvist" }
         assertNull(vedtaksperiodeAvvistMelding)
     }
 }

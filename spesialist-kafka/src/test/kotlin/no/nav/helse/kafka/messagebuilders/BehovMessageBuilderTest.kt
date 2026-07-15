@@ -170,8 +170,8 @@ class BehovMessageBuilderTest {
     }
 
     private fun JsonNode.assertStandardfelter() {
-        assertEquals("behov", this.path("@event_name").asText())
-        assertEquals(fødselsnummer, this.path("fødselsnummer").asText())
+        assertEquals("behov", this.path("@event_name").asString())
+        assertEquals(fødselsnummer, this.path("fødselsnummer").asString())
         assertEquals(commandContextId, this.path("contextId").asUUID())
         assertEquals(hendelseId, this.path("hendelseId").asUUID())
         assertEquals(listOf(1, 2, 3), this.path("sti").toList().map { it.asInt() })
@@ -183,7 +183,7 @@ class BehovMessageBuilderTest {
     ) {
         val jsonNode = objectMapper.readTree(this)
         jsonNode.assertStandardfelter()
-        assertEquals(listOf(behovtype), jsonNode.path("@behov").toList().map { it.asText() })
+        assertEquals(listOf(behovtype), jsonNode.path("@behov").toList().map { it.asString() })
         assertEquals(objectMapper.valueToTree(payload), jsonNode.path(behovtype))
     }
 }

@@ -59,20 +59,20 @@ class UtbetalingEndretRiver(
         mediator.mottaMelding(
             UtbetalingEndret(
                 id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
-                organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+                fødselsnummer = packet["fødselsnummer"].asString(),
+                organisasjonsnummer = packet["organisasjonsnummer"].asString(),
                 utbetalingId = packet["utbetalingId"].asUUID(),
-                type = packet["type"].asText(),
-                gjeldendeStatus = Utbetalingsstatus.valueOf(packet["gjeldendeStatus"].asText()),
+                type = packet["type"].asString(),
+                gjeldendeStatus = Utbetalingsstatus.valueOf(packet["gjeldendeStatus"].asString()),
                 opprettet = packet["@opprettet"].asLocalDateTime(),
                 arbeidsgiverbeløp = packet["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
                 personbeløp = packet["personOppdrag"]["nettoBeløp"].asInt(),
                 arbeidsgiverOppdrag =
                     tilOppdrag(
                         packet["arbeidsgiverOppdrag"],
-                        packet["organisasjonsnummer"].asText(),
+                        packet["organisasjonsnummer"].asString(),
                     ),
-                personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asText()),
+                personOppdrag = tilOppdrag(packet["personOppdrag"], packet["fødselsnummer"].asString()),
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),
@@ -84,8 +84,8 @@ class UtbetalingEndretRiver(
             jsonNode: JsonNode,
             mottaker: String,
         ) = LagreOppdragCommand.Oppdrag(
-            fagsystemId = jsonNode.path("fagsystemId").asText(),
-            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isTextual)?.asText() ?: mottaker,
+            fagsystemId = jsonNode.path("fagsystemId").asString(),
+            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isString)?.asString() ?: mottaker,
         )
     }
 }

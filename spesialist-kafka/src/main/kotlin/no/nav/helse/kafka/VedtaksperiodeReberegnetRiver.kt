@@ -16,7 +16,7 @@ class VedtaksperiodeReberegnetRiver(
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "vedtaksperiode_endret")
-            it.require("forrigeTilstand") { node -> check(node.asText().contains("AVVENTER_GODKJENNING")) }
+            it.require("forrigeTilstand") { node -> check(node.asString().contains("AVVENTER_GODKJENNING")) }
             it.forbidValues(
                 "gjeldendeTilstand",
                 listOf(
@@ -48,7 +48,7 @@ class VedtaksperiodeReberegnetRiver(
         mediator.mottaMelding(
             VedtaksperiodeReberegnet(
                 id = packet["@id"].asUUID(),
-                fødselsnummer = packet["fødselsnummer"].asText(),
+                fødselsnummer = packet["fødselsnummer"].asString(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                 spleisBehandlingId = SpleisBehandlingId(packet["behandlingId"].asUUID()),
                 json = packet.toJson(),

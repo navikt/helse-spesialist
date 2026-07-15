@@ -27,10 +27,10 @@ class VedtaksperiodeReberegnet(
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode["@id"].asText()),
-        fødselsnummer = jsonNode["fødselsnummer"].asText(),
-        vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
-        spleisBehandlingId = SpleisBehandlingId(UUID.fromString(jsonNode["behandlingId"].asText())),
+        id = UUID.fromString(jsonNode["@id"].asString()),
+        fødselsnummer = jsonNode["fødselsnummer"].asString(),
+        vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asString()),
+        spleisBehandlingId = SpleisBehandlingId(UUID.fromString(jsonNode["behandlingId"].asString())),
         json = jsonNode.toString(),
     )
 

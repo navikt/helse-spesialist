@@ -59,7 +59,7 @@ class KRRClientKrrRegistrertStatusHenter(
                     val responseJson = objectMapper.readTree(responseBody)
 
                     if (responseJson["feil"]?.isEmpty == false) {
-                        if (responseJson["feil"][fødselsnummer]?.asText() == "person_ikke_funnet") {
+                        if (responseJson["feil"][fødselsnummer]?.asString() == "person_ikke_funnet") {
                             loggWarn(
                                 "KRR ga feil tilbake om at personen ikke finnes. Regner det som at den ikke ligger i KRR.",
                                 "fødselsnummer" to fødselsnummer,

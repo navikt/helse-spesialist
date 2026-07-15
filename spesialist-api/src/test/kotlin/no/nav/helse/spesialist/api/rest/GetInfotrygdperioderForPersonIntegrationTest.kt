@@ -217,9 +217,9 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         // Then:
         assertEquals(200, response.status)
         val body = response.bodyAsJsonNode!!
-        assertEquals("2021-01-01", body[0]["fom"].asText())
-        assertEquals("2021-03-01", body[1]["fom"].asText())
-        assertEquals("2021-05-01", body[2]["fom"].asText())
+        assertEquals("2021-01-01", body[0]["fom"].asString())
+        assertEquals("2021-03-01", body[1]["fom"].asString())
+        assertEquals("2021-05-01", body[2]["fom"].asString())
     }
 
     @Test
@@ -249,8 +249,8 @@ class GetInfotrygdperioderForPersonIntegrationTest {
         assertEquals(200, response.status)
         val body = response.bodyAsJsonNode!!
         assertEquals(1, body.size())
-        assertEquals("2021-01-01", body[0]["fom"].asText())
-        assertEquals("2021-01-31", body[0]["tom"].asText())
+        assertEquals("2021-01-01", body[0]["fom"].asString())
+        assertEquals("2021-01-31", body[0]["tom"].asString())
     }
 
     @Test

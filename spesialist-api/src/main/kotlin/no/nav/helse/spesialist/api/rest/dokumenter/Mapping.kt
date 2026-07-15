@@ -27,9 +27,9 @@ import tools.jackson.databind.JsonNode
 
 fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
     ApiDokumentInntektsmelding(
-        arbeidsforholdId = getIfNotNull("arbeidsforholdId")?.asText(),
-        virksomhetsnummer = getIfNotNull("virksomhetsnummer")?.asText(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt = getIfNotNull("begrunnelseForReduksjonEllerIkkeUtbetalt")?.asText(),
+        arbeidsforholdId = getIfNotNull("arbeidsforholdId")?.asString(),
+        virksomhetsnummer = getIfNotNull("virksomhetsnummer")?.asString(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt = getIfNotNull("begrunnelseForReduksjonEllerIkkeUtbetalt")?.asString(),
         bruttoUtbetalt = getIfNotNull("bruttoUtbetalt")?.asDouble(),
         beregnetInntekt = getIfNotNull("beregnetInntekt")?.asDouble(),
         refusjon =
@@ -52,7 +52,7 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
                     naturalytelse =
                         opphørAvNaturalytelse
                             .getIfNotNull("naturalytelse")
-                            ?.asText()
+                            ?.asString()
                             ?.tilNaturalytelse(),
                     fom = opphørAvNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
                     beloepPrMnd = opphørAvNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
@@ -64,7 +64,7 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
                     naturalytelse =
                         gjenopptakelseNaturalytelse
                             .getIfNotNull("naturalytelse")
-                            ?.asText()
+                            ?.asString()
                             ?.tilNaturalytelse(),
                     fom = gjenopptakelseNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
                     beloepPrMnd = gjenopptakelseNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
@@ -87,13 +87,13 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
         foersteFravaersdag = getIfNotNull("foersteFravaersdag")?.asLocalDate(),
         inntektsdato = getIfNotNull("inntektsdato")?.asLocalDate(),
         naerRelasjon = getIfNotNull("naerRelasjon")?.asBoolean(),
-        innsenderFulltNavn = getIfNotNull("innsenderFulltNavn")?.asText(),
-        innsenderTelefon = getIfNotNull("innsenderTelefon")?.asText(),
+        innsenderFulltNavn = getIfNotNull("innsenderFulltNavn")?.asString(),
+        innsenderTelefon = getIfNotNull("innsenderTelefon")?.asString(),
         inntektEndringAarsaker =
             getIfNotNull("inntektEndringAarsaker")?.toList()?.let { endringAarsaker ->
                 endringAarsaker.map { endringAarsak ->
                     ApiInntektEndringAarsak(
-                        endringAarsak.get("aarsak").asText(),
+                        endringAarsak.get("aarsak").asString(),
                         endringAarsak.getIfNotNull("perioder")?.toList()?.map { periode ->
                             ApiIMPeriode(
                                 fom = periode.getIfNotNull("fom")?.asLocalDate(),
@@ -108,8 +108,8 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
         avsenderSystem =
             getIfNotNull("avsenderSystem")?.let { avsenderSystem ->
                 ApiAvsenderSystem(
-                    navn = avsenderSystem.getIfNotNull("navn")?.asText(),
-                    versjon = avsenderSystem.getIfNotNull("versjon")?.asText(),
+                    navn = avsenderSystem.getIfNotNull("navn")?.asString(),
+                    versjon = avsenderSystem.getIfNotNull("versjon")?.asString(),
                 )
             },
     )
@@ -146,7 +146,7 @@ private fun String.tilNaturalytelse(): ApiNaturalytelse =
 
 fun JsonNode.tilSøknad() =
     ApiSoknad(
-        type = getIfNotNull("type")?.asText()?.tilSoknadstype(),
+        type = getIfNotNull("type")?.asString()?.tilSoknadstype(),
         arbeidGjenopptatt = getIfNotNull("arbeidGjenopptatt")?.asLocalDateOrNull(),
         sykmeldingSkrevet = getIfNotNull("sykmeldingSkrevet")?.asLocalDateTimeOrNull(),
         egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.toList()?.map { it.asLocalDate() },
@@ -194,7 +194,7 @@ private fun tilSelvstendigNæringsdrivende(
         selvstendigNæringsdrivende.get("inntekt")["inntektsAar"].toList().map { inntektsår ->
             val pensjonsgivendeInntekt = inntektsår.get("pensjonsgivendeInntekt")
             ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
-                ar = inntektsår.get("aar").asText(),
+                ar = inntektsår.get("aar").asString(),
                 pensjonsgivendeInntektAvLonnsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntekt"].asInt(),
                 pensjonsgivendeInntektAvLonnsinntektBarePensjonsdel = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel"].asInt(),
                 pensjonsgivendeInntektAvNaringsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntekt"].asInt(),
@@ -209,17 +209,17 @@ private fun tilSelvstendigNæringsdrivende(
 )
 
 private fun JsonNode.tilSpørsmål(): ApiSporsmal {
-    val svar = getIfNotNull("svar")?.toList()?.map { ApiSvar(it.getIfNotNull("verdi")?.asText()) }
+    val svar = getIfNotNull("svar")?.toList()?.map { ApiSvar(it.getIfNotNull("verdi")?.asString()) }
     val kriterieForVisningAvUndersporsmal =
-        getIfNotNull("kriterieForVisningAvUndersporsmal")?.asText()?.tilVisningskriterium()
+        getIfNotNull("kriterieForVisningAvUndersporsmal")?.asString()?.tilVisningskriterium()
     val undersporsmal =
         getIfNotNull("undersporsmal")?.toList()?.map { it.tilSpørsmål() }?.filter { it.skalVises(rotnivå = false) }
 
     return ApiSporsmal(
-        tag = getIfNotNull("tag")?.asText(),
-        sporsmalstekst = getIfNotNull("sporsmalstekst")?.asText(),
-        undertekst = getIfNotNull("undertekst")?.asText(),
-        svartype = getIfNotNull("svartype")?.asText()?.tilSvartype(),
+        tag = getIfNotNull("tag")?.asString(),
+        sporsmalstekst = getIfNotNull("sporsmalstekst")?.asString(),
+        undertekst = getIfNotNull("undertekst")?.asString(),
+        svartype = getIfNotNull("svartype")?.asString()?.tilSvartype(),
         svar = svar,
         undersporsmal = undersporsmal,
         kriterieForVisningAvUndersporsmal = kriterieForVisningAvUndersporsmal,

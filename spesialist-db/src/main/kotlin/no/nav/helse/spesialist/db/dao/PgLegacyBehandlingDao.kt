@@ -129,10 +129,10 @@ class PgLegacyBehandlingDao private constructor(
         return objectMapper.readTree(varsler).toList().map { varsel ->
             VarselDto(
                 varsel["unik_id"].asUUID(),
-                varsel["kode"].asText(),
+                varsel["kode"].asString(),
                 varsel["opprettet"].asLocalDateTime(),
                 varsel["vedtaksperiode_id"].asUUID(),
-                when (val status = varsel["status"].asText()) {
+                when (val status = varsel["status"].asString()) {
                     "AKTIV" -> VarselStatusDto.AKTIV
                     "INAKTIV" -> VarselStatusDto.INAKTIV
                     "GODKJENT" -> VarselStatusDto.GODKJENT

@@ -43,8 +43,8 @@ class ArbeidsgiverinformasjonLøsningRiver(
                 Arbeidsgiverinformasjonløsning(
                     løsning.toList().map { arbeidsgiver ->
                         Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
-                            orgnummer = arbeidsgiver.path("orgnummer").asText(),
-                            navn = arbeidsgiver.path("navn").asText(),
+                            orgnummer = arbeidsgiver.path("orgnummer").asString(),
+                            navn = arbeidsgiver.path("navn").asString(),
                         )
                     },
                 ),

@@ -60,19 +60,19 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     ),
             )
             val opprettetEvent = events.last()
-            assertEquals(organisasjonsnummer, opprettetEvent["organisasjonsnummer"].asText())
-            assertEquals(periode.fom.toString(), opprettetEvent["periode"]["fom"].asText())
-            assertEquals(periode.tom.toString(), opprettetEvent["periode"]["tom"].asText())
-            assertEquals(periodebeløp.toString(), opprettetEvent["periodebelop"].asText())
+            assertEquals(organisasjonsnummer, opprettetEvent["organisasjonsnummer"].asString())
+            assertEquals(periode.fom.toString(), opprettetEvent["periode"]["fom"].asString())
+            assertEquals(periode.tom.toString(), opprettetEvent["periode"]["tom"].asString())
+            assertEquals(periodebeløp.toString(), opprettetEvent["periodebelop"].asString())
             assertEquals(ekskluderteUkedager.size, opprettetEvent["ekskluderteUkedager"].size())
             assertEquals(
                 ekskluderteUkedager.map(LocalDate::toString),
-                opprettetEvent["ekskluderteUkedager"].toList().map(JsonNode::asText),
+                opprettetEvent["ekskluderteUkedager"].toList().map(JsonNode::asString),
             )
         }
 
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
-        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
@@ -165,8 +165,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedEkskluderteUkedagerTil = endringEkskluderteUkedager,
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
-        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
@@ -249,8 +249,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     ),
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
-        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
@@ -349,8 +349,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedEkskluderteUkedagerTil = gjenopprettingEkskluderteUkedager,
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
-        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
@@ -475,8 +475,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     ),
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
-        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
@@ -566,7 +566,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             val tilkommenInntektskilde = tilkomneInntektskilder[0]
             assertEquals(
                 expected = organisasjonsnummer,
-                actual = tilkommenInntektskilde["organisasjonsnummer"].asText(),
+                actual = tilkommenInntektskilde["organisasjonsnummer"].asString(),
             )
             tilkommenInntektskilde["inntekter"].let { inntekter ->
                 assertEquals(2, inntekter.size())
@@ -620,7 +620,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedEkskluderteUkedager: List<LocalDate>,
         expectedFjernet: Boolean,
     ) {
-        assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asText())
+        assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asString())
         tilkommenInntektskilde["inntekter"].let { inntekter ->
             assertEquals(1, inntekter.size())
             assertApiInntekt(
@@ -646,14 +646,14 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedFjernet: Boolean,
         expectedErDelAvAktivTotrinnsvurdering: Boolean,
     ) {
-        assertEquals(expectedOrganisasjonsnummer, inntekt["organisasjonsnummer"].asText())
-        assertEquals(expectedFom.toString(), inntekt["periode"]["fom"].asText())
-        assertEquals(expectedTom.toString(), inntekt["periode"]["tom"].asText())
-        assertEquals(expectedPeriodebeløp.toString(), inntekt["periodebelop"].asText())
+        assertEquals(expectedOrganisasjonsnummer, inntekt["organisasjonsnummer"].asString())
+        assertEquals(expectedFom.toString(), inntekt["periode"]["fom"].asString())
+        assertEquals(expectedTom.toString(), inntekt["periode"]["tom"].asString())
+        assertEquals(expectedPeriodebeløp.toString(), inntekt["periodebelop"].asString())
         assertEquals(expectedEkskluderteUkedager.size, inntekt["ekskluderteUkedager"].size())
         assertEquals(
             expectedEkskluderteUkedager.map(LocalDate::toString),
-            inntekt["ekskluderteUkedager"].toList().map(JsonNode::asText),
+            inntekt["ekskluderteUkedager"].toList().map(JsonNode::asString),
         )
         assertEquals(expectedFjernet, inntekt["fjernet"].asBoolean())
         assertEquals(expectedErDelAvAktivTotrinnsvurdering, inntekt["erDelAvAktivTotrinnsvurdering"].asBoolean())
@@ -672,23 +672,23 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedEkskluderteUkedagerFra: List<LocalDate>,
         expectedEkskluderteUkedagerTil: List<LocalDate>,
     ) {
-        assertEquals(expectedOrganisasjonsnummerFra, endringer["organisasjonsnummer"]["fra"].asText())
-        assertEquals(expectedOrganisasjonsnummerTil, endringer["organisasjonsnummer"]["til"].asText())
-        assertEquals(expectedFraFom.toString(), endringer["periode"]["fra"]["fom"].asText())
-        assertEquals(expectedFraTom.toString(), endringer["periode"]["fra"]["tom"].asText())
-        assertEquals(expectedTilFom.toString(), endringer["periode"]["til"]["fom"].asText())
-        assertEquals(expectedTilTom.toString(), endringer["periode"]["til"]["tom"].asText())
-        assertEquals(expectedPeriodebeløpFra.toString(), endringer["periodebelop"]["fra"].asText())
-        assertEquals(expectedPeriodebeløpTil.toString(), endringer["periodebelop"]["til"].asText())
+        assertEquals(expectedOrganisasjonsnummerFra, endringer["organisasjonsnummer"]["fra"].asString())
+        assertEquals(expectedOrganisasjonsnummerTil, endringer["organisasjonsnummer"]["til"].asString())
+        assertEquals(expectedFraFom.toString(), endringer["periode"]["fra"]["fom"].asString())
+        assertEquals(expectedFraTom.toString(), endringer["periode"]["fra"]["tom"].asString())
+        assertEquals(expectedTilFom.toString(), endringer["periode"]["til"]["fom"].asString())
+        assertEquals(expectedTilTom.toString(), endringer["periode"]["til"]["tom"].asString())
+        assertEquals(expectedPeriodebeløpFra.toString(), endringer["periodebelop"]["fra"].asString())
+        assertEquals(expectedPeriodebeløpTil.toString(), endringer["periodebelop"]["til"].asString())
         assertEquals(expectedEkskluderteUkedagerFra.size, endringer["ekskluderteUkedager"]["fra"].size())
         assertEquals(expectedEkskluderteUkedagerTil.size, endringer["ekskluderteUkedager"]["til"].size())
         assertEquals(
             expectedEkskluderteUkedagerFra.map(LocalDate::toString),
-            endringer["ekskluderteUkedager"]["fra"].toList().map(JsonNode::asText),
+            endringer["ekskluderteUkedager"]["fra"].toList().map(JsonNode::asString),
         )
         assertEquals(
             expectedEkskluderteUkedagerTil.map(LocalDate::toString),
-            endringer["ekskluderteUkedager"]["til"].toList().map(JsonNode::asText),
+            endringer["ekskluderteUkedager"]["til"].toList().map(JsonNode::asString),
         )
     }
 
@@ -713,12 +713,12 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedSekvensnummer: Int,
         expectedNotatTilBeslutter: String,
     ) {
-        assertEquals(expectedTypename, event["__typename"].asText())
-        assertEquals("Api$expectedTypename", event["type"].asText())
+        assertEquals(expectedTypename, event["__typename"].asString())
+        assertEquals("Api$expectedTypename", event["type"].asString())
 
         val metadata = event["metadata"]
         assertEquals(expectedSekvensnummer, metadata["sekvensnummer"].asInt())
-        val eventTidspunkt = metadata["tidspunkt"].asText().let(LocalDateTime::parse).somInstantIOslo()
+        val eventTidspunkt = metadata["tidspunkt"].asString().let(LocalDateTime::parse).somInstantIOslo()
         val now = Instant.now()
         assertTrue(eventTidspunkt.isBefore(now)) {
             "Forventet at tidspunkt på event ($eventTidspunkt) var før nå ($now)"
@@ -726,8 +726,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertTrue(eventTidspunkt.isAfter(now.minusSeconds(5))) {
             "Forventet at tidspunkt på event ($eventTidspunkt) var senere enn fem sekunder før nå ($now)"
         }
-        assertEquals(saksbehandlerIdent().value, metadata["utfortAvSaksbehandlerIdent"].asText())
-        assertEquals(expectedNotatTilBeslutter, metadata["notatTilBeslutter"].asText())
+        assertEquals(saksbehandlerIdent().value, metadata["utfortAvSaksbehandlerIdent"].asString())
+        assertEquals(expectedNotatTilBeslutter, metadata["notatTilBeslutter"].asString())
     }
 
     private fun assertInntektsendringerInntektskilde(
@@ -736,7 +736,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedInntekter: List<Triple<String, String, Double>>,
         expectedNullstillinger: List<Pair<String, String>>,
     ) {
-        assertEquals(expectedOrganisasjonsnummer, inntektskilde["inntektskilde"].asText())
+        assertEquals(expectedOrganisasjonsnummer, inntektskilde["inntektskilde"].asString())
         assertInntektsendringerInntekter(expectedInntekter, inntektskilde["inntekter"])
         assertInntektsendringerNullstillinger(expectedNullstillinger, inntektskilde["nullstill"])
     }
@@ -748,8 +748,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedInntekter.size, inntekter.size())
         expectedInntekter.forEachIndexed { index, (fom, tom, dagsbeløp) ->
             val inntekt = inntekter[index]
-            assertEquals(fom, inntekt["fom"].asText())
-            assertEquals(tom, inntekt["tom"].asText())
+            assertEquals(fom, inntekt["fom"].asString())
+            assertEquals(tom, inntekt["tom"].asString())
             assertEquals(dagsbeløp, inntekt["dagsbeløp"].asDouble())
         }
     }
@@ -761,8 +761,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedNullstillinger.size, nullstillinger.size())
         expectedNullstillinger.forEachIndexed { index, (fom, tom) ->
             val nullstilling = nullstillinger[index]
-            assertEquals(fom, nullstilling["fom"].asText())
-            assertEquals(tom, nullstilling["tom"].asText())
+            assertEquals(fom, nullstilling["fom"].asString())
+            assertEquals(tom, nullstilling["tom"].asString())
         }
     }
 

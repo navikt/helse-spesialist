@@ -1050,7 +1050,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(automatiskBehandlet, løsning.path("automatiskBehandling").booleanValue())
         assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
         if (årsakerTilAvvist.isNotEmpty()) {
-            val begrunnelser = løsning["begrunnelser"].toList().map { it.asText() }
+            val begrunnelser = løsning["begrunnelser"].toList().map { it.asString() }
             assertEquals(begrunnelser, begrunnelser.distinct())
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }
@@ -1144,20 +1144,20 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse, sisteMeldingId)
         assertEquals(1, meldinger.size) {
-            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
+            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asString() }}"
         }
     }
 
     protected fun assertIkkeUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse)
         assertEquals(0, meldinger.size) {
-            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
+            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asString() }}"
         }
     }
 
     private fun assertEtterspurteBehov(vararg behov: String) {
         val etterspurteBehov = testRapid.inspektør.behov(sisteMeldingId)
-        val forårsaketAvId = inspektør.siste("behov")["@forårsaket_av"]["id"].asText()
+        val forårsaketAvId = inspektør.siste("behov")["@forårsaket_av"]["id"].asString()
         assertEquals(behov.toList().sorted(), etterspurteBehov.sorted()) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
             "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktisk etterspurte behov: $etterspurteBehov\n"

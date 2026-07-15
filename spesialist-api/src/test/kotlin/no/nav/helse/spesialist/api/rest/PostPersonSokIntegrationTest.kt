@@ -38,8 +38,8 @@ class PostPersonSokIntegrationTest {
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
-        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asText()) }
-        assertEquals("true", actualJson["klarForVisning"].asText())
+        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
+        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -66,8 +66,8 @@ class PostPersonSokIntegrationTest {
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
-        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asText()) }
-        assertEquals("true", actualJson["klarForVisning"].asText())
+        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
+        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -94,8 +94,8 @@ class PostPersonSokIntegrationTest {
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
-        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asText()) }
-        assertEquals("false", actualJson["klarForVisning"].asText())
+        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
+        assertEquals("false", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -128,8 +128,8 @@ class PostPersonSokIntegrationTest {
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
-        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asText()) }
-        assertEquals("false", actualJson["klarForVisning"].asText())
+        assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
+        assertEquals("false", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()

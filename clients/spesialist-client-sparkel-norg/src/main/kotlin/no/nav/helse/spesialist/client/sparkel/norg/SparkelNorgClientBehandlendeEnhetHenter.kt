@@ -58,13 +58,13 @@ class SparkelNorgClientBehandlendeEnhetHenter(
                 val responseJson = objectMapper.readTree(responseBody)
                 Enhet(
                     enhetNr =
-                        responseJson["enhetNr"]?.asText()
+                        responseJson["enhetNr"]?.asString()
                             ?: responseError("Fant ikke feltet enhetNr i responsen fra sparkel-norg", responseBody),
                     navn =
-                        responseJson["navn"]?.asText()
+                        responseJson["navn"]?.asString()
                             ?: responseError("Fant ikke feltet navn i responsen fra sparkel-norg", responseBody),
                     type =
-                        responseJson["type"]?.asText()
+                        responseJson["type"]?.asString()
                             ?: responseError("Fant ikke feltet type i responsen fra sparkel-norg", responseBody),
                 )
             }
