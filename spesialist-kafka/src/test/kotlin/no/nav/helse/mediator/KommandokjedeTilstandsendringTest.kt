@@ -57,7 +57,7 @@ class KommandokjedeTilstandsendringTest {
         assertEquals(contextId, melding["commandContextId"].asUUID())
         assertEquals(hendelseId, melding["meldingId"].asUUID())
         assertEquals(navn, melding["command"].asText())
-        assertEquals(listOf(1, 2, 3), melding["sti"].map { it.asInt() })
+        assertEquals(listOf(1, 2, 3), melding["sti"].toList().map { it.asInt() })
     }
 
     @Test

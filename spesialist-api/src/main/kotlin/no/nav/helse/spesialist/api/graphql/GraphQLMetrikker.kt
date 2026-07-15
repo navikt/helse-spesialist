@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.plugins.calllogging.processingTimeMillis
 import io.ktor.server.request.receive
@@ -8,6 +7,7 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import tools.jackson.databind.JsonNode
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
 

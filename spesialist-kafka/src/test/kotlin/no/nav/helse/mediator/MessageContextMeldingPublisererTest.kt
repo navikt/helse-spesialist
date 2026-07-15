@@ -1,7 +1,5 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -33,6 +31,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.convertValue
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
@@ -160,7 +160,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(fødselsnummer, it["fødselsnummer"].asText())
             assertEquals(oppgaveId, it["oppgaveId"]?.longValue())
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
-            assertEquals(setOf("SØKNAD"), it["egenskaper"].map(JsonNode::asText).toSet())
+            assertEquals(setOf("SØKNAD"), it["egenskaper"].toList().map(JsonNode::asText).toSet())
             assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asText()))
             assertEquals(null, it["saksbehandler"])
             assertEquals(null, it["beslutter"])
@@ -222,7 +222,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(fødselsnummer, it["fødselsnummer"].asText())
             assertEquals(oppgaveId, it["oppgaveId"]?.longValue())
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
-            assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].map(JsonNode::asText).toSet())
+            assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].toList().map(JsonNode::asText).toSet())
             assertEquals(behandlingId.value, UUID.fromString(it["behandlingId"]?.asText()))
             assertEquals(saksbehandler.id.value, it["saksbehandler"]?.asUUID())
         }

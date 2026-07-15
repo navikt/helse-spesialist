@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import tools.jackson.core.type.TypeReference
+import tools.jackson.module.kotlin.jacksonTypeRef
 import java.time.Duration
 
 interface Cache {

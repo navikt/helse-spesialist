@@ -1050,7 +1050,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(automatiskBehandlet, løsning.path("automatiskBehandling").booleanValue())
         assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
         if (årsakerTilAvvist.isNotEmpty()) {
-            val begrunnelser = løsning["begrunnelser"].map { it.asText() }
+            val begrunnelser = løsning["begrunnelser"].toList().map { it.asText() }
             assertEquals(begrunnelser, begrunnelser.distinct())
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }

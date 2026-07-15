@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
@@ -15,6 +13,8 @@ import no.nav.helse.kafka.TransaksjonellRiver
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.Outbox
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 
 object TestRapidHelpers {
@@ -41,23 +41,36 @@ object TestRapidHelpers {
     fun TestRapid.RapidInspector.behov() =
         hendelser("behov")
             .filterNot { it.hasNonNull("@løsning") }
-            .flatMap { it.path("@behov").map(JsonNode::asText) }
+            .flatMap { it.path("@behov").toList().map(JsonNode::asText) }
 
     fun TestRapid.RapidInspector.behov(forårsaketAv: UUID) =
         hendelser("behov")
             .filter { it.path("@forårsaket_av").path("id").asText() == forårsaketAv.toString() }
             .filterNot { it.hasNonNull("@løsning") }
-            .flatMap { it.path("@behov").map(JsonNode::asText) }
+            .flatMap { it.path("@behov").toList().map(JsonNode::asText) }
 
     fun TestRapid.RapidInspector.behov(behov: String) =
         hendelser("behov")
             .filterNot { it.hasNonNull("@løsning") }
-            .filter { it.path("@behov").map(JsonNode::asText).contains(behov) }
+            .filter {
+                it
+                    .path("@behov")
+                    .toList()
+                    .map(JsonNode::asText)
+                    .contains(behov)
+            }
 
     fun TestRapid.RapidInspector.sisteBehov(vararg behov: String) =
         hendelser("behov")
             .last()
-            .takeIf { it.path("@behov").map(JsonNode::asText).containsAll(behov.toList()) && !it.hasNonNull("@løsning") }
+            .takeIf {
+                it
+                    .path("@behov")
+                    .toList()
+                    .map(JsonNode::asText)
+                    .containsAll(behov.toList()) &&
+                    !it.hasNonNull("@løsning")
+            }
 
     fun TestRapid.RapidInspector.løsninger() =
         hendelser("behov")
@@ -65,14 +78,24 @@ object TestRapidHelpers {
 
     fun TestRapid.RapidInspector.løsning(behov: String): JsonNode? =
         løsninger()
-            .findLast { it.path("@behov").map(JsonNode::asText).contains(behov) }
-            ?.path("@løsning")
+            .findLast {
+                it
+                    .path("@behov")
+                    .toList()
+                    .map(JsonNode::asText)
+                    .contains(behov)
+            }?.path("@løsning")
             ?.path(behov)
 
     fun TestRapid.RapidInspector.løsningOrNull(behov: String): JsonNode? =
         løsninger()
-            .lastOrNull { it.path("@behov").map(JsonNode::asText).contains(behov) }
-            ?.path("@løsning")
+            .lastOrNull {
+                it
+                    .path("@behov")
+                    .toList()
+                    .map(JsonNode::asText)
+                    .contains(behov)
+            }?.path("@løsning")
             ?.path(behov)
 
     fun TestRapid.RapidInspector.contextId(): UUID =

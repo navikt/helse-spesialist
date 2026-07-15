@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.sparkel.sykepengeperioder
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvi
 import no.nav.helse.spesialist.domain.Infotrygdperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
+import tools.jackson.core.type.TypeReference
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals

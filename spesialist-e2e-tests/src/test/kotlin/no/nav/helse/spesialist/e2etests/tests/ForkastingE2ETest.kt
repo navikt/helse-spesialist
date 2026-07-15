@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import com.github.navikt.tbd_libs.jackson.asLocalDateTime
+import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest

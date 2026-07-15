@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
@@ -10,6 +9,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class AdressebeskyttelseEndret(

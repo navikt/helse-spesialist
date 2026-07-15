@@ -1,7 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -12,6 +10,8 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
 import java.time.LocalDateTime
 import java.util.UUID
 

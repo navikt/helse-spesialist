@@ -1,20 +1,15 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 
 internal class TestmeldingfabrikkTest {
     private companion object {
-        private val objectMapper =
-            jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val objectMapper = jacksonObjectMapper()
 
         private val FNR = "${UUID.randomUUID()}"
         private val AKTØR = "${UUID.randomUUID()}"

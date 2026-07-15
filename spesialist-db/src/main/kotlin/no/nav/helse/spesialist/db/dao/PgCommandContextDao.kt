@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -14,6 +12,8 @@ import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand.FERDIG
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand.NY
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand.SUSPENDERT
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource

@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.rest.dokumenter
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.modell.melding.HentDokument
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class DokumentMediator(

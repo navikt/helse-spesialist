@@ -4,8 +4,6 @@ import com.expediagroup.graphql.client.Generated
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
@@ -15,6 +13,8 @@ import no.nav.helse.spleis.graphql.scalars.AnyToUUIDConverter
 import no.nav.helse.spleis.graphql.scalars.LocalDateTimeToAnyConverter
 import no.nav.helse.spleis.graphql.scalars.LocalDateToAnyConverter
 import no.nav.helse.spleis.graphql.scalars.UUIDToAnyConverter
+import tools.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.databind.annotation.JsonSerialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

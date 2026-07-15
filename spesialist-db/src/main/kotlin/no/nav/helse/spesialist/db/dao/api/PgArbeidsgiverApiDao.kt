@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao.ArbeidsgiverInntekterFraAOrdningen
@@ -10,6 +9,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import tools.jackson.module.kotlin.readValue
 import javax.sql.DataSource
 
 class PgArbeidsgiverApiDao internal constructor(

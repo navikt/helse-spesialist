@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.typer.Kjønn
+import tools.jackson.databind.JsonNode
 
 class HentPersoninfoV2BehovLøser(
     private val person: Person,
@@ -12,7 +12,7 @@ class HentPersoninfoV2BehovLøser(
     override fun løsning(behovJson: JsonNode): Any =
         if (behovJson.has("ident")) {
             // Enkeltpersonforetak: svar med array slik at FlerePersoninfoRiver håndterer det
-            behovJson["ident"].map { ident ->
+            behovJson["ident"].toList().map { ident ->
                 personinfoMap() + mapOf("ident" to ident.asText())
             }
         } else {

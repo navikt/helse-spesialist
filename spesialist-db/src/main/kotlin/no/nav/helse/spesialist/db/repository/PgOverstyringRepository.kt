@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.repository
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.spesialist.application.OverstyringRepository
@@ -23,6 +22,7 @@ import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinje
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtTidslinjedag
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
+import tools.jackson.module.kotlin.readValue
 
 class PgOverstyringRepository(
     session: Session,

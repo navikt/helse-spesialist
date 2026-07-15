@@ -2,10 +2,10 @@ package no.nav.helse.spleis.graphql.hentsnapshot
 
 import com.expediagroup.graphql.client.Generated
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import no.nav.helse.spleis.graphql.scalars.AnyToLocalDateConverter
 import no.nav.helse.spleis.graphql.scalars.LocalDateToAnyConverter
+import tools.jackson.databind.annotation.JsonDeserialize
+import tools.jackson.databind.annotation.JsonSerialize
 import java.time.LocalDate
 
 @Generated

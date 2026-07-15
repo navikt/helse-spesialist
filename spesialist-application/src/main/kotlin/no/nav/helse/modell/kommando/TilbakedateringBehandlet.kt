@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
@@ -20,6 +19,7 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -33,7 +33,7 @@ class TilbakedateringBehandlet(
         id = UUID.fromString(jsonNode["@id"].asText()),
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         perioder =
-            jsonNode["perioder"].map {
+            jsonNode["perioder"].toList().map {
                 Periode(
                     fom = it["fom"].asText().let(LocalDate::parse),
                     tom = it["tom"].asText().let(LocalDate::parse),

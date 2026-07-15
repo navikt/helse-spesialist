@@ -43,7 +43,7 @@ class TilbakedateringBehandletRiver(
                 id = packet["@id"].asUUID(),
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 perioder =
-                    packet["perioder"].map {
+                    packet["perioder"].toList().map {
                         Periode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
                     },
                 json = packet.toJson(),

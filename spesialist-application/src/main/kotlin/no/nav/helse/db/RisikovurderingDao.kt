@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.automatisering.sjekker.Risikovurdering
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 

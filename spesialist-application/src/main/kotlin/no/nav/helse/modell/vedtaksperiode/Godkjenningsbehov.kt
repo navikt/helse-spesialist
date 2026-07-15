@@ -1,8 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
@@ -20,6 +17,7 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asBigDecimal
 import no.nav.helse.mediator.asEnum
 import no.nav.helse.mediator.asLocalDate
+import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -57,6 +55,8 @@ import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.Periode
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -146,7 +146,7 @@ class Godkjenningsbehov(
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
                 spleisVedtaksperioder =
-                    godkjenning["perioderMedSammeSkjæringstidspunkt"].map { periode ->
+                    godkjenning["perioderMedSammeSkjæringstidspunkt"].toList().map { periode ->
                         periode.asSpleisVedtaksperiode(
                             skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
                         )
@@ -159,7 +159,7 @@ class Godkjenningsbehov(
                         ?.takeUnless { it.isNull }
                         ?.takeUnless { it.asText() == "null" } // Serialisert feil én gang, nå et evig kompatibilitetsbehov...
                         ?.asUUID(),
-                tags = godkjenning["tags"].map { it.asText() },
+                tags = godkjenning["tags"].toList().map { it.asText() },
                 periodeFom = godkjenning["periodeFom"].asLocalDate(),
                 periodeTom = godkjenning["periodeTom"].asLocalDate(),
                 periodetype = godkjenning["periodetype"].asEnum<Periodetype>(),
@@ -169,6 +169,7 @@ class Godkjenningsbehov(
                 inntektskilde = godkjenning["inntektskilde"].asEnum<Inntektskilde>(),
                 orgnummereMedRelevanteArbeidsforhold =
                     godkjenning["orgnummereMedRelevanteArbeidsforhold"]
+                        ?.toList()
                         ?.map(JsonNode::asText)
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
@@ -176,7 +177,7 @@ class Godkjenningsbehov(
                     godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
                 foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
                 arbeidssituasjon = if (godkjenning["arbeidssituasjon"].asText() == "JORDBRUKER") godkjenning["arbeidssituasjon"].asEnum<Arbeidssituasjon>() else null,
-                relevanteSøknader = godkjenning["relevanteSøknader"].map { it.asUUID() },
+                relevanteSøknader = godkjenning["relevanteSøknader"].toList().map { it.asUUID() },
                 utbetalingsdager =
                     godkjenning["utbetalingsdager"]
                         ?.takeUnless { it.isNull }
@@ -224,7 +225,7 @@ class Godkjenningsbehov(
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
                             seksG = this["6G"].asDouble(),
                             arbeidsgivere =
-                                this["arbeidsgivere"].map { arbeidsgiver ->
+                                this["arbeidsgivere"].toList().map { arbeidsgiver ->
                                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
                                         organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
                                         omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
@@ -241,7 +242,7 @@ class Godkjenningsbehov(
                             seksG = this["6G"].asDouble(),
                             sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
                             arbeidsgivere =
-                                this["arbeidsgivere"].map { arbeidsgiver ->
+                                this["arbeidsgivere"].toList().map { arbeidsgiver ->
                                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                         organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
                                         omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
@@ -261,7 +262,7 @@ class Godkjenningsbehov(
             Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
                 beregningsgrunnlag = this["beregningsgrunnlag"].asBigDecimal(),
                 pensjonsgivendeInntekter =
-                    this["pensjonsgivendeInntekter"].map { inntekt ->
+                    this["pensjonsgivendeInntekter"].toList().map { inntekt ->
                         Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig.PensjonsgivendeInntekt(
                             årstall = inntekt["årstall"].asInt(),
                             beløp = inntekt["beløp"].asBigDecimal(),

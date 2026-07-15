@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.YearMonth
 

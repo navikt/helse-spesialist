@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.krr
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import tools.jackson.core.type.TypeReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

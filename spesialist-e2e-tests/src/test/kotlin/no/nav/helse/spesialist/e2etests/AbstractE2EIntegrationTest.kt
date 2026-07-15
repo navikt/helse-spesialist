@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.sessionOf
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertNull
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -185,7 +185,7 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(automatiskBehandlet, løsning["automatiskBehandling"].booleanValue())
         assertNotNull(løsning["godkjenttidspunkt"].asLocalDateTime())
         if (årsakerTilAvvist.isNotEmpty()) {
-            val begrunnelser = løsning["begrunnelser"].map { it.asText() }
+            val begrunnelser = løsning["begrunnelser"].toList().map { it.asText() }
             assertEquals(begrunnelser, begrunnelser.distinct())
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }

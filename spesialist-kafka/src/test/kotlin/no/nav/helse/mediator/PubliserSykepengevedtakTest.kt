@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
@@ -16,6 +15,7 @@ import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.convertValue
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -105,7 +105,7 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
-        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(hendelser, event["hendelser"].toList().map { UUID.fromString(it.asText()) })
         assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
@@ -179,7 +179,7 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
-        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(hendelser, event["hendelser"].toList().map { UUID.fromString(it.asText()) })
         assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
@@ -267,7 +267,7 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
-        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(hendelser, event["hendelser"].toList().map { UUID.fromString(it.asText()) })
         assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
@@ -374,7 +374,7 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
-        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(hendelser, event["hendelser"].toList().map { UUID.fromString(it.asText()) })
         assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
@@ -503,7 +503,7 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(fom, event["fom"].asLocalDate())
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
-        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
+        assertEquals(hendelser, event["hendelser"].toList().map { UUID.fromString(it.asText()) })
         assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())

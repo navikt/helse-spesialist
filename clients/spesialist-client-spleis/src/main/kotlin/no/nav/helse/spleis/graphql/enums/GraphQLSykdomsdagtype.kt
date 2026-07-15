@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.graphql.enums
 
 import com.expediagroup.graphql.client.Generated
-import com.fasterxml.jackson.`annotation`.JsonEnumDefaultValue
-import com.fasterxml.jackson.`annotation`.JsonProperty
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @Generated
 public enum class GraphQLSykdomsdagtype {

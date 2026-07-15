@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.DokumentDao
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class InMemoryDokumentDao : DokumentDao {

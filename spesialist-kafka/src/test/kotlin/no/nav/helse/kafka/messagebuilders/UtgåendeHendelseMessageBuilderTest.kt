@@ -1,6 +1,5 @@
 package no.nav.helse.kafka.messagebuilders
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import io.github.optimumcode.json.schema.JsonSchema
 import io.github.optimumcode.json.schema.ValidationError
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.ObjectNode
 import java.io.InputStreamReader
 import java.math.BigDecimal
 import java.time.LocalDate

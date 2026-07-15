@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.client.krr
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.Cache
@@ -15,6 +13,8 @@ import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import org.apache.hc.core5.util.Timeout
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.Duration
 import java.util.UUID
 

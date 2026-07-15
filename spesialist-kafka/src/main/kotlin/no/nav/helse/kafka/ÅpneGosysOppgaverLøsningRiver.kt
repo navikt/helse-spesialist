@@ -50,7 +50,7 @@ class ÅpneGosysOppgaverLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = åpneGosysOppgaver,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 }

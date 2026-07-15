@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
-import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.mediator.asLocalDateTimeOrNull
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Dialog
@@ -62,7 +62,7 @@ class GetNotaterForVedtaksperiodeBehandlerIntegrationTest {
         assertEquals(notat.feilregistrert, body.first()["feilregistrert"].asBoolean())
         assertEquals(notat.feilregistrertTidspunkt, body.first()["feilregistrert_tidspunkt"].asLocalDateTimeOrNull())
         assertEquals(notat.type.name, body.first()["type"].asText())
-        val kommentarer = body.first()["kommentarer"].map { it["tekst"].asText() to it["saksbehandlerident"].asText() }
+        val kommentarer = body.first()["kommentarer"].toList().map { it["tekst"].asText() to it["saksbehandlerident"].asText() }
         assertEquals(1, kommentarer.size)
         assertEquals(kommentartekst, kommentarer.first().first)
         assertEquals(saksbehandler.ident.value, kommentarer.first().second)

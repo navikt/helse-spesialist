@@ -1,6 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -12,6 +11,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.hendelser.VarseldefinisjonMessage
 import no.nav.helse.spesialist.application.logg.loggInfo
+import tools.jackson.databind.JsonNode
 
 class VarseldefinisjonRiver(
     private val mediator: MeldingMediator,

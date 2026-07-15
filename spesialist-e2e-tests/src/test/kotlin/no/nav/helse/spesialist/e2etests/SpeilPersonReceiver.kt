@@ -1,9 +1,8 @@
 package no.nav.helse.spesialist.e2etests
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.asLocalDate
-import com.github.navikt.tbd_libs.jackson.asUUID
-import com.github.navikt.tbd_libs.jackson.isMissingOrNull
+import no.nav.helse.mediator.asLocalDate
+import no.nav.helse.mediator.asUUID
+import no.nav.helse.mediator.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
 import no.nav.helse.spesialist.api.rest.ApiKommentarRequest
 import no.nav.helse.spesialist.api.rest.ApiLovverksreferanse
@@ -21,6 +20,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
+import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -430,13 +430,13 @@ class SpeilPersonReceiver(
 
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {
         val egenskaper =
-            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].toList().map { it["egenskap"].asText() }
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toSet())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
     fun assertHarIkkeOppgaveegenskap(vararg egenskaperSomSkalMangle: String) {
         val egenskaper =
-            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
+            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["egenskaper"].toList().map { it["egenskap"].asText() }
         assertTrue(egenskaper.none { it in egenskaperSomSkalMangle.toSet() }) { "Forventet å ikke finne ${egenskaperSomSkalMangle.toSet()} i $egenskaper" }
     }
 
@@ -462,6 +462,7 @@ class SpeilPersonReceiver(
 
         assertTrue(
             vedtaksperiodeFraFetchPerson["varsler"]
+                .toList()
                 .map { it["vurdering"]["status"].asText() }
                 .sorted()
                 .all { it == status },
@@ -483,7 +484,7 @@ class SpeilPersonReceiver(
 
         assertEquals(
             expected.sorted(),
-            vedtaksperiodeFraFetchPerson["varsler"].map { it["kode"].asText() }.sorted(),
+            vedtaksperiodeFraFetchPerson["varsler"].toList().map { it["kode"].asText() }.sorted(),
         )
     }
 

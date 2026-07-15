@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.valkey
 
-import com.fasterxml.jackson.core.type.TypeReference
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.logg.loggWarn
+import tools.jackson.core.type.TypeReference
 import java.time.Duration
 
 class PassthroughCache : Cache {

@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 
 class PoisonPills(
     private val poisonPills: Map<String, Set<String>>,

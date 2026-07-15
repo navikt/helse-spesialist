@@ -1,10 +1,9 @@
 package no.nav.helse.spesialist.api.rest.dokumenter
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.asLocalDate
-import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
-import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
-import com.github.navikt.tbd_libs.jackson.isMissingOrNull
+import no.nav.helse.mediator.asLocalDate
+import no.nav.helse.mediator.asLocalDateOrNull
+import no.nav.helse.mediator.asLocalDateTimeOrNull
+import no.nav.helse.mediator.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiAvsenderSystem
 import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
@@ -24,6 +23,7 @@ import no.nav.helse.spesialist.api.rest.ApiSvar
 import no.nav.helse.spesialist.api.rest.ApiSvartype
 import no.nav.helse.spesialist.api.rest.ApiVisningskriterium
 import no.nav.helse.spesialist.application.logg.teamLogs
+import tools.jackson.databind.JsonNode
 
 fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
     ApiDokumentInntektsmelding(
@@ -40,14 +40,14 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
                 )
             },
         endringIRefusjoner =
-            getIfNotNull("endringIRefusjoner")?.map { endringIRefusjon ->
+            getIfNotNull("endringIRefusjoner")?.toList()?.map { endringIRefusjon ->
                 ApiEndringIRefusjon(
                     endringsdato = endringIRefusjon.getIfNotNull("endringsdato")?.asLocalDate(),
                     beloep = endringIRefusjon.getIfNotNull("beloep")?.asDouble(),
                 )
             },
         opphoerAvNaturalytelser =
-            getIfNotNull("opphoerAvNaturalytelser")?.map { opphørAvNaturalytelse ->
+            getIfNotNull("opphoerAvNaturalytelser")?.toList()?.map { opphørAvNaturalytelse ->
                 ApiOpphoerAvNaturalytelse(
                     naturalytelse =
                         opphørAvNaturalytelse
@@ -59,7 +59,7 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
                 )
             },
         gjenopptakelseNaturalytelser =
-            getIfNotNull("gjenopptakelseNaturalytelser")?.map { gjenopptakelseNaturalytelse ->
+            getIfNotNull("gjenopptakelseNaturalytelser")?.toList()?.map { gjenopptakelseNaturalytelse ->
                 ApiGjenopptakelseNaturalytelse(
                     naturalytelse =
                         gjenopptakelseNaturalytelse
@@ -71,14 +71,14 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
                 )
             },
         arbeidsgiverperioder =
-            getIfNotNull("arbeidsgiverperioder")?.map { arbeidsgiverperiode ->
+            getIfNotNull("arbeidsgiverperioder")?.toList()?.map { arbeidsgiverperiode ->
                 ApiIMPeriode(
                     fom = arbeidsgiverperiode.getIfNotNull("fom")?.asLocalDate(),
                     tom = arbeidsgiverperiode.getIfNotNull("tom")?.asLocalDate(),
                 )
             },
         ferieperioder =
-            getIfNotNull("ferieperioder")?.map { ferieperiode ->
+            getIfNotNull("ferieperioder")?.toList()?.map { ferieperiode ->
                 ApiIMPeriode(
                     fom = ferieperiode.getIfNotNull("fom")?.asLocalDate(),
                     tom = ferieperiode.getIfNotNull("tom")?.asLocalDate(),
@@ -90,11 +90,11 @@ fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
         innsenderFulltNavn = getIfNotNull("innsenderFulltNavn")?.asText(),
         innsenderTelefon = getIfNotNull("innsenderTelefon")?.asText(),
         inntektEndringAarsaker =
-            getIfNotNull("inntektEndringAarsaker")?.let { endringAarsaker ->
+            getIfNotNull("inntektEndringAarsaker")?.toList()?.let { endringAarsaker ->
                 endringAarsaker.map { endringAarsak ->
                     ApiInntektEndringAarsak(
                         endringAarsak.get("aarsak").asText(),
-                        endringAarsak.getIfNotNull("perioder")?.map { periode ->
+                        endringAarsak.getIfNotNull("perioder")?.toList()?.map { periode ->
                             ApiIMPeriode(
                                 fom = periode.getIfNotNull("fom")?.asLocalDate(),
                                 tom = periode.getIfNotNull("tom")?.asLocalDate(),
@@ -149,9 +149,9 @@ fun JsonNode.tilSøknad() =
         type = getIfNotNull("type")?.asText()?.tilSoknadstype(),
         arbeidGjenopptatt = getIfNotNull("arbeidGjenopptatt")?.asLocalDateOrNull(),
         sykmeldingSkrevet = getIfNotNull("sykmeldingSkrevet")?.asLocalDateTimeOrNull(),
-        egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.map { it.asLocalDate() },
-        soknadsperioder = getIfNotNull("soknadsperioder")?.map { it.tilSøknadsperioder() },
-        sporsmal = getIfNotNull("sporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises() },
+        egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.toList()?.map { it.asLocalDate() },
+        soknadsperioder = getIfNotNull("soknadsperioder")?.toList()?.map { it.tilSøknadsperioder() },
+        sporsmal = getIfNotNull("sporsmal")?.toList()?.map { it.tilSpørsmål() }?.filter { it.skalVises() },
         selvstendigNaringsdrivende =
             getIfNotNull("selvstendigNaringsdrivende")?.let {
                 tilSelvstendigNæringsdrivende(it, getIfNotNull("meldingTilNavDagerFraSykmelding"))
@@ -191,7 +191,7 @@ private fun tilSelvstendigNæringsdrivende(
     meldingTilNavDager: JsonNode?,
 ) = ApiSoknadSelvstendigNaringsdrivende(
     inntekt =
-        selvstendigNæringsdrivende.get("inntekt")["inntektsAar"].map { inntektsår ->
+        selvstendigNæringsdrivende.get("inntekt")["inntektsAar"].toList().map { inntektsår ->
             val pensjonsgivendeInntekt = inntektsår.get("pensjonsgivendeInntekt")
             ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
                 ar = inntektsår.get("aar").asText(),
@@ -203,17 +203,17 @@ private fun tilSelvstendigNæringsdrivende(
             )
         },
     meldingTilNavDager =
-        meldingTilNavDager?.map {
+        meldingTilNavDager?.toList()?.map {
             ApiDatoPeriode(it["fom"].asLocalDate(), it["tom"].asLocalDate())
         },
 )
 
 private fun JsonNode.tilSpørsmål(): ApiSporsmal {
-    val svar = getIfNotNull("svar")?.map { ApiSvar(it.getIfNotNull("verdi")?.asText()) }
+    val svar = getIfNotNull("svar")?.toList()?.map { ApiSvar(it.getIfNotNull("verdi")?.asText()) }
     val kriterieForVisningAvUndersporsmal =
         getIfNotNull("kriterieForVisningAvUndersporsmal")?.asText()?.tilVisningskriterium()
     val undersporsmal =
-        getIfNotNull("undersporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises(rotnivå = false) }
+        getIfNotNull("undersporsmal")?.toList()?.map { it.tilSpørsmål() }?.filter { it.skalVises(rotnivå = false) }
 
     return ApiSporsmal(
         tag = getIfNotNull("tag")?.asText(),

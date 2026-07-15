@@ -4,10 +4,6 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.GraphQLException
@@ -49,6 +45,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.convertValue
+import tools.jackson.module.kotlin.treeToValue
 import java.util.UUID
 import kotlin.test.assertContains
 
@@ -496,7 +496,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runPersonQuery()
 
         assertContains(
-            body["data"]["person"]["andreFodselsnummer"].map { it["fodselsnummer"].asText() },
+            body["data"]["person"]["andreFodselsnummer"].toList().map { it["fodselsnummer"].asText() },
             annetFødselsnummer,
         )
     }

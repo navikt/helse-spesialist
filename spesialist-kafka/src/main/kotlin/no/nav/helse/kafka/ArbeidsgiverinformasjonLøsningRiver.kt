@@ -41,7 +41,7 @@ class ArbeidsgiverinformasjonLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning =
                 Arbeidsgiverinformasjonløsning(
-                    løsning.map { arbeidsgiver ->
+                    løsning.toList().map { arbeidsgiver ->
                         Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
                             orgnummer = arbeidsgiver.path("orgnummer").asText(),
                             navn = arbeidsgiver.path("navn").asText(),
@@ -49,7 +49,7 @@ class ArbeidsgiverinformasjonLøsningRiver(
                     },
                 ),
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 }

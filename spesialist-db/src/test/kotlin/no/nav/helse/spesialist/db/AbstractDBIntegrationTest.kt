@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.db
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -62,6 +59,8 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.AfterEach
+import tools.jackson.databind.introspect.DefaultAccessorNamingStrategy
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
@@ -524,7 +523,16 @@ abstract class AbstractDBIntegrationTest {
             }
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
-        sessionContext.påVentRepository.lagre(lagPåVent(this.vedtaksperiodeId, saksbehandler.id, frist, dialog.id(), årsaker, tekst))
+        sessionContext.påVentRepository.lagre(
+            lagPåVent(
+                this.vedtaksperiodeId,
+                saksbehandler.id,
+                frist,
+                dialog.id(),
+                årsaker,
+                tekst,
+            ),
+        )
         return this
     }
 
@@ -597,9 +605,9 @@ abstract class AbstractDBIntegrationTest {
 
     protected companion object {
         internal val objectMapper =
-            jacksonObjectMapper()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .registerModule(JavaTimeModule())
+            jacksonMapperBuilder()
+                .accessorNaming(DefaultAccessorNamingStrategy.Provider().withFirstCharAcceptance(true, true))
+                .build()
     }
 }
 

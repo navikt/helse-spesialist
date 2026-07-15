@@ -65,7 +65,7 @@ class FullmaktLøsningRiver(
             behovId = packet["@id"].asUUID(),
             løsning = fullmaktløsning,
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
-            sti = packet["sti"].map { it.asInt() },
+            sti = packet["sti"].toList().map { it.asInt() },
         )
     }
 }

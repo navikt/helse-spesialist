@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
@@ -47,10 +47,10 @@ internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
                 listOf("Eierandel i selskap (0 prosent)"),
                 dto.kontrollertOk.map { it["beskrivelse"].asText() },
             )
-            assertEquals(listOf("REL"), dto.kontrollertOk.flatMap { it["kategori"].map(JsonNode::asText) })
+            assertEquals(listOf("REL"), dto.kontrollertOk.flatMap { it["kategori"].toList().map(JsonNode::asText) })
 
             assertEquals(listOf("Liten bedrift (2 ansatte)"), dto.funn.map { it["beskrivelse"].asText() })
-            assertEquals(emptyList<String>(), dto.funn.flatMap { it["kategori"].map(JsonNode::asText) })
+            assertEquals(emptyList<String>(), dto.funn.flatMap { it["kategori"].toList().map(JsonNode::asText) })
         }
     }
 

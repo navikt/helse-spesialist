@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.client.speed
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -13,6 +12,7 @@ import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvi
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import org.junit.jupiter.api.extension.RegisterExtension
+import tools.jackson.core.type.TypeReference
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals

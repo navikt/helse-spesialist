@@ -1,6 +1,5 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
@@ -22,6 +21,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class GosysOppgaveEndret(

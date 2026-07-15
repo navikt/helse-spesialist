@@ -18,7 +18,6 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.auth.SaksbehandlerPrincipal
 import no.nav.helse.spesialist.api.coMedMdcOgAttribute
 import no.nav.helse.spesialist.api.mdcMapAttribute
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.application.logg.MdcKey
@@ -27,6 +26,7 @@ import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.slf4j.MDC
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 class RestAdapter(
     private val sessionFactory: SessionFactory,
@@ -35,7 +35,11 @@ class RestAdapter(
     private val personPseudoIdProvider: PersonPseudoIdProvider,
     private val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
 ) {
-    private val problemObjectMapper = objectMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
+    private val problemObjectMapper =
+        jacksonMapperBuilder()
+            .changeDefaultPropertyInclusion { incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL) }
+            .changeDefaultPropertyInclusion { incl -> incl.withContentInclusion(JsonInclude.Include.NON_NULL) }
+            .build()
 
     suspend inline fun <RESOURCE, RESPONSE, ERROR : ApiErrorCode> behandle(
         resource: RESOURCE,

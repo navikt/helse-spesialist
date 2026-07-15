@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
@@ -9,6 +8,7 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.list
 import no.nav.helse.spesialist.db.objectMapper
+import tools.jackson.module.kotlin.readValue
 
 class PgSykefraværstilfelleDao internal constructor(
     private val session: Session,

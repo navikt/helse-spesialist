@@ -1,6 +1,5 @@
 package no.nav.helse.kafka.messagebuilders
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
@@ -12,6 +11,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -174,7 +174,7 @@ class BehovMessageBuilderTest {
         assertEquals(fødselsnummer, this.path("fødselsnummer").asText())
         assertEquals(commandContextId, this.path("contextId").asUUID())
         assertEquals(hendelseId, this.path("hendelseId").asUUID())
-        assertEquals(listOf(1, 2, 3), this.path("sti").map { it.asInt() })
+        assertEquals(listOf(1, 2, 3), this.path("sti").toList().map { it.asInt() })
     }
 
     private fun String.assertBehov(
@@ -183,7 +183,7 @@ class BehovMessageBuilderTest {
     ) {
         val jsonNode = objectMapper.readTree(this)
         jsonNode.assertStandardfelter()
-        assertEquals(listOf(behovtype), jsonNode.path("@behov").map { it.asText() })
+        assertEquals(listOf(behovtype), jsonNode.path("@behov").toList().map { it.asText() })
         assertEquals(objectMapper.valueToTree(payload), jsonNode.path(behovtype))
     }
 }
