@@ -263,13 +263,6 @@ class PgOppgaveRepository private constructor(
                 if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
                     append("LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid\n")
                 }
-                if (ikkeSendtTilBeslutterAvOid != null) {
-                    append(
-                        """
-                        LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
-                        """,
-                    )
-                }
                 append("WHERE o.status = 'AvventerSaksbehandler'\n")
                 minstEnAvEgenskapene.filter { it.isNotEmpty() }.forEachIndexed { index, minstEnAvEgenskapeneGruppe ->
                     // inkluder alle oppgaver som har minst en av de valgte oppgavetype
@@ -284,7 +277,15 @@ class PgOppgaveRepository private constructor(
                 }
                 if (ikkeSendtTilBeslutterAvOid != null) {
                     val parameterName = "ikkeSendtTilBeslutterAvOid"
-                    append("AND NOT ('BESLUTTER' = ANY(egenskaper) AND ttv.saksbehandler = :$parameterName)\n")
+                    append(
+                        """
+                            AND NOT ('BESLUTTER' = ANY(egenskaper) AND EXISTS (
+                            SELECT 1 FROM totrinnsvurdering ttv 
+                            WHERE ttv.person_ref = v.person_ref
+                            AND ttv.tilstand != 'GODKJENT'
+                            AND ttv.saksbehandler = :$parameterName))
+                        """,
+                    )
                     parameterMap[parameterName] = ikkeSendtTilBeslutterAvOid.value
                 }
                 if (erPåVent != null) {

@@ -1,16 +1,17 @@
 package no.nav.helse.spesialist.db.repository
 
-import java.time.LocalDate
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
+import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -29,9 +30,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     fun `filtrerer på minstEnAvEgenskapene - inkluderer oppgave med matchende egenskap`() {
         val oppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER))
 
-        val resultat = finnOppgaveProjeksjoner(
-            minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
+            )
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(oppgave.id.value, resultat.elementer.single().id)
@@ -41,9 +43,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     fun `filtrerer på minstEnAvEgenskapene - ekskluderer oppgave uten matchende egenskap`() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
 
-        val resultat = finnOppgaveProjeksjoner(
-            minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
+            )
 
         assertEquals(0, resultat.totaltAntall)
     }
@@ -52,9 +55,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     fun `filtrerer på minstEnAvEgenskapene - matcher minst én av flere egenskaper`() {
         val oppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.RETUR))
 
-        val resultat = finnOppgaveProjeksjoner(
-            minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER, Egenskap.RETUR)),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER, Egenskap.RETUR)),
+            )
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(oppgave.id.value, resultat.elementer.single().id)
@@ -62,17 +66,20 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `filtrerer på minstEnAvEgenskapene - flere grupper fungerer som AND`() {
-        val oppgaveMedBegge = nyOppgaveForNyPerson(
-            oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER, Egenskap.RETUR),
-        )
+        val oppgaveMedBegge =
+            nyOppgaveForNyPerson(
+                oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER, Egenskap.RETUR),
+            )
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER))
 
-        val resultat = finnOppgaveProjeksjoner(
-            minstEnAvEgenskapene = listOf(
-                setOf(Egenskap.HASTER),
-                setOf(Egenskap.RETUR),
-            ),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEnAvEgenskapene =
+                    listOf(
+                        setOf(Egenskap.HASTER),
+                        setOf(Egenskap.RETUR),
+                    ),
+            )
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(oppgaveMedBegge.id.value, resultat.elementer.single().id)
@@ -82,9 +89,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     fun `filtrerer på ingenAvEgenskapene - ekskluderer oppgave med ekskludert egenskap`() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.FORTROLIG_ADRESSE))
 
-        val resultat = finnOppgaveProjeksjoner(
-            ingenAvEgenskapene = setOf(Egenskap.FORTROLIG_ADRESSE),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                ingenAvEgenskapene = setOf(Egenskap.FORTROLIG_ADRESSE),
+            )
 
         assertEquals(0, resultat.totaltAntall)
     }
@@ -93,12 +101,28 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     fun `filtrerer på ingenAvEgenskapene - inkluderer oppgave uten ekskludert egenskap`() {
         val oppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
 
-        val resultat = finnOppgaveProjeksjoner(
-            ingenAvEgenskapene = setOf(Egenskap.FORTROLIG_ADRESSE),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                ingenAvEgenskapene = setOf(Egenskap.FORTROLIG_ADRESSE),
+            )
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `henter kun en oppgave selvom det er flere totrinnsvurderinger på personen`() {
+        val fnr = lagFødselsnummer()
+        val oppgave = nyOppgaveForNyPerson(fnr)
+        nyTotrinnsvurdering(fnr, oppgave)
+        nyTotrinnsvurdering(fnr, oppgave)
+
+        val resultat =
+            finnOppgaveProjeksjoner(
+                ikkeSendtTilBeslutterAvOid = lagSaksbehandler().id,
+            )
+
+        assertEquals(1, resultat.totaltAntall)
     }
 
     @Test
@@ -143,9 +167,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
     @Test
     fun `filtrerer på erPåVent = true - kun oppgaver på vent`() {
         val saksbehandler = lagSaksbehandler()
-        val påVentOppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT))
-            .tildelOgLagre(saksbehandler)
-            .leggPåVentOgLagre(saksbehandler)
+        val påVentOppgave =
+            nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT))
+                .tildelOgLagre(saksbehandler)
+                .leggPåVentOgLagre(saksbehandler)
         nyOppgaveForNyPerson()
 
         val resultat = finnOppgaveProjeksjoner(erPåVent = true)
@@ -177,15 +202,17 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         val arbeidsgiver = opprettArbeidsgiver()
         val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
         val behandling = opprettBehandling(vedtaksperiode)
-        val oppgave = opprettOppgave(vedtaksperiode, behandling, egenskaper = setOf(Egenskap.SØKNAD, Egenskap.BESLUTTER))
-            .tildelOgLagre(beslutter, brukerroller = setOf(Brukerrolle.Beslutter))
+        val oppgave =
+            opprettOppgave(vedtaksperiode, behandling, egenskaper = setOf(Egenskap.SØKNAD, Egenskap.BESLUTTER))
+                .tildelOgLagre(beslutter, brukerroller = setOf(Brukerrolle.Beslutter))
 
         nyTotrinnsvurdering(person.id.value, oppgave)
             .sendTilBeslutterOgLagre(saksbehandler)
 
-        val resultat = finnOppgaveProjeksjoner(
-            ikkeSendtTilBeslutterAvOid = saksbehandler.id,
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                ikkeSendtTilBeslutterAvOid = saksbehandler.id,
+            )
 
         assertEquals(0, resultat.totaltAntall)
     }
@@ -200,15 +227,17 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         val arbeidsgiver = opprettArbeidsgiver()
         val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
         val behandling = opprettBehandling(vedtaksperiode)
-        val oppgave = opprettOppgave(vedtaksperiode, behandling, egenskaper = setOf(Egenskap.SØKNAD, Egenskap.BESLUTTER))
-            .tildelOgLagre(beslutter, brukerroller = setOf(Brukerrolle.Beslutter))
+        val oppgave =
+            opprettOppgave(vedtaksperiode, behandling, egenskaper = setOf(Egenskap.SØKNAD, Egenskap.BESLUTTER))
+                .tildelOgLagre(beslutter, brukerroller = setOf(Brukerrolle.Beslutter))
 
         nyTotrinnsvurdering(person.id.value, oppgave)
             .sendTilBeslutterOgLagre(saksbehandler1)
 
-        val resultat = finnOppgaveProjeksjoner(
-            ikkeSendtTilBeslutterAvOid = saksbehandler2.id,
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                ikkeSendtTilBeslutterAvOid = saksbehandler2.id,
+            )
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(oppgave.id.value, resultat.elementer.single().id)
@@ -219,9 +248,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         val saksbehandler = lagSaksbehandler()
 
         // Oppgave som matcher alle kriterier
-        val matchendeOppgave = nyOppgaveForNyPerson(
-            oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER),
-        ).tildelOgLagre(saksbehandler)
+        val matchendeOppgave =
+            nyOppgaveForNyPerson(
+                oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER),
+            ).tildelOgLagre(saksbehandler)
 
         // Oppgave som ikke matcher (mangler HASTER)
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
@@ -230,10 +260,11 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         // Oppgave som ikke matcher (ikke tildelt)
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.HASTER))
 
-        val resultat = finnOppgaveProjeksjoner(
-            minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
-            erTildelt = true,
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
+                erTildelt = true,
+            )
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(matchendeOppgave.id.value, resultat.elementer.single().id)
@@ -241,9 +272,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `returnerer tom liste når ingen oppgaver matcher`() {
-        val resultat = finnOppgaveProjeksjoner(
-            minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
-        )
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEnAvEgenskapene = listOf(setOf(Egenskap.HASTER)),
+            )
 
         assertEquals(0, resultat.totaltAntall)
         assertEquals(emptyList(), resultat.elementer)
@@ -482,7 +514,10 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         assertEquals(oppgave.id.value, resultat.elementer.single().id)
     }
 
-    private fun settBehandlingOpprettet(behandling: Behandling, dato: LocalDate) {
+    private fun settBehandlingOpprettet(
+        behandling: Behandling,
+        dato: LocalDate,
+    ) {
         val tidspunkt = dato.atStartOfDay()
         dbQuery.update(
             "UPDATE behandling SET opprettet_tidspunkt = :tidspunkt WHERE unik_id = :id",
@@ -600,4 +635,3 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         assertEquals(0, resultat.totaltAntall)
     }
 }
-
