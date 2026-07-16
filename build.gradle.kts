@@ -41,6 +41,15 @@ allprojects {
         testImplementation(kotlin("test"))
 
         constraints {
+            // Rapids & Rivers drar transitivt inn sårbare versjoner på compileClasspath (runtime løftes
+            // allerede via konfliktløsning, men compile beholder de laveste ønskede versjonene):
+            //  - opentelemetry-api <= 1.61.0 (unbounded memory allocation i W3C Baggage-propagering).
+            //    Løftes til nyeste versjon (patchet).
+            //  - logback-core < 1.5.34 (deserialisering av utrygg data). Løftes til nyeste patchede versjon.
+            implementation("io.opentelemetry:opentelemetry-api:1.64.0")
+            implementation("ch.qos.logback:logback-core:1.5.38")
+            implementation("ch.qos.logback:logback-classic:1.5.38")
+
             // WireMock drar transitivt inn handlebars < 4.5.2 med FileTemplateLoader path traversal (GHSA-6xhv-cwmr-6f52).
             // Sårbarheten ligger i selve handlebars-kjernen, så vi løfter kun den til nyeste patchede versjon.
             // handlebars-helpers holdes uendret: WireMock 3.13.2 trenger NumberHelper som ble fjernet i helpers 4.5.x.
