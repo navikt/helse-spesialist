@@ -16,6 +16,10 @@ allprojects {
         configurations.named("testImplementation") {
             extendsFrom(configurations.named("testFixturesImplementation").get())
         }
+        dependencies {
+            "testFixturesImplementation"(platform("org.eclipse.jetty:jetty-bom:12.1.11"))
+            "testFixturesImplementation"(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.1.11"))
+        }
     }
 
     ktlint {
