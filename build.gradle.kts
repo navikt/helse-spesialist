@@ -16,10 +16,6 @@ allprojects {
         configurations.named("testImplementation") {
             extendsFrom(configurations.named("testFixturesImplementation").get())
         }
-        dependencies {
-            "testFixturesImplementation"(platform("org.eclipse.jetty:jetty-bom:12.1.11"))
-            "testFixturesImplementation"(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.1.11"))
-        }
     }
 
     ktlint {
@@ -37,12 +33,25 @@ allprojects {
         implementation(platform("io.prometheus:prometheus-metrics-bom:1.7.0"))
         implementation(platform("tools.jackson:jackson-bom:3.2.1"))
         implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
+        implementation(platform("org.eclipse.jetty:jetty-bom:12.1.11"))
+        implementation(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.1.11"))
 
         testImplementation(platform("org.junit:junit-bom:6.1.1"))
-        testImplementation(platform("org.eclipse.jetty:jetty-bom:12.1.11"))
-        testImplementation(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.1.11"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation(kotlin("test"))
+
+        constraints {
+            // WireMock drar transitivt inn handlebars < 4.5.2 med FileTemplateLoader path traversal (GHSA-6xhv-cwmr-6f52).
+            // Sårbarheten ligger i selve handlebars-kjernen, så vi løfter kun den til nyeste patchede versjon.
+            // handlebars-helpers holdes uendret: WireMock 3.13.2 trenger NumberHelper som ble fjernet i helpers 4.5.x.
+            implementation("com.github.jknack:handlebars:4.5.3")
+
+            // ktlint-pluginen drar inn logback-classic 1.3.14 -> logback-core med flere sårbarheter
+            // (deserialisering av utrygg data, SSRF, EL-injection, arbitrær kodeeksekvering).
+            // Løftes til nyeste patchede versjon på ktlint-konfigurasjonen.
+            add("ktlint", "ch.qos.logback:logback-classic:1.5.38")
+            add("ktlint", "ch.qos.logback:logback-core:1.5.38")
+        }
     }
 }
 
