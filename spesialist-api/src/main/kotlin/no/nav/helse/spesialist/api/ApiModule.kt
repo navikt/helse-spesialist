@@ -21,8 +21,6 @@ import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
-import no.nav.helse.spesialist.application.InngangsvilkårHenter
-import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersonPseudoIdProvider
@@ -42,8 +40,6 @@ class ApiModule(
     private val krrRegistrertStatusHenter: KrrRegistrertStatusHenter,
     private val behandlendeEnhetHenter: BehandlendeEnhetHenter,
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
-    private val inngangsvilkårHenter: InngangsvilkårHenter,
-    private val inngangsvilkårInnsender: InngangsvilkårInnsender,
     private val alleIdenterHenter: AlleIdenterHenter,
     private val personinfoHenter: PersoninfoHenter,
     private val infotrygdperiodeHenter: InfotrygdperiodeHenter,
@@ -122,8 +118,6 @@ class ApiModule(
             meldingPubliserer = meldingPubliserer,
             dokumentMediator = dokumentMediator,
             forsikringsvurderingHenter = forsikringsvurderingHenter,
-            inngangsvilkårHenter = inngangsvilkårHenter,
-            inngangsvilkårInnsender = inngangsvilkårInnsender,
             environmentToggles = environmentToggles,
             krrRegistrertStatusHenter = krrRegistrertStatusHenter,
             behandlendeEnhetHenter = behandlendeEnhetHenter,

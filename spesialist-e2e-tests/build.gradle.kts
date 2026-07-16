@@ -32,7 +32,6 @@ dependencies {
     testImplementation(testFixtures(project(":clients:spesialist-client-sp-forsikring")))
     testImplementation(testFixtures(project(":clients:spesialist-client-spleis")))
     testImplementation(testFixtures(project(":clients:spesialist-client-speed")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-spillkar")))
     testImplementation(testFixtures(project(":clients:spesialist-client-personpseudoid")))
     testImplementation(testFixtures(project(":clients:spesialist-client-tilgangsmaskinen")))
 }

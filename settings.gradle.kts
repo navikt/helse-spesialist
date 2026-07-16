@@ -9,7 +9,6 @@ include(
     ":clients:spesialist-client-sparkel-norg",
     ":clients:spesialist-client-sparkel-sykepengeperioder",
     ":clients:spesialist-client-speed",
-    ":clients:spesialist-client-spillkar",
     ":clients:spesialist-client-sp-forsikring",
     ":clients:spesialist-client-spleis",
     ":clients:spesialist-client-personpseudoid",

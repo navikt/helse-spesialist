@@ -56,16 +56,12 @@ import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostAnmodOmForkastingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
-import no.nav.helse.spesialist.api.rest.vurderinger.GetVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.rest.vurderinger.PostArbeidstidsvurderingBehandler
-import no.nav.helse.spesialist.api.rest.vurderinger.PostVurderteInngangsvilkårForPersonBehandler
 import no.nav.helse.spesialist.api.sse.sse
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
-import no.nav.helse.spesialist.application.InngangsvilkårHenter
-import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersonPseudoIdProvider
@@ -80,8 +76,6 @@ fun Routing.restRoutes(
     behandlendeEnhetHenter: BehandlendeEnhetHenter,
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
     infotrygdperiodeHenter: InfotrygdperiodeHenter,
-    inngangsvilkårHenter: InngangsvilkårHenter,
-    inngangsvilkårInnsender: InngangsvilkårInnsender,
     alleIdenterHenter: AlleIdenterHenter,
     personinfoHenter: PersoninfoHenter,
     sessionFactory: SessionFactory,
@@ -125,8 +119,6 @@ fun Routing.restRoutes(
             get(GetInntektsmeldingBehandler(dokumentMediator = dokumentMediator), restAdapter)
 
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
-            get(GetVurderteInngangsvilkårForPersonBehandler(inngangsvilkårHenter, alleIdenterHenter), restAdapter)
-            post(PostVurderteInngangsvilkårForPersonBehandler(inngangsvilkårInnsender), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)
             patch(PatchTilkommenInntektBehandler(), restAdapter)
 

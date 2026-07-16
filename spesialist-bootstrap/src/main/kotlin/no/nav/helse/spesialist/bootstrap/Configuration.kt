@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSykepengeperioderModule
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spforsikring.ClientSpForsikringModule
-import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.client.tilgangsmaskinen.ClientTilgangsmaskinenModule
 import no.nav.helse.spesialist.db.DBModule
@@ -26,7 +25,6 @@ data class Configuration(
     val clientSparkelNorg: ClientSparkelNorgModule.Configuration,
     val clientSparkelSykepengeperioder: ClientSparkelSykepengeperioderModule.Configuration,
     val clientSpeed: ClientSpeedModule.Configuration,
-    val clientSpillkar: ClientSpillkarModule.Configuration,
     val clientSpForsikring: ClientSpForsikringModule.Configuration,
     val clientSpleis: ClientSpleisModule.Configuration,
     val clientPersonPseudoId: ClientPersonPseudoIdModule.Configuration,

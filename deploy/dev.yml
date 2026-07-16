@@ -152,10 +152,6 @@ spec:
       value: "http://sp-forsikring"
     - name: SP_FORSIKRING_SCOPE
       value: "api://dev-gcp.tbd.sp-forsikring/.default"
-    - name: SPILLKAR_API_URL
-      value: "http://spillkar"
-    - name: SPILLKAR_SCOPE
-      value: "api://dev-gcp.tbd.spillkar/.default"
     - name: SPEED_API_URL
       value: "http://speed-api"
     - name: SPEED_SCOPE

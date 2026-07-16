@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.client.sparkel.norg.ClientSparkelNorgModule
 import no.nav.helse.spesialist.client.sparkel.sykepengeperioder.ClientSparkelSykepengeperioderModule
 import no.nav.helse.spesialist.client.speed.ClientSpeedModule
 import no.nav.helse.spesialist.client.spforsikring.ClientSpForsikringModule
-import no.nav.helse.spesialist.client.spillkar.ClientSpillkarModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.client.tilgangsmaskinen.ClientTilgangsmaskinenModule
 import no.nav.helse.spesialist.db.DBModule
@@ -69,11 +68,6 @@ fun main() {
                     ClientSpeedModule.Configuration(
                         apiUrl = env.getValue("SPEED_API_URL"),
                         scope = env.getValue("SPEED_SCOPE"),
-                    ),
-                clientSpillkar =
-                    ClientSpillkarModule.Configuration(
-                        apiUrl = env.getValue("SPILLKAR_API_URL"),
-                        scope = env.getValue("SPILLKAR_SCOPE"),
                     ),
                 clientSpForsikring =
                     ClientSpForsikringModule.Configuration(
@@ -212,12 +206,6 @@ class RapidApp {
                 cache = valkeyModule.cache,
             )
 
-        val clientSpillkarModule =
-            ClientSpillkarModule(
-                configuration = configuration.clientSpillkar,
-                accessTokenProvider = clientEntraIdModule.accessTokenProvider,
-            )
-
         val clientSpForsikringModule =
             ClientSpForsikringModule(
                 configuration = configuration.clientSpForsikring,
@@ -268,8 +256,6 @@ class RapidApp {
                 krrRegistrertStatusHenter = clientKrrModule.krrRegistrertStatusHenter,
                 behandlendeEnhetHenter = clientSparkelNorgModule.behandlendeEnhetHenter,
                 forsikringsvurderingHenter = clientSpForsikringModule.spForsikringClientForsikringsvurderingHenter,
-                inngangsvilkårHenter = clientSpillkarModule.inngangsvilkårHenter,
-                inngangsvilkårInnsender = clientSpillkarModule.inngangsvilkårInnsender,
                 alleIdenterHenter = clientSpeedModule.alleIdenterHenter,
                 tilgangsgrupperTilBrukerroller = configuration.tilgangsgrupperTilBrukerroller,
                 tilgangsgrupperTilTilganger = configuration.tilgangsgrupperTilTilganger,

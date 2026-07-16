@@ -34,8 +34,6 @@ import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
-import no.nav.helse.spesialist.application.InngangsvilkårHenter
-import no.nav.helse.spesialist.application.InngangsvilkårInnsender
 import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
 import no.nav.helse.spesialist.application.OpptegnelseListener
 import no.nav.helse.spesialist.application.PersoninfoHenter
@@ -88,8 +86,6 @@ class IntegrationTestFixture {
     val behandlendeEnhetHenterMock: BehandlendeEnhetHenter = mockk(relaxed = true)
     val personinfoHenterMock: PersoninfoHenter = mockk(relaxed = true)
     val forsikringsvurderingHenterMock: ForsikringsvurderingHenter = mockk(relaxed = true)
-    val inngangsvilkårHenterMock: InngangsvilkårHenter = mockk(relaxed = true)
-    val inngangsvilkårInnsenderMock: InngangsvilkårInnsender = mockk(relaxed = true)
     val alleIdenterHenterMock: AlleIdenterHenter = mockk(relaxed = true)
     val infotrygdperiodeHenterMock: InfotrygdperiodeHenter = mockk(relaxed = true)
 
@@ -120,8 +116,6 @@ class IntegrationTestFixture {
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
             behandlendeEnhetHenter = behandlendeEnhetHenterMock,
             forsikringsvurderingHenter = forsikringsvurderingHenterMock,
-            inngangsvilkårHenter = inngangsvilkårHenterMock,
-            inngangsvilkårInnsender = inngangsvilkårInnsenderMock,
             alleIdenterHenter = alleIdenterHenterMock,
             tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller,
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
