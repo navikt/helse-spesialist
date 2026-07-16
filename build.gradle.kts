@@ -19,6 +19,8 @@ allprojects {
     }
 
     dependencies {
+        implementation(platform("io.prometheus:prometheus-metrics-bom:1.7.0"))
+
         testImplementation(platform("org.junit:junit-bom:6.1.1"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation(kotlin("test"))
