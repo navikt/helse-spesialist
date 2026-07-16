@@ -9,6 +9,15 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
+    plugins.withId("java-test-fixtures") {
+        configurations.named("testFixturesImplementation") {
+            extendsFrom(configurations.named("implementation").get())
+        }
+        configurations.named("testImplementation") {
+            extendsFrom(configurations.named("testFixturesImplementation").get())
+        }
+    }
+
     ktlint {
         ignoreFailures.set(true)
         // Hvis du gjør endringer i disse filterne må du slette alle "build"/"out"-mappene og deretter
