@@ -3,7 +3,6 @@ kotlin = "2.4.0"
 flyway = "12.10.0"
 openApiGenerator = "7.23.0"
 graphqlKotlin = "10.1.2"
-jackson = "3.2.1"
 kotlinx-coroutines = "1.11.0"
 ktor = "3.5.1"
 rapidsAndRivers = "2026071513121784113927"
@@ -25,7 +24,7 @@ graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-ser
 
 hikari = "com.zaxxer:HikariCP:7.1.0"
 
-jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 
 kotliquery = "com.github.seratch:kotliquery:1.9.1"
 
