@@ -20,6 +20,7 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-domain")))
     testImplementation(libs.bundles.ktor.server.test)
     testImplementation(libs.bundles.ktor.client)
+    testImplementation(libs.mockk)
 
     testImplementation(libs.mockOauth2Server)
 
