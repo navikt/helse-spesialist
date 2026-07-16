@@ -19,6 +19,7 @@ allprojects {
     }
 
     dependencies {
+        implementation(platform("io.netty:netty-bom:4.2.16.Final"))
         implementation(platform("io.prometheus:prometheus-metrics-bom:1.7.0"))
         implementation(platform("tools.jackson:jackson-bom:3.2.1"))
         implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
