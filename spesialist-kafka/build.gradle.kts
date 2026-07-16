@@ -18,6 +18,6 @@ dependencies {
     testFixturesImplementation(testFixtures(project(":spesialist-domain")))
     testFixturesImplementation(libs.rapidsAndRiversTest)
     testFixturesImplementation(libs.rapidsAndRivers)
-    testFixturesImplementation(libs.jackson.kotlin)
+    testFixturesImplementation(libs.bundles.jackson)
     testFixturesImplementation(libs.testcontainers.kafka)
 }
