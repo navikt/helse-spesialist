@@ -65,4 +65,5 @@ jobs:
           team: tbd
           tag: ${{ inputs.ref }}
           dockerfile: ${{ inputs.dockerfile }}
+          docker_context: '.'
           image_suffix: ${{ inputs.image_suffix }}
