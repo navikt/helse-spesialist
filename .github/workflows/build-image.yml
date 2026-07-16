@@ -8,8 +8,8 @@ on:
         type: string
         default: ${{ github.sha }}
         required: false
-      gradle_command:
-        description: 'gradle build command'
+      module:
+        description: 'gradle module to build the distribution for'
         type: string
         required: true
       dockerfile:
@@ -51,7 +51,12 @@ jobs:
         uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
 
       - name: Gradle build
-        run: ./gradlew ${{ inputs.gradle_command }}
+        run: ./gradlew build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gradle installDist
+        run: ./gradlew :${{ inputs.module }}:installDist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

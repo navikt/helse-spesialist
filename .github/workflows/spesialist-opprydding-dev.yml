@@ -27,7 +27,7 @@ jobs:
   build:
     uses: ./.github/workflows/build-image.yml
     with:
-      gradle_command: :spesialist-opprydding-dev:installDist
+      module: spesialist-opprydding-dev
       dockerfile: Dockerfile-opprydding-dev
       image_suffix: opprydding-dev
     secrets: inherit

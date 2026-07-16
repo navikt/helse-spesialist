@@ -22,7 +22,7 @@ jobs:
   build:
     uses: ./.github/workflows/build-image.yml
     with:
-      gradle_command: :spesialist-db-migrations:installDist
+      module: spesialist-db-migrations
       dockerfile: Dockerfile-db-migrations
       image_suffix: db-migrations
     secrets: inherit
