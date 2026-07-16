@@ -25,6 +25,7 @@ dependencies {
     testImplementation(libs.mockOauth2Server)
 
     testFixturesImplementation(libs.graphqlKotlin.server.ktor)
+    testFixturesImplementation(platform("io.ktor:ktor-bom:3.5.1"))
     testFixturesImplementation(libs.bundles.ktor.server)
     testFixturesImplementation(libs.mockOauth2Server)
     testFixturesImplementation(libs.tbdLibs.populasjonstilgangskontroll.api)
