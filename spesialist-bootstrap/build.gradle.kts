@@ -1,3 +1,12 @@
+plugins {
+    id("application")
+}
+
+application {
+    mainClass.set("no.nav.helse.spesialist.bootstrap.RapidAppKt")
+    applicationName = "app"
+}
+
 dependencies {
     api(project(":spesialist-api"))
     api(project(":clients:spesialist-client-entra-id"))
@@ -35,34 +44,4 @@ dependencies {
 
 tasks.withType<AbstractTestTask>().configureEach {
     failOnNoDiscoveredTests = false
-}
-
-tasks {
-    val copyDeps =
-        register<Sync>("copyDeps") {
-            description = "Kopierer runtime-avhengigheter til deps-mappa"
-            from(configurations.runtimeClasspath)
-            exclude("spesialist-*")
-            into(layout.buildDirectory.dir("deps"))
-        }
-    val copyLibs =
-        register<Sync>("copyLibs") {
-            description = "Kopierer appens egne jar-filer til libs-mappa"
-            from(configurations.runtimeClasspath)
-            include("spesialist-*")
-            into(layout.buildDirectory.dir("libs"))
-        }
-
-    named<Jar>("jar") {
-        dependsOn(copyDeps, copyLibs)
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = "no.nav.helse.spesialist.bootstrap.RapidAppKt"
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
-        }
-    }
 }
