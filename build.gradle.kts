@@ -36,6 +36,7 @@ allprojects {
 
         testImplementation(platform("org.junit:junit-bom:6.1.1"))
         testImplementation(platform("org.eclipse.jetty:jetty-bom:12.1.11"))
+        testImplementation(platform("org.eclipse.jetty.ee10:jetty-ee10-bom:12.1.11"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation(kotlin("test"))
     }
