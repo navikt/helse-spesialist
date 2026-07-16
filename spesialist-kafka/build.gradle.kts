@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.caffeine)
 
     testImplementation(libs.rapidsAndRiversTest)
+    testImplementation(libs.mockk)
     testImplementation("io.github.optimumcode:json-schema-validator:0.5.5")
     testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-kafka")))

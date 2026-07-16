@@ -16,6 +16,7 @@ dependencies {
     implementation(libs.opentelemetry.instrumentation.annotations)
 
     testImplementation(testFixtures(project(":spesialist-domain")))
+    testImplementation(libs.mockk)
 
     testFixturesImplementation(testFixtures(project(":spesialist-domain")))
     testFixturesImplementation(kotlin("test"))

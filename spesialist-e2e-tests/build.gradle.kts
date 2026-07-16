@@ -16,6 +16,7 @@ dependencies {
     testImplementation(libs.apache.httpclient5.fluent)
 
     testImplementation(libs.bundles.jackson)
+    testImplementation(libs.mockk)
     testImplementation(libs.mockOauth2Server)
     testImplementation(libs.wiremock)
 
