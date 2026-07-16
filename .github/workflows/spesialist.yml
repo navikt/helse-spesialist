@@ -38,7 +38,7 @@ jobs:
     build:
         uses: ./.github/workflows/build-image.yml
         with:
-            gradle_command: '--rerun-tasks clean :spesialist-bootstrap:build :spesialist-bootstrap:installDist'
+            gradle_command: 'clean build :spesialist-bootstrap:installDist'
             dockerfile: Dockerfile
             image_suffix: ''
         secrets: inherit
