@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.4.0"
-flyway = "12.10.0"
+flyway = "12.11.0"
 openApiGenerator = "7.23.0"
 graphqlKotlin = "10.1.2"
 kotlinx-coroutines = "1.11.0"
