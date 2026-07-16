@@ -35,6 +35,7 @@ allprojects {
         implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.1"))
 
         testImplementation(platform("org.junit:junit-bom:6.1.1"))
+        testImplementation(platform("org.eclipse.jetty:jetty-bom:12.1.11"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         testImplementation(kotlin("test"))
     }
