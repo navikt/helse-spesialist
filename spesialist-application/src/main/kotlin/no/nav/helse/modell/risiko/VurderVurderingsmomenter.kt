@@ -7,7 +7,9 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
+import no.nav.helse.modell.melding.StpPeriodeTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -27,6 +29,7 @@ internal class VurderVurderingsmomenter(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
+    private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -79,6 +82,16 @@ internal class VurderVurderingsmomenter(
                         },
                     periode = periode,
                     skjæringstidspunkt = sykefraværstilfelle.skjæringstidspunkt,
+                    perioderMedSammeSkjæringstidspunkt =
+                        spleisVedtaksperioder.map {
+                            StpPeriodeTilRisk(
+                                fom = it.fom,
+                                tom = it.tom,
+                                organisasjonsnummer = it.yrkesaktivitet?.organisasjonsnummer,
+                                yrkesaktivitetstype = it.yrkesaktivitet?.yrkesaktivitetstype,
+                                vedtaksperiodeId = it.vedtaksperiodeId,
+                            )
+                        },
                 ),
             )
             return false

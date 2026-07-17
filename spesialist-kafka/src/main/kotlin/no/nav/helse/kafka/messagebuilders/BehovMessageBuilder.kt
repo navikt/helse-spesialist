@@ -113,6 +113,7 @@ private fun Behov.Risikovurdering.detaljer(): Map<String, Any?> =
         "inntekt" to inntekt,
         "periode" to periode,
         "skjæringstidspunkt" to skjæringstidspunkt,
+        "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
     )
 
 private fun Behov.ÅpneOppgaver.detaljer(): Map<String, Any> = mapOf("ikkeEldreEnn" to this.ikkeEldreEnn)

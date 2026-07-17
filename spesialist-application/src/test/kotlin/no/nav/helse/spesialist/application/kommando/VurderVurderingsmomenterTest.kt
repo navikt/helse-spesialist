@@ -11,7 +11,9 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
+import no.nav.helse.modell.melding.StpPeriodeTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -212,6 +214,41 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                 seksG = 6 * 118620.0,
                 sykepengegrunnlag = BigDecimal("123456.7"),
             ),
+        spleisVedtaksperioder =
+            listOf(
+                SpleisVedtaksperiode(
+                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                    spleisBehandlingId = UUID.randomUUID(),
+                    fom = legacyBehandling.periode.fom,
+                    tom = legacyBehandling.periode.tom,
+                    skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+                    yrkesaktivitet =
+                        SpleisVedtaksperiode.Yrkesaktivitet(
+                            organisasjonsnummer = testperson.orgnummer,
+                            yrkesaktivitetstype = "ARBEIDSTAKER",
+                        ),
+                ),
+                SpleisVedtaksperiode(
+                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                    spleisBehandlingId = UUID.randomUUID(),
+                    fom = legacyBehandling.periode.fom,
+                    tom = legacyBehandling.periode.tom,
+                    skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+                    yrkesaktivitet = null,
+                ),
+                SpleisVedtaksperiode(
+                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                    spleisBehandlingId = UUID.randomUUID(),
+                    fom = legacyBehandling.periode.fom,
+                    tom = legacyBehandling.periode.tom,
+                    skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+                    yrkesaktivitet =
+                        SpleisVedtaksperiode.Yrkesaktivitet(
+                            organisasjonsnummer = null,
+                            yrkesaktivitetstype = "SELVSTENDIG",
+                        ),
+                ),
+            ),
     )
 
     private fun risikovurdering(kunRefusjon: Boolean) =
@@ -224,6 +261,30 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
             inntekt = inntekt(),
             periode = legacyBehandling.periode,
             skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+            perioderMedSammeSkjæringstidspunkt =
+                listOf(
+                    StpPeriodeTilRisk(
+                        vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                        fom = legacyBehandling.periode.fom,
+                        tom = legacyBehandling.periode.tom,
+                        organisasjonsnummer = testperson.orgnummer,
+                        yrkesaktivitetstype = "ARBEIDSTAKER",
+                    ),
+                    StpPeriodeTilRisk(
+                        vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                        fom = legacyBehandling.periode.fom,
+                        tom = legacyBehandling.periode.tom,
+                        organisasjonsnummer = null,
+                        yrkesaktivitetstype = null,
+                    ),
+                    StpPeriodeTilRisk(
+                        vedtaksperiodeId = testperson.vedtaksperiodeId1,
+                        fom = legacyBehandling.periode.fom,
+                        tom = legacyBehandling.periode.tom,
+                        organisasjonsnummer = null,
+                        yrkesaktivitetstype = "SELVSTENDIG",
+                    ),
+                ),
         )
 
     private fun inntekt() =

@@ -59,10 +59,19 @@ sealed interface Behov : UtgåendeMelding {
         val inntekt: InntektTilRisk?,
         val periode: Periode,
         val skjæringstidspunkt: LocalDate,
+        val perioderMedSammeSkjæringstidspunkt: List<StpPeriodeTilRisk>,
     ) : Behov
 }
 
 data class InntektTilRisk(
     val omregnetÅrsinntekt: Double,
     val inntektskilde: String,
+)
+
+data class StpPeriodeTilRisk(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vedtaksperiodeId: UUID,
+    val yrkesaktivitetstype: String?,
+    val organisasjonsnummer: String?,
 )

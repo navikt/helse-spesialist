@@ -193,6 +193,13 @@ class Godkjenningsbehov(
                 fom = this["fom"].asLocalDate(),
                 tom = this["tom"].asLocalDate(),
                 skjæringstidspunkt = skjæringstidspunkt,
+                yrkesaktivitet =
+                    this["yrkesaktivitet"]?.let { ya ->
+                        SpleisVedtaksperiode.Yrkesaktivitet(
+                            yrkesaktivitetstype = ya["yrkesaktivitetstype"].asString(),
+                            organisasjonsnummer = ya["organisasjonsnummer"]?.asString(),
+                        )
+                    },
             )
 
         private fun JsonNode.asSykepengegrunnlagsfakta(yrkesaktivitetstype: Yrkesaktivitetstype): Sykepengegrunnlagsfakta =
@@ -457,6 +464,7 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
+                spleisVedtaksperioder = godkjenningsbehovData.spleisVedtaksperioder,
             ),
             VurderAutomatiskAvvisning(
                 personDao = personDao,

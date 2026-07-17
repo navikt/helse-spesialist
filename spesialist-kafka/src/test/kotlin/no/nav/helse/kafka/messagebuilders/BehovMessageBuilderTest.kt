@@ -3,6 +3,7 @@ package no.nav.helse.kafka.messagebuilders
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
+import no.nav.helse.modell.melding.StpPeriodeTilRisk
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.domain.Periode
@@ -73,6 +74,7 @@ class BehovMessageBuilderTest {
     @Test
     fun `Risikovurdering-behov`() {
         val vedtaksperiodeId = UUID.randomUUID()
+        val annenVedtaksperiodeId = UUID.randomUUID()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val behov =
             Behov
@@ -89,6 +91,16 @@ class BehovMessageBuilderTest {
                         ),
                     periode = Periode(fom = LocalDate.of(2026, 7, 1), tom = LocalDate.of(2026, 7, 31)),
                     skjæringstidspunkt = LocalDate.of(2026, 7, 1),
+                    perioderMedSammeSkjæringstidspunkt =
+                        listOf(
+                            StpPeriodeTilRisk(
+                                fom = LocalDate.of(2026, 7, 5),
+                                tom = LocalDate.of(2026, 7, 25),
+                                vedtaksperiodeId = annenVedtaksperiodeId,
+                                organisasjonsnummer = "NOEANNET",
+                                yrkesaktivitetstype = "en yrkesaktivitetstype",
+                            ),
+                        ),
                 ).somJson()
         behov.assertBehov(
             "Risikovurdering",
@@ -108,6 +120,16 @@ class BehovMessageBuilderTest {
                         "tom" to LocalDate.of(2026, 7, 31),
                     ),
                 "skjæringstidspunkt" to LocalDate.of(2026, 7, 1),
+                "perioderMedSammeSkjæringstidspunkt" to
+                    listOf(
+                        mapOf(
+                            "vedtaksperiodeId" to annenVedtaksperiodeId,
+                            "fom" to LocalDate.of(2026, 7, 5),
+                            "tom" to LocalDate.of(2026, 7, 25),
+                            "organisasjonsnummer" to "NOEANNET",
+                            "yrkesaktivitetstype" to "en yrkesaktivitetstype",
+                        ),
+                    ),
             ),
         )
     }
