@@ -7,7 +7,6 @@ metadata:
     team: tbd
     db_policy_user: spesialistbruker
 spec:
-  image: {{image}}
   resources:
     limits:
       memory: 1024Mi
