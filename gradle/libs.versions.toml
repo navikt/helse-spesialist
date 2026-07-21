@@ -1,7 +1,6 @@
 [versions]
 kotlin = "2.4.0"
 flyway = "12.11.0"
-openApiGenerator = "7.23.0"
 graphqlKotlin = "10.1.2"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026071513121784113927"
@@ -137,8 +136,6 @@ smiley4-ktor-openapi-tools = [
 ]
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-openapi-generator = { id = "org.openapi.generator", version.ref = "openApiGenerator" }
 sas-deployable = { id = "no.nav.helse.sas.sas-deployable", version.ref = "sasGradlePlugins" }
 sas-multimodule-root = { id = "no.nav.helse.sas.sas-multimodule-root", version.ref = "sasGradlePlugins" }
