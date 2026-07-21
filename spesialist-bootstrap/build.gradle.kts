@@ -1,9 +1,10 @@
 plugins {
-    id("no.nav.helse.sas.sas-deployable")
+    id("application")
 }
 
-sasDeployable {
-    mainClass = "no.nav.helse.spesialist.bootstrap.RapidAppKt"
+application {
+    mainClass.set("no.nav.helse.spesialist.bootstrap.RapidAppKt")
+    applicationName = "app"
 }
 
 dependencies {

@@ -1,10 +1,10 @@
 plugins {
-    id("no.nav.helse.sas.sas-deployable")
+    id("application")
 }
 
-sasDeployable {
-    mainClass = "no.nav.helse.opprydding.AppKt"
-    imageName = "${rootProject.name}-opprydding-dev"
+application {
+    mainClass.set("no.nav.helse.opprydding.AppKt")
+    applicationName = "app"
 }
 
 dependencies {

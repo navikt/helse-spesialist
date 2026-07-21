@@ -1,0 +1,72 @@
+name: Spesialist
+
+on:
+    push:
+        paths-ignore:
+            - 'Dockerfile-db-migrations'
+            - 'Dockerfile-opprydding-dev'
+            - 'spesialist-db-migrations/**'
+            - 'spesialist-opprydding-dev/**'
+            - '.github/workflows/alerts.yml'
+            - '.github/workflows/codeql.yml'
+            - '.github/workflows/dependabot-auto-merge.yaml'
+            - '.github/workflows/dependency-submission.yml'
+            - '.github/workflows/pr.yml'
+            - '.github/workflows/spesialist-db-migrations.yml'
+            - '.github/workflows/spesialist-opprydding-dev.yml'
+            - 'deploy/dev-db-migrations.yml'
+            - 'deploy/dev-opprydding.yml'
+            - 'deploy/prod-db-migrations.yml'
+            - 'deploy/alerts/**'
+        branches:
+            - main
+            - 'dev-**'
+    schedule:
+      - cron: '0 4 * * 3'
+        timezone: 'Europe/Oslo'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    id-token: write
+    packages: read
+
+jobs:
+    build:
+        uses: ./.github/workflows/build-image.yml
+        with:
+            module: spesialist-bootstrap
+            dockerfile: Dockerfile
+            image_suffix: ''
+        secrets: inherit
+
+    deployDev:
+        name: Deploy to dev
+        needs: [build]
+        runs-on: ubuntu-latest
+        if: ${{github.ref_name == 'main' || startsWith(github.ref_name, 'dev-')}}
+        steps:
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: nais/deploy/actions/deploy@2d18f050f07b6a007864c6a57070ed915d571beb # v2
+              env:
+                  CLUSTER: dev-gcp
+                  RESOURCE: deploy/dev.yml,deploy/dev-db-policy.yml
+                  IMAGE: ${{ needs.build.outputs.image }}
+                  VARS: deploy/entra-id-vars.yml
+
+    deployProd:
+        name: Deploy to prod
+        needs: [build]
+        runs-on: ubuntu-latest
+        if: ${{ github.ref_name == 'main' }}
+        steps:
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: nais/deploy/actions/deploy@2d18f050f07b6a007864c6a57070ed915d571beb # v2
+              env:
+                  CLUSTER: prod-gcp
+                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml
+                  IMAGE: ${{ needs.build.outputs.image }}
+                  VARS: deploy/entra-id-vars.yml

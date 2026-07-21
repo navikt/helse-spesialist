@@ -6,6 +6,7 @@ metadata:
   labels:
     team: tbd
 spec:
+  image: {{image}}
   port: 8080
   ingresses:
     - https://spesialist.intern.dev.nav.no
