@@ -1,5 +1,5 @@
 plugins {
-    id("sas-deployable")
+    id("no.nav.helse.sas.sas-deployable")
 }
 
 sasDeployable {

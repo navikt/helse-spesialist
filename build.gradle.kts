@@ -1,5 +1,6 @@
 plugins {
-    id("sas-multimodule-root")
+    alias(libs.plugins.sas.multimodule.root)
+    alias(libs.plugins.sas.deployable) apply false
 }
 
 allprojects {
