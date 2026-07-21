@@ -17,6 +17,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high # Fail if introducing high or critical vulnerabilities
+
       - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           distribution: temurin
