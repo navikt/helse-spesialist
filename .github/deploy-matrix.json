@@ -3,10 +3,12 @@
     {
       "module": "spesialist-bootstrap",
       "dev": {
-        "resource": "deploy/dev.yml, deploy/dev-db-policy.yml"
+        "resource": "deploy/dev.yml, deploy/dev-db-policy.yml",
+        "vars": "deploy/entra-id-vars.yml"
       },
       "prod": {
-        "resource": "deploy/prod.yml, deploy/prod-db-policy.yml"
+        "resource": "deploy/prod.yml, deploy/prod-db-policy.yml",
+        "vars": "deploy/entra-id-vars.yml"
       }
     },
     {
