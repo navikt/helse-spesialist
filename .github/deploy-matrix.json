@@ -19,7 +19,7 @@
       }
     },
     {
-      "module": "opprydding-dev",
+      "module": "spesialist-opprydding-dev",
       "dev": {
         "resource": "deploy/dev-opprydding.yml"
       },
