@@ -1,0 +1,31 @@
+{
+  "include": [
+    {
+      "module": "spesialist-bootstrap",
+      "dev": {
+        "resource": "deploy/dev.yml, deploy/dev-db-policy.yml"
+      },
+      "prod": {
+        "resource": "deploy/prod.yml, deploy/prod-db-policy.yml"
+      }
+    },
+    {
+      "module": "spesialist-db-migrations",
+      "dev": {
+        "resource": "deploy/dev-db-migrations.yml"
+      },
+      "prod": {
+        "resource": "deploy/prod-db-migrations.yml"
+      }
+    },
+    {
+      "module": "opprydding-dev",
+      "dev": {
+        "resource": "deploy/dev-opprydding.yml"
+      },
+      "prod": {
+        "disabled": true
+      }
+    }
+  ]
+}

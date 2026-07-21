@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -66,7 +66,7 @@ allprojects {
 
 subprojects {
     kotlin {
-        jvmToolchain(21)
+        jvmToolchain(25)
     }
     tasks {
         // Ikke skriv ut feilformatert kode under bygging
