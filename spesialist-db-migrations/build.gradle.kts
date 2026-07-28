@@ -1,10 +1,10 @@
 plugins {
-    id("application")
+    id("no.nav.helse.sas.sas-deployable")
 }
 
-application {
-    mainClass.set("no.nav.helse.spesialist.db.migrations.AppKt")
-    applicationName = "app"
+sasDeployable {
+    mainClass = "no.nav.helse.spesialist.db.migrations.AppKt"
+    imageName = "${rootProject.name}-db-migrations"
 }
 
 dependencies {
