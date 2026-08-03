@@ -1,4 +1,5 @@
 plugins {
+    id("no.nav.helse.sas.sas-kotlin")
     alias(libs.plugins.kotlin.serialization)
 }
 
