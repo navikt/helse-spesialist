@@ -386,19 +386,42 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning") {
-        callGraphQL(
+    fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning"): JsonNode {
+        val response =
+            callGraphQL(
             "SendTilGodkjenningV2",
             mapOf(
                 "oppgavereferanse" to getOppgaveId(),
                 "vedtakBegrunnelse" to begrunnelse,
             ),
-        ).also {
-            if (it["data"].isMissingOrNull()) {
-                error("Forventer at mutation ikke feiler, fikk: $it")
-            }
+        )
+        if (response["data"].isMissingOrNull()) {
+            error("Forventer at mutation ikke feiler, fikk: $response")
+        }
+        if (!response["data"]["sendTilGodkjenningV2"].asBoolean()) {
+            error("Forventer at sendTilGodkjenningV2 returnerer true, fikk: $response")
         }
         hentOppdatertPerson()
+        return response
+    }
+
+    fun saksbehandlerSenderIRetur(notatTekst: String = "Sendt i retur"): JsonNode {
+        val response =
+            callGraphQL(
+                "SendIRetur",
+                mapOf(
+                    "oppgavereferanse" to getOppgaveId(),
+                    "notatTekst" to notatTekst,
+                ),
+            )
+        if (response["data"].isMissingOrNull()) {
+            error("Forventer at mutation ikke feiler, fikk: $response")
+        }
+        if (!response["data"]["sendIRetur"].asBoolean()) {
+            error("Forventer at sendIRetur returnerer true, fikk: $response")
+        }
+        hentOppdatertPerson()
+        return response
     }
 
     fun assertPåVent(frist: LocalDate) {
