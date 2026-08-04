@@ -410,7 +410,7 @@ class SpeilPersonReceiver(
             relativeUrl = "api/oppgaver/${getOppgaveId()}/totrinnsvurdering/send-til-godkjenning",
             request =
                 mapOf(
-                    "vedtakBegrunnelse" to begrunnelse,
+                    "begrunnelse" to begrunnelse,
                 ),
         )
         hentOppdatertPerson()

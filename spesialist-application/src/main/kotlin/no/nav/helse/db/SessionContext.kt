@@ -69,6 +69,7 @@ interface SessionContext {
     val individuellBegrunnelseRepository: IndividuellBegrunnelseRepository
     val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao
     val vedtakRepository: VedtakRepository
+    val vedtakBegrunnelseDao: VedtakBegrunnelseDao
     val opptegnelseRepository: OpptegnelseRepository
     val personKlargjoresDao: PersonKlargjoresDao
     val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository

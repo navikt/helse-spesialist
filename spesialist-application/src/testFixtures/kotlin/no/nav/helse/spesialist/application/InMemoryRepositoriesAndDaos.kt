@@ -171,6 +171,7 @@ class InMemoryRepositoriesAndDaos {
                     åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                     midlertidigBehandlingVedtakFattetDao = midlertidigBehandlingVedtakFattetDao,
                     vedtakRepository = vedtakRepository,
+                    vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                     opptegnelseRepository = opptegnelseRepository,
                     personKlargjoresDao = personKlargjoresDao,
                     saksbehandlerStansRepository = saksbehandlerStansRepository,

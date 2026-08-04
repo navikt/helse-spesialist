@@ -1,10 +1,13 @@
 package no.nav.helse.spesialist.api.rest.totrinnsvurdering
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.db.VedtakBegrunnelseFraDatabase
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
+import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiSendTilGodkjenningRequest
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -28,10 +31,21 @@ class PostSendTilGodkjenningBehandler :
             oppgaveIkkeFunnet = { ApiPostSendTilGodkjenningErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostSendTilGodkjenningErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, _, _, person ->
+            val utfall =
+                kallKontekst.transaksjon.behandlingRepository.finn(oppgave.behandlingId)?.utfall()
+                    ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.BEHANDLING_IKKE_FUNNET)
+
             val totrinnsvurdering =
                 kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
                     ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.TOTRINNSVURDERING_IKKE_FUNNET)
             try {
+                håndterVedtakBegrunnelse(
+                    utfall = utfall,
+                    begrunnelse = request.begrunnelse,
+                    oppgaveId = oppgave.id.value,
+                    saksbehandlerOid = kallKontekst.saksbehandler.id.value,
+                    kallKontekst = kallKontekst,
+                )
                 val beslutter =
                     totrinnsvurdering.beslutter
                         ?.let(kallKontekst.transaksjon.saksbehandlerRepository::finn)
@@ -55,6 +69,40 @@ class PostSendTilGodkjenningBehandler :
             RestResponse.NoContent()
         }
 
+    private fun håndterVedtakBegrunnelse(
+        utfall: Utfall,
+        begrunnelse: String?,
+        oppgaveId: Long,
+        saksbehandlerOid: java.util.UUID,
+        kallKontekst: KallKontekst,
+    ) {
+        val oppdatertBegrunnelse =
+            VedtakBegrunnelseFraDatabase(
+                type = utfall.tilDatabaseType(),
+                tekst = begrunnelse.orEmpty(),
+            )
+        val eksisterendeBegrunnelse = kallKontekst.transaksjon.vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
+        val erEndret = eksisterendeBegrunnelse != oppdatertBegrunnelse
+        val erNy = eksisterendeBegrunnelse == null
+        if (!erNy && erEndret) {
+            kallKontekst.transaksjon.vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
+        }
+        if (erNy || erEndret) {
+            kallKontekst.transaksjon.vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
+                oppgaveId = oppgaveId,
+                vedtakBegrunnelse = oppdatertBegrunnelse,
+                saksbehandlerOid = saksbehandlerOid,
+            )
+        }
+    }
+
+    private fun Utfall.tilDatabaseType() =
+        when (this) {
+            Utfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            Utfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+            Utfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
+        }
+
     private fun Modellfeil.tilErrorCode(): ApiPostSendTilGodkjenningErrorCode =
         when (this) {
             is OppgaveAlleredeSendtBeslutter -> ApiPostSendTilGodkjenningErrorCode.OPPGAVE_ALLEREDE_SENDT_TIL_BESLUTTER
@@ -68,6 +116,7 @@ enum class ApiPostSendTilGodkjenningErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
+    BEHANDLING_IKKE_FUNNET("Behandling ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     TOTRINNSVURDERING_IKKE_FUNNET("Aktiv totrinnsvurdering mangler for oppgaven", HttpStatusCode.Conflict),
     OPPGAVE_ALLEREDE_SENDT_TIL_BESLUTTER("Oppgaven er allerede sendt til beslutter", HttpStatusCode.Conflict),

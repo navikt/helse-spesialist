@@ -5,6 +5,7 @@ import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.IndividuellBegrunnelseRepository
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
@@ -48,6 +49,7 @@ import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgSykefraværstilfelleDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgUtbetalingDao
+import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
 import no.nav.helse.spesialist.db.dao.PgVedtakDao
 import no.nav.helse.spesialist.db.dao.PgVergemålDao
 import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
@@ -123,6 +125,7 @@ class DBSessionContext(
     override val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao =
         PgMidlertidigBehandlingVedtakFattetDao(session)
     override val vedtakRepository: VedtakRepository = PgVedtakRepository(session)
+    override val vedtakBegrunnelseDao: VedtakBegrunnelseDao = PgVedtakBegrunnelseDao(session)
     override val opptegnelseRepository: OpptegnelseRepository = PgOpptegnelseRepository(session)
     override val personKlargjoresDao: PersonKlargjoresDao = PgPersonKlargjoresDao(session)
     override val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository = PgVenterPåKvitteringForOverstyringRepository(session)

@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.db.dao
 
+import kotliquery.Session
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
@@ -14,6 +16,7 @@ class PgVedtakBegrunnelseDao internal constructor(
     queryRunner: QueryRunner,
 ) : QueryRunner by queryRunner,
     VedtakBegrunnelseDao {
+    internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     private fun lagreBegrunnelse(

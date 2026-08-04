@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 
 class InMemorySessionContext(
@@ -48,6 +49,7 @@ class InMemorySessionContext(
     override val åpneGosysOppgaverDao: UnimplementedÅpneGosysOppgaverDao,
     override val midlertidigBehandlingVedtakFattetDao: InMemoryMidlertidigBehandlingVedtakFattetDao,
     override val vedtakRepository: InMemoryVedtakRepository,
+    override val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     override val opptegnelseRepository: InMemoryOpptegnelseRepository,
     override val personKlargjoresDao: InMemoryPersonKlargjoresDao,
     override val saksbehandlerStansRepository: SaksbehandlerStansRepository,
