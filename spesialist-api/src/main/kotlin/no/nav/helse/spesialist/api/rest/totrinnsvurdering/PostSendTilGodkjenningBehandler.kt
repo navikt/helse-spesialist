@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.OppgaverBase
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 
 class PostSendTilGodkjenningBehandler :
@@ -30,7 +31,13 @@ class PostSendTilGodkjenningBehandler :
             oppgaveId = OppgaveId(resource.parent.parent.oppgaveId),
             oppgaveIkkeFunnet = { ApiPostSendTilGodkjenningErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostSendTilGodkjenningErrorCode.MANGLER_TILGANG_TIL_PERSON },
-        ) { oppgave, _, _, person ->
+        ) { oppgave, behandling, _, person ->
+            val harAktiveVarsler =
+                kallKontekst.transaksjon.varselRepository.finnVarslerFor(behandling.id).any { it.status == Varsel.Status.AKTIV }
+            if (harAktiveVarsler) {
+                return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.MANGLER_VURDERING_AV_VARSLER)
+            }
+
             val utfall =
                 kallKontekst.transaksjon.behandlingRepository.finn(oppgave.behandlingId)?.utfall()
                     ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.BEHANDLING_IKKE_FUNNET)
@@ -118,6 +125,7 @@ enum class ApiPostSendTilGodkjenningErrorCode(
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
     BEHANDLING_IKKE_FUNNET("Behandling ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    MANGLER_VURDERING_AV_VARSLER("Det finnes aktive varsler som mangler vurdering", HttpStatusCode.Conflict),
     TOTRINNSVURDERING_IKKE_FUNNET("Aktiv totrinnsvurdering mangler for oppgaven", HttpStatusCode.Conflict),
     OPPGAVE_ALLEREDE_SENDT_TIL_BESLUTTER("Oppgaven er allerede sendt til beslutter", HttpStatusCode.Conflict),
     KREVER_TOTRINNSVURDERING_AV_ANNEN("Oppgaven krever totrinnsvurdering av annen saksbehandler", HttpStatusCode.Conflict),

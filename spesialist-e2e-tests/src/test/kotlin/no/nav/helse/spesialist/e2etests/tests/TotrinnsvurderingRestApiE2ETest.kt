@@ -7,6 +7,8 @@ import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
     @Test
@@ -114,5 +116,39 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asString())
             assertEquals(saksbehandlerIdent().value, vedtakBegrunnelse["saksbehandlerIdent"].asString())
         }
+    }
+
+    @Test
+    fun `send til godkjenning via REST feiler hvis varsler ikke er vurdert`() {
+        // Given:
+        val vedtaksperiode =
+            førsteVedtaksperiode().apply {
+                fom = 1 jan 2021
+                tom = 31 jan 2021
+            }
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        // When:
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken()
+            saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+                periode = (2 jan 2021) tilOgMed (31 jan 2021),
+                periodebeløp = BigDecimal("1111.11"),
+                ekskluderteUkedager = emptyList(),
+                notatTilBeslutter = "notat",
+            )
+            val feil =
+                assertFailsWith<AssertionError> {
+                    saksbehandlerSenderTilGodkjenningMedRest("Mangler varselvurdering")
+                }
+
+            // Then:
+            assertTrue(feil.message?.contains("status 409") == true)
+            hentOppdatertPerson()
+            assertHarIkkeOppgaveegenskap("BESLUTTER")
+        }
+        assertGjeldendeOppgavestatus("AvventerSaksbehandler", vedtaksperiode)
     }
 }
