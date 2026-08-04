@@ -405,6 +405,17 @@ class SpeilPersonReceiver(
         return response
     }
 
+    fun saksbehandlerSenderTilGodkjenningMedRest(begrunnelse: String = "Sender til godkjenning") {
+        callHttpPost(
+            relativeUrl = "api/oppgaver/${getOppgaveId()}/totrinnsvurdering/send-til-godkjenning",
+            request =
+                mapOf(
+                    "vedtakBegrunnelse" to begrunnelse,
+                ),
+        )
+        hentOppdatertPerson()
+    }
+
     fun saksbehandlerSenderIRetur(notatTekst: String = "Sendt i retur"): JsonNode {
         val response =
             callGraphQL(

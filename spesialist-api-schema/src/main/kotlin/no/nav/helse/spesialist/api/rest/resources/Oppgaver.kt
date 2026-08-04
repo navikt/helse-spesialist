@@ -44,6 +44,16 @@ class OppgaverBase {
         val parent: OppgaverBase = OppgaverBase(),
         val oppgaveId: Long,
     ) {
+        @Resource("totrinnsvurdering")
+        data class Totrinnsvurdering(
+            val parent: OppgaveId,
+        ) {
+            @Resource("send-til-godkjenning")
+            data class SendTilGodkjenning(
+                val parent: Totrinnsvurdering,
+            )
+        }
+
         @Resource("pa-vent")
         data class PåVent(
             val parent: OppgaveId,
