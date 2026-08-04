@@ -52,6 +52,11 @@ class OppgaverBase {
             data class SendTilGodkjenning(
                 val parent: Totrinnsvurdering,
             )
+
+            @Resource("send-i-retur")
+            data class SendIRetur(
+                val parent: Totrinnsvurdering,
+            )
         }
 
         @Resource("pa-vent")

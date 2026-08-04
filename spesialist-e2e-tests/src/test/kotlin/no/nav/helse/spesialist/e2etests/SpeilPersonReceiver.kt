@@ -416,6 +416,17 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
+    fun saksbehandlerSenderIReturMedRest(notatTekst: String = "Sendt i retur") {
+        callHttpPost(
+            relativeUrl = "api/oppgaver/${getOppgaveId()}/totrinnsvurdering/send-i-retur",
+            request =
+                mapOf(
+                    "notatTekst" to notatTekst,
+                ),
+        )
+        hentOppdatertPerson()
+    }
+
     fun saksbehandlerSenderIRetur(notatTekst: String = "Sendt i retur"): JsonNode {
         val response =
             callGraphQL(

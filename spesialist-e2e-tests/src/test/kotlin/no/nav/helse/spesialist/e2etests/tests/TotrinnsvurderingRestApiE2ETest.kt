@@ -36,4 +36,41 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
             assertHarIkkeOppgaveegenskap("RETUR")
         }
     }
+
+    @Test
+    fun `send i retur via REST gir oppgaven returegenskap`() {
+        // Given:
+        val vedtaksperiode =
+            førsteVedtaksperiode().apply {
+                fom = 1 jan 2021
+                tom = 31 jan 2021
+            }
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken()
+            saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+                periode = (2 jan 2021) tilOgMed (31 jan 2021),
+                periodebeløp = BigDecimal("1111.11"),
+                ekskluderteUkedager = emptyList(),
+                notatTilBeslutter = "notat",
+            )
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerSenderTilGodkjenningMedRest()
+        }
+
+        // When:
+        beslutterMedPersonISpeil {
+            saksbehandlerSenderIReturMedRest("Trenger ny vurdering")
+        }
+
+        // Then:
+        medPersonISpeil {
+            assertHarOppgaveegenskap("RETUR")
+            assertHarIkkeOppgaveegenskap("BESLUTTER")
+        }
+        assertGjeldendeOppgavestatus("AvventerSaksbehandler", vedtaksperiode)
+    }
 }

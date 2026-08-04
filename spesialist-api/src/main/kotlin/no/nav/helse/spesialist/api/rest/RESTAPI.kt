@@ -51,6 +51,7 @@ import no.nav.helse.spesialist.api.rest.saksbehandlere.GetBrukerBehandler
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.PatchTilkommenInntektBehandler
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.PostTilkomneInntekterBehandler
+import no.nav.helse.spesialist.api.rest.totrinnsvurdering.PostSendIReturBehandler
 import no.nav.helse.spesialist.api.rest.totrinnsvurdering.PostSendTilGodkjenningBehandler
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
@@ -107,6 +108,7 @@ fun Routing.restRoutes(
             put(PutPåVentBehandler(), restAdapter)
             delete(DeletePåVentBehandler(), restAdapter)
             post(PostSendTilGodkjenningBehandler(), restAdapter)
+            post(PostSendIReturBehandler(), restAdapter)
 
             put(PutTildelingBehandler(), restAdapter)
             delete(DeleteTildelingBehandler(), restAdapter)
