@@ -73,6 +73,18 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             assertHarOppgaveegenskap("RETUR")
             assertHarIkkeOppgaveegenskap("BESLUTTER")
+
+            val returHistorikkinnslag =
+                person["arbeidsgivere"]
+                    .flatMap { arbeidsgiver ->
+                        arbeidsgiver["behandlinger"].flatMap { behandling ->
+                            behandling["perioder"].flatMap { periode ->
+                                periode["historikkinnslag"].toList()
+                            }
+                        }
+                    }.single { it["type"].asString() == "TOTRINNSVURDERING_RETUR" }
+
+            assertEquals("Trenger ny vurdering", returHistorikkinnslag["notattekst"].asString())
         }
         assertGjeldendeOppgavestatus("AvventerSaksbehandler", vedtaksperiode)
     }
