@@ -38,16 +38,12 @@ class PostSendTilGodkjenningBehandler :
                 return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.MANGLER_VURDERING_AV_VARSLER)
             }
 
-            val utfall =
-                kallKontekst.transaksjon.behandlingRepository.finn(oppgave.behandlingId)?.utfall()
-                    ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.BEHANDLING_IKKE_FUNNET)
-
             val totrinnsvurdering =
                 kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
                     ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.TOTRINNSVURDERING_IKKE_FUNNET)
             try {
                 håndterVedtakBegrunnelse(
-                    utfall = utfall,
+                    utfall = behandling.utfall(),
                     begrunnelse = request.begrunnelse,
                     oppgaveId = oppgave.id.value,
                     saksbehandlerOid = kallKontekst.saksbehandler.id.value,
@@ -123,7 +119,6 @@ enum class ApiPostSendTilGodkjenningErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
-    BEHANDLING_IKKE_FUNNET("Behandling ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     MANGLER_VURDERING_AV_VARSLER("Det finnes aktive varsler som mangler vurdering", HttpStatusCode.Conflict),
     TOTRINNSVURDERING_IKKE_FUNNET("Aktiv totrinnsvurdering mangler for oppgaven", HttpStatusCode.Conflict),
