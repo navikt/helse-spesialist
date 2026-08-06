@@ -7,6 +7,7 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
+import no.nav.helse.spesialist.api.erKlientFrakoblingUnderSerialisering
 import no.nav.helse.spesialist.api.graphql.Modellfeil
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -28,8 +29,7 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
         }
     }
     exception<DatabindException> { call: ApplicationCall, cause: DatabindException ->
-        fun messageIs(msg: String) = (cause.message?.contains(msg, ignoreCase = true) == true)
-        if (messageIs("Broken pipe") || messageIs("Connection reset by peer")) {
+        if (cause.erKlientFrakoblingUnderSerialisering()) {
             loggWarn("Klienten koblet fra under serialisering av svar", cause)
             call.respond(HttpStatusCode(499, "Client Closed Request"))
         } else {

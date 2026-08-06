@@ -8,8 +8,11 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.helse.spesialist.api.erKlientFrakoblingUnderSerialisering
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.teamLogs
+import tools.jackson.databind.DatabindException
 import java.time.Duration
 
 fun Routing.graphQLRoute(graphQLPlugin: GraphQL) {
@@ -31,7 +34,15 @@ fun Routing.graphQLRoute(graphQLPlugin: GraphQL) {
 
                     val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
                     teamLogs.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
-                    call.respond<GraphQLServerResponse>(result)
+                    try {
+                        call.respond<GraphQLServerResponse>(result)
+                    } catch (cause: DatabindException) {
+                        if (cause.erKlientFrakoblingUnderSerialisering()) {
+                            loggWarn("Klienten koblet fra under serialisering av svar", cause)
+                        } else {
+                            throw cause
+                        }
+                    }
                 }
             }
         }
