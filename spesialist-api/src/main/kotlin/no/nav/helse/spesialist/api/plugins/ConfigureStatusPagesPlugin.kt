@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.graphql.Modellfeil
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
+import tools.jackson.databind.DatabindException
 import java.util.concurrent.CancellationException
 
 fun StatusPagesConfig.configureStatusPagesPlugin() {
@@ -24,6 +25,15 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
             loggInfo("SSE-tilkobling lukket")
         } else {
             loggWarn("Klienten koblet fra før svaret ble sendt", exception)
+        }
+    }
+    exception<DatabindException> { call: ApplicationCall, cause: DatabindException ->
+        fun messageIs(msg: String) = (cause.message?.contains(msg, ignoreCase = true) == true)
+        if (messageIs("Broken pipe") || messageIs("Connection reset by peer")) {
+            loggWarn("Klienten koblet fra under serialisering av svar", cause)
+            call.respond(HttpStatusCode(499, "Client Closed Request"))
+        } else {
+            onThrowable(call, cause)
         }
     }
     exception<Throwable> { call, cause ->
