@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest.totrinnsvurdering
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.Modellfeil
@@ -15,11 +16,10 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.OppgaverBase
-import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 
-class PostSendTilGodkjenningBehandler :
-    PostBehandler<OppgaverBase.OppgaveId.Totrinnsvurdering.SendTilGodkjenning, ApiSendTilGodkjenningRequest, Unit, ApiPostSendTilGodkjenningErrorCode> {
+class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Totrinnsvurdering.SendTilGodkjenning, ApiSendTilGodkjenningRequest, Unit, ApiPostSendTilGodkjenningErrorCode> {
     override val tag = Tags.OPPGAVER
 
     override fun behandle(
@@ -32,9 +32,13 @@ class PostSendTilGodkjenningBehandler :
             oppgaveIkkeFunnet = { ApiPostSendTilGodkjenningErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostSendTilGodkjenningErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, behandling, _, person ->
-            val harAktiveVarsler =
-                kallKontekst.transaksjon.varselRepository.finnVarslerFor(behandling.id).any { it.status == Varsel.Status.AKTIV }
-            if (harAktiveVarsler) {
+            val behandlingspakke =
+                kallKontekst.transaksjon.behandlingRepository.finnBehandlingspakke(behandling, person.id.value)
+            val harUvurderteVarsler =
+                kallKontekst.transaksjon.varselRepository
+                    .finnVarslerFor(behandlingspakke.map { it.id })
+                    .any { it.trengerVurdering() }
+            if (harUvurderteVarsler) {
                 return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.MANGLER_VURDERING_AV_VARSLER)
             }
 
@@ -112,6 +116,24 @@ class PostSendTilGodkjenningBehandler :
             is OppgaveKreverVurderingAvToSaksbehandlere -> ApiPostSendTilGodkjenningErrorCode.KREVER_TOTRINNSVURDERING_AV_ANNEN
             else -> ApiPostSendTilGodkjenningErrorCode.UVENTET_MODELLFEIL
         }
+
+    /**
+     * Alle behandlinger som hører til samme sykefraværstilfelle (dvs. samme skjæringstidspunkt) som [behandling],
+     * inkludert [behandling] selv. Brukes for å sikre at et uvurdert varsel på en tidligere behandling i samme
+     * tilfelle blokkerer innsending til godkjenning, på samme måte som ved fatting av vedtak (se
+     * PostVedtakBehandler).
+     */
+    private fun BehandlingRepository.finnBehandlingspakke(
+        behandling: Behandling,
+        fødselsnummer: String,
+    ): List<Behandling> =
+        finnAndreBehandlingerISykefraværstilfelle(
+            behandling = behandling,
+            fødselsnummer = fødselsnummer,
+        ).toList()
+            .sortedByDescending { it.tom }
+            .filter { it.fom <= behandling.tom }
+            .plus(behandling)
 }
 
 enum class ApiPostSendTilGodkjenningErrorCode(
