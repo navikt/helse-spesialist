@@ -3,9 +3,14 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.Sekvensnummer
+import org.junit.jupiter.api.parallel.Isolated
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// finnNyesteSekvensnummer() leser MAX(sekvensnummer) på tvers av hele opptegnelse-tabellen, mens
+// testene i denne modulen kjøres parallelt mot samme database (se junit-platform.properties).
+// Uten isolering kan opptegnelser fra andre tester bli talt med og gjøre testene flaky.
+@Isolated
 class PgOpptegnelseRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = PgOpptegnelseRepository(session)
     private val person = opprettPerson()
