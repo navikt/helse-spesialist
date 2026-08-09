@@ -61,8 +61,12 @@ class PgOpptegnelseListenerTest : AbstractDBIntegrationTest() {
             sendUntil(varsel) { sendNotify(personId) }
             assertTrue(varsel.isCompleted, "Abonnenten skulle ha mottatt varsel for sin egen person")
 
+            // sendUntil sender NOTIFY gjentatte ganger til første varsel er mottatt, så flere varsler
+            // for egen person kan fortsatt være underveis. Vent til telleren har roet seg før vi
+            // låser referanseverdien, ellers blir etterslepet feilaktig tolket som lekkasje.
+            val antallEtterEgenPerson = ventTilTellerErStabil(antallMottatt)
+
             // LISTEN er nå aktiv: varsel for en annen person skal filtreres bort.
-            val antallEtterEgenPerson = antallMottatt.get()
             repeat(3) { sendNotify(personId + 1) }
             delay(1_000.milliseconds)
             assertEquals(
@@ -168,6 +172,22 @@ class PgOpptegnelseListenerTest : AbstractDBIntegrationTest() {
             }
         }
     }
+
+    private suspend fun ventTilTellerErStabil(
+        teller: AtomicInteger,
+        stabilPeriodeMs: Long = 1_000,
+        timeoutMs: Long = 10_000,
+    ): Int =
+        withTimeout(timeoutMs.milliseconds) {
+            var forrige = teller.get()
+            while (true) {
+                delay(stabilPeriodeMs.milliseconds)
+                val nå = teller.get()
+                if (nå == forrige) break
+                forrige = nå
+            }
+            forrige
+        }
 
     private fun sendNotify(personId: Long) {
         dataSource.connection.use { connection ->
