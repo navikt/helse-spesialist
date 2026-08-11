@@ -111,6 +111,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                             identitetsnummer = lagIdentitetsnummer(),
                             harForsikring = false,
                             dekning = null,
+                            ekskluderteForsikringer = emptyList(),
+                            gjeldendeForsikring = null,
                         )
                 },
             environmentToggles =

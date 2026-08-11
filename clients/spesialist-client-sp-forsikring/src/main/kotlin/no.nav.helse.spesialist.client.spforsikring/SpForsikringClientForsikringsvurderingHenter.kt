@@ -2,7 +2,11 @@ package no.nav.helse.spesialist.client.spforsikring
 
 import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
+import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.modell.objectMapper
+import no.nav.helse.spesialist.application.Ekskluderingsårsak
+import no.nav.helse.spesialist.application.EkskludertForsikring
+import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.logg.loggError
@@ -46,6 +50,38 @@ class SpForsikringClientForsikringsvurderingHenter(
                                             Forsikringsvurdering.Dekning(
                                                 grad = dekning["grad"].asInt(),
                                                 fraDag = dekning["fraDag"].asInt(),
+                                            )
+                                        },
+                                    ekskluderteForsikringer =
+                                        responseJson["ekskluderteForsikringer"]?.takeUnless { it.isNull }?.toList().orEmpty().map { ekskludertForsikring ->
+                                            EkskludertForsikring(
+                                                virkningsdato = ekskludertForsikring["virkningsdato"].asLocalDate(),
+                                                opphørsdato =
+                                                    ekskludertForsikring["opphørsdato"]
+                                                        ?.takeUnless { it.isNull }
+                                                        ?.asLocalDate(),
+                                                dekningsgrad = ekskludertForsikring["dekningsgrad"].asInt(),
+                                                dekningIVentetid = ekskludertForsikring["dekningIVentetid"].asBoolean(),
+                                                ekskluderingsårsak =
+                                                    when (ekskludertForsikring["ekskluderingsårsak"].asString()) {
+                                                        "SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO" -> Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO
+                                                        "SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO" -> Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO
+                                                        "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT" -> Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT
+                                                        "ALDRI_BETALT" -> Ekskluderingsårsak.ALDRI_BETALT
+                                                        else -> throw IllegalArgumentException("Ukjent ekskluderingsårsak: ${ekskludertForsikring["ekskluderingsårsak"].asString()}")
+                                                    },
+                                            )
+                                        },
+                                    gjeldendeForsikring =
+                                        responseJson["gjeldendeForsikring"]?.takeUnless { it.isNull }?.let { gjeldendeForsikring ->
+                                            Forsikring(
+                                                virkningsdato = gjeldendeForsikring["virkningsdato"].asLocalDate(),
+                                                opphørsdato =
+                                                    gjeldendeForsikring["opphørsdato"]
+                                                        ?.takeUnless { it.isNull }
+                                                        ?.asLocalDate(),
+                                                dekningsgrad = gjeldendeForsikring["dekningsgrad"].asInt(),
+                                                dekningIVentetid = gjeldendeForsikring["dekningIVentetid"].asBoolean(),
                                             )
                                         },
                                 )

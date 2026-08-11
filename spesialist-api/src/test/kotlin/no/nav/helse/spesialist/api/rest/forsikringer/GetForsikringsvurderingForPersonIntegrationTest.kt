@@ -3,6 +3,9 @@ package no.nav.helse.spesialist.api.rest.forsikringer
 import io.ktor.http.HttpStatusCode
 import io.mockk.coEvery
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.Ekskluderingsårsak
+import no.nav.helse.spesialist.application.EkskludertForsikring
+import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -10,6 +13,7 @@ import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,6 +42,23 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                         grad = 100,
                         fraDag = 17,
                     ),
+                ekskluderteForsikringer =
+                    listOf(
+                        EkskludertForsikring(
+                            virkningsdato = LocalDate.of(2018, 1, 1),
+                            opphørsdato = LocalDate.of(2019, 12, 31),
+                            dekningsgrad = 80,
+                            dekningIVentetid = false,
+                            ekskluderingsårsak = Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT,
+                        ),
+                    ),
+                gjeldendeForsikring =
+                    Forsikring(
+                        virkningsdato = LocalDate.of(2020, 1, 1),
+                        opphørsdato = null,
+                        dekningsgrad = 100,
+                        dekningIVentetid = false,
+                    ),
             )
 
         // When:
@@ -56,6 +77,21 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                "forsikringInnhold" : {
                   "gjelderFraDag" : 17,
                   "dekningsgrad" : 100
+               },
+               "ekskluderteForsikringer" : [
+                  {
+                     "virkningsdato" : "2018-01-01",
+                     "opphørsdato" : "2019-12-31",
+                     "dekningsgrad" : 80,
+                     "dekningIVentetid" : false,
+                     "ekskluderingsårsak" : "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT"
+                  }
+               ],
+               "gjeldendeForsikring" : {
+                  "virkningsdato" : "2020-01-01",
+                  "opphørsdato" : null,
+                  "dekningsgrad" : 100,
+                  "dekningIVentetid" : false
                }
             }
             """.trimIndent(),
@@ -79,6 +115,8 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                 identitetsnummer = person.id,
                 harForsikring = false,
                 dekning = null,
+                ekskluderteForsikringer = emptyList(),
+                gjeldendeForsikring = null,
             )
 
         // When:
@@ -94,7 +132,9 @@ class GetForsikringsvurderingForPersonIntegrationTest {
             """
             {
               "eksisterer" : false,
-              "forsikringInnhold" : null
+              "forsikringInnhold" : null,
+              "ekskluderteForsikringer" : [],
+              "gjeldendeForsikring" : null
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -185,6 +225,14 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                     Forsikringsvurdering.Dekning(
                         grad = 100,
                         fraDag = 17,
+                    ),
+                ekskluderteForsikringer = emptyList(),
+                gjeldendeForsikring =
+                    Forsikring(
+                        virkningsdato = LocalDate.of(2020, 1, 1),
+                        opphørsdato = null,
+                        dekningsgrad = 100,
+                        dekningIVentetid = false,
                     ),
             )
 

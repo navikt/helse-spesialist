@@ -9,16 +9,20 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.stubbing.Scenario
+import no.nav.helse.spesialist.application.Ekskluderingsårsak
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SpForsikringClientForsikringsvurderingHenterTest {
     @Suppress("JUnitMalformedDeclaration")
@@ -43,7 +47,29 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                         {
                             "identitetsnummer": "${identitetsnummer.value}",
                             "harForsikring": true,
-                            "dekning": { "grad": 100, "fraDag": 17 }
+                            "dekning": { "grad": 100, "fraDag": 17 },
+                            "ekskluderteForsikringer": [
+                                {
+                                    "virkningsdato": "2018-01-01",
+                                    "opphørsdato": "2019-12-31",
+                                    "dekningsgrad": 80,
+                                    "dekningIVentetid": false,
+                                    "ekskluderingsårsak": "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT"
+                                },
+                                {
+                                    "virkningsdato": "2021-03-01",
+                                    "opphørsdato": null,
+                                    "dekningsgrad": 100,
+                                    "dekningIVentetid": true,
+                                    "ekskluderingsårsak": "SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO"
+                                }
+                            ],
+                            "gjeldendeForsikring": {
+                                "virkningsdato": "2020-01-01",
+                                "opphørsdato": null,
+                                "dekningsgrad": 100,
+                                "dekningIVentetid": false
+                            }
                         }
                         """.trimIndent(),
                     ),
@@ -54,14 +80,31 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         val actualForsikring = client.hent(forsikringsvurderingId = forsikringsvurderingId)
 
         // Then:
+        assertNotNull(actualForsikring)
+        assertEquals(identitetsnummer, actualForsikring.identitetsnummer)
+        assertTrue(actualForsikring.harForsikring)
+        assertEquals(Forsikringsvurdering.Dekning(grad = 100, fraDag = 17), actualForsikring.dekning)
+
+        val gjeldendeForsikring = assertNotNull(actualForsikring.gjeldendeForsikring)
+        assertEquals(LocalDate.of(2020, 1, 1), gjeldendeForsikring.virkningsdato)
+        assertNull(gjeldendeForsikring.opphørsdato)
+        assertEquals(100, gjeldendeForsikring.dekningsgrad)
+        assertFalse(gjeldendeForsikring.dekningIVentetid)
+
+        assertEquals(2, actualForsikring.ekskluderteForsikringer.size)
+        val (første, andre) = actualForsikring.ekskluderteForsikringer
+        assertEquals(LocalDate.of(2018, 1, 1), første.virkningsdato)
+        assertEquals(LocalDate.of(2019, 12, 31), første.opphørsdato)
+        assertEquals(80, første.dekningsgrad)
+        assertEquals(false, første.dekningIVentetid)
+        assertEquals(Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT, første.ekskluderingsårsak)
+        assertEquals(LocalDate.of(2021, 3, 1), andre.virkningsdato)
+        assertNull(andre.opphørsdato)
+        assertEquals(100, andre.dekningsgrad)
+        assertEquals(true, andre.dekningIVentetid)
         assertEquals(
-            expected =
-                Forsikringsvurdering(
-                    identitetsnummer = identitetsnummer,
-                    harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
-                ),
-            actual = actualForsikring,
+            Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO,
+            andre.ekskluderingsårsak,
         )
     }
 
@@ -77,7 +120,9 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                         {
                             "identitetsnummer": "${identitetsnummer.value}",
                             "harForsikring": false,
-                            "dekning": null
+                            "dekning": null,
+                            "ekskluderteForsikringer": [],
+                            "gjeldendeForsikring": null
                         }
                         """.trimIndent(),
                     ),
@@ -94,6 +139,8 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                     identitetsnummer = identitetsnummer,
                     harForsikring = false,
                     dekning = null,
+                    ekskluderteForsikringer = emptyList(),
+                    gjeldendeForsikring = null,
                 ),
             actual = actualForsikring,
         )
@@ -145,7 +192,14 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                         {
                             "identitetsnummer": "${identitetsnummer.value}",
                             "harForsikring": true,
-                            "dekning": { "grad": 100, "fraDag": 17 }
+                            "dekning": { "grad": 100, "fraDag": 17 },
+                            "ekskluderteForsikringer": [],
+                            "gjeldendeForsikring": {
+                                "virkningsdato": "2020-01-01",
+                                "opphørsdato": null,
+                                "dekningsgrad": 100,
+                                "dekningIVentetid": false
+                            }
                         }
                         """.trimIndent(),
                     ),
@@ -166,15 +220,12 @@ class SpForsikringClientForsikringsvurderingHenterTest {
 
         // Then:
         wireMock.verify(2, getRequestedFor(urlEqualTo("/forsikringsvurderinger/${forsikringsvurderingId.value}")))
-        assertEquals(
-            expected =
-                Forsikringsvurdering(
-                    identitetsnummer = identitetsnummer,
-                    harForsikring = true,
-                    dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
-                ),
-            actual = actualForsikring,
-        )
+        assertNotNull(actualForsikring)
+        assertEquals(identitetsnummer, actualForsikring.identitetsnummer)
+        assertTrue(actualForsikring.harForsikring)
+        assertEquals(Forsikringsvurdering.Dekning(grad = 100, fraDag = 17), actualForsikring.dekning)
+        assertEquals(emptyList(), actualForsikring.ekskluderteForsikringer)
+        assertEquals(LocalDate.of(2020, 1, 1), assertNotNull(actualForsikring.gjeldendeForsikring).virkningsdato)
     }
 
     private fun testMedForventningOmFeiletKall(

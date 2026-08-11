@@ -389,12 +389,12 @@ class SpeilPersonReceiver(
     fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning"): JsonNode {
         val response =
             callGraphQL(
-            "SendTilGodkjenningV2",
-            mapOf(
-                "oppgavereferanse" to getOppgaveId(),
-                "vedtakBegrunnelse" to begrunnelse,
-            ),
-        )
+                "SendTilGodkjenningV2",
+                mapOf(
+                    "oppgavereferanse" to getOppgaveId(),
+                    "vedtakBegrunnelse" to begrunnelse,
+                ),
+            )
         if (response["data"].isMissingOrNull()) {
             error("Forventer at mutation ikke feiler, fikk: $response")
         }

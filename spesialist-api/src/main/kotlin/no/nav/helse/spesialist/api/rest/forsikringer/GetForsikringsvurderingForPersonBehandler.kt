@@ -1,14 +1,20 @@
 package no.nav.helse.spesialist.api.rest.forsikringer
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.spesialist.api.rest.ApiEkskluderingsårsak
+import no.nav.helse.spesialist.api.rest.ApiEkskludertForsikring
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiForsikring
+import no.nav.helse.spesialist.api.rest.ApiForsikringsvurdering
 import no.nav.helse.spesialist.api.rest.ForsikringInnhold
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.Ekskluderingsårsak
+import no.nav.helse.spesialist.application.EkskludertForsikring
+import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -18,13 +24,13 @@ import java.util.UUID
 
 class GetForsikringsvurderingForPersonBehandler(
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
-) : GetBehandler<Personer.PersonPseudoId.Forsikringsvurderinger.ForsikringvurderingId, ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> {
+) : GetBehandler<Personer.PersonPseudoId.Forsikringsvurderinger.ForsikringvurderingId, ApiForsikringsvurdering, ApiGetForsikringsvurderingForPersonErrorCode> {
     override val tag = Tags.FORSIKRINGER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Forsikringsvurderinger.ForsikringvurderingId,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> =
+    ): RestResponse<ApiForsikringsvurdering, ApiGetForsikringsvurderingForPersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetForsikringsvurderingForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
@@ -36,7 +42,7 @@ class GetForsikringsvurderingForPersonBehandler(
     private fun behandleForPerson(
         person: Person,
         forsikringsvurderingId: UUID,
-    ): RestResponse<ApiForsikring, ApiGetForsikringsvurderingForPersonErrorCode> {
+    ): RestResponse<ApiForsikringsvurdering, ApiGetForsikringsvurderingForPersonErrorCode> {
         val forsikringsvurdering =
             runCatching {
                 forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
@@ -48,12 +54,35 @@ class GetForsikringsvurderingForPersonBehandler(
             return RestResponse.Error(ApiGetForsikringsvurderingForPersonErrorCode.FORSIKRINGSVURDERING_IKKE_FUNNET)
         }
 
-        return RestResponse.OK(forsikringsvurdering.tilApiForsikring())
+        return RestResponse.OK(forsikringsvurdering.tilApiForsikringsvurdering())
     }
 }
 
-private fun Forsikringsvurdering.tilApiForsikring(): ApiForsikring =
+fun EkskludertForsikring.tilApiEkskludertForsikring(): ApiEkskludertForsikring =
+    ApiEkskludertForsikring(
+        virkningsdato = virkningsdato,
+        opphørsdato = opphørsdato,
+        dekningsgrad = dekningsgrad,
+        dekningIVentetid = dekningIVentetid,
+        ekskluderingsårsak =
+            when (ekskluderingsårsak) {
+                Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO -> ApiEkskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO
+                Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO -> ApiEkskluderingsårsak.SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO
+                Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT -> ApiEkskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT
+                Ekskluderingsårsak.ALDRI_BETALT -> ApiEkskluderingsårsak.ALDRI_BETALT
+            },
+    )
+
+fun Forsikring.tilApiForsikring(): ApiForsikring =
     ApiForsikring(
+        virkningsdato = virkningsdato,
+        opphørsdato = opphørsdato,
+        dekningsgrad = dekningsgrad,
+        dekningIVentetid = dekningIVentetid,
+    )
+
+private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvurdering =
+    ApiForsikringsvurdering(
         eksisterer = harForsikring,
         forsikringInnhold =
             dekning?.let {
@@ -62,6 +91,8 @@ private fun Forsikringsvurdering.tilApiForsikring(): ApiForsikring =
                     gjelderFraDag = it.fraDag,
                 )
             },
+        ekskluderteForsikringer = ekskluderteForsikringer.map { it.tilApiEkskludertForsikring() },
+        gjeldendeForsikring = gjeldendeForsikring?.tilApiForsikring(),
     )
 
 enum class ApiGetForsikringsvurderingForPersonErrorCode(

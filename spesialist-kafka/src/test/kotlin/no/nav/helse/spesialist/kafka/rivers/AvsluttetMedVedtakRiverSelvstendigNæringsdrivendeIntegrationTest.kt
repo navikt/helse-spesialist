@@ -5,6 +5,7 @@ import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
@@ -26,6 +27,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -52,6 +54,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 identitetsnummer = person.id,
                 harForsikring = false,
                 dekning = null,
+                ekskluderteForsikringer = emptyList(),
+                gjeldendeForsikring = null,
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -143,6 +147,14 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 identitetsnummer = person.id,
                 harForsikring = true,
                 dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                ekskluderteForsikringer = emptyList(),
+                gjeldendeForsikring =
+                    Forsikring(
+                        virkningsdato = LocalDate.of(2018, 1, 1),
+                        opphørsdato = null,
+                        dekningsgrad = 100,
+                        dekningIVentetid = false,
+                    ),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -234,6 +246,8 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 identitetsnummer = person.id,
                 harForsikring = false,
                 dekning = null,
+                ekskluderteForsikringer = emptyList(),
+                gjeldendeForsikring = null,
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
