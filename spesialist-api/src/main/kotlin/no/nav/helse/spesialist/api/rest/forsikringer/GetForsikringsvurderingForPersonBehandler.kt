@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.Person
 import java.util.UUID
@@ -49,7 +50,8 @@ class GetForsikringsvurderingForPersonBehandler(
         val forsikringsvurdering =
             runCatching {
                 forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
-            }.getOrElse {
+            }.getOrElse { throwable ->
+                loggWarn("Feil ved videre kall", throwable)
                 return RestResponse.Error(ApiGetForsikringsvurderingForPersonErrorCode.FEIL_VED_VIDERE_KALL)
             }
 
