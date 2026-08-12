@@ -41,9 +41,10 @@ class SpForsikringClientForsikringsvurderingHenter(
                     .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
                     .execute()
                     .handleResponse { response ->
+                        val responseBody = EntityUtils.toString(response.entity)
+                        loggInfo("Mottok svar HTTP ${response.code}-svar fra sp-forsikring", "responseBody" to responseBody)
                         when (response.code) {
                             200 -> {
-                                val responseBody = EntityUtils.toString(response.entity)
                                 val responseJson = objectMapper.readTree(responseBody)
                                 Forsikringsvurdering(
                                     identitetsnummer = Identitetsnummer.fraString(responseJson["identitetsnummer"].asString()),
@@ -109,12 +110,10 @@ class SpForsikringClientForsikringsvurderingHenter(
                             }
 
                             in 500..599 -> {
-                                val responseBody = EntityUtils.toString(response.entity).orEmpty()
                                 throw RetryableException("Serverfeil fra forsikringstjeneste: ${response.code}, body=$responseBody")
                             }
 
                             else -> {
-                                val responseBody = EntityUtils.toString(response.entity).orEmpty()
                                 loggError("Feil ved henting av forsikring: status=${response.code}, body=$responseBody")
                                 throw RuntimeException("Feil fra forsikringstjeneste: ${response.code}")
                             }
