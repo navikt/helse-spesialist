@@ -9,7 +9,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.stubbing.Scenario
+import no.nav.helse.spesialist.application.Ekskluderingsbegrunnelse
 import no.nav.helse.spesialist.application.Ekskluderingsårsak
+import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
@@ -54,21 +56,55 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "opphørsdato": "2019-12-31",
                                     "dekningsgrad": 80,
                                     "dekningIVentetid": false,
-                                    "ekskluderingsårsak": "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT"
+                                    "navn": "80 % fra dag 1",
+                                    "folketrygdlovenreferanse": {
+                                        "kapittel": 8,
+                                        "paragrafIKapittel": 36,
+                                        "ledd": 1,
+                                        "bokstav": "a"
+                                    },
+                                    "ekskluderingsårsak": "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT",
+                                    "ekskluderingsbegrunnelse": {
+                                        "forklaring": "Forsikringen var opphørt på skjæringstidspunktet",
+                                        "folketrygdlovenreferanse": {
+                                            "kapittel": 8,
+                                            "paragrafIKapittel": 37,
+                                            "ledd": null,
+                                            "bokstav": null
+                                        }
+                                    }
                                 },
                                 {
                                     "virkningsdato": "2021-03-01",
                                     "opphørsdato": null,
                                     "dekningsgrad": 100,
                                     "dekningIVentetid": true,
-                                    "ekskluderingsårsak": "SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO"
+                                    "navn": "100 % fra dag 1",
+                                    "folketrygdlovenreferanse": {
+                                        "kapittel": 8,
+                                        "paragrafIKapittel": 36,
+                                        "ledd": 1,
+                                        "bokstav": "c"
+                                    },
+                                    "ekskluderingsårsak": "SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO",
+                                    "ekskluderingsbegrunnelse": {
+                                        "forklaring": "Forsikringen var ikke ennå gyldig på skjæringstidspunktet",
+                                        "folketrygdlovenreferanse": null
+                                    }
                                 }
                             ],
                             "gjeldendeForsikring": {
                                 "virkningsdato": "2020-01-01",
                                 "opphørsdato": null,
                                 "dekningsgrad": 100,
-                                "dekningIVentetid": false
+                                "dekningIVentetid": false,
+                                "navn": "100 % fra dag 17",
+                                "folketrygdlovenreferanse": {
+                                    "kapittel": 8,
+                                    "paragrafIKapittel": 36,
+                                    "ledd": 1,
+                                    "bokstav": "b"
+                                }
                             }
                         }
                         """.trimIndent(),
@@ -90,6 +126,11 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         assertNull(gjeldendeForsikring.opphørsdato)
         assertEquals(100, gjeldendeForsikring.dekningsgrad)
         assertFalse(gjeldendeForsikring.dekningIVentetid)
+        assertEquals("100 % fra dag 17", gjeldendeForsikring.navn)
+        assertEquals(
+            Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'b'),
+            gjeldendeForsikring.folketrygdlovenreferanse,
+        )
 
         assertEquals(2, actualForsikring.ekskluderteForsikringer.size)
         val (første, andre) = actualForsikring.ekskluderteForsikringer
@@ -98,6 +139,19 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         assertEquals(80, første.dekningsgrad)
         assertEquals(false, første.dekningIVentetid)
         assertEquals(Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT, første.ekskluderingsårsak)
+        assertEquals("80 % fra dag 1", første.navn)
+        assertEquals(
+            Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'a'),
+            første.folketrygdlovenreferanse,
+        )
+        assertEquals(
+            Ekskluderingsbegrunnelse(
+                forklaring = "Forsikringen var opphørt på skjæringstidspunktet",
+                folketrygdlovenreferanse =
+                    Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 37, ledd = null, bokstav = null),
+            ),
+            første.ekskluderingsbegrunnelse,
+        )
         assertEquals(LocalDate.of(2021, 3, 1), andre.virkningsdato)
         assertNull(andre.opphørsdato)
         assertEquals(100, andre.dekningsgrad)
@@ -105,6 +159,18 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         assertEquals(
             Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO,
             andre.ekskluderingsårsak,
+        )
+        assertEquals("100 % fra dag 1", andre.navn)
+        assertEquals(
+            Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'c'),
+            andre.folketrygdlovenreferanse,
+        )
+        assertEquals(
+            Ekskluderingsbegrunnelse(
+                forklaring = "Forsikringen var ikke ennå gyldig på skjæringstidspunktet",
+                folketrygdlovenreferanse = null,
+            ),
+            andre.ekskluderingsbegrunnelse,
         )
     }
 
@@ -198,7 +264,14 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                 "virkningsdato": "2020-01-01",
                                 "opphørsdato": null,
                                 "dekningsgrad": 100,
-                                "dekningIVentetid": false
+                                "dekningIVentetid": false,
+                                "navn": "100 % fra dag 17",
+                                "folketrygdlovenreferanse": {
+                                    "kapittel": 8,
+                                    "paragrafIKapittel": 36,
+                                    "ledd": 1,
+                                    "bokstav": "b"
+                                }
                             }
                         }
                         """.trimIndent(),

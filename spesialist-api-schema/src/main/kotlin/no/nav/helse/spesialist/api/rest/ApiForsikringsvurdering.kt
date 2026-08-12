@@ -22,7 +22,17 @@ sealed interface ApiForsikringBase {
     val opphørsdato: LocalDate?
     val dekningsgrad: Int
     val dekningIVentetid: Boolean
+    val navn: String
+    val folketrygdlovenreferanse: ApiFolketrygdlovenreferanse
 }
+
+@Serializable
+data class ApiFolketrygdlovenreferanse(
+    val kapittel: Int,
+    val paragrafIKapittel: Int,
+    val ledd: Int?,
+    val bokstav: Char?,
+)
 
 @Serializable
 data class ApiForsikring(
@@ -30,6 +40,8 @@ data class ApiForsikring(
     override val opphørsdato: LocalDate?,
     override val dekningsgrad: Int,
     override val dekningIVentetid: Boolean,
+    override val navn: String,
+    override val folketrygdlovenreferanse: ApiFolketrygdlovenreferanse,
 ) : ApiForsikringBase
 
 @Serializable
@@ -41,12 +53,21 @@ enum class ApiEkskluderingsårsak {
 }
 
 @Serializable
+data class ApiEkskluderingsbegrunnelse(
+    val forklaring: String,
+    val folketrygdlovenreferanse: ApiFolketrygdlovenreferanse?,
+)
+
+@Serializable
 data class ApiEkskludertForsikring(
     override val virkningsdato: LocalDate,
     override val opphørsdato: LocalDate?,
     override val dekningsgrad: Int,
     override val dekningIVentetid: Boolean,
+    override val navn: String,
+    override val folketrygdlovenreferanse: ApiFolketrygdlovenreferanse,
     val ekskluderingsårsak: ApiEkskluderingsårsak,
+    val ekskluderingsbegrunnelse: ApiEkskluderingsbegrunnelse,
 ) : ApiForsikringBase
 
 @Serializable

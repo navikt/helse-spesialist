@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.rest.forsikringer
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.spesialist.api.rest.ApiEkskluderingsbegrunnelse
 import no.nav.helse.spesialist.api.rest.ApiEkskluderingsårsak
 import no.nav.helse.spesialist.api.rest.ApiEkskludertForsikring
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiFolketrygdlovenreferanse
 import no.nav.helse.spesialist.api.rest.ApiForsikring
 import no.nav.helse.spesialist.api.rest.ApiForsikringsvurdering
 import no.nav.helse.spesialist.api.rest.ForsikringInnhold
@@ -14,6 +16,7 @@ import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Ekskluderingsårsak
 import no.nav.helse.spesialist.application.EkskludertForsikring
+import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
@@ -64,6 +67,8 @@ fun EkskludertForsikring.tilApiEkskludertForsikring(): ApiEkskludertForsikring =
         opphørsdato = opphørsdato,
         dekningsgrad = dekningsgrad,
         dekningIVentetid = dekningIVentetid,
+        navn = navn,
+        folketrygdlovenreferanse = folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
         ekskluderingsårsak =
             when (ekskluderingsårsak) {
                 Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO -> ApiEkskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO
@@ -71,6 +76,11 @@ fun EkskludertForsikring.tilApiEkskludertForsikring(): ApiEkskludertForsikring =
                 Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT -> ApiEkskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT
                 Ekskluderingsårsak.ALDRI_BETALT -> ApiEkskluderingsårsak.ALDRI_BETALT
             },
+        ekskluderingsbegrunnelse =
+            ApiEkskluderingsbegrunnelse(
+                forklaring = ekskluderingsbegrunnelse.forklaring,
+                folketrygdlovenreferanse = ekskluderingsbegrunnelse.folketrygdlovenreferanse?.tilApiFolketrygdlovenreferanse(),
+            ),
     )
 
 fun Forsikring.tilApiForsikring(): ApiForsikring =
@@ -79,6 +89,16 @@ fun Forsikring.tilApiForsikring(): ApiForsikring =
         opphørsdato = opphørsdato,
         dekningsgrad = dekningsgrad,
         dekningIVentetid = dekningIVentetid,
+        navn = navn,
+        folketrygdlovenreferanse = folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
+    )
+
+private fun Folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(): ApiFolketrygdlovenreferanse =
+    ApiFolketrygdlovenreferanse(
+        kapittel = kapittel,
+        paragrafIKapittel = paragrafIKapittel,
+        ledd = ledd,
+        bokstav = bokstav,
     )
 
 private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvurdering =

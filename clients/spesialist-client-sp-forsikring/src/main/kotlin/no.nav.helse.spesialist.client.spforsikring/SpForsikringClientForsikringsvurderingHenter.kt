@@ -4,8 +4,10 @@ import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.modell.objectMapper
+import no.nav.helse.spesialist.application.Ekskluderingsbegrunnelse
 import no.nav.helse.spesialist.application.Ekskluderingsårsak
 import no.nav.helse.spesialist.application.EkskludertForsikring
+import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
@@ -17,6 +19,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class SpForsikringClientForsikringsvurderingHenter(
@@ -62,6 +65,8 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                         ?.asLocalDate(),
                                                 dekningsgrad = ekskludertForsikring["dekningsgrad"].asInt(),
                                                 dekningIVentetid = ekskludertForsikring["dekningIVentetid"].asBoolean(),
+                                                navn = ekskludertForsikring["navn"].asString(),
+                                                folketrygdlovenreferanse = ekskludertForsikring["folketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
                                                 ekskluderingsårsak =
                                                     when (ekskludertForsikring["ekskluderingsårsak"].asString()) {
                                                         "SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO" -> Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO
@@ -69,6 +74,16 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                         "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT" -> Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT
                                                         "ALDRI_BETALT" -> Ekskluderingsårsak.ALDRI_BETALT
                                                         else -> throw IllegalArgumentException("Ukjent ekskluderingsårsak: ${ekskludertForsikring["ekskluderingsårsak"].asString()}")
+                                                    },
+                                                ekskluderingsbegrunnelse =
+                                                    ekskludertForsikring["ekskluderingsbegrunnelse"].let { begrunnelse ->
+                                                        Ekskluderingsbegrunnelse(
+                                                            forklaring = begrunnelse["forklaring"].asString(),
+                                                            folketrygdlovenreferanse =
+                                                                begrunnelse["folketrygdlovenreferanse"]
+                                                                    ?.takeUnless { it.isNull }
+                                                                    ?.tilFolketrygdlovenreferanse(),
+                                                        )
                                                     },
                                             )
                                         },
@@ -82,6 +97,8 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                         ?.asLocalDate(),
                                                 dekningsgrad = gjeldendeForsikring["dekningsgrad"].asInt(),
                                                 dekningIVentetid = gjeldendeForsikring["dekningIVentetid"].asBoolean(),
+                                                navn = gjeldendeForsikring["navn"].asString(),
+                                                folketrygdlovenreferanse = gjeldendeForsikring["folketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
                                             )
                                         },
                                 )
@@ -116,3 +133,11 @@ class SpForsikringClientForsikringsvurderingHenter(
             "hent-forsikring",
         )
 }
+
+private fun JsonNode.tilFolketrygdlovenreferanse(): Folketrygdlovenreferanse =
+    Folketrygdlovenreferanse(
+        kapittel = this["kapittel"].asInt(),
+        paragrafIKapittel = this["paragrafIKapittel"].asInt(),
+        ledd = this["ledd"]?.takeUnless { it.isNull }?.asInt(),
+        bokstav = this["bokstav"]?.takeUnless { it.isNull }?.asString()?.single(),
+    )

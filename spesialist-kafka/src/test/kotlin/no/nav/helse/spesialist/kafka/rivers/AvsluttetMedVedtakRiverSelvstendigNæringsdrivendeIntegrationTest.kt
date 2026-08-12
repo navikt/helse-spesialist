@@ -5,8 +5,8 @@ import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.testfixtures.lagForsikring
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
@@ -149,7 +149,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring =
-                    Forsikring(
+                    lagForsikring(
                         virkningsdato = LocalDate.of(2018, 1, 1),
                         opphørsdato = null,
                         dekningsgrad = 100,
