@@ -10,6 +10,8 @@ import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepo
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
+import no.nav.helse.spesialist.application.GraderteAndreYtelserRepository
+import no.nav.helse.spesialist.application.InMemoryGraderteAndreYtelserRepository
 import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
@@ -113,6 +115,8 @@ class DBSessionContext(
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
     override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(session)
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
+    override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository =
+        InMemoryGraderteAndreYtelserRepository()
     override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
     override val arbeidsgiverRepository: ArbeidsgiverRepository = PgArbeidsgiverRepository(session)
     override val annulleringRepository: PgAnnulleringRepository = PgAnnulleringRepository(session)

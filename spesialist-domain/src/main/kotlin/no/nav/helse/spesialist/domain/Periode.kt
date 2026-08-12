@@ -15,6 +15,8 @@ data class Periode(
 
     infix fun overlapper(other: Periode) = fom <= other.tom && tom >= other.fom
 
+    infix fun overlapperEnAv(perioder: List<Periode>) = perioder.any { this overlapper it }
+
     infix fun erInnenfor(other: Periode) = fom >= other.fom && tom <= other.tom
 
     infix fun erInnenforEnAv(perioder: List<Periode>) = perioder.any { this erInnenfor it }

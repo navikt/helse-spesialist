@@ -54,4 +54,5 @@ class InMemorySessionContext(
     override val personKlargjoresDao: InMemoryPersonKlargjoresDao,
     override val saksbehandlerStansRepository: SaksbehandlerStansRepository,
     override val veilederStansRepository: VeilederStansRepository,
+    override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository,
 ) : SessionContext

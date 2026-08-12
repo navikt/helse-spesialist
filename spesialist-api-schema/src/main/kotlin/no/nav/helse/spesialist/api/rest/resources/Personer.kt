@@ -100,6 +100,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("graderte-andre-ytelser")
+        class GraderteAndreYtelser(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("vurderinger")
         class Vurderinger(
             val parent: PersonPseudoId,

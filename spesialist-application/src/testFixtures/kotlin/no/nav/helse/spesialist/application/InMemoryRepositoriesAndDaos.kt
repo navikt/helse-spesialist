@@ -28,6 +28,7 @@ class InMemoryRepositoriesAndDaos {
     private val saksbehandlerStansRepository = InMemorySaksbehandlerStansRepository()
     private val veilederStansRepository = InMemoryVeilederStansRepository()
     private val venterPåKvitteringRepository = InMemoryVenterPåKvitteringForOverstyringRepository()
+    private val graderteAndreYtelserRepository = InMemoryGraderteAndreYtelserRepository()
 
     private val meldingDuplikatkontrollDao = NoopMeldingDuplikatkontrollDao()
     private val poisonPillDao = NoopPoisonPillDao()
@@ -177,6 +178,7 @@ class InMemoryRepositoriesAndDaos {
                     saksbehandlerStansRepository = saksbehandlerStansRepository,
                     veilederStansRepository = veilederStansRepository,
                     venterPåKvitteringForOverstyringRepository = venterPåKvitteringRepository,
+                    graderteAndreYtelserRepository = graderteAndreYtelserRepository,
                 ),
         )
 }
