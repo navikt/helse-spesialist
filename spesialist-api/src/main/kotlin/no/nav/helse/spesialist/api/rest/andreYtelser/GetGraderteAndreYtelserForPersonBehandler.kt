@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 
@@ -16,14 +16,15 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiGraderteAndreYtelser>, ApiGetGraderteAndreYtelserForPersonErrorCode> =
         kallKontekst.medPerson(
-            identitetsnummer = Identitetsnummer.fraString(resource.parent.pseudoId),
-            personIkkeFunnet = { ApiGetGraderteAndreYtelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
+            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoIdIkkeFunnet = { ApiGetGraderteAndreYtelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetGraderteAndreYtelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             val ytelser =
                 kallKontekst.transaksjon.graderteAndreYtelserRepository
                     .finnAlleForIdentitetsnummer(person.id)
                     .map { it.tilApiGraderteAndreYtelser() }
+                    .sortedBy { graderteAndreYtelser -> graderteAndreYtelser.perioder.minOf { it.fom } }
 
             loggInfo("Hentet ${ytelser.size} graderte andre ytelser")
 

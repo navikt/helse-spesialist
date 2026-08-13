@@ -3,18 +3,17 @@ package no.nav.helse.spesialist.domain.andreytelser
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
+import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class GraderteAndreYtelserTest {
     @Test
     fun `kan opprette graderte andre ytelser`() {
-        // given
+        // Given:
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
         val perioder =
@@ -25,7 +24,7 @@ class GraderteAndreYtelserTest {
                 ),
             )
 
-        // when
+        // When:
         val graderteAndreYtelser =
             GraderteAndreYtelser.ny(
                 identitetsnummer = identitetsnummer,
@@ -36,7 +35,7 @@ class GraderteAndreYtelserTest {
                 graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
             )
 
-        // then
+        // Then:
         assertEquals(1, graderteAndreYtelser.events.size)
         assertEquals(GraderteAndreYtelserOpprettetEvent::class, graderteAndreYtelser.events.last()::class)
         val opprettetEvent = graderteAndreYtelser.events.last() as GraderteAndreYtelserOpprettetEvent
@@ -44,7 +43,6 @@ class GraderteAndreYtelserTest {
         assertEquals(identitetsnummer.value, opprettetEvent.fødselsnummer)
         assertEquals(perioder, opprettetEvent.graderteAndreYtelserPerioder)
         assertEquals(GraderteAndreYtelserType.FORELDREPENGER, opprettetEvent.graderteAndreYtelserType)
-
         assertEquals("et notat til beslutter", opprettetEvent.metadata.notatTilBeslutter)
         assertEquals(saksbehandlerIdent, opprettetEvent.metadata.utførtAvSaksbehandlerIdent)
         assertEquals(1, opprettetEvent.metadata.sekvensnummer)
@@ -53,11 +51,170 @@ class GraderteAndreYtelserTest {
         assertEquals(identitetsnummer, graderteAndreYtelser.identitetsnummer)
         assertEquals(perioder, graderteAndreYtelser.perioder)
         assertEquals(GraderteAndreYtelserType.FORELDREPENGER, graderteAndreYtelser.graderteAndreYtelserType)
+        assertFalse(graderteAndreYtelser.fjernet)
+        assertEquals(1, graderteAndreYtelser.versjon)
     }
 
     @Test
-    fun `ny() genererer unik id for hver instans`() {
-        // given
+    fun `kan endre graderte andre ytelser`() {
+        // Given:
+        val originalPerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 jan 2024) tilOgMed (31 jan 2024),
+                    grad = 50,
+                ),
+            )
+        val graderteAndreYtelser =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = lagIdentitetsnummer(),
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder = originalPerioder,
+                graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            )
+
+        val nyePerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 feb 2024) tilOgMed (29 feb 2024),
+                    grad = 80,
+                ),
+            )
+
+        // When:
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        graderteAndreYtelser.endreTil(
+            graderteAndreYtelserPerioder = nyePerioder,
+            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+            saksbehandlerIdent = saksbehandlerIdent,
+            notatTilBeslutter = "nytt notat",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+
+        // Then:
+        assertEquals(2, graderteAndreYtelser.events.size)
+        assertEquals(GraderteAndreYtelserEndretEvent::class, graderteAndreYtelser.events.last()::class)
+        val endretEvent = graderteAndreYtelser.events.last() as GraderteAndreYtelserEndretEvent
+        assertEquals(originalPerioder, endretEvent.endringer.graderteAndreYtelserPerioder?.fra)
+        assertEquals(nyePerioder, endretEvent.endringer.graderteAndreYtelserPerioder?.til)
+        assertEquals(GraderteAndreYtelserType.FORELDREPENGER, endretEvent.endringer.graderteAndreYtelserType?.fra)
+        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, endretEvent.endringer.graderteAndreYtelserType?.til)
+        assertEquals("nytt notat", endretEvent.metadata.notatTilBeslutter)
+        assertEquals(saksbehandlerIdent, endretEvent.metadata.utførtAvSaksbehandlerIdent)
+        assertEquals(2, endretEvent.metadata.sekvensnummer)
+
+        assertEquals(nyePerioder, graderteAndreYtelser.perioder)
+        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, graderteAndreYtelser.graderteAndreYtelserType)
+        assertFalse(graderteAndreYtelser.fjernet)
+        assertEquals(2, graderteAndreYtelser.versjon)
+    }
+
+    @Test
+    fun `kan gjenopprette graderte andre ytelser`() {
+        // Given:
+        val originalPerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 jan 2024) tilOgMed (31 jan 2024),
+                    grad = 50,
+                ),
+            )
+        val graderteAndreYtelser =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = lagIdentitetsnummer(),
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder = originalPerioder,
+                graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            )
+
+        graderteAndreYtelser.fjern(
+            saksbehandlerIdent = lagSaksbehandler().ident,
+            notatTilBeslutter = "fjern",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+
+        val nyePerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 feb 2024) tilOgMed (29 feb 2024),
+                    grad = 80,
+                ),
+            )
+
+        // When:
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        graderteAndreYtelser.gjenopprett(
+            graderteAndreYtelserPerioder = nyePerioder,
+            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+            saksbehandlerIdent = saksbehandlerIdent,
+            notatTilBeslutter = "gjenopprett",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+
+        // Then:
+        assertEquals(3, graderteAndreYtelser.events.size)
+        assertEquals(GraderteAndreYtelserGjenopprettetEvent::class, graderteAndreYtelser.events.last()::class)
+        val gjenopprettetEvent = graderteAndreYtelser.events.last() as GraderteAndreYtelserGjenopprettetEvent
+        assertEquals(originalPerioder, gjenopprettetEvent.endringer.graderteAndreYtelserPerioder?.fra)
+        assertEquals(nyePerioder, gjenopprettetEvent.endringer.graderteAndreYtelserPerioder?.til)
+        assertEquals(GraderteAndreYtelserType.FORELDREPENGER, gjenopprettetEvent.endringer.graderteAndreYtelserType?.fra)
+        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, gjenopprettetEvent.endringer.graderteAndreYtelserType?.til)
+        assertEquals("gjenopprett", gjenopprettetEvent.metadata.notatTilBeslutter)
+        assertEquals(saksbehandlerIdent, gjenopprettetEvent.metadata.utførtAvSaksbehandlerIdent)
+        assertEquals(3, gjenopprettetEvent.metadata.sekvensnummer)
+
+        assertEquals(nyePerioder, graderteAndreYtelser.perioder)
+        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, graderteAndreYtelser.graderteAndreYtelserType)
+        assertFalse(graderteAndreYtelser.fjernet)
+        assertEquals(3, graderteAndreYtelser.versjon)
+    }
+
+    @Test
+    fun `kan fjerne graderte andre ytelser`() {
+        // Given:
+        val graderteAndreYtelser =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = lagIdentitetsnummer(),
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder =
+                    listOf(
+                        GraderteAndreYtelserPeriode(
+                            periode = (1 jan 2024) tilOgMed (31 jan 2024),
+                            grad = 50,
+                        ),
+                    ),
+                graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            )
+
+        // When:
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        graderteAndreYtelser.fjern(
+            saksbehandlerIdent = saksbehandlerIdent,
+            notatTilBeslutter = "remove",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+
+        // Then:
+        assertEquals(2, graderteAndreYtelser.events.size)
+        assertEquals(GraderteAndreYtelserFjernetEvent::class, graderteAndreYtelser.events.last()::class)
+        val fjernetEvent = graderteAndreYtelser.events.last() as GraderteAndreYtelserFjernetEvent
+
+        assertEquals("remove", fjernetEvent.metadata.notatTilBeslutter)
+        assertEquals(saksbehandlerIdent, fjernetEvent.metadata.utførtAvSaksbehandlerIdent)
+        assertEquals(2, fjernetEvent.metadata.sekvensnummer)
+        assertTrue(graderteAndreYtelser.fjernet)
+        assertEquals(2, graderteAndreYtelser.versjon)
+    }
+
+    @Test
+    fun `ny genererer unik id for hver instans`() {
+        // Given:
         val identitetsnummer = lagIdentitetsnummer()
         val perioder =
             listOf(
@@ -67,7 +224,7 @@ class GraderteAndreYtelserTest {
                 ),
             )
 
-        // when
+        // When:
         val første =
             GraderteAndreYtelser.ny(
                 identitetsnummer = identitetsnummer,
@@ -87,74 +244,68 @@ class GraderteAndreYtelserTest {
                 graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
             )
 
-        // then
+        // Then:
         assertNotNull(første.id)
         assertNotNull(andre.id)
         assertEquals(false, første.id == andre.id)
     }
 
     @Test
-    fun `kan opprette med flere perioder`() {
-        // given
-        val perioder =
-            listOf(
-                GraderteAndreYtelserPeriode(
-                    periode = (1 jan 2024) tilOgMed (5 jan 2024),
-                    grad = 50,
-                ),
-                GraderteAndreYtelserPeriode(
-                    periode = (6 jan 2024) tilOgMed (28 jan 2024),
-                    grad = 80,
-                ),
-            )
-
-        // when
-        val graderteAndreYtelser =
+    fun `fraLagring rekonstruerer riktig tilstand fra historikken`() {
+        // Given:
+        val original =
             GraderteAndreYtelser.ny(
                 identitetsnummer = lagIdentitetsnummer(),
                 saksbehandlerIdent = lagSaksbehandler().ident,
                 notatTilBeslutter = "notat",
                 totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                graderteAndreYtelserPerioder = perioder,
-                graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-            )
-
-        // then
-        assertEquals(2, graderteAndreYtelser.perioder.size)
-        assertEquals(50, graderteAndreYtelser.perioder[0].grad)
-        assertEquals(80, graderteAndreYtelser.perioder[1].grad)
-        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, graderteAndreYtelser.graderteAndreYtelserType)
-    }
-
-    @Test
-    fun `fraLagring rekonstruerer riktig tilstand fra events`() {
-        // given
-        val identitetsnummer = lagIdentitetsnummer()
-        val saksbehandlerIdent = lagSaksbehandler().ident
-        val perioder =
-            listOf(
-                GraderteAndreYtelserPeriode(
-                    periode = (1 jan 2024) tilOgMed (31 jan 2024),
-                    grad = 60,
-                ),
-            )
-        val original =
-            GraderteAndreYtelser.ny(
-                identitetsnummer = identitetsnummer,
-                saksbehandlerIdent = saksbehandlerIdent,
-                notatTilBeslutter = "notat",
-                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                graderteAndreYtelserPerioder = perioder,
+                graderteAndreYtelserPerioder =
+                    listOf(
+                        GraderteAndreYtelserPeriode(
+                            periode = (1 jan 2024) tilOgMed (31 jan 2024),
+                            grad = 60,
+                        ),
+                    ),
                 graderteAndreYtelserType = GraderteAndreYtelserType.SVANGERSKAPSPENGER,
             )
 
-        // when
+        val oppdatertePerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 feb 2024) tilOgMed (29 feb 2024),
+                    grad = 80,
+                ),
+            )
+        original.endreTil(
+            graderteAndreYtelserPerioder = oppdatertePerioder,
+            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+            saksbehandlerIdent = lagSaksbehandler().ident,
+            notatTilBeslutter = "endre",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+        original.fjern(
+            saksbehandlerIdent = lagSaksbehandler().ident,
+            notatTilBeslutter = "fjern",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+        original.gjenopprett(
+            graderteAndreYtelserPerioder = oppdatertePerioder,
+            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+            saksbehandlerIdent = lagSaksbehandler().ident,
+            notatTilBeslutter = "gjenopprett",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+
+        // When:
         val rekonstruert = GraderteAndreYtelser.fraLagring(original.events)
 
-        // then
+        // Then:
         assertEquals(original.id, rekonstruert.id)
         assertEquals(original.identitetsnummer, rekonstruert.identitetsnummer)
-        assertEquals(original.perioder, rekonstruert.perioder)
-        assertEquals(original.graderteAndreYtelserType, rekonstruert.graderteAndreYtelserType)
+        assertEquals(oppdatertePerioder, rekonstruert.perioder)
+        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, rekonstruert.graderteAndreYtelserType)
+        assertFalse(rekonstruert.fjernet)
+        assertEquals(4, rekonstruert.versjon)
+        assertEquals(4, rekonstruert.events.size)
     }
 }

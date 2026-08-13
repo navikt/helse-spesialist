@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
@@ -223,6 +223,7 @@ internal abstract class AbstractDatabaseTest {
                 "risikovurdering_faresignal",
                 "overstyringer_for_vedtaksperioder",
                 "tilkommen_inntekt_events",
+                "graderte_andre_ytelser_events",
                 "ukoblede_annulleringer",
                 "midlertidig_behandling_vedtak_fattet",
                 "tmp_slettede_varsler",

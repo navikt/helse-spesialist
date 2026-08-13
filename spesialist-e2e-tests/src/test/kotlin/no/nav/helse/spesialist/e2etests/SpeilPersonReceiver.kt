@@ -3,15 +3,7 @@ package no.nav.helse.spesialist.e2etests
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.isMissingOrNull
-import no.nav.helse.spesialist.api.rest.ApiForkastingRequest
-import no.nav.helse.spesialist.api.rest.ApiKommentarRequest
-import no.nav.helse.spesialist.api.rest.ApiLovverksreferanse
-import no.nav.helse.spesialist.api.rest.ApiPatchKommentarRequest
-import no.nav.helse.spesialist.api.rest.ApiPutPåVentRequest
-import no.nav.helse.spesialist.api.rest.ApiPåVentÅrsak
-import no.nav.helse.spesialist.api.rest.ApiSykepengegrunnlagRequest
-import no.nav.helse.spesialist.api.rest.ApiTildelingRequest
-import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -23,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
@@ -36,6 +28,7 @@ class SpeilPersonReceiver(
     val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asString()
     var person: JsonNode = fetchPerson(personPseudoId)
     var tilkomneInntektskilder: JsonNode = callGetTilkomneInntektskilder()
+    var graderteAndreYtelser: JsonNode = callGetGraderteAndreYtelser()
 
     fun hentOppdatertPerson() {
         logg.info("Henter oppdatert person...")
@@ -45,6 +38,11 @@ class SpeilPersonReceiver(
     fun hentOppdaterteTilkomneInntektskilder() {
         logg.info("Henter oppdaterte tilkomne inntektskilder...")
         tilkomneInntektskilder = callGetTilkomneInntektskilder()
+    }
+
+    fun hentOppdaterteGraderteAndreYtelser() {
+        logg.info("Henter oppdaterte graderte andre ytelser...")
+        graderteAndreYtelser = callGetGraderteAndreYtelser()
     }
 
     fun saksbehandlerGodkjennerAlleVarsler() {
@@ -208,6 +206,31 @@ class SpeilPersonReceiver(
                 ),
         )!!["tilkommenInntektId"].asUUID().also {
             hentOppdaterteTilkomneInntektskilder()
+        }
+
+    fun saksbehandlerLeggerTilGraderteAndreYtelser(
+        perioder: Collection<ApiGraderteAndreYtelserPeriode>,
+        andreYtelseType: ApiGraderteAndreYtelseType,
+        notatTilBeslutter: String,
+    ): UUID =
+        callHttpPost(
+            relativeUrl = "api/graderte-andre-ytelser",
+            request =
+                mapOf(
+                    "fodselsnummer" to testContext.person.fødselsnummer,
+                    "perioder" to
+                        perioder.map {
+                            mapOf(
+                                "fom" to it.fom.toString(),
+                                "tom" to it.tom.toString(),
+                                "grad" to it.grad,
+                            )
+                        },
+                    "andreYtelseType" to andreYtelseType.name,
+                    "notatTilBeslutter" to notatTilBeslutter,
+                ),
+        )!!["andreYtelserId"].asUUID().also {
+            hentOppdaterteGraderteAndreYtelser()
         }
 
     fun saksbehandlerEndrerTilkommenInntekt(
@@ -551,6 +574,8 @@ class SpeilPersonReceiver(
     }
 
     fun callGetTilkomneInntektskilder(): JsonNode = callHttpGet("api/personer/$personPseudoId/tilkomne-inntektskilder")!!
+
+    fun callGetGraderteAndreYtelser(): JsonNode = callHttpGet("api/personer/$personPseudoId/graderte-andre-ytelser")!!
 
     fun callPostPersonerSok(fødselsnummer: String): JsonNode =
         callHttpPost(

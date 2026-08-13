@@ -1,80 +1,12 @@
 package no.nav.helse.spesialist.db
 
 import kotliquery.Session
-import no.nav.helse.db.AvviksvurderingRepository
-import no.nav.helse.db.BehandlingRepository
-import no.nav.helse.db.IndividuellBegrunnelseRepository
-import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.db.*
 import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.spesialist.application.ArbeidsgiverRepository
-import no.nav.helse.spesialist.application.DialogRepository
-import no.nav.helse.spesialist.application.GraderteAndreYtelserRepository
-import no.nav.helse.spesialist.application.InMemoryGraderteAndreYtelserRepository
-import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
-import no.nav.helse.spesialist.application.NotatRepository
-import no.nav.helse.spesialist.application.OpptegnelseRepository
-import no.nav.helse.spesialist.application.OverstyringRepository
-import no.nav.helse.spesialist.application.PersonKlargjoresDao
-import no.nav.helse.spesialist.application.PersonRepository
-import no.nav.helse.spesialist.application.PåVentRepository
-import no.nav.helse.spesialist.application.SaksbehandlerRepository
-import no.nav.helse.spesialist.application.TilkommenInntektRepository
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VarselRepository
-import no.nav.helse.spesialist.application.VarseldefinisjonRepository
-import no.nav.helse.spesialist.application.VedtakRepository
-import no.nav.helse.spesialist.application.VedtaksperiodeRepository
-import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
-import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
-import no.nav.helse.spesialist.db.dao.PgAutomatiseringDao
-import no.nav.helse.spesialist.db.dao.PgAvviksvurderingRepository
-import no.nav.helse.spesialist.db.dao.PgCommandContextDao
-import no.nav.helse.spesialist.db.dao.PgDialogDao
-import no.nav.helse.spesialist.db.dao.PgDokumentDao
-import no.nav.helse.spesialist.db.dao.PgLegacyBehandlingDao
-import no.nav.helse.spesialist.db.dao.PgLegacyPersonRepository
-import no.nav.helse.spesialist.db.dao.PgLegacyVedtaksperiodeRepository
-import no.nav.helse.spesialist.db.dao.PgMeldingDao
-import no.nav.helse.spesialist.db.dao.PgMetrikkDao
-import no.nav.helse.spesialist.db.dao.PgMidlertidigBehandlingVedtakFattetDao
-import no.nav.helse.spesialist.db.dao.PgNotatDao
-import no.nav.helse.spesialist.db.dao.PgOppgaveDao
-import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
-import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.PgPersonKlargjoresDao
-import no.nav.helse.spesialist.db.dao.PgPåVentDao
-import no.nav.helse.spesialist.db.dao.PgReservasjonDao
-import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
-import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
-import no.nav.helse.spesialist.db.dao.PgSykefraværstilfelleDao
-import no.nav.helse.spesialist.db.dao.PgTildelingDao
-import no.nav.helse.spesialist.db.dao.PgUtbetalingDao
-import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
-import no.nav.helse.spesialist.db.dao.PgVedtakDao
-import no.nav.helse.spesialist.db.dao.PgVergemålDao
-import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
-import no.nav.helse.spesialist.db.repository.PgArbeidsgiverRepository
-import no.nav.helse.spesialist.db.repository.PgBehandlingRepository
-import no.nav.helse.spesialist.db.repository.PgDialogRepository
-import no.nav.helse.spesialist.db.repository.PgIndividuellBegrunnelseRepository
-import no.nav.helse.spesialist.db.repository.PgNotatRepository
-import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
-import no.nav.helse.spesialist.db.repository.PgOpptegnelseRepository
-import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
-import no.nav.helse.spesialist.db.repository.PgPersonRepository
-import no.nav.helse.spesialist.db.repository.PgPåVentRepository
-import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
-import no.nav.helse.spesialist.db.repository.PgSaksbehandlerStansRepository
-import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
-import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
-import no.nav.helse.spesialist.db.repository.PgVarselRepository
-import no.nav.helse.spesialist.db.repository.PgVarseldefinisjonRepository
-import no.nav.helse.spesialist.db.repository.PgVedtakRepository
-import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
-import no.nav.helse.spesialist.db.repository.PgVeilederStansRepository
-import no.nav.helse.spesialist.db.repository.PgVenterPåKvitteringForOverstyringRepository
+import no.nav.helse.spesialist.application.*
+import no.nav.helse.spesialist.db.dao.*
+import no.nav.helse.spesialist.db.repository.*
 
 class DBSessionContext(
     session: Session,
@@ -115,8 +47,7 @@ class DBSessionContext(
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
     override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(session)
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
-    override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository =
-        InMemoryGraderteAndreYtelserRepository()
+    override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository = PgGraderteAndreYtelserRepository(session)
     override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
     override val arbeidsgiverRepository: ArbeidsgiverRepository = PgArbeidsgiverRepository(session)
     override val annulleringRepository: PgAnnulleringRepository = PgAnnulleringRepository(session)
