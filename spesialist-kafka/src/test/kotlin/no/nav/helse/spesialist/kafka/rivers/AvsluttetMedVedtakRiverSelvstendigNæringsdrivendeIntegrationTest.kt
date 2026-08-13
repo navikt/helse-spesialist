@@ -27,6 +27,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -56,6 +57,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 dekning = null,
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring = null,
+                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -155,6 +157,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                         dekningsgrad = 100,
                         dekningIVentetid = false,
                     ),
+                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -248,6 +251,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 dekning = null,
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring = null,
+                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 

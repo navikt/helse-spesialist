@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
@@ -105,7 +106,8 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "ledd": 1,
                                     "bokstav": "b"
                                 }
-                            }
+                            },
+                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),
                     ),
@@ -120,6 +122,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         assertEquals(identitetsnummer, actualForsikring.identitetsnummer)
         assertTrue(actualForsikring.harForsikring)
         assertEquals(Forsikringsvurdering.Dekning(grad = 100, fraDag = 17), actualForsikring.dekning)
+        assertEquals(Instant.parse("2020-02-01T09:30:00Z"), actualForsikring.dataHentetTidspunkt)
 
         val gjeldendeForsikring = assertNotNull(actualForsikring.gjeldendeForsikring)
         assertEquals(LocalDate.of(2020, 1, 1), gjeldendeForsikring.virkningsdato)
@@ -188,7 +191,8 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                             "harForsikring": false,
                             "dekning": null,
                             "ekskluderteForsikringer": [],
-                            "gjeldendeForsikring": null
+                            "gjeldendeForsikring": null,
+                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),
                     ),
@@ -207,6 +211,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                     dekning = null,
                     ekskluderteForsikringer = emptyList(),
                     gjeldendeForsikring = null,
+                    dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                 ),
             actual = actualForsikring,
         )
@@ -272,7 +277,8 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "ledd": 1,
                                     "bokstav": "b"
                                 }
-                            }
+                            },
+                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),
                     ),

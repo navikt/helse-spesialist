@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
+import java.time.Instant
 import java.time.LocalDate
 
 fun lagForsikringsvurdering(
@@ -16,6 +17,7 @@ fun lagForsikringsvurdering(
     dekning: Forsikringsvurdering.Dekning? = null,
     ekskluderteForsikringer: List<EkskludertForsikring> = emptyList(),
     gjeldendeForsikring: Forsikring? = null,
+    dataHentetTidspunkt: Instant = Instant.parse("2018-01-01T12:00:00Z"),
 ): Forsikringsvurdering =
     Forsikringsvurdering(
         identitetsnummer = identitetsnummer,
@@ -23,6 +25,7 @@ fun lagForsikringsvurdering(
         dekning = dekning,
         ekskluderteForsikringer = ekskluderteForsikringer,
         gjeldendeForsikring = gjeldendeForsikring,
+        dataHentetTidspunkt = dataHentetTidspunkt,
     )
 
 fun lagFolketrygdlovenreferanse(

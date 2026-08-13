@@ -59,6 +59,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -113,6 +114,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                             dekning = null,
                             ekskluderteForsikringer = emptyList(),
                             gjeldendeForsikring = null,
+                            dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                         )
                 },
             environmentToggles =

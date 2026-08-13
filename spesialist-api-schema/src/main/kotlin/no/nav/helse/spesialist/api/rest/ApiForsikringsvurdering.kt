@@ -76,6 +76,7 @@ data class ApiForsikringsvurdering(
     val forsikringInnhold: ForsikringInnhold?,
     val ekskluderteForsikringer: List<ApiEkskludertForsikring>,
     val gjeldendeForsikring: ApiForsikring?,
+    val dataHentetTidspunkt: Instant,
 )
 
 @Serializable

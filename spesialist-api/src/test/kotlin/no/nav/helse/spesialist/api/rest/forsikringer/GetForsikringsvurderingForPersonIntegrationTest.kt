@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
@@ -89,6 +90,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                                 bokstav = 'b',
                             ),
                     ),
+                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
 
         // When:
@@ -145,7 +147,8 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                      "ledd" : 1,
                      "bokstav" : "b"
                   }
-               }
+               },
+               "dataHentetTidspunkt" : "2020-02-01T09:30:00Z"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -170,6 +173,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                 dekning = null,
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring = null,
+                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
 
         // When:
@@ -187,7 +191,8 @@ class GetForsikringsvurderingForPersonIntegrationTest {
               "eksisterer" : false,
               "forsikringInnhold" : null,
               "ekskluderteForsikringer" : [],
-              "gjeldendeForsikring" : null
+              "gjeldendeForsikring" : null,
+              "dataHentetTidspunkt" : "2020-02-01T09:30:00Z"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -287,6 +292,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                         dekningsgrad = 100,
                         dekningIVentetid = false,
                     ),
+                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
 
         // When:

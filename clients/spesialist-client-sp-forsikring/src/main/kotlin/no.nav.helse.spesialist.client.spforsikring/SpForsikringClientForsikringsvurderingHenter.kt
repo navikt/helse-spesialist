@@ -20,6 +20,7 @@ import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import tools.jackson.databind.JsonNode
+import java.time.Instant
 import java.util.UUID
 
 class SpForsikringClientForsikringsvurderingHenter(
@@ -102,6 +103,7 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                 folketrygdlovenreferanse = gjeldendeForsikring["folketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
                                             )
                                         },
+                                    dataHentetTidspunkt = Instant.parse(responseJson["dataHentetTidspunkt"].asString()),
                                 )
                             }
 

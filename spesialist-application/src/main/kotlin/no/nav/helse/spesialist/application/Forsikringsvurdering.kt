@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import java.time.Instant
 import java.time.LocalDate
 
 data class Folketrygdlovenreferanse(
@@ -55,6 +56,7 @@ data class Forsikringsvurdering(
     val dekning: Dekning?,
     val ekskluderteForsikringer: List<EkskludertForsikring>,
     val gjeldendeForsikring: Forsikring?,
+    val dataHentetTidspunkt: Instant,
 ) {
     data class Dekning(
         val grad: Int,

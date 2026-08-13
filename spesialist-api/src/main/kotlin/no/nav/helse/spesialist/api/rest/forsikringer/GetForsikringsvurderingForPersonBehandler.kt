@@ -115,6 +115,7 @@ private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvur
             },
         ekskluderteForsikringer = ekskluderteForsikringer.map { it.tilApiEkskludertForsikring() },
         gjeldendeForsikring = gjeldendeForsikring?.tilApiForsikring(),
+        dataHentetTidspunkt = dataHentetTidspunkt,
     )
 
 enum class ApiGetForsikringsvurderingForPersonErrorCode(
