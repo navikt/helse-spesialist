@@ -21,10 +21,10 @@ spec:
       path: /stop
   resources:
     limits:
-      memory: 2048Mi
+      memory: 2Gi
     requests:
       cpu: 100m
-      memory: 768Mi
+      memory: 2Gi
   strategy:
     rollingUpdate:
       maxSurge: 100%
