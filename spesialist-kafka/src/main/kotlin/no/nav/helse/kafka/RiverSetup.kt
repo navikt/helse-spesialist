@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
-import java.util.UUID
+import java.util.*
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -33,6 +33,7 @@ class RiverSetup(
     private val rivers =
         listOf(
             GodkjenningsbehovRiver(mediator),
+            GraderteAndreYtelserBehovRiver(),
             SøknadSendtRiver(),
             PersoninfoløsningRiver(mediator),
             FlerePersoninfoRiver(mediator),

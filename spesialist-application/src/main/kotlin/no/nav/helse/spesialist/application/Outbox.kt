@@ -6,7 +6,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import java.util.UUID
+import java.util.*
 
 class Outbox(
     private val versjonAvKode: String,
@@ -100,6 +100,26 @@ class Outbox(
         )
     }
 
+    private data class OutboxPacket(
+        val identitetsnummer: Identitetsnummer,
+        val packet: String,
+        val årsak: String,
+    ) : OutboxMelding
+
+    fun leggTil(
+        identitetsnummer: Identitetsnummer,
+        packet: String,
+        årsak: String,
+    ) {
+        outbox.add(
+            OutboxPacket(
+                identitetsnummer = identitetsnummer,
+                packet = packet,
+                årsak = årsak,
+            ),
+        )
+    }
+
     fun sendAlle(meldingPubliserer: MeldingPubliserer) {
         outbox.forEach {
             when (it) {
@@ -133,6 +153,14 @@ class Outbox(
                     meldingPubliserer.publiser(
                         fødselsnummer = it.identitetsnummer.value,
                         hendelse = it.hendelse,
+                        årsak = it.årsak,
+                    )
+                }
+
+                is OutboxPacket -> {
+                    meldingPubliserer.publiser(
+                        fødselsnummer = it.identitetsnummer.value,
+                        packet = it.packet,
                         årsak = it.årsak,
                     )
                 }

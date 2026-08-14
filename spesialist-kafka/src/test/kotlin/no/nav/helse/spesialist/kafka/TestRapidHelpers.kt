@@ -6,8 +6,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.kafka.EventMetadata
+import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.SpesialistRiver
 import no.nav.helse.kafka.TransaksjonellRiver
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -15,7 +17,7 @@ import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.Outbox
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
-import java.util.UUID
+import java.util.*
 
 object TestRapidHelpers {
     fun TestRapid.RapidInspector.meldinger() = (0 until size).map { index -> message(index) }
@@ -213,14 +215,24 @@ internal fun TestRapid.medTransaksjonelleRivers(
                     meterRegistry: MeterRegistry,
                 ) {
                     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
+                    val outbox = Outbox("versjonAvKode")
                     sessionFactory.transactionalSessionScope { sessionContext ->
                         this.river.transaksjonellOnPacket(
                             packet,
-                            Outbox("versjonAvKode"),
+                            outbox,
                             sessionContext,
                             EventMetadata(UUID.randomUUID()),
                         )
                     }
+                    outbox.sendAlle(MessageContextMeldingPubliserer(context))
+                }
+
+                override fun onError(
+                    problems: MessageProblems,
+                    context: MessageContext,
+                    metadata: MessageMetadata,
+                ) {
+                    this.river.onError(problems, context, metadata)
                 }
             }
         }.forEach {

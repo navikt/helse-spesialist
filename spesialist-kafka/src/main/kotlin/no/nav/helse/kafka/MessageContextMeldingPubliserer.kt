@@ -10,7 +10,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.spesialist.application.logg.loggInfo
-import java.util.UUID
+import java.util.*
 
 class MessageContextMeldingPubliserer(
     private val context: MessageContext,
@@ -56,5 +56,14 @@ class MessageContextMeldingPubliserer(
         val message = JsonMessage.newMessage(event.eventName, event.detaljer()).toJson()
         loggInfo("Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}", "json" to message)
         context.publish(fødselsnummer, message)
+    }
+
+    override fun publiser(
+        fødselsnummer: String,
+        packet: String,
+        årsak: String,
+    ) {
+        loggInfo("Publiserer packet på grunn av $årsak")
+        context.publish(fødselsnummer, packet)
     }
 }
