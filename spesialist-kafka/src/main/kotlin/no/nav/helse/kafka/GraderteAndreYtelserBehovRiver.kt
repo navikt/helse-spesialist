@@ -53,7 +53,7 @@ class GraderteAndreYtelserBehovRiver : TransaksjonellRiver() {
                         .filter { it.periode overlapper forespurtPeriode }
                         .map { periode ->
                             mapOf(
-                                "ytelse" to graderteAndreYtelser.graderteAndreYtelserType.name,
+                                "graderteAndreYtelserType" to graderteAndreYtelser.graderteAndreYtelserType.name,
                                 "fom" to maxOf(periode.periode.fom, forespurtPeriode.fom),
                                 "tom" to minOf(periode.periode.tom, forespurtPeriode.tom),
                                 "grad" to periode.grad,
@@ -61,7 +61,7 @@ class GraderteAndreYtelserBehovRiver : TransaksjonellRiver() {
                         }
                 }.sortedWith(
                     compareBy<Map<String, Any?>>(
-                        { it.getValue("ytelse") as String },
+                        { it.getValue("graderteAndreYtelserType") as String },
                         { it.getValue("fom").toString() },
                         { it.getValue("tom").toString() },
                         { it.getValue("grad") as Int },

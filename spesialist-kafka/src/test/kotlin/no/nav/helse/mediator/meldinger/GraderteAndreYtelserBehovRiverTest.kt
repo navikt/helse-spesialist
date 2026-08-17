@@ -90,13 +90,13 @@ internal class GraderteAndreYtelserBehovRiverTest {
               "@løsning": {
                 "GraderteAndreYtelserForBeregning": [
                   {
-                    "ytelse": "PLEIEPENGER",
+                    "graderteAndreYtelserType": "PLEIEPENGER",
                     "fom": "2024-01-01",
                     "tom": "2024-01-31",
                     "grad": 50
                   },
                   {
-                    "ytelse": "SVANGERSKAPSPENGER",
+                    "graderteAndreYtelserType": "SVANGERSKAPSPENGER",
                     "fom": "2024-01-10",
                     "tom": "2024-01-12",
                     "grad": 20
@@ -196,12 +196,12 @@ internal class GraderteAndreYtelserBehovRiverTest {
 
     private fun assertLøsningsrad(
         jsonNode: JsonNode,
-        ytelse: String,
+        graderteAndreYtelserType: String,
         fom: LocalDate,
         tom: LocalDate,
         grad: Int,
     ) {
-        assertEquals(ytelse, jsonNode["ytelse"].asString())
+        assertEquals(graderteAndreYtelserType, jsonNode["graderteAndreYtelserType"].asString())
         assertEquals(fom.toString(), jsonNode["fom"].asString())
         assertEquals(tom.toString(), jsonNode["tom"].asString())
         assertEquals(grad, jsonNode["grad"].asInt())
