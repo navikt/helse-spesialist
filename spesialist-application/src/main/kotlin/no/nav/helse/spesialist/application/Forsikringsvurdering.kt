@@ -11,45 +11,6 @@ data class Folketrygdlovenreferanse(
     val bokstav: Char?,
 )
 
-open class Forsikring(
-    val virkningsdato: LocalDate,
-    val opphørsdato: LocalDate?,
-    val dekningsgrad: Int,
-    val dekningIVentetid: Boolean,
-    val navn: String,
-    val folketrygdlovenreferanse: Folketrygdlovenreferanse,
-)
-
-enum class Ekskluderingsårsak {
-    SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO,
-    SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO,
-    OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT,
-    ALDRI_BETALT,
-}
-
-data class Ekskluderingsbegrunnelse(
-    val forklaring: String,
-    val folketrygdlovenreferanse: Folketrygdlovenreferanse?,
-)
-
-class EkskludertForsikring(
-    virkningsdato: LocalDate,
-    opphørsdato: LocalDate?,
-    dekningsgrad: Int,
-    dekningIVentetid: Boolean,
-    navn: String,
-    folketrygdlovenreferanse: Folketrygdlovenreferanse,
-    val ekskluderingsårsak: Ekskluderingsårsak,
-    val ekskluderingsbegrunnelse: Ekskluderingsbegrunnelse,
-) : Forsikring(
-        virkningsdato,
-        opphørsdato,
-        dekningsgrad,
-        dekningIVentetid,
-        navn,
-        folketrygdlovenreferanse,
-    )
-
 data class KollektivForsikring(
     val navn: String,
     val dekningFolketrygdlovenreferanse: Folketrygdlovenreferanse,
@@ -72,11 +33,6 @@ data class NavKjøptForsikring(
 
 data class Forsikringsvurdering(
     val identitetsnummer: Identitetsnummer,
-    val harForsikring: Boolean,
-    val dekning: Dekning?,
-    val ekskluderteForsikringer: List<EkskludertForsikring>,
-    val gjeldendeForsikring: Forsikring?,
-    val dataHentetTidspunkt: Instant,
     val samletDekning: Dekning?,
     val kollektivForsikring: KollektivForsikring?,
     val navKjøpteForsikringer: List<NavKjøptForsikring>,

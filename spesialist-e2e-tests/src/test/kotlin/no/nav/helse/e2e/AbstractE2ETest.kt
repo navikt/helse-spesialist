@@ -110,11 +110,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     override fun hent(forsikringsvurderingId: ForsikringsvurderingId) =
                         Forsikringsvurdering(
                             identitetsnummer = lagIdentitetsnummer(),
-                            harForsikring = false,
-                            dekning = null,
-                            ekskluderteForsikringer = emptyList(),
-                            gjeldendeForsikring = null,
-                            dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                             samletDekning = null,
                             kollektivForsikring = null,
                             navKjøpteForsikringer = emptyList(),

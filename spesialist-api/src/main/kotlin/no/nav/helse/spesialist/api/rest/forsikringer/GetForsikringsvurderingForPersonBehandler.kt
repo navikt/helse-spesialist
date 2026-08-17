@@ -2,26 +2,18 @@ package no.nav.helse.spesialist.api.rest.forsikringer
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiDekning
-import no.nav.helse.spesialist.api.rest.ApiEkskluderingsbegrunnelse
-import no.nav.helse.spesialist.api.rest.ApiEkskluderingsårsak
-import no.nav.helse.spesialist.api.rest.ApiEkskludertForsikring
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiFolketrygdlovenreferanse
-import no.nav.helse.spesialist.api.rest.ApiForsikring
 import no.nav.helse.spesialist.api.rest.ApiForsikringsvurdering
 import no.nav.helse.spesialist.api.rest.ApiKollektivForsikring
 import no.nav.helse.spesialist.api.rest.ApiNavKjøptForsikring
 import no.nav.helse.spesialist.api.rest.ApiNavKjøptForsikringKonklusjon
-import no.nav.helse.spesialist.api.rest.ForsikringInnhold
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.application.Ekskluderingsårsak
-import no.nav.helse.spesialist.application.EkskludertForsikring
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
-import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.KollektivForsikring
@@ -69,38 +61,6 @@ class GetForsikringsvurderingForPersonBehandler(
     }
 }
 
-fun EkskludertForsikring.tilApiEkskludertForsikring(): ApiEkskludertForsikring =
-    ApiEkskludertForsikring(
-        virkningsdato = virkningsdato,
-        opphørsdato = opphørsdato,
-        dekningsgrad = dekningsgrad,
-        dekningIVentetid = dekningIVentetid,
-        navn = navn,
-        folketrygdlovenreferanse = folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
-        ekskluderingsårsak =
-            when (ekskluderingsårsak) {
-                Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO -> ApiEkskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO
-                Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO -> ApiEkskluderingsårsak.SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO
-                Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT -> ApiEkskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT
-                Ekskluderingsårsak.ALDRI_BETALT -> ApiEkskluderingsårsak.ALDRI_BETALT
-            },
-        ekskluderingsbegrunnelse =
-            ApiEkskluderingsbegrunnelse(
-                forklaring = ekskluderingsbegrunnelse.forklaring,
-                folketrygdlovenreferanse = ekskluderingsbegrunnelse.folketrygdlovenreferanse?.tilApiFolketrygdlovenreferanse(),
-            ),
-    )
-
-fun Forsikring.tilApiForsikring(): ApiForsikring =
-    ApiForsikring(
-        virkningsdato = virkningsdato,
-        opphørsdato = opphørsdato,
-        dekningsgrad = dekningsgrad,
-        dekningIVentetid = dekningIVentetid,
-        navn = navn,
-        folketrygdlovenreferanse = folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
-    )
-
 private fun Folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(): ApiFolketrygdlovenreferanse =
     ApiFolketrygdlovenreferanse(
         kapittel = kapittel,
@@ -111,17 +71,6 @@ private fun Folketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(): ApiFolket
 
 private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvurdering =
     ApiForsikringsvurdering(
-        eksisterer = harForsikring,
-        forsikringInnhold =
-            dekning?.let {
-                ForsikringInnhold(
-                    dekningsgrad = it.grad,
-                    gjelderFraDag = it.fraDag,
-                )
-            },
-        ekskluderteForsikringer = ekskluderteForsikringer.map { it.tilApiEkskludertForsikring() },
-        gjeldendeForsikring = gjeldendeForsikring?.tilApiForsikring(),
-        dataHentetTidspunkt = dataHentetTidspunkt,
         samletDekning =
             samletDekning?.let {
                 ApiDekning(

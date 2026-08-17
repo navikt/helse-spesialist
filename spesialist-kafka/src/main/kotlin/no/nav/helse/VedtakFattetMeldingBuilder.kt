@@ -201,8 +201,7 @@ class VedtakFattetMeldingBuilder(
             ?.let { forsikringsvurderingId ->
                 forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
                     ?: error("Fant ikke forsikringsvurdering med id $forsikringsvurderingId")
-            }?.takeIf { it.harForsikring }
-            ?.dekning
+            }?.samletDekning
             ?.let { VedtakFattetMelding.Dekning(dekningsgrad = it.grad, gjelderFraDag = it.fraDag) }
             ?: VedtakFattetMelding.Dekning(dekningsgrad = 80, gjelderFraDag = 17)
 

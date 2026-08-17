@@ -4,11 +4,7 @@ import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.spesialist.application.Ekskluderingsbegrunnelse
-import no.nav.helse.spesialist.application.Ekskluderingsårsak
-import no.nav.helse.spesialist.application.EkskludertForsikring
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
-import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.KollektivForsikring
@@ -51,61 +47,6 @@ class SpForsikringClientForsikringsvurderingHenter(
                                 val responseJson = objectMapper.readTree(responseBody)
                                 Forsikringsvurdering(
                                     identitetsnummer = Identitetsnummer.fraString(responseJson["identitetsnummer"].asString()),
-                                    harForsikring = responseJson["harForsikring"].asBoolean(),
-                                    dekning =
-                                        responseJson["dekning"]?.takeUnless { it.isNull }?.let { dekning ->
-                                            Forsikringsvurdering.Dekning(
-                                                grad = dekning["grad"].asInt(),
-                                                fraDag = dekning["fraDag"].asInt(),
-                                            )
-                                        },
-                                    ekskluderteForsikringer =
-                                        responseJson["ekskluderteForsikringer"]?.takeUnless { it.isNull }?.toList().orEmpty().map { ekskludertForsikring ->
-                                            EkskludertForsikring(
-                                                virkningsdato = ekskludertForsikring["virkningsdato"].asLocalDate(),
-                                                opphørsdato =
-                                                    ekskludertForsikring["opphørsdato"]
-                                                        ?.takeUnless { it.isNull }
-                                                        ?.asLocalDate(),
-                                                dekningsgrad = ekskludertForsikring["dekningsgrad"].asInt(),
-                                                dekningIVentetid = ekskludertForsikring["dekningIVentetid"].asBoolean(),
-                                                navn = ekskludertForsikring["navn"].asString(),
-                                                folketrygdlovenreferanse = ekskludertForsikring["folketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
-                                                ekskluderingsårsak =
-                                                    when (ekskludertForsikring["ekskluderingsårsak"].asString()) {
-                                                        "SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO" -> Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_INNEN_28_DAGER_FØR_VIRKNINGSDATO
-                                                        "SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO" -> Ekskluderingsårsak.SKJÆRINGSTIDSPUNKT_MER_ENN_28_DAGER_FØR_VIRKNINGSDATO
-                                                        "OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT" -> Ekskluderingsårsak.OPPHØRT_PÅ_SKJÆRINGSTIDSPUNKT
-                                                        "ALDRI_BETALT" -> Ekskluderingsårsak.ALDRI_BETALT
-                                                        else -> throw IllegalArgumentException("Ukjent ekskluderingsårsak: ${ekskludertForsikring["ekskluderingsårsak"].asString()}")
-                                                    },
-                                                ekskluderingsbegrunnelse =
-                                                    ekskludertForsikring["ekskluderingsbegrunnelse"].let { begrunnelse ->
-                                                        Ekskluderingsbegrunnelse(
-                                                            forklaring = begrunnelse["forklaring"].asString(),
-                                                            folketrygdlovenreferanse =
-                                                                begrunnelse["folketrygdlovenreferanse"]
-                                                                    ?.takeUnless { it.isNull }
-                                                                    ?.tilFolketrygdlovenreferanse(),
-                                                        )
-                                                    },
-                                            )
-                                        },
-                                    gjeldendeForsikring =
-                                        responseJson["gjeldendeForsikring"]?.takeUnless { it.isNull }?.let { gjeldendeForsikring ->
-                                            Forsikring(
-                                                virkningsdato = gjeldendeForsikring["virkningsdato"].asLocalDate(),
-                                                opphørsdato =
-                                                    gjeldendeForsikring["opphørsdato"]
-                                                        ?.takeUnless { it.isNull }
-                                                        ?.asLocalDate(),
-                                                dekningsgrad = gjeldendeForsikring["dekningsgrad"].asInt(),
-                                                dekningIVentetid = gjeldendeForsikring["dekningIVentetid"].asBoolean(),
-                                                navn = gjeldendeForsikring["navn"].asString(),
-                                                folketrygdlovenreferanse = gjeldendeForsikring["folketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
-                                            )
-                                        },
-                                    dataHentetTidspunkt = Instant.parse(responseJson["dataHentetTidspunkt"].asString()),
                                     samletDekning =
                                         responseJson["samletDekning"]?.takeUnless { it.isNull }?.let { samletDekning ->
                                             Forsikringsvurdering.Dekning(

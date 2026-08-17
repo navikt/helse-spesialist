@@ -6,7 +6,6 @@ import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Forsikringsvurdering
-import no.nav.helse.spesialist.application.testfixtures.lagForsikring
 import no.nav.helse.spesialist.application.testfixtures.lagNavKjøptForsikring
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -54,11 +52,6 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         integrationTestFixture.forsikringHenter.forsikringsvurdering =
             Forsikringsvurdering(
                 identitetsnummer = person.id,
-                harForsikring = false,
-                dekning = null,
-                ekskluderteForsikringer = emptyList(),
-                gjeldendeForsikring = null,
-                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                 samletDekning = null,
                 kollektivForsikring = null,
                 navKjøpteForsikringer = emptyList(),
@@ -152,17 +145,6 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         integrationTestFixture.forsikringHenter.forsikringsvurdering =
             Forsikringsvurdering(
                 identitetsnummer = person.id,
-                harForsikring = true,
-                dekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
-                ekskluderteForsikringer = emptyList(),
-                gjeldendeForsikring =
-                    lagForsikring(
-                        virkningsdato = LocalDate.of(2018, 1, 1),
-                        opphørsdato = null,
-                        dekningsgrad = 100,
-                        dekningIVentetid = false,
-                    ),
-                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                 samletDekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
                 kollektivForsikring = null,
                 navKjøpteForsikringer = listOf(lagNavKjøptForsikring()),
@@ -256,11 +238,6 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         integrationTestFixture.forsikringHenter.forsikringsvurdering =
             Forsikringsvurdering(
                 identitetsnummer = person.id,
-                harForsikring = false,
-                dekning = null,
-                ekskluderteForsikringer = emptyList(),
-                gjeldendeForsikring = null,
-                dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                 samletDekning = null,
                 kollektivForsikring = null,
                 navKjøpteForsikringer = emptyList(),
