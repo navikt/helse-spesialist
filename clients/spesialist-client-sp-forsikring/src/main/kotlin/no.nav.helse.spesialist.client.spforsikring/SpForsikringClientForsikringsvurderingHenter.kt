@@ -11,6 +11,8 @@ import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.application.KollektivForsikring
+import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.client.spforsikring.ClientUtils.Companion.retryMedBackoff
@@ -104,6 +106,52 @@ class SpForsikringClientForsikringsvurderingHenter(
                                             )
                                         },
                                     dataHentetTidspunkt = Instant.parse(responseJson["dataHentetTidspunkt"].asString()),
+                                    samletDekning =
+                                        responseJson["samletDekning"]?.takeUnless { it.isNull }?.let { samletDekning ->
+                                            Forsikringsvurdering.Dekning(
+                                                grad = samletDekning["grad"].asInt(),
+                                                fraDag = samletDekning["fraDag"].asInt(),
+                                            )
+                                        },
+                                    kollektivForsikring =
+                                        responseJson["kollektivForsikring"]?.takeUnless { it.isNull }?.let { kollektivForsikring ->
+                                            KollektivForsikring(
+                                                navn = kollektivForsikring["navn"].asString(),
+                                                dekningFolketrygdlovenreferanse =
+                                                    kollektivForsikring["dekningFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
+                                                kollektivFolketrygdlovenreferanse =
+                                                    kollektivForsikring["kollektivFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
+                                            )
+                                        },
+                                    navKjøpteForsikringer =
+                                        responseJson["navKjøpteForsikringer"]
+                                            ?.takeUnless { it.isNull }
+                                            ?.toList()
+                                            .orEmpty()
+                                            .map { navKjøptForsikring ->
+                                                NavKjøptForsikring(
+                                                    navn = navKjøptForsikring["navn"].asString(),
+                                                    dekningFolketrygdlovenreferanse =
+                                                        navKjøptForsikring["dekningFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
+                                                    virkningsdato = navKjøptForsikring["virkningsdato"].asLocalDate(),
+                                                    opphørsdato =
+                                                        navKjøptForsikring["opphørsdato"]
+                                                            ?.takeUnless { it.isNull }
+                                                            ?.asLocalDate(),
+                                                    konklusjon =
+                                                        navKjøptForsikring["konklusjon"].let { konklusjon ->
+                                                            NavKjøptForsikring.Konklusjon(
+                                                                forklaring = konklusjon["forklaring"].asString(),
+                                                                folketrygdlovenreferanse =
+                                                                    konklusjon["folketrygdlovenreferanse"]
+                                                                        ?.takeUnless { it.isNull }
+                                                                        ?.tilFolketrygdlovenreferanse(),
+                                                            )
+                                                        },
+                                                    lagtTilGrunn = navKjøptForsikring["lagtTilGrunn"].asBoolean(),
+                                                )
+                                            },
+                                    vurdertTidspunkt = Instant.parse(responseJson["vurdertTidspunkt"].asString()),
                                 )
                             }
 

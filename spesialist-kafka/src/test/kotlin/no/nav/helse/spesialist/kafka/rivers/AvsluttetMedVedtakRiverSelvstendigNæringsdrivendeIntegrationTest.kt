@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.testfixtures.lagForsikring
+import no.nav.helse.spesialist.application.testfixtures.lagNavKjøptForsikring
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
@@ -58,6 +59,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring = null,
                 dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                samletDekning = null,
+                kollektivForsikring = null,
+                navKjøpteForsikringer = emptyList(),
+                vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -158,6 +163,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                         dekningIVentetid = false,
                     ),
                 dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                samletDekning = Forsikringsvurdering.Dekning(grad = 100, fraDag = 17),
+                kollektivForsikring = null,
+                navKjøpteForsikringer = listOf(lagNavKjøptForsikring()),
+                vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -252,6 +261,10 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring = null,
                 dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                samletDekning = null,
+                kollektivForsikring = null,
+                navKjøpteForsikringer = emptyList(),
+                vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 

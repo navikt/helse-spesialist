@@ -50,6 +50,26 @@ class EkskludertForsikring(
         folketrygdlovenreferanse,
     )
 
+data class KollektivForsikring(
+    val navn: String,
+    val dekningFolketrygdlovenreferanse: Folketrygdlovenreferanse,
+    val kollektivFolketrygdlovenreferanse: Folketrygdlovenreferanse,
+)
+
+data class NavKjøptForsikring(
+    val navn: String,
+    val dekningFolketrygdlovenreferanse: Folketrygdlovenreferanse,
+    val virkningsdato: LocalDate,
+    val opphørsdato: LocalDate?,
+    val konklusjon: Konklusjon,
+    val lagtTilGrunn: Boolean,
+) {
+    data class Konklusjon(
+        val forklaring: String,
+        val folketrygdlovenreferanse: Folketrygdlovenreferanse?,
+    )
+}
+
 data class Forsikringsvurdering(
     val identitetsnummer: Identitetsnummer,
     val harForsikring: Boolean,
@@ -57,6 +77,10 @@ data class Forsikringsvurdering(
     val ekskluderteForsikringer: List<EkskludertForsikring>,
     val gjeldendeForsikring: Forsikring?,
     val dataHentetTidspunkt: Instant,
+    val samletDekning: Dekning?,
+    val kollektivForsikring: KollektivForsikring?,
+    val navKjøpteForsikringer: List<NavKjøptForsikring>,
+    val vurdertTidspunkt: Instant,
 ) {
     data class Dekning(
         val grad: Int,

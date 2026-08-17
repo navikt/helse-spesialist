@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest.forsikringer
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.spesialist.api.rest.ApiDekning
 import no.nav.helse.spesialist.api.rest.ApiEkskluderingsbegrunnelse
 import no.nav.helse.spesialist.api.rest.ApiEkskluderingsårsak
 import no.nav.helse.spesialist.api.rest.ApiEkskludertForsikring
@@ -8,6 +9,9 @@ import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiFolketrygdlovenreferanse
 import no.nav.helse.spesialist.api.rest.ApiForsikring
 import no.nav.helse.spesialist.api.rest.ApiForsikringsvurdering
+import no.nav.helse.spesialist.api.rest.ApiKollektivForsikring
+import no.nav.helse.spesialist.api.rest.ApiNavKjøptForsikring
+import no.nav.helse.spesialist.api.rest.ApiNavKjøptForsikringKonklusjon
 import no.nav.helse.spesialist.api.rest.ForsikringInnhold
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
@@ -20,6 +24,8 @@ import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.application.KollektivForsikring
+import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
@@ -116,6 +122,37 @@ private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvur
         ekskluderteForsikringer = ekskluderteForsikringer.map { it.tilApiEkskludertForsikring() },
         gjeldendeForsikring = gjeldendeForsikring?.tilApiForsikring(),
         dataHentetTidspunkt = dataHentetTidspunkt,
+        samletDekning =
+            samletDekning?.let {
+                ApiDekning(
+                    grad = it.grad,
+                    fraDag = it.fraDag,
+                )
+            },
+        kollektivForsikring = kollektivForsikring?.tilApiKollektivForsikring(),
+        navKjøpteForsikringer = navKjøpteForsikringer.map { it.tilApiNavKjøptForsikring() },
+        vurdertTidspunkt = vurdertTidspunkt,
+    )
+
+private fun KollektivForsikring.tilApiKollektivForsikring(): ApiKollektivForsikring =
+    ApiKollektivForsikring(
+        navn = navn,
+        dekningFolketrygdlovenreferanse = dekningFolketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
+        kollektivFolketrygdlovenreferanse = kollektivFolketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
+    )
+
+private fun NavKjøptForsikring.tilApiNavKjøptForsikring(): ApiNavKjøptForsikring =
+    ApiNavKjøptForsikring(
+        navn = navn,
+        dekningFolketrygdlovenreferanse = dekningFolketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
+        virkningsdato = virkningsdato,
+        opphørsdato = opphørsdato,
+        konklusjon =
+            ApiNavKjøptForsikringKonklusjon(
+                forklaring = konklusjon.forklaring,
+                folketrygdlovenreferanse = konklusjon.folketrygdlovenreferanse?.tilApiFolketrygdlovenreferanse(),
+            ),
+        lagtTilGrunn = lagtTilGrunn,
     )
 
 enum class ApiGetForsikringsvurderingForPersonErrorCode(

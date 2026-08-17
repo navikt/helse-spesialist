@@ -13,6 +13,8 @@ import no.nav.helse.spesialist.application.Ekskluderingsbegrunnelse
 import no.nav.helse.spesialist.application.Ekskluderingsårsak
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.KollektivForsikring
+import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -107,7 +109,63 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "bokstav": "b"
                                 }
                             },
-                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z"
+                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z",
+                            "samletDekning": { "grad": 100, "fraDag": 17 },
+                            "kollektivForsikring": {
+                                "navn": "100 % fra 17. dag (Kollektiv)",
+                                "dekningFolketrygdlovenreferanse": {
+                                    "kapittel": 8,
+                                    "paragrafIKapittel": 34,
+                                    "ledd": 1,
+                                    "bokstav": null
+                                },
+                                "kollektivFolketrygdlovenreferanse": {
+                                    "kapittel": 8,
+                                    "paragrafIKapittel": 39,
+                                    "ledd": null,
+                                    "bokstav": null
+                                }
+                            },
+                            "navKjøpteForsikringer": [
+                                {
+                                    "navn": "100 % fra 17. dag (Nav-kjøpt)",
+                                    "dekningFolketrygdlovenreferanse": {
+                                        "kapittel": 8,
+                                        "paragrafIKapittel": 36,
+                                        "ledd": 1,
+                                        "bokstav": "b"
+                                    },
+                                    "virkningsdato": "2020-01-01",
+                                    "opphørsdato": null,
+                                    "konklusjon": {
+                                        "forklaring": "Lagt til grunn",
+                                        "folketrygdlovenreferanse": null
+                                    },
+                                    "lagtTilGrunn": true
+                                },
+                                {
+                                    "navn": "80 % fra 1. dag (Nav-kjøpt)",
+                                    "dekningFolketrygdlovenreferanse": {
+                                        "kapittel": 8,
+                                        "paragrafIKapittel": 36,
+                                        "ledd": 1,
+                                        "bokstav": "a"
+                                    },
+                                    "virkningsdato": "2018-01-01",
+                                    "opphørsdato": "2019-12-31",
+                                    "konklusjon": {
+                                        "forklaring": "Forsikringen opphørte før skjæringstidspunktet",
+                                        "folketrygdlovenreferanse": {
+                                            "kapittel": 8,
+                                            "paragrafIKapittel": 37,
+                                            "ledd": null,
+                                            "bokstav": null
+                                        }
+                                    },
+                                    "lagtTilGrunn": false
+                                }
+                            ],
+                            "vurdertTidspunkt": "2020-02-01T09:31:00Z"
                         }
                         """.trimIndent(),
                     ),
@@ -123,6 +181,50 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         assertTrue(actualForsikring.harForsikring)
         assertEquals(Forsikringsvurdering.Dekning(grad = 100, fraDag = 17), actualForsikring.dekning)
         assertEquals(Instant.parse("2020-02-01T09:30:00Z"), actualForsikring.dataHentetTidspunkt)
+        assertEquals(Instant.parse("2020-02-01T09:31:00Z"), actualForsikring.vurdertTidspunkt)
+        assertEquals(Forsikringsvurdering.Dekning(grad = 100, fraDag = 17), actualForsikring.samletDekning)
+        assertEquals(
+            KollektivForsikring(
+                navn = "100 % fra 17. dag (Kollektiv)",
+                dekningFolketrygdlovenreferanse =
+                    Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 34, ledd = 1, bokstav = null),
+                kollektivFolketrygdlovenreferanse =
+                    Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 39, ledd = null, bokstav = null),
+            ),
+            actualForsikring.kollektivForsikring,
+        )
+        assertEquals(
+            listOf(
+                NavKjøptForsikring(
+                    navn = "100 % fra 17. dag (Nav-kjøpt)",
+                    dekningFolketrygdlovenreferanse =
+                        Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'b'),
+                    virkningsdato = LocalDate.of(2020, 1, 1),
+                    opphørsdato = null,
+                    konklusjon =
+                        NavKjøptForsikring.Konklusjon(
+                            forklaring = "Lagt til grunn",
+                            folketrygdlovenreferanse = null,
+                        ),
+                    lagtTilGrunn = true,
+                ),
+                NavKjøptForsikring(
+                    navn = "80 % fra 1. dag (Nav-kjøpt)",
+                    dekningFolketrygdlovenreferanse =
+                        Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'a'),
+                    virkningsdato = LocalDate.of(2018, 1, 1),
+                    opphørsdato = LocalDate.of(2019, 12, 31),
+                    konklusjon =
+                        NavKjøptForsikring.Konklusjon(
+                            forklaring = "Forsikringen opphørte før skjæringstidspunktet",
+                            folketrygdlovenreferanse =
+                                Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 37, ledd = null, bokstav = null),
+                        ),
+                    lagtTilGrunn = false,
+                ),
+            ),
+            actualForsikring.navKjøpteForsikringer,
+        )
 
         val gjeldendeForsikring = assertNotNull(actualForsikring.gjeldendeForsikring)
         assertEquals(LocalDate.of(2020, 1, 1), gjeldendeForsikring.virkningsdato)
@@ -192,7 +294,11 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                             "dekning": null,
                             "ekskluderteForsikringer": [],
                             "gjeldendeForsikring": null,
-                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z"
+                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z",
+                            "samletDekning": null,
+                            "kollektivForsikring": null,
+                            "navKjøpteForsikringer": [],
+                            "vurdertTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),
                     ),
@@ -212,6 +318,10 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                     ekskluderteForsikringer = emptyList(),
                     gjeldendeForsikring = null,
                     dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                    samletDekning = null,
+                    kollektivForsikring = null,
+                    navKjøpteForsikringer = emptyList(),
+                    vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                 ),
             actual = actualForsikring,
         )
@@ -278,7 +388,11 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "bokstav": "b"
                                 }
                             },
-                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z"
+                            "dataHentetTidspunkt": "2020-02-01T09:30:00Z",
+                            "samletDekning": { "grad": 100, "fraDag": 17 },
+                            "kollektivForsikring": null,
+                            "navKjøpteForsikringer": [],
+                            "vurdertTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),
                     ),

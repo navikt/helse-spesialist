@@ -9,6 +9,8 @@ import no.nav.helse.spesialist.application.EkskludertForsikring
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikring
 import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.KollektivForsikring
+import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testfixtures.lagForsikring
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -91,6 +93,57 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                             ),
                     ),
                 dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                samletDekning =
+                    Forsikringsvurdering.Dekning(
+                        grad = 100,
+                        fraDag = 17,
+                    ),
+                kollektivForsikring =
+                    KollektivForsikring(
+                        navn = "100 % fra 17. dag (Kollektiv)",
+                        dekningFolketrygdlovenreferanse =
+                            Folketrygdlovenreferanse(
+                                kapittel = 8,
+                                paragrafIKapittel = 34,
+                                ledd = 1,
+                                bokstav = null,
+                            ),
+                        kollektivFolketrygdlovenreferanse =
+                            Folketrygdlovenreferanse(
+                                kapittel = 8,
+                                paragrafIKapittel = 39,
+                                ledd = null,
+                                bokstav = null,
+                            ),
+                    ),
+                navKjøpteForsikringer =
+                    listOf(
+                        NavKjøptForsikring(
+                            navn = "80 % fra 1. dag (Nav-kjøpt)",
+                            dekningFolketrygdlovenreferanse =
+                                Folketrygdlovenreferanse(
+                                    kapittel = 8,
+                                    paragrafIKapittel = 36,
+                                    ledd = 1,
+                                    bokstav = 'a',
+                                ),
+                            virkningsdato = LocalDate.of(2018, 1, 1),
+                            opphørsdato = LocalDate.of(2019, 12, 31),
+                            konklusjon =
+                                NavKjøptForsikring.Konklusjon(
+                                    forklaring = "Forsikringen opphørte før skjæringstidspunktet",
+                                    folketrygdlovenreferanse =
+                                        Folketrygdlovenreferanse(
+                                            kapittel = 8,
+                                            paragrafIKapittel = 37,
+                                            ledd = null,
+                                            bokstav = null,
+                                        ),
+                                ),
+                            lagtTilGrunn = false,
+                        ),
+                    ),
+                vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
 
         // When:
@@ -148,7 +201,50 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                      "bokstav" : "b"
                   }
                },
-               "dataHentetTidspunkt" : "2020-02-01T09:30:00Z"
+               "dataHentetTidspunkt" : "2020-02-01T09:30:00Z",
+               "samletDekning" : {
+                  "grad" : 100,
+                  "fraDag" : 17
+               },
+               "kollektivForsikring" : {
+                  "navn" : "100 % fra 17. dag (Kollektiv)",
+                  "dekningFolketrygdlovenreferanse" : {
+                     "kapittel" : 8,
+                     "paragrafIKapittel" : 34,
+                     "ledd" : 1,
+                     "bokstav" : null
+                  },
+                  "kollektivFolketrygdlovenreferanse" : {
+                     "kapittel" : 8,
+                     "paragrafIKapittel" : 39,
+                     "ledd" : null,
+                     "bokstav" : null
+                  }
+               },
+               "navKjøpteForsikringer" : [
+                  {
+                     "navn" : "80 % fra 1. dag (Nav-kjøpt)",
+                     "dekningFolketrygdlovenreferanse" : {
+                        "kapittel" : 8,
+                        "paragrafIKapittel" : 36,
+                        "ledd" : 1,
+                        "bokstav" : "a"
+                     },
+                     "virkningsdato" : "2018-01-01",
+                     "opphørsdato" : "2019-12-31",
+                     "konklusjon" : {
+                        "forklaring" : "Forsikringen opphørte før skjæringstidspunktet",
+                        "folketrygdlovenreferanse" : {
+                           "kapittel" : 8,
+                           "paragrafIKapittel" : 37,
+                           "ledd" : null,
+                           "bokstav" : null
+                        }
+                     },
+                     "lagtTilGrunn" : false
+                  }
+               ],
+               "vurdertTidspunkt" : "2020-02-01T09:30:00Z"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -174,6 +270,10 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                 ekskluderteForsikringer = emptyList(),
                 gjeldendeForsikring = null,
                 dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                samletDekning = null,
+                kollektivForsikring = null,
+                navKjøpteForsikringer = emptyList(),
+                vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
 
         // When:
@@ -192,7 +292,11 @@ class GetForsikringsvurderingForPersonIntegrationTest {
               "forsikringInnhold" : null,
               "ekskluderteForsikringer" : [],
               "gjeldendeForsikring" : null,
-              "dataHentetTidspunkt" : "2020-02-01T09:30:00Z"
+              "dataHentetTidspunkt" : "2020-02-01T09:30:00Z",
+              "samletDekning" : null,
+              "kollektivForsikring" : null,
+              "navKjøpteForsikringer" : [],
+              "vurdertTidspunkt" : "2020-02-01T09:30:00Z"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -293,6 +397,14 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                         dekningIVentetid = false,
                     ),
                 dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                samletDekning =
+                    Forsikringsvurdering.Dekning(
+                        grad = 100,
+                        fraDag = 17,
+                    ),
+                kollektivForsikring = null,
+                navKjøpteForsikringer = emptyList(),
+                vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
             )
 
         // When:

@@ -115,6 +115,10 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                             ekskluderteForsikringer = emptyList(),
                             gjeldendeForsikring = null,
                             dataHentetTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                            samletDekning = null,
+                            kollektivForsikring = null,
+                            navKjøpteForsikringer = emptyList(),
+                            vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                         )
                 },
             environmentToggles =
