@@ -45,28 +45,23 @@ class GraderteAndreYtelserBehovRiver : TransaksjonellRiver() {
         val løsning =
             transaksjon.graderteAndreYtelserRepository
                 .finnAlleForIdentitetsnummer(identitetsnummer)
-                .asSequence()
                 .filterNot { it.fjernet }
-                .flatMap { graderteAndreYtelser ->
-                    graderteAndreYtelser.perioder
-                        .asSequence()
-                        .filter { it.periode overlapper forespurtPeriode }
-                        .map { periode ->
-                            mapOf(
-                                "graderteAndreYtelserType" to graderteAndreYtelser.graderteAndreYtelserType.name,
-                                "fom" to maxOf(periode.periode.fom, forespurtPeriode.fom),
-                                "tom" to minOf(periode.periode.tom, forespurtPeriode.tom),
-                                "grad" to periode.grad,
-                            )
-                        }
-                }.sortedWith(
-                    compareBy<Map<String, Any?>>(
-                        { it.getValue("graderteAndreYtelserType") as String },
-                        { it.getValue("fom").toString() },
-                        { it.getValue("tom").toString() },
-                        { it.getValue("grad") as Int },
-                    ),
-                ).toList()
+                .map { graderteAndreYtelser ->
+                    mapOf(
+                        "graderteAndreYtelserType" to graderteAndreYtelser.graderteAndreYtelserType.name,
+                        "graderteAndreYtelserPerioder" to
+                            graderteAndreYtelser.perioder
+                                .filter { it.periode overlapper forespurtPeriode }
+                                .map { periode ->
+                                    mapOf(
+                                        "fom" to maxOf(periode.periode.fom, forespurtPeriode.fom),
+                                        "tom" to minOf(periode.periode.tom, forespurtPeriode.tom),
+                                        "grad" to periode.grad,
+                                    )
+                                }.sortedBy { it.getValue("fom").toString() },
+                    )
+                }.filter { (it.getValue("graderteAndreYtelserPerioder") as List<*>).isNotEmpty() }
+                .sortedBy { it.getValue("graderteAndreYtelserType") as String }
 
         val løstPacket =
             (objectMapper.readTree(packet.toJson()) as ObjectNode).also { original ->

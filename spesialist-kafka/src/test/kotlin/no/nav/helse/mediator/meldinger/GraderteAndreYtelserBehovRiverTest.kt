@@ -28,7 +28,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
     private val testperson = TestPerson()
 
     @Test
-    fun `publiserer overlappende graderte andre ytelser som flat liste og bevarer packet`() {
+    fun `publiserer overlappende graderte andre ytelser gruppert per type og bevarer packet`() {
         lagreGraderteAndreYtelser(
             type = GraderteAndreYtelserType.FORELDREPENGER,
             perioder =
@@ -56,10 +56,22 @@ internal class GraderteAndreYtelserBehovRiverTest {
         val løsning = svar["@løsning"]["GraderteAndreYtelserForBeregning"]
         assertEquals("behov-123", svar["@behovId"].asString())
         assertEquals("behandling-123", svar["behandlingId"].asString())
-        assertEquals(3, løsning.size())
-        assertLøsningsrad(løsning[0], "FORELDREPENGER", 1.januar(), 2.januar(), 50)
-        assertLøsningsrad(løsning[1], "FORELDREPENGER", 5.januar(), 6.januar(), 80)
-        assertLøsningsrad(løsning[2], "SVANGERSKAPSPENGER", 3.januar(), 4.januar(), 40)
+        assertEquals(2, løsning.size())
+        assertLøsningsrad(
+            løsning[0],
+            "FORELDREPENGER",
+            listOf(
+                Triple(1.januar(), 2.januar(), 50),
+                Triple(5.januar(), 6.januar(), 80),
+            ),
+        )
+        assertLøsningsrad(
+            løsning[1],
+            "SVANGERSKAPSPENGER",
+            listOf(
+                Triple(3.januar(), 4.januar(), 40),
+            ),
+        )
     }
 
     @Test
@@ -91,15 +103,21 @@ internal class GraderteAndreYtelserBehovRiverTest {
                 "GraderteAndreYtelserForBeregning": [
                   {
                     "graderteAndreYtelserType": "PLEIEPENGER",
-                    "fom": "2024-01-01",
-                    "tom": "2024-01-31",
-                    "grad": 50
+                    "graderteAndreYtelserPerioder": [
+                    {
+                        "fom": "2024-01-01",
+                        "tom": "2024-01-31",
+                        "grad": 50
+                      }
+                    ]
                   },
                   {
                     "graderteAndreYtelserType": "SVANGERSKAPSPENGER",
-                    "fom": "2024-01-10",
-                    "tom": "2024-01-12",
-                    "grad": 20
+                    "graderteAndreYtelserPerioder": [{
+                      "fom": "2024-01-10",
+                      "tom": "2024-01-12",
+                      "grad": 20
+                    }]
                   }
                 ]
               }
@@ -119,7 +137,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
 
         val løsning = rapid.inspektør.message(0)["@løsning"]["GraderteAndreYtelserForBeregning"]
         assertEquals(1, løsning.size())
-        assertLøsningsrad(løsning[0], "PLEIEPENGER", 1.januar(), 31.januar(), 50)
+        assertLøsningsrad(løsning[0], "PLEIEPENGER", listOf(Triple(1.januar(), 31.januar(), 50)))
     }
 
     @Test
@@ -197,14 +215,16 @@ internal class GraderteAndreYtelserBehovRiverTest {
     private fun assertLøsningsrad(
         jsonNode: JsonNode,
         graderteAndreYtelserType: String,
-        fom: LocalDate,
-        tom: LocalDate,
-        grad: Int,
+        perioder: List<Triple<LocalDate, LocalDate, Int>>,
     ) {
         assertEquals(graderteAndreYtelserType, jsonNode["graderteAndreYtelserType"].asString())
-        assertEquals(fom.toString(), jsonNode["fom"].asString())
-        assertEquals(tom.toString(), jsonNode["tom"].asString())
-        assertEquals(grad, jsonNode["grad"].asInt())
+        val perioderNode = jsonNode["graderteAndreYtelserPerioder"]
+        assertEquals(perioder.size, perioderNode.size())
+        perioder.forEachIndexed { index, (fom, tom, grad) ->
+            assertEquals(fom.toString(), perioderNode[index]["fom"].asString())
+            assertEquals(tom.toString(), perioderNode[index]["tom"].asString())
+            assertEquals(grad, perioderNode[index]["grad"].asInt())
+        }
     }
 
     private fun assertPublisertJson(
