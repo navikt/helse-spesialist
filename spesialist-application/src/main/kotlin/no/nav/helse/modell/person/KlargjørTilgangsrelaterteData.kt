@@ -4,17 +4,13 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterEnhetCommand
-import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
-import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
+import no.nav.helse.modell.kommando.*
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import tools.jackson.databind.JsonNode
-import java.util.UUID
+import java.util.*
 
 class KlargjørTilgangsrelaterteData(
     override val id: UUID,
@@ -32,7 +28,12 @@ class KlargjørTilgangsrelaterteData(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { klargjørTilgangsrelaterteData(this@KlargjørTilgangsrelaterteData, sessionContext) }
+        kommandostarter {
+            KlargjørTilgangsrelaterteDataCommand(
+                fødselsnummer = fødselsnummer(),
+                personRepository = sessionContext.personRepository,
+            )
+        }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

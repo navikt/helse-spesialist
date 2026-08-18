@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 class EndretEgenAnsattStatus(
     override val id: UUID,
@@ -35,7 +35,13 @@ class EndretEgenAnsattStatus(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus) }
+        kommandostarter {
+            EndretEgenAnsattStatusCommand(
+                fødselsnummer = fødselsnummer(),
+                erEgenAnsatt = erEgenAnsatt,
+                opprettet = opprettet,
+            )
+        }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

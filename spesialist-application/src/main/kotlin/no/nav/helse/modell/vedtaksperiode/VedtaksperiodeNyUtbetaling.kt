@@ -9,7 +9,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.person.LegacyPerson
 import tools.jackson.databind.JsonNode
-import java.util.UUID
+import java.util.*
 
 class VedtaksperiodeNyUtbetaling(
     override val id: UUID,
@@ -36,7 +36,13 @@ class VedtaksperiodeNyUtbetaling(
         sessionContext: SessionContext,
     ) {
         person.nyUtbetalingForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        kommandostarter { vedtaksperiodeNyUtbetaling(this@VedtaksperiodeNyUtbetaling, sessionContext) }
+        kommandostarter {
+            VedtaksperiodeNyUtbetalingCommand(
+                vedtaksperiodeId = vedtaksperiodeId(),
+                utbetalingId = utbetalingId,
+                utbetalingDao = sessionContext.utbetalingDao,
+            )
+        }
     }
 
     override fun toJson(): String = json

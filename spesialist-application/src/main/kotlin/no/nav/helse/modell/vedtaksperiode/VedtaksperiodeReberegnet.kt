@@ -4,20 +4,14 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.kommando.AvbrytContextCommand
-import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
-import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
-import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
+import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
-import java.util.UUID
+import java.util.*
 
 class VedtaksperiodeReberegnet(
     override val id: UUID,
@@ -47,7 +41,15 @@ class VedtaksperiodeReberegnet(
     ) {
         val vedtaksperiode =
             checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) { "Fant ikke vedtaksperiode med id: $vedtaksperiodeId" }
-        kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, spleisBehandlingId, sessionContext) }
+        kommandostarter {
+            VedtaksperiodeReberegnetCommand(
+                fødselsnummer = fødselsnummer(),
+                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
+                spleisBehandlingId = spleisBehandlingId,
+                periodehistorikkDao = sessionContext.periodehistorikkDao,
+                spesialistBehandlingId = vedtaksperiode.gjeldendeUnikId,
+            )
+        }
     }
 }
 

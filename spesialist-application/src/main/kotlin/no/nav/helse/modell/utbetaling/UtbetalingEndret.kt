@@ -10,7 +10,7 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class UtbetalingEndret(
     override val id: UUID,
@@ -47,7 +47,23 @@ class UtbetalingEndret(
         sessionContext: SessionContext,
     ) {
         if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
-        this.kommandostarter { utbetalingEndret(this@UtbetalingEndret, sessionContext) }
+        this.kommandostarter {
+            UtbetalingEndretCommand(
+                fødselsnummer = fødselsnummer(),
+                organisasjonsnummer = organisasjonsnummer,
+                utbetalingId = utbetalingId,
+                utbetalingstype = type,
+                gjeldendeStatus = gjeldendeStatus,
+                opprettet = opprettet,
+                arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+                personOppdrag = personOppdrag,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
+                utbetalingDao = sessionContext.utbetalingDao,
+                opptegnelseRepository = sessionContext.opptegnelseRepository,
+                json = toJson(),
+            )
+        }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

@@ -3,9 +3,11 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.person.LegacyPerson
+import no.nav.helse.spesialist.application.Outbox
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class VeilederStansMelding(
     override val id: UUID,
@@ -22,7 +24,11 @@ class VeilederStansMelding(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { veilederStansBehandler(this@VeilederStansMelding) }
+        kommandostarter {
+            ikkesuspenderendeCommand { sessionContext: SessionContext, _: Outbox ->
+                VeilederStansMediator.Factory.veilederStansMediator(sessionContext).håndter(this@VeilederStansMelding)
+            }
+        }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

@@ -4,18 +4,13 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.modell.kommando.AvbrytContextCommand
-import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
-import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
+import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import tools.jackson.databind.JsonNode
-import java.util.UUID
+import java.util.*
 
 class VedtaksperiodeForkastet(
     override val id: UUID,
@@ -43,10 +38,12 @@ class VedtaksperiodeForkastet(
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
         kommandostarter {
-            vedtaksperiodeForkastet(
-                this@VedtaksperiodeForkastet,
-                person.forkastedeVedtaksperiodeIder(),
-                sessionContext,
+            VedtaksperiodeForkastetCommand(
+                fødselsnummer = fødselsnummer(),
+                vedtaksperiodeId = vedtaksperiodeId(),
+                spleisBehandlingId = spleisBehandlingId,
+                alleForkastedeVedtaksperiodeIder = person.forkastedeVedtaksperiodeIder(),
+                oppgaveRepository = sessionContext.oppgaveRepository,
             )
         }
     }

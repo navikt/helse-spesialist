@@ -10,7 +10,7 @@ import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import tools.jackson.databind.JsonNode
-import java.util.UUID
+import java.util.*
 
 class AdressebeskyttelseEndret(
     override val id: UUID,
@@ -33,9 +33,8 @@ class AdressebeskyttelseEndret(
         sessionContext: SessionContext,
     ) {
         kommandostarter {
-            adressebeskyttelseEndret(
-                this@AdressebeskyttelseEndret,
-            )
+            val identitetsnummer = Identitetsnummer.fraString(fødselsnummer())
+            AdressebeskyttelseEndretCommand(identitetsnummer = identitetsnummer)
         }
     }
 }

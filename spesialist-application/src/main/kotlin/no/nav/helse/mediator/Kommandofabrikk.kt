@@ -4,35 +4,15 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.db.MetrikkDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndretCommand
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.TilbakedateringBehandlet
-import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
-import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.modell.person.EndretEgenAnsattStatus
-import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
-import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
+import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMediator
-import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMelding
-import no.nav.helse.modell.utbetaling.UtbetalingEndret
-import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastetCommand
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import no.nav.helse.spesialist.application.Outbox
@@ -40,10 +20,8 @@ import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggDebug
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.medMdc
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import java.util.UUID
+import java.util.*
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
@@ -53,15 +31,6 @@ class Kommandofabrikk(
     private val stikkprøver: Stikkprøver,
 ) {
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
-
-    internal fun endretEgenAnsattStatus(
-        melding: EndretEgenAnsattStatus,
-    ): EndretEgenAnsattStatusCommand =
-        EndretEgenAnsattStatusCommand(
-            fødselsnummer = melding.fødselsnummer(),
-            erEgenAnsatt = melding.erEgenAnsatt,
-            opprettet = melding.opprettet,
-        )
 
     internal fun gosysOppgaveEndret(
         person: LegacyPerson,
@@ -119,90 +88,6 @@ class Kommandofabrikk(
             automatiseringDao = sessionContext.automatiseringDao,
             vedtakRepository = sessionContext.vedtakRepository,
         )
-    }
-
-    internal fun vedtaksperiodeReberegnet(
-        hendelse: VedtaksperiodeReberegnet,
-        vedtaksperiode: LegacyVedtaksperiode,
-        spleisBehandlingId: SpleisBehandlingId,
-        sessionContext: SessionContext,
-    ): VedtaksperiodeReberegnetCommand =
-        VedtaksperiodeReberegnetCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
-            spleisBehandlingId = spleisBehandlingId,
-            periodehistorikkDao = sessionContext.periodehistorikkDao,
-            spesialistBehandlingId = vedtaksperiode.gjeldendeUnikId,
-        )
-
-    internal fun vedtaksperiodeNyUtbetaling(
-        hendelse: VedtaksperiodeNyUtbetaling,
-        sessionContext: SessionContext,
-    ): VedtaksperiodeNyUtbetalingCommand =
-        VedtaksperiodeNyUtbetalingCommand(
-            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            utbetalingId = hendelse.utbetalingId,
-            utbetalingDao = sessionContext.utbetalingDao,
-        )
-
-    internal fun adressebeskyttelseEndret(
-        melding: AdressebeskyttelseEndret,
-    ): AdressebeskyttelseEndretCommand {
-        val identitetsnummer = Identitetsnummer.fraString(melding.fødselsnummer())
-        return AdressebeskyttelseEndretCommand(
-            identitetsnummer = identitetsnummer,
-        )
-    }
-
-    internal fun klargjørTilgangsrelaterteData(
-        hendelse: Personmelding,
-        sessionContext: SessionContext,
-    ): KlargjørTilgangsrelaterteDataCommand =
-        KlargjørTilgangsrelaterteDataCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            personRepository = sessionContext.personRepository,
-        )
-
-    internal fun utbetalingEndret(
-        hendelse: UtbetalingEndret,
-        sessionContext: SessionContext,
-    ): UtbetalingEndretCommand =
-        UtbetalingEndretCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            organisasjonsnummer = hendelse.organisasjonsnummer,
-            utbetalingId = hendelse.utbetalingId,
-            utbetalingstype = hendelse.type,
-            gjeldendeStatus = hendelse.gjeldendeStatus,
-            opprettet = hendelse.opprettet,
-            arbeidsgiverOppdrag = hendelse.arbeidsgiverOppdrag,
-            personOppdrag = hendelse.personOppdrag,
-            arbeidsgiverbeløp = hendelse.arbeidsgiverbeløp,
-            personbeløp = hendelse.personbeløp,
-            utbetalingDao = sessionContext.utbetalingDao,
-            opptegnelseRepository = sessionContext.opptegnelseRepository,
-            json = hendelse.toJson(),
-        )
-
-    internal fun vedtaksperiodeForkastet(
-        hendelse: VedtaksperiodeForkastet,
-        alleForkastedeVedtaksperiodeIder: List<UUID>,
-        sessionContext: SessionContext,
-    ): VedtaksperiodeForkastetCommand =
-        VedtaksperiodeForkastetCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            vedtaksperiodeId = hendelse.vedtaksperiodeId(),
-            spleisBehandlingId = hendelse.spleisBehandlingId,
-            alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
-            oppgaveRepository = sessionContext.oppgaveRepository,
-        )
-
-    internal fun veilederStansBehandler(
-        hendelse: VeilederStansMelding,
-    ) = ikkesuspenderendeCommand { sessionContext: SessionContext, _: Outbox ->
-        VeilederStansMediator.Factory
-            .veilederStansMediator(
-                sessionContext,
-            ).håndter(hendelse)
     }
 
     internal fun godkjenningsbehov(
