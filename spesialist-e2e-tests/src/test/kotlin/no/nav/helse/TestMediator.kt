@@ -28,14 +28,6 @@ class TestMediator(
     private val daos = DBDaos(dataSource)
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
-    private val oppgaveService =
-        OppgaveService(
-            oppgaveDao = daos.oppgaveDao,
-            reservasjonDao = daos.reservasjonDao,
-            meldingPubliserer = meldingPubliserer,
-            oppgaveRepository = daos.oppgaveRepository,
-            brukerrollehenter = { Either.Success(emptySet()) },
-        )
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             daos = daos,
@@ -67,7 +59,15 @@ class TestMediator(
 
     private val kommandofabrikk =
         Kommandofabrikk(
-            oppgaveServiceProvider = { _ -> oppgaveService },
+            oppgaveServiceProvider = { sessionContext ->
+                OppgaveService(
+                    oppgaveDao = sessionContext.oppgaveDao,
+                    reservasjonDao = sessionContext.reservasjonDao,
+                    meldingPubliserer = meldingPubliserer,
+                    oppgaveRepository = sessionContext.oppgaveRepository,
+                    brukerrollehenter = { Either.Success(emptySet()) },
+                )
+            },
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
         )
