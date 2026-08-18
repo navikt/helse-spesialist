@@ -112,7 +112,7 @@ private fun parsePersoninfo(node: JsonNode): HentPersoninfoløsning {
     val mellomnavn = node.path("mellomnavn").takeUnless(JsonNode::isMissingOrNull)?.asString()
     val etternavn = node.path("etternavn").asString()
     val fødselsdato = node.path("fødselsdato").asLocalDate()
-    val kjønn = Kjønn.valueOf(node.path("kjønn").textValue())
-    val adressebeskyttelse = Adressebeskyttelse.valueOf(node.path("adressebeskyttelse").textValue())
+    val kjønn = Kjønn.valueOf(node.path("kjønn").stringValue())
+    val adressebeskyttelse = Adressebeskyttelse.valueOf(node.path("adressebeskyttelse").stringValue())
     return HentPersoninfoløsning(ident, fornavn, mellomnavn, etternavn, fødselsdato, kjønn, adressebeskyttelse)
 }

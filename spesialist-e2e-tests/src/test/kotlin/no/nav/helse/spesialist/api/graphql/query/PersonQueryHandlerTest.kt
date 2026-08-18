@@ -26,11 +26,7 @@ import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
-import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.*
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -38,10 +34,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
@@ -49,7 +42,7 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 import tools.jackson.module.kotlin.convertValue
 import tools.jackson.module.kotlin.treeToValue
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertContains
 
 class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
@@ -320,13 +313,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         val perioder = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
         assertEquals(2, perioder.size())
-        val responseperiode1 = perioder.first { it["vedtaksperiodeId"].textValue() == periode1.id.toString() }
-        val responseperiode2 = perioder.first { it["vedtaksperiodeId"].textValue() == periode2.id.toString() }
+        val responseperiode1 = perioder.first { it["vedtaksperiodeId"].stringValue() == periode1.id.toString() }
+        val responseperiode2 = perioder.first { it["vedtaksperiodeId"].stringValue() == periode2.id.toString() }
         assertFalse(
-            responseperiode1["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
+            responseperiode1["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
         )
         assertTrue(
-            responseperiode2["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
+            responseperiode2["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
         )
     }
 
@@ -345,7 +338,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
         val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
         assertFalse(periode["handlinger"].isEmpty)
-        assertTrue(periode["handlinger"].first { it["type"].textValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue())
+        assertTrue(periode["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
 
     @Test
@@ -370,7 +363,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 .first()["hendelser"]
                 .first()
         assertNotNull(hendelse)
-        assertEquals(eksternDokumentId.toString(), hendelse["eksternDokumentId"].textValue())
+        assertEquals(eksternDokumentId.toString(), hendelse["eksternDokumentId"].stringValue())
     }
 
     @Test
@@ -455,9 +448,9 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 .first()["avslag"]
                 .first()
         assertNotNull(avslag)
-        assertEquals(ApiAvslagstype.AVSLAG, enumValueOf<ApiAvslagstype>(avslag["type"].textValue()))
-        assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].textValue())
-        assertEquals(saksbehandler.ident.value, avslag["saksbehandlerIdent"].textValue())
+        assertEquals(ApiAvslagstype.AVSLAG, enumValueOf<ApiAvslagstype>(avslag["type"].stringValue()))
+        assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].stringValue())
+        assertEquals(saksbehandler.ident.value, avslag["saksbehandlerIdent"].stringValue())
         assertFalse(avslag["invalidert"].booleanValue())
     }
 

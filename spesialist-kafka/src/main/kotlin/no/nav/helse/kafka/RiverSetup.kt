@@ -94,7 +94,7 @@ class RiverSetup(
                         val eventName =
                             packet.run {
                                 interestedIn("@event_name")
-                                get("@event_name").textValue() ?: "ukjent"
+                                get("@event_name").stringValue() ?: "ukjent"
                             }
                         logg.debug(
                             "{} leste melding id={}, event_name={}. En annen/tidligere river har allerede/også behandlet meldingen:{}",

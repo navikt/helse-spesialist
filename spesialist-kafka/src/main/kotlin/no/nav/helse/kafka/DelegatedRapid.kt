@@ -1,12 +1,7 @@
 package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.*
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggError
@@ -77,14 +72,14 @@ internal class DelegatedRapid(
                                 separator = ", ",
                                 prefix = "[",
                                 postfix = "]",
-                                transform = JsonNode::textValue,
+                                transform = JsonNode::stringValue,
                             ).orEmpty()
 
                 else -> it
             }
         }
 
-    private fun JsonNode.safelyGetText(key: String): String? = get(key)?.takeUnless(JsonNode::isMissingOrNull)?.textValue()
+    private fun JsonNode.safelyGetText(key: String): String? = get(key)?.takeUnless(JsonNode::isMissingOrNull)?.stringValue()
 
     override fun publish(message: String) {
         rapidsConnection.publish(message)

@@ -49,8 +49,8 @@ class VarseldefinisjonRiver(
                 id = packet["gjeldende_definisjon.id"].asUUID(),
                 varselkode = packet["varselkode"].asString(),
                 tittel = packet["gjeldende_definisjon.tittel"].asString(),
-                forklaring = packet["gjeldende_definisjon.forklaring"].takeUnless(JsonNode::isMissingOrNull)?.textValue(),
-                handling = packet["gjeldende_definisjon.handling"].takeUnless(JsonNode::isMissingOrNull)?.textValue(),
+                forklaring = packet["gjeldende_definisjon.forklaring"].takeUnless(JsonNode::isMissingOrNull)?.stringValue(),
+                handling = packet["gjeldende_definisjon.handling"].takeUnless(JsonNode::isMissingOrNull)?.stringValue(),
                 avviklet = packet["gjeldende_definisjon.avviklet"].asBoolean(),
                 opprettet = packet["gjeldende_definisjon.opprettet"].asLocalDateTime(),
             )
