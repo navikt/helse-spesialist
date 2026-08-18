@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.OppgaveOpprettet
@@ -18,16 +17,11 @@ import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter.Feil
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.oppgave.Egenskap
-import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
-import no.nav.helse.spesialist.domain.oppgave.Mottaker
-import no.nav.helse.spesialist.domain.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.oppgave.*
 import no.nav.helse.spesialist.domain.oppgave.Oppgave.Companion.ny
-import no.nav.helse.spesialist.domain.oppgave.Oppgavehendelse
-import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.sql.SQLException
-import java.util.UUID
+import java.util.*
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDao,
@@ -36,15 +30,6 @@ class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val brukerrollehenter: Brukerrollehenter,
 ) : Oppgavehåndterer {
-    fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
-        OppgaveService(
-            oppgaveDao = sessionContext.oppgaveDao,
-            reservasjonDao = sessionContext.reservasjonDao,
-            meldingPubliserer = meldingPubliserer,
-            oppgaveRepository = sessionContext.oppgaveRepository,
-            brukerrollehenter = brukerrollehenter,
-        )
-
     fun nyOppgave(
         fødselsnummer: String,
         vedtaksperiodeId: VedtaksperiodeId,

@@ -44,12 +44,12 @@ class KafkaModule(
                     meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
                     kommandofabrikk =
                         Kommandofabrikk(
-                            oppgaveService = {
+                            oppgaveServiceProvider = { sessionContext ->
                                 OppgaveService(
-                                    oppgaveDao = daos.oppgaveDao,
-                                    reservasjonDao = daos.reservasjonDao,
+                                    oppgaveDao = sessionContext.oppgaveDao,
+                                    reservasjonDao = sessionContext.reservasjonDao,
                                     meldingPubliserer = meldingPubliserer,
-                                    oppgaveRepository = daos.oppgaveRepository,
+                                    oppgaveRepository = sessionContext.oppgaveRepository,
                                     brukerrollehenter = brukerrollehenter,
                                 )
                             },

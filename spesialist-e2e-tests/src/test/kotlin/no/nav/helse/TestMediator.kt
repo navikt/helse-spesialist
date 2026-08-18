@@ -67,7 +67,7 @@ class TestMediator(
 
     private val kommandofabrikk =
         Kommandofabrikk(
-            oppgaveService = { oppgaveService },
+            oppgaveServiceProvider = { _ -> oppgaveService },
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
         )

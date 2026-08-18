@@ -26,12 +26,10 @@ import java.util.*
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
 
 class Kommandofabrikk(
-    oppgaveService: () -> OppgaveService,
+    private val oppgaveServiceProvider: (SessionContext) -> OppgaveService,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
 ) {
-    private val oppgaveService: OppgaveService by lazy { oppgaveService() }
-
     internal fun gosysOppgaveEndret(
         person: LegacyPerson,
         oppgave: Oppgave?,
@@ -56,7 +54,7 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(sessionContext),
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             oppgaveDao = sessionContext.oppgaveDao,
-            oppgaveService = transaksjonellOppgaveService(sessionContext),
+            oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
@@ -81,7 +79,7 @@ class Kommandofabrikk(
             utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
             oppgave = oppgave,
-            oppgaveService = transaksjonellOppgaveService(sessionContext),
+            oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
@@ -113,7 +111,7 @@ class Kommandofabrikk(
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             avviksvurderingRepository = sessionContext.avviksvurderingRepository,
-            oppgaveService = transaksjonellOppgaveService(sessionContext),
+            oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             person = person,
             vedtakRepository = sessionContext.vedtakRepository,
@@ -144,8 +142,6 @@ class Kommandofabrikk(
                 )
             }
         }
-
-    private fun transaksjonellOppgaveService(sessionContext: SessionContext): OppgaveService = oppgaveService.nyOppgaveService(sessionContext)
 
     private fun transaksjonellAutomatisering(sessionContext: SessionContext): Automatisering =
         Automatisering.Factory.automatisering(
