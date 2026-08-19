@@ -409,6 +409,40 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
+    fun saksbehandlerOverstyrerArbeidsforhold(
+        organisasjonsnummer: String = testContext.arbeidsgiver.organisasjonsnummer,
+        deaktivert: Boolean = true,
+        begrunnelse: String = "Deaktiverer arbeidsforhold",
+        forklaring: String = "Arbeidsforholdet er ikke relevant for sykepengegrunnlaget",
+    ) {
+        val vedtaksperiode = testContext.vedtaksperioder.first()
+        callHttpPost(
+            relativeUrl = "api/personer/$personPseudoId/sykefravaerstilfeller/${vedtaksperiode.skjæringstidspunkt}/arbeidsforhold",
+            request =
+                ApiArbeidsforholdoverstyringRequest(
+                    initierendeVedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+                    overstyrteArbeidsforhold =
+                        listOf(
+                            ApiArbeidsforholdoverstyringRequest.Arbeidsforhold(
+                                organisasjonsnummer = organisasjonsnummer,
+                                deaktivert = deaktivert,
+                                begrunnelse = begrunnelse,
+                                forklaring = forklaring,
+                                lovverksreferanse =
+                                    ApiLovverksreferanse(
+                                        paragraf = "8-15",
+                                        ledd = null,
+                                        bokstav = null,
+                                        lovverk = "folketrygdloven",
+                                        lovverksversjon = "2019-01-01",
+                                    ),
+                            ),
+                        ),
+                ),
+        )
+        hentOppdatertPerson()
+    }
+
     fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning"): JsonNode {
         val response =
             callGraphQL(

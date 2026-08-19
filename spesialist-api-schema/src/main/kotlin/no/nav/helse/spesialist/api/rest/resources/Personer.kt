@@ -51,6 +51,11 @@ class Personer {
                 class Sykepengegrunnlag(
                     val parent: Skjæringstidspunkt,
                 )
+
+                @Resource("arbeidsforhold")
+                class Arbeidsforhold(
+                    val parent: Skjæringstidspunkt,
+                )
             }
         }
 
