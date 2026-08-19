@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varselvurdering
+import no.nav.helse.spesialist.domain.ÅrsakTilVarselsletting
 import no.nav.helse.spesialist.domain.testfixtures.lagVarselId
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -219,11 +220,32 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val varsel = opprettVarsel(behandling, "RV_IV_1")
 
         // when
-        repository.slett(varsel.id)
+        repository.slett(varsel.id, ÅrsakTilVarselsletting.ERSTATTET_AV_NYTT_VARSEL)
 
         // then
         val funnet = repository.finn(varsel.id)
         assertNull(funnet)
+    }
+
+    @Test
+    fun `slettet varsel havner i revisjonstabellen`() {
+        // given
+        val varsel = opprettVarsel(behandling, "RV_IV_1")
+
+        // when
+        repository.slett(varsel.id, ÅrsakTilVarselsletting.ERSTATTET_AV_NYTT_VARSEL)
+
+        // then
+        val slettedeVarsler =
+            dbQuery.list(
+                "SELECT kode, status, årsak FROM varsel_slettet WHERE unik_id = :unikId",
+                "unikId" to varsel.id.value,
+            ) { row -> Triple(row.string("kode"), row.string("status"), row.string("årsak")) }
+
+        assertEquals(
+            listOf(Triple("RV_IV_1", "AKTIV", ÅrsakTilVarselsletting.ERSTATTET_AV_NYTT_VARSEL.name)),
+            slettedeVarsler,
+        )
     }
 
     @Test

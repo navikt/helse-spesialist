@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.ÅrsakTilVarselsletting
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ArrayNode
 import java.time.LocalDateTime
@@ -76,15 +77,28 @@ class NyeVarslerRiver : TransaksjonellRiver() {
                 val (finnesFraFør, finnesIkkeFraFør) = varsler.partition { it.kode in eksisterendeVarsler.keys }
                 transaksjon.varselRepository.lagre(finnesIkkeFraFør)
                 finnesFraFør
-                    .forEach {
-                        val eksisterendeVarsel = eksisterendeVarsler.getValue(it.kode)
-                        if (it.erVarselOmAvvik()) {
-                            transaksjon.varselRepository.slett(eksisterendeVarsel.id)
-                            transaksjon.varselRepository.lagre(it)
-                        }
-                        if (eksisterendeVarsel.erInaktivt()) {
-                            eksisterendeVarsel.reaktiver()
-                            transaksjon.varselRepository.lagre(eksisterendeVarsel)
+                    .forEach { nyttVarsel ->
+                        val eksisterendeVarsel = eksisterendeVarsler.getValue(nyttVarsel.kode)
+                        when (eksisterendeVarsel.status) {
+                            Varsel.Status.AKTIV -> {
+                                transaksjon.varselRepository.slett(
+                                    varselId = eksisterendeVarsel.id,
+                                    årsak = ÅrsakTilVarselsletting.ERSTATTET_AV_NYTT_VARSEL,
+                                )
+                                transaksjon.varselRepository.lagre(nyttVarsel)
+                            }
+
+                            Varsel.Status.INAKTIV -> {
+                                eksisterendeVarsel.reaktiver()
+                                transaksjon.varselRepository.lagre(eksisterendeVarsel)
+                            }
+
+                            // Varselet er allerede vurdert eller ferdigbehandlet, da beholder vi det og forkaster det nye
+                            Varsel.Status.VURDERT,
+                            Varsel.Status.GODKJENT,
+                            Varsel.Status.AVVIST,
+                            Varsel.Status.AVVIKLET,
+                            -> Unit
                         }
                     }
             }

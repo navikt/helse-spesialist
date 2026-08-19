@@ -260,6 +260,7 @@ internal class PersonRepository(
     ) {
         slettOppgave(personRef)
         slettVarsler(personRef)
+        slettSlettedeVarsler(personRef)
         slettAutomatisering(personRef)
         slettRisikovurdering(personRef)
         slettStansAutomatisering(fødselsnummer)
@@ -325,6 +326,14 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = """
              DELETE FROM selve_varsel sv USING vedtaksperiode v WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+        """
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettSlettedeVarsler(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = """
+             DELETE FROM varsel_slettet vs USING vedtaksperiode v WHERE vs.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }

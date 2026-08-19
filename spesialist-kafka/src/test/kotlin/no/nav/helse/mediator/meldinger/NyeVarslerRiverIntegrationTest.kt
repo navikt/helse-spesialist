@@ -2,7 +2,9 @@ package no.nav.helse.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
@@ -11,6 +13,9 @@ import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
@@ -133,7 +138,7 @@ internal class NyeVarslerRiverIntegrationTest {
     }
 
     @Test
-    fun `erstatter varsel om avvik hvis det finnes fra før av`() {
+    fun `erstatter aktivt varsel hvis det finnes fra før av`() {
         // given
         val person =
             lagPerson()
@@ -144,11 +149,11 @@ internal class NyeVarslerRiverIntegrationTest {
         val behandling1 =
             lagBehandling(vedtaksperiodeId = vedtaksperiode1.id)
                 .also(sessionContext.behandlingRepository::lagre)
-        testRapid.sendTestMessage(lagNyeVarslerMelding(person, vedtaksperiode1 to "RV_IV_2"))
+        testRapid.sendTestMessage(lagNyeVarslerMelding(person, vedtaksperiode1 to "RV_IV_1"))
         val eksisterendeVarsel = sessionContext.varselRepository.finnVarslerFor(behandling1.id).single()
 
         // when
-        testRapid.sendTestMessage(lagNyeVarslerMelding(person, vedtaksperiode1 to "RV_IV_2"))
+        testRapid.sendTestMessage(lagNyeVarslerMelding(person, vedtaksperiode1 to "RV_IV_1"))
 
         // then
         val varslerForBehandling1 = sessionContext.varselRepository.finnVarslerFor(behandling1.id)
@@ -158,7 +163,37 @@ internal class NyeVarslerRiverIntegrationTest {
         assertNotEquals(eksisterendeVarsel.id, varselet.id)
         assertEquals(eksisterendeVarsel.spleisBehandlingId, varselet.spleisBehandlingId)
         assertEquals(eksisterendeVarsel.behandlingUnikId, varselet.behandlingUnikId)
-        assertEquals("RV_IV_2", varselet.kode)
+        assertEquals("RV_IV_1", varselet.kode)
+        assertEquals(Varsel.Status.AKTIV, varselet.status)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["VURDERT", "GODKJENT"])
+    fun `forkaster nytt varsel når eksisterende varsel er vurdert eller godkjent`(status: Varsel.Status) {
+        // given
+        val person =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
+        val vedtaksperiode =
+            lagVedtaksperiode()
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val behandling =
+            lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+                .also(sessionContext.behandlingRepository::lagre)
+        testRapid.sendTestMessage(lagNyeVarslerMelding(person, vedtaksperiode to "RV_IV_1"))
+        val eksisterendeVarsel = sessionContext.varselRepository.finnVarslerFor(behandling.id).single()
+        eksisterendeVarsel.vurder(SaksbehandlerOid(UUID.randomUUID()), VarseldefinisjonId(UUID.randomUUID()))
+        if (status == Varsel.Status.GODKJENT) eksisterendeVarsel.godkjenn()
+        sessionContext.varselRepository.lagre(eksisterendeVarsel)
+
+        // when
+        testRapid.sendTestMessage(lagNyeVarslerMelding(person, vedtaksperiode to "RV_IV_1"))
+
+        // then
+        val varselet = sessionContext.varselRepository.finnVarslerFor(behandling.id).single()
+        assertEquals(eksisterendeVarsel.id, varselet.id)
+        assertEquals(status, varselet.status)
+        assertEquals(eksisterendeVarsel.vurdering, varselet.vurdering)
     }
 
     @Test
