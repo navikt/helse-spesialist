@@ -80,17 +80,16 @@ class NyeVarslerRiver : TransaksjonellRiver() {
                     .forEach { nyttVarsel ->
                         val eksisterendeVarsel = eksisterendeVarsler.getValue(nyttVarsel.kode)
                         when (eksisterendeVarsel.status) {
-                            Varsel.Status.AKTIV -> {
+                            // Inaktive varsler skal på sikt ikke finnes, fordi deaktivering erstattes av sletting.
+                            // Inntil den migreringen er gjennomført behandler vi dem som aktive varsler.
+                            Varsel.Status.AKTIV,
+                            Varsel.Status.INAKTIV,
+                            -> {
                                 transaksjon.varselRepository.slett(
                                     varselId = eksisterendeVarsel.id,
                                     årsak = ÅrsakTilVarselsletting.ERSTATTET_AV_NYTT_VARSEL,
                                 )
                                 transaksjon.varselRepository.lagre(nyttVarsel)
-                            }
-
-                            Varsel.Status.INAKTIV -> {
-                                eksisterendeVarsel.reaktiver()
-                                transaksjon.varselRepository.lagre(eksisterendeVarsel)
                             }
 
                             // Varselet er allerede vurdert eller ferdigbehandlet, da beholder vi det og forkaster det nye

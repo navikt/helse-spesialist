@@ -197,7 +197,7 @@ internal class NyeVarslerRiverIntegrationTest {
     }
 
     @Test
-    fun `reaktiverer inaktivt varsel når det dukker opp på nytt`() {
+    fun `erstatter inaktivt varsel når det dukker opp på nytt`() {
         // given
         val person =
             lagPerson()
@@ -221,8 +221,7 @@ internal class NyeVarslerRiverIntegrationTest {
         val varselet = varslerForBehandling1.single()
         assertEquals(1, varslerForBehandling1.size)
 
-        assertEquals(eksisterendeVarsel.id, varselet.id)
-        assertNotEquals(eksisterendeVarsel.status, varselet.status)
+        assertNotEquals(eksisterendeVarsel.id, varselet.id)
         assertEquals(eksisterendeVarsel.spleisBehandlingId, varselet.spleisBehandlingId)
         assertEquals(eksisterendeVarsel.behandlingUnikId, varselet.behandlingUnikId)
         assertEquals("RV_IV_1", varselet.kode)
