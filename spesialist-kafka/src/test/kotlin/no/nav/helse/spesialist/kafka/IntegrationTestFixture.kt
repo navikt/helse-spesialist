@@ -13,7 +13,8 @@ class IntegrationTestFixture(
 ) {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
     val daos = inMemoryRepositoriesAndDaos.daos
-    val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
+    private val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
+    val sessionContext = sessionFactory.sessionContext
     val forsikringHenter = MockForsikringsvurderingHenter()
     val environmentToggles =
         object : EnvironmentToggles {

@@ -17,7 +17,7 @@ import kotlin.test.assertNotEquals
 internal class NyeVarslerRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `lagrer varsel ved nye_varsler`() {

@@ -19,7 +19,7 @@ import java.util.UUID
 
 class PostVedtaksperiodeAnnullerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
     private val annulleringRepository = sessionContext.annulleringRepository
 
     @Test

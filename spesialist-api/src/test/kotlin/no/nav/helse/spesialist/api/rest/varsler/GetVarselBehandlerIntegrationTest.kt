@@ -29,7 +29,7 @@ import kotlin.test.assertEquals
 
 class GetVarselBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `gir OK og tilbake et varsel i happy case`() {

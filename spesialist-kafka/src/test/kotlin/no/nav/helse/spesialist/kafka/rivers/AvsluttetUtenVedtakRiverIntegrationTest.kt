@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 internal class AvsluttetUtenVedtakRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `avsluttet med vedtak blir prosessert riktig`() {

@@ -9,16 +9,14 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import org.intellij.lang.annotations.Language
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 internal class OvervåkOverstyringerRiverTest {
     private val testRapid = TestRapid()
-    private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    val sessionFactory = integrationTestFixture.sessionFactory
-    private val sessionContext = sessionFactory.sessionContext
+    private val sessionContext = IntegrationTestFixture(testRapid).sessionContext
 
     @Test
     fun `overstyringer i blå perioder gir innslag i venter-tabellen`() {

@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 
 class GetSaksbehandlerStansBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `Returnerer aktiv saksbehandler-stans for person`() {

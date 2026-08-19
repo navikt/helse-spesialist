@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 
 class GetForsikringsvurderingForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `Returnerer forsikring hvis den finnes`() {

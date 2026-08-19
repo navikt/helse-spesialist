@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 
 class PatchVeilederStansBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `Får feilmelding hvis man forsøker å opprette veileder-stans fra speil`() {

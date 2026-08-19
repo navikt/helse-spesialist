@@ -34,7 +34,7 @@ import java.util.UUID
 class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     private val hendelser = listOf(UUID.randomUUID(), UUID.randomUUID())
     private val vedtakFattetTidspunkt = LocalDateTime.now()

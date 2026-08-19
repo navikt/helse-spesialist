@@ -1,42 +1,20 @@
 package no.nav.helse.spesialist.api
 
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.sse.SSE
-import io.ktor.client.plugins.sse.sse
-import io.ktor.client.request.accept
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.delete
-import io.ktor.client.request.get
-import io.ktor.client.request.patch
-import io.ktor.client.request.post
-import io.ktor.client.request.put
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.serialization.jackson3.JacksonConverter
-import io.ktor.server.testing.testApplication
-import io.ktor.sse.ServerSentEvent
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.sse.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson3.*
+import io.ktor.server.testing.*
+import io.ktor.sse.*
 import io.mockk.mockk
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
-import no.nav.helse.spesialist.application.AlleIdenterHenter
-import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
-import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
-import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
-import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
-import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
-import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
-import no.nav.helse.spesialist.application.OpptegnelseListener
-import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
@@ -49,7 +27,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.readValue
-import java.util.Collections
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -57,6 +35,7 @@ class IntegrationTestFixture {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
     val daos = inMemoryRepositoriesAndDaos.daos
     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
+    val sessionContext = sessionFactory.sessionContext
     val meldingPubliserer = InMemoryMeldingPubliserer()
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
     val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()

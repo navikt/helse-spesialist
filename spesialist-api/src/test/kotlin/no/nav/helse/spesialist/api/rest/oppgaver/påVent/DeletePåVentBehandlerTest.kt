@@ -24,14 +24,14 @@ import kotlin.test.assertNull
 
 class DeletePåVentBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
-    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
-    private val behandlingRepository = integrationTestFixture.sessionFactory.sessionContext.behandlingRepository
-    private val saksbehandlerRepository = integrationTestFixture.sessionFactory.sessionContext.saksbehandlerRepository
-    private val periodehistorikkDao = integrationTestFixture.sessionFactory.sessionContext.periodehistorikkDao
-    private val påVentRepository = integrationTestFixture.sessionFactory.sessionContext.påVentRepository
-    private val dialogRepository = integrationTestFixture.sessionFactory.sessionContext.dialogRepository
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
+    private val oppgaveRepository = integrationTestFixture.sessionContext.oppgaveRepository
+    private val vedtaksperiodeRepository = integrationTestFixture.sessionContext.vedtaksperiodeRepository
+    private val behandlingRepository = integrationTestFixture.sessionContext.behandlingRepository
+    private val saksbehandlerRepository = integrationTestFixture.sessionContext.saksbehandlerRepository
+    private val periodehistorikkDao = integrationTestFixture.sessionContext.periodehistorikkDao
+    private val påVentRepository = integrationTestFixture.sessionContext.påVentRepository
+    private val dialogRepository = integrationTestFixture.sessionContext.dialogRepository
 
     @Test
     fun `happy path`() {

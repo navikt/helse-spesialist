@@ -18,8 +18,8 @@ import kotlin.test.assertEquals
 
 class GetInntektsmeldingBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val dokumentDao = integrationTestFixture.sessionContext.dokumentDao
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
     private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
 
     @Test

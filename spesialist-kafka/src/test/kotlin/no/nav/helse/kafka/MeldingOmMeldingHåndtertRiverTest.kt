@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import org.intellij.lang.annotations.Language
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -15,8 +15,7 @@ import kotlin.test.assertNull
 class MeldingOmMeldingHåndtertRiverTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    val sessionFactory = integrationTestFixture.sessionFactory
-    private val sessionContext = sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `lager ikke opptegnelse for urelaterte kvitteringer`() {

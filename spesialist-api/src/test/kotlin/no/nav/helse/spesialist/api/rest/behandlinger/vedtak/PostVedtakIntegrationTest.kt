@@ -45,7 +45,7 @@ import kotlin.test.assertIs
 
 class PostVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `happy case - ingen totrinnskontroll`() {

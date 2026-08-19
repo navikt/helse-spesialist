@@ -15,7 +15,7 @@ import java.util.UUID
 internal class MinuttRiverTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `publiserer gosys_oppgave_endret for oppgaver med aktivt SB_EX_3-varsel`() {

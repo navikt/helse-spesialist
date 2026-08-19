@@ -16,7 +16,7 @@ import kotlin.test.assertNotNull
 
 class GetNotaterForVedtaksperiodeBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `returnerer et notat i happy case`() {

@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 
 class PostKommentarBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `legg til kommentar fungerer som forventet`() {

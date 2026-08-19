@@ -26,7 +26,7 @@ import kotlin.test.assertTrue
 
 class PostSendIReturIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `gir NotFound hvis oppgaven ikke finnes`() {

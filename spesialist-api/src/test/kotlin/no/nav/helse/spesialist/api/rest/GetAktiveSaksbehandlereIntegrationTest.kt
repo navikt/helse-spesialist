@@ -9,10 +9,10 @@ import kotlin.test.assertNotNull
 
 class GetAktiveSaksbehandlereIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val saksbehandlerRepository = integrationTestFixture.sessionFactory.sessionContext.saksbehandlerRepository
+    private val saksbehandlerRepository = integrationTestFixture.sessionContext.saksbehandlerRepository
 
     @Test
-    fun `henter alle aktive saksbehandlere siste tre mnder`() {
+    fun `henter alle aktive saksbehandlere siste tre måneder`() {
         // Given:
         val saksbehandler1 = lagSaksbehandler()
         val saksbehandler2 = lagSaksbehandler()

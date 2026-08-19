@@ -17,7 +17,7 @@ import kotlin.test.assertNotNull
 class GetKrrRegistrertStatusForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
 
     @Test
     fun `henter registrert status for reservert person som forventet`() {

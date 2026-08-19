@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 class GetBehandlendeEnhetForPersonIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
 
     @Test
     fun `henter behandlende enhet som forventet`() {

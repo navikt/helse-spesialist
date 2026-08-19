@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 
 class DeleteVarselvurderingBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
     private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
     private val behandlingRepository = sessionContext.behandlingRepository
     private val varseldefinisjonRepository = sessionContext.varseldefinisjonRepository

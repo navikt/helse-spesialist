@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 
 class PostArbeidstidsvurderingIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
     private val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
 
     private val saksbehandler = lagSaksbehandler()

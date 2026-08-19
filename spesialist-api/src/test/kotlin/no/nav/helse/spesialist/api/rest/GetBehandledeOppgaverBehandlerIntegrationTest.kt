@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 
 class GetBehandledeOppgaverBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `returnerer behandlede oppgaver for saksbehandler som gjør kallet`() {

@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 
 class PatchSaksbehandlerStansBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `Lagrer historikk og stans når saksbehandler opphever saksbehandler-stans fra speil`() {

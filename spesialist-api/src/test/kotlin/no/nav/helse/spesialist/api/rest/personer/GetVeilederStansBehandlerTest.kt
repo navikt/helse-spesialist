@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 
 class GetVeilederStansBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `Returnerer aktiv veileder-stans for person`() {

@@ -2,38 +2,29 @@ package no.nav.helse.spesialist.api.rest.behandlinger.forkasting
 
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
-import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.Totrinnsvurdering
-import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
-import no.nav.helse.spesialist.domain.Varsel
-import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
-import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
-import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
-import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
-import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.*
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class PostForkastingBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
     private val saksbehandlerRepository = sessionContext.saksbehandlerRepository
     private val behandlingRepository = sessionContext.behandlingRepository
     private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
@@ -82,9 +73,7 @@ class PostForkastingBehandlerIntegrationTest {
         val funnetVarsel = varselRepository.finn(varsel.id)
         val funnetTotrinnsvurdering = totrinnsvurderingRepository.finn(totrinnsvurdering.id())
         val funnetOppgave = oppgaveRepository.finn(oppgave.id)
-        val reservasjon =
-            integrationTestFixture.sessionFactory.sessionContext.reservasjonDao
-                .hentReservasjonFor(person.id.value)
+        val reservasjon = integrationTestFixture.sessionContext.reservasjonDao.hentReservasjonFor(person.id.value)
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         assertEquals(Varsel.Status.AVVIST, funnetVarsel?.status)
         assertEquals(TotrinnsvurderingTilstand.GODKJENT, funnetTotrinnsvurdering?.tilstand)

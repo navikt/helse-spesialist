@@ -29,7 +29,7 @@ import kotlin.test.assertNull
 class BehandlingOpprettetRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `oppretter ny vedtaksperiode med behandling`() {

@@ -9,14 +9,15 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Isolated
 class ServerSentEventsIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val opptegnelseRepository = integrationTestFixture.sessionFactory.sessionContext.opptegnelseRepository
+    private val opptegnelseRepository = integrationTestFixture.sessionContext.opptegnelseRepository
     private val personPseudoIdProvider = integrationTestFixture.personPseudoIdProvider
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
 
     @Test
     fun `mottar server sent events som forventet`() {
@@ -38,7 +39,7 @@ class ServerSentEventsIntegrationTest {
         )
 
         integrationTestFixture.sse("/api/personer/${personPseudoId.value}/sse") { events ->
-            delay(200)
+            delay(200.milliseconds)
             assertEquals(0, events.size)
 
             // When:
@@ -49,7 +50,7 @@ class ServerSentEventsIntegrationTest {
                 ),
             )
             withTimeout(10.seconds) {
-                while (events.isEmpty()) delay(100)
+                while (events.isEmpty()) delay(100.milliseconds)
             }
 
             // Then:

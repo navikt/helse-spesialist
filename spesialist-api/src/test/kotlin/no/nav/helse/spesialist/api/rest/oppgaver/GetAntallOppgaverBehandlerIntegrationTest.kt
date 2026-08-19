@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 
 class GetAntallOppgaverBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `returnerer 0 antall mine saker og mine saker på vent når saksbehandler ikke har noen tildelte oppgaver`() {

@@ -214,9 +214,8 @@ internal fun TestRapid.medTransaksjonelleRivers(
                     metadata: MessageMetadata,
                     meterRegistry: MeterRegistry,
                 ) {
-                    val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
                     val outbox = Outbox("versjonAvKode")
-                    sessionFactory.transactionalSessionScope { sessionContext ->
+                    inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope { sessionContext ->
                         this.river.transaksjonellOnPacket(
                             packet,
                             outbox,

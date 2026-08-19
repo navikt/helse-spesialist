@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
 
 class PutVarselvurderingBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
     private val saksbehandlerRepository = sessionContext.saksbehandlerRepository
     private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
     private val behandlingRepository = sessionContext.behandlingRepository

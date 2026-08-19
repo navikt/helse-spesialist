@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
 
 class PostSendTilGodkjenningIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `gir Internal Server Error hvis behandlingen ikke finnes`() {

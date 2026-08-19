@@ -9,7 +9,7 @@ import kotlin.test.assertNotNull
 
 abstract class ApplicationTest {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
-    val sessionContext = inMemoryRepositoriesAndDaos.sessionFactory.sessionContext
+    val sessionContext = inMemoryRepositoriesAndDaos.sessionContext
     val outbox = Outbox("1.0.0")
 
     inline fun <reified T : UtgåendeHendelse> assertUtgåendeHendelse(assertBlock: (T) -> Unit = {}) {

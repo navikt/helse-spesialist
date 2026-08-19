@@ -15,11 +15,11 @@ import kotlin.test.assertEquals
 
 class DeleteTildelingBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
-    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
-    private val behandlingRepository = integrationTestFixture.sessionFactory.sessionContext.behandlingRepository
-    private val saksbehandlerRepository = integrationTestFixture.sessionFactory.sessionContext.saksbehandlerRepository
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
+    private val oppgaveRepository = integrationTestFixture.sessionContext.oppgaveRepository
+    private val vedtaksperiodeRepository = integrationTestFixture.sessionContext.vedtaksperiodeRepository
+    private val behandlingRepository = integrationTestFixture.sessionContext.behandlingRepository
+    private val saksbehandlerRepository = integrationTestFixture.sessionContext.saksbehandlerRepository
 
     @Test
     fun `happy path`() {

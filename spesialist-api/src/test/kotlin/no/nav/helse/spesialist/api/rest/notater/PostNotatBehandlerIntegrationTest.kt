@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 
 class PostNotatÏBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `leggTilNotat fungerer som forventet`() {

@@ -25,8 +25,8 @@ import kotlin.test.assertNotNull
 
 class PostSykepengegrunnlagBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
-    private val totrinnsvurderingRepository = integrationTestFixture.sessionFactory.sessionContext.totrinnsvurderingRepository
+    private val personRepository = integrationTestFixture.sessionContext.personRepository
+    private val totrinnsvurderingRepository = integrationTestFixture.sessionContext.totrinnsvurderingRepository
 
     @Test
     fun `happy path`() {

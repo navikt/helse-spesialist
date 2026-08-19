@@ -18,7 +18,7 @@ import kotlin.test.assertNotNull
 
 class PostPersonSokIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
     fun `Finner klar person med identitetsnummer`() {

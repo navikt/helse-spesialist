@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 
 class GetNotatVedtaksperiodeIderForPersonBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val sessionContext = integrationTestFixture.sessionContext
 
     private fun lagPersonOgPseudoId() =
         lagPerson()
