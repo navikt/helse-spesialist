@@ -1,6 +1,4 @@
 -- Revisjonstabell for varsler som slettes. Skrives kun til, leses ikke av applikasjonen.
--- Dekker foreløpig kun sletting via VarselRepository (NyeVarslerRiver). Legacy-løypa
--- (PgLegacyBehandlingDao) sletter fortsatt varsler uten å skrive revisjonsrad.
 create table varsel_slettet
 (
     id                      bigserial primary key,

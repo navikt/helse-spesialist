@@ -12,6 +12,7 @@ value class VarselId(
 
 enum class ÅrsakTilVarselsletting {
     ERSTATTET_AV_NYTT_VARSEL,
+    LEGACY_BEHANDLING_OPPDATERT,
 }
 
 sealed interface ResultatAvSletting {
