@@ -63,7 +63,7 @@ class LegacyVedtaksperiode(
             )
             return
         }
-        aktuellBehandling.håndter(this, spleisVedtaksperiode)
+        aktuellBehandling.håndter(spleisVedtaksperiode)
     }
 
     internal fun utbetalingForkastet(forkastetUtbetalingId: UUID) {
@@ -131,11 +131,11 @@ class LegacyVedtaksperiode(
                 tom = tom,
                 tilstand =
                     when (tilstand) {
-                        TilstandDto.VedtakFattet -> LegacyBehandling.VedtakFattet
-                        TilstandDto.VidereBehandlingAvklares -> LegacyBehandling.VidereBehandlingAvklares
-                        TilstandDto.AvsluttetUtenVedtak -> LegacyBehandling.AvsluttetUtenVedtak
-                        TilstandDto.AvsluttetUtenVedtakMedVarsler -> LegacyBehandling.AvsluttetUtenVedtakMedVarsler
-                        TilstandDto.KlarTilBehandling -> LegacyBehandling.KlarTilBehandling
+                        TilstandDto.VedtakFattet -> LegacyBehandling.Tilstand.VedtakFattet
+                        TilstandDto.VidereBehandlingAvklares -> LegacyBehandling.Tilstand.VidereBehandlingAvklares
+                        TilstandDto.AvsluttetUtenVedtak -> LegacyBehandling.Tilstand.AvsluttetUtenVedtak
+                        TilstandDto.AvsluttetUtenVedtakMedVarsler -> LegacyBehandling.Tilstand.AvsluttetUtenVedtakMedVarsler
+                        TilstandDto.KlarTilBehandling -> LegacyBehandling.Tilstand.KlarTilBehandling
                     },
                 tags = tags.toList(),
                 varsler =

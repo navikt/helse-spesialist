@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.domain.legacy
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.finnEksisterendeVarsel
@@ -12,7 +10,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.innehold
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmÅpenGosysOppgave
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
@@ -50,7 +47,7 @@ class LegacyBehandling private constructor(
         spleisBehandlingId = spleisBehandlingId,
         skjæringstidspunkt = skjæringstidspunkt,
         periode = Periode(fom, tom),
-        tilstand = VidereBehandlingAvklares,
+        tilstand = Tilstand.VidereBehandlingAvklares,
         tags = emptyList(),
         varsler = emptySet(),
         yrkesaktivitetstype = yrkesaktivitetstype,
@@ -116,25 +113,22 @@ class LegacyBehandling private constructor(
     internal fun harVarselOmManglendeInntektsmelding() = varsler.any { it.erVarselOmManglendeInntektsmelding() }
 
     internal fun håndter(
-        vedtaksperiode: LegacyVedtaksperiode,
         spleisVedtaksperiode: SpleisVedtaksperiode,
     ) {
-        tilstand.spleisVedtaksperiode(vedtaksperiode, this, spleisVedtaksperiode)
-    }
-
-    private fun spleisVedtaksperiode(spleisVedtaksperiode: SpleisVedtaksperiode) {
         this.periode = Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom)
         this.skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt
         this.spleisBehandlingId = spleisVedtaksperiode.spleisBehandlingId
     }
 
     fun håndterNyUtbetaling(utbetalingId: UUID) {
-        tilstand.nyUtbetaling(this, utbetalingId)
+        this.utbetalingId = utbetalingId
+        this.tilstand = Tilstand.KlarTilBehandling
     }
 
     internal fun håndterForkastetUtbetaling(utbetalingId: UUID) {
         if (utbetalingId != this.utbetalingId) return
-        tilstand.invaliderUtbetaling(this, utbetalingId)
+        this.utbetalingId = null
+        this.tilstand = Tilstand.VidereBehandlingAvklares
     }
 
     fun håndterNyttVarsel(varsel: LegacyVarsel) {
@@ -165,29 +159,26 @@ class LegacyBehandling private constructor(
         spleisBehandlingId: UUID,
         utbetalingId: UUID,
     ) {
-        tilstand.oppdaterBehandlingsinformasjon(this, tags, spleisBehandlingId, utbetalingId)
+        this.tags = tags
+        this.spleisBehandlingId = spleisBehandlingId
+        this.utbetalingId = utbetalingId
     }
 
     fun håndterVedtakFattet() {
-        tilstand.vedtakFattet(this)
+        this.tilstand = Tilstand.VedtakFattet
     }
 
     fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
 
     fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
 
-    private fun nyTilstand(ny: Tilstand) {
-        this.tilstand = ny
-    }
-
-    private fun nyUtbetaling(utbetalingId: UUID) {
-        this.utbetalingId = utbetalingId
-    }
-
     private fun nyttVarsel(varsel: LegacyVarsel) {
         logg.info("Legger til varsel $varsel")
         varsler.add(varsel)
-        tilstand.nyttVarsel(this)
+        if (tilstand == Tilstand.AvsluttetUtenVedtak) {
+            sikkerlogg.warn("Mottar nytt varsel i tilstand ${tilstand.name}")
+            tilstand = Tilstand.AvsluttetUtenVedtakMedVarsler
+        }
     }
 
     private fun harMedlemskapsvarsel(): Boolean {
@@ -214,8 +205,13 @@ class LegacyBehandling private constructor(
         return inneholderKunÅpenGosysOppgaveVarsel
     }
 
-    sealed interface Tilstand {
-        fun navn(): String
+    enum class Tilstand {
+        VidereBehandlingAvklares,
+        KlarTilBehandling,
+        VedtakFattet,
+        AvsluttetUtenVedtak,
+        AvsluttetUtenVedtakMedVarsler,
+        ;
 
         fun toDto(): TilstandDto =
             when (this) {
@@ -225,148 +221,6 @@ class LegacyBehandling private constructor(
                 AvsluttetUtenVedtakMedVarsler -> TilstandDto.AvsluttetUtenVedtakMedVarsler
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
-
-        fun vedtakFattet(legacyBehandling: LegacyBehandling) {
-            sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
-        }
-
-        fun spleisVedtaksperiode(
-            vedtaksperiode: LegacyVedtaksperiode,
-            legacyBehandling: LegacyBehandling,
-            spleisVedtaksperiode: SpleisVedtaksperiode,
-        ) {
-            legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
-        }
-
-        fun nyUtbetaling(
-            legacyBehandling: LegacyBehandling,
-            utbetalingId: UUID,
-        ) {
-            sikkerlogg.error(
-                "Mottatt ny utbetaling med {} for {} i {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("behandling", legacyBehandling),
-                keyValue("tilstand", this::class.simpleName),
-            )
-            logg.error(
-                "Mottatt ny utbetaling med {} i {}",
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("tilstand", this::class.simpleName),
-            )
-        }
-
-        fun invaliderUtbetaling(
-            legacyBehandling: LegacyBehandling,
-            utbetalingId: UUID,
-        ) {
-            logg.error(
-                "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
-                keyValue("Behandling", legacyBehandling),
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("tilstand", this::class.simpleName),
-            )
-            sikkerlogg.error(
-                "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
-                keyValue("Behandling", legacyBehandling),
-                keyValue("utbetalingId", utbetalingId),
-                keyValue("tilstand", this::class.simpleName),
-            )
-        }
-
-        fun nyttVarsel(legacyBehandling: LegacyBehandling) {}
-
-        fun oppdaterBehandlingsinformasjon(
-            legacyBehandling: LegacyBehandling,
-            tags: List<String>,
-            spleisBehandlingId: UUID,
-            utbetalingId: UUID,
-        ): Unit = throw IllegalStateException("Mottatt godkjenningsbehov i tilstand=${navn()}")
-    }
-
-    data object VidereBehandlingAvklares : Tilstand {
-        override fun navn(): String = "VidereBehandlingAvklares"
-
-        override fun nyUtbetaling(
-            legacyBehandling: LegacyBehandling,
-            utbetalingId: UUID,
-        ) {
-            legacyBehandling.nyUtbetaling(utbetalingId)
-            legacyBehandling.nyTilstand(KlarTilBehandling)
-        }
-    }
-
-    data object KlarTilBehandling : Tilstand {
-        override fun navn(): String = "KlarTilBehandling"
-
-        override fun vedtakFattet(legacyBehandling: LegacyBehandling) {
-            checkNotNull(legacyBehandling.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
-            legacyBehandling.nyTilstand(VedtakFattet)
-        }
-
-        override fun oppdaterBehandlingsinformasjon(
-            legacyBehandling: LegacyBehandling,
-            tags: List<String>,
-            spleisBehandlingId: UUID,
-            utbetalingId: UUID,
-        ) {
-            legacyBehandling.tags = tags
-            legacyBehandling.spleisBehandlingId = spleisBehandlingId
-            legacyBehandling.utbetalingId = utbetalingId
-        }
-
-        override fun invaliderUtbetaling(
-            legacyBehandling: LegacyBehandling,
-            utbetalingId: UUID,
-        ) {
-            legacyBehandling.utbetalingId = null
-            legacyBehandling.nyTilstand(VidereBehandlingAvklares)
-        }
-    }
-
-    data object VedtakFattet : Tilstand {
-        override fun navn(): String = "VedtakFattet"
-
-        override fun spleisVedtaksperiode(
-            vedtaksperiode: LegacyVedtaksperiode,
-            legacyBehandling: LegacyBehandling,
-            spleisVedtaksperiode: SpleisVedtaksperiode,
-        ) {
-            legacyBehandling.run {
-                if (
-                    periode != Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom) ||
-                    skjæringstidspunkt != spleisVedtaksperiode.skjæringstidspunkt ||
-                    spleisBehandlingId != spleisVedtaksperiode.spleisBehandlingId
-                ) {
-                    logg.warn(
-                        """
-                        Mottar spleis-info som avviker fra lagret info. Det betyr kanskje at noe uforutsett har skjedd? Kanskje spesialist har gått glipp av noe spleis har gjort?
-
-                        Ignorerer informasjonen.
-
-                        Mottatt info: $spleisVedtaksperiode
-                        Lagret info: $legacyBehandling
-                        """.trimIndent(),
-                    )
-                }
-            }
-        }
-    }
-
-    data object AvsluttetUtenVedtak : Tilstand {
-        override fun navn(): String = "AvsluttetUtenVedtak"
-
-        override fun nyttVarsel(legacyBehandling: LegacyBehandling) {
-            sikkerlogg.warn("Mottar nytt varsel i tilstand ${navn()}")
-            legacyBehandling.nyTilstand(AvsluttetUtenVedtakMedVarsler)
-        }
-
-        override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
-    }
-
-    data object AvsluttetUtenVedtakMedVarsler : Tilstand {
-        override fun navn(): String = "AvsluttetUtenVedtakMedVarsler"
-
-        override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
 
     override fun toString(): String = "LegacyBehandling(spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId, spleisBehandlingId=$spleisBehandlingId, fom=${periode.fom}, tom=${periode.tom}, skjæringstidspunkt=$skjæringstidspunkt)"

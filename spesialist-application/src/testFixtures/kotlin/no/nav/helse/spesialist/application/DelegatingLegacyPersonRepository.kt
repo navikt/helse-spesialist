@@ -59,11 +59,11 @@ class DelegatingLegacyPersonRepository(
                                                 tom = behandling.tom,
                                                 tilstand =
                                                     when (behandling.tilstand) {
-                                                        Behandling.Tilstand.VedtakFattet -> LegacyBehandling.VedtakFattet
-                                                        Behandling.Tilstand.VidereBehandlingAvklares -> LegacyBehandling.VidereBehandlingAvklares
-                                                        Behandling.Tilstand.AvsluttetUtenVedtak -> LegacyBehandling.AvsluttetUtenVedtak
-                                                        Behandling.Tilstand.AvsluttetUtenVedtakMedVarsler -> LegacyBehandling.AvsluttetUtenVedtakMedVarsler
-                                                        Behandling.Tilstand.KlarTilBehandling -> LegacyBehandling.KlarTilBehandling
+                                                        Behandling.Tilstand.VedtakFattet -> LegacyBehandling.Tilstand.VedtakFattet
+                                                        Behandling.Tilstand.VidereBehandlingAvklares -> LegacyBehandling.Tilstand.VidereBehandlingAvklares
+                                                        Behandling.Tilstand.AvsluttetUtenVedtak -> LegacyBehandling.Tilstand.AvsluttetUtenVedtak
+                                                        Behandling.Tilstand.AvsluttetUtenVedtakMedVarsler -> LegacyBehandling.Tilstand.AvsluttetUtenVedtakMedVarsler
+                                                        Behandling.Tilstand.KlarTilBehandling -> LegacyBehandling.Tilstand.KlarTilBehandling
                                                     },
                                                 tags = behandling.tags.toList(),
                                                 varsler =
