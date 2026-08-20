@@ -11,15 +11,3 @@ interface GraderteAndreYtelserRepository {
 
     fun lagre(graderteAndreYtelser: GraderteAndreYtelser)
 }
-
-class InMemoryGraderteAndreYtelserRepository : GraderteAndreYtelserRepository {
-    private val data = mutableListOf<GraderteAndreYtelser>()
-
-    override fun finnAlleForIdentitetsnummer(identitetsnummer: Identitetsnummer): List<GraderteAndreYtelser> = data.filter { it.identitetsnummer == identitetsnummer }
-
-    override fun finn(id: GraderteAndreYtelserId): GraderteAndreYtelser? = data.find { it.id == id }
-
-    override fun lagre(graderteAndreYtelser: GraderteAndreYtelser) {
-        data.add(graderteAndreYtelser)
-    }
-}
