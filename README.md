@@ -54,21 +54,17 @@ export DOCKER_HOST=unix://$HOME/.colima/default/docker.sock
 colima start
 ```
 
-## Kjøre lokal Swagger UI
+## Kjøre Spesialist lokalt
 
-- Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/spesialist/bootstrap/LocalApp.kt) sin main-metode, det starter en lokal server.
-- Gå til http://localhost:8080/api/swagger i en nettleser
-- Søk etter "OAuth2-token" i oppstartsloggen, kopier tokenet som står under og lim det inn under "Authorize"-knappen i Swagger UI
-- Requests kan nå kjøres mot lokal instans via "Try it out"
+[LocalApp.kt](spesialist-e2e-tests/src/test/kotlin/no/nav/helse/spesialist/e2etests/lokal/LocalApp.kt) starter
+Spesialist lokalt på http://localhost:8080 med det samme oppsettet som E2E-testene bruker: alle integrasjoner (Spleis,
+PDL, Gosys, risikovurdering osv.) er stubbet, og meldinger går på en rapid som lever i minnet. Da kan man opprette
+testpersoner uten å være avhengig av Spleis eller andre apper.
 
-## Kjøre Speil lokalt mot Spesialist lokalt
+Kjør main-metoden i `LocalApp.kt` (eller run-konfigurasjonen "Start LocalApp").
 
-[LocalAppMedTestdata.kt](spesialist-e2e-tests/src/test/kotlin/no/nav/helse/spesialist/e2etests/lokal/LocalAppMedTestdata.kt)
-starter Spesialist lokalt på http://localhost:8080 med det samme oppsettet som E2E-testene bruker: alle integrasjoner
-(Spleis, PDL, Gosys, risikovurdering osv.) er stubbet, og meldinger går på en rapid som lever i minnet. Da kan man
-opprette testpersoner uten å være avhengig av Spleis eller andre apper.
+### Opprette testpersoner (for eksempel for å kjøre Speil lokalt)
 
-- Kjør main-metoden i `LocalAppMedTestdata.kt` (eller run-konfigurasjonen "Start LocalApp med testdata")
 - Opprett en testperson med en oppgave som ligger til godkjenning:
   ```shell
   curl -X POST http://localhost:8080/local/testpersoner
@@ -87,6 +83,12 @@ opprette testpersoner uten å være avhengig av Spleis eller andre apper.
 
 Testpersonene lever i databasen som kjøres opp av Testcontainers, mens stubbene lever i minnet til appen. Restarter du
 appen, må du derfor opprette testpersonene på nytt.
+
+### Swagger UI
+
+- Gå til http://localhost:8080/api/swagger i en nettleser
+- Søk etter "OAuth2-token" i oppstartsloggen, kopier tokenet som står under og lim det inn under "Authorize"-knappen i Swagger UI
+- Requests kan nå kjøres mot lokal instans via "Try it out"
 
 ## Kjøre tester raskere
 

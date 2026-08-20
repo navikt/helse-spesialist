@@ -14,7 +14,8 @@ private const val PORT = 8080
 
 /**
  * Starter en lokal Spesialist med alle integrasjoner stubbet, slik E2E-testene gjør, og med et
- * endepunkt for å opprette testpersoner. Ment for å kjøre Speil lokalt mot Spesialist lokalt.
+ * endepunkt for å opprette testpersoner. Ment for å kjøre Speil eller Swagger UI lokalt mot
+ * Spesialist lokalt.
  */
 fun main() {
     SpesialistTestApplikasjon(
@@ -54,6 +55,8 @@ private fun skrivUtOppstartsinfo(applikasjon: SpesialistTestApplikasjon) {
         """
         
         Spesialist kjører lokalt på http://localhost:$PORT med stubbede integrasjoner.
+        
+        Swagger UI: http://localhost:$PORT/api/swagger
         
         Opprett en testperson med en oppgave til godkjenning:
             curl -X POST http://localhost:$PORT/local/testpersoner
