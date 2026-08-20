@@ -19,7 +19,7 @@ fun validerGraderteAndreYtelserPeriode(
             vedtaksperioder = vedtaksperioder,
         )
     ) {
-        error("Kan ikke legge til andre ytelser som ikke overlapper med et sykefraværstilfelle")
+        error("Ingen sykefraværstilfeller overlapper med perioden(e) i gradert annen ytelse ($nyGraderteAndreYtelserPerioder)")
     }
     validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
         nyGraderteAndreYtelserPerioder = nyGraderteAndreYtelserPerioder,

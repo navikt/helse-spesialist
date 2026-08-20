@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
+import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -11,7 +12,6 @@ import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteA
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.andreytelser.validerGraderteAndreYtelserPeriode
-import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource as GraderteAndreYtelserResource
 
 class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserResource, ApiLeggTilGraderteAndreYtelserRequest, ApiLeggTilGraderteAndreYtelserResponse, ApiPostAndreYtelserErrorCode> {
     override val tag = Tags.GRADERTE_ANDRE_YTELSER
