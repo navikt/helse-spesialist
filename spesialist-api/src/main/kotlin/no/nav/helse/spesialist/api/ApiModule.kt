@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -69,7 +68,6 @@ class ApiModule(
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
-            daos = daos,
             versjonAvKode = configuration.versjonAvKode,
             meldingPubliserer = meldingPubliserer,
             sessionFactory = sessionFactory,
@@ -98,10 +96,6 @@ class ApiModule(
                     MutationHandlers(
                         overstyring =
                             OverstyringMutationHandler(
-                                saksbehandlerMediator = saksbehandlerMediator,
-                            ),
-                        totrinnsvurdering =
-                            TotrinnsvurderingMutationHandler(
                                 saksbehandlerMediator = saksbehandlerMediator,
                             ),
                     ),

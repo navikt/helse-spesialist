@@ -33,7 +33,7 @@ class InMemoryDaos(
     override val tildelingDao: DelegatingTildelingDao,
     override val tildelingApiDao: UnimplementedTildelingApiDao,
     override val varselApiRepository: UnimplementedVarselApiRepository,
-    override val vedtakBegrunnelseDao: UnimplementedVedtakBegrunnelseDao,
+    override val vedtakBegrunnelseDao: InMemoryVedtakBegrunnelseDao,
     override val vedtakDao: DelegatingVedtakDao,
     override val vergemålApiDao: UnimplementedVergemålApiDao,
 ) : Daos

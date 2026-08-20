@@ -30,7 +30,6 @@ class TestMediator(
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
-            daos = daos,
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             sessionFactory = TransactionalSessionFactory(dataSource),

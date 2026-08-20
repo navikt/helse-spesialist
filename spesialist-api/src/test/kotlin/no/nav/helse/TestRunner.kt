@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
@@ -144,10 +143,6 @@ object TestRunner {
                             MutationHandlers(
                                 overstyring =
                                     OverstyringMutationHandler(
-                                        saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
-                                    ),
-                                totrinnsvurdering =
-                                    TotrinnsvurderingMutationHandler(
                                         saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
                                     ),
                             ),

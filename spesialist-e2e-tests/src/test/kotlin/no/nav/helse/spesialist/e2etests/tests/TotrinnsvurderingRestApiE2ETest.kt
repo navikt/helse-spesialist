@@ -32,7 +32,7 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
                 notatTilBeslutter = "notat",
             )
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerSenderTilGodkjenningMedRest()
+            saksbehandlerSenderTilGodkjenning()
 
             // Then:
             assertHarOppgaveegenskap("BESLUTTER")
@@ -61,12 +61,12 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
                 notatTilBeslutter = "notat",
             )
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerSenderTilGodkjenningMedRest()
+            saksbehandlerSenderTilGodkjenning()
         }
 
         // When:
         beslutterMedPersonISpeil {
-            saksbehandlerSenderIReturMedRest("Trenger ny vurdering")
+            saksbehandlerSenderIRetur("Trenger ny vurdering")
         }
 
         // Then:
@@ -110,7 +110,7 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
                 notatTilBeslutter = "notat",
             )
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerSenderTilGodkjenningMedRest("Her er min begrunnelse")
+            saksbehandlerSenderTilGodkjenning("Her er min begrunnelse")
         }
 
         // Then:
@@ -153,7 +153,7 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
             )
             val feil =
                 assertFailsWith<AssertionError> {
-                    saksbehandlerSenderTilGodkjenningMedRest("Mangler varselvurdering")
+                    saksbehandlerSenderTilGodkjenning("Mangler varselvurdering")
                 }
 
             // Then:

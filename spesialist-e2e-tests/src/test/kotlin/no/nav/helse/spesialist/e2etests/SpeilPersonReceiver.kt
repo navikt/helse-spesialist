@@ -409,26 +409,7 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning"): JsonNode {
-        val response =
-            callGraphQL(
-                "SendTilGodkjenningV2",
-                mapOf(
-                    "oppgavereferanse" to getOppgaveId(),
-                    "vedtakBegrunnelse" to begrunnelse,
-                ),
-            )
-        if (response["data"].isMissingOrNull()) {
-            error("Forventer at mutation ikke feiler, fikk: $response")
-        }
-        if (!response["data"]["sendTilGodkjenningV2"].asBoolean()) {
-            error("Forventer at sendTilGodkjenningV2 returnerer true, fikk: $response")
-        }
-        hentOppdatertPerson()
-        return response
-    }
-
-    fun saksbehandlerSenderTilGodkjenningMedRest(begrunnelse: String = "Sender til godkjenning") {
+    fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning") {
         callHttpPost(
             relativeUrl = "api/oppgaver/${getOppgaveId()}/totrinnsvurdering/send-til-godkjenning",
             request =
@@ -439,7 +420,7 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerSenderIReturMedRest(notatTekst: String = "Sendt i retur") {
+    fun saksbehandlerSenderIRetur(notatTekst: String = "Sendt i retur") {
         callHttpPost(
             relativeUrl = "api/oppgaver/${getOppgaveId()}/totrinnsvurdering/send-i-retur",
             request =
@@ -448,25 +429,6 @@ class SpeilPersonReceiver(
                 ),
         )
         hentOppdatertPerson()
-    }
-
-    fun saksbehandlerSenderIRetur(notatTekst: String = "Sendt i retur"): JsonNode {
-        val response =
-            callGraphQL(
-                "SendIRetur",
-                mapOf(
-                    "oppgavereferanse" to getOppgaveId(),
-                    "notatTekst" to notatTekst,
-                ),
-            )
-        if (response["data"].isMissingOrNull()) {
-            error("Forventer at mutation ikke feiler, fikk: $response")
-        }
-        if (!response["data"]["sendIRetur"].asBoolean()) {
-            error("Forventer at sendIRetur returnerer true, fikk: $response")
-        }
-        hentOppdatertPerson()
-        return response
     }
 
     fun assertPåVent(frist: LocalDate) {

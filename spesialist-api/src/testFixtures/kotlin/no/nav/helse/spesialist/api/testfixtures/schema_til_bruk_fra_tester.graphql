@@ -321,8 +321,6 @@ type Mutation {
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean
-    sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean
-    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
 }
 
 type OmregnetArsinntekt {

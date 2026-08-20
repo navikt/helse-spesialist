@@ -1,6 +1,0 @@
-mutation SendTilGodkjenningV2($oppgavereferanse: String!, $vedtakBegrunnelse: String) {
-    sendTilGodkjenningV2(
-        oppgavereferanse: $oppgavereferanse
-        vedtakBegrunnelse: $vedtakBegrunnelse
-    )
-}

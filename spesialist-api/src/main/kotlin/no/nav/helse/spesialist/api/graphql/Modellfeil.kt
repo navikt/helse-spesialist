@@ -32,21 +32,6 @@ class OppgaveIkkeTildelt(
     }
 }
 
-class ManglerVurderingAvVarsler(
-    private val oppgaveId: Long,
-) : Modellfeil() {
-    override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
-    override val httpkode = HttpStatusCode.BadRequest
-    override val feilkode: String = "mangler_vurdering_av_varsler"
-
-    override fun logger() {
-        loggInfo(
-            "Returnerer ${httpkode.value} for $feilkode for tildeling",
-            "oppgaveId" to oppgaveId,
-        )
-    }
-}
-
 class IkkeTilgang(
     private val oid: UUID,
     private val oppgaveId: Long,

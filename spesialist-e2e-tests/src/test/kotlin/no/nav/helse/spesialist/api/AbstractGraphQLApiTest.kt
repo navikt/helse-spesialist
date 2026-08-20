@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenera
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
@@ -109,7 +108,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 mutationHandlers =
                     SpesialistSchema.MutationHandlers(
                         overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                        totrinnsvurdering = TotrinnsvurderingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     ),
             )
 

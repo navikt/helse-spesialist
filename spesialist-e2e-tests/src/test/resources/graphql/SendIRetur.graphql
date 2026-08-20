@@ -1,6 +1,0 @@
-mutation SendIRetur($oppgavereferanse: String!, $notatTekst: String!) {
-    sendIRetur(
-        oppgavereferanse: $oppgavereferanse
-        notatTekst: $notatTekst
-    )
-}

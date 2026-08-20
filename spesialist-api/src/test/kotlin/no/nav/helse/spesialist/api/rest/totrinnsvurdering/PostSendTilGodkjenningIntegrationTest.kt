@@ -3,19 +3,32 @@ package no.nav.helse.spesialist.api.rest.totrinnsvurdering
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Varselvurdering
+import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertInstanceOf
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PostSendTilGodkjenningIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
@@ -150,6 +163,70 @@ class PostSendTilGodkjenningIntegrationTest {
             """.trimIndent(),
             response.bodyAsJsonNode!!,
         )
+    }
+
+    @ParameterizedTest
+    @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
+    fun `sender til godkjenning, oppdaterer totrinnsvurdering og lagrer vedtaksbegrunnelse med utfall basert på tags`(
+        tag: String,
+        forventetUtfall: VedtakBegrunnelseTypeFraDatabase,
+    ) {
+        // Given: en behandling med et vurdert varsel (skal ikke blokkere innsending).
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        val behandling =
+            lagBehandling(
+                vedtaksperiodeId = vedtaksperiode.id,
+                tags = setOf(tag),
+            )
+        sessionContext.behandlingRepository.lagre(behandling)
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+        val varseldefinisjon = lagVarseldefinisjon()
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+        sessionContext.varselRepository.lagre(
+            lagVarsel(
+                behandlingUnikId = behandling.id,
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                status = Varsel.Status.VURDERT,
+                kode = varseldefinisjon.kode,
+                vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
+            ),
+        )
+        val oppgave =
+            lagOppgave(
+                behandlingId = behandling.spleisBehandlingId!!,
+                godkjenningsbehovId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiode.id,
+            ).also(sessionContext.oppgaveRepository::lagre)
+        val totrinnsvurdering = Totrinnsvurdering.ny(person.id.value)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/oppgaver/${oppgave.id.value}/totrinnsvurdering/send-til-godkjenning",
+                body = """{"begrunnelse":"En begrunnelse"}""",
+                saksbehandler = saksbehandler,
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+
+        val oppdatertOppgave = sessionContext.oppgaveRepository.finn(oppgave.id)!!
+        assertTrue(Egenskap.BESLUTTER in oppdatertOppgave.egenskaper)
+
+        val oppdatertTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)!!
+        assertEquals(TotrinnsvurderingTilstand.AVVENTER_BESLUTTER, oppdatertTotrinnsvurdering.tilstand)
+        assertEquals(saksbehandler.id, oppdatertTotrinnsvurdering.saksbehandler)
+
+        val vedtakBegrunnelse = sessionContext.vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgave.id.value)
+        assertEquals(forventetUtfall, vedtakBegrunnelse?.type)
+        assertEquals("En begrunnelse", vedtakBegrunnelse?.tekst)
+
+        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
+        assertEquals(1, historikk.size)
+        assertInstanceOf<AvventerTotrinnsvurdering>(historikk.single())
     }
 
     @Test

@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.modell.kommando.TestMelding
@@ -14,8 +13,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.graphql.SendIReturResult
-import no.nav.helse.spesialist.api.graphql.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
@@ -23,7 +20,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
@@ -45,7 +41,6 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
@@ -64,8 +59,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -322,51 +315,11 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         )
     }
 
-    private fun nyttVarsel(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        kode: String = "EN_KODE",
-        definisjonRef: Long? = null,
-        status: String,
-        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
-    ) = dbQuery.update(
-        """
-        INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-        VALUES (:id, :kode, :vedtaksperiodeId, (SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId LIMIT 1), :definisjonRef, :opprettet, :status, :ident, :tidspunkt)
-        """.trimIndent(),
-        "id" to id,
-        "kode" to kode,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "definisjonRef" to definisjonRef,
-        "opprettet" to LocalDateTime.now(),
-        "status" to status,
-        "ident" to if (endretTidspunkt != null) "EN_IDENT" else null,
-        "tidspunkt" to endretTidspunkt,
-    )
-
-    private fun opprettVarseldefinisjon(
-        tittel: String = "EN_TITTEL",
-        kode: String = "EN_KODE",
-        definisjonId: UUID = UUID.randomUUID(),
-    ): Long =
-        dbQuery
-            .updateAndReturnGeneratedKey(
-                """
-                INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
-                VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)    
-                """.trimIndent(),
-                "definisjonId" to definisjonId,
-                "kode" to kode,
-                "tittel" to tittel,
-                "opprettet" to LocalDateTime.now(),
-            ).let(::requireNotNull)
-
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
     private val mediator =
         SaksbehandlerMediator(
-            daos = DBDaos(dataSource),
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             sessionFactory = TransactionalSessionFactory(dataSource),
@@ -390,106 +343,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @BeforeEach
     fun beforeEach() {
         testRapid.reset()
-    }
-
-    @ParameterizedTest
-    @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
-    fun `håndter totrinnsvurdering med utfall innvilgelse basert på tags fra Spleis`(
-        tag: String,
-        utfall: VedtakBegrunnelseTypeFraDatabase,
-    ) {
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = lagVedtaksperiodeId()
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-        )
-        opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
-        sessionFactory.transactionalSessionScope { session ->
-            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
-                oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId.value,
-                    spleisBehandlingId = spleisBehandlingId.value,
-                    tags = listOf(tag),
-                    utbetalingId = utbetalingId,
-                )
-            }
-        }
-
-        val result = mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
-
-        assertEquals(SendTilGodkjenningResult.Ok, result)
-        val totrinnsvurdering =
-            sessionFactory.transactionalSessionScope { session ->
-                session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-            }
-        checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
-        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
-        assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "Begrunnelse")
-    }
-
-    @Test
-    fun `håndter totrinnsvurdering når periode har vurdert varsel`() {
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = lagVedtaksperiodeId()
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-        )
-        opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
-        sessionFactory.transactionalSessionScope { session ->
-            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
-                oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId.value,
-                    spleisBehandlingId = spleisBehandlingId.value,
-                    tags = listOf("Innvilget"),
-                    utbetalingId = utbetalingId,
-                )
-            }
-        }
-        val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId.value,
-            definisjonRef = definisjonRef,
-            status = "VURDERT",
-        )
-
-        val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
-
-        assertEquals(SendTilGodkjenningResult.Ok, result)
-        val totrinnsvurdering =
-            sessionFactory.transactionalSessionScope { session ->
-                session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-            }
-        checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
-        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
     }
 
     @Test
@@ -607,161 +460,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 .isAfter(LocalDateTime.now().minusSeconds(5)),
         )
         assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
-    }
-
-    @Test
-    fun `håndter totrinnsvurdering send i retur`() {
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = lagVedtaksperiodeId()
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-        )
-        opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
-        sessionFactory.transactionalSessionScope { session ->
-            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
-                oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId.value,
-                    spleisBehandlingId = spleisBehandlingId.value,
-                    tags = listOf("Innvilget"),
-                    utbetalingId = utbetalingId,
-                )
-            }
-        }
-        val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId.value,
-            definisjonRef = definisjonRef,
-            status = "VURDERT",
-        )
-
-        val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
-
-        assertEquals(SendTilGodkjenningResult.Ok, result)
-
-        val beslutter = lagSaksbehandler()
-        opprettSaksbehandler(beslutter.id.value, beslutter.navn, beslutter.epost, beslutter.ident.value)
-        val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
-
-        assertEquals(SendIReturResult.Ok, resultRetur)
-
-        val totrinnsvurdering =
-            sessionFactory.transactionalSessionScope { session ->
-                session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-            }
-        checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
-        assertEquals(beslutter.id.value, totrinnsvurdering.beslutter?.value)
-        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
-    }
-
-    @Test
-    fun `håndter totrinnsvurdering når periode har aktivt varsel`() {
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = lagVedtaksperiodeId()
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-        )
-        opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
-        val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId.value,
-            definisjonRef = definisjonRef,
-            status = "AKTIV",
-        )
-        sessionFactory.transactionalSessionScope { session ->
-            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
-                oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId.value,
-                    spleisBehandlingId = spleisBehandlingId.value,
-                    tags = listOf("Innvilget"),
-                    utbetalingId = utbetalingId,
-                )
-            }
-        }
-
-        assertTrue(
-            mediator.håndterTotrinnsvurdering(
-                oppgaveId,
-                saksbehandler,
-                "Begrunnelse",
-            ) is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler,
-        )
-    }
-
-    @Test
-    fun `håndter totrinnsvurdering når periode ikke har noen varsler`() {
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = lagVedtaksperiodeId()
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = lagSpleisBehandlingId()
-        nyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId,
-        )
-
-        opprettTotrinnsvurdering(fødselsnummer = fødselsnummer)
-        opprettSaksbehandler()
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
-        sessionFactory.transactionalSessionScope { session ->
-            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
-                oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId.value,
-                    spleisBehandlingId = spleisBehandlingId.value,
-                    tags = listOf("Innvilget"),
-                    utbetalingId = utbetalingId,
-                )
-            }
-        }
-
-        val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
-
-        assertEquals(SendTilGodkjenningResult.Ok, result)
-    }
-
-    private fun assertVedtakBegrunnelse(
-        expectedUtfall: VedtakBegrunnelseTypeFraDatabase,
-        expectedBegrunnelse: String,
-    ) {
-        val vedtakBegrunnelse = daos.vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
-        checkNotNull(vedtakBegrunnelse)
-        assertEquals(expectedUtfall, vedtakBegrunnelse.type)
-        assertEquals(expectedBegrunnelse, vedtakBegrunnelse.tekst)
     }
 
     // Eksperimentering med DSL for å lage testdata
