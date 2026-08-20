@@ -61,6 +61,33 @@ colima start
 - Søk etter "OAuth2-token" i oppstartsloggen, kopier tokenet som står under og lim det inn under "Authorize"-knappen i Swagger UI
 - Requests kan nå kjøres mot lokal instans via "Try it out"
 
+## Kjøre Speil lokalt mot Spesialist lokalt
+
+[LocalAppMedTestdata.kt](spesialist-e2e-tests/src/test/kotlin/no/nav/helse/spesialist/e2etests/lokal/LocalAppMedTestdata.kt)
+starter Spesialist lokalt på http://localhost:8080 med det samme oppsettet som E2E-testene bruker: alle integrasjoner
+(Spleis, PDL, Gosys, risikovurdering osv.) er stubbet, og meldinger går på en rapid som lever i minnet. Da kan man
+opprette testpersoner uten å være avhengig av Spleis eller andre apper.
+
+- Kjør main-metoden i `LocalAppMedTestdata.kt` (eller run-konfigurasjonen "Start LocalApp med testdata")
+- Opprett en testperson med en oppgave som ligger til godkjenning:
+  ```shell
+  curl -X POST http://localhost:8080/local/testpersoner
+  ```
+  Responsen inneholder blant annet fødselsnummeret du kan søke opp i Speil.
+- Se hvilke testpersoner som er opprettet:
+  ```shell
+  curl http://localhost:8080/local/testpersoner
+  ```
+- Oppsettet kan styres med en JSON-body, for eksempel for å få en sak som blir behandlet automatisk:
+  ```shell
+  curl -X POST http://localhost:8080/local/testpersoner \
+    -H 'Content-Type: application/json' \
+    -d '{"varselkoder": [], "kanGodkjennesAutomatisk": true, "antallÅpneGosysoppgaver": 0}'
+  ```
+
+Testpersonene lever i databasen som kjøres opp av Testcontainers, mens stubbene lever i minnet til appen. Restarter du
+appen, må du derfor opprette testpersonene på nytt.
+
 ## Kjøre tester raskere
 
 - Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt, eksempelvis `~/.testcontainers.properties`
