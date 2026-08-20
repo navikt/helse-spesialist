@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.4.0"
 flyway = "13.3.0"
-graphqlKotlin = "10.2.0"
+graphqlKotlin = "10.2.1"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026071513121784113927"
 tbdLibs = "20260820.1510"
