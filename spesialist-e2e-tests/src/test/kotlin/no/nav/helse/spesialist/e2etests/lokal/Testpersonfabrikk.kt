@@ -113,6 +113,15 @@ class Testpersonfabrikk(
     }
 }
 
+/**
+ * Standardverdiene gir en sak som blir liggende til manuell behandling, fordi varselet gjør at saken
+ * ikke kan behandles automatisk. Uten varsler, uten åpne Gosys-oppgaver og med en risikovurdering som
+ * kan godkjennes automatisk, blir saken behandlet automatisk og det opprettes ingen oppgave.
+ *
+ * @param varselkoder varsler Spleis melder inn på behandlingen, må finnes i api_varseldefinisjon
+ * @param antallÅpneGosysoppgaver svaret stubben gir på ÅpneOppgaver-behovet
+ * @param kanGodkjennesAutomatisk svaret stubben gir på Risikovurdering-behovet
+ */
 data class Testpersonspesifikasjon(
     val varselkoder: List<String> = listOf("RV_IV_1"),
     val antallÅpneGosysoppgaver: Int = 0,
