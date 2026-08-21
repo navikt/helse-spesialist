@@ -271,6 +271,7 @@ query HentSnapshot($fnr: String!) {
                 oppfyllerKravOmMinstelonn
                 oppfyllerKravOmOpptjening
                 opptjeningFra
+                opptjeningsvurderingId
                 beregningsgrunnlag
             }
         }

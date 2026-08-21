@@ -732,6 +732,7 @@ type VilkarsgrunnlagSpleisV2 implements VilkarsgrunnlagV2 {
     oppfyllerKravOmMinstelonn: Boolean!
     oppfyllerKravOmOpptjening: Boolean!
     opptjeningFra: LocalDate!
+    opptjeningsvurderingId: UUID!
     skjaeringstidspunkt: LocalDate!
     skjonnsmessigFastsattAarlig: Float
     sykepengegrunnlag: Float!

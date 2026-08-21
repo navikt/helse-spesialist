@@ -397,6 +397,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
                 oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
                 opptjeningFra = opptjeningFra,
+                opptjeningsvurderingId = opptjeningsvurderingId,
                 avviksvurdering =
                     avviksvurdering?.let {
                         ApiVilkårsgrunnlagAvviksvurdering(

@@ -40,6 +40,7 @@ data class ApiVilkårsgrunnlagSpleisV2(
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
+    val opptjeningsvurderingId: UUID,
     val beregningsgrunnlag: BigDecimal,
     val forsikringsvurderingId: UUID?,
 ) : ApiVilkårsgrunnlagV2

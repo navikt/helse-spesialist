@@ -171,6 +171,7 @@ object GraphQLTestdata {
         oppfyllerKravOmMinstelonn = true,
         oppfyllerKravOmOpptjening = true,
         opptjeningFra = 1 jan 2000,
+        opptjeningsvurderingId = UUID.randomUUID(),
         arbeidsgiverrefusjoner =
             listOf(
                 GraphQLArbeidsgiverrefusjon(
