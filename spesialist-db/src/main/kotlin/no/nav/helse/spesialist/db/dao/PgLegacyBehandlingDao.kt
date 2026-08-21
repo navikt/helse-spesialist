@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.ÅrsakTilVarselsletting
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -107,6 +108,25 @@ class PgLegacyBehandlingDao private constructor(
         behandlingId: UUID,
         varselIder: List<UUID>,
     ) {
+        asSQLWithQuestionMarks(
+            if (varselIder.isEmpty()) {
+                """
+                INSERT INTO varsel_slettet (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt, årsak)
+                SELECT unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt, '${ÅrsakTilVarselsletting.LEGACY_BEHANDLING_OPPDATERT.name}'
+                FROM selve_varsel WHERE behandling_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1)
+                """.trimIndent()
+            } else {
+                """
+                INSERT INTO varsel_slettet (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt, årsak)
+                SELECT unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt, '${ÅrsakTilVarselsletting.LEGACY_BEHANDLING_OPPDATERT.name}'
+                FROM selve_varsel 
+                WHERE behandling_ref = (SELECT id FROM behandling b WHERE b.unik_id = ? LIMIT 1) 
+                AND selve_varsel.unik_id NOT IN (${varselIder.joinToString { "?" }})
+                """.trimIndent()
+            },
+            behandlingId,
+            *varselIder.toTypedArray(),
+        ).update()
         asSQLWithQuestionMarks(
             if (varselIder.isEmpty()) {
                 """

@@ -10,6 +10,11 @@ value class VarselId(
     val value: UUID,
 ) : ValueObject
 
+enum class ÅrsakTilVarselsletting {
+    ERSTATTET_AV_NYTT_VARSEL,
+    LEGACY_BEHANDLING_OPPDATERT,
+}
+
 sealed interface ResultatAvSletting {
     data object Slettet : ResultatAvSletting
 
@@ -42,10 +47,6 @@ class Varsel private constructor(
         AVVIST,
         AVVIKLET,
     }
-
-    fun erVarselOmAvvik(): Boolean = this.kode == "RV_IV_2"
-
-    fun erInaktivt(): Boolean = this.status == Status.INAKTIV
 
     fun kanAvvises() = status in listOf(Status.AKTIV, Status.VURDERT)
 

@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.Varselvurdering
+import no.nav.helse.spesialist.domain.ÅrsakTilVarselsletting
 
 class PgVarselRepository private constructor(
     private val dbQuery: DbQuery,
@@ -173,7 +174,19 @@ class PgVarselRepository private constructor(
         varsler.forEach { lagre(it) }
     }
 
-    override fun slett(varselId: VarselId) {
+    override fun slett(
+        varselId: VarselId,
+        årsak: ÅrsakTilVarselsletting,
+    ) {
+        dbQuery.update(
+            """
+                INSERT INTO varsel_slettet (unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt, årsak)
+                SELECT unik_id, kode, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt, :aarsak
+                FROM selve_varsel WHERE unik_id = :id
+            """,
+            "id" to varselId.value,
+            "aarsak" to årsak.name,
+        )
         dbQuery.update(
             """
                  DELETE FROM selve_varsel WHERE unik_id = :id

@@ -4,6 +4,7 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.ÅrsakTilVarselsletting
 
 class InMemoryVarselRepository :
     AbstractInMemoryRepository<VarselId, Varsel>(),
@@ -16,6 +17,13 @@ class InMemoryVarselRepository :
 
     override fun lagre(varsler: List<Varsel>) {
         varsler.forEach(::lagre)
+    }
+
+    override fun slett(
+        varselId: VarselId,
+        årsak: ÅrsakTilVarselsletting,
+    ) {
+        slett(varselId)
     }
 
     override fun deepCopy(original: Varsel): Varsel =
