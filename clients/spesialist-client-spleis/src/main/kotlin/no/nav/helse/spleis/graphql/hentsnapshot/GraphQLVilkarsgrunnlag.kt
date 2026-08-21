@@ -109,6 +109,8 @@ public data class GraphQLSpleisVilkarsgrunnlag(
     @JsonDeserialize(converter = AnyToLocalDateConverter::class)
     @get:JsonProperty(value = "opptjeningFra")
     public val opptjeningFra: LocalDate,
+    @get:JsonProperty(value = "opptjeningsvurderingId")
+    public val opptjeningsvurderingId: UUID,
     @get:JsonProperty(value = "beregningsgrunnlag")
     public val beregningsgrunnlag: Double,
     @get:JsonProperty(value = "forsikringsvurderingId")
