@@ -54,7 +54,6 @@ internal class KlargjørTilgangsrelaterteDataCommand(
             OppdaterEnhetCommand(fødselsnummer, personRepository),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
             ),
             ikkesuspenderendeCommand("opprettOptegnelse") { sessionContext: SessionContext, _: Outbox ->
                 val opptegnelse =

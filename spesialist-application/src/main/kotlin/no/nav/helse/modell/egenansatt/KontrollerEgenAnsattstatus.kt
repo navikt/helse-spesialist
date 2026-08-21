@@ -6,28 +6,29 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 
 internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
-    private val personRepository: PersonRepository,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(commandContext)
+    ) = behandle(commandContext, sessionContext)
 
     override fun resume(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(commandContext)
+    ) = behandle(commandContext, sessionContext)
 
-    private fun behandle(commandContext: CommandContext): Boolean {
-        if (viHarInformasjon()) return true
+    private fun behandle(
+        commandContext: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
+        if (viHarInformasjon(sessionContext)) return true
         val løsning = commandContext.get<EgenAnsattløsning>()
         if (løsning == null) {
             logg.info("Trenger informasjon om egen ansatt")
@@ -35,10 +36,10 @@ internal class KontrollerEgenAnsattstatus(
             return false
         }
 
-        løsning.lagre(personRepository)
+        løsning.lagre(sessionContext.personRepository)
         return true
     }
 
     // Hvis vi har informasjon i databasen er den "garantert" oppdatert, pga. at vi lytter på endringer på topic fra NOM.
-    private fun viHarInformasjon() = personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus != null
+    private fun viHarInformasjon(sessionContext: SessionContext) = sessionContext.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus != null
 }

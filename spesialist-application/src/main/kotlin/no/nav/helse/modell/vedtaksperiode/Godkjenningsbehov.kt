@@ -429,7 +429,6 @@ internal class GodkjenningsbehovCommand(
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                personRepository = personRepository,
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
