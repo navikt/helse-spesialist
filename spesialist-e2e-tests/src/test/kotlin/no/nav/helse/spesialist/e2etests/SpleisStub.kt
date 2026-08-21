@@ -37,84 +37,137 @@ class SpleisStub(
     }
 
     fun stubSnapshotForPerson(context: TestContext) {
-        val data = javaClass.getResourceAsStream("/hentSnapshot.json").use(objectMapper::readTree)
+        val mal = javaClass.getResourceAsStream("/hentSnapshot.json").use(objectMapper::readTree)
 
         val person = context.person
+        settVerdi(mal, "/data/person/aktorId", person.aktørId)
+        settVerdi(mal, "/data/person/fodselsnummer", person.fødselsnummer)
 
-        settVerdi(data, "/data/person/aktorId", person.aktørId)
-        settVerdi(data, "/data/person/fodselsnummer", person.fødselsnummer)
+        val arbeidsgivereMal = mal.at(JsonPointer.compile("/data/person/arbeidsgivere")) as ArrayNode
+        val arbeidsgiverMal = arbeidsgivereMal[0].deepCopy() as ObjectNode
+        val periodeMal =
+            arbeidsgiverMal
+                .at(JsonPointer.compile("/generasjoner/0/perioder/0"))
+                .deepCopy() as ObjectNode
+        arbeidsgivereMal.removeAll()
 
-        sequenceOf(
-            "/data/person/arbeidsgivere/0/organisasjonsnummer",
-            "/data/person/vilkarsgrunnlag/0/inntekter/0/arbeidsgiver",
-            "/data/person/vilkarsgrunnlag/0/arbeidsgiverrefusjoner/0/arbeidsgiver",
-        ).forEach {
-            settVerdi(
-                jsonNode = data,
-                pointer = it,
-                verdi = context.arbeidsgiver.organisasjonsnummer,
-            )
+        val sykefraværstilfeller = sykefraværstilfellerFor(context)
+        // Klassiske enkelt-AG-enkelt-periode-tester (bl.a. HentPersonE2ETest) forventer at
+        // periode-/inntektsmalens egne datoer (2024-12-xx) blir stående urørt. Når testen faktisk
+        // bruker flere arbeidsgivere/perioder (LocalApp/Testpersonfabrikk-scenarioer) må vi derimot
+        // bruke de virkelige datoene som er satt på hver vedtaksperiode.
+        val brukReelleDatoer = context.arbeidsgivere.size > 1 || context.vedtaksperioder.size > 1
+
+        context.arbeidsgivere.forEach { arbeidsgiver ->
+            val arbeidsgiverNode = arbeidsgiverMal.deepCopy() as ObjectNode
+            arbeidsgiverNode.put("organisasjonsnummer", arbeidsgiver.organisasjonsnummer)
+
+            val perioder = arbeidsgiverNode.at(JsonPointer.compile("/generasjoner/0/perioder")) as ArrayNode
+            perioder.removeAll()
+
+            context.vedtaksperioderFor(arbeidsgiver).filter { it.spleisBehandlingId != null }.forEach { vedtaksperiode ->
+                val periodeNode = periodeMal.deepCopy() as ObjectNode
+                if (brukReelleDatoer) {
+                    settVerdi(periodeNode, "/fom", vedtaksperiode.fom.toString())
+                    settVerdi(periodeNode, "/tom", vedtaksperiode.tom.toString())
+                }
+                settVerdi(periodeNode, "/behandlingId", vedtaksperiode.spleisBehandlingId.toString())
+                settVerdi(periodeNode, "/vedtaksperiodeId", vedtaksperiode.vedtaksperiodeId.toString())
+                settVerdi(periodeNode, "/vilkarsgrunnlagId", context.vilkårsgrunnlagId.toString())
+                settVerdi(periodeNode, "/utbetaling/id", vedtaksperiode.utbetalingId.toString())
+                settVerdi(
+                    periodeNode,
+                    "/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
+                    arbeidsgiver.organisasjonsnummer,
+                )
+                settVerdi(
+                    periodeNode,
+                    "/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/detaljer/0/refunderesOrgNr",
+                    arbeidsgiver.organisasjonsnummer,
+                )
+                settVerdi(
+                    periodeNode,
+                    "/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
+                    arbeidsgiver.navn,
+                )
+                settVerdi(periodeNode, "/inntekter/0/inntektskilde", arbeidsgiver.organisasjonsnummer)
+                perioder.add(periodeNode)
+            }
+
+            val ghostPerioder = arbeidsgiverNode.at(JsonPointer.compile("/ghostPerioder")) as ArrayNode
+            ghostPerioder.removeAll()
+            if (context.vedtaksperioderFor(arbeidsgiver).isEmpty()) {
+                sykefraværstilfeller.forEach { tilfelle ->
+                    ghostPerioder.addObject().apply {
+                        put("fom", tilfelle.fom.toString())
+                        put("tom", tilfelle.tom.toString())
+                        put("skjaeringstidspunkt", tilfelle.skjæringstidspunkt.toString())
+                    }
+                }
+            }
+
+            arbeidsgivereMal.add(arbeidsgiverNode)
         }
 
-        settVerdi(
-            jsonNode = data,
-            pointer = "/data/person/vilkarsgrunnlag/0/id",
-            verdi = context.vilkårsgrunnlagId.toString(),
-        )
+        val vilkårsgrunnlagMal = mal.at(JsonPointer.compile("/data/person/vilkarsgrunnlag/0")) as ObjectNode
+        settVerdi(vilkårsgrunnlagMal, "/id", context.vilkårsgrunnlagId.toString())
 
-        context.vedtaksperioder.forEachIndexed { index, vedtaksperiode ->
-            if (index > 0) {
-                // Opprett kopi av periodeelementer
-                val perioder =
-                    data.at(JsonPointer.compile("/data/person/arbeidsgivere/0/generasjoner/0/perioder")) as ArrayNode
-                perioder.add(perioder[0].deepCopy())
-            }
+        val realeArbeidsgivere = context.arbeidsgivere.filterNot { context.vedtaksperioderFor(it).isEmpty() }
+        val inntektMal = vilkårsgrunnlagMal.at(JsonPointer.compile("/inntekter/0")).deepCopy() as ObjectNode
+        val refusjonMal = vilkårsgrunnlagMal.at(JsonPointer.compile("/arbeidsgiverrefusjoner/0")).deepCopy() as ObjectNode
 
-            sequenceOf(
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/detaljer/0/refunderesOrgNr",
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/inntekter/0/inntektskilde",
-            ).forEach {
-                settVerdi(
-                    jsonNode = data,
-                    pointer = it,
-                    verdi = context.arbeidsgiver.organisasjonsnummer,
-                )
-            }
-            settVerdi(
-                jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
-                verdi = context.arbeidsgiver.navn,
-            )
+        val inntekter = vilkårsgrunnlagMal.at(JsonPointer.compile("/inntekter")) as ArrayNode
+        inntekter.removeAll()
+        val refusjoner = vilkårsgrunnlagMal.at(JsonPointer.compile("/arbeidsgiverrefusjoner")) as ArrayNode
+        refusjoner.removeAll()
 
-            settVerdi(
-                jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/behandlingId",
-                verdi = vedtaksperiode.spleisBehandlingId.toString(),
+        realeArbeidsgivere.forEach { arbeidsgiver ->
+            inntekter.add(
+                (inntektMal.deepCopy() as ObjectNode).apply {
+                    put("arbeidsgiver", arbeidsgiver.organisasjonsnummer)
+                    put("deaktivert", false)
+                },
             )
-            settVerdi(
-                jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vedtaksperiodeId",
-                verdi = vedtaksperiode.vedtaksperiodeId.toString(),
-            )
-            settVerdi(
-                jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vilkarsgrunnlagId",
-                verdi = context.vilkårsgrunnlagId.toString(),
-            )
-            settVerdi(
-                jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/id",
-                verdi = vedtaksperiode.utbetalingId.toString(),
-            )
+            refusjoner.add((refusjonMal.deepCopy() as ObjectNode).apply { put("arbeidsgiver", arbeidsgiver.organisasjonsnummer) })
         }
 
         wireMockServer.stubFor(
             post("/graphql")
                 .withRequestBody(matchingJsonPath("\$.variables[?(@.fnr == '${person.fødselsnummer}')]"))
-                .willReturn(okJson(data.toPrettyString())),
+                .willReturn(okJson(mal.toPrettyString())),
         )
     }
+
+    /**
+     * Et sykefraværstilfelle er den sammenhengende perioden med sykdom på tvers av arbeidsgivere.
+     * Opphold i sykdommen (uansett hvilken arbeidsgiver) starter et nytt tilfelle. Brukes til å
+     * utlede ghost-perioder for arbeidsgivere uten egne vedtaksperioder: en ghost-arbeidsgiver skal
+     * ha én ghost-periode per sykefraværstilfelle, som strekker seg over hele tilfellet.
+     */
+    private data class Sykefraværstilfelle(
+        val fom: java.time.LocalDate,
+        val tom: java.time.LocalDate,
+        val skjæringstidspunkt: java.time.LocalDate,
+    )
+
+    private fun sykefraværstilfellerFor(context: TestContext): List<Sykefraværstilfelle> =
+        context.vedtaksperioder
+            .sortedBy(Vedtaksperiode::fom)
+            .fold(mutableListOf<MutableList<Vedtaksperiode>>()) { tilfeller, periode ->
+                val gjeldende = tilfeller.lastOrNull()
+                if (gjeldende != null && !periode.fom.isAfter(gjeldende.maxOf(Vedtaksperiode::tom).plusDays(1))) {
+                    gjeldende.add(periode)
+                } else {
+                    tilfeller.add(mutableListOf(periode))
+                }
+                tilfeller
+            }.map { perioderITilfellet ->
+                Sykefraværstilfelle(
+                    fom = perioderITilfellet.minOf(Vedtaksperiode::fom),
+                    tom = perioderITilfellet.maxOf(Vedtaksperiode::tom),
+                    skjæringstidspunkt = perioderITilfellet.minOf(Vedtaksperiode::fom),
+                )
+            }
 
     private fun settVerdi(
         jsonNode: JsonNode,
@@ -141,8 +194,8 @@ class SpleisStub(
         vedtaksperiode: Vedtaksperiode,
     ) {
         spleisReberegnerPerioden(testContext.person, vedtaksperiode)
-        spleisForkasterGammelUtbetaling(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
-        spleisLagerNyUtbetalingForVedtaksperiode(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
+        spleisForkasterGammelUtbetaling(testContext.person, vedtaksperiode.arbeidsgiver, vedtaksperiode)
+        spleisLagerNyUtbetalingForVedtaksperiode(testContext.person, vedtaksperiode.arbeidsgiver, vedtaksperiode)
     }
 
     private fun spleisReberegnerPerioden(
@@ -251,8 +304,8 @@ class SpleisStub(
             val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
             if (godkjent) {
                 spleisLukkerBehandlingen(vedtaksperiode, testContext.person)
-                utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
-                spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
+                utbetalingSkjer(vedtaksperiode, testContext.person, vedtaksperiode.arbeidsgiver)
+                spleisAvslutterPerioden(vedtaksperiode, testContext.person, vedtaksperiode.arbeidsgiver)
             } else {
                 spleisForkasterPerioden(testContext, vedtaksperiode)
             }
@@ -320,17 +373,25 @@ class SpleisStub(
             val jsonNode = objectMapper.readTree(packet.toJson())
             val skjønnsfastsatteArbeidsgivere = jsonNode["arbeidsgivere"]
             val skjæringstidspunkt = jsonNode["skjæringstidspunkt"].asLocalDate()
+            val organisasjonsnummer = skjønnsfastsatteArbeidsgivere.firstOrNull()?.get("organisasjonsnummer")?.asString()
             val fødselsnummer = jsonNode["fødselsnummer"].asString()
             val testContext =
                 contextForPerson(fødselsnummer)
             val vedtaksperiode =
                 testContext.vedtaksperioder
-                    .find { it.skjæringstidspunkt == skjæringstidspunkt }
+                    .filter { it.skjæringstidspunkt == skjæringstidspunkt }
+                    .let { kandidater ->
+                        if (organisasjonsnummer != null) {
+                            kandidater.find { it.arbeidsgiver.organisasjonsnummer == organisasjonsnummer } ?: kandidater.firstOrNull()
+                        } else {
+                            kandidater.firstOrNull()
+                        }
+                    }
                     ?: error("Fant ikke vedtaksperiode med skjæringstidspunkt $skjæringstidspunkt i context for person $fødselsnummer")
             spleisReberegnerPerioden(testContext, vedtaksperiode)
             spleisSenderGodkjenningsbehovMedSkjønnsfastsattSykepengegrunnlag(
                 person = testContext.person,
-                arbeidsgiver = testContext.arbeidsgiver,
+                arbeidsgiver = vedtaksperiode.arbeidsgiver,
                 vedtaksperiode = vedtaksperiode,
                 vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
                 skjønnsfastsatteArbeidsgivereJson = skjønnsfastsatteArbeidsgivere,
