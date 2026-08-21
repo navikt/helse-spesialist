@@ -1,9 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -14,8 +12,6 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 
 internal class VurderAutomatiskAvvisning(
-    private val personDao: PersonDao,
-    private val vergemålDao: VergemålDao,
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
     override fun execute(
@@ -26,8 +22,8 @@ internal class VurderAutomatiskAvvisning(
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
 
-        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
-        val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
+        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(fødselsnummer))
+        val underVergemål = sessionContext.vergemålDao.harVergemål(fødselsnummer) ?: false
 
         if (!(tilhørerEnhetUtland || underVergemål)) return true
 

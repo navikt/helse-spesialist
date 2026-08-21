@@ -1,48 +1,51 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.helse.db.PersonDao
-import no.nav.helse.db.VergemålDao
+import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.test.assertEquals
 
 internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
+    private companion object {
+        private const val UTLANDSENHET = 393
+        private const val ANNEN_ENHET = 100
+    }
+
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
     private val fødselsnummer = lagFødselsnummer()
 
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val personDao = mockk<PersonDao>(relaxed = true)
-
     @Test
     fun `skal avvise ved vergemål dersom perioden kan avvises`() {
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
+        lagrePerson(enhet = ANNEN_ENHET)
+        lagreVergemål(harVergemål = true)
         assertAvvisning(lagCommand(kanAvvises = true), "Vergemål")
     }
 
     @Test
     fun `skal ikke avvise ved vergemål dersom perioden ikke kan avvises`() {
-        every { vergemålDao.harVergemål(fødselsnummer) } returns true
+        lagrePerson(enhet = ANNEN_ENHET)
+        lagreVergemål(harVergemål = true)
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
     @Test
     fun `skal avvise ved utland dersom perioden kan avvises`() {
-        every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
+        lagrePerson(enhet = UTLANDSENHET)
         assertAvvisning(lagCommand(kanAvvises = true), "Utland")
     }
 
     @Test
     fun `skal ikke avvise ved utland dersom perioden ikke kan avvises`() {
-        every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
+        lagrePerson(enhet = UTLANDSENHET)
         assertIkkeAvvisning(lagCommand(kanAvvises = false))
     }
 
@@ -63,12 +66,24 @@ internal class VurderAutomatiskAvvisningTest : ApplicationTest() {
         assertIkkeUtgåendeHendelse<Godkjenningsbehovløsning>()
     }
 
+    private fun lagrePerson(enhet: Int) {
+        sessionContext.personRepository.lagre(
+            lagPerson(id = Identitetsnummer.fraString(fødselsnummer), enhet = enhet),
+        )
+    }
+
+    private fun lagreVergemål(harVergemål: Boolean) {
+        sessionContext.vergemålDao.lagre(
+            fødselsnummer = fødselsnummer,
+            vergemålOgFremtidsfullmakt = VergemålOgFremtidsfullmakt(harVergemål = harVergemål, harFremtidsfullmakter = false),
+            fullmakt = false,
+        )
+    }
+
     private fun lagCommand(
         kanAvvises: Boolean = true,
         fødselsnummer: String = this.fødselsnummer,
     ) = VurderAutomatiskAvvisning(
-        personDao = personDao,
-        vergemålDao = vergemålDao,
         godkjenningsbehov =
             godkjenningsbehovData(
                 fødselsnummer = fødselsnummer,

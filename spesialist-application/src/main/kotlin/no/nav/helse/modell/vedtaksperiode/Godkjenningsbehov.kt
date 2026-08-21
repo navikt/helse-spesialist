@@ -463,8 +463,6 @@ internal class GodkjenningsbehovCommand(
                 spleisVedtaksperioder = godkjenningsbehovData.spleisVedtaksperioder,
             ),
             VurderAutomatiskAvvisning(
-                personDao = personDao,
-                vergemålDao = vergemålDao,
                 godkjenningsbehov = godkjenningsbehovData,
             ),
             VurderBehovForTotrinnskontroll(
