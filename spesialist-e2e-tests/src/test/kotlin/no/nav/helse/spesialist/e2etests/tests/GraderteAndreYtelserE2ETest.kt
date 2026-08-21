@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
+import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelseType
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserPeriode
@@ -64,6 +65,9 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 expectedAndreYtelseType = domainAndreYtelseType,
             )
         }
+        val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
+        assertEquals(fødselsnummer(), endringsmelding["fødselsnummer"].asString())
+        assertEquals(2 jan 2021, endringsmelding["fom"].asLocalDate())
     }
 
     @Test

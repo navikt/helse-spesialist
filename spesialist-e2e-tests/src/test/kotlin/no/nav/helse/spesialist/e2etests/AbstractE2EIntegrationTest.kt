@@ -11,26 +11,16 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
-import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.FullmaktBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.*
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertNull
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 abstract class AbstractE2EIntegrationTest {
     protected val testContext: TestContext = TestContext()
@@ -89,6 +79,8 @@ abstract class AbstractE2EIntegrationTest {
             .filterNot { it.hasNonNull("@løsning") }
             .last()[0]
             .asString()
+
+    protected fun sisteSendteMeldingMedEventName(eventName: String): JsonNode = meldinger().last { it["@event_name"].asString() == eventName }
 
     protected fun vedtakFattetMelding(): JsonNode =
         meldinger().find { it["@event_name"].asString() == "vedtak_fattet" }

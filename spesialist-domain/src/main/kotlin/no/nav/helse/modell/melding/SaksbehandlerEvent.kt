@@ -1,9 +1,10 @@
 package no.nav.helse.modell.melding
 
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgradPeriode
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class OverstyrtInntektOgRefusjonEvent(
     val eksternHendelseId: UUID,
@@ -181,3 +182,8 @@ data class InntektsendringerEvent(
 
     override fun toString() = inntektskilder.joinToString(separator = "\n")
 }
+
+data class GraderteAndreYtelserEndringerEvent(
+    val fødselsnummer: Identitetsnummer,
+    val fom: LocalDate,
+) : UtgåendeHendelse

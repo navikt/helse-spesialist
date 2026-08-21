@@ -1,37 +1,14 @@
 package no.nav.helse.kafka.messagebuilders
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import no.nav.helse.modell.melding.AnmodningOmForkastingEvent
-import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
-import no.nav.helse.modell.melding.Godkjenningsbehovløsning
-import no.nav.helse.modell.melding.HentDokument
-import no.nav.helse.modell.melding.InntektsendringerEvent
-import no.nav.helse.modell.melding.KlargjørPersonForVisning
-import no.nav.helse.modell.melding.LagtPåVentEvent
-import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
-import no.nav.helse.modell.melding.OppgaveOppdatert
-import no.nav.helse.modell.melding.OppgaveOpprettet
-import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
-import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
-import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
-import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
-import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.modell.melding.VarselEndret
-import no.nav.helse.modell.melding.VedtakFattetMelding
-import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
-import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
-import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
-import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
+import no.nav.helse.modell.melding.*
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.oppgave.Oppgave.AvventerSaksbehandler
-import no.nav.helse.spesialist.domain.oppgave.Oppgave.AvventerSystem
-import no.nav.helse.spesialist.domain.oppgave.Oppgave.Ferdigstilt
-import no.nav.helse.spesialist.domain.oppgave.Oppgave.Invalidert
+import no.nav.helse.spesialist.domain.oppgave.Oppgave.*
 import no.nav.helse.spesialist.kafka.objectMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
 private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
@@ -79,6 +56,7 @@ internal fun UtgåendeHendelse.eventName() =
         is VarselEndret -> "varsel_endret"
 
         is InntektsendringerEvent -> "inntektsendringer"
+        is GraderteAndreYtelserEndringerEvent -> "graderte_andre_ytelser_endret"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
@@ -103,6 +81,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is SkjønnsfastsattSykepengegrunnlagEvent -> this.detaljer()
         is VarselEndret -> this.detaljer()
         is InntektsendringerEvent -> this.detaljer()
+        is GraderteAndreYtelserEndringerEvent -> this.detaljer()
     }
 
 private fun Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
@@ -416,3 +395,5 @@ private fun InntektsendringerEvent.detaljer(): Map<String, Any> =
             },
         )
     }
+
+private fun GraderteAndreYtelserEndringerEvent.detaljer(): Map<String, Any> = mapOf("fom" to fom)

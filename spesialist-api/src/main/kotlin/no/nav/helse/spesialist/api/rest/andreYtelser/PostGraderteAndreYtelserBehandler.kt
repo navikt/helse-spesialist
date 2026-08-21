@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
+import no.nav.helse.modell.melding.GraderteAndreYtelserEndringerEvent
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
@@ -69,21 +70,21 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
                 graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelseType.name),
             )
         kallKontekst.transaksjon.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
-        // TODO, legg til eventet som skal sendes til spleis i outboxen
-        /*
+
         kallKontekst.outbox.leggTil(
             identitetsnummer = graderteAndreYtelser.identitetsnummer,
             hendelse =
-                InntektsendringerEventBygger.forNy(
-                    inntektskilde = tilkommenInntekt.organisasjonsnummer,
-                    dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
-                    dagsbeløp = tilkommenInntekt.dagbeløp(),
+                GraderteAndreYtelserEndringerEvent(
+                    fødselsnummer = person.id,
+                    fom =
+                        graderteAndreYtelser.perioder
+                            .minByOrNull { it.periode.fom }!!
+                            .periode.fom,
                 ),
-            årsak = "tilkommen inntekt lagt til",
+            årsak = "graderte andre ytelser lagt til",
         )
-         */
 
-        loggInfo("La til graderte andre ytelser", "graderteAndreYtelserId" to graderteAndreYtelser.id)
+        loggInfo("La til graderte andre ytelser (graderteAndreYtelserId: ${graderteAndreYtelser.id}")
 
         return RestResponse.OK(ApiLeggTilGraderteAndreYtelserResponse(graderteAndreYtelser.id.value))
     }
