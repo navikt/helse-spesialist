@@ -4,20 +4,20 @@ import tools.jackson.databind.JsonNode
 import java.time.YearMonth
 
 class InntekterForSykepengegrunnlagBehovLøser(
-    private val organisasjonsnummer: String,
+    private val organisasjonsnumre: List<String>,
 ) : AbstractBehovLøser("InntekterForSykepengegrunnlag") {
     override fun løsning(behovJson: JsonNode) =
         listOf(
             mapOf(
                 "årMåned" to "${YearMonth.now().minusMonths(1)}",
                 "inntektsliste" to
-                    listOf(
+                    organisasjonsnumre.map { organisasjonsnummer ->
                         mapOf(
                             "beløp" to 20000,
                             "inntektstype" to "LOENNSINNTEKT",
                             "orgnummer" to organisasjonsnummer,
-                        ),
-                    ),
+                        )
+                    },
             ),
         )
 }

@@ -102,6 +102,7 @@ object Meldingsbygger {
         kanAvvises: Boolean = true,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -116,7 +117,7 @@ object Meldingsbygger {
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
             førstegangsbehandling = true,
             utbetalingtype = Utbetalingtype.UTBETALING,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             kanAvvises = kanAvvises,
             spleisBehandlingId = vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
