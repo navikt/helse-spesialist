@@ -71,7 +71,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
         }
 
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        val inntektsendringerMelding = sisteSendteMeldingMedEventName("inntektsendringer")
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
@@ -165,7 +165,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedEkskluderteUkedagerTil = endringEkskluderteUkedager,
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        val inntektsendringerMelding = sisteSendteMeldingMedEventName("inntektsendringer")
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
@@ -249,7 +249,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     ),
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        val inntektsendringerMelding = sisteSendteMeldingMedEventName("inntektsendringer")
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
@@ -349,7 +349,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedEkskluderteUkedagerTil = gjenopprettingEkskluderteUkedager,
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        val inntektsendringerMelding = sisteSendteMeldingMedEventName("inntektsendringer")
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
@@ -475,7 +475,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     ),
             )
         }
-        val inntektsendringerMelding = meldinger().last { it["@event_name"].asString() == "inntektsendringer" }
+        val inntektsendringerMelding = sisteSendteMeldingMedEventName("inntektsendringer")
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asString())
         assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(

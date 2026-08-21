@@ -80,11 +80,11 @@ abstract class AbstractE2EIntegrationTest {
             .last()[0]
             .asString()
 
-    protected fun sisteSendteMeldingMedEventName(eventName: String): JsonNode = meldinger().last { it["@event_name"].asString() == eventName }
+    protected fun sisteSendteMeldingMedEventName(eventName: String): JsonNode =
+        meldinger().lastOrNull { it["@event_name"].asString() == eventName }
+            ?: error("Fant ikke melding med @event_name $eventName")
 
-    protected fun vedtakFattetMelding(): JsonNode =
-        meldinger().find { it["@event_name"].asString() == "vedtak_fattet" }
-            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+    protected fun vedtakFattetMelding(): JsonNode = sisteSendteMeldingMedEventName("vedtak_fattet")
 
     protected fun søknadOgGodkjenningbehovKommerInn(
         tags: List<String> = listOf("Innvilget"),

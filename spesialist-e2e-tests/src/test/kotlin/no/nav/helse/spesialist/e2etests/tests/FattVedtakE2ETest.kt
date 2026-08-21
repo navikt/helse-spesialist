@@ -256,7 +256,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
         val meldinger = meldinger()
         val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asString() == "oppgave_oppdatert" }.dropLast(1).last()
-        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asString() == "oppgave_oppdatert" }
+        val sisteOppgaveOppdatert = sisteSendteMeldingMedEventName("oppgave_oppdatert")
         assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asString())
         assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asString())
 

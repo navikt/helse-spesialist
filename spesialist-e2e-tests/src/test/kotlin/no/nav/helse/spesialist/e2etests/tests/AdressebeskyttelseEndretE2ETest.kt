@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 
 class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
@@ -70,7 +70,6 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             assertAdressebeskyttelse("Fortrolig")
         }
-        val vedtaksperiodeAvvistMelding = meldinger().find { it["@event_name"].asString() == "vedtaksperiode_avvist" }
-        assertNull(vedtaksperiodeAvvistMelding)
+        assertTrue(meldinger().none { it["@event_name"].asString() == "vedtaksperiode_avvist" })
     }
 }
