@@ -6,6 +6,15 @@ import java.util.UUID
 
 class InMemoryAutomatiseringDao : AutomatiseringDao {
     val automatisert = mutableListOf<UUID>()
+    val manuellSaksbehandling = mutableListOf<ManuellSaksbehandling>()
+    val stikkprøver = mutableListOf<UUID>()
+
+    data class ManuellSaksbehandling(
+        val problemer: List<String>,
+        val vedtaksperiodeId: UUID,
+        val hendelseId: UUID,
+        val utbetalingId: UUID,
+    )
 
     override fun plukketUtTilStikkprøve(
         vedtaksperiodeId: UUID,
@@ -42,7 +51,7 @@ class InMemoryAutomatiseringDao : AutomatiseringDao {
         hendelseId: UUID,
         utbetalingId: UUID,
     ) {
-        TODO("Not yet implemented")
+        manuellSaksbehandling.add(ManuellSaksbehandling(problems, vedtaksperiodeId, hendelseId, utbetalingId))
     }
 
     override fun stikkprøve(
@@ -50,7 +59,7 @@ class InMemoryAutomatiseringDao : AutomatiseringDao {
         hendelseId: UUID,
         utbetalingId: UUID,
     ) {
-        TODO("Not yet implemented")
+        stikkprøver.add(utbetalingId)
     }
 
     override fun hentAktivAutomatisering(

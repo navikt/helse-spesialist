@@ -12,7 +12,6 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -24,9 +23,7 @@ internal class VurderAutomatiskInnvilgelse(
     private val utbetaling: Utbetaling,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjenningsbehov: GodkjenningsbehovData,
-    private val automatiseringDao: AutomatiseringDao,
     private val oppgaveService: OppgaveService,
-    private val vedtakRepository: VedtakRepository,
 ) : Command {
     private val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
     private val utbetalingId = godkjenningsbehov.utbetalingId
@@ -58,7 +55,7 @@ internal class VurderAutomatiskInnvilgelse(
                     "utbetalingId" to utbetalingId,
                     "problemer" to resultat.problemer.joinToString(),
                 )
-                manuellSaksbehandling(resultat.problemer)
+                manuellSaksbehandling(sessionContext.automatiseringDao, resultat.problemer)
             }
 
             is Automatiseringsresultat.Stikkprøve -> {
@@ -67,7 +64,7 @@ internal class VurderAutomatiskInnvilgelse(
                     "vedtaksperiodeId" to vedtaksperiodeId,
                     "utbetalingId" to utbetalingId,
                 )
-                stikkprøve()
+                stikkprøve(sessionContext.automatiseringDao)
             }
 
             is Automatiseringsresultat.KanAutomatiseres -> {
@@ -76,7 +73,7 @@ internal class VurderAutomatiskInnvilgelse(
                     "vedtaksperiodeId" to vedtaksperiodeId,
                     "utbetalingId" to utbetalingId,
                 )
-                automatiserSaksbehandling(commandContext)
+                automatiserSaksbehandling(commandContext, sessionContext)
                 return ferdigstill(commandContext)
             }
         }
@@ -84,18 +81,24 @@ internal class VurderAutomatiskInnvilgelse(
         return true
     }
 
-    private fun manuellSaksbehandling(problemer: List<String>) {
+    private fun manuellSaksbehandling(
+        automatiseringDao: AutomatiseringDao,
+        problemer: List<String>,
+    ) {
         automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
-    private fun stikkprøve() {
+    private fun stikkprøve(automatiseringDao: AutomatiseringDao) {
         automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
     }
 
-    private fun automatiserSaksbehandling(commandContext: CommandContext) {
+    private fun automatiserSaksbehandling(
+        commandContext: CommandContext,
+        sessionContext: SessionContext,
+    ) {
         val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId)
         val vedtak =
-            vedtakRepository.finn(spleisBehandlingId).let { vedtak ->
+            sessionContext.vedtakRepository.finn(spleisBehandlingId).let { vedtak ->
                 when (vedtak?.behandletAvSpleis) {
                     null -> {
                         Vedtak.automatisk(spleisBehandlingId)
@@ -113,8 +116,8 @@ internal class VurderAutomatiskInnvilgelse(
                 }
             }
 
-        vedtakRepository.lagre(vedtak)
-        automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
+        sessionContext.vedtakRepository.lagre(vedtak)
+        sessionContext.automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
         godkjenningMediator.automatiskUtbetaling(commandContext, godkjenningsbehov)
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
         Span.current().setAttribute("speil.saksbehandling.spesialist", "vedtak_fattet_automatisk")

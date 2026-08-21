@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.db.ArbeidsforholdDao
-import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
@@ -53,7 +52,6 @@ import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.Periode
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
@@ -371,12 +369,10 @@ internal class GodkjenningsbehovCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
-    automatiseringDao: AutomatiseringDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,
-    vedtakRepository: VedtakRepository,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
     personRepository: PersonRepository,
@@ -485,9 +481,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehovData,
-                automatiseringDao = automatiseringDao,
                 oppgaveService = oppgaveService,
-                vedtakRepository = vedtakRepository,
             ),
             OpprettSaksbehandleroppgave(
                 behovData = godkjenningsbehovData,

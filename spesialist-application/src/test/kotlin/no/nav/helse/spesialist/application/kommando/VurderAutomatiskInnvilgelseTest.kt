@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
@@ -18,9 +17,9 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.InMemoryAutomatiseringDao
 import no.nav.helse.spesialist.application.InMemoryCommandContextDao
 import no.nav.helse.spesialist.application.InMemoryMeldingDao
-import no.nav.helse.spesialist.application.InMemoryVedtakRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
@@ -29,7 +28,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -57,8 +56,8 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             spleisBehandlingId = spleisBehandlingId.value,
         )
-    private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
-    private val vedtakRepository = InMemoryVedtakRepository()
+    private val automatiseringDao = sessionContext.automatiseringDao
+    private val vedtakRepository = sessionContext.vedtakRepository
     private val observatør =
         object : CommandContextObserver {
             val hendelser = mutableListOf<UtgåendeHendelse>()
@@ -97,9 +96,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
                     json = """{ "@event_name": "behov" }""",
                     spleisBehandlingId = spleisBehandlingId.value,
                 ),
-            automatiseringDao = automatiseringDao,
             oppgaveService = mockk(relaxed = true),
-            vedtakRepository = vedtakRepository,
         )
 
     @Test
@@ -134,8 +131,8 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         val vedtak = vedtakRepository.finn(spleisBehandlingId)
         assertIs<Vedtak.Automatisk>(vedtak)
-        verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
-        verify(exactly = 0) { automatiseringDao.manuellSaksbehandling(any(), any(), any(), any()) }
+        assertEquals(listOf(utbetalingId), automatiseringDao.automatisert)
+        assertTrue(automatiseringDao.manuellSaksbehandling.isEmpty())
     }
 
     @Test
@@ -147,8 +144,11 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             )
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertNull(vedtakRepository.finn(spleisBehandlingId))
-        verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
-        verify(exactly = 1) { automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
+        assertTrue(automatiseringDao.automatisert.isEmpty())
+        assertEquals(
+            listOf(InMemoryAutomatiseringDao.ManuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)),
+            automatiseringDao.manuellSaksbehandling,
+        )
     }
 
     @Test
@@ -159,8 +159,8 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             )
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertNull(vedtakRepository.finn(spleisBehandlingId))
-        verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
-        verify(exactly = 1) { automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }
+        assertTrue(automatiseringDao.automatisert.isEmpty())
+        assertEquals(listOf(utbetalingId), automatiseringDao.stikkprøver)
     }
 
     @Test
@@ -177,7 +177,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
-        verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+        assertEquals(listOf(utbetalingId), automatiseringDao.automatisert)
     }
 
     @Test
@@ -187,7 +187,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
-        verify(exactly = 0) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
+        assertTrue(automatiseringDao.automatisert.isEmpty())
     }
 
     private val commandContextDao = InMemoryCommandContextDao(InMemoryMeldingDao())

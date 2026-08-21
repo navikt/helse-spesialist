@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -14,7 +13,6 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
@@ -74,8 +72,6 @@ internal class TilbakedateringGodkjentCommand(
     godkjenningMediator: GodkjenningMediator,
     søknadsperioder: List<Periode>,
     godkjenningsbehov: GodkjenningsbehovData,
-    automatiseringDao: AutomatiseringDao,
-    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -96,8 +92,6 @@ internal class TilbakedateringGodkjentCommand(
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
-                automatiseringDao = automatiseringDao,
-                vedtakRepository = vedtakRepository,
             ),
         )
 }

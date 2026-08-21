@@ -1,6 +1,5 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.ÅpneGosysOppgaverDao
@@ -18,7 +17,6 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import tools.jackson.databind.JsonNode
@@ -63,8 +61,6 @@ internal class GosysOppgaveEndretCommand(
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
-    automatiseringDao: AutomatiseringDao,
-    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -91,8 +87,6 @@ internal class GosysOppgaveEndretCommand(
                 utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
-                automatiseringDao = automatiseringDao,
-                vedtakRepository = vedtakRepository,
             ),
         )
 }

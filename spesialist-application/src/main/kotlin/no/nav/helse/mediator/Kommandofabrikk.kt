@@ -57,8 +57,6 @@ class Kommandofabrikk(
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,
-            automatiseringDao = sessionContext.automatiseringDao,
-            vedtakRepository = sessionContext.vedtakRepository,
         )
     }
 
@@ -83,8 +81,6 @@ class Kommandofabrikk(
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
-            automatiseringDao = sessionContext.automatiseringDao,
-            vedtakRepository = sessionContext.vedtakRepository,
         )
     }
 
@@ -107,14 +103,12 @@ class Kommandofabrikk(
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             risikovurderingDao = sessionContext.risikovurderingDao,
             påVentDao = sessionContext.påVentDao,
-            automatiseringDao = sessionContext.automatiseringDao,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             avviksvurderingRepository = sessionContext.avviksvurderingRepository,
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             person = person,
-            vedtakRepository = sessionContext.vedtakRepository,
             personRepository = sessionContext.personRepository,
             opptegnelseRepository = sessionContext.opptegnelseRepository,
         )
