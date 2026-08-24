@@ -52,7 +52,6 @@ class Kommandofabrikk(
             harTildeltOppgave = harTildeltOppgave,
             oppgave = oppgave,
             automatisering = transaksjonellAutomatisering(sessionContext),
-            oppgaveDao = sessionContext.oppgaveDao,
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             godkjenningsbehov = godkjenningsbehovData,

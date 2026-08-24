@@ -1,6 +1,5 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -55,7 +54,6 @@ internal class GosysOppgaveEndretCommand(
     harTildeltOppgave: Boolean,
     oppgave: Oppgave,
     automatisering: Automatisering,
-    oppgaveDao: OppgaveDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
@@ -70,7 +68,6 @@ internal class GosysOppgaveEndretCommand(
             ),
             SjekkAtOppgaveFortsattErÅpenCommand(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
-                oppgaveDao = oppgaveDao,
             ),
             SettTidligereAutomatiseringInaktivCommand(
                 vedtaksperiodeId = oppgave.vedtaksperiodeId.value,
