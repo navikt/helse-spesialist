@@ -471,7 +471,8 @@ internal class PersonRepository(
         return run(
             queryOf(query, personRef)
                 .map {
-                    listOf(it.int("arbeidsgiver_fagsystem_id_ref"), it.int("person_fagsystem_id_ref"))
+                    // Kolonnene er nullable f.o.m. V695 og skrives ikke lenger. Droppes i V696.
+                    listOfNotNull(it.intOrNull("arbeidsgiver_fagsystem_id_ref"), it.intOrNull("person_fagsystem_id_ref"))
                 }.asList,
         ).flatten()
     }
