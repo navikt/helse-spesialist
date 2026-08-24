@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
@@ -29,8 +28,6 @@ class LagreOppdragCommand(
     private val arbeidsgiverbeløp: Int,
     private val personbeløp: Int,
     private val json: String,
-    private val utbetalingDao: UtbetalingDao,
-    private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
@@ -48,13 +45,14 @@ class LagreOppdragCommand(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        lagOpptegnelse()
+        lagOpptegnelse(sessionContext)
         log.info("lagrer utbetaling $utbetalingId med status $status")
-        lagre()
+        lagre(sessionContext)
         return true
     }
 
-    private fun lagre() {
+    private fun lagre(sessionContext: SessionContext) {
+        val utbetalingDao = sessionContext.utbetalingDao
         val utbetalingIdRef =
             utbetalingDao.finnUtbetalingIdRef(utbetalingId)
                 ?: run {
@@ -79,7 +77,7 @@ class LagreOppdragCommand(
         utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
     }
 
-    private fun lagOpptegnelse() {
+    private fun lagOpptegnelse(sessionContext: SessionContext) {
         val opptegnelseType: Opptegnelse.Type =
             when (type) {
                 Utbetalingtype.ANNULLERING if status == UTBETALING_FEILET -> {
@@ -110,6 +108,6 @@ class LagreOppdragCommand(
                 identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                 type = opptegnelseType,
             )
-        opptegnelseRepository.lagre(opptegnelse)
+        sessionContext.opptegnelseRepository.lagre(opptegnelse)
     }
 }

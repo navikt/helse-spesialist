@@ -39,7 +39,7 @@ class InMemorySessionContext(
     override val tildelingDao: DelegatingTildelingDao,
     override val tilkommenInntektRepository: InMemoryTilkommenInntektRepository,
     override val totrinnsvurderingRepository: InMemoryTotrinnsvurderingRepository,
-    override val utbetalingDao: UnimplementedUtbetalingDao,
+    override val utbetalingDao: InMemoryUtbetalingDao,
     override val varselRepository: InMemoryVarselRepository,
     override val varseldefinisjonRepository: InMemoryVarseldefinisjonRepository,
     override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,

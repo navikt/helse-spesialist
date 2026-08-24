@@ -1,13 +1,11 @@
 package no.nav.helse.modell.utbetaling
 
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.spesialist.application.OpptegnelseRepository
 import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.*
@@ -59,8 +57,6 @@ class UtbetalingEndret(
                 personOppdrag = personOppdrag,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
-                utbetalingDao = sessionContext.utbetalingDao,
-                opptegnelseRepository = sessionContext.opptegnelseRepository,
                 json = toJson(),
             )
         }
@@ -92,8 +88,6 @@ internal class UtbetalingEndretCommand(
     personOppdrag: LagreOppdragCommand.Oppdrag,
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
-    utbetalingDao: UtbetalingDao,
-    opptegnelseRepository: OpptegnelseRepository,
     json: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -110,8 +104,6 @@ internal class UtbetalingEndretCommand(
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 json = json,
-                utbetalingDao = utbetalingDao,
-                opptegnelseRepository = opptegnelseRepository,
             ),
         )
 }
