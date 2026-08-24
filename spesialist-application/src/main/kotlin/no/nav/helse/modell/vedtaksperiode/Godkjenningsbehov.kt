@@ -395,7 +395,6 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
                 vedtaksperiodetype = godkjenningsbehovData.periodetype,
                 inntektskilde = godkjenningsbehovData.inntektskilde,
-                vedtakDao = vedtakDao,
             ),
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,

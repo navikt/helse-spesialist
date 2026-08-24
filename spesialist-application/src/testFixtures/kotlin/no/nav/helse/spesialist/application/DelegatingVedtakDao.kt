@@ -9,13 +9,22 @@ import java.util.UUID
 class DelegatingVedtakDao(
     private val automatiseringDao: InMemoryAutomatiseringDao,
 ) : VedtakDao {
+    private data class Vedtaksperiodetype(
+        val type: Periodetype,
+        val inntektskilde: Inntektskilde,
+    )
+
+    private val vedtaksperiodetyper = mutableMapOf<UUID, Vedtaksperiodetype>()
+
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
         inntektskilde: Inntektskilde,
     ) {
-        TODO("Not yet implemented")
+        vedtaksperiodetyper[vedtaksperiodeId] = Vedtaksperiodetype(type, inntektskilde)
     }
+
+    fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype? = vedtaksperiodetyper[vedtaksperiodeId]?.type
 
     override fun erAutomatiskGodkjent(utbetalingId: UUID): Boolean = automatiseringDao.automatisert.contains(utbetalingId)
 
@@ -26,9 +35,7 @@ class DelegatingVedtakDao(
         TODO("Not yet implemented")
     }
 
-    override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? {
-        TODO("Not yet implemented")
-    }
+    override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? = vedtaksperiodetyper[vedtaksperiodeId]?.inntektskilde
 
     override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? {
         TODO("Not yet implemented")
