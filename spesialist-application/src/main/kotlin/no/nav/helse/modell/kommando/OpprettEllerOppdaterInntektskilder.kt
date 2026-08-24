@@ -13,19 +13,24 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import java.time.LocalDate
 
 internal class OpprettEllerOppdaterInntektskilder(
-    fødselsnummer: String,
+    private val fødselsnummer: String,
     identifikatorer: Set<String>,
-    private val arbeidsgiverRepository: ArbeidsgiverRepository,
-    private val avviksvurderingRepository: AvviksvurderingRepository,
 ) : Command {
-    private val alleIdentifikatorer =
+    private val identifikatorerUtenSelvstendig =
         identifikatorer
             .filterNot { it == SELVSTENDIG }
             .map(ArbeidsgiverIdentifikator::fraString)
-            .plus(organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer))
+
+    private fun alleIdentifikatorer(avviksvurderingRepository: AvviksvurderingRepository) =
+        identifikatorerUtenSelvstendig
+            .plus(organisasjonsnumreFraSammenligningsgrunnlag(avviksvurderingRepository, fødselsnummer = fødselsnummer))
             .distinct()
 
-    fun finnNyeOgUtdaterteArbeidsgivere(): Pair<Set<ArbeidsgiverIdentifikator>, List<Arbeidsgiver>> {
+    fun finnNyeOgUtdaterteArbeidsgivere(
+        arbeidsgiverRepository: ArbeidsgiverRepository,
+        avviksvurderingRepository: AvviksvurderingRepository,
+    ): Pair<Set<ArbeidsgiverIdentifikator>, List<Arbeidsgiver>> {
+        val alleIdentifikatorer = alleIdentifikatorer(avviksvurderingRepository)
         val eksisterendeArbeidsgivere = arbeidsgiverRepository.finnAlle(alleIdentifikatorer.toSet())
 
         return Pair(
@@ -34,7 +39,10 @@ internal class OpprettEllerOppdaterInntektskilder(
         )
     }
 
-    private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<ArbeidsgiverIdentifikator> =
+    private fun organisasjonsnumreFraSammenligningsgrunnlag(
+        avviksvurderingRepository: AvviksvurderingRepository,
+        fødselsnummer: String,
+    ): List<ArbeidsgiverIdentifikator> =
         avviksvurderingRepository
             .finnAvviksvurderinger(fødselsnummer)
             .flatMap { it.sammenligningsgrunnlag.innrapporterteInntekter }
@@ -51,7 +59,8 @@ internal class OpprettEllerOppdaterInntektskilder(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
+        val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) =
+            finnNyeOgUtdaterteArbeidsgivere(sessionContext.arbeidsgiverRepository, sessionContext.avviksvurderingRepository)
         if (nyeArbeidsgiverIdentifikatorer.isEmpty() && utdaterteArbeidsgivere.isEmpty()) return true
         if (nyeArbeidsgiverIdentifikatorer.isNotEmpty()) {
             loggInfo(
@@ -77,7 +86,8 @@ internal class OpprettEllerOppdaterInntektskilder(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
+        val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) =
+            finnNyeOgUtdaterteArbeidsgivere(sessionContext.arbeidsgiverRepository, sessionContext.avviksvurderingRepository)
 
         nyeArbeidsgiverIdentifikatorer.forEach { identifikator ->
             val navnFraLøsning = finnNavnILøsninger(identifikator, commandContext)
@@ -88,7 +98,7 @@ internal class OpprettEllerOppdaterInntektskilder(
                         navnString = navnFraLøsning,
                     )
                 loggInfo("Lagrer ny arbeidsgiver", "arbeidsgiver" to arbeidsgiver.toLogString())
-                arbeidsgiverRepository.lagre(arbeidsgiver)
+                sessionContext.arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
 
@@ -98,7 +108,7 @@ internal class OpprettEllerOppdaterInntektskilder(
             if (navnFraLøsning != null) {
                 arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
                 loggInfo("Lagrer oppdatert arbeidsgiver", "arbeidsgiver" to arbeidsgiver.toLogString())
-                arbeidsgiverRepository.lagre(arbeidsgiver)
+                sessionContext.arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
 

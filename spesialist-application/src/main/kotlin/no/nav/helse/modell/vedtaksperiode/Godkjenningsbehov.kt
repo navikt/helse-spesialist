@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
@@ -46,7 +45,6 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -360,14 +358,12 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     personDao: PersonDao,
-    arbeidsgiverRepository: ArbeidsgiverRepository,
     utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
@@ -418,8 +414,6 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
                 arbeidsgiverIdentifikatorer = (godkjenningsbehovData.orgnummereMedRelevanteArbeidsforhold + godkjenningsbehovData.organisasjonsnummer).toSet(),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
@@ -499,8 +493,6 @@ private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
     arbeidsgiverIdentifikatorer: Set<String>,
-    arbeidsgiverRepository: ArbeidsgiverRepository,
-    avviksvurderingRepository: AvviksvurderingRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -510,8 +502,6 @@ private class ForberedVisningCommand(
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = fødselsnummer,
                 identifikatorer = arbeidsgiverIdentifikatorer,
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             ),
             OpprettEllerOppdaterArbeidsforhold(
                 fødselsnummer = fødselsnummer,

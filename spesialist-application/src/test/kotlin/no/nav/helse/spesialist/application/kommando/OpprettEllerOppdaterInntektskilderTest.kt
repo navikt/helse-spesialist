@@ -12,8 +12,6 @@ import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.application.InMemoryArbeidsgiverRepository
-import no.nav.helse.spesialist.application.InMemoryAvviksvurderingRepository
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -34,9 +32,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
-    private val arbeidsgiverRepository = InMemoryArbeidsgiverRepository()
-    private val avviksvurderingRepository = InMemoryAvviksvurderingRepository()
-
     private val observer =
         object : CommandContextObserver {
             fun reset() = behov.clear()
@@ -64,8 +59,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -83,8 +76,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -103,8 +94,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -123,8 +112,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -143,8 +130,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -160,8 +145,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -176,8 +159,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -201,8 +182,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
                         organisasjonsnummer2.organisasjonsnummer,
                         organisasjonsnummer3.organisasjonsnummer,
                     ),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -235,8 +214,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
                         fødselsnummer2.fødselsnummer,
                         fødselsnummer3.fødselsnummer,
                     ),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -263,8 +240,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer, fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -286,8 +261,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
         command.execute(context, sessionContext, outbox)
 
@@ -302,8 +275,8 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
 
-        assertEquals(1, arbeidsgiverRepository.alle().size)
-        arbeidsgiverRepository.alle().single().assertArbeidsgiver(
+        assertEquals(1, sessionContext.arbeidsgiverRepository.alle().size)
+        sessionContext.arbeidsgiverRepository.alle().single().assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn,
         )
@@ -317,8 +290,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         command.execute(context, sessionContext, outbox)
@@ -336,8 +307,8 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
 
-        assertEquals(1, arbeidsgiverRepository.alle().size)
-        arbeidsgiverRepository.alle().single().assertArbeidsgiver(
+        assertEquals(1, sessionContext.arbeidsgiverRepository.alle().size)
+        sessionContext.arbeidsgiverRepository.alle().single().assertArbeidsgiver(
             forventetIdentifikator = fødselsnummer,
             forventetNavn = "$fornavn $etternavn",
         )
@@ -354,8 +325,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer, fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
         command.execute(context, sessionContext, outbox)
 
@@ -379,12 +348,12 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
 
         val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
-        assertEquals(2, arbeidsgiverRepository.alle().size)
-        arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
+        assertEquals(2, sessionContext.arbeidsgiverRepository.alle().size)
+        sessionContext.arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn,
         )
-        arbeidsgiverRepository.finn(fødselsnummer).assertArbeidsgiver(
+        sessionContext.arbeidsgiverRepository.finn(fødselsnummer).assertArbeidsgiver(
             forventetIdentifikator = fødselsnummer,
             forventetNavn = "$fornavn $etternavn",
         )
@@ -401,8 +370,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer, fødselsnummer.fødselsnummer),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
         command.execute(context, sessionContext, outbox)
 
@@ -419,8 +386,8 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         val ferdig = command.resume(context, sessionContext, outbox)
         assertFalse(ferdig)
 
-        assertEquals(2, arbeidsgiverRepository.alle().size)
-        arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
+        assertEquals(2, sessionContext.arbeidsgiverRepository.alle().size)
+        sessionContext.arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn,
         )
@@ -436,7 +403,7 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummerIdentifikator()
 
-        avviksvurderingRepository.lagre(
+        sessionContext.avviksvurderingRepository.lagre(
             Avviksvurdering(
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
@@ -462,8 +429,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = fødselsnummer,
                 identifikatorer = emptySet(),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -479,7 +444,7 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummerIdentifikator()
 
-        avviksvurderingRepository.lagre(
+        sessionContext.avviksvurderingRepository.lagre(
             Avviksvurdering(
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
@@ -501,8 +466,6 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
                 identifikatorer = emptySet(),
-                arbeidsgiverRepository = arbeidsgiverRepository,
-                avviksvurderingRepository = avviksvurderingRepository,
             )
 
         val ferdig = command.execute(context, sessionContext, outbox)
@@ -571,7 +534,7 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         identifikator: ArbeidsgiverIdentifikator,
         navnSistOppdatertDato: LocalDate,
     ) {
-        arbeidsgiverRepository.lagre(
+        sessionContext.arbeidsgiverRepository.lagre(
             Arbeidsgiver.Factory.fraLagring(
                 id = identifikator,
                 navn =
