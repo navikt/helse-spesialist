@@ -1,7 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
@@ -16,28 +15,19 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-class LagreOppdragCommand(
+class LagreUtbetalingCommand(
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val utbetalingId: UUID,
     private val type: Utbetalingtype,
     private val status: Utbetalingsstatus,
     private val opprettet: LocalDateTime,
-    private val arbeidsgiverOppdrag: Oppdrag,
-    private val personOppdrag: Oppdrag,
     private val arbeidsgiverbeløp: Int,
     private val personbeløp: Int,
     private val json: String,
 ) : Command {
     private companion object {
-        private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
-    }
-
-    class Oppdrag(
-        private val fagsystemId: String,
-        private val mottaker: String,
-    ) {
-        internal fun lagre(utbetalingDao: UtbetalingDao) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)
+        private val log = LoggerFactory.getLogger(LagreUtbetalingCommand::class.java)
     }
 
     override fun execute(
@@ -55,24 +45,15 @@ class LagreOppdragCommand(
         val utbetalingDao = sessionContext.utbetalingDao
         val utbetalingIdRef =
             utbetalingDao.finnUtbetalingIdRef(utbetalingId)
-                ?: run {
-                    val arbeidsgiverFagsystemIdRef =
-                        requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao)) { "Forventet arbeidsgiver fagsystemId ref" }
-                    val personFagsystemIdRef =
-                        requireNotNull(personOppdrag.lagre(utbetalingDao)) { "Forventet person fagsystemId ref" }
-
-                    utbetalingDao.opprettUtbetalingId(
-                        utbetalingId,
-                        fødselsnummer,
-                        orgnummer,
-                        type,
-                        opprettet,
-                        arbeidsgiverFagsystemIdRef,
-                        personFagsystemIdRef,
-                        arbeidsgiverbeløp,
-                        personbeløp,
-                    )
-                }
+                ?: utbetalingDao.opprettUtbetalingId(
+                    utbetalingId,
+                    fødselsnummer,
+                    orgnummer,
+                    type,
+                    opprettet,
+                    arbeidsgiverbeløp,
+                    personbeløp,
+                )
 
         utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
     }

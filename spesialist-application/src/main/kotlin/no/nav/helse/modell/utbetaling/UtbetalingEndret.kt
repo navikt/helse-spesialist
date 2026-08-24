@@ -20,8 +20,6 @@ class UtbetalingEndret(
     val opprettet: LocalDateTime,
     val arbeidsgiverbeløp: Int,
     val personbeløp: Int,
-    val arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
-    val personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
@@ -34,8 +32,6 @@ class UtbetalingEndret(
         opprettet = jsonNode["@opprettet"].asString().let(LocalDateTime::parse),
         arbeidsgiverbeløp = jsonNode["arbeidsgiverOppdrag"]["nettoBeløp"].asInt(),
         personbeløp = jsonNode["personOppdrag"]["nettoBeløp"].asInt(),
-        arbeidsgiverOppdrag = tilOppdrag(jsonNode["arbeidsgiverOppdrag"], jsonNode["organisasjonsnummer"].asString()),
-        personOppdrag = tilOppdrag(jsonNode["personOppdrag"], jsonNode["fødselsnummer"].asString()),
         json = jsonNode.toString(),
     )
 
@@ -53,8 +49,6 @@ class UtbetalingEndret(
                 utbetalingstype = type,
                 gjeldendeStatus = gjeldendeStatus,
                 opprettet = opprettet,
-                arbeidsgiverOppdrag = arbeidsgiverOppdrag,
-                personOppdrag = personOppdrag,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 json = toJson(),
@@ -65,16 +59,6 @@ class UtbetalingEndret(
     override fun fødselsnummer(): String = fødselsnummer
 
     override fun toJson(): String = json
-
-    private companion object {
-        private fun tilOppdrag(
-            jsonNode: JsonNode,
-            mottaker: String,
-        ) = LagreOppdragCommand.Oppdrag(
-            fagsystemId = jsonNode.path("fagsystemId").asString(),
-            mottaker = jsonNode.path("mottaker").takeIf(JsonNode::isString)?.asString() ?: mottaker,
-        )
-    }
 }
 
 internal class UtbetalingEndretCommand(
@@ -84,23 +68,19 @@ internal class UtbetalingEndretCommand(
     utbetalingstype: String,
     gjeldendeStatus: Utbetalingsstatus,
     opprettet: LocalDateTime,
-    arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
-    personOppdrag: LagreOppdragCommand.Oppdrag,
     arbeidsgiverbeløp: Int,
     personbeløp: Int,
     json: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
         mutableListOf(
-            LagreOppdragCommand(
+            LagreUtbetalingCommand(
                 fødselsnummer = fødselsnummer,
                 orgnummer = organisasjonsnummer,
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.valueOf(utbetalingstype),
                 status = gjeldendeStatus,
                 opprettet = opprettet,
-                arbeidsgiverOppdrag = arbeidsgiverOppdrag,
-                personOppdrag = personOppdrag,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 json = json,

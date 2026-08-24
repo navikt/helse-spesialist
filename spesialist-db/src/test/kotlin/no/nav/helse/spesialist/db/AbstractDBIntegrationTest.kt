@@ -379,14 +379,10 @@ abstract class AbstractDBIntegrationTest {
         fødselsnummer: String,
         organisasjonsnummer: String,
     ) {
-        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
-        val personOppdragId = lagPersonoppdrag(fagsystemId(), fødselsnummer)
         val utbetaling_idId =
             lagUtbetalingId(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                arbeidsgiverOppdragId = arbeidsgiveroppdragId,
-                personOppdragId = personOppdragId,
                 utbetalingId = utbetalingId,
                 arbeidsgiverbeløp = beløpTilArbeidsgiver,
                 personbeløp = beløpTilSykmeldt,
@@ -396,19 +392,7 @@ abstract class AbstractDBIntegrationTest {
         opprettUtbetalingKobling(vedtaksperiodeId, utbetalingId)
     }
 
-    protected fun lagArbeidsgiveroppdrag(
-        fagsystemId: String = fagsystemId(),
-        mottaker: String = ORGNUMMER,
-    ) = utbetalingDao.nyttOppdrag(fagsystemId, mottaker)!!
-
-    protected fun lagPersonoppdrag(
-        fagsystemId: String = fagsystemId(),
-        fødselsnummer: String,
-    ) = utbetalingDao.nyttOppdrag(fagsystemId, fødselsnummer)!!
-
     protected fun lagUtbetalingId(
-        arbeidsgiverOppdragId: Long,
-        personOppdragId: Long,
         utbetalingId: UUID = UUID.randomUUID(),
         arbeidsgiverbeløp: Int = 2000,
         personbeløp: Int = 2000,
@@ -422,8 +406,6 @@ abstract class AbstractDBIntegrationTest {
             arbeidsgiverIdentifikator = organisasjonsnummer,
             type = utbetalingtype,
             opprettet = LocalDateTime.now(),
-            arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
-            personFagsystemIdRef = personOppdragId,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
         )

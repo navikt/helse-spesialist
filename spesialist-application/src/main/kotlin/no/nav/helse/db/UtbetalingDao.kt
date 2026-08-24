@@ -18,19 +18,12 @@ interface UtbetalingDao {
         json: String,
     )
 
-    fun nyttOppdrag(
-        fagsystemId: String,
-        mottaker: String,
-    ): Long?
-
     fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
         arbeidsgiverIdentifikator: String,
         type: Utbetalingtype,
         opprettet: LocalDateTime,
-        arbeidsgiverFagsystemIdRef: Long,
-        personFagsystemIdRef: Long,
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
     ): Long

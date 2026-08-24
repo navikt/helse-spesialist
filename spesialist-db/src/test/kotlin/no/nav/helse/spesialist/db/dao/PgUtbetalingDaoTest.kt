@@ -25,11 +25,6 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner utbetaling`() {
-        val arbeidsgiverFagsystemId = fagsystemId()
-        val personFagsystemId = fagsystemId()
-
-        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        val personOppdragId1 = lagPersonoppdrag(personFagsystemId, person.id.value)
         val utbetalingId = UUID.randomUUID()
         utbetalingDao.opprettUtbetalingId(
             utbetalingId,
@@ -37,8 +32,6 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
             arbeidsgiver.organisasjonsnummer,
             Utbetalingtype.UTBETALING,
             LocalDateTime.now(),
-            arbeidsgiveroppdragId1,
-            personOppdragId1,
             2000,
             2000,
         )
@@ -49,11 +42,6 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagrer personbeløp og arbeidsgiverbeløp på utbetaling`() {
-        val arbeidsgiverFagsystemId = fagsystemId()
-        val personFagsystemId = fagsystemId()
-
-        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        val personOppdragId1 = lagPersonoppdrag(personFagsystemId, person.id.value)
         val utbetalingId = UUID.randomUUID()
         utbetalingDao.opprettUtbetalingId(
             utbetalingId,
@@ -61,8 +49,6 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
             arbeidsgiver.organisasjonsnummer,
             Utbetalingtype.UTBETALING,
             LocalDateTime.now(),
-            arbeidsgiveroppdragId1,
-            personOppdragId1,
             2000,
             2000,
         )
@@ -72,11 +58,7 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `alle enumer finnes også i db`() {
-        val arbeidsgiverFagsystemId = fagsystemId()
-        val personFagsystemId = fagsystemId()
-        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        val personOppdragId = lagPersonoppdrag(personFagsystemId, person.id.value)
-        val utbetaling = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, fødselsnummer = person.id.value, organisasjonsnummer = arbeidsgiver.organisasjonsnummer)
+        val utbetaling = lagUtbetalingId(fødselsnummer = person.id.value, organisasjonsnummer = arbeidsgiver.organisasjonsnummer)
 
         assertDoesNotThrow {
             Utbetalingsstatus.entries.forEach {

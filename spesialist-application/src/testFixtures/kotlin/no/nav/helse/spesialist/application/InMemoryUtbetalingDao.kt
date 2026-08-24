@@ -15,19 +15,9 @@ class InMemoryUtbetalingDao : UtbetalingDao {
         val arbeidsgiverIdentifikator: String,
         val type: Utbetalingtype,
         val opprettet: LocalDateTime,
-        val arbeidsgiverFagsystemIdRef: Long,
-        val personFagsystemIdRef: Long,
         val arbeidsgiverbeløp: Int,
         val personbeløp: Int,
     )
-
-    private data class Oppdrag(
-        val fagsystemId: String,
-        val mottaker: String,
-    )
-
-    private val oppdrag = mutableMapOf<Long, Oppdrag>()
-    private var nesteOppdragRef = 1L
 
     private val utbetalinger = mutableMapOf<Long, UtbetalingRecord>()
     private var nesteUtbetalingIdRef = 1L
@@ -56,23 +46,12 @@ class InMemoryUtbetalingDao : UtbetalingDao {
         statusHistorikk.getOrPut(utbetalingIdRef) { mutableListOf() }.add(status)
     }
 
-    override fun nyttOppdrag(
-        fagsystemId: String,
-        mottaker: String,
-    ): Long {
-        val ref = nesteOppdragRef++
-        oppdrag[ref] = Oppdrag(fagsystemId, mottaker)
-        return ref
-    }
-
     override fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
         arbeidsgiverIdentifikator: String,
         type: Utbetalingtype,
         opprettet: LocalDateTime,
-        arbeidsgiverFagsystemIdRef: Long,
-        personFagsystemIdRef: Long,
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
     ): Long {
@@ -85,8 +64,6 @@ class InMemoryUtbetalingDao : UtbetalingDao {
                 arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
                 type = type,
                 opprettet = opprettet,
-                arbeidsgiverFagsystemIdRef = arbeidsgiverFagsystemIdRef,
-                personFagsystemIdRef = personFagsystemIdRef,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
             )

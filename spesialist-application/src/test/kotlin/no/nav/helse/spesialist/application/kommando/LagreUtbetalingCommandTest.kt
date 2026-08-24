@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.utbetaling.LagreOppdragCommand
+import no.nav.helse.modell.utbetaling.LagreUtbetalingCommand
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 
-class LagreOppdragCommandTest : ApplicationTest() {
+class LagreUtbetalingCommandTest : ApplicationTest() {
     @Test
     fun `lagre arbeidsgiverbeløp og personbeløp`() {
         // given
@@ -39,18 +39,16 @@ class LagreOppdragCommandTest : ApplicationTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
-    ): LagreOppdragCommand {
+    ): LagreUtbetalingCommand {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        return LagreOppdragCommand(
+        return LagreUtbetalingCommand(
             fødselsnummer,
             organisasjonsnummer,
             utbetalingId,
             type = Utbetalingtype.UTBETALING,
             status = Utbetalingsstatus.IKKE_UTBETALT,
             LocalDateTime.now(),
-            arbeidsgiverOppdrag = LagreOppdragCommand.Oppdrag(UUID.randomUUID().toString(), organisasjonsnummer),
-            personOppdrag = LagreOppdragCommand.Oppdrag(UUID.randomUUID().toString(), fødselsnummer),
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
             json = "{}",
