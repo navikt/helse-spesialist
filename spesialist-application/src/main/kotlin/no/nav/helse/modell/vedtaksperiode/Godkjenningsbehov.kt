@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
@@ -42,7 +41,6 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Periode
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
@@ -354,8 +352,6 @@ internal class GodkjenningsbehovCommand(
     personDao: PersonDao,
     vergemålDao: VergemålDao,
     risikovurderingDao: RisikovurderingDao,
-    periodehistorikkDao: PeriodehistorikkDao,
-    totrinnsvurderingRepository: TotrinnsvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
@@ -443,8 +439,6 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
                 vedtaksperiode = person.vedtaksperiode(godkjenningsbehovData.vedtaksperiodeId),
                 oppgaveService = oppgaveService,
-                periodehistorikkDao = periodehistorikkDao,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderAutomatiskInnvilgelse(

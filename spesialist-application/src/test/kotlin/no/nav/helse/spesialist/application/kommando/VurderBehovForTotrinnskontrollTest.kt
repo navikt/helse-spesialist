@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
@@ -14,7 +13,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
@@ -64,23 +62,6 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val totrinnsvurderingRepository =
-        object : TotrinnsvurderingRepository {
-            val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
-            var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
-
-            override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
-                if (!totrinnsvurdering.harFåttTildeltId()) {
-                    totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
-                }
-                lagredeTotrinnsvurderinger.add(totrinnsvurdering)
-            }
-
-            override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-
-            override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-        }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
     val sykefraværstilfelle =
@@ -111,8 +92,6 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiode = VEDTAKSPERIODE,
             oppgaveService = oppgaveService,
-            periodehistorikkDao = periodehistorikkDao,
-            totrinnsvurderingRepository = totrinnsvurderingRepository,
             sykefraværstilfelle = sykefraværstilfelle,
         )
 
@@ -124,7 +103,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @Test
@@ -135,7 +114,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @ParameterizedTest
@@ -149,7 +128,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @ParameterizedTest
@@ -163,19 +142,18 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @Test
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
         val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
 
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
-            lagTotrinnsvurdering(saksbehandler = saksbehandler)
+        sessionContext.totrinnsvurderingRepository.lagre(lagTotrinnsvurdering(saksbehandler = saksbehandler))
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
     }
 
@@ -184,29 +162,39 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         val saksbehandler = lagSaksbehandlerOid()
         val beslutter = lagSaksbehandlerOid()
 
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
+        sessionContext.totrinnsvurderingRepository.lagre(
             lagTotrinnsvurdering(
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-            )
+            ),
+        )
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
 
-        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().tilstand)
+        assertEquals(
+            AVVENTER_SAKSBEHANDLER,
+            sessionContext.totrinnsvurderingRepository
+                .alle()
+                .single()
+                .tilstand,
+        )
 
-        verify(exactly = 1) {
-            periodehistorikkDao.lagre(historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(), any())
-        }
+        assertEquals(
+            1,
+            sessionContext.periodehistorikkDao.behandlingData[VEDTAKSPERIODE.gjeldendeUnikId]
+                ?.filterIsInstance<TotrinnsvurderingAutomatiskRetur>()
+                ?.size,
+        )
     }
 
     @Test
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
-        assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+        assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)

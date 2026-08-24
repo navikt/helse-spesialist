@@ -17,16 +17,13 @@ abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateId
     fun alle(): List<T> = data.map(::deepCopy)
 
     fun lagre(root: T) {
-        val index =
-            if (root.harFåttTildeltId()) {
-                data.indexOfFirst { it.id() == root.id() }.also {
-                    data.remove(root)
-                }
-            } else {
-                data.size
-            }
         tildelIderSomMangler(root)
-        data.add(index, deepCopy(root))
+        val index = data.indexOfFirst { it.id() == root.id() }
+        if (index >= 0) {
+            data[index] = deepCopy(root)
+        } else {
+            data.add(deepCopy(root))
+        }
     }
 
     fun lagreAlle(roots: Collection<T>) {

@@ -96,8 +96,6 @@ class Kommandofabrikk(
             personDao = sessionContext.personDao,
             vergemålDao = sessionContext.vergemålDao,
             risikovurderingDao = sessionContext.risikovurderingDao,
-            periodehistorikkDao = sessionContext.periodehistorikkDao,
-            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             person = person,
