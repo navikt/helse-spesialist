@@ -233,6 +233,32 @@ class SpeilPersonReceiver(
             hentOppdaterteGraderteAndreYtelser()
         }
 
+    fun saksbehandlerEndrerGraderteAndreYtelser(
+        graderteAndreYtelserId: UUID,
+        perioder: Collection<ApiGraderteAndreYtelserPeriode>,
+        andreYtelseType: ApiGraderteAndreYtelseType,
+        notatTilBeslutter: String,
+    ): UUID =
+        callHttpPatch(
+            relativeUrl = "api/graderte-andre-ytelser/$graderteAndreYtelserId",
+            request =
+                mapOf(
+                    "graderteAndreYtelserId" to graderteAndreYtelserId.toString(),
+                    "perioder" to
+                        perioder.map {
+                            mapOf(
+                                "fom" to it.fom.toString(),
+                                "tom" to it.tom.toString(),
+                                "grad" to it.grad,
+                            )
+                        },
+                    "andreYtelseType" to andreYtelseType.name,
+                    "notatTilBeslutter" to notatTilBeslutter,
+                ),
+        )!!["andreYtelserId"].asUUID().also {
+            hentOppdaterteGraderteAndreYtelser()
+        }
+
     fun saksbehandlerEndrerTilkommenInntekt(
         tilkommenInntektId: UUID,
         organisasjonsnummerEndring: Pair<String, String>?,

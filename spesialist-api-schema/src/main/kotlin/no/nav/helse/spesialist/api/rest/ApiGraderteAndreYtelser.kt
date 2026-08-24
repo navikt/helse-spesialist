@@ -51,3 +51,16 @@ data class ApiGraderteAndreYtelser(
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelseType: ApiGraderteAndreYtelseType,
 )
+
+@Serializable
+data class ApiPatchGraderteAndreYtelserRequest(
+    val graderteAndreYtelserId: UUID,
+    val perioder: List<ApiGraderteAndreYtelserPeriode>,
+    val andreYtelseType: ApiGraderteAndreYtelseType,
+    val notatTilBeslutter: String,
+)
+
+@Serializable
+data class ApiPatchGraderteAndreYtelserResponse(
+    val andreYtelserId: UUID,
+)

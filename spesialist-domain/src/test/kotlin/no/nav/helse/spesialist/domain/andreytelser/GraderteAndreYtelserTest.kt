@@ -112,6 +112,37 @@ class GraderteAndreYtelserTest {
     }
 
     @Test
+    fun `kan endre graderte andre ytelser fra en til tre perioder`() {
+        val opprinneligePerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 jan 2024) tilOgMed (31 jan 2024),
+                    grad = 50,
+                ),
+            )
+        val nyePerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (1 jan 2024) tilOgMed (10 jan 2024),
+                    grad = 20,
+                ),
+                GraderteAndreYtelserPeriode(
+                    periode = (11 jan 2024) tilOgMed (20 jan 2024),
+                    grad = 40,
+                ),
+                GraderteAndreYtelserPeriode(
+                    periode = (21 jan 2024) tilOgMed (31 jan 2024),
+                    grad = 60,
+                ),
+            )
+
+        assertEndreTilOppdatererPerioder(
+            opprinneligePerioder = opprinneligePerioder,
+            nyePerioder = nyePerioder,
+        )
+    }
+
+    @Test
     fun `kan gjenopprette graderte andre ytelser`() {
         // Given:
         val originalPerioder =
@@ -307,5 +338,38 @@ class GraderteAndreYtelserTest {
         assertFalse(rekonstruert.fjernet)
         assertEquals(4, rekonstruert.versjon)
         assertEquals(4, rekonstruert.events.size)
+    }
+
+    private fun assertEndreTilOppdatererPerioder(
+        opprinneligePerioder: List<GraderteAndreYtelserPeriode>,
+        nyePerioder: List<GraderteAndreYtelserPeriode>,
+    ) {
+        val graderteAndreYtelser =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = lagIdentitetsnummer(),
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "et notat til beslutter",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder = opprinneligePerioder,
+                graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            )
+
+        graderteAndreYtelser.endreTil(
+            graderteAndreYtelserPerioder = nyePerioder,
+            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            saksbehandlerIdent = lagSaksbehandler().ident,
+            notatTilBeslutter = "oppdaterer perioder",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+        )
+
+        assertEquals(2, graderteAndreYtelser.events.size)
+        assertEquals(GraderteAndreYtelserEndretEvent::class, graderteAndreYtelser.events.last()::class)
+        val endretEvent = graderteAndreYtelser.events.last() as GraderteAndreYtelserEndretEvent
+        assertEquals(opprinneligePerioder, endretEvent.endringer.graderteAndreYtelserPerioder?.fra)
+        assertEquals(nyePerioder, endretEvent.endringer.graderteAndreYtelserPerioder?.til)
+        assertEquals(null, endretEvent.endringer.graderteAndreYtelserType)
+        assertEquals(nyePerioder, graderteAndreYtelser.perioder)
+        assertEquals(GraderteAndreYtelserType.FORELDREPENGER, graderteAndreYtelser.graderteAndreYtelserType)
+        assertEquals(2, graderteAndreYtelser.versjon)
     }
 }

@@ -1,21 +1,16 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.openApi
-import io.github.smiley4.ktoropenapi.resources.delete
-import io.github.smiley4.ktoropenapi.resources.get
-import io.github.smiley4.ktoropenapi.resources.patch
-import io.github.smiley4.ktoropenapi.resources.post
-import io.github.smiley4.ktoropenapi.resources.put
+import io.github.smiley4.ktoropenapi.resources.*
 import io.github.smiley4.ktorswaggerui.swaggerUI
-import io.ktor.server.auth.authenticate
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.route
+import io.ktor.server.auth.*
+import io.ktor.server.routing.*
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.andreYtelser.GetGraderteAndreYtelserForPersonBehandler
+import no.nav.helse.spesialist.api.rest.andreYtelser.PatchGraderteAndreYtelserBehandler
 import no.nav.helse.spesialist.api.rest.andreYtelser.PostGraderteAndreYtelserBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
@@ -26,25 +21,13 @@ import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.api.rest.dokumenter.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokumenter.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.forsikringer.GetForsikringsvurderingForPersonBehandler
-import no.nav.helse.spesialist.api.rest.notater.GetNotatBehandler
-import no.nav.helse.spesialist.api.rest.notater.GetNotatVedtaksperiodeIderForPersonBehandler
-import no.nav.helse.spesialist.api.rest.notater.GetNotaterForVedtaksperiodeBehandler
-import no.nav.helse.spesialist.api.rest.notater.PatchNotatBehandler
-import no.nav.helse.spesialist.api.rest.notater.PostNotatBehandler
+import no.nav.helse.spesialist.api.rest.notater.*
 import no.nav.helse.spesialist.api.rest.oppgaver.GetAntallOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetBehandledeOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.DeletePåVentBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.PutPåVentBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetBehandlendeEnhetForPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetInfotrygdperioderForPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetKrrRegistrertStatusForPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetPersonBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetSaksbehandlerStansBehandler
-import no.nav.helse.spesialist.api.rest.personer.GetVeilederStansBehandler
-import no.nav.helse.spesialist.api.rest.personer.PatchSaksbehandlerStansBehandler
-import no.nav.helse.spesialist.api.rest.personer.PatchVeilederStansBehandler
-import no.nav.helse.spesialist.api.rest.personer.PostPersonSokBehandler
+import no.nav.helse.spesialist.api.rest.personer.*
 import no.nav.helse.spesialist.api.rest.personer.sykefraværstilfeller.sykepengegrunnlag.PostSykepengegrunnlagBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.DeleteTildelingBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.PutTildelingBehandler
@@ -62,14 +45,7 @@ import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostAnmodOmForkastingBeh
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
 import no.nav.helse.spesialist.api.rest.vurderinger.PostArbeidstidsvurderingBehandler
 import no.nav.helse.spesialist.api.sse.sse
-import no.nav.helse.spesialist.application.AlleIdenterHenter
-import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
-import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
-import no.nav.helse.spesialist.application.InfotrygdperiodeHenter
-import no.nav.helse.spesialist.application.KrrRegistrertStatusHenter
-import no.nav.helse.spesialist.application.OpptegnelseListener
-import no.nav.helse.spesialist.application.PersonPseudoIdProvider
-import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.application.*
 
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
@@ -130,6 +106,7 @@ fun Routing.restRoutes(
 
             get(GetGraderteAndreYtelserForPersonBehandler(), restAdapter)
             post(PostGraderteAndreYtelserBehandler(), restAdapter)
+            patch(PatchGraderteAndreYtelserBehandler(), restAdapter)
 
             post(PostSykepengegrunnlagBehandler(), restAdapter)
 

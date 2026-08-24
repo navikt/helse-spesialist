@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
@@ -116,6 +117,47 @@ class GraderteAndreYtelserPeriodeValidatorTest {
             eksisterendeGraderteAndreYtelser = listOf(eksisterende),
             vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2024, tom = 28 feb 2024)),
         )
+    }
+
+    @Test
+    fun `kaster feil når en ytelse endres til samme type som en overlappende eksisterende ytelse`() {
+        val identitetsnummer = lagIdentitetsnummer()
+        val førsteYtelse =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "notat",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder =
+                    listOf(
+                        GraderteAndreYtelserPeriode(periode = (1 jan 2024) tilOgMed (31 jan 2024), grad = 50),
+                    ),
+                graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+            )
+        val andreYtelse =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "notat",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder =
+                    listOf(
+                        GraderteAndreYtelserPeriode(periode = (15 jan 2024) tilOgMed (28 feb 2024), grad = 60),
+                    ),
+                graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            )
+
+        assertThrows<IllegalStateException> {
+            validerGraderteAndreYtelserPeriode(
+                nyGraderteAndreYtelserPerioder = førsteYtelse.perioder,
+                nyGraderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+                eksisterendeGraderteAndreYtelser = listOf(andreYtelse),
+                vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2024, tom = 28 feb 2024)),
+            )
+        }
+
+        assertEquals(GraderteAndreYtelserType.PLEIEPENGER, førsteYtelse.graderteAndreYtelserType)
+        assertEquals(1, førsteYtelse.events.size)
     }
 
     @Test
