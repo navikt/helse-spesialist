@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.melding.Behov
@@ -12,14 +11,13 @@ import java.time.YearMonth
 internal class PersisterInntektCommand(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
-    private val personDao: PersonDao,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
+        if (sessionContext.personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
 
         loggInfo(
             "Inntekter er ikke tidligere lagret for person, sender behov",
@@ -33,14 +31,14 @@ internal class PersisterInntektCommand(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
+        if (sessionContext.personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
         val løsning = commandContext.get<Inntektløsning>() ?: return trengerInntekt(commandContext)
 
         loggInfo(
             "Lagrer inntekter for person",
             "fødselsnummer" to fødselsnummer,
         )
-        løsning.lagre(personDao, fødselsnummer, skjæringstidspunkt)
+        løsning.lagre(sessionContext.personDao, fødselsnummer, skjæringstidspunkt)
         return true
     }
 

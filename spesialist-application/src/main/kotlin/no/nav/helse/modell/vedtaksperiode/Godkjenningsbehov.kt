@@ -469,7 +469,6 @@ internal class GodkjenningsbehovCommand(
             PersisterInntektCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
                 skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
-                personDao = personDao,
             ),
         )
 }

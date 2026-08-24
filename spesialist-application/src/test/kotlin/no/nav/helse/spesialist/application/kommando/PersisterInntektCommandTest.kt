@@ -1,15 +1,14 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -22,7 +21,6 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
         private const val FNR = "12345678910"
     }
 
-    private val personDao = mockk<PersonDao>(relaxed = true)
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -37,11 +35,13 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
 
+    init {
+        sessionContext.personRepository.lagre(lagPerson(id = Identitetsnummer.fraString(FNR)))
+    }
+
     @Test
     fun `Sender behov om inntekt ikke er lagret fra før`() {
-        every { personDao.finnInntekter(any(), any()) } returns null
-
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
+        val command = PersisterInntektCommand(FNR, LocalDate.now())
 
         assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
@@ -49,9 +49,10 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
 
     @Test
     fun `Fullfører dersom inntekt er lagret fra før`() {
-        every { personDao.finnInntekter(any(), any()) } returns inntekter()
+        val skjæringtidspunkt = LocalDate.now()
+        sessionContext.personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter())
 
-        val command = PersisterInntektCommand(FNR, LocalDate.now(), personDao)
+        val command = PersisterInntektCommand(FNR, skjæringtidspunkt)
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
@@ -61,27 +62,25 @@ internal class PersisterInntektCommandTest : ApplicationTest() {
     fun `Lagrer inntekter dersom det ikke finnes på skjæringstidspunkt for person`() {
         val skjæringtidspunkt = LocalDate.now()
 
-        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns null
-
-        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
+        val command = PersisterInntektCommand(FNR, skjæringtidspunkt)
 
         assertFalse(command.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
 
         commandContext.add(løsning())
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
+        assertEquals(inntekter(), sessionContext.personDao.finnInntekter(FNR, skjæringtidspunkt))
     }
 
     @Test
     fun `Bryr oss ikke om løsning dersom vi har inntekter alt`() {
         val skjæringtidspunkt = LocalDate.now()
-        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns inntekter()
+        sessionContext.personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter())
 
-        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
+        val command = PersisterInntektCommand(FNR, skjæringtidspunkt)
 
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 0) { personDao.lagreInntekter(any(), any(), any()) }
+        assertEquals(inntekter(), sessionContext.personDao.finnInntekter(FNR, skjæringtidspunkt))
     }
 
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)
