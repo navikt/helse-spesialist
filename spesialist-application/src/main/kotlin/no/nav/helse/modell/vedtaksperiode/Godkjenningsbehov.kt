@@ -423,7 +423,6 @@ internal class GodkjenningsbehovCommand(
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
                 arbeidsforholdDao = arbeidsforholdDao,
-                personRepository = personRepository,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
@@ -506,13 +505,11 @@ private class ForberedVisningCommand(
     arbeidsgiverRepository: ArbeidsgiverRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
-    personRepository: PersonRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OppdaterPersonCommand(
                 fødselsnummer = fødselsnummer,
-                personRepository = personRepository,
             ),
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = fødselsnummer,

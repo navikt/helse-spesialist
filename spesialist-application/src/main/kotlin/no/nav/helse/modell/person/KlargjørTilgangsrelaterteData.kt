@@ -6,7 +6,6 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import tools.jackson.databind.JsonNode
@@ -31,7 +30,6 @@ class KlargjørTilgangsrelaterteData(
         kommandostarter {
             KlargjørTilgangsrelaterteDataCommand(
                 fødselsnummer = fødselsnummer(),
-                personRepository = sessionContext.personRepository,
             )
         }
     }
@@ -43,7 +41,6 @@ class KlargjørTilgangsrelaterteData(
 
 internal class KlargjørTilgangsrelaterteDataCommand(
     fødselsnummer: String,
-    personRepository: PersonRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -51,7 +48,7 @@ internal class KlargjørTilgangsrelaterteDataCommand(
                 identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                 force = false,
             ),
-            OppdaterEnhetCommand(fødselsnummer, personRepository),
+            OppdaterEnhetCommand(fødselsnummer),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = fødselsnummer,
             ),

@@ -5,7 +5,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OppdaterEnhetCommand
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.spesialist.application.InMemoryPersonRepository
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import java.time.LocalDate
 import java.util.UUID
@@ -29,8 +28,6 @@ internal class OppdaterEnhetCommandTest : ApplicationTest() {
             }
         }
 
-    private val personRepository = InMemoryPersonRepository()
-
     private val context =
         CommandContext(UUID.randomUUID()).also {
             it.nyObserver(observer)
@@ -38,8 +35,8 @@ internal class OppdaterEnhetCommandTest : ApplicationTest() {
 
     @Test
     fun `mangler enhet`() {
-        val person = lagPerson(enhet = null).also(personRepository::lagre)
-        val command = OppdaterEnhetCommand(person.id.value, personRepository)
+        val person = lagPerson(enhet = null).also(sessionContext.personRepository::lagre)
+        val command = OppdaterEnhetCommand(person.id.value)
         assertFalse(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isNotEmpty())
         assertEquals(listOf(Behov.Enhet), observer.behov.toList())
@@ -48,8 +45,8 @@ internal class OppdaterEnhetCommandTest : ApplicationTest() {
     @Test
     fun `utdatert enhet`() {
         // given
-        val person = lagPerson(enhetSistOppdatert = LocalDate.now().minusDays(15)).also(personRepository::lagre)
-        val command = OppdaterEnhetCommand(person.id.value, personRepository)
+        val person = lagPerson(enhetSistOppdatert = LocalDate.now().minusDays(15)).also(sessionContext.personRepository::lagre)
+        val command = OppdaterEnhetCommand(person.id.value)
 
         // when
         val løsning = HentEnhetløsning("1002")
@@ -57,7 +54,7 @@ internal class OppdaterEnhetCommandTest : ApplicationTest() {
         assertTrue(command.execute(context, sessionContext, outbox))
 
         // then
-        val funnet = personRepository.finn(person.id)
+        val funnet = sessionContext.personRepository.finn(person.id)
         assertNotNull(funnet)
         val enhet = funnet.enhetRef
         assertNotNull(enhet)
@@ -66,8 +63,8 @@ internal class OppdaterEnhetCommandTest : ApplicationTest() {
 
     @Test
     fun `oppdaterer ingenting når informasjonen er ny nok`() {
-        val person = lagPerson().also(personRepository::lagre)
-        val command = OppdaterEnhetCommand(person.id.value, personRepository)
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val command = OppdaterEnhetCommand(person.id.value)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
     }

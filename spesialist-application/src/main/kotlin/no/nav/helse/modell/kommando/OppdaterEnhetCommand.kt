@@ -12,7 +12,6 @@ import java.time.LocalDate
 
 internal class OppdaterEnhetCommand(
     fødselsnummer: String,
-    private val personRepository: PersonRepository,
 ) : Command {
     private companion object {
         private val datoForUtdatert = LocalDate.now().minusDays(5)
@@ -26,11 +25,11 @@ internal class OppdaterEnhetCommand(
         outbox: Outbox,
     ): Boolean {
         val person =
-            personRepository.finn(identitetsnummer)
+            sessionContext.personRepository.finn(identitetsnummer)
                 ?: error("Fant ikke person")
         val sistOppdatert = person.enhetRefOppdatert
         if (sistOppdatert != null && sistOppdatert > datoForUtdatert) return ignorer()
-        return behandle(commandContext, person)
+        return behandle(commandContext, sessionContext.personRepository, person)
     }
 
     override fun resume(
@@ -39,9 +38,9 @@ internal class OppdaterEnhetCommand(
         outbox: Outbox,
     ): Boolean {
         val person =
-            personRepository.finn(identitetsnummer)
+            sessionContext.personRepository.finn(identitetsnummer)
                 ?: error("Fant ikke person")
-        return behandle(commandContext, person)
+        return behandle(commandContext, sessionContext.personRepository, person)
     }
 
     private fun ignorer(): Boolean {
@@ -58,6 +57,7 @@ internal class OppdaterEnhetCommand(
 
     private fun behandle(
         commandContext: CommandContext,
+        personRepository: PersonRepository,
         person: Person,
     ): Boolean {
         val løsning = commandContext.get<HentEnhetløsning>() ?: return trengerMerInformasjon(commandContext)
