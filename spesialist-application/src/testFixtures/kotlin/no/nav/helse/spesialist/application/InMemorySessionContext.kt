@@ -6,7 +6,7 @@ import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepo
 
 class InMemorySessionContext(
     override val annulleringRepository: InMemoryAnnulleringRepository,
-    override val arbeidsforholdDao: UnimplementedArbeidsforholdDao,
+    override val arbeidsforholdDao: InMemoryArbeidsforholdDao,
     override val arbeidsgiverRepository: InMemoryArbeidsgiverRepository,
     override val automatiseringDao: InMemoryAutomatiseringDao,
     override val avviksvurderingRepository: InMemoryAvviksvurderingRepository,

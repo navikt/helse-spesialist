@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
@@ -362,7 +361,6 @@ internal class GodkjenningsbehovCommand(
     vedtakDao: VedtakDao,
     personDao: PersonDao,
     arbeidsgiverRepository: ArbeidsgiverRepository,
-    arbeidsforholdDao: ArbeidsforholdDao,
     utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
     risikovurderingDao: RisikovurderingDao,
@@ -422,7 +420,6 @@ internal class GodkjenningsbehovCommand(
                 arbeidsgiverIdentifikatorer = (godkjenningsbehovData.orgnummereMedRelevanteArbeidsforhold + godkjenningsbehovData.organisasjonsnummer).toSet(),
                 arbeidsgiverRepository = arbeidsgiverRepository,
                 avviksvurderingRepository = avviksvurderingRepository,
-                arbeidsforholdDao = arbeidsforholdDao,
             ),
             KontrollerEgenAnsattstatus(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
@@ -504,7 +501,6 @@ private class ForberedVisningCommand(
     arbeidsgiverIdentifikatorer: Set<String>,
     arbeidsgiverRepository: ArbeidsgiverRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
-    arbeidsforholdDao: ArbeidsforholdDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -520,7 +516,6 @@ private class ForberedVisningCommand(
             OpprettEllerOppdaterArbeidsforhold(
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                arbeidsforholdDao = arbeidsforholdDao,
             ),
         )
 }

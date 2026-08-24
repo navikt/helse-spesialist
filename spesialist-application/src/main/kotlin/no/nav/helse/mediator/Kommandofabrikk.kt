@@ -96,7 +96,6 @@ class Kommandofabrikk(
             vedtakDao = sessionContext.vedtakDao,
             personDao = sessionContext.personDao,
             arbeidsgiverRepository = sessionContext.arbeidsgiverRepository,
-            arbeidsforholdDao = sessionContext.arbeidsforholdDao,
             utbetalingDao = sessionContext.utbetalingDao,
             vergemålDao = sessionContext.vergemålDao,
             risikovurderingDao = sessionContext.risikovurderingDao,

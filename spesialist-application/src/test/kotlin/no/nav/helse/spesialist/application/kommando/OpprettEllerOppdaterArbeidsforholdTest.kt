@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -27,29 +26,6 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
         val SLUTTDATO = null
     }
 
-    private val repository =
-        object : ArbeidsforholdDao {
-            val arbeidsforholdSomHarBlittOppdatert = mutableListOf<KomplettArbeidsforholdDto>()
-            val eksisterendeArbeidsforhold = mutableListOf<KomplettArbeidsforholdDto>()
-
-            override fun findArbeidsforhold(
-                fødselsnummer: String,
-                arbeidsgiverIdentifikator: String,
-            ): List<KomplettArbeidsforholdDto> =
-                eksisterendeArbeidsforhold.filter {
-                    it.fødselsnummer.equals(fødselsnummer) &&
-                        it.organisasjonsnummer.equals(arbeidsgiverIdentifikator)
-                }
-
-            override fun upsertArbeidsforhold(
-                fødselsnummer: String,
-                organisasjonsnummer: String,
-                arbeidsforhold: List<KomplettArbeidsforholdDto>,
-            ) {
-                arbeidsforholdSomHarBlittOppdatert.addAll(arbeidsforhold)
-            }
-        }
-
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -68,7 +44,6 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
         OpprettEllerOppdaterArbeidsforhold(
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
-            arbeidsforholdDao = repository,
         )
 
     @Test
@@ -91,8 +66,8 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
         )
         assertTrue(command.resume(commandContext, sessionContext, outbox))
 
-        assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-        assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
+        assertEquals(1, sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.size)
+        assertExpectedKomplettArbeidsforholdDto(sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.single())
     }
 
     @Test
@@ -115,22 +90,22 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
         )
         assertTrue(command.resume(commandContext, sessionContext, outbox))
 
-        assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
-        assertExpectedKomplettArbeidsforholdDto(repository.arbeidsforholdSomHarBlittOppdatert.single())
+        assertEquals(1, sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.size)
+        assertExpectedKomplettArbeidsforholdDto(sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.single())
     }
 
     @Test
     fun `oppretter ikke arbeidsforhold når den finnes`() {
         arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
         assertTrue(enCommand().execute(commandContext, sessionContext, outbox))
-        assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
+        assertEquals(0, sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.size)
     }
 
     @Test
     fun `oppdaterer ikke arbeidsforhold når den er oppdatert`() {
         arbeidsforholdFinnes(enKomplettArbeidsforholdDto())
         assertTrue(enCommand().execute(commandContext, sessionContext, outbox))
-        assertEquals(0, repository.arbeidsforholdSomHarBlittOppdatert.size)
+        assertEquals(0, sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.size)
     }
 
     @Test
@@ -152,15 +127,15 @@ class OpprettEllerOppdaterArbeidsforholdTest : ApplicationTest() {
             ),
         )
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(1, repository.arbeidsforholdSomHarBlittOppdatert.size)
+        assertEquals(1, sessionContext.arbeidsforholdDao.oppdaterteArbeidsforhold.size)
     }
 
     private fun arbeidsforholdFinnes(komplettArbeidsforholdDto: KomplettArbeidsforholdDto) {
-        repository.eksisterendeArbeidsforhold.add(komplettArbeidsforholdDto)
+        sessionContext.arbeidsforholdDao.eksisterendeArbeidsforhold.add(komplettArbeidsforholdDto)
     }
 
     private fun arbeidsforholdFinnesIkke() {
-        repository.eksisterendeArbeidsforhold.clear()
+        sessionContext.arbeidsforholdDao.eksisterendeArbeidsforhold.clear()
     }
 
     private fun enKomplettArbeidsforholdDto(

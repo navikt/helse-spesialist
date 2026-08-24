@@ -63,7 +63,7 @@ class InMemoryRepositoriesAndDaos {
             sykefraværstilfelleDao,
         )
 
-    private val arbeidsforholdDao = UnimplementedArbeidsforholdDao()
+    private val arbeidsforholdDao = InMemoryArbeidsforholdDao()
     private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
     private val automatiseringDao = InMemoryAutomatiseringDao()
     private val behandlingApiRepository = UnimplementedBehandlingApiRepository()

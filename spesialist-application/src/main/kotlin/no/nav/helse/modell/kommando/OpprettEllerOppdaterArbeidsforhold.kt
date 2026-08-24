@@ -11,13 +11,12 @@ import org.slf4j.LoggerFactory
 internal class OpprettEllerOppdaterArbeidsforhold(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val arbeidsforholdDao: ArbeidsforholdDao,
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettEllerOppdaterArbeidsforhold::class.java)
     }
 
-    private val arbeidsforhold =
+    private fun arbeidsforhold(arbeidsforholdDao: ArbeidsforholdDao) =
         arbeidsforholdDao
             .findArbeidsforhold(fødselsnummer, organisasjonsnummer)
             .ifEmpty {
@@ -29,7 +28,7 @@ internal class OpprettEllerOppdaterArbeidsforhold(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        if (arbeidsforhold.any { it.måOppdateres() }) {
+        if (arbeidsforhold(sessionContext.arbeidsforholdDao).any { it.måOppdateres() }) {
             return trengerMerInformasjon(commandContext).also {
                 log.info("Trenger mer informasjon for å opprette eller oppdatere arbeidsforhold")
             }
@@ -45,11 +44,14 @@ internal class OpprettEllerOppdaterArbeidsforhold(
         outbox: Outbox,
     ): Boolean {
         val løsning = commandContext.get<Arbeidsforholdløsning>() ?: return trengerMerInformasjon(commandContext)
-        return behandle(løsning)
+        return behandle(løsning, sessionContext.arbeidsforholdDao)
     }
 
-    fun behandle(løsning: Arbeidsforholdløsning): Boolean {
-        if (arbeidsforhold.any { it.måOppdateres() }) {
+    fun behandle(
+        løsning: Arbeidsforholdløsning,
+        arbeidsforholdDao: ArbeidsforholdDao,
+    ): Boolean {
+        if (arbeidsforhold(arbeidsforholdDao).any { it.måOppdateres() }) {
             løsning.upsert(arbeidsforholdDao, fødselsnummer, organisasjonsnummer)
         }
         return true
