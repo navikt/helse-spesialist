@@ -95,7 +95,6 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(sessionContext),
             vedtakDao = sessionContext.vedtakDao,
             personDao = sessionContext.personDao,
-            utbetalingDao = sessionContext.utbetalingDao,
             vergemålDao = sessionContext.vergemålDao,
             risikovurderingDao = sessionContext.risikovurderingDao,
             påVentDao = sessionContext.påVentDao,

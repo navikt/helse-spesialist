@@ -5,7 +5,6 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -358,7 +357,6 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     personDao: PersonDao,
-    utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
@@ -408,7 +406,6 @@ internal class GodkjenningsbehovCommand(
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
                 utbetalingId = godkjenningsbehovData.utbetalingId,
-                utbetalingDao = utbetalingDao,
             ),
             ForberedVisningCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,

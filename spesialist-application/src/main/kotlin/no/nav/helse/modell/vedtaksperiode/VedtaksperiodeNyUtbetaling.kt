@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
@@ -40,7 +39,6 @@ class VedtaksperiodeNyUtbetaling(
             VedtaksperiodeNyUtbetalingCommand(
                 vedtaksperiodeId = vedtaksperiodeId(),
                 utbetalingId = utbetalingId,
-                utbetalingDao = sessionContext.utbetalingDao,
             )
         }
     }
@@ -51,14 +49,12 @@ class VedtaksperiodeNyUtbetaling(
 internal class VedtaksperiodeNyUtbetalingCommand(
     vedtaksperiodeId: UUID,
     utbetalingId: UUID,
-    utbetalingDao: UtbetalingDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             OpprettKoblingTilUtbetalingCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
-                utbetalingDao = utbetalingDao,
             ),
         )
 }
