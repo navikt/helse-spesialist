@@ -32,7 +32,7 @@ class InMemorySessionContext(
     override val påVentDao: DelegatingPåVentDao,
     override val påVentRepository: InMemoryPåVentRepository,
     override val reservasjonDao: InMemoryReservasjonDao,
-    override val risikovurderingDao: UnimplementedRisikovurderingDao,
+    override val risikovurderingDao: InMemoryRisikovurderingDao,
     override val saksbehandlerDao: DelegatingSaksbehandlerDao,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
     override val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,

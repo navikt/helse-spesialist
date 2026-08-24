@@ -76,7 +76,7 @@ class InMemoryRepositoriesAndDaos {
     private val periodehistorikkDao = InMemoryPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
     private val påVentApiDao = UnimplementedPåVentApiDao()
-    private val risikovurderingDao = UnimplementedRisikovurderingDao()
+    private val risikovurderingDao = InMemoryRisikovurderingDao()
     private val risikovurderingApiDao = UnimplementedRisikovurderingApiDao()
     private val tildelingDao = DelegatingTildelingDao(oppgaveRepository, saksbehandlerRepository)
     private val tildelingApiDao = UnimplementedTildelingApiDao()

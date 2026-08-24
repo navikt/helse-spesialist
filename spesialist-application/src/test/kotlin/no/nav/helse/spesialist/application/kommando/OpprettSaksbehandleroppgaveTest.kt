@@ -3,15 +3,10 @@ package no.nav.helse.spesialist.application.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.PersonDao
-import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -23,9 +18,11 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.OpptegnelseRepository
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.ARBEIDSTAKER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
@@ -50,6 +47,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
+import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
@@ -61,7 +59,11 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.JsonNodeFactory
+import tools.jackson.databind.node.ObjectNode
+import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.test.assertEquals
 
 internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     private val FNR = lagFødselsnummer()
@@ -74,25 +76,20 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val personDao = mockk<PersonDao>(relaxed = true)
-    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
-    private val personRepository =
-        mockk<PersonRepository>(relaxed = true) {
-            every { finn(any()) } returns lagPerson(erEgenAnsatt = false)
-        }
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
-    private val påVentDao = mockk<PåVentDao>(relaxed = true)
-    private val opptegnelseRepository = mockk<OpptegnelseRepository>(relaxed = true)
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
+
+    init {
+        lagrePerson()
+    }
 
     @Test
     fun `oppretter oppgave`() {
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
-        verify(exactly = 1) { opptegnelseRepository.lagre(any()) }
+        assertEquals(1, sessionContext.opptegnelseRepository.alle().size)
     }
 
     @Test
@@ -111,7 +108,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter risk QA`() {
-        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID.value) } returns true
+        lagreRisikovurdering(kanGodkjennesAutomatisk = false)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -131,7 +128,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for fortrolig adresse`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        lagrePerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -145,7 +142,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
+        lagrePerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -159,7 +156,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() {
-        every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
+        lagrePerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortroligUtland)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -269,7 +266,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egen ansatt`() {
-        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
+        lagrePerson(erEgenAnsatt = true)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -283,7 +280,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egenskap UTLAND`() {
-        every { personDao.finnEnhetId(FNR) } returns "0393"
+        lagrePerson(enhet = 393)
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -327,7 +324,13 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egenskap PÅ_VENT`() {
-        every { påVentDao.erPåVent(VEDTAKSPERIODE_ID.value) } returns true
+        sessionContext.påVentRepository.lagre(
+            lagPåVent(
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+                dialogId = DialogId(1L),
+            ),
+        )
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -359,7 +362,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
-        every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID.value) } returns true
+        lagreRisikovurdering(kanGodkjennesAutomatisk = false)
         assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context, sessionContext, outbox))
 
         assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
@@ -413,6 +416,30 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
         )
     }
 
+    private fun lagrePerson(
+        adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
+        erEgenAnsatt: Boolean = false,
+        enhet: Int? = null,
+    ) {
+        sessionContext.personRepository.lagre(
+            lagPerson(
+                id = Identitetsnummer.fraString(FNR),
+                adressebeskyttelse = adressebeskyttelse,
+                erEgenAnsatt = erEgenAnsatt,
+                enhet = enhet ?: 100,
+            ),
+        )
+    }
+
+    private fun lagreRisikovurdering(kanGodkjennesAutomatisk: Boolean) {
+        sessionContext.risikovurderingDao.lagre(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID.value,
+            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+            data = ObjectNode(JsonNodeFactory.instance),
+            opprettet = LocalDateTime.now(),
+        )
+    }
+
     private fun assertForventedeEgenskaper(
         vararg egenskaper: Egenskap,
         kanAvvises: Boolean = true,
@@ -461,14 +488,8 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
             ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,
-        personDao = personDao,
-        risikovurderingDao = risikovurderingDao,
-        personRepository = personRepository,
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
-        vergemålDao = vergemålDao,
-        påVentDao = påVentDao,
-        opptegnelseRepository = opptegnelseRepository,
     )
 }

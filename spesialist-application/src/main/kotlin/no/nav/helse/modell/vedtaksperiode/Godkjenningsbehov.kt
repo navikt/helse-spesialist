@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VedtakDao
@@ -44,8 +43,6 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.spesialist.application.OpptegnelseRepository
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Periode
 import tools.jackson.core.type.TypeReference
@@ -359,14 +356,11 @@ internal class GodkjenningsbehovCommand(
     personDao: PersonDao,
     vergemålDao: VergemålDao,
     risikovurderingDao: RisikovurderingDao,
-    påVentDao: PåVentDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
-    personRepository: PersonRepository,
-    opptegnelseRepository: OpptegnelseRepository,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
     override val commands: List<Command> =
@@ -468,15 +462,9 @@ internal class GodkjenningsbehovCommand(
                 behovData = godkjenningsbehovData,
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
-                personDao = personDao,
-                risikovurderingDao = risikovurderingDao,
-                personRepository = personRepository,
                 utbetalingtype = godkjenningsbehovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
-                vergemålDao = vergemålDao,
-                påVentDao = påVentDao,
-                opptegnelseRepository = opptegnelseRepository,
             ),
             PersisterInntektCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,

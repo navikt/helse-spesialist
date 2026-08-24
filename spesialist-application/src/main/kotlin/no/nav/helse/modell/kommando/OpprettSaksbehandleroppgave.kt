@@ -1,11 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import io.opentelemetry.api.trace.Span
-import no.nav.helse.db.PersonDao
-import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig
@@ -20,9 +16,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.OpptegnelseRepository
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -66,15 +60,9 @@ internal class OpprettSaksbehandleroppgave(
     private val behovData: GodkjenningsbehovData,
     private val oppgaveService: OppgaveService,
     private val automatisering: Automatisering,
-    private val personDao: PersonDao,
-    private val risikovurderingDao: RisikovurderingDao,
-    private val personRepository: PersonRepository,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
-    private val vergemålDao: VergemålDao,
-    private val påVentDao: PåVentDao,
-    private val opptegnelseRepository: OpptegnelseRepository,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -109,19 +97,19 @@ internal class OpprettSaksbehandleroppgave(
 
         val egenskaper =
             buildSet {
-                egenAnsatt(fødselsnummer)
-                adressebeskyttelse(fødselsnummer)
+                egenAnsatt(fødselsnummer, sessionContext)
+                adressebeskyttelse(fødselsnummer, sessionContext)
                 oppgavetype(oppgavetype)
                 stikkprøve(vedtaksperiodeId, hendelseId)
-                vurderingsmomenter(vedtaksperiodeId, utbetalingtype)
-                vergemål(fødselsnummer)
-                enhetUtland(fødselsnummer)
+                vurderingsmomenter(vedtaksperiodeId, utbetalingtype, sessionContext)
+                vergemål(fødselsnummer, sessionContext)
+                enhetUtland(fødselsnummer, sessionContext)
                 mottaker(mottaker)
                 inntektskilde(inntektskilde)
                 inntektsforhold(inntektsforhold)
                 arbeidssituasjon(behovData.arbeidssituasjon)
                 periodetype(periodetype)
-                påVent(vedtaksperiodeId)
+                påVent(vedtaksperiodeId, sessionContext)
                 skjønnsfastsettelse(vedtaksperiodeId)
                 tilbakedatert(vedtaksperiodeId)
                 kunÅpenGosysOppgave(vedtaksperiodeId)
@@ -152,16 +140,28 @@ internal class OpprettSaksbehandleroppgave(
                 type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
             )
         Span.current().setAttribute("speil.saksbehandling.spesialist", "oppgave_opprettet")
-        opptegnelseRepository.lagre(opptegnelse)
+        sessionContext.opptegnelseRepository.lagre(opptegnelse)
         return true
     }
 
-    private fun MutableSet<Egenskap>.egenAnsatt(fødselsnummer: String) {
-        if (personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus?.erEgenAnsatt == true) add(EGEN_ANSATT)
+    private fun MutableSet<Egenskap>.egenAnsatt(
+        fødselsnummer: String,
+        sessionContext: SessionContext,
+    ) {
+        if (sessionContext.personRepository
+                .finn(Identitetsnummer.fraString(fødselsnummer))
+                ?.egenAnsattStatus
+                ?.erEgenAnsatt == true
+        ) {
+            add(EGEN_ANSATT)
+        }
     }
 
-    private fun MutableSet<Egenskap>.adressebeskyttelse(fødselsnummer: String) {
-        when (personDao.finnAdressebeskyttelse(fødselsnummer)) {
+    private fun MutableSet<Egenskap>.adressebeskyttelse(
+        fødselsnummer: String,
+        sessionContext: SessionContext,
+    ) {
+        when (sessionContext.personDao.finnAdressebeskyttelse(fødselsnummer)) {
             StrengtFortrolig,
             StrengtFortroligUtland,
             -> add(STRENGT_FORTROLIG_ADRESSE)
@@ -186,18 +186,25 @@ internal class OpprettSaksbehandleroppgave(
     private fun MutableSet<Egenskap>.vurderingsmomenter(
         vedtaksperiodeId: UUID,
         utbetalingtype: Utbetalingtype,
+        sessionContext: SessionContext,
     ) {
-        if (utbetalingtype != Utbetalingtype.REVURDERING && risikovurderingDao.måTilManuell(vedtaksperiodeId)) {
+        if (utbetalingtype != Utbetalingtype.REVURDERING && sessionContext.risikovurderingDao.måTilManuell(vedtaksperiodeId)) {
             add(RISK_QA)
         }
     }
 
-    private fun MutableSet<Egenskap>.vergemål(fødselsnummer: String) {
-        if (vergemålDao.harVergemål(fødselsnummer) == true) add(VERGEMÅL)
+    private fun MutableSet<Egenskap>.vergemål(
+        fødselsnummer: String,
+        sessionContext: SessionContext,
+    ) {
+        if (sessionContext.vergemålDao.harVergemål(fødselsnummer) == true) add(VERGEMÅL)
     }
 
-    private fun MutableSet<Egenskap>.enhetUtland(fødselsnummer: String) {
-        if (HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))) add(UTLAND)
+    private fun MutableSet<Egenskap>.enhetUtland(
+        fødselsnummer: String,
+        sessionContext: SessionContext,
+    ) {
+        if (HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(fødselsnummer))) add(UTLAND)
     }
 
     private fun MutableSet<Egenskap>.arbeidssituasjon(arbeidssituasjon: Arbeidssituasjon?) {
@@ -236,8 +243,11 @@ internal class OpprettSaksbehandleroppgave(
         }
     }
 
-    private fun MutableSet<Egenskap>.påVent(vedtaksperiodeId: UUID) {
-        if (påVentDao.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
+    private fun MutableSet<Egenskap>.påVent(
+        vedtaksperiodeId: UUID,
+        sessionContext: SessionContext,
+    ) {
+        if (sessionContext.påVentDao.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
     }
 
     private fun MutableSet<Egenskap>.skjønnsfastsettelse(vedtaksperiodeId: UUID) {
