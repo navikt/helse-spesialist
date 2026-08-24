@@ -40,7 +40,6 @@ internal class VedtaksperiodeReberegnetCommandTest : ApplicationTest() {
                 vedtaksperiodeId = vedtaksperiode.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 spesialistBehandlingId = randomUUID(),
-                periodehistorikkDao = sessionContext.periodehistorikkDao,
             ).execute(contextForReberegning, sessionContext, outbox)
 
         // then

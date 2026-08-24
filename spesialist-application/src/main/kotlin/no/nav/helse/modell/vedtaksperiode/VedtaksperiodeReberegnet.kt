@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -46,7 +45,6 @@ class VedtaksperiodeReberegnet(
                 fødselsnummer = fødselsnummer(),
                 vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
                 spleisBehandlingId = spleisBehandlingId,
-                periodehistorikkDao = sessionContext.periodehistorikkDao,
                 spesialistBehandlingId = vedtaksperiode.gjeldendeUnikId,
             )
         }
@@ -57,14 +55,12 @@ internal class VedtaksperiodeReberegnetCommand(
     fødselsnummer: String,
     vedtaksperiodeId: UUID,
     spleisBehandlingId: SpleisBehandlingId,
-    periodehistorikkDao: PeriodehistorikkDao,
     spesialistBehandlingId: UUID,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             VedtaksperiodeReberegnetPeriodehistorikk(
                 spesialistBehandlingId = spesialistBehandlingId,
-                periodehistorikkDao = periodehistorikkDao,
             ),
             ReserverPersonHvisTildeltCommand(fødselsnummer = fødselsnummer),
             AvbrytOppgaveCommand(

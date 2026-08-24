@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
@@ -14,9 +11,10 @@ class VedtaksperiodeReberegnetPeriodehistorikkTest : ApplicationTest() {
     @Test
     fun `Lagrer historikkinnslag når vedtaksperioden er reberegnet`() {
         val context = CommandContext(UUID.randomUUID())
-        val repository = mockk<PeriodehistorikkDao>(relaxed = true)
-        val command = VedtaksperiodeReberegnetPeriodehistorikk(mockk(relaxed = true), repository)
+        val spesialistBehandlingId = UUID.randomUUID()
+        val command = VedtaksperiodeReberegnetPeriodehistorikk(spesialistBehandlingId)
         assertTrue(command.execute(context, sessionContext, outbox))
-        verify(exactly = 1) { repository.lagre(any<VedtaksperiodeReberegnet>(), any<UUID>()) }
+        val innslag = sessionContext.periodehistorikkDao.behandlingData[spesialistBehandlingId]
+        assertTrue(innslag?.singleOrNull() is VedtaksperiodeReberegnet)
     }
 }
