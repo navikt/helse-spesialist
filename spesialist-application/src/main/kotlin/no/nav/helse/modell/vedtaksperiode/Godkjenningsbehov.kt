@@ -4,7 +4,6 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
@@ -352,7 +351,6 @@ internal class GodkjenningsbehovCommand(
     godkjenningsbehovData: GodkjenningsbehovData,
     utbetaling: Utbetaling,
     automatisering: Automatisering,
-    vedtakDao: VedtakDao,
     personDao: PersonDao,
     vergemålDao: VergemålDao,
     risikovurderingDao: RisikovurderingDao,

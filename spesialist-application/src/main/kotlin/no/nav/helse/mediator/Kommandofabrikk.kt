@@ -93,7 +93,6 @@ class Kommandofabrikk(
             godkjenningsbehovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
-            vedtakDao = sessionContext.vedtakDao,
             personDao = sessionContext.personDao,
             vergemålDao = sessionContext.vergemålDao,
             risikovurderingDao = sessionContext.risikovurderingDao,
