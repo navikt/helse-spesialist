@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asBigDecimal
@@ -347,7 +346,6 @@ internal class GodkjenningsbehovCommand(
     godkjenningsbehovData: GodkjenningsbehovData,
     utbetaling: Utbetaling,
     automatisering: Automatisering,
-    vergemålDao: VergemålDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
@@ -400,7 +398,6 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vergemålDao = vergemålDao,
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),

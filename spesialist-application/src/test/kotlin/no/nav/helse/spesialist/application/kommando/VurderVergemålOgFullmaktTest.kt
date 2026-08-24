@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
@@ -26,7 +23,6 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         private val VEDTAKSPERIODE_ID = UUID.fromString("1cd0d9cb-62e8-4f16-b634-f2b9dab550b6")
     }
 
-    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val legacyBehandling =
         LegacyBehandling(
             id = UUID.randomUUID(),
@@ -41,7 +37,6 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
     private val command =
         VurderVergemålOgFullmakt(
             fødselsnummer = FNR,
-            vergemålDao = vergemålDao,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             sykefraværstilfelle = sykefraværstilfelle,
         )
@@ -69,7 +64,7 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
     @Test
     fun `gjør ingen behandling om vi mangler løsning ved resume`() {
         assertFalse(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 0) { vergemålDao.lagre(any(), any(), any()) }
+        assertEquals(null, sessionContext.vergemålDao.harVergemål(FNR))
     }
 
     @Test
@@ -78,7 +73,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(ingenVergemål))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål, false) }
+        assertEquals(false, sessionContext.vergemålDao.harVergemål(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
         assertEquals(0, observer.hendelser.size)
         legacyBehandling.inspektør {
             assertEquals(0, varsler.size)
@@ -91,7 +87,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harVergemål))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harVergemål, false) }
+        assertEquals(true, sessionContext.vergemålDao.harVergemål(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -101,7 +98,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harFullmakt))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harFullmakt, false) }
+        assertEquals(false, sessionContext.vergemålDao.harVergemål(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -111,7 +109,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harFremtidsfullmakt))
         commandContext.add(Fullmaktløsning(true))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harFremtidsfullmakt, true) }
+        assertEquals(false, sessionContext.vergemålDao.harVergemål(FNR))
+        assertEquals(true, sessionContext.vergemålDao.harFullmakt(FNR))
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -121,7 +120,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harAlt))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt, false) }
+        assertEquals(true, sessionContext.vergemålDao.harVergemål(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
         assertEquals(0, observer.hendelser.size)
         legacyBehandling.inspektør {
             assertEquals(1, varsler.size)

@@ -92,7 +92,6 @@ class Kommandofabrikk(
             godkjenningsbehovData = godkjenningsbehovData,
             utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
-            vergemålDao = sessionContext.vergemålDao,
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             person = person,

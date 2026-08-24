@@ -3,7 +3,6 @@ package no.nav.helse.modell.vedtaksperiode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -43,7 +42,6 @@ class VedtaksperiodeForkastet(
                 vedtaksperiodeId = vedtaksperiodeId(),
                 spleisBehandlingId = spleisBehandlingId,
                 alleForkastedeVedtaksperiodeIder = person.forkastedeVedtaksperiodeIder(),
-                oppgaveRepository = sessionContext.oppgaveRepository,
             )
         }
     }
@@ -56,7 +54,6 @@ class VedtaksperiodeForkastetCommand(
     val vedtaksperiodeId: UUID,
     val spleisBehandlingId: SpleisBehandlingId?,
     val alleForkastedeVedtaksperiodeIder: List<UUID>,
-    val oppgaveRepository: OppgaveRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(

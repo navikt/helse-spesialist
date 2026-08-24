@@ -34,7 +34,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 vedtaksperiodeId = vedtaksperiode.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
-                oppgaveRepository = sessionContext.oppgaveRepository,
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
@@ -64,7 +63,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 vedtaksperiodeId = vedtaksperiode.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
-                oppgaveRepository = sessionContext.oppgaveRepository,
             ).execute(CommandContext(randomUUID()), sessionContext, outbox)
 
         // then
@@ -105,7 +103,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 vedtaksperiodeId = vedtaksperiode.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
-                oppgaveRepository = sessionContext.oppgaveRepository,
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
@@ -143,7 +140,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 vedtaksperiodeId = vedtaksperiode.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
-                oppgaveRepository = sessionContext.oppgaveRepository,
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
