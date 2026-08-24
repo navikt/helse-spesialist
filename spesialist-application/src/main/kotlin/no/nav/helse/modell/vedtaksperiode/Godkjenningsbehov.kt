@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -348,7 +347,6 @@ internal class GodkjenningsbehovCommand(
     godkjenningsbehovData: GodkjenningsbehovData,
     utbetaling: Utbetaling,
     automatisering: Automatisering,
-    personDao: PersonDao,
     vergemålDao: VergemålDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
@@ -409,7 +407,6 @@ internal class GodkjenningsbehovCommand(
             VurderEnhetUtland(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                personDao = personDao,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
