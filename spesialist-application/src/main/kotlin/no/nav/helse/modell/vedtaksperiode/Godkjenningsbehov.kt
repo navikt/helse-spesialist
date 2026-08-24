@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.db.PersonDao
-import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -351,7 +350,6 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     personDao: PersonDao,
     vergemålDao: VergemålDao,
-    risikovurderingDao: RisikovurderingDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
@@ -423,7 +421,6 @@ internal class GodkjenningsbehovCommand(
             VurderVurderingsmomenter(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
                 periode = Periode(godkjenningsbehovData.periodeFom, godkjenningsbehovData.periodeTom),
-                risikovurderingDao = risikovurderingDao,
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,
                 førstegangsbehandling = godkjenningsbehovData.førstegangsbehandling,

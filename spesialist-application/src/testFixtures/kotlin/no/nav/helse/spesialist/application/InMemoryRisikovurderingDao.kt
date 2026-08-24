@@ -16,9 +16,11 @@ class InMemoryRisikovurderingDao : RisikovurderingDao {
 
     private val risikovurderinger = mutableListOf<LagretRisikovurdering>()
 
-    override fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering? = null
+    override fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering? = risikovurderinger.lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }?.let { Risikovurdering.restore(it.kanGodkjennesAutomatisk) }
 
     override fun måTilManuell(vedtaksperiodeId: UUID): Boolean = risikovurderinger.lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }?.kanGodkjennesAutomatisk?.not() ?: false
+
+    fun antallLagret(vedtaksperiodeId: UUID): Int = risikovurderinger.count { it.vedtaksperiodeId == vedtaksperiodeId }
 
     override fun lagre(
         vedtaksperiodeId: UUID,

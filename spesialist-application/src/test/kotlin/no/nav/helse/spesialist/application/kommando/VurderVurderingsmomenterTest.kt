@@ -1,11 +1,7 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.CommandContext
@@ -24,7 +20,6 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.node.JsonNodeFactory
 import java.math.BigDecimal
@@ -32,7 +27,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderVurderingsmomenterTest : ApplicationTest() {
-    private val risikovurderingDao = mockk<RisikovurderingDao>()
     private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
 
     private companion object {
@@ -73,11 +67,6 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
             }
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
-
-    @BeforeEach
-    fun setup() {
-        every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns null
-    }
 
     @Test
     fun `Sender behov for risikovurdering ved execute`() {
@@ -131,7 +120,12 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
-        every { risikovurderingDao.hentRisikovurdering(testperson.vedtaksperiodeId1) } returns mockk()
+        sessionContext.risikovurderingDao.lagre(
+            testperson.vedtaksperiodeId1,
+            true,
+            JsonNodeFactory.instance.objectNode(),
+            LocalDateTime.now(),
+        )
         assertTrue(risikoCommand().resume(commandContext, sessionContext, outbox))
         assertTrue(risikoCommand().execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
@@ -139,14 +133,13 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
     @Test
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
-        every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         commandContext.add(
             behovløsning(),
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
-        verify(exactly = 1) { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) }
+        assertEquals(1, sessionContext.risikovurderingDao.antallLagret(testperson.vedtaksperiodeId1))
     }
 
     @Test
@@ -175,7 +168,6 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
     @Test
     fun `Lager varsel om risk-svaret tilsier det`() {
-        every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         commandContext.add(
             behovløsning(
                 kanGodkjennesAutomatisk = false,
@@ -189,13 +181,11 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
     private fun risikoCommand(
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
         organisasjonsnummer: String = testperson.orgnummer,
         førstegangsbehandling: Boolean = true,
     ) = VurderVurderingsmomenter(
         vedtaksperiodeId = vedtaksperiodeId,
         periode = legacyBehandling.periode,
-        risikovurderingDao = risikovurderingDao,
         organisasjonsnummer = organisasjonsnummer,
         yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         førstegangsbehandling = førstegangsbehandling,

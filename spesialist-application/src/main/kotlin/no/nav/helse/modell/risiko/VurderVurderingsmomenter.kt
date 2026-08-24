@@ -1,6 +1,5 @@
 package no.nav.helse.modell.risiko
 
-import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.kommando.Command
@@ -22,7 +21,6 @@ import java.util.UUID
 internal class VurderVurderingsmomenter(
     private val vedtaksperiodeId: UUID,
     private val periode: Periode,
-    private val risikovurderingDao: RisikovurderingDao,
     private val organisasjonsnummer: String,
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val førstegangsbehandling: Boolean,
@@ -35,16 +33,19 @@ internal class VurderVurderingsmomenter(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ) = behandle(commandContext)
+    ) = behandle(commandContext, sessionContext)
 
     override fun resume(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
-    ): Boolean = behandle(commandContext)
+    ): Boolean = behandle(commandContext, sessionContext)
 
-    private fun behandle(commandContext: CommandContext): Boolean {
-        if (risikovurderingAlleredeGjort()) return true
+    private fun behandle(
+        commandContext: CommandContext,
+        sessionContext: SessionContext,
+    ): Boolean {
+        if (risikovurderingAlleredeGjort(sessionContext)) return true
 
         val løsning = commandContext.get<Risikovurderingløsning>()
         if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
@@ -97,12 +98,12 @@ internal class VurderVurderingsmomenter(
             return false
         }
 
-        løsning.lagre(risikovurderingDao)
+        løsning.lagre(sessionContext.risikovurderingDao)
         løsning.leggTilVarsler()
         return true
     }
 
-    private fun risikovurderingAlleredeGjort() = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
+    private fun risikovurderingAlleredeGjort(sessionContext: SessionContext) = sessionContext.risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
 
     private fun Risikovurderingløsning.leggTilVarsler() {
         if (!kanGodkjennesAutomatisk) {
