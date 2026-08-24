@@ -110,6 +110,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
             "antallOpptjeningsdagerErMinst" : 7919,
             "grunnbelop" : 124028,
             "opptjeningFra" : "2003-03-28",
+            "opptjeningsvurderingId" : "b89e2ae5-59e3-388e-98cd-42a8e7350773",
             "sykepengegrunnlagsgrense" : {
               "grunnbelop" : 124028,
               "grense" : 744168,

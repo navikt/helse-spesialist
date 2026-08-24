@@ -37,6 +37,7 @@ data class SnapshotSpleisVilkarsgrunnlag(
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
+    val opptjeningsvurderingId: UUID,
     val beregingsgrunnlag: BigDecimal,
     val forsikringsvurderingId: UUID?,
 ) : SnapshotVilkarsgrunnlag

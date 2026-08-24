@@ -504,6 +504,7 @@ fun GraphQLSpleisVilkarsgrunnlag.tilSnapshotSpleisVilkarsgrunnlag() =
         oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
         oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
         opptjeningFra = opptjeningFra,
+        opptjeningsvurderingId = opptjeningsvurderingId,
         beregingsgrunnlag = BigDecimal.valueOf(beregningsgrunnlag),
         forsikringsvurderingId = forsikringsvurderingId,
     )
