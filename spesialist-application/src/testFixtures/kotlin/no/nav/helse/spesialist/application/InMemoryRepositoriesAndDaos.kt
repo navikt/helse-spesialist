@@ -87,7 +87,7 @@ class InMemoryRepositoriesAndDaos {
     private val vedtakDao = DelegatingVedtakDao(automatiseringDao)
     private val vergemålDao = InMemoryVergemålDao()
     private val vergemålApiDao = UnimplementedVergemålApiDao()
-    private val åpneGosysOppgaverDao = UnimplementedÅpneGosysOppgaverDao()
+    private val åpneGosysOppgaverDao = InMemoryÅpneGosysOppgaverDao()
 
     val daos =
         InMemoryDaos(

@@ -10,7 +10,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
-import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asBigDecimal
@@ -366,7 +365,6 @@ internal class GodkjenningsbehovCommand(
     arbeidsforholdDao: ArbeidsforholdDao,
     utbetalingDao: UtbetalingDao,
     vergemålDao: VergemålDao,
-    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
     periodehistorikkDao: PeriodehistorikkDao,
@@ -443,7 +441,6 @@ internal class GodkjenningsbehovCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
-                åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = false,

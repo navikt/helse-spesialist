@@ -2,7 +2,6 @@ package no.nav.helse.modell.gosysoppgaver
 
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
@@ -56,7 +55,6 @@ internal class GosysOppgaveEndretCommand(
     harTildeltOppgave: Boolean,
     oppgave: Oppgave,
     automatisering: Automatisering,
-    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     oppgaveDao: OppgaveDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
@@ -65,7 +63,6 @@ internal class GosysOppgaveEndretCommand(
     override val commands: List<Command> =
         listOf(
             VurderÅpenGosysoppgave(
-                åpneGosysOppgaverDao = åpneGosysOppgaverDao,
                 vedtaksperiodeId = oppgave.vedtaksperiodeId.value,
                 sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,

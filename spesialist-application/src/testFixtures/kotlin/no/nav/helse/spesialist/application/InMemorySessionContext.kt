@@ -46,7 +46,7 @@ class InMemorySessionContext(
     override val individuellBegrunnelseRepository: InMemoryIndividuellBegrunnelseRepository,
     override val vedtakDao: DelegatingVedtakDao,
     override val vergemålDao: InMemoryVergemålDao,
-    override val åpneGosysOppgaverDao: UnimplementedÅpneGosysOppgaverDao,
+    override val åpneGosysOppgaverDao: InMemoryÅpneGosysOppgaverDao,
     override val midlertidigBehandlingVedtakFattetDao: InMemoryMidlertidigBehandlingVedtakFattetDao,
     override val vedtakRepository: InMemoryVedtakRepository,
     override val vedtakBegrunnelseDao: VedtakBegrunnelseDao,

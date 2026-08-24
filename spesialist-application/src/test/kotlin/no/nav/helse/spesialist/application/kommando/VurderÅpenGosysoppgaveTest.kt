@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.application.kommando
 
-import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -41,13 +39,11 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
             skjæringstidspunkt,
             listOf(behandlingAg1, behandlingAg2),
         )
-    private val åpneGosysOppgaverDao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     private fun command(
         harTildeltOppgave: Boolean = false,
     ) = VurderÅpenGosysoppgave(
-        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         vedtaksperiodeId = VEDTAKPERIODE_ID_AG_1,
         sykefraværstilfelle = sykefraværstilfelle,
         harTildeltOppgave = harTildeltOppgave,
@@ -70,6 +66,8 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
             }
         }
 
+    private fun persisterteÅpneGosysOppgaver() = sessionContext.åpneGosysOppgaverDao.persisterteÅpneGosysOppgaver
+
     @Test
     fun `Ber om åpne oppgaver i gosys`() {
         val behov = mutableListOf<Behov>()
@@ -81,7 +79,7 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
     @Test
     fun `Mangler løsning ved resume`() {
         assertFalse(command().resume(commandContext(), sessionContext, outbox))
-        verify(exactly = 0) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
+        assertEquals(0, persisterteÅpneGosysOppgaver().size)
     }
 
     @Test
@@ -89,7 +87,7 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command().resume(context, sessionContext, outbox))
-        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
+        assertEquals(1, persisterteÅpneGosysOppgaver().size)
     }
 
     @Test
@@ -102,7 +100,7 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
             commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
             assertTrue(command().resume(commandContext, sessionContext, outbox))
         }
-        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
+        assertEquals(1, persisterteÅpneGosysOppgaver().size)
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
@@ -128,7 +126,6 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
     fun `Lagrer varsel ved åpne oppgaver, uavhengig om eventuell oppgave er tildelt eller ikke`() {
         lagrerVarselVedÅpneOppgaver(harTildeltOppgave = false, commandContext())
         verify(exactly = 1) { oppgaveService.leggTilGosysEgenskap(any()) }
-        clearMocks(åpneGosysOppgaverDao)
         lagrerVarselVedÅpneOppgaver(harTildeltOppgave = true, commandContext())
     }
 
@@ -137,7 +134,7 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command().resume(context, sessionContext, outbox))
-        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
+        assertEquals(1, persisterteÅpneGosysOppgaver().size)
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_3", varsler.first().varselkode)
@@ -166,9 +163,10 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         harTildeltOppgave: Boolean,
         commandContext: CommandContext,
     ) {
+        val forventetAntallFørDenneOppgaven = persisterteÅpneGosysOppgaver().size + 1
         commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(commandContext, sessionContext, outbox))
-        verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
+        assertEquals(forventetAntallFørDenneOppgaven, persisterteÅpneGosysOppgaver().size)
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
             assertEquals("SB_EX_1", varsler.first().varselkode)
