@@ -26,8 +26,6 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
 
         return kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiPatchVeilederStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPatchVeilederStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             if (!request.stans) {
                 opphevVeilederStans(request.begrunnelse, person, kallKontekst)
@@ -70,7 +68,5 @@ enum class ApiPatchVeilederStansErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     KAN_IKKE_OPPRETTE_VEILEDER_STANS("Kan ikke opprette veilederstans", HttpStatusCode.BadRequest),
 }

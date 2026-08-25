@@ -26,8 +26,6 @@ class GetPersonBehandler(
     ): RestResponse<ApiPerson, ApiGetPersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             val identitetsnummer = person.id
             val personinfo =
@@ -91,8 +89,6 @@ enum class ApiGetPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     PERSON_IKKE_FUNNET("Fant ikke data for person", HttpStatusCode.NotFound),
     AKTØRID_IKKE_FUNNET("Fant ikke aktørId for person", HttpStatusCode.InternalServerError),
 }

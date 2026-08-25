@@ -1,10 +1,9 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import io.ktor.http.HttpStatusCode
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.rest.KallKontekst
+import no.nav.helse.spesialist.api.rest.PersonErrorCode
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
@@ -16,18 +15,16 @@ import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
+class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse, PersonErrorCode> {
     override val tag = Tags.TILKOMNE_INNTEKTER
 
     override fun behandle(
         resource: TilkomneInntekter,
         request: ApiLeggTilTilkommenInntektRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> =
+    ): RestResponse<ApiLeggTilTilkommenInntektResponse, PersonErrorCode> =
         kallKontekst.medPerson(
             identitetsnummer = Identitetsnummer.fraString(identitetsnummer = request.fodselsnummer),
-            personIkkeFunnet = { ApiPostTilkomneInntekterErrorCode.PERSON_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             behandleForPerson(request, person, kallKontekst)
         }
@@ -36,7 +33,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
         request: ApiLeggTilTilkommenInntektRequest,
         person: Person,
         kallKontekst: KallKontekst,
-    ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
+    ): RestResponse<ApiLeggTilTilkommenInntektResponse, PersonErrorCode> {
         val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
             periode = periode,
@@ -79,12 +76,4 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
 
         return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
     }
-}
-
-enum class ApiPostTilkomneInntekterErrorCode(
-    override val title: String,
-    override val statusCode: HttpStatusCode,
-) : ApiErrorCode {
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.BadRequest),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

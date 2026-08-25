@@ -35,8 +35,6 @@ class GetForsikringsvurderingForPersonBehandler(
     ): RestResponse<ApiForsikringsvurdering, ApiGetForsikringsvurderingForPersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetForsikringsvurderingForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetForsikringsvurderingForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             behandleForPerson(person, resource.forsikringvurderingId)
         }
@@ -108,8 +106,6 @@ enum class ApiGetForsikringsvurderingForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FORSIKRINGSVURDERING_IKKE_FUNNET("Forsikringsvurderingen ble ikke funnet", HttpStatusCode.NotFound),
     FEIL_VED_VIDERE_KALL("Klarte ikke kommunisere med bakomforliggende system", HttpStatusCode.InternalServerError),
 }

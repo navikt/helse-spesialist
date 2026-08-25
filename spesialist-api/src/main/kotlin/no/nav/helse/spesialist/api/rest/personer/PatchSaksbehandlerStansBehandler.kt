@@ -1,14 +1,8 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiStansRequest
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PatchBehandler
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -17,18 +11,16 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 
-class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, ApiPatchSaksbehandlerStansErrorCode> {
+class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Saksbehandler, ApiStansRequest, Unit, PersonErrorCode> {
     override val tag = Tags.PERSONER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.Stans.Saksbehandler,
         request: ApiStansRequest,
         kallKontekst: KallKontekst,
-    ): RestResponse<Unit, ApiPatchSaksbehandlerStansErrorCode> =
+    ): RestResponse<Unit, PersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiPatchSaksbehandlerStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPatchSaksbehandlerStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             if (request.stans) {
                 opprettSaksbehandlerstansV2(request.begrunnelse, person, kallKontekst)
@@ -116,12 +108,4 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
     }
 
     private fun OppgaveDao.oppgaveId(fødselsnummer: String) = this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
-}
-
-enum class ApiPatchSaksbehandlerStansErrorCode(
-    override val title: String,
-    override val statusCode: HttpStatusCode,
-) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntekt
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEndretEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEvent
@@ -13,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
+import no.nav.helse.spesialist.api.rest.PersonErrorCode
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
@@ -33,17 +32,15 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.SortedSet
 
-class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, PersonErrorCode> {
     override val tag = Tags.TILKOMNE_INNTEKTER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.TilkomneInntektskilder,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
+    ): RestResponse<List<ApiTilkommenInntektskilde>, PersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             behandleForPerson(person, kallKontekst)
         }
@@ -51,7 +48,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
     private fun behandleForPerson(
         person: Person,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+    ): RestResponse<List<ApiTilkommenInntektskilde>, PersonErrorCode> {
         val tilkomneInntektskilder =
             kallKontekst.transaksjon.tilkommenInntektRepository
                 .finnAlleForIdentitetsnummer(identitetsnummer = person.id)
@@ -164,12 +161,4 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
     private fun Endring<BigDecimal>.tilApiBigDecimalEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
 
     private fun Endring<SortedSet<LocalDate>>.tilApiListLocalDateEndring(): ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring = ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(fra = fra.toList(), til = til.toList())
-}
-
-enum class ApiGetTilkomneInntektskilderForPersonErrorCode(
-    override val title: String,
-    override val statusCode: HttpStatusCode,
-) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

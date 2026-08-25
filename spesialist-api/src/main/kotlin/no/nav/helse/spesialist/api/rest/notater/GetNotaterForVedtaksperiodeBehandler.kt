@@ -22,7 +22,6 @@ class GetNotaterForVedtaksperiodeBehandler : GetBehandler<Vedtaksperioder.Vedtak
         kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { GetNotaterForVedtaksperiodeErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { GetNotaterForVedtaksperiodeErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { vedtaksperiode, _ ->
             behandleForVedtaksperiode(vedtaksperiode, kallKontekst)
         }
@@ -60,6 +59,5 @@ enum class GetNotaterForVedtaksperiodeErrorCode(
     override val statusCode: HttpStatusCode,
     override val title: String,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VEDTAKSPERIODE_IKKE_FUNNET(HttpStatusCode.NotFound, "Vedtaksperiode ikke funnet"),
 }

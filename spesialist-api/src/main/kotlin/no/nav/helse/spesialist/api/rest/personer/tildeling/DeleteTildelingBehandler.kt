@@ -20,8 +20,6 @@ class DeleteTildelingBehandler : DeleteBehandler<Personer.PersonPseudoId.Tildeli
     ): RestResponse<Unit, ApiDeleteTildelingErrorCode> {
         return kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiDeleteTildelingErrorCode.OPPGAVE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiDeleteTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
             val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPerson(it.id) ?: error("Fant ikke oppgave")
             if (!oppgave.erTildelt()) {
@@ -41,5 +39,4 @@ enum class ApiDeleteTildelingErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

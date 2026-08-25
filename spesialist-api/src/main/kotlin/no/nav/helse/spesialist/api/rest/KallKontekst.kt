@@ -38,7 +38,6 @@ class KallKontekst(
     fun <RESPONSE, ERROR : ApiErrorCode> medOppgave(
         oppgaveId: OppgaveId,
         oppgaveIkkeFunnet: () -> ERROR,
-        manglerTilgangTilPerson: () -> ERROR,
         block: (Oppgave, Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.OPPGAVE_ID to oppgaveId.value.toString()) {
@@ -52,14 +51,12 @@ class KallKontekst(
             medBehandling(
                 spleisBehandlingId = oppgave.behandlingId,
                 behandlingIkkeFunnet = { error("Behandlingen ble ikke funnet") },
-                manglerTilgangTilPerson = manglerTilgangTilPerson,
             ) { behandling, vedtaksperiode, person -> block(oppgave, behandling, vedtaksperiode, person) }
         }
 
     fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
         spleisBehandlingId: SpleisBehandlingId,
         behandlingIkkeFunnet: () -> ERROR,
-        manglerTilgangTilPerson: () -> ERROR,
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
@@ -74,7 +71,6 @@ class KallKontekst(
                 medVedtaksperiode(
                     vedtaksperiodeId = behandling.vedtaksperiodeId,
                     vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
-                    manglerTilgangTilPerson = manglerTilgangTilPerson,
                 ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
             }
         }
@@ -82,7 +78,6 @@ class KallKontekst(
     fun <RESPONSE, ERROR : ApiErrorCode> medBehandling(
         behandlingUnikId: BehandlingUnikId,
         behandlingIkkeFunnet: () -> ERROR,
-        manglerTilgangTilPerson: () -> ERROR,
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandlingUnikId.value.toString()) {
@@ -98,14 +93,12 @@ class KallKontekst(
                 medVedtaksperiode(
                     vedtaksperiodeId = behandling.vedtaksperiodeId,
                     vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
-                    manglerTilgangTilPerson = manglerTilgangTilPerson,
                 ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
             } else {
                 medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
                     medVedtaksperiode(
                         vedtaksperiodeId = behandling.vedtaksperiodeId,
                         vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
-                        manglerTilgangTilPerson = manglerTilgangTilPerson,
                     ) { vedtaksperiode, person -> block(behandling, vedtaksperiode, person) }
                 }
             }
@@ -114,7 +107,6 @@ class KallKontekst(
     fun <RESPONSE, ERROR : ApiErrorCode> medVedtaksperiode(
         vedtaksperiodeId: VedtaksperiodeId,
         vedtaksperiodeIkkeFunnet: () -> ERROR,
-        manglerTilgangTilPerson: () -> ERROR,
         block: (Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
@@ -127,15 +119,11 @@ class KallKontekst(
 
             medPerson(
                 identitetsnummer = vedtaksperiode.identitetsnummer,
-                personIkkeFunnet = { error("Personen ble ikke funnet") },
-                manglerTilgangTilPerson = manglerTilgangTilPerson,
             ) { person -> block(vedtaksperiode, person) }
         }
 
     fun <RESPONSE, ERROR : ApiErrorCode> medPerson(
         personPseudoId: PersonPseudoId,
-        personPseudoIdIkkeFunnet: () -> ERROR,
-        manglerTilgangTilPerson: () -> ERROR,
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
@@ -143,21 +131,17 @@ class KallKontekst(
 
             if (identitetsnummer == null) {
                 loggWarn("Identitetsnummeret ble ikke funnet", "personPseudoId" to personPseudoId)
-                return@medMdcOgAttribute RestResponse.Error(personPseudoIdIkkeFunnet())
+                throw KallKontekstException(PersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET)
             }
 
             medPerson(
                 identitetsnummer = identitetsnummer,
-                personIkkeFunnet = { error("Personen ble ikke funnet") },
-                manglerTilgangTilPerson = manglerTilgangTilPerson,
                 block = block,
             )
         }
 
     fun <RESPONSE, ERROR : ApiErrorCode> medPerson(
         identitetsnummer: Identitetsnummer,
-        personIkkeFunnet: () -> ERROR,
-        manglerTilgangTilPerson: () -> ERROR,
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
@@ -165,14 +149,14 @@ class KallKontekst(
 
             if (person == null) {
                 loggWarn("Personen ble ikke funnet", "identitetsnummer" to identitetsnummer)
-                return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
+                throw KallKontekstException(PersonErrorCode.PERSON_IKKE_FUNNET)
             }
 
             when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, person.id.value)) {
-                TilgangskontrollResultat.IdentIkkeFunnet -> return@medMdcOgAttribute RestResponse.Error(personIkkeFunnet())
+                TilgangskontrollResultat.IdentIkkeFunnet -> throw KallKontekstException(PersonErrorCode.PERSON_IKKE_FUNNET)
                 is TilgangskontrollResultat.ManglerTilgang -> {
                     loggWarn("Saksbehandler har ikke tilgang til personen", "identitetsnummer" to identitetsnummer, "tilgang_som_mangler" to resultat.tilgangSomMangler.name)
-                    return@medMdcOgAttribute RestResponse.Error(manglerTilgangTilPerson())
+                    throw KallKontekstException(PersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
                 }
                 is TilgangskontrollResultat.UventetFeil -> error("Uventet feil fra Tilgangsmaskinen: ${resultat.menneskeligLesbarForklaring}")
                 TilgangskontrollResultat.Ok -> block(person)

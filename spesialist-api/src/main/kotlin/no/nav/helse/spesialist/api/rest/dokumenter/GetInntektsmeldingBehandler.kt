@@ -23,8 +23,6 @@ class GetInntektsmeldingBehandler(
     ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetInntektsmeldingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(resource, person, kallKontekst) }
 
     private fun behandleForPerson(
@@ -80,8 +78,6 @@ enum class ApiGetInntektsmeldingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_DOKUMENT("Fant ikke inntektsmeldingdokument", HttpStatusCode.NotFound),
     MANGLER_FØDSELSNUMMER_OG_AKTØRID("IM mangler fødselsnummer og aktørId", HttpStatusCode.NotFound),
 }

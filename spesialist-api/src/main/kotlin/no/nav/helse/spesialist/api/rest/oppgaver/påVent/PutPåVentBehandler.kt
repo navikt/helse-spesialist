@@ -30,7 +30,6 @@ class PutPåVentBehandler : PutBehandler<OppgaverBase.OppgaveId.PåVent, ApiPutP
         kallKontekst.medOppgave(
             oppgaveId = OppgaveId(resource.parent.oppgaveId),
             oppgaveIkkeFunnet = { ApiPutPåVentErrorCode.OPPGAVE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPutPåVentErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, behandling, vedtaksperiode, person ->
             val dialog = kallKontekst.opprettOgLagreNyDialog()
             val påVent =
@@ -139,5 +138,4 @@ enum class ApiPutPåVentErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

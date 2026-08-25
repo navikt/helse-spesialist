@@ -24,8 +24,6 @@ class PostFjernGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelse
 
         return kallKontekst.medPerson(
             identitetsnummer = graderteAndreYtelser.identitetsnummer,
-            personIkkeFunnet = { ApiPostFjernGraderteAndreYtelserErrorCode.PERSON_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostFjernGraderteAndreYtelserErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             graderteAndreYtelser.fjern(
                 saksbehandlerIdent = kallKontekst.saksbehandler.ident,
@@ -55,6 +53,4 @@ enum class ApiPostFjernGraderteAndreYtelserErrorCode(
 ) : ApiErrorCode {
     GRADERTE_ANDRE_YTELSER_IKKE_FUNNET("Graderte andre ytelser ikke funnet", HttpStatusCode.BadRequest),
     GRADERTE_ANDRE_YTELSER_ALLEREDE_FJERNET("Graderte andre ytelser er allerede fjernet", HttpStatusCode.Conflict),
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.BadRequest),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

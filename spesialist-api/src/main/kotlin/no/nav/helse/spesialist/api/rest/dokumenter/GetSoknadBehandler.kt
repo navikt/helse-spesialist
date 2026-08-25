@@ -24,8 +24,6 @@ class GetSoknadBehandler(
     ): RestResponse<ApiSoknad, ApiGetSoknadErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetSoknadErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetSoknadErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             behandleForPerson(resource, person, kallKontekst)
         }
@@ -62,7 +60,5 @@ enum class ApiGetSoknadErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_DOKUMENT("Fant ikke søknadsdokument", HttpStatusCode.NotFound),
 }

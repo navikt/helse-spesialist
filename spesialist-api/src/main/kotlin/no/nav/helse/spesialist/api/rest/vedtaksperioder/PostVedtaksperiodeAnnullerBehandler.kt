@@ -25,7 +25,6 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
         kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { ApiPostVedtaksperiodeAnnullerErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostVedtaksperiodeAnnullerErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { vedtaksperiode, _ ->
             behandleForVedtaksperiode(request, vedtaksperiode, kallKontekst)
         }
@@ -84,7 +83,6 @@ enum class ApiPostVedtaksperiodeAnnullerErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     ALLEREDE_ANNULLERT("Perioden er allerede annullert", HttpStatusCode.Conflict),
 }

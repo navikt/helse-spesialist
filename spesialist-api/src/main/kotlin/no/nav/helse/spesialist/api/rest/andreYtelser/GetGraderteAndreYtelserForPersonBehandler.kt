@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest.andreYtelser
 
-import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -8,17 +7,15 @@ import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 
-class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.GraderteAndreYtelser, List<ApiGraderteAndreYtelser>, ApiGetGraderteAndreYtelserForPersonErrorCode> {
+class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.GraderteAndreYtelser, List<ApiGraderteAndreYtelser>, PersonErrorCode> {
     override val tag = Tags.GRADERTE_ANDRE_YTELSER
 
     override fun behandle(
         resource: Personer.PersonPseudoId.GraderteAndreYtelser,
         kallKontekst: KallKontekst,
-    ): RestResponse<List<ApiGraderteAndreYtelser>, ApiGetGraderteAndreYtelserForPersonErrorCode> =
+    ): RestResponse<List<ApiGraderteAndreYtelser>, PersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetGraderteAndreYtelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetGraderteAndreYtelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             val ytelser =
                 kallKontekst.transaksjon.graderteAndreYtelserRepository
@@ -54,12 +51,4 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
             GraderteAndreYtelserType.PLEIEPENGER -> ApiGraderteAndreYtelseType.PLEIEPENGER
             GraderteAndreYtelserType.OPPLARINGSPENGER -> ApiGraderteAndreYtelseType.OPPLARINGSPENGER
         }
-}
-
-enum class ApiGetGraderteAndreYtelserForPersonErrorCode(
-    override val title: String,
-    override val statusCode: HttpStatusCode,
-) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.BadRequest),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

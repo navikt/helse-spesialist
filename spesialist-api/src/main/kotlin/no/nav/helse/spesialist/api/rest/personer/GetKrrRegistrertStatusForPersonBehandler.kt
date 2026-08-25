@@ -26,8 +26,6 @@ class GetKrrRegistrertStatusForPersonBehandler(
     ): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetKrrRegistrertStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(person) }
 
     private fun behandleForPerson(person: Person): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> {
@@ -56,8 +54,6 @@ enum class ApiGetKrrRegistrertStatusForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     TIMEOUT_VED_VIDERE_KALL(
         "Kontakt- og Reservasjonsregisteret brukte for lang tid på å svare (timeout)",
         HttpStatusCode.GatewayTimeout,

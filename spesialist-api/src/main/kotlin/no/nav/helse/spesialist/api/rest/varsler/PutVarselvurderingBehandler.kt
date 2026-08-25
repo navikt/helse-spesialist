@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_KAN_IKKE_VURDERES
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER
@@ -33,7 +32,6 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         return kallKontekst.medBehandling(
             behandlingUnikId = varsel.behandlingUnikId,
             behandlingIkkeFunnet = { error("Fant ikke behandling") },
-            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { _, _, _ ->
             behandleForBehandling(request, varsel, kallKontekst)
         }
@@ -76,7 +74,6 @@ enum class PutVarselvurderingErrorCode(
     override val statusCode: HttpStatusCode,
     override val title: String,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Varsel ikke funnet"),
     VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER(
         HttpStatusCode.Conflict,

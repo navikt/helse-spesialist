@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_HAR_FEIL_STATUS
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -35,7 +34,6 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
         return kallKontekst.medBehandling(
             behandlingUnikId = varsel.behandlingUnikId,
             behandlingIkkeFunnet = { error("Fant ikke behandling") },
-            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { _, _, _ ->
             behandleForBehandling(varsel, kallKontekst)
         }
@@ -65,7 +63,6 @@ enum class DeleteVarselvurderingErrorCode(
     override val statusCode: HttpStatusCode,
     override val title: String,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Varsel ikke funnet"),
     VARSEL_HAR_FEIL_STATUS(
         HttpStatusCode.Conflict,

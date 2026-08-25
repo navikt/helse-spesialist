@@ -25,7 +25,6 @@ class PostSendIReturBehandler : PostBehandler<OppgaverBase.OppgaveId.Totrinnsvur
         kallKontekst.medOppgave(
             oppgaveId = OppgaveId(resource.parent.parent.oppgaveId),
             oppgaveIkkeFunnet = { ApiPostSendIReturErrorCode.OPPGAVE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostSendIReturErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, _, _, person ->
             val totrinnsvurdering =
                 kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
@@ -80,7 +79,6 @@ enum class ApiPostSendIReturErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     TOTRINNSVURDERING_IKKE_FUNNET("Aktiv totrinnsvurdering mangler for oppgaven", HttpStatusCode.Conflict),
     TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER("Totrinnsvurdering mangler opprinnelig saksbehandler", HttpStatusCode.Conflict),
     OPPGAVE_ALLEREDE_SENDT_I_RETUR("Oppgaven er allerede sendt i retur", HttpStatusCode.Conflict),

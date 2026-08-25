@@ -28,7 +28,6 @@ class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.Vedtaksperi
         kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(resource.parent.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { ApiPostAnmodOmForkastingErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostAnmodOmForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { vedtaksperiode, _ -> behandleForVedtaksperiode(request, vedtaksperiode, kallKontekst) }
 
     private fun behandleForVedtaksperiode(
@@ -67,7 +66,6 @@ enum class ApiPostAnmodOmForkastingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     BEHANDLING_IKKE_FUNNET("Fant ikke tilhørende behandling", HttpStatusCode.NotFound),
     MANGLER_ÅRSAKER("Årsaker kan ikke være tom", HttpStatusCode.BadRequest),

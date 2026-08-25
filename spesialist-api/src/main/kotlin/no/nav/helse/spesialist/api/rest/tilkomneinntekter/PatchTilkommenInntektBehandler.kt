@@ -33,8 +33,6 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         return kallKontekst.medPerson(
             identitetsnummer = tilkommenInntekt.identitetsnummer,
-            personIkkeFunnet = { error("Personen ble ikke funnet") },
-            manglerTilgangTilPerson = { ApiPatchTilkommenInntektErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
             behandleForPerson(request, tilkommenInntekt, kallKontekst)
         }
@@ -198,7 +196,6 @@ enum class ApiPatchTilkommenInntektErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_TILKOMMEN_INNTEKT("Fant ikke tilkommen inntekt", HttpStatusCode.NotFound),
     FEIL_UTGANGSPUNKT("Fra-verdier stemmer ikke med nåværende tilstand", HttpStatusCode.Conflict),
 }

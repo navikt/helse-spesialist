@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.BEHANDLING_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING
-import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OPPGAVE_FEIL_TILSTAND
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OPPGAVE_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OVERLAPPER_MED_INFOTRYGD
@@ -61,7 +60,6 @@ class PostVedtakBehandler(
         kallKontekst.medBehandling(
             spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId),
             behandlingIkkeFunnet = { BEHANDLING_IKKE_FUNNET },
-            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { behandling, vedtaksperiode, person ->
             behandleForBehandling(request, behandling, vedtaksperiode, person, kallKontekst)
         }
@@ -347,7 +345,6 @@ enum class ApiPostVedtakErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     OPPGAVE_IKKE_FUNNET("Fant ikke oppgave", HttpStatusCode.BadRequest),
     OPPGAVE_FEIL_TILSTAND("Oppgaven er i feil tilstand", HttpStatusCode.BadRequest),
     SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG("Mangler besluttertilgang", HttpStatusCode.Forbidden),

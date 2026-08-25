@@ -32,8 +32,6 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
     ): RestResponse<Unit, ApiArbeidstidsvurderingErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiArbeidstidsvurderingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(request, person, kallKontekst) }
 
     private fun behandleForPerson(
@@ -162,8 +160,6 @@ enum class ApiArbeidstidsvurderingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     MISMATCH_I_IDENTITETSNUMRE(
         "Person referert til i URL matcher ikke person referert til i request",
         HttpStatusCode.BadRequest,

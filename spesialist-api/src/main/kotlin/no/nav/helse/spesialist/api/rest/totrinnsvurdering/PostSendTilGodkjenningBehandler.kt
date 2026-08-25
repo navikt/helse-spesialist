@@ -30,7 +30,6 @@ class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Tot
         kallKontekst.medOppgave(
             oppgaveId = OppgaveId(resource.parent.parent.oppgaveId),
             oppgaveIkkeFunnet = { ApiPostSendTilGodkjenningErrorCode.OPPGAVE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostSendTilGodkjenningErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, behandling, _, person ->
             val behandlingspakke =
                 kallKontekst.transaksjon.behandlingRepository.finnBehandlingspakke(behandling, person.id.value)
@@ -141,7 +140,6 @@ enum class ApiPostSendTilGodkjenningErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     MANGLER_VURDERING_AV_VARSLER("Det finnes aktive varsler som mangler vurdering", HttpStatusCode.Conflict),
     TOTRINNSVURDERING_IKKE_FUNNET("Aktiv totrinnsvurdering mangler for oppgaven", HttpStatusCode.Conflict),
     OPPGAVE_ALLEREDE_SENDT_TIL_BESLUTTER("Oppgaven er allerede sendt til beslutter", HttpStatusCode.Conflict),

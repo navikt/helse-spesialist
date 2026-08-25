@@ -57,6 +57,18 @@ inline fun <reified RESPONSE, reified ERROR : ApiErrorCode> RestBehandler.openAp
                 body<RESPONSE>()
             }
         }
+        code(HttpStatusCode.Forbidden) {
+            description = "Mangler tilgang til person"
+            body<ApiHttpProblemDetails<PersonErrorCode>> {
+                mediaTypes = setOf(ContentType.Application.ProblemJson)
+            }
+        }
+        code(HttpStatusCode.NotFound) {
+            description = "Person ikke funnet"
+            body<ApiHttpProblemDetails<PersonErrorCode>> {
+                mediaTypes = setOf(ContentType.Application.ProblemJson)
+            }
+        }
         default {
             description = "Svar ved feil"
             body<ApiHttpProblemDetails<ERROR>> {

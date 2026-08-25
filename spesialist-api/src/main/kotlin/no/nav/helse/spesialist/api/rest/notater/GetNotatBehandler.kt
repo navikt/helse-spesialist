@@ -27,7 +27,6 @@ class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorC
         return kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(notat.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
-            manglerTilgangTilPerson = { GetNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { _, _ ->
             behandleForVedtaksperiode(notat, kallKontekst)
         }
@@ -53,9 +52,5 @@ enum class GetNotatErrorCode(
     override val statusCode: HttpStatusCode,
     override val title: String,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON(
-        HttpStatusCode.Forbidden,
-        "Mangler tilgang til person",
-    ),
     NOTAT_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke notat"),
 }

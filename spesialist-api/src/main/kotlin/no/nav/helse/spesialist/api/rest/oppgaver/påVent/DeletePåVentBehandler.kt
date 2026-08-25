@@ -21,7 +21,6 @@ class DeletePåVentBehandler : DeleteBehandler<OppgaverBase.OppgaveId.PåVent, U
         return kallKontekst.medOppgave(
             oppgaveId = OppgaveId(resource.parent.oppgaveId),
             oppgaveIkkeFunnet = { ApiDeletePåVentErrorCode.OPPGAVE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiDeletePåVentErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, behandling, vedtaksperiode, person ->
             val påVent = kallKontekst.transaksjon.påVentRepository.finnFor(vedtaksperiode.id) ?: return@medOppgave RestResponse.NoContent()
             val innslag = Historikkinnslag.fjernetFraPåVentInnslag(kallKontekst.saksbehandler)
@@ -41,5 +40,4 @@ enum class ApiDeletePåVentErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

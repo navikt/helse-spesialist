@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Varsel
@@ -28,7 +27,6 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
         return kallKontekst.medBehandling(
             behandlingUnikId = varsel.behandlingUnikId,
             behandlingIkkeFunnet = { error("Fant ikke behandling") },
-            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { _, _, _ ->
             behandleForBehandling(varsel, kallKontekst)
         }
@@ -85,6 +83,5 @@ enum class GetVarselErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     VARSEL_IKKE_FUNNET("Fant ikke varsel", HttpStatusCode.NotFound),
 }

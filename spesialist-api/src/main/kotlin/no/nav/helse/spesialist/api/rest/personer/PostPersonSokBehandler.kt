@@ -64,8 +64,6 @@ class PostPersonSokBehandler(
             }
         return kallKontekst.medPerson(
             person.id,
-            personIkkeFunnet = { ApiPostPersonSokErrorCode.PERSON_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostPersonSokErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
             val personPseudoId = kallKontekst.personPseudoIdProvider.nyPersonPseudoId(person.id)
             val klarForVisning = person.harDataNødvendigForVisning()
@@ -110,11 +108,10 @@ enum class ApiPostPersonSokErrorCode(
         "Enten aktørId eller identitetsnummer må spesifiseres, ikke begge",
         HttpStatusCode.BadRequest,
     ),
+    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     MANGLER_INPUTPARAMETERE(
         "Enten aktørId eller identitetsnummer må spesifiseres, begge manglet",
         HttpStatusCode.BadRequest,
     ),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     AKTØRID_IKKE_FUNNET("Fant ikke aktørId for person", HttpStatusCode.InternalServerError),
 }

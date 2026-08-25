@@ -27,7 +27,6 @@ class PostNotatBehandler : PostBehandler<Notater, ApiNotatRequest, ApiNotatRespo
         kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(request.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { ApiPostNotatErrorCode.VEDTAKSPERIODE_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPostNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { vedtaksperiode, _ ->
             behandleForVedtaksperiode(request, vedtaksperiode, kallKontekst)
         }
@@ -62,6 +61,5 @@ enum class ApiPostNotatErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
 }

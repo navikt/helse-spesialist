@@ -29,8 +29,6 @@ class PatchEndreGraderteAndreYtelserBehandler : PatchBehandler<GraderteAndreYtel
         }
         return kallKontekst.medPerson(
             identitetsnummer = eksisterendeGraderteAndreYtelser.identitetsnummer,
-            personIkkeFunnet = { ApiPatchEndreGraderteAndreYtelserErrorCode.PERSON_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiPatchEndreGraderteAndreYtelserErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             behandleForPerson(request, eksisterendeGraderteAndreYtelser, person, kallKontekst)
         }
@@ -97,6 +95,4 @@ enum class ApiPatchEndreGraderteAndreYtelserErrorCode(
 ) : ApiErrorCode {
     GRADERTE_ANDRE_YTELSER_IKKE_FUNNET("Graderte andre ytelser ikke funnet", HttpStatusCode.BadRequest),
     GRADERTE_ANDRE_YTELSER_ER_FJERNET("Graderte andre ytelser er fjernet og kan ikke endres", HttpStatusCode.Conflict),
-    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.BadRequest),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

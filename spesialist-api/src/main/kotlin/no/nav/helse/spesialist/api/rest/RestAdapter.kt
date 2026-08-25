@@ -2,14 +2,11 @@ package no.nav.helse.spesialist.api.rest
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.principal
-import io.ktor.server.request.contentLength
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.RoutingCall
+import io.ktor.http.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
@@ -148,17 +145,17 @@ class RestAdapter(
                             return@coMedMdcFraKall
                         }
                         val problemDetails =
-                            if (cause is WrappedApiHttpProblemDetailsException) {
-                                cause.problemDetails
-                            } else {
-                                genericProblemDetails<ERROR>(HttpStatusCode.InternalServerError)
+                            when (cause) {
+                                is WrappedApiHttpProblemDetailsException -> cause.problemDetails
+                                is KallKontekstException -> cause.tilApiHttpProblemDetails()
+                                else -> genericProblemDetails<ERROR>(HttpStatusCode.InternalServerError)
                             }
                         val statusCode = problemDetails.status
                         val title = problemDetails.title
                         val loggmelding =
                             buildString {
                                 append("Returnerer HTTP $statusCode - $title")
-                                if (cause !is WrappedApiHttpProblemDetailsException) {
+                                if (cause !is WrappedApiHttpProblemDetailsException && cause !is KallKontekstException) {
                                     append(" (pga. ${cause::class.simpleName})")
                                 }
                             }
@@ -178,6 +175,13 @@ class RestAdapter(
             }
         }
     }
+
+    private fun KallKontekstException.tilApiHttpProblemDetails() =
+        ApiHttpProblemDetails(
+            status = errorCode.statusCode.value,
+            title = errorCode.title,
+            code = errorCode,
+        )
 
     private suspend fun RoutingCall.respondWithProblem(problemDetails: ApiHttpProblemDetails<out ApiErrorCode>) {
         respondText(

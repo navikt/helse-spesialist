@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.BEHANDLING_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_FEIL_TILSTAND
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.OPPGAVE_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostForkastingErrorCode.TOTRINNSVURDERING_SENDT_TIL_BESLUTTER
@@ -44,7 +43,6 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         kallKontekst.medBehandling(
             spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId),
             behandlingIkkeFunnet = { BEHANDLING_IKKE_FUNNET },
-            manglerTilgangTilPerson = { MANGLER_TILGANG_TIL_PERSON },
         ) { behandling, vedtaksperiode, person ->
             behandleForBehandling(request, behandling, vedtaksperiode, person, kallKontekst)
         }
@@ -209,7 +207,6 @@ enum class ApiPostForkastingErrorCode(
 ) : ApiErrorCode {
     BEHANDLING_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke behandling"),
     OPPGAVE_IKKE_FUNNET(HttpStatusCode.BadRequest, "Fant ikke oppgave."),
-    MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     OPPGAVE_FEIL_TILSTAND(HttpStatusCode.BadRequest, "Oppgaven er i feil tilstand."),
     TOTRINNSVURDERING_SENDT_TIL_BESLUTTER(
         HttpStatusCode.BadRequest,

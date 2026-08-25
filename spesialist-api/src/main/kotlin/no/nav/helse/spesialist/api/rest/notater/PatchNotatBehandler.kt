@@ -30,7 +30,6 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
         return kallKontekst.medVedtaksperiode(
             vedtaksperiodeId = VedtaksperiodeId(notat.vedtaksperiodeId),
             vedtaksperiodeIkkeFunnet = { error("Vedtaksperioden ble ikke funnet") },
-            manglerTilgangTilPerson = { ApiPatchNotatErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { _, _ ->
             behandleForVedtaksperiode(notat, kallKontekst)
         }
@@ -55,7 +54,6 @@ enum class ApiPatchNotatErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     NOTAT_IKKE_FUNNET("Fant ikke notat", HttpStatusCode.NotFound),
     KAN_IKKE_FJERNE_FEILREGISTRERING("Kan ikke fjerne feilregistrering", HttpStatusCode.BadRequest),
 }

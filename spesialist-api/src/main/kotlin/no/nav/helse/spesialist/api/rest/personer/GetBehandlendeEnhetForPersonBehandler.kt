@@ -25,8 +25,6 @@ class GetBehandlendeEnhetForPersonBehandler(
     ): RestResponse<ApiBehandlendeEnhet, ApiGetBehandlendeEnhetForPersonErrorCode> =
         kallKontekst.medPerson(
             personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
-            personPseudoIdIkkeFunnet = { ApiGetBehandlendeEnhetForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
-            manglerTilgangTilPerson = { ApiGetBehandlendeEnhetForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(person) }
 
     private fun behandleForPerson(person: Person): RestResponse<ApiBehandlendeEnhet, ApiGetBehandlendeEnhetForPersonErrorCode> {
@@ -47,7 +45,5 @@ enum class ApiGetBehandlendeEnhetForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
-    PERSON_PSEUDO_ID_IKKE_FUNNET("PersonPseudoId har utløpt (eller aldri eksistert)", HttpStatusCode.NotFound),
-    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     BEHANDLENDE_ENHET_IKKE_FUNNET("Fant ingen behandlende enhet for personen", HttpStatusCode.NotFound),
 }
