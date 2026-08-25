@@ -17,6 +17,7 @@ enum class Tags(
     FORSIKRINGER("Forsikringer"),
     NOTATER("Notater"),
     OPPGAVER("Oppgaver"),
+    OVERSTYRINGER("Overstyringer"),
     PERSONER("Personer"),
     SAKSBEHANDLERE("Saksbehandlere"),
     TILKOMNE_INNTEKTER("Tilkomne inntekter"),

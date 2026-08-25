@@ -41,6 +41,9 @@ import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostAnmodOmForkastingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.overstyring.PostOverstyrArbeidsforholdBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.overstyring.PostOverstyrInntektOgRefusjonBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.overstyring.PostOverstyrTidslinjeBehandler
 import no.nav.helse.spesialist.api.rest.vurderinger.PostArbeidstidsvurderingBehandler
 import no.nav.helse.spesialist.api.sse.sse
 import no.nav.helse.spesialist.application.*
@@ -115,6 +118,10 @@ fun Routing.restRoutes(
 
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
             post(PostAnmodOmForkastingBehandler(), restAdapter)
+
+            post(PostOverstyrTidslinjeBehandler(), restAdapter)
+            post(PostOverstyrInntektOgRefusjonBehandler(), restAdapter)
+            post(PostOverstyrArbeidsforholdBehandler(), restAdapter)
 
             post(PostArbeidstidsvurderingBehandler(), restAdapter)
 

@@ -28,5 +28,25 @@ class Vedtaksperioder {
         class AnmodOmForkasting(
             val parent: VedtaksperiodeId,
         )
+
+        @Resource("overstyringer")
+        class Overstyringer(
+            val parent: VedtaksperiodeId,
+        ) {
+            @Resource("tidslinje")
+            class Tidslinje(
+                val parent: Overstyringer,
+            )
+
+            @Resource("inntekt-og-refusjon")
+            class InntektOgRefusjon(
+                val parent: Overstyringer,
+            )
+
+            @Resource("arbeidsforhold")
+            class Arbeidsforhold(
+                val parent: Overstyringer,
+            )
+        }
     }
 }
