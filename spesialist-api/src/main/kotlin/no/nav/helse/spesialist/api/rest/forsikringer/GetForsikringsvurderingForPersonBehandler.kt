@@ -79,7 +79,6 @@ private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvur
                 )
             },
         kollektivForsikring = kollektivForsikring?.tilApiKollektivForsikring(),
-        navKjøpteForsikringer = individuelleForsikringer.map { it.tilApiIndividuellForsikring() },
         individuelleForsikringer = individuelleForsikringer.map { it.tilApiIndividuellForsikring() },
         vurdertTidspunkt = vurdertTidspunkt,
     )

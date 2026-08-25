@@ -121,29 +121,6 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                      "bokstav" : null
                   }
                },
-               "navKjøpteForsikringer" : [
-                  {
-                     "navn" : "80 % fra 1. dag (Individuell)",
-                     "dekningFolketrygdlovenreferanse" : {
-                        "kapittel" : 8,
-                        "paragrafIKapittel" : 36,
-                        "ledd" : 1,
-                        "bokstav" : "a"
-                     },
-                     "virkningsdato" : "2018-01-01",
-                     "opphørsdato" : "2019-12-31",
-                     "konklusjon" : {
-                        "forklaring" : "Forsikringen opphørte før skjæringstidspunktet",
-                        "folketrygdlovenreferanse" : {
-                           "kapittel" : 8,
-                           "paragrafIKapittel" : 37,
-                           "ledd" : null,
-                           "bokstav" : null
-                        }
-                     },
-                     "lagtTilGrunn" : false
-                  }
-               ],
                "individuelleForsikringer" : [
                   {
                      "navn" : "80 % fra 1. dag (Individuell)",
@@ -208,7 +185,6 @@ class GetForsikringsvurderingForPersonIntegrationTest {
             {
               "samletDekning" : null,
               "kollektivForsikring" : null,
-              "navKjøpteForsikringer" : [],
               "individuelleForsikringer" : [],
               "vurdertTidspunkt" : "2020-02-01T09:30:00Z"
             }

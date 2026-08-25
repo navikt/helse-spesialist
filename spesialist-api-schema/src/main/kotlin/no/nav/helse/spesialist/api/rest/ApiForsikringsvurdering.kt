@@ -57,7 +57,6 @@ data class ApiDekning(
 data class ApiForsikringsvurdering(
     val samletDekning: ApiDekning?,
     val kollektivForsikring: ApiKollektivForsikring?,
-    val navKjøpteForsikringer: List<ApiIndividuellForsikring>,
     val individuelleForsikringer: List<ApiIndividuellForsikring>,
     val vurdertTidspunkt: Instant,
 )
