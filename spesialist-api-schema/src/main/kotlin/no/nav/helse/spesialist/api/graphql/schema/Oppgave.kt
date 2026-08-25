@@ -38,7 +38,7 @@ enum class ApiEgenskap {
     SELVSTENDIG_NAERINGSDRIVENDE,
     ARBEIDSTAKER,
     JORDBRUKER_REINDRIFT,
-    FORSRIKING,
+    FORSIKRING,
 }
 
 @GraphQLName("Kategori")

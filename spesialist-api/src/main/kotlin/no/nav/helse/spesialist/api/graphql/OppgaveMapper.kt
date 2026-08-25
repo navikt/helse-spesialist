@@ -49,7 +49,7 @@ internal object OppgaveMapper {
             Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE
             Egenskap.ARBEIDSTAKER -> ApiEgenskap.ARBEIDSTAKER
             Egenskap.JORDBRUKER_REINDRIFT -> ApiEgenskap.JORDBRUKER_REINDRIFT
-            Egenskap.FORSIKRING -> ApiEgenskap.FORSRIKING
+            Egenskap.FORSIKRING -> ApiEgenskap.FORSIKRING
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): ApiKategori =

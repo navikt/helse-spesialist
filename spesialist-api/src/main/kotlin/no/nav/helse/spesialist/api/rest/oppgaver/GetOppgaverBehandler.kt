@@ -108,7 +108,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
             ApiEgenskap.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
             ApiEgenskap.JORDBRUKER_REINDRIFT -> Egenskap.JORDBRUKER_REINDRIFT
-            ApiEgenskap.FORSRIKING -> Egenskap.FORSIKRING
+            ApiEgenskap.FORSIKRING -> Egenskap.FORSIKRING
         }
 
     override fun openApi(config: RouteConfig) {
