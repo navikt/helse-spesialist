@@ -112,7 +112,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                             identitetsnummer = lagIdentitetsnummer(),
                             samletDekning = null,
                             kollektivForsikring = null,
-                            navKjøpteForsikringer = emptyList(),
+                            individuelleForsikringer = emptyList(),
                             vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                         )
                 },

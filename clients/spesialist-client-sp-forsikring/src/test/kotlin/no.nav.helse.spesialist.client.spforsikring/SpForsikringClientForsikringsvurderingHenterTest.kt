@@ -11,8 +11,8 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.IndividuellForsikring
 import no.nav.helse.spesialist.application.KollektivForsikring
-import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -63,9 +63,9 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "bokstav": null
                                 }
                             },
-                            "navKjøpteForsikringer": [
+                            "individuelleForsikringer": [
                                 {
-                                    "navn": "100 % fra 17. dag (Nav-kjøpt)",
+                                    "navn": "100 % fra 17. dag (Individuell)",
                                     "dekningFolketrygdlovenreferanse": {
                                         "kapittel": 8,
                                         "paragrafIKapittel": 36,
@@ -81,7 +81,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "lagtTilGrunn": true
                                 },
                                 {
-                                    "navn": "80 % fra 1. dag (Nav-kjøpt)",
+                                    "navn": "80 % fra 1. dag (Individuell)",
                                     "dekningFolketrygdlovenreferanse": {
                                         "kapittel": 8,
                                         "paragrafIKapittel": 36,
@@ -129,27 +129,27 @@ class SpForsikringClientForsikringsvurderingHenterTest {
         )
         assertEquals(
             listOf(
-                NavKjøptForsikring(
-                    navn = "100 % fra 17. dag (Nav-kjøpt)",
+                IndividuellForsikring(
+                    navn = "100 % fra 17. dag (Individuell)",
                     dekningFolketrygdlovenreferanse =
                         Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'b'),
                     virkningsdato = LocalDate.of(2020, 1, 1),
                     opphørsdato = null,
                     konklusjon =
-                        NavKjøptForsikring.Konklusjon(
+                        IndividuellForsikring.Konklusjon(
                             forklaring = "Lagt til grunn",
                             folketrygdlovenreferanse = null,
                         ),
                     lagtTilGrunn = true,
                 ),
-                NavKjøptForsikring(
-                    navn = "80 % fra 1. dag (Nav-kjøpt)",
+                IndividuellForsikring(
+                    navn = "80 % fra 1. dag (Individuell)",
                     dekningFolketrygdlovenreferanse =
                         Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 36, ledd = 1, bokstav = 'a'),
                     virkningsdato = LocalDate.of(2018, 1, 1),
                     opphørsdato = LocalDate.of(2019, 12, 31),
                     konklusjon =
-                        NavKjøptForsikring.Konklusjon(
+                        IndividuellForsikring.Konklusjon(
                             forklaring = "Forsikringen opphørte før skjæringstidspunktet",
                             folketrygdlovenreferanse =
                                 Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 37, ledd = null, bokstav = null),
@@ -157,7 +157,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                     lagtTilGrunn = false,
                 ),
             ),
-            actualForsikring.navKjøpteForsikringer,
+            actualForsikring.individuelleForsikringer,
         )
     }
 
@@ -174,7 +174,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                             "identitetsnummer": "${identitetsnummer.value}",
                             "samletDekning": null,
                             "kollektivForsikring": null,
-                            "navKjøpteForsikringer": [],
+                            "individuelleForsikringer": [],
                             "vurdertTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),
@@ -192,7 +192,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                     identitetsnummer = identitetsnummer,
                     samletDekning = null,
                     kollektivForsikring = null,
-                    navKjøpteForsikringer = emptyList(),
+                    individuelleForsikringer = emptyList(),
                     vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                 ),
             actual = actualForsikring,
@@ -246,7 +246,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                             "identitetsnummer": "${identitetsnummer.value}",
                             "samletDekning": { "grad": 100, "fraDag": 17 },
                             "kollektivForsikring": null,
-                            "navKjøpteForsikringer": [],
+                            "individuelleForsikringer": [],
                             "vurdertTidspunkt": "2020-02-01T09:30:00Z"
                         }
                         """.trimIndent(),

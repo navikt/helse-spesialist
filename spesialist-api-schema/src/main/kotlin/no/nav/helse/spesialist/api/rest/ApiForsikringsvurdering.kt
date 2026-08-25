@@ -32,18 +32,18 @@ data class ApiKollektivForsikring(
 )
 
 @Serializable
-data class ApiNavKjøptForsikringKonklusjon(
+data class ApiIndividuellForsikringKonklusjon(
     val forklaring: String,
     val folketrygdlovenreferanse: ApiFolketrygdlovenreferanse?,
 )
 
 @Serializable
-data class ApiNavKjøptForsikring(
+data class ApiIndividuellForsikring(
     val navn: String,
     val dekningFolketrygdlovenreferanse: ApiFolketrygdlovenreferanse,
     val virkningsdato: LocalDate,
     val opphørsdato: LocalDate?,
-    val konklusjon: ApiNavKjøptForsikringKonklusjon,
+    val konklusjon: ApiIndividuellForsikringKonklusjon,
     val lagtTilGrunn: Boolean,
 )
 
@@ -57,6 +57,7 @@ data class ApiDekning(
 data class ApiForsikringsvurdering(
     val samletDekning: ApiDekning?,
     val kollektivForsikring: ApiKollektivForsikring?,
-    val navKjøpteForsikringer: List<ApiNavKjøptForsikring>,
+    val navKjøpteForsikringer: List<ApiIndividuellForsikring>,
+    val individuelleForsikringer: List<ApiIndividuellForsikring>,
     val vurdertTidspunkt: Instant,
 )

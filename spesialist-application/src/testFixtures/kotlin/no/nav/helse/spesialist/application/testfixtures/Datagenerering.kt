@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.application.testfixtures
 
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.IndividuellForsikring
 import no.nav.helse.spesialist.application.KollektivForsikring
-import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import java.time.Instant
@@ -13,14 +13,14 @@ fun lagForsikringsvurdering(
     identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
     samletDekning: Forsikringsvurdering.Dekning? = null,
     kollektivForsikring: KollektivForsikring? = null,
-    navKjøpteForsikringer: List<NavKjøptForsikring> = emptyList(),
+    individuelleForsikringer: List<IndividuellForsikring> = emptyList(),
     vurdertTidspunkt: Instant = Instant.parse("2018-01-01T12:00:00Z"),
 ): Forsikringsvurdering =
     Forsikringsvurdering(
         identitetsnummer = identitetsnummer,
         samletDekning = samletDekning,
         kollektivForsikring = kollektivForsikring,
-        navKjøpteForsikringer = navKjøpteForsikringer,
+        individuelleForsikringer = individuelleForsikringer,
         vurdertTidspunkt = vurdertTidspunkt,
     )
 
@@ -36,19 +36,19 @@ fun lagKollektivForsikring(
         kollektivFolketrygdlovenreferanse = kollektivFolketrygdlovenreferanse,
     )
 
-fun lagNavKjøptForsikring(
-    navn: String = "80 % fra 1. dag (Nav-kjøpt)",
+fun lagIndividuellForsikring(
+    navn: String = "80 % fra 1. dag (Individuell)",
     dekningFolketrygdlovenreferanse: Folketrygdlovenreferanse = lagFolketrygdlovenreferanse(),
     virkningsdato: LocalDate = LocalDate.of(2018, 1, 1),
     opphørsdato: LocalDate? = null,
-    konklusjon: NavKjøptForsikring.Konklusjon =
-        NavKjøptForsikring.Konklusjon(
+    konklusjon: IndividuellForsikring.Konklusjon =
+        IndividuellForsikring.Konklusjon(
             forklaring = "Lagt til grunn",
             folketrygdlovenreferanse = null,
         ),
     lagtTilGrunn: Boolean = true,
-): NavKjøptForsikring =
-    NavKjøptForsikring(
+): IndividuellForsikring =
+    IndividuellForsikring(
         navn = navn,
         dekningFolketrygdlovenreferanse = dekningFolketrygdlovenreferanse,
         virkningsdato = virkningsdato,

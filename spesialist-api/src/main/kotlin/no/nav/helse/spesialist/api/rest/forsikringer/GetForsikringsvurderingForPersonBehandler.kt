@@ -5,9 +5,9 @@ import no.nav.helse.spesialist.api.rest.ApiDekning
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiFolketrygdlovenreferanse
 import no.nav.helse.spesialist.api.rest.ApiForsikringsvurdering
+import no.nav.helse.spesialist.api.rest.ApiIndividuellForsikring
+import no.nav.helse.spesialist.api.rest.ApiIndividuellForsikringKonklusjon
 import no.nav.helse.spesialist.api.rest.ApiKollektivForsikring
-import no.nav.helse.spesialist.api.rest.ApiNavKjøptForsikring
-import no.nav.helse.spesialist.api.rest.ApiNavKjøptForsikringKonklusjon
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
@@ -16,8 +16,8 @@ import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.application.IndividuellForsikring
 import no.nav.helse.spesialist.application.KollektivForsikring
-import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
@@ -79,7 +79,8 @@ private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvur
                 )
             },
         kollektivForsikring = kollektivForsikring?.tilApiKollektivForsikring(),
-        navKjøpteForsikringer = navKjøpteForsikringer.map { it.tilApiNavKjøptForsikring() },
+        navKjøpteForsikringer = individuelleForsikringer.map { it.tilApiIndividuellForsikring() },
+        individuelleForsikringer = individuelleForsikringer.map { it.tilApiIndividuellForsikring() },
         vurdertTidspunkt = vurdertTidspunkt,
     )
 
@@ -90,14 +91,14 @@ private fun KollektivForsikring.tilApiKollektivForsikring(): ApiKollektivForsikr
         kollektivFolketrygdlovenreferanse = kollektivFolketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
     )
 
-private fun NavKjøptForsikring.tilApiNavKjøptForsikring(): ApiNavKjøptForsikring =
-    ApiNavKjøptForsikring(
+private fun IndividuellForsikring.tilApiIndividuellForsikring(): ApiIndividuellForsikring =
+    ApiIndividuellForsikring(
         navn = navn,
         dekningFolketrygdlovenreferanse = dekningFolketrygdlovenreferanse.tilApiFolketrygdlovenreferanse(),
         virkningsdato = virkningsdato,
         opphørsdato = opphørsdato,
         konklusjon =
-            ApiNavKjøptForsikringKonklusjon(
+            ApiIndividuellForsikringKonklusjon(
                 forklaring = konklusjon.forklaring,
                 folketrygdlovenreferanse = konklusjon.folketrygdlovenreferanse?.tilApiFolketrygdlovenreferanse(),
             ),

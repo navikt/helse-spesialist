@@ -17,7 +17,7 @@ data class KollektivForsikring(
     val kollektivFolketrygdlovenreferanse: Folketrygdlovenreferanse,
 )
 
-data class NavKjøptForsikring(
+data class IndividuellForsikring(
     val navn: String,
     val dekningFolketrygdlovenreferanse: Folketrygdlovenreferanse,
     val virkningsdato: LocalDate,
@@ -35,7 +35,7 @@ data class Forsikringsvurdering(
     val identitetsnummer: Identitetsnummer,
     val samletDekning: Dekning?,
     val kollektivForsikring: KollektivForsikring?,
-    val navKjøpteForsikringer: List<NavKjøptForsikring>,
+    val individuelleForsikringer: List<IndividuellForsikring>,
     val vurdertTidspunkt: Instant,
 ) {
     data class Dekning(

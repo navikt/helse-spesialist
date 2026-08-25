@@ -7,8 +7,8 @@ import no.nav.helse.modell.objectMapper
 import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.application.IndividuellForsikring
 import no.nav.helse.spesialist.application.KollektivForsikring
-import no.nav.helse.spesialist.application.NavKjøptForsikring
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.client.spforsikring.ClientUtils.Companion.retryMedBackoff
@@ -64,24 +64,24 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                     kollektivForsikring["kollektivFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
                                             )
                                         },
-                                    navKjøpteForsikringer =
-                                        responseJson["navKjøpteForsikringer"]
+                                    individuelleForsikringer =
+                                        responseJson["individuelleForsikringer"]
                                             ?.takeUnless { it.isNull }
                                             ?.toList()
                                             .orEmpty()
-                                            .map { navKjøptForsikring ->
-                                                NavKjøptForsikring(
-                                                    navn = navKjøptForsikring["navn"].asString(),
+                                            .map { individuellForsikring ->
+                                                IndividuellForsikring(
+                                                    navn = individuellForsikring["navn"].asString(),
                                                     dekningFolketrygdlovenreferanse =
-                                                        navKjøptForsikring["dekningFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
-                                                    virkningsdato = navKjøptForsikring["virkningsdato"].asLocalDate(),
+                                                        individuellForsikring["dekningFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
+                                                    virkningsdato = individuellForsikring["virkningsdato"].asLocalDate(),
                                                     opphørsdato =
-                                                        navKjøptForsikring["opphørsdato"]
+                                                        individuellForsikring["opphørsdato"]
                                                             ?.takeUnless { it.isNull }
                                                             ?.asLocalDate(),
                                                     konklusjon =
-                                                        navKjøptForsikring["konklusjon"].let { konklusjon ->
-                                                            NavKjøptForsikring.Konklusjon(
+                                                        individuellForsikring["konklusjon"].let { konklusjon ->
+                                                            IndividuellForsikring.Konklusjon(
                                                                 forklaring = konklusjon["forklaring"].asString(),
                                                                 folketrygdlovenreferanse =
                                                                     konklusjon["folketrygdlovenreferanse"]
@@ -89,7 +89,7 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                                         ?.tilFolketrygdlovenreferanse(),
                                                             )
                                                         },
-                                                    lagtTilGrunn = navKjøptForsikring["lagtTilGrunn"].asBoolean(),
+                                                    lagtTilGrunn = individuellForsikring["lagtTilGrunn"].asBoolean(),
                                                 )
                                             },
                                     vurdertTidspunkt = Instant.parse(responseJson["vurdertTidspunkt"].asString()),
