@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import java.util.UUID
+import java.util.*
 
 @GraphQLName("Egenskap")
 enum class ApiEgenskap {
@@ -38,6 +38,7 @@ enum class ApiEgenskap {
     SELVSTENDIG_NAERINGSDRIVENDE,
     ARBEIDSTAKER,
     JORDBRUKER_REINDRIFT,
+    FORSRIKING,
 }
 
 @GraphQLName("Kategori")

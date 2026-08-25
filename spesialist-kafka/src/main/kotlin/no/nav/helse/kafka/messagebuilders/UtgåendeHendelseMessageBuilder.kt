@@ -255,6 +255,7 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
                     Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> "SELVSTENDIG_NÆRINGSDRIVENDE"
                     Egenskap.ARBEIDSTAKER -> "ARBEIDSTAKER"
                     Egenskap.JORDBRUKER_REINDRIFT -> "JORDBRUKER_REINDRIFT"
+                    Egenskap.FORSIKRING -> "FORSIKRING"
                 }
             },
         "behandlingId" to behandlingId,

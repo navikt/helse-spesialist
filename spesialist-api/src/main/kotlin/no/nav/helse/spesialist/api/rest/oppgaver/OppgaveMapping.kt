@@ -8,11 +8,7 @@ import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
 import no.nav.helse.spesialist.api.rest.ApiPersonnavn
 import no.nav.helse.spesialist.api.rest.ApiTildeling
 import no.nav.helse.spesialist.application.PersonPseudoIdProvider
-import no.nav.helse.spesialist.domain.Dialog
-import no.nav.helse.spesialist.domain.DialogId
-import no.nav.helse.spesialist.domain.PåVent
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -177,4 +173,5 @@ internal fun Egenskap.tilApiversjon(): ApiEgenskap =
         Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE
         Egenskap.ARBEIDSTAKER -> ApiEgenskap.ARBEIDSTAKER
         Egenskap.JORDBRUKER_REINDRIFT -> ApiEgenskap.JORDBRUKER_REINDRIFT
+        Egenskap.FORSIKRING -> ApiEgenskap.FORSRIKING
     }

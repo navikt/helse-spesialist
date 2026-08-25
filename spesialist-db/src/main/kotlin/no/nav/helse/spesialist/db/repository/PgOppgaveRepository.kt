@@ -8,10 +8,7 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.mediator.oppgave.OppgaveRepository.AntallOppgaverProjeksjon
-import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
-import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
-import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
+import no.nav.helse.mediator.oppgave.OppgaveRepository.*
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -20,25 +17,12 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.PåVentId
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.oppgave.Egenskap
-import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
-import no.nav.helse.spesialist.domain.oppgave.Mottaker
-import no.nav.helse.spesialist.domain.oppgave.Mottaker.DelvisRefusjon
-import no.nav.helse.spesialist.domain.oppgave.Mottaker.IngenUtbetaling
-import no.nav.helse.spesialist.domain.oppgave.Mottaker.UtbetalingTilArbeidsgiver
-import no.nav.helse.spesialist.domain.oppgave.Mottaker.UtbetalingTilSykmeldt
-import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.oppgave.OppgaveId
-import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
+import no.nav.helse.spesialist.domain.*
+import no.nav.helse.spesialist.domain.oppgave.*
+import no.nav.helse.spesialist.domain.oppgave.Mottaker.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 class PgOppgaveRepository private constructor(
@@ -798,6 +782,7 @@ class PgOppgaveRepository private constructor(
             Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> "SELVSTENDIG_NÆRINGSDRIVENDE"
             Egenskap.ARBEIDSTAKER -> "ARBEIDSTAKER"
             Egenskap.JORDBRUKER_REINDRIFT -> "JORDBRUKER_REINDRIFT"
+            Egenskap.FORSIKRING -> "FORSIKRING"
         }
 
     private fun String.fromDb(): Egenskap? =

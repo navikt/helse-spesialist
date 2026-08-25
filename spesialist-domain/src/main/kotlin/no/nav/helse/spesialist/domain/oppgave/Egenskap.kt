@@ -36,6 +36,7 @@ enum class Egenskap(
     SELVSTENDIG_NÆRINGSDRIVENDE(kategori = Kategori.Inntektsforhold),
     ARBEIDSTAKER(kategori = Kategori.Inntektsforhold),
     JORDBRUKER_REINDRIFT(kategori = Kategori.Arbeidssituasjon),
+    FORSIKRING,
     ;
 
     enum class Kategori {
