@@ -50,10 +50,11 @@ data class ApiGraderteAndreYtelser(
     val andreYtelserId: UUID,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelseType: ApiGraderteAndreYtelseType,
+    val fjernet: Boolean,
 )
 
 @Serializable
-data class ApiPatchGraderteAndreYtelserRequest(
+data class ApiPatchEndreGraderteAndreYtelserRequest(
     val graderteAndreYtelserId: UUID,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelseType: ApiGraderteAndreYtelseType,
@@ -61,6 +62,26 @@ data class ApiPatchGraderteAndreYtelserRequest(
 )
 
 @Serializable
-data class ApiPatchGraderteAndreYtelserResponse(
+data class ApiPostFjernGraderteAndreYtelserRequest(
+    val notatTilBeslutter: String,
+)
+
+@Serializable
+data class ApiPostGjenopprettGraderteAndreYtelserRequest(
+    val notatTilBeslutter: String,
+)
+
+@Serializable
+data class ApiPatchEndreGraderteAndreYtelserResponse(
+    val andreYtelserId: UUID,
+)
+
+@Serializable
+data class ApiPostFjernGraderteAndreYtelserResponse(
+    val andreYtelserId: UUID,
+)
+
+@Serializable
+data class ApiPostGjenopprettGraderteAndreYtelserResponse(
     val andreYtelserId: UUID,
 )

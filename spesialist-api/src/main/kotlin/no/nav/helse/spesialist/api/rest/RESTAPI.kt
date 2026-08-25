@@ -9,9 +9,7 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.rest.andreYtelser.GetGraderteAndreYtelserForPersonBehandler
-import no.nav.helse.spesialist.api.rest.andreYtelser.PatchGraderteAndreYtelserBehandler
-import no.nav.helse.spesialist.api.rest.andreYtelser.PostGraderteAndreYtelserBehandler
+import no.nav.helse.spesialist.api.rest.andreYtelser.*
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.behandlingsstatistikk.GetBehandlingsstatistikkBehandler
@@ -106,7 +104,9 @@ fun Routing.restRoutes(
 
             get(GetGraderteAndreYtelserForPersonBehandler(), restAdapter)
             post(PostGraderteAndreYtelserBehandler(), restAdapter)
-            patch(PatchGraderteAndreYtelserBehandler(), restAdapter)
+            patch(PatchEndreGraderteAndreYtelserBehandler(), restAdapter)
+            post(PostFjernGraderteAndreYtelserBehandler(), restAdapter)
+            post(PostGjenopprettGraderteAndreYtelserBehandler(), restAdapter)
 
             post(PostSykepengegrunnlagBehandler(), restAdapter)
 

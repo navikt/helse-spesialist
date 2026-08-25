@@ -43,6 +43,7 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                     )
                 },
             andreYtelseType = graderteAndreYtelserType.tilApiGraderteAndreYtelseType(),
+            fjernet = fjernet,
         )
 
     private fun GraderteAndreYtelserType.tilApiGraderteAndreYtelseType() =

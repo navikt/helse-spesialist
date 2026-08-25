@@ -22,5 +22,15 @@ class GraderteAndreYtelserResource {
     class Id(
         val parent: GraderteAndreYtelserResource = GraderteAndreYtelserResource(),
         val graderteAndreYtelserId: UUID,
-    )
+    ) {
+        @Resource("fjern")
+        class Fjern(
+            val parent: Id,
+        )
+
+        @Resource("gjenopprett")
+        class Gjenopprett(
+            val parent: Id,
+        )
+    }
 }

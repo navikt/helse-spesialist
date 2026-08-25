@@ -76,7 +76,57 @@ class GetGraderteAndreYtelserIntegrationTest {
                     "grad": 66
                   }
                 ],
-                "andreYtelseType": "SVANGERSKAPSPENGER"
+                "andreYtelseType": "SVANGERSKAPSPENGER",
+                "fjernet": false
+              }
+            ]
+            """.trimIndent(),
+            response.bodyAsJsonNode,
+        )
+    }
+
+    @Test
+    fun `kan hente en fjernet graderte-andre-ytelser for en person`() {
+        // Given:
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
+        val saksbehandler = lagSaksbehandler()
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+
+        val enFjernetGradertAnnenYtelse =
+            opprettEnGradertAnnenYtelse(person, saksbehandler).also {
+                it.fjern(
+                    saksbehandlerIdent = saksbehandler.ident,
+                    notatTilBeslutter = "fjerner ytelsen",
+                    totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                )
+            }
+        integrationTestFixture.sessionContext.graderteAndreYtelserRepository.lagre(enFjernetGradertAnnenYtelse)
+
+        // When:
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${personPseudoId.value}/graderte-andre-ytelser",
+                saksbehandler = saksbehandler,
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.OK.value, response.status)
+        assertNotNull(response.bodyAsJsonNode)
+        assertJsonEquals(
+            """
+            [
+              {
+                "andreYtelserId": "${enFjernetGradertAnnenYtelse.id.value}",
+                "perioder": [
+                  {
+                    "fom": "2024-09-12",
+                    "tom": "2024-10-02",
+                    "grad": 66
+                  }
+                ],
+                "andreYtelseType": "SVANGERSKAPSPENGER",
+                "fjernet": true
               }
             ]
             """.trimIndent(),

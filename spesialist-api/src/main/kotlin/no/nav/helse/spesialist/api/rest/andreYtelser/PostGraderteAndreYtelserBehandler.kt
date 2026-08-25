@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
-import no.nav.helse.modell.melding.GraderteAndreYtelserEndringerEvent
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
@@ -71,16 +70,8 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
             )
         kallKontekst.transaksjon.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
 
-        kallKontekst.outbox.leggTil(
-            identitetsnummer = graderteAndreYtelser.identitetsnummer,
-            hendelse =
-                GraderteAndreYtelserEndringerEvent(
-                    fødselsnummer = person.id,
-                    fom =
-                        graderteAndreYtelser.perioder
-                            .minByOrNull { it.periode.fom }!!
-                            .periode.fom,
-                ),
+        kallKontekst.leggTilGraderteAndreYtelserEndringshendelse(
+            graderteAndreYtelser = graderteAndreYtelser,
             årsak = "graderte andre ytelser lagt til",
         )
 
