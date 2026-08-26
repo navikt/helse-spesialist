@@ -1,20 +1,15 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 class TestPerson {
     val fødselsnummer: String = lagFødselsnummer()
@@ -75,6 +70,7 @@ object Testdata {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
+        forsikringsvurderingId: UUID? = null,
         tags: List<String> = emptyList(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
@@ -94,6 +90,7 @@ object Testdata {
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
             vilkårsgrunnlagId = UUID.randomUUID(),
+            forsikringsvurderingId = forsikringsvurderingId,
             tags = tags,
             periodeFom = 1 jan 2018,
             periodeTom = 31 jan 2018,

@@ -1,13 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.mediator.asBigDecimal
-import no.nav.helse.mediator.asEnum
-import no.nav.helse.mediator.asLocalDate
-import no.nav.helse.mediator.asLocalDateTime
-import no.nav.helse.mediator.asUUID
+import no.nav.helse.mediator.*
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
@@ -15,21 +9,7 @@ import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
-import no.nav.helse.modell.kommando.AvbrytContextCommand
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
-import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterPersonCommand
-import no.nav.helse.modell.kommando.OpprettEllerOppdaterArbeidsforhold
-import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
-import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
-import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
-import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
-import no.nav.helse.modell.kommando.PersisterInntektCommand
-import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
-import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
-import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
-import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
+import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.objectMapper
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -38,13 +18,14 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.domain.Periode
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class Godkjenningsbehov(
     override val id: UUID,
@@ -101,6 +82,7 @@ class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
+            forsikringsvurderingId = forsikringsvurderingId,
             tags = tags,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -349,6 +331,7 @@ internal class GodkjenningsbehovCommand(
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
+    forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
     override val commands: List<Command> =
@@ -447,6 +430,7 @@ internal class GodkjenningsbehovCommand(
                 utbetalingtype = godkjenningsbehovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
+                forsikringsvurderingHenter = forsikringsvurderingHenter,
             ),
             PersisterInntektCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,

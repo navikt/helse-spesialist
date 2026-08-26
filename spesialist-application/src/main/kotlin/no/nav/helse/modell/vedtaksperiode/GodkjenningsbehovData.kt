@@ -8,7 +8,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.domain.NAVIdent
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class GodkjenningsbehovData(
     val id: UUID,
@@ -21,6 +21,7 @@ data class GodkjenningsbehovData(
     val utbetalingId: UUID,
     val spleisBehandlingId: UUID,
     val vilkårsgrunnlagId: UUID,
+    val forsikringsvurderingId: UUID?,
     val tags: List<String>,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,

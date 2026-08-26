@@ -60,6 +60,7 @@ class KafkaModule(
                                 )
                             },
                             stikkprøver = Stikkprøver(stikkprøver),
+                            forsikringsvurderingHenter = forsikringsvurderingHenter,
                         ),
                     dokumentDao = daos.dokumentDao,
                     legacyVarselRepository =

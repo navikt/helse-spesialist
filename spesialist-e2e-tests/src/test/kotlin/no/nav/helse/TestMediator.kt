@@ -69,6 +69,7 @@ class TestMediator(
             },
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
+            forsikringsvurderingHenter = forsikringsvurderingHenter,
         )
 
     init {

@@ -38,6 +38,11 @@ data class Forsikringsvurdering(
     val individuelleForsikringer: List<IndividuellForsikring>,
     val vurdertTidspunkt: Instant,
 ) {
+    // Speiler sp-forsikring sin egen definisjon: Forsikringsvurdering.harForsikring()
+    // (individuelleForsikringer.any { it.erGyldig() } || kollektivForsikring != null).
+    // I API-svaret fra sp-forsikring tilsvarer erGyldig() feltet lagtTilGrunn.
+    fun harForsikring(): Boolean = individuelleForsikringer.any { it.lagtTilGrunn } || kollektivForsikring != null
+
     data class Dekning(
         val grad: Int,
         val fraDag: Int,

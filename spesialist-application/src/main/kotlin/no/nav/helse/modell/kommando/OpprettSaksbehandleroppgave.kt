@@ -4,57 +4,21 @@ import io.opentelemetry.api.trace.Span
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig
-import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
-import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
+import no.nav.helse.modell.person.Adressebeskyttelse.*
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
-import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.modell.vedtaksperiode.*
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Opptegnelse
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.ARBEIDSTAKER
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.EGEN_ANSATT
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.EN_ARBEIDSGIVER
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORLENGELSE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORSTEGANGSBEHANDLING
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.GOSYS
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.GRUNNBELØPSREGULERING
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.HASTER
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.INFOTRYGDFORLENGELSE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.INGEN_UTBETALING
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.MANGLER_IM
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.MEDLEMSKAP
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.OVERGANG_FRA_IT
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.PÅ_VENT
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.REVURDERING
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.RISK_QA
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.SKJØNNSFASTSETTELSE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.STIKKPRØVE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.SØKNAD
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.VERGEMÅL
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.*
 import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
 import no.nav.helse.spesialist.domain.oppgave.Mottaker
 import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
-import java.util.UUID
+import java.util.*
 
 internal class OpprettSaksbehandleroppgave(
     private val behovData: GodkjenningsbehovData,
@@ -63,6 +27,7 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
+    private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -117,6 +82,7 @@ internal class OpprettSaksbehandleroppgave(
                 medlemskap(vedtaksperiodeId)
                 haster(vedtaksperiodeId)
                 grunnbeløpsregulering(behovData.tags, utbetalingtype)
+                forsikring(behovData.forsikringsvurderingId)
             }
 
         val behandlingId = behovData.spleisBehandlingId
@@ -283,5 +249,11 @@ internal class OpprettSaksbehandleroppgave(
 
     private fun MutableSet<Egenskap>.haster(vedtaksperiodeId: UUID) {
         if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) add(HASTER)
+    }
+
+    private fun MutableSet<Egenskap>.forsikring(forsikringsvurderingId: UUID?) {
+        if (forsikringsvurderingId == null) return
+        val forsikringsvurdering = forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
+        if (forsikringsvurdering?.harForsikring() == true) add(FORSIKRING)
     }
 }

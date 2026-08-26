@@ -15,6 +15,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggDebug
@@ -29,6 +30,7 @@ class Kommandofabrikk(
     private val oppgaveServiceProvider: (SessionContext) -> OppgaveService,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
+    private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) {
     internal fun gosysOppgaveEndret(
         person: LegacyPerson,
@@ -95,6 +97,7 @@ class Kommandofabrikk(
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
             person = person,
+            forsikringsvurderingHenter = forsikringsvurderingHenter,
         )
     }
 

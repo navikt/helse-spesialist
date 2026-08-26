@@ -18,7 +18,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.MockForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.application.testfixtures.lagForsikringsvurdering
+import no.nav.helse.spesialist.application.testfixtures.lagKollektivForsikring
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
@@ -29,6 +32,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.EN_ARBEIDSGIVER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORSIKRING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.GRUNNBELØPSREGULERING
@@ -50,19 +54,13 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
 import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
-import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
-import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
-import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
-import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.node.JsonNodeFactory
 import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 
 internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
@@ -77,6 +75,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
+    private val forsikringsvurderingHenter = MockForsikringsvurderingHenter()
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
@@ -203,6 +202,35 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egenskap ingen utbetaling`() {
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap forsikring dersom vurderingen har forsikring`() {
+        val forsikringsvurderingId = UUID.randomUUID()
+        forsikringsvurderingHenter.forsikringsvurdering =
+            lagForsikringsvurdering(kollektivForsikring = lagKollektivForsikring())
+        assertTrue(
+            opprettSaksbehandlerOppgaveCommand(forsikringsvurderingId = forsikringsvurderingId)
+                .execute(context, sessionContext, outbox),
+        )
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, FORSIKRING)
+    }
+
+    @Test
+    fun `oppretter ikke oppgave med egenskap forsikring dersom vurderingen ikke har forsikring`() {
+        val forsikringsvurderingId = UUID.randomUUID()
+        forsikringsvurderingHenter.forsikringsvurdering = lagForsikringsvurdering()
+        assertTrue(
+            opprettSaksbehandlerOppgaveCommand(forsikringsvurderingId = forsikringsvurderingId)
+                .execute(context, sessionContext, outbox),
+        )
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    @Test
+    fun `oppretter ikke oppgave med egenskap forsikring dersom det ikke finnes forsikringsvurderingId`() {
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
@@ -470,6 +498,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
         tags: List<String> = emptyList(),
         arbeidssituasjon: Arbeidssituasjon? = null,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        forsikringsvurderingId: UUID? = null,
     ) = OpprettSaksbehandleroppgave(
         behovData =
             godkjenningsbehovData(
@@ -485,11 +514,13 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
                 tags = tags,
                 arbeidssituasjon = arbeidssituasjon,
                 yrkesaktivitetstype = yrkesaktivitetstype,
+                forsikringsvurderingId = forsikringsvurderingId,
             ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
+        forsikringsvurderingHenter = forsikringsvurderingHenter,
     )
 }
