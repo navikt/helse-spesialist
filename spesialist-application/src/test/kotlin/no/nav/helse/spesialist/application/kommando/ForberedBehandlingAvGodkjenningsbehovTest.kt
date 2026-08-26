@@ -29,7 +29,7 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                 skjæringstidspunkt = 1 jan 2018,
                 fom = 1 jan 2018,
                 tom = 31 jan 2018,
-                tilstand = LegacyBehandling.VedtakFattet,
+                tilstand = LegacyBehandling.Tilstand.VedtakFattet,
                 tags = emptyList(),
                 varsler = emptySet(),
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,

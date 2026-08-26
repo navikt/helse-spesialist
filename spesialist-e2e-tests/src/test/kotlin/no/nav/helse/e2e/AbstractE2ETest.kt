@@ -1009,7 +1009,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dbQuery.singleOrNull(
             """
             SELECT 1 FROM behandling
-            WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${LegacyBehandling.VedtakFattet.navn()}'
+            WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${LegacyBehandling.Tilstand.VedtakFattet.navn()}'
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ) { true } ?: false

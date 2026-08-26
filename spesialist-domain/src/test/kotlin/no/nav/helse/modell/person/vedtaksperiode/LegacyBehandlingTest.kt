@@ -1,6 +1,5 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import io.mockk.mockk
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
@@ -362,7 +361,6 @@ internal class LegacyBehandlingTest {
         val behandlingId = UUID.randomUUID()
         val behandling = behandling(fom = 1 jan 2018, tom = 31 jan 2018, skjæringstidspunkt = 1 jan 2018)
         behandling.håndter(
-            mockk(relaxed = true),
             SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2 jan 2018, 30 jan 2018, 2 jan 2018),
         )
         val dto = behandling.toDto()
@@ -540,10 +538,10 @@ internal class LegacyBehandlingTest {
 
     @Test
     fun `behandlingTilstand toDto`() {
-        assertEquals(TilstandDto.VedtakFattet, LegacyBehandling.VedtakFattet.toDto())
-        assertEquals(TilstandDto.VidereBehandlingAvklares, LegacyBehandling.VidereBehandlingAvklares.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenVedtak, LegacyBehandling.AvsluttetUtenVedtak.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, LegacyBehandling.AvsluttetUtenVedtakMedVarsler.toDto())
+        assertEquals(TilstandDto.VedtakFattet, LegacyBehandling.Tilstand.VedtakFattet.toDto())
+        assertEquals(TilstandDto.VidereBehandlingAvklares, LegacyBehandling.Tilstand.VidereBehandlingAvklares.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtak, LegacyBehandling.Tilstand.AvsluttetUtenVedtak.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, LegacyBehandling.Tilstand.AvsluttetUtenVedtakMedVarsler.toDto())
     }
 
     private fun behandlingMedVarsel(
