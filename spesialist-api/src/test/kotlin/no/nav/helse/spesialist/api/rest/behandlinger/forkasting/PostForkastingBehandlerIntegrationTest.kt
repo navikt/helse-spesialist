@@ -77,7 +77,7 @@ class PostForkastingBehandlerIntegrationTest {
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         assertEquals(Varsel.Status.AVVIST, funnetVarsel?.status)
         assertEquals(TotrinnsvurderingTilstand.GODKJENT, funnetTotrinnsvurdering?.tilstand)
-        assertEquals(Oppgave.AvventerSystem, funnetOppgave?.tilstand)
+        assertEquals(Oppgave.Tilstand.AvventerSystem, funnetOppgave?.tilstand)
         assertEquals(false, funnetOppgave?.egenskaper?.contains(Egenskap.PÅ_VENT))
         assertNotNull(reservasjon)
         assertEquals(saksbehandler, reservasjon.reservertTil)

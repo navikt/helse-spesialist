@@ -53,6 +53,6 @@ internal class VurderVidereBehandlingAvGodkjenningsbehovTest : ApplicationTest()
         val lagretOppgave = sessionContext.oppgaveRepository.finn(oppgave.id)
         assertNotNull(lagretOppgave)
         assertEquals(newData.id, lagretOppgave.godkjenningsbehovId)
-        assertEquals(Oppgave.Invalidert, lagretOppgave.tilstand)
+        assertEquals(Oppgave.Tilstand.Invalidert, lagretOppgave.tilstand)
     }
 }

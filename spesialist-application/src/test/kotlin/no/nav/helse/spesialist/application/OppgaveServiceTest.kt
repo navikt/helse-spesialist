@@ -201,7 +201,7 @@ internal class OppgaveServiceTest {
         opprettet = LocalDateTime.now(),
         førsteOpprettet = null,
         egenskaper = mutableSetOf(EGENSKAP_SØKNAD),
-        tilstand = Oppgave.AvventerSaksbehandler,
+        tilstand = Oppgave.Tilstand.AvventerSaksbehandler,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = BEHANDLING_ID,
         utbetalingId = UTBETALING_ID,

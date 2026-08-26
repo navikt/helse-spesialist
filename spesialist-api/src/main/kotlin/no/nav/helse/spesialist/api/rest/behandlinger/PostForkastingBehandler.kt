@@ -60,7 +60,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
             kallKontekst.transaksjon.oppgaveRepository.finn(behandling.spleisBehandlingId!!)
                 ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
 
-        if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
+        if (oppgave.tilstand != Oppgave.Tilstand.AvventerSaksbehandler) {
             return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
         }
 

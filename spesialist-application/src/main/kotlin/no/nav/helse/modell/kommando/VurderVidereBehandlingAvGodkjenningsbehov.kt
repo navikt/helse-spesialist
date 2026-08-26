@@ -34,7 +34,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         }
 
         val oppgave = sessionContext.oppgaveRepository.finn(SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)) ?: return true
-        if (oppgave.tilstand is Oppgave.Invalidert) return true
+        if (oppgave.tilstand == Oppgave.Tilstand.Invalidert) return true
 
         val gammelGodkjenningsbehovId = oppgave.godkjenningsbehovId
         oppgave.nyttGodkjenningsbehov(meldingId)
@@ -43,7 +43,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
 
         val harEndringerIGodkjenningsbehov = harEndringerIGodkjenningsbehov(sessionContext, gammelGodkjenningsbehovId)
 
-        if (oppgave.tilstand is Oppgave.Ferdigstilt) {
+        if (oppgave.tilstand == Oppgave.Tilstand.Ferdigstilt) {
             if (!harEndringerIGodkjenningsbehov) {
                 loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId. Er allerede ferdigstilt.")
                 logg.warn(

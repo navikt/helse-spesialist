@@ -83,7 +83,10 @@ class Oppgave private constructor(
         brukerroller: Set<Brukerrolle>,
     ) {
         sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
-        tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
+        when (tilstand) {
+            Tilstand.AvventerSaksbehandler -> tildel(saksbehandler)
+            else -> uventetForsøk("forsøk på tildeling")
+        }
     }
 
     private fun sjekkAtOppgaveKanTildeles(
@@ -120,7 +123,10 @@ class Oppgave private constructor(
             return
         }
         sjekkAtOppgaveKanTildeles(brukerroller, saksbehandler)
-        tilstand.tildel(oppgave = this, saksbehandler = saksbehandler)
+        when (tilstand) {
+            Tilstand.AvventerSaksbehandler -> tildel(saksbehandler)
+            else -> uventetForsøk("forsøk på tildeling")
+        }
     }
 
     fun forsøkAvmelding(saksbehandler: Saksbehandler) {
@@ -138,7 +144,10 @@ class Oppgave private constructor(
                 kv("oppgaveId", id.value),
             )
         }
-        tilstand.avmeld(this)
+        when (tilstand) {
+            Tilstand.AvventerSaksbehandler -> avmeld()
+            else -> uventetForsøk("forsøk på avmelding")
+        }
     }
 
     fun sendTilBeslutter(beslutter: Saksbehandler?) {
@@ -225,18 +234,37 @@ class Oppgave private constructor(
     }
 
     fun ferdigstill() {
-        tilstand.ferdigstill(this)
+        when (tilstand) {
+            Tilstand.AvventerSystem -> nesteTilstand(Tilstand.Ferdigstilt)
+            else -> uventetForsøk("ferdigstillelse")
+        }
     }
 
     fun avventerSystem(
         ident: NAVIdent,
         oid: UUID,
     ) {
-        tilstand.avventerSystem(this, ident, oid)
+        when (tilstand) {
+            Tilstand.AvventerSaksbehandler -> {
+                ferdigstiltAvIdent = ident
+                ferdigstiltAvOid = oid
+                nesteTilstand(Tilstand.AvventerSystem)
+            }
+            Tilstand.AvventerSystem -> {
+                ferdigstiltAvIdent = ident
+                ferdigstiltAvOid = oid
+            }
+            else -> uventetForsøk("avventer system")
+        }
     }
 
     fun avbryt() {
-        tilstand.invalider(this)
+        when (tilstand) {
+            Tilstand.AvventerSaksbehandler,
+            Tilstand.AvventerSystem,
+            -> nesteTilstand(Tilstand.Invalidert)
+            else -> uventetForsøk("invalidering")
+        }
     }
 
     fun kanTildelesTil(
@@ -285,6 +313,15 @@ class Oppgave private constructor(
         hendelser.add(Oppgavehendelse.OppgaveOppdatert(this))
     }
 
+    private fun uventetForsøk(handling: String) {
+        logg.warn(
+            "Forventer ikke {} i {} for oppgave med {}",
+            kv("handling", handling),
+            kv("tilstand", tilstand),
+            kv("oppgaveId", id.value),
+        )
+    }
+
     private fun nesteTilstand(neste: Tilstand) {
         val forrige = tilstand
         tilstand = neste
@@ -297,106 +334,12 @@ class Oppgave private constructor(
         oppgaveEndret()
     }
 
-    sealed interface Tilstand {
-        fun invalider(oppgave: Oppgave) {
-            logg.warn(
-                "Forventer ikke invalidering i {} for oppgave med {}",
-                kv("tilstand", this),
-                kv("oppgaveId", oppgave.id.value),
-            )
-        }
-
-        fun avventerSystem(
-            oppgave: Oppgave,
-            ident: NAVIdent,
-            oid: UUID,
-        ) {
-            logg.warn(
-                "Forventer ikke avventer system i {} for oppgave med {}",
-                kv("tilstand", this),
-                kv("oppgaveId", oppgave.id.value),
-            )
-        }
-
-        fun ferdigstill(oppgave: Oppgave) {
-            logg.warn(
-                "Forventer ikke ferdigstillelse i {} for oppgave med {}",
-                kv("tilstand", this),
-                kv("oppgaveId", oppgave.id.value),
-            )
-        }
-
-        fun tildel(
-            oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
-        ) {
-            logg.warn(
-                "Forventer ikke forsøk på tildeling i {} for oppgave med {}",
-                kv("tilstand", this),
-                kv("oppgaveId", oppgave.id.value),
-            )
-        }
-
-        fun avmeld(oppgave: Oppgave) {
-            logg.warn(
-                "Forventer ikke forsøk på avmelding i {} for oppgave med {}",
-                kv("tilstand", this),
-                kv("oppgaveId", oppgave.id.value),
-            )
-        }
+    enum class Tilstand {
+        AvventerSaksbehandler,
+        AvventerSystem,
+        Ferdigstilt,
+        Invalidert,
     }
-
-    data object AvventerSaksbehandler : Tilstand {
-        override fun avventerSystem(
-            oppgave: Oppgave,
-            ident: NAVIdent,
-            oid: UUID,
-        ) {
-            oppgave.ferdigstiltAvIdent = ident
-            oppgave.ferdigstiltAvOid = oid
-            oppgave.nesteTilstand(AvventerSystem)
-        }
-
-        override fun invalider(oppgave: Oppgave) {
-            oppgave.nesteTilstand(Invalidert)
-        }
-
-        override fun tildel(
-            oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
-        ) {
-            oppgave.tildel(saksbehandler)
-        }
-
-        override fun avmeld(
-            oppgave: Oppgave,
-        ) {
-            oppgave.avmeld()
-        }
-    }
-
-    data object AvventerSystem : Tilstand {
-        override fun avventerSystem(
-            oppgave: Oppgave,
-            ident: NAVIdent,
-            oid: UUID,
-        ) {
-            oppgave.ferdigstiltAvIdent = ident
-            oppgave.ferdigstiltAvOid = oid
-        }
-
-        override fun ferdigstill(oppgave: Oppgave) {
-            oppgave.nesteTilstand(Ferdigstilt)
-        }
-
-        override fun invalider(oppgave: Oppgave) {
-            oppgave.nesteTilstand(Invalidert)
-        }
-    }
-
-    data object Ferdigstilt : Tilstand
-
-    data object Invalidert : Tilstand
 
     override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=${id.value})"
 
@@ -424,7 +367,7 @@ class Oppgave private constructor(
                 id = OppgaveId(id),
                 opprettet = opprettet,
                 førsteOpprettet = førsteOpprettet ?: opprettet,
-                tilstand = AvventerSaksbehandler,
+                tilstand = Tilstand.AvventerSaksbehandler,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = behandlingId,
                 utbetalingId = utbetalingId,

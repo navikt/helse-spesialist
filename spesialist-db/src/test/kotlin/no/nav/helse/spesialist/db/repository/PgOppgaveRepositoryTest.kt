@@ -136,7 +136,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
         assertNotNull(funnetOppgave)
-        assertEquals(Oppgave.AvventerSystem, funnetOppgave.tilstand)
+        assertEquals(Oppgave.Tilstand.AvventerSystem, funnetOppgave.tilstand)
     }
 
     @Test
@@ -149,7 +149,7 @@ class PgOppgaveRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
         assertNotNull(funnetOppgave)
-        assertEquals(Oppgave.Ferdigstilt, funnetOppgave.tilstand)
+        assertEquals(Oppgave.Tilstand.Ferdigstilt, funnetOppgave.tilstand)
         assertEquals(saksbehandler.ident, funnetOppgave.ferdigstiltAvIdent)
         assertEquals(saksbehandler.id.value, funnetOppgave.ferdigstiltAvOid)
     }

@@ -734,19 +734,19 @@ class PgOppgaveRepository private constructor(
 
     private fun tilstand(oppgavestatus: String): Oppgave.Tilstand =
         when (oppgavestatus) {
-            "AvventerSaksbehandler" -> Oppgave.AvventerSaksbehandler
-            "AvventerSystem" -> Oppgave.AvventerSystem
-            "Ferdigstilt" -> Oppgave.Ferdigstilt
-            "Invalidert" -> Oppgave.Invalidert
+            "AvventerSaksbehandler" -> Oppgave.Tilstand.AvventerSaksbehandler
+            "AvventerSystem" -> Oppgave.Tilstand.AvventerSystem
+            "Ferdigstilt" -> Oppgave.Tilstand.Ferdigstilt
+            "Invalidert" -> Oppgave.Tilstand.Invalidert
             else -> throw IllegalStateException("Oppgavestatus $oppgavestatus er ikke en gyldig status")
         }
 
     private fun status(tilstand: Oppgave.Tilstand): String =
         when (tilstand) {
-            Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
-            Oppgave.AvventerSystem -> "AvventerSystem"
-            Oppgave.Ferdigstilt -> "Ferdigstilt"
-            Oppgave.Invalidert -> "Invalidert"
+            Oppgave.Tilstand.AvventerSaksbehandler -> "AvventerSaksbehandler"
+            Oppgave.Tilstand.AvventerSystem -> "AvventerSystem"
+            Oppgave.Tilstand.Ferdigstilt -> "Ferdigstilt"
+            Oppgave.Tilstand.Invalidert -> "Invalidert"
         }
 
     private fun Egenskap.toDb() =

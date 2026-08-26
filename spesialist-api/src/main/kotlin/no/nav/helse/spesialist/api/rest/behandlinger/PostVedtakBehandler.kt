@@ -98,7 +98,7 @@ class PostVedtakBehandler(
             val oppgave =
                 kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
                     ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
-            if (oppgave.tilstand !in setOf(Oppgave.AvventerSaksbehandler, Oppgave.AvventerSystem)) {
+            if (oppgave.tilstand !in setOf(Oppgave.Tilstand.AvventerSaksbehandler, Oppgave.Tilstand.AvventerSystem)) {
                 return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
             }
 

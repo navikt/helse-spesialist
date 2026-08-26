@@ -136,7 +136,7 @@ fun lagOppgave(
         inntektsforhold = Inntektsforhold.Arbeidstaker,
         periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         opprettet = LocalDateTime.now(),
-        tilstand = Oppgave.AvventerSaksbehandler,
+        tilstand = Oppgave.Tilstand.AvventerSaksbehandler,
         ferdigstiltAvOid = null,
         ferdigstiltAvIdent = null,
         tildeltTil = null,

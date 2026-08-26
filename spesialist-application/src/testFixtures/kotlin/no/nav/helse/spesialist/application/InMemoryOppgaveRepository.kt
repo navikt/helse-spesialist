@@ -42,14 +42,14 @@ class InMemoryOppgaveRepository(
     override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
         val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
         return oppgaver.values
-            .filter { it.tilstand in listOf(Oppgave.AvventerSaksbehandler) }
+            .filter { it.tilstand in listOf(Oppgave.Tilstand.AvventerSaksbehandler) }
             .singleOrNull { it.vedtaksperiodeId in ider }
     }
 
     override fun finnGjeldendeForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
         val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
         return oppgaver.values
-            .filter { it.tilstand in listOf(Oppgave.AvventerSystem, Oppgave.AvventerSaksbehandler) }
+            .filter { it.tilstand in listOf(Oppgave.Tilstand.AvventerSystem, Oppgave.Tilstand.AvventerSaksbehandler) }
             .singleOrNull { it.vedtaksperiodeId in ider }
     }
 
@@ -106,7 +106,7 @@ class InMemoryOppgaveRepository(
 
     override fun finnFødselsnumreForÅpneOppgaverMedAktivtVarsel(varselkode: String): Set<String> =
         oppgaver.values
-            .filter { it.tilstand is Oppgave.AvventerSaksbehandler }
+            .filter { it.tilstand == Oppgave.Tilstand.AvventerSaksbehandler }
             .filter { oppgave ->
                 varselRepository
                     .finnVarsler(listOf(oppgave.behandlingId))

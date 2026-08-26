@@ -214,10 +214,10 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
         "oppgaveId" to id.value,
         "tilstand" to
             when (tilstand) {
-                AvventerSaksbehandler -> "AvventerSaksbehandler"
-                AvventerSystem -> "AvventerSystem"
-                Ferdigstilt -> "Ferdigstilt"
-                Invalidert -> "Invalidert"
+                Tilstand.AvventerSaksbehandler -> "AvventerSaksbehandler"
+                Tilstand.AvventerSystem -> "AvventerSystem"
+                Tilstand.Ferdigstilt -> "Ferdigstilt"
+                Tilstand.Invalidert -> "Invalidert"
             },
         "egenskaper" to
             egenskaper.map {

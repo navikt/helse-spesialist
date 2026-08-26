@@ -16,7 +16,7 @@ class DelegatingOppgaveDao(
         return oppgaveRepository
             .alle()
             .filter { it.vedtaksperiodeId.value in vedtaksperiodeIder }
-            .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
+            .firstOrNull { it.tilstand == Oppgave.Tilstand.AvventerSaksbehandler }
             ?.id
             ?.value
     }
@@ -45,7 +45,7 @@ class DelegatingOppgaveDao(
     override fun finnOppgaveId(utbetalingId: UUID): Long? =
         oppgaveRepository
             .alle()
-            .filter { it.utbetalingId == utbetalingId && it.tilstand !is Oppgave.Invalidert && it.tilstand !is Oppgave.Ferdigstilt }
+            .filter { it.utbetalingId == utbetalingId && it.tilstand != Oppgave.Tilstand.Invalidert && it.tilstand != Oppgave.Tilstand.Ferdigstilt }
             .maxByOrNull { it.id.value }
             ?.id
             ?.value
@@ -69,7 +69,7 @@ class DelegatingOppgaveDao(
     override fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? =
         oppgaveRepository
             .alle()
-            .filter { it.vedtaksperiodeId.value == vedtaksperiodeId && it.tilstand !is Oppgave.Ferdigstilt && it.tilstand !is Oppgave.Invalidert }
+            .filter { it.vedtaksperiodeId.value == vedtaksperiodeId && it.tilstand != Oppgave.Tilstand.Ferdigstilt && it.tilstand != Oppgave.Tilstand.Invalidert }
             .maxByOrNull { it.opprettet }
             ?.id
             ?.value
@@ -85,5 +85,5 @@ class DelegatingOppgaveDao(
     override fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean =
         oppgaveRepository
             .alle()
-            .any { it.vedtaksperiodeId.value == vedtaksperiodeId && it.tilstand is Oppgave.Ferdigstilt }
+            .any { it.vedtaksperiodeId.value == vedtaksperiodeId && it.tilstand == Oppgave.Tilstand.Ferdigstilt }
 }

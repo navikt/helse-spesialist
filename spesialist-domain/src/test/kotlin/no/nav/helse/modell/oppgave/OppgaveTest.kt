@@ -216,7 +216,7 @@ internal class OppgaveTest {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSystem, tilstand)
+            assertEquals(Oppgave.Tilstand.AvventerSystem, tilstand)
         }
     }
 
@@ -226,7 +226,7 @@ internal class OppgaveTest {
         oppgave.avbryt()
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, tilstand)
+            assertEquals(Oppgave.Tilstand.Invalidert, tilstand)
         }
     }
 
@@ -237,7 +237,7 @@ internal class OppgaveTest {
         oppgave.ferdigstill()
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, tilstand)
+            assertEquals(Oppgave.Tilstand.Ferdigstilt, tilstand)
         }
     }
 
@@ -330,7 +330,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.ferdigstill()
         inspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.Tilstand.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -341,7 +341,7 @@ internal class OppgaveTest {
         oppgave.ferdigstill()
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Tilstand.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -352,7 +352,7 @@ internal class OppgaveTest {
         oppgave.ferdigstill()
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         inspektør(oppgave) {
-            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Tilstand.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -362,7 +362,7 @@ internal class OppgaveTest {
         oppgave.avbryt()
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Tilstand.Invalidert, this.tilstand)
         }
     }
 
@@ -371,7 +371,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Tilstand.Invalidert, this.tilstand)
         }
     }
 
@@ -380,7 +380,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Tilstand.Invalidert, this.tilstand)
         }
     }
 
@@ -390,7 +390,7 @@ internal class OppgaveTest {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(Oppgave.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Tilstand.Invalidert, this.tilstand)
         }
     }
 
@@ -405,7 +405,7 @@ internal class OppgaveTest {
         assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[1])
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.Tilstand.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -422,7 +422,7 @@ internal class OppgaveTest {
         assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[2])
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.Tilstand.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -524,7 +524,7 @@ internal class OppgaveTest {
         assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[2])
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.Tilstand.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -546,7 +546,7 @@ internal class OppgaveTest {
         assertEquals(Oppgavehendelse.OppgaveOppdatert(oppgave), hendelser[3])
 
         inspektør(oppgave) {
-            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.Tilstand.AvventerSaksbehandler, this.tilstand)
         }
     }
 
