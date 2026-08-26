@@ -51,8 +51,6 @@ internal abstract class AbstractDatabaseTest {
             VALUES ('$organisasjonsnummer', 'ARBEIDSGIVER', '2018-01-01');
             INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_identifikator, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
             VALUES (${sequence_number}, ${sequence_number}, '$organisasjonsnummer', '2018-01-01', '2018-01-31', 'STILLING', 100, now());
-            UPDATE global_snapshot_versjon
-            SET versjon = 1 WHERE versjon <> 1; -- WHERE for å slippe varsel om "update without 'where' updates all rows at once
             INSERT INTO snapshot(id, data, person_ref, versjon)
             VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
             INSERT INTO vedtaksperiode(id, vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)
@@ -201,7 +199,6 @@ internal abstract class AbstractDatabaseTest {
             listOf(
                 "flyway_schema_history",
                 "enhet",
-                "global_snapshot_versjon",
                 "saksbehandler",
                 "arbeidsgiver",
                 "api_varseldefinisjon",
