@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 
 class ValkeyPersonPseudoIdProvider(
     configuration: ClientPersonPseudoIdModule.Configuration,
-    private val fallbackPersonPseudoIdProvider: PersonPseudoIdProvider,
 ) : PersonPseudoIdProvider {
     private val client =
         PersonPseudoIdClient(
@@ -24,7 +23,5 @@ class ValkeyPersonPseudoIdProvider(
         return PersonPseudoId.fraString(id.toString())
     }
 
-    override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId): Identitetsnummer? =
-        client.finnIdentitetsnummer(personPseudoId.value)?.let { Identitetsnummer.fraString(it) }
-            ?: fallbackPersonPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
+    override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId): Identitetsnummer? = client.finnIdentitetsnummer(personPseudoId.value)?.let { Identitetsnummer.fraString(it) }
 }
