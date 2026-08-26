@@ -275,12 +275,23 @@ class SpeilPersonReceiver(
 
     fun saksbehandlerGjenoppretterGraderteAndreYtelser(
         graderteAndreYtelserId: UUID,
+        perioder: Collection<ApiGraderteAndreYtelserPeriode>,
+        andreYtelseType: ApiGraderteAndreYtelseType,
         notatTilBeslutter: String,
     ): UUID =
         callHttpPost(
             relativeUrl = "api/graderte-andre-ytelser/$graderteAndreYtelserId/gjenopprett",
             request =
                 mapOf(
+                    "perioder" to
+                        perioder.map {
+                            mapOf(
+                                "fom" to it.fom.toString(),
+                                "tom" to it.tom.toString(),
+                                "grad" to it.grad,
+                            )
+                        },
+                    "andreYtelseType" to andreYtelseType.name,
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )!!["andreYtelserId"].asUUID().also {

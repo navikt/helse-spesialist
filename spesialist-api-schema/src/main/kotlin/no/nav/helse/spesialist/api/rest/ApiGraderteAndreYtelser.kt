@@ -68,6 +68,8 @@ data class ApiPostFjernGraderteAndreYtelserRequest(
 
 @Serializable
 data class ApiPostGjenopprettGraderteAndreYtelserRequest(
+    val perioder: List<ApiGraderteAndreYtelserPeriode>,
+    val andreYtelseType: ApiGraderteAndreYtelseType,
     val notatTilBeslutter: String,
 )
 

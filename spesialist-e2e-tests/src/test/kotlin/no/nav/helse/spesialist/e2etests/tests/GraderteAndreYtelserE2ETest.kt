@@ -356,7 +356,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             fom = 1 jan 2021
             tom = 31 jan 2021
         }
-        val apiPerioder =
+        val opprinneligeApiPerioder =
             listOf(
                 ApiGraderteAndreYtelserPeriode(
                     fom = 2 jan 2021,
@@ -364,8 +364,21 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                     grad = 50,
                 ),
             )
-        val domainPerioder =
-            apiPerioder.map { apiPeriode ->
+        val gjenopprettedeApiPerioder =
+            listOf(
+                ApiGraderteAndreYtelserPeriode(
+                    fom = 5 jan 2021,
+                    tom = 10 jan 2021,
+                    grad = 20,
+                ),
+                ApiGraderteAndreYtelserPeriode(
+                    fom = 11 jan 2021,
+                    tom = 20 jan 2021,
+                    grad = 60,
+                ),
+            )
+        val gjenopprettedeDomainPerioder =
+            gjenopprettedeApiPerioder.map { apiPeriode ->
                 GraderteAndreYtelserPeriode(
                     periode = apiPeriode.fom tilOgMed apiPeriode.tom,
                     grad = apiPeriode.grad,
@@ -377,7 +390,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             val andreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
-                    perioder = apiPerioder,
+                    perioder = opprinneligeApiPerioder,
                     andreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER,
                     notatTilBeslutter = "opprinnelig notat",
                 )
@@ -391,6 +404,8 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreYtelserIdEtterGjenoppretting =
                 saksbehandlerGjenoppretterGraderteAndreYtelser(
                     graderteAndreYtelserId = andreYtelserId,
+                    perioder = gjenopprettedeApiPerioder,
+                    andreYtelseType = ApiGraderteAndreYtelseType.PLEIEPENGER,
                     notatTilBeslutter = "gjenoppretter ytelsen",
                 )
 
@@ -400,14 +415,14 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             assertGraderteAndreYtelser(
                 graderteAndreYtelser = graderteAndreYtelser[0],
                 expectedAndreYtelserId = andreYtelserId,
-                expectedPerioder = domainPerioder,
-                expectedAndreYtelseType = GraderteAndreYtelserType.FORELDREPENGER,
+                expectedPerioder = gjenopprettedeDomainPerioder,
+                expectedAndreYtelseType = GraderteAndreYtelserType.PLEIEPENGER,
                 expectedFjernet = false,
             )
         }
         val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
         assertEquals(fødselsnummer(), endringsmelding["fødselsnummer"].asString())
-        assertEquals(2 jan 2021, endringsmelding["fom"].asLocalDate())
+        assertEquals(5 jan 2021, endringsmelding["fom"].asLocalDate())
     }
 
     private fun assertGraderteAndreYtelser(

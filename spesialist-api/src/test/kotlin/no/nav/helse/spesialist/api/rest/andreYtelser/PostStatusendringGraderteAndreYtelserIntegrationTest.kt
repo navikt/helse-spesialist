@@ -10,6 +10,8 @@ import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.okt
 import no.nav.helse.spesialist.domain.testfixtures.sep
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -52,6 +54,18 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
     fun `kan gjenopprette fjernede graderte andre ytelser`() {
         val saksbehandler = lagreSaksbehandler()
         val person = lagrePerson()
+        lagreVedtaksperiode(person)
+        val oppdatertePerioder =
+            listOf(
+                GraderteAndreYtelserPeriode(
+                    periode = (13 sep 2024) tilOgMed (20 sep 2024),
+                    grad = 50,
+                ),
+                GraderteAndreYtelserPeriode(
+                    periode = (21 sep 2024) tilOgMed (2 okt 2024),
+                    grad = 80,
+                ),
+            )
         val graderteAndreYtelser =
             opprettEnGradertAnnenYtelse(person, saksbehandler).also {
                 it.fjern(
@@ -69,6 +83,19 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
                 body =
                     """
                     {
+                      "perioder": [
+                        {
+                          "fom": "2024-09-13",
+                          "tom": "2024-09-20",
+                          "grad": 50
+                        },
+                        {
+                          "fom": "2024-09-21",
+                          "tom": "2024-10-02",
+                          "grad": 80
+                        }
+                      ],
+                      "andreYtelseType": "FORELDREPENGER",
                       "notatTilBeslutter": "gjenoppretter ytelsen"
                     }
                     """.trimIndent(),
@@ -76,7 +103,11 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
 
         assertEquals(HttpStatusCode.OK.value, response.status)
         assertJsonEquals("""{"andreYtelserId":"${graderteAndreYtelser.id.value}"}""", response.bodyAsJsonNode!!)
-        assertFalse(hentFraRepository(graderteAndreYtelser).fjernet)
+        hentFraRepository(graderteAndreYtelser).also {
+            assertFalse(it.fjernet)
+            assertEquals(GraderteAndreYtelserType.FORELDREPENGER, it.graderteAndreYtelserType)
+            assertEquals(oppdatertePerioder, it.perioder)
+        }
     }
 
     @Test
@@ -149,6 +180,15 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
     private fun lagrePerson() = lagPerson().also(sessionContext.personRepository::lagre)
 
     private fun lagreSaksbehandler() = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+
+    private fun lagreVedtaksperiode(person: Person) {
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(sessionContext.vedtaksperiodeRepository::lagre)
+        lagBehandling(
+            vedtaksperiodeId = vedtaksperiode.id,
+            fom = 13 sep (2024),
+            tom = 2 okt (2024),
+        ).also(sessionContext.behandlingRepository::lagre)
+    }
 
     private fun hentFraRepository(graderteAndreYtelser: GraderteAndreYtelser): GraderteAndreYtelser = requireNotNull(sessionContext.graderteAndreYtelserRepository.finn(graderteAndreYtelser.id))
 

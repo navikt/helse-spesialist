@@ -5,13 +5,9 @@ import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
-import no.nav.helse.spesialist.domain.andreytelser.validerGraderteAndreYtelserPeriode
 
 class PatchEndreGraderteAndreYtelserBehandler : PatchBehandler<GraderteAndreYtelserResource.Id, ApiPatchEndreGraderteAndreYtelserRequest, ApiPatchEndreGraderteAndreYtelserResponse, ApiPatchEndreGraderteAndreYtelserErrorCode> {
     override val tag = Tags.GRADERTE_ANDRE_YTELSER
@@ -42,32 +38,19 @@ class PatchEndreGraderteAndreYtelserBehandler : PatchBehandler<GraderteAndreYtel
         person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiPatchEndreGraderteAndreYtelserResponse, ApiPatchEndreGraderteAndreYtelserErrorCode> {
-        validerGraderteAndreYtelserPeriode(
-            eksisterendeGraderteAndreYtelser =
-                kallKontekst.transaksjon.graderteAndreYtelserRepository
-                    .finnAlleForIdentitetsnummer(person.id)
-                    .filterNot { it.id == eksisterendeGraderteAndreYtelser.id },
-            nyGraderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelseType.name),
-            nyGraderteAndreYtelserPerioder =
-                request.perioder.map {
-                    GraderteAndreYtelserPeriode(
-                        periode = Periode(it.fom, it.tom),
-                        grad = it.grad,
-                    )
-                },
-            vedtaksperioder =
-                kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(person.id.value),
+        val oppdatertePerioder = request.perioder.tilGraderteAndreYtelserPerioder()
+        val oppdatertType = request.andreYtelseType.tilDomeneType()
+
+        kallKontekst.validerGraderteAndreYtelserEndring(
+            person = person,
+            graderteAndreYtelserId = eksisterendeGraderteAndreYtelser.id,
+            perioder = oppdatertePerioder,
+            type = oppdatertType,
         )
 
         eksisterendeGraderteAndreYtelser.endreTil(
-            graderteAndreYtelserPerioder =
-                request.perioder.map {
-                    GraderteAndreYtelserPeriode(
-                        periode = Periode(it.fom, it.tom),
-                        grad = it.grad,
-                    )
-                },
-            graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelseType.name),
+            graderteAndreYtelserPerioder = oppdatertePerioder,
+            graderteAndreYtelserType = oppdatertType,
             saksbehandlerIdent = kallKontekst.saksbehandler.ident,
             notatTilBeslutter = request.notatTilBeslutter,
             totrinnsvurderingId =

@@ -27,9 +27,19 @@ class PostGjenopprettGraderteAndreYtelserBehandler : PostBehandler<GraderteAndre
             personIkkeFunnet = { ApiPostGjenopprettGraderteAndreYtelserErrorCode.PERSON_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostGjenopprettGraderteAndreYtelserErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
+            val oppdatertePerioder = request.perioder.tilGraderteAndreYtelserPerioder()
+            val oppdatertType = request.andreYtelseType.tilDomeneType()
+
+            kallKontekst.validerGraderteAndreYtelserEndring(
+                person = person,
+                graderteAndreYtelserId = graderteAndreYtelser.id,
+                perioder = oppdatertePerioder,
+                type = oppdatertType,
+            )
+
             graderteAndreYtelser.gjenopprett(
-                graderteAndreYtelserPerioder = graderteAndreYtelser.perioder,
-                graderteAndreYtelserType = graderteAndreYtelser.graderteAndreYtelserType,
+                graderteAndreYtelserPerioder = oppdatertePerioder,
+                graderteAndreYtelserType = oppdatertType,
                 saksbehandlerIdent = kallKontekst.saksbehandler.ident,
                 notatTilBeslutter = request.notatTilBeslutter,
                 totrinnsvurderingId =
