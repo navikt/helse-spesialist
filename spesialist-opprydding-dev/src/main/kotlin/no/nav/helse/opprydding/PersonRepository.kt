@@ -23,7 +23,6 @@ internal class PersonRepository(
                         return@transaction
                     }
                 it.slettPersonKlargjøres(fødselsnummer)
-                it.slettPersonpseudoid(fødselsnummer)
                 it.slettOverstyring(personId)
                 it.slettAvslag(personId)
                 it.slettReserverPerson(personId)
@@ -85,12 +84,6 @@ internal class PersonRepository(
     private fun TransactionalSession.slettPersonKlargjøres(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "DELETE FROM person_klargjores WHERE fødselsnummer = :fodselsnummer"
-        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
-    }
-
-    private fun TransactionalSession.slettPersonpseudoid(fødselsnummer: String) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM personpseudoid WHERE identitetsnummer = :fodselsnummer"
         run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
