@@ -64,4 +64,5 @@ enum class EgenskapForDatabase {
     SELVSTENDIG_NÆRINGSDRIVENDE,
     ARBEIDSTAKER,
     JORDBRUKER_REINDRIFT,
+    FORSIKRING,
 }
