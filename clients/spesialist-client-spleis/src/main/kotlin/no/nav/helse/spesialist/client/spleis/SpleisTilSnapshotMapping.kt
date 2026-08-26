@@ -486,6 +486,7 @@ fun GraphQLInfotrygdVilkarsgrunnlag.tilSnapshotInfotrygdVilkarsgrunnlag() =
         omregnetArsinntekt = omregnetArsinntekt,
         skjaeringstidspunkt = skjaeringstidspunkt,
         sykepengegrunnlag = sykepengegrunnlag,
+        opptjeningsvurderingId = opptjeningsvurderingId,
     )
 
 fun GraphQLSpleisVilkarsgrunnlag.tilSnapshotSpleisVilkarsgrunnlag() =

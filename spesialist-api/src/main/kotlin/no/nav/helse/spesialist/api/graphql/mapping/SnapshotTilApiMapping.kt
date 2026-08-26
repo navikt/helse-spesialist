@@ -428,6 +428,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 omregnetArsinntekt = omregnetArsinntekt,
                 skjaeringstidspunkt = skjaeringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
+                opptjeningsvurderingId = opptjeningsvurderingId,
             )
 
         is SnapshotUkjentVilkarsgrunnlag -> error("Ukjent vilkårsgrunnlag ${this.javaClass.name}")

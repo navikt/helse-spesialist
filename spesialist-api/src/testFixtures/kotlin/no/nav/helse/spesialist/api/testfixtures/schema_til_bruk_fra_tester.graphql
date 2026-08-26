@@ -716,6 +716,7 @@ type VilkarsgrunnlagInfotrygdV2 implements VilkarsgrunnlagV2 {
     id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
+    opptjeningsvurderingId: UUID!
     skjaeringstidspunkt: LocalDate!
     sykepengegrunnlag: Float!
 }

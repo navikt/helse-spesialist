@@ -71,6 +71,8 @@ public data class GraphQLInfotrygdVilkarsgrunnlag(
     override val skjaeringstidspunkt: LocalDate,
     @get:JsonProperty(value = "sykepengegrunnlag")
     override val sykepengegrunnlag: Double,
+    @get:JsonProperty(value = "opptjeningsvurderingId")
+    public val opptjeningsvurderingId: UUID,
 ) : GraphQLVilkarsgrunnlag
 
 @Generated

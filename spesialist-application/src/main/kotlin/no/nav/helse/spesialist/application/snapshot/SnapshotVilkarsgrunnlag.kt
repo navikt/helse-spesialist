@@ -20,6 +20,7 @@ data class SnapshotInfotrygdVilkarsgrunnlag(
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
+    val opptjeningsvurderingId: UUID,
 ) : SnapshotVilkarsgrunnlag
 
 data class SnapshotSpleisVilkarsgrunnlag(

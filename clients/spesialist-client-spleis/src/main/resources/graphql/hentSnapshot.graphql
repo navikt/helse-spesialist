@@ -256,6 +256,7 @@ query HentSnapshot($fnr: String!) {
             ...grunnlag
             ... on GraphQLInfotrygdVilkarsgrunnlag {
                 __typename
+                opptjeningsvurderingId
             }
             ... on GraphQLSpleisVilkarsgrunnlag {
                 __typename

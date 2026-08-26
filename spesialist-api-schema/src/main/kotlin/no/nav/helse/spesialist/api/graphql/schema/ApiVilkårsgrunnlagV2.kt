@@ -22,6 +22,7 @@ data class ApiVilkårsgrunnlagInfotrygdV2(
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
     val omregnetArsinntekt: Double,
+    val opptjeningsvurderingId: UUID,
 ) : ApiVilkårsgrunnlagV2
 
 @GraphQLName("VilkarsgrunnlagSpleisV2")
