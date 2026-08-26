@@ -1,15 +1,8 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import no.nav.helse.db.SessionContext
-import no.nav.helse.spesialist.api.rest.ApiDatoPeriode
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PatchBehandler
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
-import no.nav.helse.spesialist.api.rest.fraVerdiValidering
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.NAVIdent
@@ -70,8 +63,10 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
         val notatTilBeslutter = request.notatTilBeslutter
         if (endringer.fjernet?.fra == true && endringer.fjernet?.til == false) {
             // Gjenopprettelse har endringer bakt inn i seg, så vi kaller bare endre hvis vi ikke gjenoppretter samtidig
+            loggInfo("Behandler forespørselen som gjenoppretting av tilkommen inntekt", "tilkommenInntektId" to tilkommenInntekt.id)
             gjenopprett(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         } else {
+            loggInfo("Behandler forespørselen som endring av tilkommen inntekt", "tilkommenInntektId" to tilkommenInntekt.id)
             endre(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         }
         TilkommenInntektPeriodeValidator.validerPeriode(
