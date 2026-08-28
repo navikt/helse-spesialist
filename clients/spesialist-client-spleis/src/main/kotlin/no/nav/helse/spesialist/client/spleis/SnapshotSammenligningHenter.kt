@@ -5,19 +5,14 @@ import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spleis.rest.hentperson.Person
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 /**
  * Skygge-sjekk under migreringen fra spleis sitt GraphQL-endepunkt til det nye REST-endepunktet
  * (`POST /api/person`). [graphQL] er fortsatt sannheten og returneres uendret til kalleren.
- * [hentPersonRest] (typisk [SpleisRestClient.hentPerson]) kalles i parallell, kun for å sammenligne
- * det mappede resultatet mot GraphQL-resultatet.
+ * [hentPersonRest] (typisk [SpleisRestClient.hentPerson]) kalles seriellt etter GraphQL, kun for å
+ * sammenligne det mappede resultatet mot GraphQL-resultatet.
  *
  * Designvalg (avklart med teamet):
- * - REST-kallet er fire-and-forget: vi venter ikke på det før vi returnerer GraphQL-resultatet, slik
- *   at et tregt/nede REST-endepunkt aldri kan påvirke saksbehandlers latency eller robusthet.
  * - Alle feil fra REST-kallet eller -mappingen svelges og logges, aldri kastet videre.
  * - Ved avvik logges en PII-fri melding til vanlig applikasjonslogg, mens selve diff-innholdet
  *   (som kan inneholde fødselsnummer, beløp osv.) kun sendes til `tjenestekall` (sikkerlogg), i tråd
@@ -29,25 +24,14 @@ internal class SnapshotSammenligningHenter(
     private val graphQL: Snapshothenter,
     private val hentPersonRest: (fødselsnummer: String) -> Person?,
     private val skalSammenligne: Boolean,
-    private val executor: Executor = Executors.newCachedThreadPool(),
 ) : Snapshothenter {
     override fun hentPerson(fødselsnummer: String): SnapshotPerson? {
         if (!skalSammenligne) return graphQL.hentPerson(fødselsnummer)
 
-        val restFuture =
-            CompletableFuture.supplyAsync(
-                { runCatching { hentPersonRest(fødselsnummer)?.tilSnapshotPerson() } },
-                executor,
-            )
-
         val graphQLResultat = graphQL.hentPerson(fødselsnummer)
 
-        restFuture.whenCompleteAsync(
-            { restResultat, feil ->
-                sammenlign(fødselsnummer, graphQLResultat, restResultat, feil)
-            },
-            executor,
-        )
+        val restResultat = runCatching { hentPersonRest(fødselsnummer)?.tilSnapshotPerson() }
+        sammenlign(fødselsnummer, graphQLResultat, restResultat, null)
 
         return graphQLResultat
     }

@@ -3,15 +3,12 @@ package no.nav.helse.spesialist.client.spleis
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import java.time.LocalDate
-import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class SnapshotSammenligningHenterTest {
-    private val synkronExecutor = Executor { it.run() } // kjør "parallelt" kall synkront i testene
-
     private fun person(versjon: Int) =
         SnapshotPerson(
             aktorId = "1234567890123",
@@ -33,7 +30,6 @@ class SnapshotSammenligningHenterTest {
                 graphQL = graphQL,
                 hentPersonRest = { restKallt = true; null },
                 skalSammenligne = false,
-                executor = synkronExecutor,
             )
 
         val result = henter.hentPerson("11111111111")
@@ -52,7 +48,6 @@ class SnapshotSammenligningHenterTest {
                 graphQL = graphQL,
                 hentPersonRest = { error("REST er nede") },
                 skalSammenligne = true,
-                executor = synkronExecutor,
             )
 
         val result = henter.hentPerson("11111111111")
@@ -70,7 +65,6 @@ class SnapshotSammenligningHenterTest {
                 graphQL = graphQL,
                 hentPersonRest = { null }, // ulikt resultat (null i stedet for person)
                 skalSammenligne = true,
-                executor = synkronExecutor,
             )
 
         val result = henter.hentPerson("11111111111")
@@ -89,7 +83,6 @@ class SnapshotSammenligningHenterTest {
                 graphQL = graphQL,
                 hentPersonRest = { kallteller.incrementAndGet(); null },
                 skalSammenligne = true,
-                executor = synkronExecutor,
             )
 
         henter.hentPerson("11111111111")
