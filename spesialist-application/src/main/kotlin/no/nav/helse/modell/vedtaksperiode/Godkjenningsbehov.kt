@@ -20,7 +20,6 @@ import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
@@ -387,7 +386,8 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderEnhetUtland(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId),
+                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
+                sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,

@@ -1,57 +1,47 @@
 package no.nav.helse.spesialist.application.kommando
 
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class VurderEnhetUtlandTest : ApplicationTest() {
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
-    fun settOppTestdata(enhet: Int): Person {
-        val person =
-            lagPerson(enhet = enhet)
-                .also(sessionContext.personRepository::lagre)
-        val vedtaksperiode =
-            lagVedtaksperiode(id = VedtaksperiodeId(vedtaksperiodeId))
-                .also(sessionContext.vedtaksperiodeRepository::lagre)
-        lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-            .also(sessionContext.behandlingRepository::lagre)
-
-        return person
-    }
+    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
 
     @Test
     fun `skal legge på varsel om utland`() {
-        val person = settOppTestdata(enhet = 393)
+        val person = lagPerson(enhet = 393).also(sessionContext.personRepository::lagre)
+        val slot = slot<LegacyVarsel>()
         assertTrue(hentCommand(person).execute(commandContext, sessionContext, outbox))
-        assertEquals(
-            "SB_EX_5",
-            sessionContext.varselRepository
-                .alle()
-                .single()
-                .kode,
-        )
+        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
+        assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
     @Test
-    fun `legger ikke på varsel om utland for enhet som ikke er utland`() {
-        val person = settOppTestdata(enhet = 1001)
+    fun `skal legge på varsel for utland også ved revurdering`() {
+        val person = lagPerson(enhet = 393).also(sessionContext.personRepository::lagre)
+        val slot = slot<LegacyVarsel>()
         assertTrue(hentCommand(person).execute(commandContext, sessionContext, outbox))
-        assertEquals(0, sessionContext.varselRepository.alle().size)
+        verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
+        assertEquals("SB_EX_5", slot.captured.toDto().varselkode)
     }
 
     private fun hentCommand(person: Person) =
         VurderEnhetUtland(
             fødselsnummer = person.id.value,
-            vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
+            vedtaksperiodeId = vedtaksperiodeId,
+            sykefraværstilfelle = sykefraværstilfelle,
         )
 
     private companion object {
