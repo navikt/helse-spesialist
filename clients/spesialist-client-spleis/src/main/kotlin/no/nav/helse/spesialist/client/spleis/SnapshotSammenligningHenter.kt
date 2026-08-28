@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spleis.rest.hentperson.Person
+import java.util.UUID
 
 /**
  * Skygge-sjekk under migreringen fra spleis sitt GraphQL-endepunkt til det nye REST-endepunktet
@@ -45,8 +46,8 @@ internal class SnapshotSammenligningHenter(
         val utfall =
             when {
                 feil != null || restResultat == null || restResultat.isFailure -> Utfall.FEIL
-                graphQLResultat != restResultat.getOrNull() -> Utfall.ULIKT
-                graphQLResultat == restResultat.getOrNull() -> Utfall.LIKT
+                graphQLResultat.utenFlyktigeFelter() != restResultat.getOrNull().utenFlyktigeFelter() -> Utfall.ULIKT
+                graphQLResultat.utenFlyktigeFelter() == restResultat.getOrNull().utenFlyktigeFelter() -> Utfall.LIKT
                 else -> Utfall.SKAL_IKKE_SKJE
             }
 
@@ -91,3 +92,24 @@ internal class SnapshotSammenligningHenter(
             utfall.name.lowercase(),
         )
 }
+
+/**
+ * `SnapshotBehandling.id` genereres med `UUID.randomUUID()` i spleis for hvert kall som bygger
+ * snapshotet (se `SpeilGenerasjonerBuilder.mapRadTilSpeilGenerasjon`), og er derfor aldri lik mellom
+ * to separate kall - selv om resten av dataene er identiske. Feltet må derfor normaliseres bort før
+ * GraphQL- og REST-resultatet sammenlignes, ellers vil sammenligningen alltid rapportere avvik.
+ */
+private val NØYTRAL_BEHANDLINGS_ID: UUID = UUID(0, 0)
+
+private fun SnapshotPerson?.utenFlyktigeFelter(): SnapshotPerson? =
+    this?.copy(
+        arbeidsgivere =
+            arbeidsgivere.map { arbeidsgiver ->
+                arbeidsgiver.copy(
+                    behandlinger =
+                        arbeidsgiver.behandlinger.map { behandling ->
+                            behandling.copy(id = NØYTRAL_BEHANDLINGS_ID)
+                        },
+                )
+            },
+    )
