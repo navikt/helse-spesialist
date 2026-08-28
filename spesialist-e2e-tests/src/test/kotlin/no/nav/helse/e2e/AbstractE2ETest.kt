@@ -13,21 +13,9 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
-import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
@@ -35,14 +23,7 @@ import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
-import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
-import no.nav.helse.spesialist.domain.ForsikringsvurderingId
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -54,15 +35,13 @@ import no.nav.helse.spesialist.e2etests.TestRapidHelpers.sisteBehov
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
@@ -128,13 +107,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"
     protected val SAKSBEHANDLER_NAVN = "Augunn Saksbehandler"
-    private val saksbehandler =
-        Saksbehandler(
-            id = SaksbehandlerOid(value = SAKSBEHANDLER_OID),
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLER_EPOST,
-            ident = NAVIdent(SAKSBEHANDLER_IDENT),
-        )
     private val enhetsnummerOslo = "0301"
 
     @BeforeEach
@@ -898,113 +870,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sisteMeldingId = meldingssender.sendAdressebeskyttelseEndret(aktørId, fødselsnummer)
     }
 
-    protected fun håndterOverstyrTidslinje(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        dager: List<ApiOverstyringDag> =
-            listOf(
-                ApiOverstyringDag(
-                    1.januar(1970),
-                    Dagtype.Feriedag.toString(),
-                    Dagtype.Sykedag.toString(),
-                    null,
-                    100,
-                    null,
-                ),
-            ),
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer) {
-            val handling =
-                ApiTidslinjeOverstyring(
-                    vedtaksperiodeId,
-                    organisasjonsnummer,
-                    fødselsnummer,
-                    aktørId,
-                    "En begrunnelse",
-                    dager,
-                )
-            testMediator.håndter(handling, saksbehandler)
-            // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
-        }
-    }
-
-    protected fun håndterOverstyrInntektOgRefusjon(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        skjæringstidspunkt: LocalDate = 1.januar(1970),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        arbeidsgivere: List<ApiOverstyringArbeidsgiver> =
-            listOf(
-                ApiOverstyringArbeidsgiver(
-                    organisasjonsnummer = ORGNR,
-                    manedligInntekt = 25000.0,
-                    fraManedligInntekt = 25001.0,
-                    forklaring = "testbortforklaring",
-                    lovhjemmel = ApiLovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
-                    refusjonsopplysninger = null,
-                    fraRefusjonsopplysninger = null,
-                    begrunnelse = "en begrunnelse",
-                    fom = null,
-                    tom = null,
-                ),
-            ),
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, ORGNR) {
-            val handling =
-                ApiInntektOgRefusjonOverstyring(
-                    aktørId,
-                    fødselsnummer,
-                    skjæringstidspunkt,
-                    arbeidsgivere,
-                    vedtaksperiodeId,
-                )
-            testMediator.håndter(handling, saksbehandler)
-        }
-    }
-
-    protected fun håndterOverstyrArbeidsforhold(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        skjæringstidspunkt: LocalDate = 1.januar,
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        overstyrteArbeidsforhold: List<ApiOverstyringArbeidsforhold> =
-            listOf(
-                ApiOverstyringArbeidsforhold(
-                    orgnummer = organisasjonsnummer,
-                    deaktivert = true,
-                    begrunnelse = "begrunnelse",
-                    forklaring = "forklaring",
-                    lovhjemmel = ApiLovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
-                ),
-            ),
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer) {
-            val handling =
-                ApiArbeidsforholdOverstyringHandling(
-                    fodselsnummer = fødselsnummer,
-                    aktorId = aktørId,
-                    skjaringstidspunkt = skjæringstidspunkt,
-                    overstyrteArbeidsforhold = overstyrteArbeidsforhold,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                )
-            testMediator.håndter(handling, saksbehandler)
-        }
-    }
-
-    private fun håndterOverstyring(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        overstyringBlock: () -> Unit,
-    ) {
-        overstyringBlock()
-        håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
-        håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = UUID.randomUUID())
-    }
-
     private fun erRevurdering(vedtaksperiodeId: UUID) =
         dbQuery.singleOrNull(
             """
@@ -1175,57 +1040,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertSisteEtterspurteBehov(behov: String) {
         val sisteEtterspurteBehov = testRapid.inspektør.behov().last()
         assertEquals(sisteEtterspurteBehov, behov)
-    }
-
-    protected fun assertOverstyringer(fødselsnummer: String) {
-        val totrinnsvurderingId =
-            dbQuery.single(
-                """
-            select tv.id from totrinnsvurdering tv 
-                inner join person p on p.id = tv.person_ref 
-            where p.fødselsnummer = :fodselsnummer
-                """.trimMargin(),
-                "fodselsnummer" to fødselsnummer,
-            ) { TotrinnsvurderingId(it.long("id")) }
-        val overstyringer =
-            sessionFactory.transactionalSessionScope { session ->
-                session.overstyringRepository.finnAktive(totrinnsvurderingId)
-            }
-        assertTrue(overstyringer.isNotEmpty())
-    }
-
-    protected fun assertTotrinnsvurdering(oppgaveId: Long) {
-        val erToTrinnsvurdering =
-            dbQuery.singleOrNull(
-                """
-                SELECT 1 FROM totrinnsvurdering tv
-                INNER JOIN vedtaksperiode v on tv.person_ref = v.person_ref
-                INNER JOIN oppgave o on v.id = o.vedtak_ref
-                WHERE o.id = :oppgaveId
-                AND tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
-                """.trimIndent(),
-                "oppgaveId" to oppgaveId,
-            ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
-        assertTrue(erToTrinnsvurdering) {
-            "Forventer at oppgaveId=$oppgaveId krever totrinnsvurdering"
-        }
-    }
-
-    protected fun assertTotrinnsvurderingForkastet(fødselsnummer: String) {
-        val totrinnsvurderingForkastet =
-            dbQuery.singleOrNull(
-                """
-                SELECT 1 FROM totrinnsvurdering tv
-                INNER JOIN person p on p.id = tv.person_ref
-                WHERE p.fødselsnummer = :fodselsnummer
-                AND tv.vedtaksperiode_forkastet = true
-                """.trimIndent(),
-                "fodselsnummer" to fødselsnummer,
-            ) { it.boolean(1) }
-                ?: throw IllegalStateException("Finner ikke totrinns markert som forkastet for fødselsnummer=$fødselsnummer")
-        assertTrue(totrinnsvurderingForkastet) {
-            "Forventer at totrinnsvurdering er markert som forkastet"
-        }
     }
 
     fun erFerdigstilt(godkjenningsbehovId: UUID) =
