@@ -3,7 +3,13 @@ package no.nav.helse.spesialist.client.spleis
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.loggWarn
+import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotDag
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
+import no.nav.helse.spesialist.application.snapshot.SnapshotSykdomsdagkildetype
+import no.nav.helse.spesialist.application.snapshot.SnapshotTidslinjeperiode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUkjentTidslinjeperiode
 import no.nav.helse.spleis.rest.hentperson.Person
 import java.util.UUID
 
@@ -101,6 +107,16 @@ internal class SnapshotSammenligningHenter(
  */
 private val NØYTRAL_BEHANDLINGS_ID: UUID = UUID(0, 0)
 
+/**
+ * `SnapshotSykdomsdagkilde.id` genereres også med `UUID.randomUUID()` i spleis - men bare for dager
+ * som ikke finnes på sykdomstidslinjen og derfor antas å være en arbeidsdag (se
+ * `TidslinjeBuilder.tidslinje`, fallback-grenen som setter `kilde.type = Ukjent`). For alle andre
+ * kildetyper (Inntektsmelding, Søknad, Saksbehandler, Sykmelding) er `id` en persistert
+ * meldingsreferanse og skal fortsatt sammenlignes - vi normaliserer derfor kun bort `id` når
+ * `type == UKJENT`, ellers ville vi maskert reelle avvik i disse feltene.
+ */
+private val NØYTRAL_KILDE_ID: UUID = UUID(0, 0)
+
 private fun SnapshotPerson?.utenFlyktigeFelter(): SnapshotPerson? =
     this?.copy(
         arbeidsgivere =
@@ -108,8 +124,21 @@ private fun SnapshotPerson?.utenFlyktigeFelter(): SnapshotPerson? =
                 arbeidsgiver.copy(
                     behandlinger =
                         arbeidsgiver.behandlinger.map { behandling ->
-                            behandling.copy(id = NØYTRAL_BEHANDLINGS_ID)
+                            behandling.copy(
+                                id = NØYTRAL_BEHANDLINGS_ID,
+                                perioder = behandling.perioder.map { it.utenFlyktigeFelter() },
+                            )
                         },
                 )
             },
     )
+
+private fun SnapshotTidslinjeperiode.utenFlyktigeFelter(): SnapshotTidslinjeperiode =
+    when (this) {
+        is SnapshotUberegnetPeriode -> copy(tidslinje = tidslinje.map { it.utenFlyktigKildeId() })
+        is SnapshotBeregnetPeriode -> copy(tidslinje = tidslinje.map { it.utenFlyktigKildeId() })
+        is SnapshotUkjentTidslinjeperiode -> copy(tidslinje = tidslinje.map { it.utenFlyktigKildeId() })
+    }
+
+private fun SnapshotDag.utenFlyktigKildeId(): SnapshotDag =
+    if (kilde.type == SnapshotSykdomsdagkildetype.UKJENT) copy(kilde = kilde.copy(id = NØYTRAL_KILDE_ID)) else this
