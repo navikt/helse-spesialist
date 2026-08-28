@@ -13,4 +13,6 @@ dependencies {
     implementation(libs.micrometer.prometheus)
 
     testFixturesImplementation(libs.wiremock)
+
+    testImplementation(testFixtures(project(":spesialist-application")))
 }
