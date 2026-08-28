@@ -474,6 +474,54 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
+    fun saksbehandlerOverstyrerTidslinje(
+        vedtaksperiodeId: UUID,
+        dager: List<ApiOverstyrTidslinjeRequest.Dag>,
+        begrunnelse: String = "begrunnelse",
+    ) {
+        callHttpPost(
+            relativeUrl = "api/vedtaksperioder/$vedtaksperiodeId/overstyringer/tidslinje",
+            request =
+                ApiOverstyrTidslinjeRequest(
+                    begrunnelse = begrunnelse,
+                    dager = dager,
+                ),
+        )
+        hentOppdatertPerson()
+    }
+
+    fun saksbehandlerOverstyrerInntektOgRefusjon(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        arbeidsgivere: List<ApiOverstyrInntektOgRefusjonRequest.Arbeidsgiver>,
+    ) {
+        callHttpPost(
+            relativeUrl = "api/vedtaksperioder/$vedtaksperiodeId/overstyringer/inntekt-og-refusjon",
+            request =
+                ApiOverstyrInntektOgRefusjonRequest(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    arbeidsgivere = arbeidsgivere,
+                ),
+        )
+        hentOppdatertPerson()
+    }
+
+    fun saksbehandlerOverstyrerArbeidsforhold(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        overstyrteArbeidsforhold: List<ApiOverstyrArbeidsforholdRequest.Arbeidsforhold>,
+    ) {
+        callHttpPost(
+            relativeUrl = "api/vedtaksperioder/$vedtaksperiodeId/overstyringer/arbeidsforhold",
+            request =
+                ApiOverstyrArbeidsforholdRequest(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+                ),
+        )
+        hentOppdatertPerson()
+    }
+
     fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning") {
         callHttpPost(
             relativeUrl = "api/oppgaver/${getOppgaveId()}/totrinnsvurdering/send-til-godkjenning",
