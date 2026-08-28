@@ -15,16 +15,17 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TestPerson
+import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.node.JsonNodeFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class VurderVurderingsmomenterTest : ApplicationTest() {
     private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
@@ -52,6 +53,17 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
             skjæringstidspunkt = 1 jan 2018,
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
+
+    private val behandling =
+        Behandling
+            .ny(
+                SpleisBehandlingId(UUID.randomUUID()),
+                vedtaksperiodeId = VedtaksperiodeId(testperson.vedtaksperiodeId1),
+                fom = 1 jan 2018,
+                tom = 31 jan 2018,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            ).also { sessionContext.behandlingRepository.lagre(it) }
+
     private val sykefraværstilfelle =
         Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
     private val observer =
@@ -176,7 +188,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
         risikoCommand().execute(commandContext, sessionContext, outbox)
 
-        assertEquals(listOf("SB_RV_1"), legacyBehandling.toDto().varsler.map { it.varselkode })
+        assertEquals(listOf("SB_RV_1"), sessionContext.varselRepository.finnVarslerFor(behandling.id).map { it.kode })
     }
 
     private fun risikoCommand(

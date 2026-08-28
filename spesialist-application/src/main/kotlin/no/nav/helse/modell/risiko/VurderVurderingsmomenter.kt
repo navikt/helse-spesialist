@@ -9,14 +9,19 @@ import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.melding.StpPeriodeTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Periode
-import java.util.UUID
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import java.time.LocalDateTime
+import java.util.*
 
 internal class VurderVurderingsmomenter(
     private val vedtaksperiodeId: UUID,
@@ -99,15 +104,28 @@ internal class VurderVurderingsmomenter(
         }
 
         løsning.lagre(sessionContext.risikovurderingDao)
-        løsning.leggTilVarsler()
+        løsning.leggTilVarsler(sessionContext)
         return true
     }
 
     private fun risikovurderingAlleredeGjort(sessionContext: SessionContext) = sessionContext.risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
 
-    private fun Risikovurderingløsning.leggTilVarsler() {
+    private fun Risikovurderingløsning.leggTilVarsler(sessionContext: SessionContext) {
         if (!kanGodkjennesAutomatisk) {
-            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
+            logg.info("Oppretter risk-varsel for vedtaksperiode $vedtaksperiodeId")
+            val nyesteBehandling =
+                sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(VedtaksperiodeId(vedtaksperiodeId))
+                    ?: error("Fant ikke behandling")
+
+            val varsel =
+                Varsel.nytt(
+                    VarselId(UUID.randomUUID()),
+                    behandlingUnikId = nyesteBehandling.id,
+                    spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                    kode = Varselkode.SB_RV_1.name,
+                    opprettetTidspunkt = LocalDateTime.now(),
+                )
+            sessionContext.varselRepository.lagre(varsel)
         }
     }
 }
