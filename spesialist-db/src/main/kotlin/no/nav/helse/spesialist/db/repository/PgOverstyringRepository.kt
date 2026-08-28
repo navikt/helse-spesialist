@@ -466,7 +466,7 @@ class PgOverstyringRepository(
             """
             SELECT berort_vedtaksperiode_id, arbeidsgiver_identifikator
             FROM overstyring_minimum_sykdomsgrad_arbeidsgiver
-            WHERE id = :id
+            WHERE overstyring_minimum_sykdomsgrad_ref = :id
             """,
             "id" to id,
         ).list { it.toMinimumSykdomsgradArbeidsgiver() }
