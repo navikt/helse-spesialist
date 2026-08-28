@@ -1,15 +1,7 @@
 package no.nav.helse.modell.automatisering
 
-import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.LegacyBehandlingDao
-import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.*
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
-import no.nav.helse.db.PersonDao
-import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VedtakDao
-import no.nav.helse.db.VergemålDao
-import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
@@ -27,16 +19,13 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.PersonRepository
-import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VeilederStansRepository
+import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
@@ -53,6 +42,8 @@ internal class Automatisering(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val veilederStansRepository: VeilederStansRepository,
     private val saksbehandlerStansRepository: SaksbehandlerStansRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val varselRepository: VarselRepository,
 ) {
     object Factory {
         fun automatisering(
@@ -75,6 +66,8 @@ internal class Automatisering(
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 veilederStansRepository = sessionContext.veilederStansRepository,
                 saksbehandlerStansRepository = sessionContext.saksbehandlerStansRepository,
+                behandlingRepository = sessionContext.behandlingRepository,
+                varselRepository = sessionContext.varselRepository,
             )
     }
 
@@ -264,7 +257,13 @@ internal class Automatisering(
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Perioden skal til totrinnskontroll") { !harKravOmTotrinnsvurdering },
-            IkkeAutomatiserNåddMaksdatoOgRefusjonAG(maksdato, tags, sykefraværstilfelle, vedtaksperiodeId),
+            IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
+                maksdato = maksdato,
+                tags = tags,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingRepository = behandlingRepository,
+                varselRepository = varselRepository,
+            ),
         )
     }
 
