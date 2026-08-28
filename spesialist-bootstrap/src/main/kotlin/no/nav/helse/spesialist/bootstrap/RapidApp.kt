@@ -216,7 +216,6 @@ class RapidApp {
             ClientSpleisModule(
                 configuration = configuration.clientSpleis,
                 accessTokenProvider = clientEntraIdModule.accessTokenProvider,
-                environmentToggles = configuration.environmentToggles,
             )
 
         val clientTilgangsmaskinenModule =
