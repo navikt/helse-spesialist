@@ -9,11 +9,8 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.PersonhåndtererImpl
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
-import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
-import no.nav.helse.spesialist.api.graphql.SpesialistSchema.MutationHandlers
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
-import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.application.AlleIdenterHenter
@@ -66,13 +63,6 @@ class ApiModule(
             oppgaveDao = daos.oppgaveDao,
         )
 
-    private val saksbehandlerMediator =
-        SaksbehandlerMediator(
-            versjonAvKode = configuration.versjonAvKode,
-            meldingPubliserer = meldingPubliserer,
-            sessionFactory = sessionFactory,
-        )
-
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao)
 
     private val spesialistSchema =
@@ -90,13 +80,6 @@ class ApiModule(
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
                                 populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
-                            ),
-                    ),
-                mutationHandlers =
-                    MutationHandlers(
-                        overstyring =
-                            OverstyringMutationHandler(
-                                saksbehandlerMediator = saksbehandlerMediator,
                             ),
                     ),
             )

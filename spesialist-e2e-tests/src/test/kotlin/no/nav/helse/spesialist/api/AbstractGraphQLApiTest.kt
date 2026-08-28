@@ -4,20 +4,13 @@ import com.expediagroup.graphql.server.ktor.GraphQL
 import com.expediagroup.graphql.server.ktor.KtorGraphQLRequestParser
 import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLServerResponse
-import io.ktor.client.call.body
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.server.application.plugin
-import io.ktor.server.response.respond
-import io.ktor.server.routing.application
-import io.ktor.server.routing.post
-import io.ktor.server.routing.route
-import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.testing.*
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
@@ -26,9 +19,7 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.graphQLSpleisVilkarsg
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
-import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
-import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
@@ -47,10 +38,9 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import tools.jackson.databind.JsonNode
 import java.time.Duration.ofNanos
-import java.util.UUID
+import java.util.*
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-    protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
@@ -104,10 +94,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 personPseudoIdProvider = personPseudoIdProvider,
                                 populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
                             ),
-                    ),
-                mutationHandlers =
-                    SpesialistSchema.MutationHandlers(
-                        overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     ),
             )
 
@@ -199,7 +185,11 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                             epost = SAKSBEHANDLER.epost,
                             ident = SAKSBEHANDLER.ident.value,
                             oid = SAKSBEHANDLER.id.value.toString(),
-                            group = brukerrolle?.let { tilgangsgrupperTilBrukerroller.uuiderFor(setOf(it)) }?.single()?.toString(),
+                            group =
+                                brukerrolle
+                                    ?.let { tilgangsgrupperTilBrukerroller.uuiderFor(setOf(it)) }
+                                    ?.single()
+                                    ?.toString(),
                         )
                         setBody(mapOf("query" to query))
                     }.body<String>()

@@ -10,13 +10,10 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
-import no.nav.helse.spesialist.api.graphql.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.spesialist.domain.Saksbehandler
 import javax.sql.DataSource
 
 class TestMediator(
@@ -27,13 +24,6 @@ class TestMediator(
 ) {
     private val daos = DBDaos(dataSource)
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-
-    private val saksbehandlerMediator =
-        SaksbehandlerMediator(
-            versjonAvKode = "versjonAvKode",
-            meldingPubliserer = meldingPubliserer,
-            sessionFactory = TransactionalSessionFactory(dataSource),
-        )
 
     private val stikkprøver =
         Stikkprøver(
@@ -100,12 +90,5 @@ class TestMediator(
             forsikringsvurderingHenter = forsikringsvurderingHenter,
             environmentToggles = environmentToggles,
         ).registrerRivers(testRapid)
-    }
-
-    fun håndter(
-        handling: HandlingFraApi,
-        saksbehandler: Saksbehandler,
-    ) {
-        saksbehandlerMediator.håndter(handling, saksbehandler)
     }
 }

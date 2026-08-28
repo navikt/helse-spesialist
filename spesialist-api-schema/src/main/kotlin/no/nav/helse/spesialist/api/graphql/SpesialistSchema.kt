@@ -1,21 +1,14 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.ktor.GraphQLConfiguration
-import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
-import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationSchema
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuerySchema
 
 class SpesialistSchema(
     val queryHandlers: QueryHandlers,
-    val mutationHandlers: MutationHandlers,
 ) {
     class QueryHandlers(
         val person: PersonQuerySchema,
-    )
-
-    class MutationHandlers(
-        val overstyring: OverstyringMutationSchema,
     )
 
     fun setup(schemaConfiguration: GraphQLConfiguration.SchemaConfiguration) {
@@ -24,11 +17,6 @@ class SpesialistSchema(
         schemaConfiguration.queries =
             listOf(
                 PersonQuery(handler = queryHandlers.person),
-            )
-
-        schemaConfiguration.mutations =
-            listOf(
-                OverstyringMutation(handler = mutationHandlers.overstyring),
             )
 
         schemaConfiguration.hooks = schemaGeneratorHooks
