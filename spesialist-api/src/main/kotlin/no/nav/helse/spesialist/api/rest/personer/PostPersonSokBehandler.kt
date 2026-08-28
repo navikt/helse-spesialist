@@ -1,16 +1,11 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiPersonSokRequest
-import no.nav.helse.spesialist.api.rest.ApiPersonSokResponse
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PostBehandler
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.AlleIdenterHenter
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -50,12 +45,13 @@ class PostPersonSokBehandler(
 
                     val identitet = Identitetsnummer.fraString(identitetsnummer)
                     kallKontekst.transaksjon.personRepository.finn(identitet)
-                        ?: opprettPerson(identitet)
-                            .getOrElse { return RestResponse.Error(ApiPostPersonSokErrorCode.AKTØRID_IKKE_FUNNET) }
-                            .also {
-                                loggInfo("Kjenner ikke til personen fra før av, lagrer personen")
-                                kallKontekst.transaksjon.personRepository.lagre(it)
-                            }
+                        ?: when (val resultat = opprettPerson(identitet)) {
+                            is Either.Failure -> return RestResponse.Error(resultat.error)
+                            is Either.Success -> resultat.result
+                        }.also {
+                            loggInfo("Kjenner ikke til personen fra før av, lagrer personen")
+                            kallKontekst.transaksjon.personRepository.lagre(it)
+                        }
                 }
 
                 else -> {
@@ -82,16 +78,16 @@ class PostPersonSokBehandler(
         }
     }
 
-    private fun opprettPerson(identitetsnummer: Identitetsnummer): Result<Person> {
+    private fun opprettPerson(identitetsnummer: Identitetsnummer): Either<Person, ApiPostPersonSokErrorCode> {
         val aktørId =
             alleIdenterHenter
                 .hentAlleIdenter(identitetsnummer)
                 .filter { it.gjeldende }
                 .find { it.type == AlleIdenterHenter.IdentType.AKTORID }
                 ?.ident
-                ?: return Result.failure(IllegalArgumentException("Fant ikke aktørId for identitetsnummer $identitetsnummer"))
+                ?: return Either.Failure(ApiPostPersonSokErrorCode.AKTØRID_IKKE_FUNNET_I_PDL)
         val personinfo = personinfoHenter.hentPersoninfo(identitetsnummer)
-        return Result.success(
+        return Either.Success(
             Person.Factory.ny(
                 identitetsnummer,
                 aktørId,
@@ -116,5 +112,5 @@ enum class ApiPostPersonSokErrorCode(
     ),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
-    AKTØRID_IKKE_FUNNET("Fant ikke aktørId for person", HttpStatusCode.InternalServerError),
+    AKTØRID_IKKE_FUNNET_I_PDL("AktørId for personen fins ikke i PDL", HttpStatusCode.NotFound),
 }
