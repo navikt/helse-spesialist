@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResulta
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.verify
+import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -63,7 +64,8 @@ class GetPersonIntegrationTest {
               "fødselsdato": "$fødselsdato",
               "dødsdato": null,
               "kjønn": "MANN",
-              "adressebeskyttelse": "UGRADERT"
+              "adressebeskyttelse": "UGRADERT",
+              "fullmakt": null
             }
             """.trimIndent(),
             body,
@@ -111,7 +113,8 @@ class GetPersonIntegrationTest {
               "fødselsdato": "$fødselsdato",
               "dødsdato": null,
               "kjønn": "KVINNE",
-              "adressebeskyttelse": "UGRADERT"
+              "adressebeskyttelse": "UGRADERT",
+              "fullmakt": null
             }
             """.trimIndent(),
             body,
@@ -150,6 +153,35 @@ class GetPersonIntegrationTest {
             sorterteIdentitetsnumre.joinToString(prefix = "[ ", separator = ", ", postfix = " ]") { "\"$it\"" },
             body["andreIdentitetsnumre"],
         )
+    }
+
+    @Test
+    fun `henter person med fullmakt`() {
+        // Given:
+        val person = lagPerson().also(personRepository::lagre)
+        val personinfo = person.info!!
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns personinfo
+        every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(person.id) } returns
+            listOf(
+                AlleIdenterHenter.Ident(person.id.value, AlleIdenterHenter.IdentType.FOLKEREGISTERIDENT, true),
+                AlleIdenterHenter.Ident(person.aktørId, AlleIdenterHenter.IdentType.AKTORID, true),
+            )
+        integrationTestFixture.sessionContext.vergemålDao.lagre(
+            fødselsnummer = person.id.value,
+            vergemålOgFremtidsfullmakt = VergemålOgFremtidsfullmakt(harVergemål = false, harFremtidsfullmakter = false),
+            fullmakt = true,
+        )
+
+        val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
+
+        // When:
+        val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}")
+
+        // Then:
+        assertEquals(200, response.status)
+        val body = response.bodyAsJsonNode
+        assertNotNull(body)
+        assertJsonEquals("true", body["fullmakt"])
     }
 
     @Test

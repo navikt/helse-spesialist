@@ -1,12 +1,7 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.ktor.http.HttpStatusCode
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiPerson
-import no.nav.helse.spesialist.api.rest.GetBehandler
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import io.ktor.http.*
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.PersonPseudoId
@@ -82,6 +77,7 @@ class GetPersonBehandler(
                             Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiPerson.Adressebeskyttelse.STRENGT_FORTROLIG_UTLAND
                             Personinfo.Adressebeskyttelse.Ukjent -> ApiPerson.Adressebeskyttelse.UKJENT
                         },
+                    fullmakt = kallKontekst.transaksjon.vergemålDao.harFullmakt(identitetsnummer.value),
                 ),
             )
         }

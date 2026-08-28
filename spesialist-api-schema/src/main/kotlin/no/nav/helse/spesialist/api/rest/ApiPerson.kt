@@ -14,7 +14,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Serializable
 data class ApiPerson(
@@ -28,6 +28,7 @@ data class ApiPerson(
     val dødsdato: LocalDate?,
     val kjønn: Kjønn,
     val adressebeskyttelse: Adressebeskyttelse,
+    val fullmakt: Boolean?,
 ) {
     enum class Kjønn {
         KVINNE,
