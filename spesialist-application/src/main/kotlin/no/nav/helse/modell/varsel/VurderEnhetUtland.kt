@@ -4,16 +4,18 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
-import java.util.UUID
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import java.time.LocalDateTime
+import java.util.*
 
 internal class VurderEnhetUtland(
     private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val vedtaksperiodeId: VedtaksperiodeId,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -21,9 +23,22 @@ internal class VurderEnhetUtland(
         outbox: Outbox,
     ): Boolean {
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(fødselsnummer))
+
         if (tilhørerEnhetUtland) {
-            logg.info("Håndterer varsel om utland på vedtaksperiode $vedtaksperiodeId")
-            sykefraværstilfelle.håndter(Varselkode.SB_EX_5.nyttVarsel(vedtaksperiodeId))
+            logg.info("Oppretter varsel om utlandsenhet for vedtaksperiode $vedtaksperiodeId")
+            val nyesteBehandling =
+                sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiodeId)
+                    ?: error("Fant ikke behandling")
+
+            val varsel =
+                Varsel.nytt(
+                    VarselId(UUID.randomUUID()),
+                    behandlingUnikId = nyesteBehandling.id,
+                    spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                    kode = Varselkode.SB_EX_5.name,
+                    opprettetTidspunkt = LocalDateTime.now(),
+                )
+            sessionContext.varselRepository.lagre(varsel)
         }
 
         return true
