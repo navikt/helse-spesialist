@@ -42,9 +42,12 @@ internal class SnapshotSammenligningHenter(
 
         val graphQLResultat = graphQL.hentPerson(fødselsnummer)
 
-        restFuture.whenComplete { restResultat, feil ->
-            sammenlign(fødselsnummer, graphQLResultat, restResultat, feil)
-        }
+        restFuture.whenCompleteAsync(
+            { restResultat, feil ->
+                sammenlign(fødselsnummer, graphQLResultat, restResultat, feil)
+            },
+            executor,
+        )
 
         return graphQLResultat
     }
