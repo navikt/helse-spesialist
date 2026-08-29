@@ -12,7 +12,6 @@ dependencies {
 
     testFixturesImplementation(testFixtures(project(":spesialist-domain")))
     testFixturesImplementation(libs.rapidsAndRiversTest)
-    testFixturesImplementation(libs.testcontainers.kafka)
 
     testImplementation(libs.mockk)
     testImplementation("io.github.optimumcode:json-schema-validator:0.5.5")

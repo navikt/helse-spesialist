@@ -11,7 +11,9 @@ class Vedtaksperiode(
     var fom: LocalDate = 1 jan 2018,
     var tom: LocalDate = 31 jan 2018,
     var skjæringstidspunkt: LocalDate = fom,
-    arbeidsgiver: Arbeidsgiver,
+    val arbeidsgiver: Arbeidsgiver,
+    /** Kun brukt av Testpersonfabrikk for å vite hvilke varsler som skal spilles inn for perioden. */
+    var varselkoder: List<String> = emptyList(),
     var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta =
         Sykepengegrunnlagsfakta(
             skjæringstidspunkt = skjæringstidspunkt,

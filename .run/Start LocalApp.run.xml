@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Start LocalApp" type="JetRunConfigurationType">
-    <option name="MAIN_CLASS_NAME" value="no.nav.helse.spesialist.bootstrap.LocalAppKt" />
-    <module name="spesialist.spesialist-bootstrap.test" />
+    <option name="MAIN_CLASS_NAME" value="no.nav.helse.spesialist.e2etests.lokal.LocalAppKt" />
+    <module name="spesialist.spesialist-e2e-tests.test" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />

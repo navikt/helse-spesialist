@@ -22,21 +22,6 @@ dependencies {
     api(project(":spesialist-valkey"))
 
     implementation(libs.rapidsAndRivers)
-
-    testImplementation(testFixtures(project(":spesialist-application")))
-    testImplementation(testFixtures(project(":spesialist-db")))
-    testImplementation(testFixtures(project(":spesialist-api")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-entra-id")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-krr")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-sparkel-norg")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-sparkel-sykepengeperioder")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-speed")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-sp-forsikring")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-spleis")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-personpseudoid")))
-    testImplementation(testFixtures(project(":clients:spesialist-client-tilgangsmaskinen")))
-    testImplementation(testFixtures(project(":spesialist-kafka")))
-    testImplementation(libs.mockOauth2Server)
 }
 
 tasks.withType<AbstractTestTask>().configureEach {

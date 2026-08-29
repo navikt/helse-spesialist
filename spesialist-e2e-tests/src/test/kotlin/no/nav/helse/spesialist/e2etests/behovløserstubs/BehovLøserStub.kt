@@ -33,6 +33,11 @@ class BehovLøserStub(
     fun init(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
+    ) = init(person = person, arbeidsgivere = listOf(arbeidsgiver))
+
+    fun init(
+        person: Person,
+        arbeidsgivere: List<Arbeidsgiver>,
     ) {
         løsereForFødselsnummer[person.fødselsnummer] =
             listOf(
@@ -42,7 +47,7 @@ class BehovLøserStub(
                 EgenAnsattBehovLøser(),
                 HentEnhetBehovLøser(),
                 HentPersoninfoV2BehovLøser(person),
-                InntekterForSykepengegrunnlagBehovLøser(arbeidsgiver.organisasjonsnummer),
+                InntekterForSykepengegrunnlagBehovLøser(arbeidsgivere.map(Arbeidsgiver::organisasjonsnummer)),
                 RisikovurderingBehovLøser(),
                 FullmaktBehovLøser(),
                 VergemålBehovLøser(),
