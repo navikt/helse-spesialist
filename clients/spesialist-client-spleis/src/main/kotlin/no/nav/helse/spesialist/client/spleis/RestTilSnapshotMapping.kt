@@ -62,8 +62,8 @@ import no.nav.helse.spleis.rest.hentperson.Hendelse
 import no.nav.helse.spleis.rest.hentperson.Hendelsetype
 import no.nav.helse.spleis.rest.hentperson.InfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.rest.hentperson.InntektFraAOrdningen
-import no.nav.helse.spleis.rest.hentperson.Inntektskilde
 import no.nav.helse.spleis.rest.hentperson.InntekterFraAOrdningen
+import no.nav.helse.spleis.rest.hentperson.Inntektskilde
 import no.nav.helse.spleis.rest.hentperson.Inntektsmelding
 import no.nav.helse.spleis.rest.hentperson.OmregnetArsinntekt
 import no.nav.helse.spleis.rest.hentperson.Oppdrag
