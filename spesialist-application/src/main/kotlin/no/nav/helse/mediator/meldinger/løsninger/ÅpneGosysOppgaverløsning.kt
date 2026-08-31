@@ -1,13 +1,17 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
+import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
+import no.nav.helse.spesialist.application.VarselRepository
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class ÅpneGosysOppgaverløsning(
     private val opprettet: LocalDateTime,
@@ -28,28 +32,60 @@ class ÅpneGosysOppgaverløsning(
 
     internal fun evaluer(
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle,
+        varselRepository: VarselRepository,
+        behandlingRepository: BehandlingRepository,
         harTildeltOppgave: Boolean,
         oppgaveService: OppgaveService,
     ) {
-        varslerForOppslagFeilet(vedtaksperiodeId, sykefraværstilfelle)
-        varslerForÅpneGosysOppgaver(vedtaksperiodeId, sykefraværstilfelle, harTildeltOppgave, oppgaveService)
+        varslerForOppslagFeilet(
+            vedtaksperiodeId,
+            varselRepository,
+            behandlingRepository,
+        )
+        varslerForÅpneGosysOppgaver(
+            vedtaksperiodeId,
+            varselRepository,
+            behandlingRepository,
+            harTildeltOppgave,
+            oppgaveService,
+        )
     }
 
     private fun varslerForOppslagFeilet(
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle,
+        varselRepository: VarselRepository,
+        behandlingRepository: BehandlingRepository,
     ) {
+        val nyesteBehandling =
+            behandlingRepository.finnNyesteForVedtaksperiode(VedtaksperiodeId(vedtaksperiodeId))
+                ?: error("Fant ikke behandling")
+
         if (oppslagFeilet) {
-            sykefraværstilfelle.håndter(SB_EX_3.nyttVarsel(vedtaksperiodeId))
+            val varsler = varselRepository.finnVarslerFor(behandlingUnikId = nyesteBehandling.id)
+            varsler.none { it.kode == SB_EX_3.name }.let {
+                varselRepository.lagre(
+                    Varsel.nytt(
+                        id = VarselId(UUID.randomUUID()),
+                        behandlingUnikId = nyesteBehandling.id,
+                        spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                        kode = SB_EX_3.name,
+                        opprettetTidspunkt = LocalDateTime.now(),
+                    ),
+                )
+            }
         } else {
-            sykefraværstilfelle.deaktiver(SB_EX_3.nyttVarsel(vedtaksperiodeId))
+            val varsler = varselRepository.finnVarslerFor(behandlingUnikId = nyesteBehandling.id)
+            varsler.find { it.kode == SB_EX_3.name }?.let {
+                it.deaktiver()
+                varselRepository.lagre(it)
+            }
         }
     }
 
     private fun varslerForÅpneGosysOppgaver(
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle,
+        varselRepository: VarselRepository,
+        behandlingRepository: BehandlingRepository,
         harTildeltOppgave: Boolean,
         oppgaveService: OppgaveService,
     ) {
@@ -57,15 +93,47 @@ class ÅpneGosysOppgaverløsning(
 
         when {
             antall > 0 -> {
-                sykefraværstilfelle.håndter(SB_EX_1.nyttVarsel(vedtaksperiodeId))
-                if (sykefraværstilfelle.harKunGosysvarsel(vedtaksperiodeId)) {
+                val nyesteBehandling =
+                    behandlingRepository.finnNyesteForVedtaksperiode(VedtaksperiodeId(vedtaksperiodeId))
+                        ?: error("Fant ikke behandling")
+
+                val varsler = varselRepository.finnVarslerFor(nyesteBehandling.id)
+                varsler.find { it.kode == SB_EX_1.name }?.let {
+                    it.deaktiver()
+                    varselRepository.lagre(it)
+                }
+                    ?: varselRepository.lagre(
+                        Varsel.nytt(
+                            id = VarselId(UUID.randomUUID()),
+                            behandlingUnikId = nyesteBehandling.id,
+                            spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                            kode = SB_EX_1.name,
+                            opprettetTidspunkt = LocalDateTime.now(),
+                        ),
+                    )
+
+                val behandlingspakke =
+                    behandlingRepository.finnAndreBehandlingerISykefraværstilfelle(nyesteBehandling, fødselsnummer)
+                val behandlingUnikIder = behandlingspakke.map { behandling -> behandling.id }
+                val varslerPåTvers = varselRepository.finnVarslerFor(behandlingUnikIder)
+
+                if (varslerPåTvers.filterNot { it.kode == SB_EX_1.name }.isEmpty()) {
                     oppgaveService.leggTilGosysEgenskap(vedtaksperiodeId)
                 }
             }
 
             antall == 0 && !harTildeltOppgave -> {
                 oppgaveService.fjernGosysEgenskap(vedtaksperiodeId)
-                sykefraværstilfelle.deaktiver(SB_EX_1.nyttVarsel(vedtaksperiodeId))
+
+                val nyesteBehandling =
+                    behandlingRepository.finnNyesteForVedtaksperiode(VedtaksperiodeId(vedtaksperiodeId))
+                        ?: error("Fant ikke behandling")
+
+                val varsler = varselRepository.finnVarslerFor(behandlingUnikId = nyesteBehandling.id)
+                varsler.find { it.kode == SB_EX_1.name }?.let {
+                    it.deaktiver()
+                    varselRepository.lagre(it)
+                }
             }
         }
     }

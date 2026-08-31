@@ -2,7 +2,9 @@ package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.helse.db.AutomatiseringDao
+import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
@@ -32,15 +34,19 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VeilederStansRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.VeilederStans
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -89,6 +95,8 @@ internal class AutomatiseringTest {
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
     private val legacyBehandlingDaoMock = mockk<LegacyBehandlingDao>(relaxed = true)
+    private val behandlingRepositoryMock = mockk<BehandlingRepository>(relaxed = true)
+    private val varselRepositoryMock = mockk<VarselRepository>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
@@ -130,6 +138,8 @@ internal class AutomatiseringTest {
             totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
             veilederStansRepository = veilederStansRepositoryMock,
             saksbehandlerStansRepository = saksbehandlerStansRepositoryMock,
+            behandlingRepository = behandlingRepositoryMock,
+            varselRepository = varselRepositoryMock,
         )
 
     @BeforeEach
@@ -176,9 +186,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
         every { meldingDaoMock.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId) } returns 3
-        val gjeldendeBehandling = enBehandling()
-        blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = gjeldendeBehandling,
+        blirManuellOppgaveMedFeilOgLagretVarsel(
             problems = listOf("Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer"),
             varselkode = Varselkode.SB_SØ_1,
         )
@@ -213,8 +221,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med nådd maksdato og refusjon fra AG er ikke automatiserbar`() {
-        blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = enBehandling(skjæringstidspunkt = 1 jan 2018),
+        blirManuellOppgaveMedFeilOgLagretVarsel(
             tags = listOf("ArbeidsgiverØnskerRefusjon"),
             maksdato = 1 des 2017,
             varselkode = Varselkode.RV_OV_5,
@@ -506,24 +513,33 @@ internal class AutomatiseringTest {
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) = assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, yrkesaktivitetstype = yrkesaktivitetstype))
 
-    private fun blirManuellOppgaveMedFeilOgVarsel(
+    private fun blirManuellOppgaveMedFeilOgLagretVarsel(
         utbetaling: Utbetaling = enUtbetaling(),
         problems: List<String>,
-        legacyBehandling: LegacyBehandling = enBehandling(),
         varselkode: Varselkode,
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
     ) {
+        val nyesteBehandling = lagBehandling(vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId))
+        every { behandlingRepositoryMock.finnNyesteForVedtaksperiode(VedtaksperiodeId(vedtaksperiodeId)) } returns nyesteBehandling
+
         val resultat =
             forsøkAutomatisering(
                 utbetaling = utbetaling,
-                behandlinger = listOf(legacyBehandling),
                 maksdato = maksdato,
                 tags = tags,
             )
         assertKanIkkeAutomatiseres(resultat)
         check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
         assertEquals(problems.toSet(), resultat.problemer.toSet())
-        assertEquals(varselkode.name, legacyBehandling.varsler().first().varselkode)
+        verify {
+            varselRepositoryMock.lagre(
+                match<Varsel> {
+                    it.kode == varselkode.name &&
+                        it.behandlingUnikId == nyesteBehandling.id &&
+                        it.spleisBehandlingId == nyesteBehandling.spleisBehandlingId
+                },
+            )
+        }
     }
 }

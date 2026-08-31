@@ -1,15 +1,7 @@
 package no.nav.helse.modell.automatisering
 
-import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.LegacyBehandlingDao
-import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.*
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
-import no.nav.helse.db.PersonDao
-import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.SessionContext
-import no.nav.helse.db.VedtakDao
-import no.nav.helse.db.VergemålDao
-import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad
 import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSøknadResultat.SkyldesKorrigertSøknad
@@ -27,16 +19,16 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.PersonRepository
-import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VeilederStansRepository
+import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
@@ -53,6 +45,8 @@ internal class Automatisering(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val veilederStansRepository: VeilederStansRepository,
     private val saksbehandlerStansRepository: SaksbehandlerStansRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val varselRepository: VarselRepository,
 ) {
     object Factory {
         fun automatisering(
@@ -75,6 +69,8 @@ internal class Automatisering(
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 veilederStansRepository = sessionContext.veilederStansRepository,
                 saksbehandlerStansRepository = sessionContext.saksbehandlerStansRepository,
+                behandlingRepository = sessionContext.behandlingRepository,
+                varselRepository = sessionContext.varselRepository,
             )
     }
 
@@ -126,7 +122,7 @@ internal class Automatisering(
 
         when (
             val resultat =
-                vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)
+                vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         ) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
             -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
@@ -149,6 +145,26 @@ internal class Automatisering(
     private fun erEgenAnsattEllerSkjermet(fødselsnummer: String) =
         personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus?.erEgenAnsatt == true ||
             personDao.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
+
+    private fun opprettVarsel(
+        varselkode: Varselkode,
+        vedtaksperiodeId: UUID,
+    ) {
+        logg.info("Legger til varsel ${varselkode.name} på vedtaksperiode $vedtaksperiodeId")
+        val nyesteBehandling =
+            behandlingRepository.finnNyesteForVedtaksperiode(VedtaksperiodeId(vedtaksperiodeId))
+                ?: error("Fant ikke behandling")
+
+        val varsel =
+            Varsel.nytt(
+                VarselId(UUID.randomUUID()),
+                behandlingUnikId = nyesteBehandling.id,
+                spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                kode = varselkode.name,
+                opprettetTidspunkt = LocalDateTime.now(),
+            )
+        varselRepository.lagre(varsel)
+    }
 
     private fun finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(
         fødselsnummer: String,
@@ -173,18 +189,16 @@ internal class Automatisering(
     private fun vurderOmBehandlingSkyldesKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        sykefraværstilfelle: Sykefraværstilfelle,
     ): AutomatiserKorrigertSøknadResultat {
         val behandlingOpprettetKorrigertSøknad =
             finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
                 ?: return SkyldesIkkeKorrigertSøknad
 
-        return kanKorrigertSøknadAutomatiseres(behandlingOpprettetKorrigertSøknad, sykefraværstilfelle)
+        return kanKorrigertSøknadAutomatiseres(behandlingOpprettetKorrigertSøknad)
     }
 
     private fun kanKorrigertSøknadAutomatiseres(
         behandlingOpprettetKorrigertSøknad: BehandlingOpprettetKorrigertSøknad,
-        sykefraværstilfelle: Sykefraværstilfelle,
     ): AutomatiserKorrigertSøknadResultat {
         val hendelseId = behandlingOpprettetKorrigertSøknad.meldingId
         val vedtaksperiodeId = behandlingOpprettetKorrigertSøknad.vedtaksperiodeId
@@ -206,7 +220,7 @@ internal class Automatisering(
         val antallTidligereKorrigeringer =
             meldingDao.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId)
         if (antallTidligereKorrigeringer >= 2) {
-            sykefraværstilfelle.håndter(Varselkode.SB_SØ_1.nyttVarsel(vedtaksperiodeId))
+            opprettVarsel(Varselkode.SB_SØ_1, vedtaksperiodeId)
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer",
             )
@@ -264,7 +278,13 @@ internal class Automatisering(
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Perioden skal til totrinnskontroll") { !harKravOmTotrinnsvurdering },
-            IkkeAutomatiserNåddMaksdatoOgRefusjonAG(maksdato, tags, sykefraværstilfelle, vedtaksperiodeId),
+            IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
+                maksdato = maksdato,
+                tags = tags,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingRepository = behandlingRepository,
+                varselRepository = varselRepository,
+            ),
         )
     }
 

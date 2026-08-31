@@ -6,40 +6,32 @@ import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VurderVergemålOgFullmaktTest : ApplicationTest() {
     private companion object {
-        private const val FNR = "12345678911"
-        private val VEDTAKSPERIODE_ID = UUID.fromString("1cd0d9cb-62e8-4f16-b634-f2b9dab550b6")
+        private val VEDTAKSPERIODE_ID = VedtaksperiodeId(UUID.randomUUID())
     }
 
-    private val legacyBehandling =
-        LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        )
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(legacyBehandling))
+    private lateinit var fødselsnummer: String
 
-    private val command =
+    private val command by lazy {
         VurderVergemålOgFullmakt(
-            fødselsnummer = FNR,
+            fødselsnummer = fødselsnummer,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            sykefraværstilfelle = sykefraværstilfelle,
         )
+    }
+
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -55,6 +47,19 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         }
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID()).also { it.nyObserver(observer) }
 
+    @BeforeEach
+    fun settOppTestdata() {
+        fødselsnummer =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
+                .id.value
+        val vedtaksperiode =
+            lagVedtaksperiode(id = VEDTAKSPERIODE_ID)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
+        lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+            .also(sessionContext.behandlingRepository::lagre)
+    }
+
     @Test
     fun `Ber om informasjon om vergemål hvis den mangler`() {
         assertFalse(command.execute(commandContext, sessionContext, outbox))
@@ -64,7 +69,7 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
     @Test
     fun `gjør ingen behandling om vi mangler løsning ved resume`() {
         assertFalse(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(null, sessionContext.vergemålDao.harVergemål(FNR))
+        assertEquals(null, sessionContext.vergemålDao.harVergemål(fødselsnummer))
     }
 
     @Test
@@ -73,12 +78,10 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(ingenVergemål))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(false, sessionContext.vergemålDao.harVergemål(FNR))
-        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harVergemål(fødselsnummer))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(fødselsnummer))
         assertEquals(0, observer.hendelser.size)
-        legacyBehandling.inspektør {
-            assertEquals(0, varsler.size)
-        }
+        assertEquals(0, sessionContext.varselRepository.alle().size)
     }
 
     @Test
@@ -87,8 +90,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harVergemål))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(true, sessionContext.vergemålDao.harVergemål(FNR))
-        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
+        assertEquals(true, sessionContext.vergemålDao.harVergemål(fødselsnummer))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(fødselsnummer))
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -98,8 +101,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harFullmakt))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(false, sessionContext.vergemålDao.harVergemål(FNR))
-        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harVergemål(fødselsnummer))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(fødselsnummer))
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -109,8 +112,8 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harFremtidsfullmakt))
         commandContext.add(Fullmaktløsning(true))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(false, sessionContext.vergemålDao.harVergemål(FNR))
-        assertEquals(true, sessionContext.vergemålDao.harFullmakt(FNR))
+        assertEquals(false, sessionContext.vergemålDao.harVergemål(fødselsnummer))
+        assertEquals(true, sessionContext.vergemålDao.harFullmakt(fødselsnummer))
         assertEquals(0, observer.hendelser.size)
     }
 
@@ -120,11 +123,15 @@ class VurderVergemålOgFullmaktTest : ApplicationTest() {
         commandContext.add(Vergemålløsning(harAlt))
         commandContext.add(Fullmaktløsning(false))
         assertTrue(command.resume(commandContext, sessionContext, outbox))
-        assertEquals(true, sessionContext.vergemålDao.harVergemål(FNR))
-        assertEquals(false, sessionContext.vergemålDao.harFullmakt(FNR))
+        assertEquals(true, sessionContext.vergemålDao.harVergemål(fødselsnummer))
+        assertEquals(false, sessionContext.vergemålDao.harFullmakt(fødselsnummer))
         assertEquals(0, observer.hendelser.size)
-        legacyBehandling.inspektør {
-            assertEquals(1, varsler.size)
-        }
+        assertEquals(
+            "SB_EX_4",
+            sessionContext.varselRepository
+                .alle()
+                .single()
+                .kode,
+        )
     }
 }

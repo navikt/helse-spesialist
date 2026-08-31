@@ -7,16 +7,18 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_4
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderVergemålOgFullmakt(
     private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
+    private val vedtaksperiodeId: VedtaksperiodeId,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -56,8 +58,19 @@ internal class VurderVergemålOgFullmakt(
 
         if (vergemålløsning.harVergemål()) {
             logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
-            sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId))
-            return true
+            val nyesteBehandling =
+                sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiodeId)
+                    ?: error("Fant ikke behandling")
+
+            val varsel =
+                Varsel.nytt(
+                    VarselId(UUID.randomUUID()),
+                    behandlingUnikId = nyesteBehandling.id,
+                    spleisBehandlingId = nyesteBehandling.spleisBehandlingId,
+                    kode = SB_EX_4.name,
+                    opprettetTidspunkt = LocalDateTime.now(),
+                )
+            sessionContext.varselRepository.lagre(varsel)
         }
 
         return true
