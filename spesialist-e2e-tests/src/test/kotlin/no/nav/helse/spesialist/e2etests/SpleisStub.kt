@@ -37,17 +37,17 @@ class SpleisStub(
     }
 
     fun stubSnapshotForPerson(context: TestContext) {
-        val data = javaClass.getResourceAsStream("/hentSnapshot.json").use(objectMapper::readTree)
+        val data = javaClass.getResourceAsStream("/hentPerson.json").use(objectMapper::readTree)
 
         val person = context.person
 
-        settVerdi(data, "/data/person/aktorId", person.aktørId)
-        settVerdi(data, "/data/person/fodselsnummer", person.fødselsnummer)
+        settVerdi(data, "/aktorId", person.aktørId)
+        settVerdi(data, "/fodselsnummer", person.fødselsnummer)
 
         sequenceOf(
-            "/data/person/arbeidsgivere/0/organisasjonsnummer",
-            "/data/person/vilkarsgrunnlag/0/inntekter/0/arbeidsgiver",
-            "/data/person/vilkarsgrunnlag/0/arbeidsgiverrefusjoner/0/arbeidsgiver",
+            "/arbeidsgivere/0/organisasjonsnummer",
+            "/vilkarsgrunnlag/0/inntekter/0/arbeidsgiver",
+            "/vilkarsgrunnlag/0/arbeidsgiverrefusjoner/0/arbeidsgiver",
         ).forEach {
             settVerdi(
                 jsonNode = data,
@@ -58,7 +58,7 @@ class SpleisStub(
 
         settVerdi(
             jsonNode = data,
-            pointer = "/data/person/vilkarsgrunnlag/0/id",
+            pointer = "/vilkarsgrunnlag/0/id",
             verdi = context.vilkårsgrunnlagId.toString(),
         )
 
@@ -66,14 +66,13 @@ class SpleisStub(
             if (index > 0) {
                 // Opprett kopi av periodeelementer
                 val perioder =
-                    data.at(JsonPointer.compile("/data/person/arbeidsgivere/0/generasjoner/0/perioder")) as ArrayNode
+                    data.at(JsonPointer.compile("/arbeidsgivere/0/generasjoner/0/perioder")) as ArrayNode
                 perioder.add(perioder[0].deepCopy())
             }
 
             sequenceOf(
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/detaljer/0/refunderesOrgNr",
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/inntekter/0/inntektskilde",
+                "/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
+                "/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/detaljer/0/refunderesOrgNr",
             ).forEach {
                 settVerdi(
                     jsonNode = data,
@@ -83,35 +82,35 @@ class SpleisStub(
             }
             settVerdi(
                 jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
+                pointer = "/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
                 verdi = context.arbeidsgiver.navn,
             )
 
             settVerdi(
                 jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/behandlingId",
+                pointer = "/arbeidsgivere/0/generasjoner/0/perioder/$index/behandlingId",
                 verdi = vedtaksperiode.spleisBehandlingId.toString(),
             )
             settVerdi(
                 jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vedtaksperiodeId",
+                pointer = "/arbeidsgivere/0/generasjoner/0/perioder/$index/vedtaksperiodeId",
                 verdi = vedtaksperiode.vedtaksperiodeId.toString(),
             )
             settVerdi(
                 jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vilkarsgrunnlagId",
+                pointer = "/arbeidsgivere/0/generasjoner/0/perioder/$index/vilkarsgrunnlagId",
                 verdi = context.vilkårsgrunnlagId.toString(),
             )
             settVerdi(
                 jsonNode = data,
-                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/id",
+                pointer = "/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/id",
                 verdi = vedtaksperiode.utbetalingId.toString(),
             )
         }
 
         wireMockServer.stubFor(
-            post("/graphql")
-                .withRequestBody(matchingJsonPath("\$.variables[?(@.fnr == '${person.fødselsnummer}')]"))
+            post("/api/person")
+                .withRequestBody(matchingJsonPath("\$[?(@.fødselsnummer == '${person.fødselsnummer}')]"))
                 .willReturn(okJson(data.toPrettyString())),
         )
     }
