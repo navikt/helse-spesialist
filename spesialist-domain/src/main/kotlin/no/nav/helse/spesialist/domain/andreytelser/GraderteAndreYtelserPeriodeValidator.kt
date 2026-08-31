@@ -35,11 +35,13 @@ private fun validerAtTotalGraderingIkkeOverstiger100Prosent(
     nyGraderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
 ) {
     val allePerioder = eksisterendeGraderteAndreYtelser.flatMap { it.perioder } + nyGraderteAndreYtelserPerioder
-    val tidslinjeMapMedGrad = allePerioder.flatMap { periode ->
-        periode.periode.datoer().map { dato ->
-            Pair(dato, periode.grad)
-        }
-    }.groupBy({ it.first }, { it.second })
+    val tidslinjeMapMedGrad =
+        allePerioder
+            .flatMap { periode ->
+                periode.periode.datoer().map { dato ->
+                    Pair(dato, periode.grad)
+                }
+            }.groupBy({ it.first }, { it.second })
     val erDetOver99Prosent = tidslinjeMapMedGrad.map { (_, grader) -> grader.sum() }.any { it > 99 }
 
     if (erDetOver99Prosent) {

@@ -91,7 +91,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 ApiGraderteAndreYtelserPeriode(
                     fom = 16 jan 2021,
                     tom = 31 jan 2021,
-                    grad = 100,
+                    grad = 99,
                 ),
             )
         val domainFørstePerioder =

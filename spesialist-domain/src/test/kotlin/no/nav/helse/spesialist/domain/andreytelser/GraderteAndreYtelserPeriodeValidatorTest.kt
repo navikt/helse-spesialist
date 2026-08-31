@@ -148,7 +148,6 @@ class GraderteAndreYtelserPeriodeValidatorTest {
         }
     }
 
-
     @Test
     fun `kaster feil når en ytelse endres til samme type som en overlappende eksisterende ytelse`() {
         val identitetsnummer = lagIdentitetsnummer()
