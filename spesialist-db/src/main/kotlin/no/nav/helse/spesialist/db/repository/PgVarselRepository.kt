@@ -5,13 +5,7 @@ import kotliquery.Session
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
-import no.nav.helse.spesialist.domain.BehandlingUnikId
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.Varsel
-import no.nav.helse.spesialist.domain.VarselId
-import no.nav.helse.spesialist.domain.VarseldefinisjonId
-import no.nav.helse.spesialist.domain.Varselvurdering
+import no.nav.helse.spesialist.domain.*
 
 class PgVarselRepository private constructor(
     private val dbQuery: DbQuery,
@@ -66,19 +60,21 @@ class PgVarselRepository private constructor(
             row.mapTilVarsel()
         }
 
-    override fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel> =
-        dbQuery.listWithListParameter(
+    override fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel> {
+        if (behandlingUnikIder.isEmpty()) return emptyList()
+        return dbQuery.listWithListParameter(
             """
-                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
-                JOIN behandling b ON sv.behandling_ref = b.id
-                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
-                LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
-                WHERE b.unik_id IN (${behandlingUnikIder.joinToString { "?" }})
-            """,
+                    SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                    JOIN behandling b ON sv.behandling_ref = b.id
+                    LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                    LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
+                    WHERE b.unik_id IN (${behandlingUnikIder.joinToString { "?" }})
+                """,
             *behandlingUnikIder.map { it.value }.toTypedArray(),
         ) { row ->
             row.mapTilVarsel()
         }
+    }
 
     private fun Row.mapTilVarsel(): Varsel {
         val status = enumValueOf<Varsel.Status>(string("status"))

@@ -382,8 +382,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderVergemålOgFullmakt(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                sykefraværstilfelle = sykefraværstilfelle,
+                vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId),
             ),
             VurderEnhetUtland(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
@@ -391,7 +390,7 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderÅpenGosysoppgave(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                sykefraværstilfelle = sykefraværstilfelle,
+                skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
                 harTildeltOppgave = false,
                 oppgaveService = oppgaveService,
             ),

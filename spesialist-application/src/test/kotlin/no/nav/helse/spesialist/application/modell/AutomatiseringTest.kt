@@ -186,9 +186,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
         every { meldingDaoMock.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId) } returns 3
-        val gjeldendeBehandling = enBehandling()
-        blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = gjeldendeBehandling,
+        blirManuellOppgaveMedFeilOgLagretVarsel(
             problems = listOf("Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer"),
             varselkode = Varselkode.SB_SØ_1,
         )
@@ -514,27 +512,6 @@ internal class AutomatiseringTest {
         utbetaling: Utbetaling = enUtbetaling(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) = assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, yrkesaktivitetstype = yrkesaktivitetstype))
-
-    private fun blirManuellOppgaveMedFeilOgVarsel(
-        utbetaling: Utbetaling = enUtbetaling(),
-        problems: List<String>,
-        legacyBehandling: LegacyBehandling = enBehandling(),
-        varselkode: Varselkode,
-        maksdato: LocalDate = 1 des 2018,
-        tags: List<String> = emptyList(),
-    ) {
-        val resultat =
-            forsøkAutomatisering(
-                utbetaling = utbetaling,
-                behandlinger = listOf(legacyBehandling),
-                maksdato = maksdato,
-                tags = tags,
-            )
-        assertKanIkkeAutomatiseres(resultat)
-        check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
-        assertEquals(problems.toSet(), resultat.problemer.toSet())
-        assertEquals(varselkode.name, legacyBehandling.varsler().first().varselkode)
-    }
 
     private fun blirManuellOppgaveMedFeilOgLagretVarsel(
         utbetaling: Utbetaling = enUtbetaling(),

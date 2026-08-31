@@ -8,20 +8,15 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
-import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
     private companion object {
@@ -33,19 +28,13 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
     private val behandlingAg1 = behandling(VEDTAKPERIODE_ID_AG_1)
     private val behandlingAg2 = behandling(VEDTAKPERIODE_ID_AG_2)
     private val skjæringstidspunkt = LocalDate.now().minusDays(17)
-    private val sykefraværstilfelle =
-        Sykefraværstilfelle(
-            FNR,
-            skjæringstidspunkt,
-            listOf(behandlingAg1, behandlingAg2),
-        )
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
     private fun command(
         harTildeltOppgave: Boolean = false,
     ) = VurderÅpenGosysoppgave(
         vedtaksperiodeId = VEDTAKPERIODE_ID_AG_1,
-        sykefraværstilfelle = sykefraværstilfelle,
+        skjæringstidspunkt = skjæringstidspunkt,
         harTildeltOppgave = harTildeltOppgave,
         oppgaveService = oppgaveService,
     )
@@ -92,33 +81,47 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
 
     @Test
     fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
-        behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
-        behandlingAg1.inspektør {
-            assertEquals(1, varsler.size)
-        }
+        sessionContext.varselRepository.lagre(
+            Varsel.nytt(
+                VarselId(UUID.randomUUID()),
+                behandlingAg1.id,
+                behandlingAg1.spleisBehandlingId,
+                Varselkode.SB_EX_1.name,
+                LocalDateTime.now(),
+            ),
+        )
+        assertEquals(1, sessionContext.varselRepository.finnVarslerFor(behandlingUnikId = behandlingAg1.id).size)
         commandContext().let { commandContext ->
             commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
             assertTrue(command().resume(commandContext, sessionContext, outbox))
         }
         assertEquals(1, persisterteÅpneGosysOppgaver().size)
-        behandlingAg1.inspektør {
+        sessionContext.varselRepository.finnVarslerFor(behandlingUnikId = behandlingAg1.id).let { varsler ->
             assertEquals(1, varsler.size)
-            assertEquals("SB_EX_1", varsler.first().varselkode)
-            assertEquals(VarselStatusDto.INAKTIV, varsler.first().status)
+            assertEquals("SB_EX_1", varsler.first().kode)
+            assertEquals(Varsel.Status.INAKTIV, varsler.first().status)
         }
         verify(exactly = 1) { oppgaveService.fjernGosysEgenskap(any()) }
     }
 
     @Test
     fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
-        behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        sessionContext.varselRepository.lagre(
+            Varsel.nytt(
+                VarselId(UUID.randomUUID()),
+                behandlingAg1.id,
+                behandlingAg1.spleisBehandlingId,
+                Varselkode.SB_EX_1.name,
+                LocalDateTime.now(),
+            ),
+        )
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command(harTildeltOppgave = true).resume(context, sessionContext, outbox))
-        behandlingAg1.inspektør {
+        sessionContext.varselRepository.finnVarslerFor(behandlingUnikId = behandlingAg1.id).let { varsler ->
             assertEquals(1, varsler.size)
-            assertEquals("SB_EX_1", varsler.first().varselkode)
-            assertEquals(VarselStatusDto.AKTIV, varsler.first().status)
+            assertEquals("SB_EX_1", varsler.first().kode)
+            assertEquals(Varsel.Status.AKTIV, varsler.first().status)
         }
     }
 
@@ -135,15 +138,23 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command().resume(context, sessionContext, outbox))
         assertEquals(1, persisterteÅpneGosysOppgaver().size)
-        behandlingAg1.inspektør {
+        sessionContext.varselRepository.finnVarslerFor(behandlingUnikId = behandlingAg1.id).let { varsler ->
             assertEquals(1, varsler.size)
-            assertEquals("SB_EX_3", varsler.first().varselkode)
+            assertEquals("SB_EX_3", varsler.first().kode)
         }
     }
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
-        behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        sessionContext.varselRepository.lagre(
+            Varsel.nytt(
+                VarselId(UUID.randomUUID()),
+                behandlingAg1.id,
+                behandlingAg1.spleisBehandlingId,
+                Varselkode.RV_IV_2.name,
+                LocalDateTime.now(),
+            ),
+        )
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context, sessionContext, outbox)
@@ -152,7 +163,15 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på andre overlappende perioder`() {
-        behandlingAg2.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
+        sessionContext.varselRepository.lagre(
+            Varsel.nytt(
+                VarselId(UUID.randomUUID()),
+                behandlingAg2.id,
+                behandlingAg2.spleisBehandlingId,
+                Varselkode.SB_EX_4.name,
+                LocalDateTime.now(),
+            ),
+        )
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context, sessionContext, outbox)
@@ -167,23 +186,19 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(commandContext, sessionContext, outbox))
         assertEquals(forventetAntallFørDenneOppgaven, persisterteÅpneGosysOppgaver().size)
-        behandlingAg1.inspektør {
+        sessionContext.varselRepository.finnVarslerFor(behandlingUnikId = behandlingAg1.id).let { varsler ->
             assertEquals(1, varsler.size)
-            assertEquals("SB_EX_1", varsler.first().varselkode)
+            assertEquals("SB_EX_1", varsler.first().kode)
         }
     }
 
-    private fun behandling(vedtaksperiodeId: UUID = UUID.randomUUID()) =
-        LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        )
-}
-
-internal fun LegacyBehandling.inspektør(block: BehandlingDto.() -> Unit) {
-    this.toDto().block()
+    private fun behandling(vedtaksperiodeId: UUID = UUID.randomUUID()): Behandling =
+        Behandling
+            .ny(
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
+                fom = 1 jan 2018,
+                tom = 31 jan 2018,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            ).also { sessionContext.behandlingRepository.lagre(it) }
 }

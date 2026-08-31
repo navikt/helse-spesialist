@@ -7,17 +7,16 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class VurderÅpenGosysoppgave(
     private val vedtaksperiodeId: UUID,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
     private val harTildeltOppgave: Boolean,
     private val oppgaveService: OppgaveService,
+    private val skjæringstidspunkt: LocalDate,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -47,12 +46,18 @@ internal class VurderÅpenGosysoppgave(
         }
 
         løsning.lagre(sessionContext.åpneGosysOppgaverDao)
-        løsning.evaluer(vedtaksperiodeId, sykefraværstilfelle, harTildeltOppgave, oppgaveService)
+        løsning.evaluer(
+            vedtaksperiodeId,
+            sessionContext.varselRepository,
+            sessionContext.behandlingRepository,
+            harTildeltOppgave,
+            oppgaveService,
+        )
         return true
     }
 
     private fun ikkeEldreEnn(vedtaksperiodeId: UUID): LocalDate {
-        val ikkeEldreEnn = sykefraværstilfelle.skjæringstidspunkt.minusYears(1)
+        val ikkeEldreEnn = skjæringstidspunkt.minusYears(1)
         logg.info(
             "Sender {} for {} i behov for oppgaveinformasjon fra Gosys",
             kv("ikkeEldreEnn", ikkeEldreEnn),

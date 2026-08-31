@@ -18,7 +18,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import tools.jackson.databind.JsonNode
-import java.util.UUID
+import java.util.*
 
 class GosysOppgaveEndret(
     override val id: UUID,
@@ -62,7 +62,7 @@ internal class GosysOppgaveEndretCommand(
         listOf(
             VurderÅpenGosysoppgave(
                 vedtaksperiodeId = oppgave.vedtaksperiodeId.value,
-                sykefraværstilfelle = sykefraværstilfelle,
+                skjæringstidspunkt = sykefraværstilfelle.skjæringstidspunkt,
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
             ),
