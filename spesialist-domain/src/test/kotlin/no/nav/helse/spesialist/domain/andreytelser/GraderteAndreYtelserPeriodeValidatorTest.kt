@@ -111,13 +111,43 @@ class GraderteAndreYtelserPeriodeValidatorTest {
         validerGraderteAndreYtelserPeriode(
             nyGraderteAndreYtelserPerioder =
                 listOf(
-                    GraderteAndreYtelserPeriode(periode = (15 jan 2024) tilOgMed (28 feb 2024), grad = 60),
+                    GraderteAndreYtelserPeriode(periode = (15 jan 2024) tilOgMed (28 feb 2024), grad = 40),
                 ),
             nyGraderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
             eksisterendeGraderteAndreYtelser = listOf(eksisterende),
             vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2024, tom = 28 feb 2024)),
         )
     }
+
+    @Test
+    fun `gir feil når overlappende perioder overstiger 99 prosent`() {
+        val identitetsnummer = lagIdentitetsnummer()
+        val eksisterende =
+            GraderteAndreYtelser.ny(
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = lagSaksbehandler().ident,
+                notatTilBeslutter = "notat",
+                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                graderteAndreYtelserPerioder =
+                    listOf(
+                        GraderteAndreYtelserPeriode(periode = (1 jan 2024) tilOgMed (31 jan 2024), grad = 50),
+                    ),
+                graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+            )
+
+        assertThrows<IllegalStateException> {
+            validerGraderteAndreYtelserPeriode(
+                nyGraderteAndreYtelserPerioder =
+                    listOf(
+                        GraderteAndreYtelserPeriode(periode = (15 jan 2024) tilOgMed (28 feb 2024), grad = 60),
+                    ),
+                nyGraderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                eksisterendeGraderteAndreYtelser = listOf(eksisterende),
+                vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2024, tom = 28 feb 2024)),
+            )
+        }
+    }
+
 
     @Test
     fun `kaster feil når en ytelse endres til samme type som en overlappende eksisterende ytelse`() {

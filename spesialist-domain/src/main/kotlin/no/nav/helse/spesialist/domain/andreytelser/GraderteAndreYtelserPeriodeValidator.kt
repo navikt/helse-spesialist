@@ -21,11 +21,30 @@ fun validerGraderteAndreYtelserPeriode(
     ) {
         error("Ingen sykefraværstilfeller overlapper med perioden(e) i gradert annen ytelse ($nyGraderteAndreYtelserPerioder)")
     }
+
+    validerAtTotalGraderingIkkeOverstiger100Prosent(eksisterendeGraderteAndreYtelser, nyGraderteAndreYtelserPerioder)
     validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
         nyGraderteAndreYtelserPerioder = nyGraderteAndreYtelserPerioder,
         graderteAndreYtelserType = nyGraderteAndreYtelserType,
         eksisterendeGraderteAndreYtelser = eksisterendeGraderteAndreYtelser,
     )
+}
+
+private fun validerAtTotalGraderingIkkeOverstiger100Prosent(
+    eksisterendeGraderteAndreYtelser: List<GraderteAndreYtelser>,
+    nyGraderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
+) {
+    val allePerioder = eksisterendeGraderteAndreYtelser.flatMap { it.perioder } + nyGraderteAndreYtelserPerioder
+    val tidslinjeMapMedGrad = allePerioder.flatMap { periode ->
+        periode.periode.datoer().map { dato ->
+            Pair(dato, periode.grad)
+        }
+    }.groupBy({ it.first }, { it.second })
+    val erDetOver99Prosent = tidslinjeMapMedGrad.map { (_, grader) -> grader.sum() }.any { it > 99 }
+
+    if (erDetOver99Prosent) {
+        error("Minst en dag overskrider 99 prosent på tvers av graderte andre ytelser")
+    }
 }
 
 private fun validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
