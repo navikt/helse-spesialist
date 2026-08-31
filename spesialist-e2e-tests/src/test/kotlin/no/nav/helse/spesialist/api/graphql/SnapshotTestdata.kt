@@ -1,61 +1,62 @@
 package no.nav.helse.spesialist.api.graphql
 
+import no.nav.helse.spesialist.application.snapshot.SnapshotAlder
+import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
+import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
+import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
+import no.nav.helse.spesialist.application.snapshot.SnapshotBehandling
+import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotHendelse
+import no.nav.helse.spesialist.application.snapshot.SnapshotHendelsetype
+import no.nav.helse.spesialist.application.snapshot.SnapshotInntektskilde
+import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
+import no.nav.helse.spesialist.application.snapshot.SnapshotOmregnetArsinntekt
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetype
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodevilkar
+import no.nav.helse.spesialist.application.snapshot.SnapshotRefusjonselement
+import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadArbeidsledig
+import no.nav.helse.spesialist.application.snapshot.SnapshotSpleisVilkarsgrunnlag
+import no.nav.helse.spesialist.application.snapshot.SnapshotSykepengedager
+import no.nav.helse.spesialist.application.snapshot.SnapshotSykepengegrunnlagsgrense
+import no.nav.helse.spesialist.application.snapshot.SnapshotTidslinjeperiode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetaling
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.mai
 import no.nav.helse.spesialist.domain.testfixtures.okt
-import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
-import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
-import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.enums.Utbetalingtype
-import no.nav.helse.spleis.graphql.hentsnapshot.Alder
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-object GraphQLTestdata {
+object SnapshotTestdata {
     fun opprettSnapshotArbeidsgiver(
         organisasjonsnummer: String,
-        generasjoner: List<GraphQLGenerasjon>,
-    ) = GraphQLArbeidsgiver(
+        behandlinger: List<SnapshotBehandling>,
+    ) = SnapshotArbeidsgiver(
         organisasjonsnummer = organisasjonsnummer,
         ghostPerioder = emptyList(),
-        generasjoner = generasjoner,
+        behandlinger = behandlinger,
     )
 
     fun opprettSnapshotHendelse(eksternDokumentId: UUID) =
-        GraphQLSoknadArbeidsledig(
+        SnapshotSoknadArbeidsledig(
             id = UUID.randomUUID().toString(),
             eksternDokumentId = eksternDokumentId.toString(),
             fom = 11 mai 2022,
             tom = 30.mai(2022),
             rapportertDato = (10 okt 2023).atStartOfDay(),
             sendtNav = (10 okt 2023).atStartOfDay(),
-            type = GraphQLHendelsetype.SENDTSOKNADARBEIDSLEDIG,
+            type = SnapshotHendelsetype.SENDTSOKNADARBEIDSLEDIG,
         )
 
     fun opprettSnapshotGenerasjon(
-        perioder: List<GraphQLTidslinjeperiode>,
+        perioder: List<SnapshotTidslinjeperiode>,
         id: UUID = UUID.randomUUID(),
-    ) = GraphQLGenerasjon(id = id, perioder = perioder)
+    ) = SnapshotBehandling(id = id, perioder = perioder)
 
     fun opprettBeregnetPeriode(
         fom: LocalDate = LocalDate.now(),
@@ -63,15 +64,15 @@ object GraphQLTestdata {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
-        hendelser: List<GraphQLHendelse> = emptyList(),
-    ) = GraphQLBeregnetPeriode(
+        hendelser: List<SnapshotHendelse> = emptyList(),
+    ) = SnapshotBeregnetPeriode(
         erForkastet = false,
         fom = fom,
         tom = tom,
-        inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+        inntektstype = SnapshotInntektstype.ENARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
-        periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
-        periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+        periodetype = SnapshotPeriodetype.FORSTEGANGSBEHANDLING,
+        periodetilstand = SnapshotPeriodetilstand.TILGODKJENNING,
         skjaeringstidspunkt = LocalDate.now(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId,
@@ -81,10 +82,12 @@ object GraphQLTestdata {
         maksdato = LocalDate.now(),
         vilkarsgrunnlagId = null,
         periodevilkar =
-            GraphQLPeriodevilkar(
-                alder = Alder(55, true),
+            SnapshotPeriodevilkar(
+                alder = SnapshotAlder(55, true),
                 sykepengedager =
-                    Sykepengedager(
+                    SnapshotSykepengedager(
+                        forbrukteSykedager = null,
+                        gjenstaendeSykedager = null,
                         maksdato = LocalDate.now(),
                         oppfylt = true,
                         skjaeringstidspunkt = LocalDate.now(),
@@ -92,14 +95,17 @@ object GraphQLTestdata {
             ),
         behandlingId = behandlingId,
         utbetaling =
-            GraphQLUtbetaling(
+            SnapshotUtbetaling(
                 id = utbetalingId,
                 arbeidsgiverFagsystemId = "EN_FAGSYSTEM_ID",
                 arbeidsgiverNettoBelop = 1,
                 personFagsystemId = "EN_FAGSYSTEM_ID",
                 personNettoBelop = 0,
-                statusEnum = GraphQLUtbetalingstatus.IKKEGODKJENT,
-                typeEnum = Utbetalingtype.UTBETALING,
+                statusEnum = SnapshotUtbetalingstatus.IKKEGODKJENT,
+                typeEnum = SnapshotUtbetalingtype.UTBETALING,
+                vurdering = null,
+                personoppdrag = null,
+                arbeidsgiveroppdrag = null,
             ),
         pensjonsgivendeInntekter = emptyList(),
         annulleringskandidater = emptyList(),
@@ -110,14 +116,14 @@ object GraphQLTestdata {
         tom: LocalDate = LocalDate.now(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
-    ) = GraphQLUberegnetPeriode(
+    ) = SnapshotUberegnetPeriode(
         erForkastet = false,
         fom = fom,
         tom = tom,
-        inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+        inntektstype = SnapshotInntektstype.ENARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
-        periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
-        periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+        periodetype = SnapshotPeriodetype.FORSTEGANGSBEHANDLING,
+        periodetilstand = SnapshotPeriodetilstand.TILGODKJENNING,
         skjaeringstidspunkt = LocalDate.now(),
         tidslinje = emptyList(),
         vedtaksperiodeId = vedtaksperiodeId,
@@ -128,29 +134,35 @@ object GraphQLTestdata {
     fun graphQLSpleisVilkarsgrunnlag(
         organisasjonsnummer: String,
         id: UUID = UUID.randomUUID(),
-    ) = GraphQLSpleisVilkarsgrunnlag(
+    ) = SnapshotSpleisVilkarsgrunnlag(
         id = id,
         inntekter =
             listOf(
-                GraphQLArbeidsgiverinntekt(
+                SnapshotArbeidsgiverinntekt(
                     arbeidsgiver = organisasjonsnummer,
                     omregnetArsinntekt =
-                        GraphQLOmregnetArsinntekt(
+                        SnapshotOmregnetArsinntekt(
                             belop = 500_000.0,
+                            inntekterFraAOrdningen = null,
                             manedsbelop = 55_000.0,
-                            kilde = GraphQLInntektskilde.INNTEKTSMELDING,
+                            kilde = SnapshotInntektskilde.INNTEKTSMELDING,
                         ),
+                    skjonnsmessigFastsatt = null,
+                    deaktivert = null,
                     fom = 1 jan 2020,
                     tom = null,
                 ),
-                GraphQLArbeidsgiverinntekt(
+                SnapshotArbeidsgiverinntekt(
                     arbeidsgiver = "987656789",
                     omregnetArsinntekt =
-                        GraphQLOmregnetArsinntekt(
+                        SnapshotOmregnetArsinntekt(
                             belop = 500_000.0,
+                            inntekterFraAOrdningen = null,
                             manedsbelop = 55_000.0,
-                            kilde = GraphQLInntektskilde.INNTEKTSMELDING,
+                            kilde = SnapshotInntektskilde.INNTEKTSMELDING,
                         ),
+                    skjonnsmessigFastsatt = null,
+                    deaktivert = null,
                     fom = 1 jan 2020,
                     tom = null,
                 ),
@@ -162,7 +174,7 @@ object GraphQLTestdata {
         antallOpptjeningsdagerErMinst = 123,
         grunnbelop = 100_000,
         sykepengegrunnlagsgrense =
-            GraphQLSykepengegrunnlagsgrense(
+            SnapshotSykepengegrunnlagsgrense(
                 grunnbelop = 100_000,
                 grense = 600_000,
                 virkningstidspunkt = 1 jan 2020,
@@ -174,11 +186,11 @@ object GraphQLTestdata {
         opptjeningsvurderingId = UUID.randomUUID(),
         arbeidsgiverrefusjoner =
             listOf(
-                GraphQLArbeidsgiverrefusjon(
+                SnapshotArbeidsgiverrefusjon(
                     arbeidsgiver = organisasjonsnummer,
                     refusjonsopplysninger =
                         listOf(
-                            GraphQLRefusjonselement(
+                            SnapshotRefusjonselement(
                                 fom = 1 jan 2020,
                                 tom = null,
                                 belop = 30000.0,
@@ -187,7 +199,7 @@ object GraphQLTestdata {
                         ),
                 ),
             ),
-        beregningsgrunnlag = 25.0,
+        beregingsgrunnlag = BigDecimal.valueOf(25.0),
         forsikringsvurderingId = null,
     )
 }

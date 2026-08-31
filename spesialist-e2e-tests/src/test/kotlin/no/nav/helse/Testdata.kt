@@ -3,20 +3,20 @@ package no.nav.helse
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.application.snapshot.SnapshotAlder
+import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
+import no.nav.helse.spesialist.application.snapshot.SnapshotBehandling
+import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetype
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodevilkar
+import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
+import no.nav.helse.spesialist.application.snapshot.SnapshotSykepengedager
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetaling
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
 import no.nav.helse.spesialist.test.TestPerson
-import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.enums.Utbetalingtype
-import no.nav.helse.spleis.graphql.hentsnapshot.Alder
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.util.desember
 import no.nav.helse.util.januar
 import java.time.LocalDate
@@ -34,59 +34,59 @@ object Testdata {
         utbetalingId: UUID = testperson.utbetalingId1,
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
-        utbetaling: GraphQLUtbetaling =
-            GraphQLUtbetaling(
+        utbetaling: SnapshotUtbetaling =
+            SnapshotUtbetaling(
                 id = utbetalingId,
                 arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
                 arbeidsgiverNettoBelop = arbeidsgiverbeløp,
                 personFagsystemId = "EN_FAGSYSTEMID",
                 personNettoBelop = personbeløp,
-                statusEnum = GraphQLUtbetalingstatus.UBETALT,
-                typeEnum = Utbetalingtype.UTBETALING,
+                statusEnum = SnapshotUtbetalingstatus.UBETALT,
+                typeEnum = SnapshotUtbetalingtype.UTBETALING,
                 vurdering = null,
                 personoppdrag = null,
                 arbeidsgiveroppdrag = null,
             ),
-    ): GraphQLPerson =
-        GraphQLPerson(
+    ): SnapshotPerson =
+        SnapshotPerson(
             aktorId = aktørId,
             fodselsnummer = fødselsnummer,
             versjon = versjon,
             arbeidsgivere =
                 listOf(
-                    GraphQLArbeidsgiver(
+                    SnapshotArbeidsgiver(
                         organisasjonsnummer = organisasjonsnummer,
                         ghostPerioder = emptyList(),
-                        generasjoner =
+                        behandlinger =
                             listOf(
-                                GraphQLGenerasjon(
+                                SnapshotBehandling(
                                     id = UUID.randomUUID(),
                                     perioder =
                                         listOf(
-                                            GraphQLBeregnetPeriode(
+                                            SnapshotBeregnetPeriode(
                                                 behandlingId = UUID.randomUUID(),
                                                 vedtaksperiodeId = vedtaksperiodeId,
                                                 utbetaling = utbetaling,
                                                 erForkastet = false,
                                                 fom = 1.januar(2020),
                                                 tom = 31.januar(2020),
-                                                inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+                                                inntektstype = SnapshotInntektstype.ENARBEIDSGIVER,
                                                 opprettet = 31.januar(2020).atStartOfDay(),
-                                                periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+                                                periodetype = SnapshotPeriodetype.FORSTEGANGSBEHANDLING,
                                                 tidslinje = emptyList(),
                                                 forbrukteSykedager = null,
                                                 gjenstaendeSykedager = null,
                                                 hendelser = emptyList(),
                                                 maksdato = 1.januar(2021),
                                                 periodevilkar =
-                                                    GraphQLPeriodevilkar(
+                                                    SnapshotPeriodevilkar(
                                                         alder =
-                                                            Alder(
+                                                            SnapshotAlder(
                                                                 alderSisteSykedag = 30,
                                                                 oppfylt = true,
                                                             ),
                                                         sykepengedager =
-                                                            Sykepengedager(
+                                                            SnapshotSykepengedager(
                                                                 forbrukteSykedager = null,
                                                                 gjenstaendeSykedager = null,
                                                                 maksdato = 1.januar(2021),
@@ -96,7 +96,7 @@ object Testdata {
                                                     ),
                                                 skjaeringstidspunkt = 1.januar(2020),
                                                 vilkarsgrunnlagId = null,
-                                                periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+                                                periodetilstand = SnapshotPeriodetilstand.TILGODKJENNING,
                                                 pensjonsgivendeInntekter = emptyList(),
                                                 annulleringskandidater = emptyList(),
                                             ),

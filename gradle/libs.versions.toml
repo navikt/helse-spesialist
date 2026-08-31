@@ -18,7 +18,6 @@ caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.4"
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 
-graphqlKotlin-client-jackson = { module = "com.expediagroup:graphql-kotlin-client-jackson", version.ref = "graphqlKotlin" }
 graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphqlKotlin" }
 
 hikari = "com.zaxxer:HikariCP:7.1.0"

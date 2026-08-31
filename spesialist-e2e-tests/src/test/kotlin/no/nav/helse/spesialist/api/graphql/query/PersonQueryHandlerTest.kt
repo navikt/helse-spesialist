@@ -11,17 +11,19 @@ import io.mockk.every
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotHendelse
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPeriode
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotGenerasjon
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotHendelse
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -32,8 +34,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
@@ -190,7 +190,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 501-feil når oppdatering av snapshot feiler`() {
-        every { spleisClient.hentPerson(FØDSELSNUMMER) } throws GraphQLException("Oops")
+        every { snapshothenter.hentPerson(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson())
 
         val pseudoId = opprettPersonPseudoId()
@@ -303,7 +303,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val vedtakId = opprettVedtaksperiode(personRef, periode = periode1)
         ferdigstillOppgave(vedtakId)
         opprettVedtaksperiode(personRef, periode = periode2)
-        val førstePeriode = periode1.tilBeregnetPeriode().copy(periodetilstand = GraphQLPeriodetilstand.UTBETALT)
+        val førstePeriode = periode1.tilBeregnetPeriode().copy(periodetilstand = SnapshotPeriodetilstand.UTBETALT)
         val andrePeriode = periode2.tilBeregnetPeriode()
         val snapshotBehandling = opprettSnapshotGenerasjon(listOf(førstePeriode, andrePeriode))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
@@ -420,7 +420,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 listOf(
                     opprettSnapshotArbeidsgiver(
                         organisasjonsnummer = organisasjonsnummer,
-                        generasjoner =
+                        behandlinger =
                             listOf(
                                 opprettSnapshotGenerasjon(
                                     perioder =
@@ -590,7 +590,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val kode: String,
     )
 
-    private fun Periode.tilBeregnetPeriode(): GraphQLBeregnetPeriode = opprettBeregnetPeriode(fom, tom, id)
+    private fun Periode.tilBeregnetPeriode(): SnapshotBeregnetPeriode = opprettBeregnetPeriode(fom, tom, id)
 
     private class Logglytter {
         private val appender =

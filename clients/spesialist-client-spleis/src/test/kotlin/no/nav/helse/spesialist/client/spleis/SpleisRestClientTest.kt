@@ -86,6 +86,32 @@ class SpleisRestClientTest {
     }
 
     @Test
+    fun `feiler ikke ved ukjente felter i responsen (fremtidssikring mot nye felter fra spleis)`() {
+        setupStub(
+            okJson(
+                """
+                {
+                  "aktorId": "1234567890123",
+                  "fodselsnummer": "11111111111",
+                  "arbeidsgivere": [],
+                  "dodsdato": null,
+                  "versjon": 1,
+                  "vilkarsgrunnlag": [],
+                  "etHeltNyttFeltViIkkeKjennerTilEnna": "noe verdi",
+                  "enNyStruktur": { "med": ["nestede", "verdier"] }
+                }
+                """.trimIndent(),
+            ),
+        )
+
+        val result = lagKlient().hentPerson("11111111111")
+
+        assertNotNull(result)
+        assertEquals("1234567890123", result.aktorId)
+        assertEquals("11111111111", result.fodselsnummer)
+    }
+
+    @Test
     fun `returnerer null ved 404`() {
         setupStub(notFound())
 
