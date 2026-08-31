@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'dev-*'
     paths:
       # Generelt oppsett - alt unntatt dokumentasjon / urelatert oppsett
       - '**'
@@ -70,6 +71,7 @@ jobs:
       id-token: write # for nais login
 
   deploy-prod:
+    if: github.ref == 'refs/heads/main'
     name: Deploy til prod
     needs: [bygg-image, deploy-dev]
     uses: navikt/helse-sas-github-workflows/.github/workflows/deploy.yml@2f6844aa5e6852c64522681b3edb09c99445ad59 # v1.0.1
