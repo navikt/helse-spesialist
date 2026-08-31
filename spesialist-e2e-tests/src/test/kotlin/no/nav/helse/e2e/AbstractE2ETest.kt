@@ -20,8 +20,7 @@ import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontr
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
-import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -71,8 +70,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     lateinit var utbetalingId: UUID
         private set
-    val spleisClient = mockk<SpleisClient>()
-    val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    val snapshothenter = mockk<Snapshothenter>()
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
     val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
     private val testRapid = TestRapid()
@@ -1093,7 +1091,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
-        every { spleisClient.hentPerson(fødselsnummer) } returns
+        every { snapshothenter.hentPerson(fødselsnummer) } returns
             snapshot(
                 versjon = 1,
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,

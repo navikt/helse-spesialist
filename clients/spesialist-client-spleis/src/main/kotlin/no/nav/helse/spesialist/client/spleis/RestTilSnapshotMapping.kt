@@ -49,7 +49,6 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsinfo
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingslinje
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
-import no.nav.helse.spesialist.application.snapshot.SnapshotVilkarsgrunnlag
 import no.nav.helse.spesialist.application.snapshot.SnapshotVurdering
 import no.nav.helse.spleis.rest.hentperson.Arbeidsgiver
 import no.nav.helse.spleis.rest.hentperson.Arbeidsgiverinntekt
@@ -102,10 +101,7 @@ import no.nav.helse.spleis.rest.hentperson.Vurdering
 import java.math.BigDecimal
 
 /**
- * Mekanisk port av [SpleisTilSnapshotMapping] for REST-DTO-ene i `no.nav.helse.spleis.rest.hentperson`.
- * Skal produsere identisk [SnapshotPerson] som GraphQL-mappingen, gitt samme underliggende data —
- * dette er grunnlaget [SnapshotSammenligningHenter] sammenligner mot. Enhver utilsiktet forskjell her
- * gir falske positiver (eller, verre, skjulte reelle avvik) i sammenligningen.
+ * Mapper REST-DTO-ene i `no.nav.helse.spleis.rest.hentperson` til [SnapshotPerson].
  */
 internal fun Person.tilSnapshotPerson() =
     SnapshotPerson(

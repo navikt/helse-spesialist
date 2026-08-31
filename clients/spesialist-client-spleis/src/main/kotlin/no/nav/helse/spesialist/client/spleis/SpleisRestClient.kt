@@ -20,8 +20,7 @@ import java.net.URI
 import java.util.UUID
 
 /**
- * REST-motstykket til [SpleisClient]. Kalles i dag kun av [SnapshotSammenligningHenter] for å
- * sammenligne mot GraphQL-resultatet — GraphQL er fortsatt sannheten.
+ * Klient for spleis sitt REST-endepunkt (`POST /api/person`) for å hente et snapshot av en person.
  */
 internal class SpleisRestClient(
     private val accessTokenProvider: AccessTokenProvider,

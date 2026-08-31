@@ -15,26 +15,25 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.graphQLSpleisVilkarsgrunnlag
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.graphQLSpleisVilkarsgrunnlag
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
+import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
+import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
+import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
-import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import tools.jackson.databind.JsonNode
 import java.time.Duration.ofNanos
@@ -43,8 +42,7 @@ import java.util.*
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
 
-    protected val spleisClient = mockk<SpleisClient>(relaxed = true)
-    private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    protected val snapshothenter = mockk<Snapshothenter>(relaxed = true)
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
     val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
 
@@ -108,21 +106,21 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,
-        arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
+        arbeidsgivere: List<SnapshotArbeidsgiver> = listOf(defaultArbeidsgivere()),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
         val respons = snapshot(fødselsnummer, arbeidsgivere, vilkårsgrunnlagId)
-        every { spleisClient.hentPerson(fødselsnummer) } returns respons
+        every { snapshothenter.hentPerson(fødselsnummer) } returns respons
     }
 
     private fun snapshot(
         fødselsnummer: String = FØDSELSNUMMER,
-        arbeidsgivere: List<GraphQLArbeidsgiver>,
+        arbeidsgivere: List<SnapshotArbeidsgiver>,
         vilkårsgrunnlagId: UUID,
-    ): GraphQLPerson {
+    ): SnapshotPerson {
         val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGANISASJONSNUMMER, vilkårsgrunnlagId)
 
-        return GraphQLPerson(
+        return SnapshotPerson(
             aktorId = AKTØRID,
             arbeidsgivere = arbeidsgivere,
             dodsdato = null,
@@ -132,7 +130,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun defaultArbeidsgivere(): GraphQLArbeidsgiver {
+    private fun defaultArbeidsgivere(): SnapshotArbeidsgiver {
         val periodeMedOppgave = Periode(UUID.randomUUID(), 1 jan 2018, 25 jan 2018)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
         val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
