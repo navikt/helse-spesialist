@@ -18,7 +18,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Serializable
 data class ApiTilkommenInntektskilde(
@@ -139,11 +139,11 @@ data class ApiTilkommenInntektPatch(
 ) {
     @Serializable
     data class ApiTilkommenInntektEndringer(
-        val organisasjonsnummer: ApiPatchStringEndring?,
-        val periode: ApiPatchDatoPeriodeEndring?,
-        val periodebeløp: ApiPatchBigDecimalEndring?,
-        val ekskluderteUkedager: ApiPatchListLocalDateEndring?,
-        val fjernet: ApiPatchBooleanEndring?,
+        val organisasjonsnummer: EndringFraTil<String>?,
+        val periode: EndringFraTil<ApiDatoPeriode>?,
+        val periodebeløp: EndringFraTil<BigDecimal>?,
+        val ekskluderteUkedager: EndringFraTil<List<LocalDate>>?,
+        val fjernet: EndringFraTil<Boolean>?,
     )
 }
 
