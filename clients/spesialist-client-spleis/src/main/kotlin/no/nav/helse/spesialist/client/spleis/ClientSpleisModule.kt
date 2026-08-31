@@ -14,24 +14,15 @@ class ClientSpleisModule(
         val loggRespons: Boolean,
     )
 
+    // GraphQL-klienten (SpleisClient/SpleisClientSnapshothenter) og skygge-sammenligningen
+    // (SnapshotSammenligningHenter) er ikke lenger koblet inn - migreringen til spleis sitt
+    // REST-endepunkt (`POST /api/person`) er fullført, og den gamle koden ligger død inntil videre.
     val snapshothenter: Snapshothenter =
-        SnapshotSammenligningHenter(
-            graphQL =
-                SpleisClientSnapshothenter(
-                    SpleisClient(
-                        accessTokenProvider = accessTokenProvider,
-                        spleisUrl = configuration.spleisUrl,
-                        spleisClientId = configuration.spleisClientId,
-                        loggRespons = configuration.loggRespons,
-                    ),
-                ),
-            hentPersonRest =
-                SpleisRestClient(
-                    accessTokenProvider = accessTokenProvider,
-                    spleisUrl = configuration.spleisUrl,
-                    spleisClientId = configuration.spleisClientId,
-                )::hentPerson,
-            // Kjøres foreløpig kun i dev-gcp - se plan for gradvis utrulling til prod-gcp.
-            skalSammenligne = true,
+        SpleisRestClientSnapshothenter(
+            SpleisRestClient(
+                accessTokenProvider = accessTokenProvider,
+                spleisUrl = configuration.spleisUrl,
+                spleisClientId = configuration.spleisClientId,
+            ),
         )
 }
