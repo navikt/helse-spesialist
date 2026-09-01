@@ -95,7 +95,7 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
                           "grad": 80
                         }
                       ],
-                      "andreYtelseType": "FORELDREPENGER",
+                      "andreYtelserType": "FORELDREPENGER",
                       "notatTilBeslutter": "gjenoppretter ytelsen"
                     }
                     """.trimIndent(),
@@ -168,7 +168,7 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
                           "grad": 66
                         }
                       ],
-                      "andreYtelseType": "SVANGERSKAPSPENGER",
+                      "andreYtelserType": "SVANGERSKAPSPENGER",
                       "notatTilBeslutter": "prøver å endre fjernet ytelse"
                     }
                     """.trimIndent(),

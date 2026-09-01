@@ -28,7 +28,7 @@ class PostGjenopprettGraderteAndreYtelserBehandler : PostBehandler<GraderteAndre
             manglerTilgangTilPerson = { ApiPostGjenopprettGraderteAndreYtelserErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->
             val oppdatertePerioder = request.perioder.tilGraderteAndreYtelserPerioder()
-            val oppdatertType = request.andreYtelseType.tilDomeneType()
+            val oppdatertType = request.andreYtelserType.tilDomeneType()
 
             kallKontekst.validerGraderteAndreYtelserEndring(
                 person = person,

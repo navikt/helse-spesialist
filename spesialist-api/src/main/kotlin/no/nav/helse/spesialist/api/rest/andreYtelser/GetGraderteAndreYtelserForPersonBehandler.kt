@@ -42,17 +42,17 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                         grad = periode.grad,
                     )
                 },
-            andreYtelseType = graderteAndreYtelserType.tilApiGraderteAndreYtelseType(),
+            andreYtelserType = graderteAndreYtelserType.tilApiGraderteAndreYtelserType(),
             fjernet = fjernet,
         )
 
-    private fun GraderteAndreYtelserType.tilApiGraderteAndreYtelseType() =
+    private fun GraderteAndreYtelserType.tilApiGraderteAndreYtelserType() =
         when (this) {
-            GraderteAndreYtelserType.FORELDREPENGER -> ApiGraderteAndreYtelseType.FORELDREPENGER
-            GraderteAndreYtelserType.SVANGERSKAPSPENGER -> ApiGraderteAndreYtelseType.SVANGERSKAPSPENGER
-            GraderteAndreYtelserType.OMSORGSPENGER -> ApiGraderteAndreYtelseType.OMSORGSPENGER
-            GraderteAndreYtelserType.PLEIEPENGER -> ApiGraderteAndreYtelseType.PLEIEPENGER
-            GraderteAndreYtelserType.OPPLARINGSPENGER -> ApiGraderteAndreYtelseType.OPPLARINGSPENGER
+            GraderteAndreYtelserType.FORELDREPENGER -> ApiGraderteAndreYtelserType.FORELDREPENGER
+            GraderteAndreYtelserType.SVANGERSKAPSPENGER -> ApiGraderteAndreYtelserType.SVANGERSKAPSPENGER
+            GraderteAndreYtelserType.OMSORGSPENGER -> ApiGraderteAndreYtelserType.OMSORGSPENGER
+            GraderteAndreYtelserType.PLEIEPENGER -> ApiGraderteAndreYtelserType.PLEIEPENGER
+            GraderteAndreYtelserType.OPPLARINGSPENGER -> ApiGraderteAndreYtelserType.OPPLARINGSPENGER
         }
 }
 

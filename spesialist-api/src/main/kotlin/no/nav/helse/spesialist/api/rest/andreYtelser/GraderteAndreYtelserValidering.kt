@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.rest.andreYtelser
 
-import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelseType
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserPeriode
+import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserType
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
@@ -18,7 +18,7 @@ internal fun List<ApiGraderteAndreYtelserPeriode>.tilGraderteAndreYtelserPeriode
         )
     }
 
-internal fun ApiGraderteAndreYtelseType.tilDomeneType() = GraderteAndreYtelserType.valueOf(name)
+internal fun ApiGraderteAndreYtelserType.tilDomeneType() = GraderteAndreYtelserType.valueOf(name)
 
 internal fun KallKontekst.validerGraderteAndreYtelserEndring(
     person: Person,

@@ -39,7 +39,7 @@ class PatchEndreGraderteAndreYtelserBehandler : PatchBehandler<GraderteAndreYtel
         kallKontekst: KallKontekst,
     ): RestResponse<ApiPatchEndreGraderteAndreYtelserResponse, ApiPatchEndreGraderteAndreYtelserErrorCode> {
         val oppdatertePerioder = request.perioder.tilGraderteAndreYtelserPerioder()
-        val oppdatertType = request.andreYtelseType.tilDomeneType()
+        val oppdatertType = request.andreYtelserType.tilDomeneType()
 
         kallKontekst.validerGraderteAndreYtelserEndring(
             person = person,

@@ -76,7 +76,7 @@ class GetGraderteAndreYtelserIntegrationTest {
                     "grad": 66
                   }
                 ],
-                "andreYtelseType": "SVANGERSKAPSPENGER",
+                "andreYtelserType": "SVANGERSKAPSPENGER",
                 "fjernet": false
               }
             ]
@@ -125,7 +125,7 @@ class GetGraderteAndreYtelserIntegrationTest {
                     "grad": 66
                   }
                 ],
-                "andreYtelseType": "SVANGERSKAPSPENGER",
+                "andreYtelserType": "SVANGERSKAPSPENGER",
                 "fjernet": true
               }
             ]

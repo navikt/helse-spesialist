@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelseType
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserPeriode
+import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
@@ -42,8 +42,8 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                     grad = apiPeriode.grad,
                 )
             }
-        val apiAndreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER
-        val domainAndreYtelseType = GraderteAndreYtelserType.FORELDREPENGER
+        val apiAndreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER
+        val domainAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
 
@@ -52,7 +52,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = ApiPerioder,
-                    andreYtelseType = apiAndreYtelseType,
+                    andreYtelserType = apiAndreYtelserType,
                     notatTilBeslutter = "notat",
                 )
 
@@ -62,7 +62,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 graderteAndreYtelser = graderteAndreYtelser[0],
                 expectedAndreYtelserId = andreYtelserId,
                 expectedPerioder = domainPerioder,
-                expectedAndreYtelseType = domainAndreYtelseType,
+                expectedAndreYtelserType = domainAndreYtelserType,
                 expectedFjernet = false,
             )
         }
@@ -116,13 +116,13 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val førsteAndreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = apiFørstePeriode,
-                    andreYtelseType = ApiGraderteAndreYtelseType.PLEIEPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.PLEIEPENGER,
                     notatTilBeslutter = "første notat",
                 )
             val andreAndreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = apiAndrePerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.OMSORGSPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.OMSORGSPENGER,
                     notatTilBeslutter = "andre notat",
                 )
 
@@ -133,14 +133,14 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 graderteAndreYtelser = requireNotNull(graderteAndreYtelserPerId[førsteAndreYtelserId]),
                 expectedAndreYtelserId = førsteAndreYtelserId,
                 expectedPerioder = domainFørstePerioder,
-                expectedAndreYtelseType = GraderteAndreYtelserType.PLEIEPENGER,
+                expectedAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
                 expectedFjernet = false,
             )
             assertGraderteAndreYtelser(
                 graderteAndreYtelser = requireNotNull(graderteAndreYtelserPerId[andreAndreYtelserId]),
                 expectedAndreYtelserId = andreAndreYtelserId,
                 expectedPerioder = domainAndrePerioder,
-                expectedAndreYtelseType = GraderteAndreYtelserType.OMSORGSPENGER,
+                expectedAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
                 expectedFjernet = false,
             )
         }
@@ -193,7 +193,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = opprinneligeApiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
                     notatTilBeslutter = "opprinnelig notat",
                 )
 
@@ -202,7 +202,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 saksbehandlerEndrerGraderteAndreYtelser(
                     graderteAndreYtelserId = andreYtelserId,
                     perioder = endredeApiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.PLEIEPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.PLEIEPENGER,
                     notatTilBeslutter = "oppdaterer perioder og type",
                 )
 
@@ -213,7 +213,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 graderteAndreYtelser = graderteAndreYtelser[0],
                 expectedAndreYtelserId = andreYtelserId,
                 expectedPerioder = endredeDomainPerioder,
-                expectedAndreYtelseType = GraderteAndreYtelserType.PLEIEPENGER,
+                expectedAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
                 expectedFjernet = false,
             )
         }
@@ -269,7 +269,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = opprinneligeApiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
                     notatTilBeslutter = "opprinnelig notat",
                 )
 
@@ -278,7 +278,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 saksbehandlerEndrerGraderteAndreYtelser(
                     graderteAndreYtelserId = andreYtelserId,
                     perioder = endredeApiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
                     notatTilBeslutter = "deler opp i tre perioder",
                 )
 
@@ -289,7 +289,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 graderteAndreYtelser = graderteAndreYtelser[0],
                 expectedAndreYtelserId = andreYtelserId,
                 expectedPerioder = endredeDomainPerioder,
-                expectedAndreYtelseType = GraderteAndreYtelserType.FORELDREPENGER,
+                expectedAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
                 expectedFjernet = false,
             )
         }
@@ -319,7 +319,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = apiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
                     notatTilBeslutter = "opprinnelig notat",
                 )
 
@@ -341,7 +341,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                             grad = apiPeriode.grad,
                         )
                     },
-                expectedAndreYtelseType = GraderteAndreYtelserType.FORELDREPENGER,
+                expectedAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
                 expectedFjernet = true,
             )
         }
@@ -391,7 +391,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreYtelserId =
                 saksbehandlerLeggerTilGraderteAndreYtelser(
                     perioder = opprinneligeApiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.FORELDREPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
                     notatTilBeslutter = "opprinnelig notat",
                 )
 
@@ -405,7 +405,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 saksbehandlerGjenoppretterGraderteAndreYtelser(
                     graderteAndreYtelserId = andreYtelserId,
                     perioder = gjenopprettedeApiPerioder,
-                    andreYtelseType = ApiGraderteAndreYtelseType.PLEIEPENGER,
+                    andreYtelserType = ApiGraderteAndreYtelserType.PLEIEPENGER,
                     notatTilBeslutter = "gjenoppretter ytelsen",
                 )
 
@@ -416,7 +416,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 graderteAndreYtelser = graderteAndreYtelser[0],
                 expectedAndreYtelserId = andreYtelserId,
                 expectedPerioder = gjenopprettedeDomainPerioder,
-                expectedAndreYtelseType = GraderteAndreYtelserType.PLEIEPENGER,
+                expectedAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
                 expectedFjernet = false,
             )
         }
@@ -429,11 +429,11 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
         graderteAndreYtelser: JsonNode,
         expectedAndreYtelserId: UUID,
         expectedPerioder: List<GraderteAndreYtelserPeriode>,
-        expectedAndreYtelseType: GraderteAndreYtelserType,
+        expectedAndreYtelserType: GraderteAndreYtelserType,
         expectedFjernet: Boolean,
     ) {
         assertEquals(expectedAndreYtelserId, graderteAndreYtelser["andreYtelserId"].asUUID())
-        assertEquals(expectedAndreYtelseType.name, graderteAndreYtelser["andreYtelseType"].asString())
+        assertEquals(expectedAndreYtelserType.name, graderteAndreYtelser["andreYtelserType"].asString())
         assertEquals(expectedFjernet, graderteAndreYtelser["fjernet"].asBoolean())
         assertEquals(expectedPerioder.size, graderteAndreYtelser["perioder"].size())
         graderteAndreYtelser["perioder"].forEachIndexed { index, periode ->

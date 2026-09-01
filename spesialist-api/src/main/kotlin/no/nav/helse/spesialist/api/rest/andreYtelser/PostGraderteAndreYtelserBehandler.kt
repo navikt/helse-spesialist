@@ -37,7 +37,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
         validerGraderteAndreYtelserPeriode(
             eksisterendeGraderteAndreYtelser =
                 kallKontekst.transaksjon.graderteAndreYtelserRepository.finnAlleForIdentitetsnummer(person.id),
-            nyGraderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelseType.name),
+            nyGraderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelserType.name),
             nyGraderteAndreYtelserPerioder =
                 request.perioder.map {
                     GraderteAndreYtelserPeriode(
@@ -66,7 +66,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
                             grad = it.grad,
                         )
                     },
-                graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelseType.name),
+                graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelserType.name),
             )
         kallKontekst.transaksjon.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
 

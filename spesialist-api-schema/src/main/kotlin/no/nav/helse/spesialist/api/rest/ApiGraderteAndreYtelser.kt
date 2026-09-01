@@ -20,12 +20,12 @@ import java.util.*
 data class ApiLeggTilGraderteAndreYtelserRequest(
     val fodselsnummer: String,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
-    val andreYtelseType: ApiGraderteAndreYtelseType,
+    val andreYtelserType: ApiGraderteAndreYtelserType,
     val notatTilBeslutter: String,
 )
 
 @Serializable
-enum class ApiGraderteAndreYtelseType {
+enum class ApiGraderteAndreYtelserType {
     FORELDREPENGER,
     SVANGERSKAPSPENGER,
     OMSORGSPENGER,
@@ -49,7 +49,7 @@ data class ApiLeggTilGraderteAndreYtelserResponse(
 data class ApiGraderteAndreYtelser(
     val andreYtelserId: UUID,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
-    val andreYtelseType: ApiGraderteAndreYtelseType,
+    val andreYtelserType: ApiGraderteAndreYtelserType,
     val fjernet: Boolean,
 )
 
@@ -57,7 +57,7 @@ data class ApiGraderteAndreYtelser(
 data class ApiPatchEndreGraderteAndreYtelserRequest(
     val graderteAndreYtelserId: UUID,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
-    val andreYtelseType: ApiGraderteAndreYtelseType,
+    val andreYtelserType: ApiGraderteAndreYtelserType,
     val notatTilBeslutter: String,
 )
 
@@ -69,7 +69,7 @@ data class ApiPostFjernGraderteAndreYtelserRequest(
 @Serializable
 data class ApiPostGjenopprettGraderteAndreYtelserRequest(
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
-    val andreYtelseType: ApiGraderteAndreYtelseType,
+    val andreYtelserType: ApiGraderteAndreYtelserType,
     val notatTilBeslutter: String,
 )
 

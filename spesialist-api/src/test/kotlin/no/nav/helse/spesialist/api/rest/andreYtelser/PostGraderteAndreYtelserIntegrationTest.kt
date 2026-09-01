@@ -44,7 +44,7 @@ class PostGraderteAndreYtelserIntegrationTest {
                           "grad": 67
                         }
                       ],
-                      "andreYtelseType": "SVANGERSKAPSPENGER",
+                      "andreYtelserType": "SVANGERSKAPSPENGER",
                       "notatTilBeslutter": "notat om en gradert annen ytelse"
                     }
                     """.trimIndent(),

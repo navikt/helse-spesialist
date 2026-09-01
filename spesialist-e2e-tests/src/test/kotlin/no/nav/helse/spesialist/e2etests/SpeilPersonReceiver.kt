@@ -210,7 +210,7 @@ class SpeilPersonReceiver(
 
     fun saksbehandlerLeggerTilGraderteAndreYtelser(
         perioder: Collection<ApiGraderteAndreYtelserPeriode>,
-        andreYtelseType: ApiGraderteAndreYtelseType,
+        andreYtelserType: ApiGraderteAndreYtelserType,
         notatTilBeslutter: String,
     ): UUID =
         callHttpPost(
@@ -226,7 +226,7 @@ class SpeilPersonReceiver(
                                 "grad" to it.grad,
                             )
                         },
-                    "andreYtelseType" to andreYtelseType.name,
+                    "andreYtelserType" to andreYtelserType.name,
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )!!["andreYtelserId"].asUUID().also {
@@ -236,7 +236,7 @@ class SpeilPersonReceiver(
     fun saksbehandlerEndrerGraderteAndreYtelser(
         graderteAndreYtelserId: UUID,
         perioder: Collection<ApiGraderteAndreYtelserPeriode>,
-        andreYtelseType: ApiGraderteAndreYtelseType,
+        andreYtelserType: ApiGraderteAndreYtelserType,
         notatTilBeslutter: String,
     ): UUID =
         callHttpPatch(
@@ -252,7 +252,7 @@ class SpeilPersonReceiver(
                                 "grad" to it.grad,
                             )
                         },
-                    "andreYtelseType" to andreYtelseType.name,
+                    "andreYtelserType" to andreYtelserType.name,
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )!!["andreYtelserId"].asUUID().also {
@@ -276,7 +276,7 @@ class SpeilPersonReceiver(
     fun saksbehandlerGjenoppretterGraderteAndreYtelser(
         graderteAndreYtelserId: UUID,
         perioder: Collection<ApiGraderteAndreYtelserPeriode>,
-        andreYtelseType: ApiGraderteAndreYtelseType,
+        andreYtelserType: ApiGraderteAndreYtelserType,
         notatTilBeslutter: String,
     ): UUID =
         callHttpPost(
@@ -291,7 +291,7 @@ class SpeilPersonReceiver(
                                 "grad" to it.grad,
                             )
                         },
-                    "andreYtelseType" to andreYtelseType.name,
+                    "andreYtelserType" to andreYtelserType.name,
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),
         )!!["andreYtelserId"].asUUID().also {
