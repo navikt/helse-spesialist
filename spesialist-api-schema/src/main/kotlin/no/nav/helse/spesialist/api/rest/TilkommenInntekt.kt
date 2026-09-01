@@ -73,27 +73,39 @@ sealed interface ApiTilkommenInntektEvent {
     ) {
         @Serializable
         data class DatoPeriodeEndring(
-            val fra: ApiDatoPeriode,
-            val til: ApiDatoPeriode,
-        )
+            override val fra: ApiDatoPeriode,
+            override val til: ApiDatoPeriode,
+        ) : ApiEndringFraTil<ApiDatoPeriode>
 
         @Serializable
         data class BigDecimalEndring(
-            val fra: BigDecimal,
-            val til: BigDecimal,
-        )
+            override val fra: BigDecimal,
+            override val til: BigDecimal,
+        ) : ApiEndringFraTil<BigDecimal>
 
         @Serializable
         data class StringEndring(
-            val fra: String,
-            val til: String,
-        )
+            override val fra: String,
+            override val til: String,
+        ) : ApiEndringFraTil<String>
+
+        @Serializable
+        data class BooleanEndring(
+            override val fra: Boolean,
+            override val til: Boolean,
+        ) : ApiEndringFraTil<Boolean>
 
         @Serializable
         data class ListLocalDateEndring(
-            val fra: List<LocalDate>,
-            val til: List<LocalDate>,
-        )
+            override val fra: List<LocalDate>,
+            override val til: List<LocalDate>,
+        ) : ApiEndringFraTil<List<LocalDate>>
+
+        @Serializable
+        sealed interface ApiEndringFraTil<T> {
+            val fra: T
+            val til: T
+        }
     }
 }
 
@@ -139,11 +151,11 @@ data class ApiTilkommenInntektPatch(
 ) {
     @Serializable
     data class ApiTilkommenInntektEndringer(
-        val organisasjonsnummer: EndringFraTil<String>?,
-        val periode: EndringFraTil<ApiDatoPeriode>?,
-        val periodebeløp: EndringFraTil<BigDecimal>?,
-        val ekskluderteUkedager: EndringFraTil<List<LocalDate>>?,
-        val fjernet: EndringFraTil<Boolean>?,
+        val organisasjonsnummer: ApiTilkommenInntektEvent.Endringer.StringEndring?,
+        val periode: ApiTilkommenInntektEvent.Endringer.DatoPeriodeEndring?,
+        val periodebeløp: ApiTilkommenInntektEvent.Endringer.BigDecimalEndring?,
+        val ekskluderteUkedager: ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring?,
+        val fjernet: ApiTilkommenInntektEvent.Endringer.BooleanEndring?,
     )
 }
 

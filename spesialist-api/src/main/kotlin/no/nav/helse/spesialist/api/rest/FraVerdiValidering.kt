@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.application.logg.teamLogs
 import kotlin.reflect.KProperty0
 
 internal class FraVerdiValidering<T, R>(
-    felt: KProperty0<EndringFraTil<T>?>,
+    felt: KProperty0<ApiTilkommenInntektEvent.Endringer.ApiEndringFraTil<T>?>,
     private val faktiskVerdi: R,
     private val mapping: (T) -> R,
 ) {
@@ -28,12 +28,12 @@ internal class FraVerdiValidering<T, R>(
 }
 
 internal fun <T, R> fraVerdiValidering(
-    endringFelt: KProperty0<EndringFraTil<T>?>,
+    endringFelt: KProperty0<ApiTilkommenInntektEvent.Endringer.ApiEndringFraTil<T>?>,
     faktiskVerdi: R,
     mapping: (T) -> R,
 ): FraVerdiValidering<T, R> = FraVerdiValidering(endringFelt, faktiskVerdi, mapping)
 
 internal fun <T> fraVerdiValidering(
-    endringFelt: KProperty0<EndringFraTil<T>?>,
+    endringFelt: KProperty0<ApiTilkommenInntektEvent.Endringer.ApiEndringFraTil<T>?>,
     faktiskVerdi: T,
 ): FraVerdiValidering<T, T> = FraVerdiValidering(endringFelt, faktiskVerdi) { it }
