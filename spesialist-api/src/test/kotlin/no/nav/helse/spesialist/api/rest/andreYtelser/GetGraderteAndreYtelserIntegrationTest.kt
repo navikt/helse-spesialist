@@ -1,8 +1,11 @@
 package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
+import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -63,7 +66,8 @@ class GetGraderteAndreYtelserIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
-        assertNotNull(response.bodyAsJsonNode)
+        val body = response.bodyAsJsonNode
+        assertNotNull(body)
         assertJsonEquals(
             """
             [
@@ -77,12 +81,32 @@ class GetGraderteAndreYtelserIntegrationTest {
                   }
                 ],
                 "andreYtelserType": "SVANGERSKAPSPENGER",
-                "fjernet": false
+                "fjernet": false,
+                "events": [
+                  {
+                    "type": "ApiGraderteAndreYtelserOpprettetEvent",
+                    "metadata": {
+                      "sekvensnummer": 1,
+                      "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                      "notatTilBeslutter": "et notat til beslutter"
+                    },
+                    "perioder": [
+                      {
+                        "fom": "2024-09-12",
+                        "tom": "2024-10-02",
+                        "grad": 66
+                      }
+                    ],
+                    "andreYtelserType": "SVANGERSKAPSPENGER"
+                  }
+                ]
               }
             ]
             """.trimIndent(),
-            response.bodyAsJsonNode,
+            body,
+            "events.metadata.tidspunkt",
         )
+        assertMindreEnnNSekunderSiden(5, body.first()["events"].first()["metadata"]["tidspunkt"].asLocalDateTime())
     }
 
     @Test
@@ -112,7 +136,8 @@ class GetGraderteAndreYtelserIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.OK.value, response.status)
-        assertNotNull(response.bodyAsJsonNode)
+        val body = response.bodyAsJsonNode
+        assertNotNull(body)
         assertJsonEquals(
             """
             [
@@ -126,30 +151,157 @@ class GetGraderteAndreYtelserIntegrationTest {
                   }
                 ],
                 "andreYtelserType": "SVANGERSKAPSPENGER",
-                "fjernet": true
+                "fjernet": true,
+                "events": [
+                  {
+                    "type": "ApiGraderteAndreYtelserOpprettetEvent",
+                    "metadata": {
+                      "sekvensnummer": 1,
+                      "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                      "notatTilBeslutter": "et notat til beslutter"
+                    },
+                    "perioder": [
+                      {
+                        "fom": "2024-09-12",
+                        "tom": "2024-10-02",
+                        "grad": 66
+                      }
+                    ],
+                    "andreYtelserType": "SVANGERSKAPSPENGER"
+                  },
+                  {
+                    "type": "ApiGraderteAndreYtelserFjernetEvent",
+                    "metadata": {
+                      "sekvensnummer": 2,
+                      "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                      "notatTilBeslutter": "fjerner ytelsen"
+                    }
+                  }
+                ]
               }
             ]
             """.trimIndent(),
-            response.bodyAsJsonNode,
+            body,
+            "events.metadata.tidspunkt",
         )
+        assertMindreEnnNSekunderSiden(5, body.first()["events"].get(1)["metadata"]["tidspunkt"].asLocalDateTime())
+    }
+
+    @Test
+    fun `kan endre en graderte-andre-ytelser for en person`() {
+        // Given:
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
+        val saksbehandler = lagSaksbehandler()
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+
+        val periode = 12 sep 2024 tilOgMed (2 okt 2024)
+        val enFjernetGradertAnnenYtelse =
+            opprettEnGradertAnnenYtelse(person, saksbehandler, periode = periode).also {
+                it.endreTil(
+                    saksbehandlerIdent = saksbehandler.ident,
+                    notatTilBeslutter = "endrer ytelsen",
+                    totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+                    graderteAndreYtelserPerioder = listOf(GraderteAndreYtelserPeriode(periode.copy(tom = periode.tom.plusDays(22)), grad = 66)),
+                    graderteAndreYtelserType = it.graderteAndreYtelserType,
+                )
+            }
+        integrationTestFixture.sessionContext.graderteAndreYtelserRepository.lagre(enFjernetGradertAnnenYtelse)
+
+        // When:
+        val response =
+            integrationTestFixture.get(
+                url = "/api/personer/${personPseudoId.value}/graderte-andre-ytelser",
+                saksbehandler = saksbehandler,
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.OK.value, response.status)
+        val body = response.bodyAsJsonNode
+        assertNotNull(body)
+        assertJsonEquals(
+            """
+            [
+              {
+                "andreYtelserId": "${enFjernetGradertAnnenYtelse.id.value}",
+                "perioder": [
+                  {
+                    "fom": "2024-09-12",
+                    "tom": "2024-10-24",
+                    "grad": 66
+                  }
+                ],
+                "andreYtelserType": "SVANGERSKAPSPENGER",
+                "fjernet": false,
+                "events": [
+                  {
+                    "type": "ApiGraderteAndreYtelserOpprettetEvent",
+                    "metadata": {
+                      "sekvensnummer": 1,
+                      "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                      "notatTilBeslutter": "et notat til beslutter"
+                    },
+                    "perioder": [
+                      {
+                        "fom": "2024-09-12",
+                        "tom": "2024-10-02",
+                        "grad": 66
+                      }
+                    ],
+                    "andreYtelserType": "SVANGERSKAPSPENGER"
+                  },
+                  {
+                    "type": "ApiGraderteAndreYtelserEndretEvent",
+                    "metadata": {
+                      "sekvensnummer": 2,
+                      "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                      "notatTilBeslutter": "endrer ytelsen"
+                    },
+                    "endringer": {
+                      "perioder": {
+                        "fra": [
+                          {
+                            "periode": {
+                              "fom": "2024-09-12",
+                              "tom": "2024-10-02"
+                            },
+                            "grad": 66
+                          }
+                        ],
+                        "til": [
+                          {
+                            "periode": {
+                              "fom": "2024-09-12",
+                              "tom": "2024-10-24"
+                            },
+                            "grad": 66
+                          }
+                        ]
+                      },
+                      "andreYtelserType": null
+                    }
+                  }
+                ]
+              }
+            ]
+            """.trimIndent(),
+            body,
+            "events.metadata.tidspunkt",
+        )
+        assertMindreEnnNSekunderSiden(5, body.first()["events"].get(1)["metadata"]["tidspunkt"].asLocalDateTime())
     }
 
     private fun opprettEnGradertAnnenYtelse(
         person: Person,
         saksbehandler: Saksbehandler,
+        periode: Periode = 12 sep 2024 tilOgMed (2 okt 2024),
     ): GraderteAndreYtelser =
         GraderteAndreYtelser.ny(
             identitetsnummer = person.id,
             saksbehandlerIdent = saksbehandler.ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            graderteAndreYtelserPerioder =
-                listOf(
-                    GraderteAndreYtelserPeriode(
-                        periode = (12 sep 2024) tilOgMed (2 okt 2024),
-                        grad = 66,
-                    ),
-                ),
+            graderteAndreYtelserPerioder = listOf(GraderteAndreYtelserPeriode(periode = periode, grad = 66)),
             graderteAndreYtelserType = GraderteAndreYtelserType.SVANGERSKAPSPENGER,
         )
 }

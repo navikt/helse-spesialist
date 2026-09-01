@@ -163,7 +163,7 @@ class GraderteAndreYtelserPeriodeValidatorTest {
                     ),
                 graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
             )
-        val andreYtelse =
+        val andreYtelser =
             GraderteAndreYtelser.ny(
                 identitetsnummer = identitetsnummer,
                 saksbehandlerIdent = lagSaksbehandler().ident,
@@ -180,7 +180,7 @@ class GraderteAndreYtelserPeriodeValidatorTest {
             validerGraderteAndreYtelserPeriode(
                 nyGraderteAndreYtelserPerioder = førsteYtelse.perioder,
                 nyGraderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                eksisterendeGraderteAndreYtelser = listOf(andreYtelse),
+                eksisterendeGraderteAndreYtelser = listOf(andreYtelser),
                 vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2024, tom = 28 feb 2024)),
             )
         }
