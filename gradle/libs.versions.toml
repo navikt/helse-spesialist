@@ -58,7 +58,7 @@ mockOauth2Server = "no.nav.security:mock-oauth2-server:6.0.2"
 opentelemetry-instrumentation-annotations = 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.31.1'
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.9.1"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.13"
-postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.29.0"
+postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.30.0"
 
 rapidsAndRivers = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsAndRivers" }
 rapidsAndRiversTest = { module = "com.github.navikt.rapids-and-rivers:rapids-and-rivers-test", version.ref = "rapidsAndRivers" }
