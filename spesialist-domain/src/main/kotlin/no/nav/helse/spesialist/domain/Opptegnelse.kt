@@ -21,7 +21,6 @@ class Opptegnelse private constructor(
         REVURDERING_AVVIST,
         REVURDERING_FERDIGBEHANDLET,
         PERSONDATA_OPPDATERT,
-        PERSON_KLAR_TIL_BEHANDLING,
     }
 
     companion object {

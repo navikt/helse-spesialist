@@ -33,6 +33,5 @@ data class ApiServerSentEvent(
         REVURDERING_AVVIST,
         REVURDERING_FERDIGBEHANDLET,
         PERSONDATA_OPPDATERT,
-        PERSON_KLAR_TIL_BEHANDLING,
     }
 }

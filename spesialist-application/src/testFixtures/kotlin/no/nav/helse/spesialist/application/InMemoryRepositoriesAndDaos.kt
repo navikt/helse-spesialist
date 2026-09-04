@@ -13,7 +13,6 @@ class InMemoryRepositoriesAndDaos {
     private val notatRepository = InMemoryNotatRepository()
     private val opptegnelseRepository = InMemoryOpptegnelseRepository()
     private val overstyringRepository = InMemoryOverstyringRepository()
-    private val personKlargjoresDao = InMemoryPersonKlargjoresDao()
     private val personRepository = InMemoryPersonRepository()
     private val påVentRepository = InMemoryPåVentRepository()
     private val saksbehandlerRepository = InMemorySaksbehandlerRepository()
@@ -173,7 +172,6 @@ class InMemoryRepositoriesAndDaos {
             vedtakRepository = vedtakRepository,
             vedtakBegrunnelseDao = vedtakBegrunnelseDao,
             opptegnelseRepository = opptegnelseRepository,
-            personKlargjoresDao = personKlargjoresDao,
             saksbehandlerStansRepository = saksbehandlerStansRepository,
             veilederStansRepository = veilederStansRepository,
             venterPåKvitteringForOverstyringRepository = venterPåKvitteringRepository,

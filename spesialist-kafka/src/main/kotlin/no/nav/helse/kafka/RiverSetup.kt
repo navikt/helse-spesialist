@@ -48,7 +48,6 @@ class RiverSetup(
             ÅpneGosysOppgaverLøsningRiver(mediator),
             VurderingsmomenterLøsningRiver(mediator),
             InntektLøsningRiver(mediator),
-            KlargjørPersonForVisningRiver(mediator),
             UtbetalingEndretRiver(mediator),
             VedtaksperiodeReberegnetRiver(mediator),
             GosysOppgaveEndretRiver(mediator),

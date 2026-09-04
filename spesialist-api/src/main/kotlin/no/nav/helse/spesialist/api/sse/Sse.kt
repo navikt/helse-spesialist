@@ -109,5 +109,4 @@ private fun Opptegnelse.Type.tilEvent(): String =
         Opptegnelse.Type.REVURDERING_AVVIST -> "REVURDERING_AVVIST"
         Opptegnelse.Type.REVURDERING_FERDIGBEHANDLET -> "REVURDERING_FERDIGBEHANDLET"
         Opptegnelse.Type.PERSONDATA_OPPDATERT -> "PERSONDATA_OPPDATERT"
-        Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING -> "PERSON_KLAR_TIL_BEHANDLING"
     }

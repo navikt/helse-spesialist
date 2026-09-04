@@ -34,7 +34,7 @@ class ServerSentEventsIntegrationTest {
         opptegnelseRepository.lagre(
             Opptegnelse.ny(
                 identitetsnummer = identitetsnummer,
-                type = Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING,
+                type = Opptegnelse.Type.REVURDERING_AVVIST,
             ),
         )
 

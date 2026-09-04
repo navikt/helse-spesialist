@@ -711,19 +711,6 @@ object Testmeldingfabrikk {
         ),
     )
 
-    fun lagKlargjørPersonForVisning(
-        aktørId: String,
-        fødselsnummer: String,
-        id: UUID,
-    ) = nyHendelse(
-        id,
-        "klargjør_person_for_visning",
-        mutableMapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-        ),
-    )
-
     fun lagAvviksvurderingløsning(
         fødselsnummer: String,
         organisasjonsnummer: String,

@@ -29,8 +29,6 @@ internal fun UtgåendeHendelse.eventName() =
 
         is VedtakFattetMelding -> "vedtak_fattet"
 
-        is KlargjørPersonForVisning -> "klargjør_person_for_visning"
-
         is HentDokument -> "hent-dokument"
 
         is OppgaveOpprettet -> "oppgave_opprettet"
@@ -67,7 +65,6 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
         is Godkjenningsbehovløsning -> this.detaljer()
         is VedtakFattetMelding -> this.detaljer()
-        is KlargjørPersonForVisning -> emptyMap()
         is HentDokument -> this.detaljer()
         is OppgaveOpprettet -> this.detaljer()
         is OppgaveOppdatert -> this.detaljer()

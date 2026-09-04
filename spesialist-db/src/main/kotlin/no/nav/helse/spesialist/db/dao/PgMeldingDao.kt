@@ -9,7 +9,6 @@ import no.nav.helse.db.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENNING
 import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
 import no.nav.helse.db.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
-import no.nav.helse.db.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
 import no.nav.helse.db.MeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.db.MeldingDao.Meldingtype.UTBETALING_ENDRET
 import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
@@ -21,7 +20,6 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
-import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -208,7 +206,6 @@ class PgMeldingDao private constructor(
             ENDRET_EGEN_ANSATT_STATUS -> EndretEgenAnsattStatus(jsonNode)
             SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
-            KLARGJØR_TILGANGSRELATERTE_DATA -> KlargjørTilgangsrelaterteData(jsonNode)
             else -> throw IllegalArgumentException("ukjent meldingtype: $meldingtype")
         }
     }
@@ -225,7 +222,6 @@ class PgMeldingDao private constructor(
             is SøknadSendt -> SØKNAD_SENDT
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
-            is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             is VeilederStansMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
