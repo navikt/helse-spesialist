@@ -415,9 +415,9 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vedtaksperiode = person.vedtaksperiode(godkjenningsbehovData.vedtaksperiodeId),
                 oppgaveService = oppgaveService,
-                sykefraværstilfelle = sykefraværstilfelle,
+                behandlingUnikId = BehandlingUnikId(legacyBehandling.unikId()),
+                vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId),
             ),
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,

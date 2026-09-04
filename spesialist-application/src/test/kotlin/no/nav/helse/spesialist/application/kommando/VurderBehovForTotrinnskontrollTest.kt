@@ -7,100 +7,41 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
-import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.Totrinnsvurdering
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.testfixtures.feb
-import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.*
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random.Default.nextLong
 
 internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
-    private companion object {
-        private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
-        private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE =
-            LegacyVedtaksperiode.gjenopprett(
-                organisasjonsnummer = "987654321",
-                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                behandlinger =
-                    listOf(
-                        BehandlingDto(
-                            spleisBehandlingId = UUID.randomUUID(),
-                            fom = LocalDate.now(),
-                            tom = LocalDate.now(),
-                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                            vedtaksperiodeId = VEDTAKSPERIODE_ID_1,
-                            utbetalingId = UUID.randomUUID(),
-                            skjæringstidspunkt = LocalDate.now(),
-                            tilstand = TilstandDto.KlarTilBehandling,
-                            id = UUID.randomUUID(),
-                            tags = emptyList(),
-                            varsler = emptyList(),
-                        ),
-                    ),
-                forkastet = false,
-            )
-        private val FØDSELSNUMMER = "fnr"
-    }
+    private val fødselsnummer = lagFødselsnummer()
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
-    val sykefraværstilfelle =
-        Sykefraværstilfelle(
-            FØDSELSNUMMER,
-            1 jan 2018,
-            listOf(
-                LegacyBehandling(
-                    id = UUID.randomUUID(),
-                    vedtaksperiodeId = VEDTAKSPERIODE_ID_1,
-                    fom = 1 jan 2018,
-                    tom = 31 jan 2018,
-                    skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                ),
-                LegacyBehandling(
-                    id = UUID.randomUUID(),
-                    vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                    fom = 1 feb 2018,
-                    tom = 28 feb 2018,
-                    skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                ),
-            ),
-        )
+    private val behandlingUnikId = lagBehandlingUnikId()
+    private val spleisBehandlingId = lagSpleisBehandlingId()
+    private val vedtaksperiodeId = lagVedtaksperiodeId()
     private val command =
         VurderBehovForTotrinnskontroll(
-            fødselsnummer = FØDSELSNUMMER,
-            vedtaksperiode = VEDTAKSPERIODE,
+            fødselsnummer = fødselsnummer,
             oppgaveService = oppgaveService,
-            sykefraværstilfelle = sykefraværstilfelle,
+            behandlingUnikId = behandlingUnikId,
+            vedtaksperiodeId = vedtaksperiodeId,
         )
 
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        sykefraværstilfelle.håndter(
-            LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
-        )
-        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+        sessionContext.varselRepository.lagre(lagVarsel(behandlingUnikId = behandlingUnikId, spleisBehandlingId = spleisBehandlingId, kode = "RV_MV_1"))
+        every { oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId.value) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
@@ -108,38 +49,32 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
 
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for manglende inntektsmelding, og ikke har hatt oppgave som har vært ferdigstilt før`() {
-        sykefraværstilfelle.håndter(
-            LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
-        )
-        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+        sessionContext.varselRepository.lagre(lagVarsel(behandlingUnikId = behandlingUnikId, spleisBehandlingId = spleisBehandlingId, kode = "RV_IV_10"))
+        every { oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId.value) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @ParameterizedTest
-    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(
-        status: LegacyVarsel.Status,
+        status: Varsel.Status,
     ) {
-        sykefraværstilfelle.håndter(
-            LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
-        )
-        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+        sessionContext.varselRepository.lagre(lagVarsel(behandlingUnikId = behandlingUnikId, spleisBehandlingId = spleisBehandlingId, kode = "RV_MV_1", status = status))
+        every { oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId.value) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @ParameterizedTest
-    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for manglende inntektsmelding og er utbetalt`(
-        status: LegacyVarsel.Status,
+        status: Varsel.Status,
     ) {
-        sykefraværstilfelle.håndter(
-            LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
-        )
-        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+        sessionContext.varselRepository.lagre(lagVarsel(behandlingUnikId = behandlingUnikId, spleisBehandlingId = spleisBehandlingId, kode = "RV_IV_10", status = status))
+        every { oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId.value) } returns false
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
@@ -154,7 +89,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
         assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, fødselsnummer) }
     }
 
     @Test
@@ -172,7 +107,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
         assertEquals(1, sessionContext.totrinnsvurderingRepository.alle().size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, fødselsnummer) }
 
         assertEquals(
             AVVENTER_SAKSBEHANDLER,
@@ -184,7 +119,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
 
         assertEquals(
             1,
-            sessionContext.periodehistorikkDao.behandlingData[VEDTAKSPERIODE.gjeldendeUnikId]
+            sessionContext.periodehistorikkDao.behandlingData[behandlingUnikId.value]
                 ?.filterIsInstance<TotrinnsvurderingAutomatiskRetur>()
                 ?.size,
         )
@@ -205,7 +140,7 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         beslutter: SaksbehandlerOid = lagSaksbehandlerOid(),
     ) = Totrinnsvurdering.fraLagring(
         id = TotrinnsvurderingId(nextLong()),
-        fødselsnummer = FØDSELSNUMMER,
+        fødselsnummer = fødselsnummer,
         saksbehandler = saksbehandler,
         beslutter = beslutter,
         opprettet = LocalDateTime.now(),

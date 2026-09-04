@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.domain
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @JvmInline
 value class VarselId(
@@ -113,6 +113,10 @@ class Varsel private constructor(
         if (!kanGodkjennes()) error("Kan ikke godkjennes, varselet er ikke vurdert")
         status = Status.GODKJENT
     }
+
+    fun erVarselOmMedlemsskap(): Boolean = status == Status.AKTIV && kode == "RV_MV_1"
+
+    fun erVarselOmManglendeInntektsmelding(): Boolean = status == Status.AKTIV && kode == "RV_IV_10"
 
     companion object {
         fun nytt(
