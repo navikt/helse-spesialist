@@ -43,10 +43,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
         {
           "fodselsnummer" : "${testContext.person.fødselsnummer}",
           "dodsdato" : null,
-          "enhet" : {
-            "id" : "0301",
-            "__typename" : "Enhet"
-          },
           "personinfo" : {
             "fornavn" : "${testContext.person.fornavn}",
             "mellomnavn" : ${testContext.person.mellomnavn?.let { "\"$it\"" }},

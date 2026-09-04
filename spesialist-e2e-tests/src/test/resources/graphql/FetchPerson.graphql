@@ -562,10 +562,6 @@ fragment tilleggsinfoForInntektskilde on TilleggsinfoForInntektskilde {
 fragment person on Person {
     fodselsnummer
     dodsdato
-    enhet {
-        id
-        __typename
-    }
     personinfo {
         fornavn
         mellomnavn
