@@ -67,7 +67,12 @@ class SpleisRestClientTest {
         assertNotNull(person)
         val snapshotPerson = person.tilSnapshotPerson()
 
-        val perioder = snapshotPerson.arbeidsgivere.single().behandlinger.single().perioder
+        val perioder =
+            snapshotPerson.arbeidsgivere
+                .single()
+                .behandlinger
+                .single()
+                .perioder
         assertEquals(2, perioder.size)
         val uberegnetPeriode = assertIs<SnapshotUberegnetPeriode>(perioder[0])
         val beregnetPeriode = assertIs<SnapshotBeregnetPeriode>(perioder[1])

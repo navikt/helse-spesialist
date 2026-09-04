@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.api.rest.personer
 
 import io.ktor.http.*
-import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.application.PersoninfoKlargjører
+import no.nav.helse.spesialist.application.PersoninfoKlargjører.KlargjøringResultat
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
@@ -14,8 +15,10 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostPersonSokBehandler(
     private val alleIdenterHenter: AlleIdenterHenter,
-    private val personinfoHenter: PersoninfoHenter,
+    personinfoHenter: PersoninfoHenter,
 ) : PostBehandler<Personer.Sok, ApiPersonSokRequest, ApiPersonSokResponse, ApiPostPersonSokErrorCode> {
+    private val personinfoKlargjører = PersoninfoKlargjører(personinfoHenter)
+
     override val påkrevdTilgang = Tilgang.Les
     override val tag = Tags.PERSONER
 
@@ -63,16 +66,15 @@ class PostPersonSokBehandler(
             personIkkeFunnet = { ApiPostPersonSokErrorCode.PERSON_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostPersonSokErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
-            val personPseudoId = kallKontekst.personPseudoIdProvider.nyPersonPseudoId(person.id)
-            val klarForVisning = person.harDataNødvendigForVisning()
-            if (!klarForVisning) {
-                if (!kallKontekst.transaksjon.personKlargjoresDao.klargjøringPågår(person.id.value)) {
-                    kallKontekst.outbox.leggTil(person.id, KlargjørPersonForVisning, "klargjørPersonForVisning")
-                    kallKontekst.transaksjon.personKlargjoresDao.personKlargjøres(person.id.value)
-                }
+            when (personinfoKlargjører.klargjør(person)) {
+                is KlargjøringResultat.IkkeFunnet -> return@medPerson RestResponse.Error(ApiPostPersonSokErrorCode.PERSONINFO_IKKE_FUNNET_I_PDL)
+                is KlargjøringResultat.OppslagFeilet -> return@medPerson RestResponse.Error(ApiPostPersonSokErrorCode.PERSONINFO_OPPSLAG_FEILET)
+                KlargjøringResultat.Klargjort -> Unit
             }
+            kallKontekst.transaksjon.personRepository.lagre(person)
 
-            val body = ApiPersonSokResponse(personPseudoId = personPseudoId.value, klarForVisning = klarForVisning)
+            val personPseudoId = kallKontekst.personPseudoIdProvider.nyPersonPseudoId(person.id)
+            val body = ApiPersonSokResponse(personPseudoId = personPseudoId.value, klarForVisning = true)
 
             RestResponse.OK(body)
         }
@@ -86,12 +88,11 @@ class PostPersonSokBehandler(
                 .find { it.type == AlleIdenterHenter.IdentType.AKTORID }
                 ?.ident
                 ?: return Either.Failure(ApiPostPersonSokErrorCode.AKTØRID_IKKE_FUNNET_I_PDL)
-        val personinfo = personinfoHenter.hentPersoninfo(identitetsnummer)
         return Either.Success(
             Person.Factory.ny(
                 identitetsnummer,
                 aktørId,
-                personinfo,
+                null,
                 null,
             ),
         )
@@ -113,4 +114,6 @@ enum class ApiPostPersonSokErrorCode(
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     AKTØRID_IKKE_FUNNET_I_PDL("AktørId for personen fins ikke i PDL", HttpStatusCode.NotFound),
+    PERSONINFO_IKKE_FUNNET_I_PDL("Personinfo for personen fins ikke i PDL", HttpStatusCode.NotFound),
+    PERSONINFO_OPPSLAG_FEILET("Klarte ikke å hente personinfo", HttpStatusCode.BadGateway),
 }

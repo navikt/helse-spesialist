@@ -1,15 +1,17 @@
 package no.nav.helse.spesialist.api.rest
 
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
+import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.mockk.every
-import no.nav.helse.modell.melding.KlargjørPersonForVisning
+import io.mockk.verify
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.AlleIdenterHenter.IdentType
-import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPersoninfo
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.UUID
 import kotlin.test.Test
@@ -21,7 +23,7 @@ class PostPersonSokIntegrationTest {
     private val sessionContext = integrationTestFixture.sessionContext
 
     @Test
-    fun `Finner klar person med identitetsnummer`() {
+    fun `Finner person som allerede har personinfo, med identitetsnummer`() {
         // Given:
         val person = lagPerson().also(sessionContext.personRepository::lagre)
         val identitetsnummer = person.id.value
@@ -49,7 +51,7 @@ class PostPersonSokIntegrationTest {
     }
 
     @Test
-    fun `Finner klar person med aktørId`() {
+    fun `Finner person som allerede har personinfo, med aktørId`() {
         // Given:
         val person = lagPerson().also(sessionContext.personRepository::lagre)
         val aktørId = person.aktørId
@@ -77,10 +79,11 @@ class PostPersonSokIntegrationTest {
     }
 
     @Test
-    fun `Finner ikke-klar person med identitetsnummer og setter igang klargjøring`() {
+    fun `Klargjør person uten personinfo synkront ved søk med identitetsnummer, og publiserer ingenting`() {
         // Given:
         val person = lagPerson(info = null).also(sessionContext.personRepository::lagre)
         val identitetsnummer = person.id.value
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns lagPersoninfo()
 
         // When:
         val response =
@@ -95,26 +98,21 @@ class PostPersonSokIntegrationTest {
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
         assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
-        assertEquals("false", actualJson["klarForVisning"].asString())
+        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser(
-            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
-                fødselsnummer = identitetsnummer,
-                hendelse = KlargjørPersonForVisning,
-                årsak = "klargjørPersonForVisning",
-            ),
-        )
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
     @Test
-    fun `Finner ikke-klar person med aktørId og setter igang klargjøring`() {
+    fun `Klargjør person uten personinfo synkront ved søk med aktørId, og publiserer ingenting`() {
         // Given:
         val person = lagPerson(info = null).also(sessionContext.personRepository::lagre)
         val aktørId = person.aktørId
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns lagPersoninfo()
 
         // When:
         val response =
@@ -129,19 +127,13 @@ class PostPersonSokIntegrationTest {
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
         assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
-        assertEquals("false", actualJson["klarForVisning"].asString())
+        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser(
-            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
-                fødselsnummer = person.id.value,
-                hendelse = KlargjørPersonForVisning,
-                årsak = "klargjørPersonForVisning",
-            ),
-        )
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
     @Test
@@ -216,13 +208,14 @@ class PostPersonSokIntegrationTest {
     }
 
     @Test
-    fun `Oppretter ny person og klargjør personen når Spesialist ikke kjenner til den fra før`() {
+    fun `Oppretter, klargjør og returnerer person når Spesialist ikke kjenner til den fra før av`() {
         // Given:
         val identitetsnummer = lagIdentitetsnummer()
         every { integrationTestFixture.alleIdenterHenterMock.hentAlleIdenter(identitetsnummer) } returns
             listOf(
                 AlleIdenterHenter.Ident(lagAktørId(), IdentType.AKTORID, true),
             )
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(identitetsnummer) } returns lagPersoninfo()
 
         // When:
         val response =
@@ -235,41 +228,128 @@ class PostPersonSokIntegrationTest {
         assertEquals(200, response.status)
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
+        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser(
-            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(identitetsnummer.value, hendelse = KlargjørPersonForVisning, årsak = "klargjørPersonForVisning"),
-        )
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
     @Test
-    fun `Setter kun igang klargjøring én gang tross to requester på ikke-klar person`() {
+    fun `Gjentatte søk på samme person lykkes og publiserer ingenting`() {
         // Given:
         val person = lagPerson(info = null).also(sessionContext.personRepository::lagre)
         val identitetsnummer = person.id.value
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns lagPersoninfo()
 
         // When:
-        repeat(3) {
+        val responser =
+            (1..3).map {
+                integrationTestFixture.post(
+                    "/api/personer/sok",
+                    body = """{ "identitetsnummer": "$identitetsnummer" }""",
+                )
+            }
+
+        // Then:
+        responser.forEach { response ->
+            assertEquals(200, response.status)
+            val actualJson = response.bodyAsJsonNode
+            assertNotNull(actualJson)
+            assertEquals("true", actualJson["klarForVisning"].asString())
+        }
+
+        // Sjekk publiserte meldinger
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+    }
+
+    @Test
+    fun `Gir feilmelding når personinfo ikke finnes i PDL, og publiserer ingenting`() {
+        // Given:
+        val person = lagPerson(info = null).also(sessionContext.personRepository::lagre)
+        val identitetsnummer = person.id.value
+        every { integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id) } returns null
+
+        // When:
+        val response =
             integrationTestFixture.post(
                 "/api/personer/sok",
                 body = """{ "identitetsnummer": "$identitetsnummer" }""",
             )
-        }
 
         // Then:
+        assertEquals(404, response.status)
+        val actualJson = response.bodyAsJsonNode
+        assertNotNull(actualJson)
+        assertEquals("PERSONINFO_IKKE_FUNNET_I_PDL", actualJson["code"].asString())
+
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser(
-            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
-                fødselsnummer = identitetsnummer,
-                hendelse = KlargjørPersonForVisning,
-                årsak = "klargjørPersonForVisning",
-            ),
-        )
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+    }
+
+    @Test
+    fun `Gir feilmelding når personinfo-oppslaget feiler, og publiserer ingenting`() {
+        // Given:
+        val person = lagPerson(info = null).also(sessionContext.personRepository::lagre)
+        val identitetsnummer = person.id.value
+        every {
+            integrationTestFixture.personinfoHenterMock.hentPersoninfo(person.id)
+        } throws RuntimeException("Speed er nede")
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "identitetsnummer": "$identitetsnummer" }""",
+            )
+
+        // Then:
+        assertEquals(502, response.status)
+        val actualJson = response.bodyAsJsonNode
+        assertNotNull(actualJson)
+        assertEquals("PERSONINFO_OPPSLAG_FEILET", actualJson["code"].asString())
+
+        // Sjekk publiserte meldinger
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+    }
+
+    @Test
+    fun `Saksbehandler uten tilgang blir avvist, og det gjøres ikke noe personinfo-oppslag`() {
+        // Given:
+        integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(
+                TilgangSomMangler.StrengtFortroligAdresse,
+            )
+        val person = lagPerson(info = null).also(sessionContext.personRepository::lagre)
+        val identitetsnummer = person.id.value
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                "/api/personer/sok",
+                body = """{ "identitetsnummer": "$identitetsnummer" }""",
+            )
+
+        // Then:
+        assertEquals(403, response.status)
+
+        verify(exactly = 0) { integrationTestFixture.personinfoHenterMock.hentPersoninfo(any()) }
+
+        // Sjekk publiserte meldinger
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 }
