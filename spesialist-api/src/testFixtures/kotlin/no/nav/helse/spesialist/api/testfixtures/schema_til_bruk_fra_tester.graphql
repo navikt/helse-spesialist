@@ -408,7 +408,6 @@ type Person {
     selvstendigNaering: SelvstendigNaering
     tildeling: Tildeling
     tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
-    versjon: Int!
     vilkarsgrunnlagV2: [VilkarsgrunnlagV2!]!
 }
 

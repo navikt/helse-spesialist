@@ -54,7 +54,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
             "__typename" : "Personinfo"
           },
           "tildeling" : null,
-          "versjon" : 54,
           "vilkarsgrunnlagV2" : [ {
             "sykepengegrunnlag" : 180000.0,
             "skjaeringstidspunkt" : "2024-12-01",

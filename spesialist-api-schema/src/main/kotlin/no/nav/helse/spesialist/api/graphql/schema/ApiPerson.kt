@@ -60,7 +60,6 @@ data class ApiAnnetFodselsnummer(
 
 @GraphQLName("Person")
 data class ApiPerson(
-    val versjon: Int,
     val aktorId: String,
     val fodselsnummer: String,
     val andreFodselsnummer: List<ApiAnnetFodselsnummer>,

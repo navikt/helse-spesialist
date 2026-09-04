@@ -578,7 +578,6 @@ fragment person on Person {
         oid
         __typename
     }
-    versjon
     vilkarsgrunnlagV2 {
         ...vilkarsgrunnlagV2
         __typename

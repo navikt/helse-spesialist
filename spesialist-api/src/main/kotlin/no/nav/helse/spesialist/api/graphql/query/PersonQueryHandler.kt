@@ -222,7 +222,6 @@ class PersonQueryHandler(
         if (snapshot == null) {
             loggInfo("Fant ikke snapshot fra Spleis, returnerer en minimal person")
             return ApiPerson(
-                versjon = 0,
                 aktorId = personEntity.aktørId,
                 fodselsnummer = personEntity.id.value,
                 andreFodselsnummer = andreFødselsnumre(transaction, personEntity, personEntity.id),
@@ -252,7 +251,6 @@ class PersonQueryHandler(
         val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value)
 
         return ApiPerson(
-            versjon = snapshot.versjon,
             aktorId = snapshot.aktorId,
             fodselsnummer = identitetsnummer.value,
             andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
