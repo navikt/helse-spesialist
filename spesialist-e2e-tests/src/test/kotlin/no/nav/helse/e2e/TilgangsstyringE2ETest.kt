@@ -7,7 +7,6 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -22,31 +22,40 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertNotNull
 
 class TilgangsstyringE2ETest : AbstractE2ETest() {
     @Test
-    fun `Gir 409 når bare søknad er mottatt`() {
+    fun `Kan hente en minimal person når personinfo er kjent, og trigger ikke klargjøring`() {
         settOppDefaultDataOgTilganger()
 
         assertKanIkkeHentePerson("Fant ikke data for person")
 
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
+        berikPersonMedPersoninfo()
 
-        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
+        every { snapshothenter.hentPerson(FØDSELSNUMMER) } returns null
+
+        assertKanHentePerson()
+        assertIkkeUtgåendeMelding("klargjør_person_for_visning")
     }
 
     @Test
-    fun `Kan hente person som er egen ansatt så lenge vi kjenner til den og saksbehandler har tilgang til egen ansatte`() {
+    fun `Kan hente person både før og etter at egen ansatt-status er avklart, og trigger ikke klargjøring`() {
+        // Egen ansatt-status er kun brukt til tilgangsstyring av Tilgangsmaskinen (dekket av testene under),
+        // ikke til å avgjøre om personen er klar for visning. Denne testen viser at henting av person ikke
+        // lenger avhenger av at egenAnsattStatus er satt, verken før eller etter den blir kjent.
         settOppDefaultDataOgTilganger()
         sendMeldingerOppTilEgenAnsatt()
         mockSnapshot()
 
-        assertKanIkkeHentePerson("Personen er ikke klar for visning ennå")
+        assertKanHentePerson()
 
         håndterEgenansattløsning(erEgenAnsatt = false)
         assertKanHentePerson()
+        assertIkkeUtgåendeMelding("klargjør_person_for_visning")
     }
 
     @Test
@@ -78,6 +87,26 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         mockSnapshot()
         håndterEgenansattløsning()
         assertKanIkkeHentePerson("Har ikke tilgang til person")
+    }
+
+    private fun berikPersonMedPersoninfo(fødselsnummer: String = FØDSELSNUMMER) {
+        sessionFactory.transactionalSessionScope { transaction ->
+            val person =
+                transaction.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))
+                    ?: error("Fant ikke person med fødselsnummer=$fødselsnummer")
+            person.oppdaterInfo(
+                Personinfo(
+                    fornavn = "Fornavn",
+                    mellomnavn = null,
+                    etternavn = "Etternavn",
+                    fødselsdato = LocalDate.of(1990, 1, 1),
+                    dødsdato = null,
+                    kjønn = Personinfo.Kjønn.Ukjent,
+                    adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
+                ),
+            )
+            transaction.personRepository.lagre(person)
+        }
     }
 
     private fun sendMeldingerOppTilEgenAnsatt(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) {
@@ -138,10 +167,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                 PersonQueryHandler(
                     daos = daos,
                     apiOppgaveService = mockk(relaxed = true),
-                    personhåndterer =
-                        object : Personhåndterer {
-                            override fun klargjørPersonForVisning(fødselsnummer: String) {}
-                        },
                     snapshothenter = snapshothenter,
                     sessionFactory = sessionFactory,
                     personPseudoIdProvider = personPseudoIdProvider,

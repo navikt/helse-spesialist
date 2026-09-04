@@ -7,7 +7,6 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
-import no.nav.helse.mediator.PersonhåndtererImpl
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
@@ -66,24 +65,20 @@ class ApiModule(
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao)
 
     private val spesialistSchema =
-        run {
-            val personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
-            SpesialistSchema(
-                queryHandlers =
-                    QueryHandlers(
-                        person =
-                            PersonQueryHandler(
-                                daos = daos,
-                                apiOppgaveService = apiOppgaveService,
-                                personhåndterer = personhåndterer,
-                                snapshothenter = snapshothenter,
-                                sessionFactory = sessionFactory,
-                                personPseudoIdProvider = personPseudoIdProvider,
-                                populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
-                            ),
-                    ),
-            )
-        }
+        SpesialistSchema(
+            queryHandlers =
+                QueryHandlers(
+                    person =
+                        PersonQueryHandler(
+                            daos = daos,
+                            apiOppgaveService = apiOppgaveService,
+                            snapshothenter = snapshothenter,
+                            sessionFactory = sessionFactory,
+                            personPseudoIdProvider = personPseudoIdProvider,
+                            populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
+                        ),
+                ),
+        )
 
     fun setUpApi(application: Application) {
         configureKtorApplication(

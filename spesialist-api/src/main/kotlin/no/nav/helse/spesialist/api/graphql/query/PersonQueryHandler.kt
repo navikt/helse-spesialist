@@ -13,7 +13,6 @@ import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.isMissingOrNull
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.AuditLogger
-import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.auth.AccessToken
 import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
@@ -133,7 +132,6 @@ import java.util.UUID
 class PersonQueryHandler(
     private val daos: Daos,
     private val apiOppgaveService: ApiOppgaveService,
-    private val personhåndterer: Personhåndterer,
     private val snapshothenter: Snapshothenter,
     private val sessionFactory: SessionFactory,
     private val personPseudoIdProvider: PersonPseudoIdProvider,
@@ -209,15 +207,6 @@ class PersonQueryHandler(
         identitetsnummer: Identitetsnummer,
         saksbehandler: Saksbehandler,
     ): DataFetcherResult<ApiPerson?> {
-        if (!personEntity.harDataNødvendigForVisning()) {
-            if (!transaction.personKlargjoresDao.klargjøringPågår(identitetsnummer.value)) {
-                personhåndterer.klargjørPersonForVisning(identitetsnummer.value)
-                transaction.personKlargjoresDao.personKlargjøres(identitetsnummer.value)
-            }
-
-            personIkkeKlarTilVisning(saksbehandler, identitetsnummer)
-        }
-
         val oppgave = transaction.oppgaveRepository.finnAktivForPerson(identitetsnummer)
 
         val snapshot =
@@ -1085,17 +1074,6 @@ class PersonQueryHandler(
         )
         forbidden("Har ikke tilgang til person")
     }
-
-    private fun personIkkeKlarTilVisning(
-        saksbehandler: Saksbehandler,
-        identitetsnummer: Identitetsnummer,
-    ): Nothing {
-        AuditLogger.loggManglendeTilgang(
-            saksbehandler = saksbehandler,
-            identitetsnummer = identitetsnummer,
-        )
-        conflict("Personen er ikke klar for visning ennå")
-    }
 }
 
 private fun badRequest(message: String): Nothing = throw graphqlErrorException(400, message)
@@ -1103,8 +1081,6 @@ private fun badRequest(message: String): Nothing = throw graphqlErrorException(4
 private fun forbidden(message: String): Nothing = throw graphqlErrorException(403, message)
 
 private fun notFound(message: String): Nothing = throw graphqlErrorException(404, message)
-
-private fun conflict(message: String): Nothing = throw graphqlErrorException(409, message)
 
 private fun internalServerError(message: String): Nothing = throw graphqlErrorException(500, message)
 

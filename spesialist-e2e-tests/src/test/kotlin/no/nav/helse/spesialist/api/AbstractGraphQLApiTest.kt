@@ -40,8 +40,6 @@ import java.time.Duration.ofNanos
 import java.util.*
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-    private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-
     protected val snapshothenter = mockk<Snapshothenter>(relaxed = true)
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
     val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
@@ -86,7 +84,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                             PersonQueryHandler(
                                 daos = daos,
                                 apiOppgaveService = apiOppgaveService,
-                                personhåndterer = personhåndterer,
                                 snapshothenter = snapshothenter,
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
