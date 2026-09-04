@@ -2,7 +2,6 @@
 
 schema {
     query: Query
-    mutation: Mutation
 }
 
 "This directive allows results to be deferred during execution"
@@ -311,12 +310,6 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
     saksbehandler: Saksbehandler!
     timestamp: LocalDateTime!
     vedtaksperiodeId: UUID!
-}
-
-type Mutation {
-    overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean
-    overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean
-    overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean
 }
 
 type OmregnetArsinntekt {
@@ -801,6 +794,7 @@ enum Egenskap {
     EN_ARBEIDSGIVER
     FLERE_ARBEIDSGIVERE
     FORLENGELSE
+    FORSIKRING
     FORSTEGANGSBEHANDLING
     FORTROLIG_ADRESSE
     GOSYS
@@ -1026,72 +1020,3 @@ scalar UUID
 
 "class java.time.YearMonth"
 scalar YearMonth
-
-input ArbeidsforholdOverstyringHandlingInput {
-    aktorId: String!
-    fodselsnummer: String!
-    overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
-    skjaringstidspunkt: LocalDate!
-    vedtaksperiodeId: UUID!
-}
-
-input InntektOgRefusjonOverstyringInput {
-    aktorId: String!
-    arbeidsgivere: [OverstyringArbeidsgiverInput!]!
-    fodselsnummer: String!
-    skjaringstidspunkt: LocalDate!
-    vedtaksperiodeId: UUID!
-}
-
-input LovhjemmelInput {
-    bokstav: String
-    ledd: String
-    lovverk: String!
-    lovverksversjon: String!
-    paragraf: String!
-}
-
-input OverstyringArbeidsforholdInput {
-    begrunnelse: String!
-    deaktivert: Boolean!
-    forklaring: String!
-    lovhjemmel: LovhjemmelInput
-    orgnummer: String!
-}
-
-input OverstyringArbeidsgiverInput {
-    begrunnelse: String!
-    fom: LocalDate
-    forklaring: String!
-    fraManedligInntekt: Float!
-    fraRefusjonsopplysninger: [OverstyringRefusjonselementInput!]
-    lovhjemmel: LovhjemmelInput
-    manedligInntekt: Float!
-    organisasjonsnummer: String!
-    refusjonsopplysninger: [OverstyringRefusjonselementInput!]
-    tom: LocalDate
-}
-
-input OverstyringDagInput {
-    dato: LocalDate!
-    fraGrad: Int
-    fraType: String!
-    grad: Int
-    lovhjemmel: LovhjemmelInput
-    type: String!
-}
-
-input OverstyringRefusjonselementInput {
-    belop: Float!
-    fom: LocalDate!
-    tom: LocalDate
-}
-
-input TidslinjeOverstyringInput {
-    aktorId: String!
-    begrunnelse: String!
-    dager: [OverstyringDagInput!]!
-    fodselsnummer: String!
-    organisasjonsnummer: String!
-    vedtaksperiodeId: UUID!
-}
