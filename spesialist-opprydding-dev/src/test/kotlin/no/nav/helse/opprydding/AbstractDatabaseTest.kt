@@ -44,7 +44,6 @@ internal abstract class AbstractDatabaseTest {
             VALUES ('${command_context_id}', '${hendelse_id}', now(), 'SUSPENDERT', '{}'::json);
             INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
             VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
-            INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES ($fødselsnummer, now());
             INSERT INTO person(id, fødselsnummer, aktør_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert)
             VALUES (${sequence_number}, '$fødselsnummer', '${aktør_id}', ${sequence_number}, 101, now(), now());
             INSERT INTO arbeidsgiver(identifikator, navn, navn_sist_oppdatert_dato)
