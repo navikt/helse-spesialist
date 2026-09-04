@@ -4,30 +4,23 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
-import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
-import no.nav.helse.modell.vilkårsprøving.Inntekt
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.modell.vilkårsprøving.*
+import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.api.assertNotNull
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class VurderBehovForAvviksvurderingTest : ApplicationTest() {
     private val fødselsnummer = lagFødselsnummer()
@@ -54,7 +47,8 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
                 ),
             sykepengegrunnlag = BigDecimal("666666.0"),
         )
-    private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
+    private val expectedOmregnedeÅrsinntekter =
+        listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
     private val beregningsgrunnlag =
         Beregningsgrunnlag(
             totalbeløp = beregningsgrunnlagTotalbeløp,
@@ -73,18 +67,9 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
                 ),
         )
 
-    private val legacyBehandling =
-        LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            spleisBehandlingId = UUID.randomUUID(),
-            utbetalingId = null,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        )
-
+    private val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+    private val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+    private val behandlingUnikId = BehandlingUnikId(UUID.randomUUID())
     private val repository = sessionContext.avviksvurderingRepository
 
     private val observer =
@@ -137,7 +122,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
         assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
         assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
-        assertEquals(legacyBehandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
+        assertEquals(vedtaksperiodeId.value, behov.vedtaksperiodeId)
     }
 
     @Test
@@ -189,7 +174,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             ),
         )
         command.resume(context, sessionContext, outbox)
-        assertTrue(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        assertTrue(sessionContext.varselRepository.finnVarslerFor(behandlingUnikId).any { it.erVarselOmAvvik() })
     }
 
     @Test
@@ -208,7 +193,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             ),
         )
         command.resume(context, sessionContext, outbox)
-        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        assertFalse(sessionContext.varselRepository.finnVarslerFor(behandlingUnikId).any { it.erVarselOmAvvik() })
     }
 
     @Test
@@ -240,7 +225,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         command.resume(context, sessionContext, outbox)
 
         // then
-        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        assertFalse(sessionContext.varselRepository.finnVarslerFor(behandlingUnikId).any { it.erVarselOmAvvik() })
     }
 
     private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering =
@@ -275,7 +260,9 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         skjæringstidspunkt = skjæringstidspunkt,
         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
         vilkårsgrunnlagId = vilkårsgrunnlagId,
-        legacyBehandling = legacyBehandling,
+        vedtaksperiodeId = vedtaksperiodeId,
+        spleisBehandlingId = spleisBehandlingId,
+        behandlingUnikId = behandlingUnikId,
         yrkesaktivitetstype = yrkesaktivitetstype,
         organisasjonsnummer = organisasjonsnummer,
     )

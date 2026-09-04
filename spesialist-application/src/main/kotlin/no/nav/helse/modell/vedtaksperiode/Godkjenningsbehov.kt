@@ -19,7 +19,9 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
@@ -335,6 +337,10 @@ internal class GodkjenningsbehovCommand(
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
+    private val legacyBehandling =
+        person
+            .vedtaksperiode(godkjenningsbehovData.vedtaksperiodeId)
+            .finnBehandling(godkjenningsbehovData.spleisBehandlingId)
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
@@ -356,10 +362,9 @@ internal class GodkjenningsbehovCommand(
                 skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
                 vilkårsgrunnlagId = godkjenningsbehovData.vilkårsgrunnlagId,
-                legacyBehandling =
-                    person
-                        .vedtaksperiode(godkjenningsbehovData.vedtaksperiodeId)
-                        .finnBehandling(godkjenningsbehovData.spleisBehandlingId),
+                vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId),
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
+                behandlingUnikId = BehandlingUnikId(legacyBehandling.unikId()),
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
             ),

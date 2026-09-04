@@ -19,7 +19,7 @@ import no.nav.helse.spesialist.domain.Periode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class LegacyBehandling private constructor(
     private val id: UUID,
@@ -75,7 +75,7 @@ class LegacyBehandling private constructor(
     var utbetalingId: UUID? = utbetalingId
         private set
 
-    internal fun spleisBehandlingId() = spleisBehandlingId
+    fun spleisBehandlingId() = spleisBehandlingId
 
     fun skjæringstidspunkt() = skjæringstidspunkt
 
@@ -83,7 +83,7 @@ class LegacyBehandling private constructor(
 
     fun varsler(): List<LegacyVarsel> = varsler.toList()
 
-    internal fun unikId() = id
+    fun unikId() = id
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
@@ -134,6 +134,7 @@ class LegacyBehandling private constructor(
                     )
                 }
             }
+
             else -> {
                 this.periode = Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom)
                 this.skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt
@@ -148,6 +149,7 @@ class LegacyBehandling private constructor(
                 nyUtbetaling(utbetalingId)
                 nyTilstand(Tilstand.KlarTilBehandling)
             }
+
             else -> {
                 sikkerlogg.error(
                     "Mottatt ny utbetaling med {} for {} i {}",
@@ -171,6 +173,7 @@ class LegacyBehandling private constructor(
                 this.utbetalingId = null
                 nyTilstand(Tilstand.VidereBehandlingAvklares)
             }
+
             else -> {
                 logg.error(
                     "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
@@ -222,6 +225,7 @@ class LegacyBehandling private constructor(
                 this.spleisBehandlingId = spleisBehandlingId
                 this.utbetalingId = utbetalingId
             }
+
             else -> throw IllegalStateException("Mottatt godkjenningsbehov i tilstand=${tilstand.navn()}")
         }
     }
@@ -232,6 +236,7 @@ class LegacyBehandling private constructor(
                 checkNotNull(utbetalingId) { "Mottatt vedtak_fattet i tilstand=${tilstand.navn()}, men mangler utbetalingId" }
                 nyTilstand(Tilstand.VedtakFattet)
             }
+
             Tilstand.AvsluttetUtenVedtak, Tilstand.AvsluttetUtenVedtakMedVarsler -> {}
             else -> sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", tilstand.navn()))
         }

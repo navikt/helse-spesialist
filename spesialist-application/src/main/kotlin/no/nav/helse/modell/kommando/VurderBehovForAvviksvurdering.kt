@@ -9,16 +9,19 @@ import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.application.Outbox
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.*
 import java.time.LocalDate
-import java.util.UUID
+import java.time.LocalDateTime
+import java.util.*
 
 class VurderBehovForAvviksvurdering(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
     private val vilkårsgrunnlagId: UUID,
-    private val legacyBehandling: LegacyBehandling,
+    private val vedtaksperiodeId: VedtaksperiodeId,
+    private val spleisBehandlingId: SpleisBehandlingId,
+    private val behandlingUnikId: BehandlingUnikId,
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val organisasjonsnummer: String,
 ) : Command {
@@ -38,11 +41,16 @@ class VurderBehovForAvviksvurdering(
         outbox: Outbox,
     ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
-        val løsning = commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
-        val eksisterendeAvviksvurdering = sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
+        val løsning =
+            commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
+        val eksisterendeAvviksvurdering =
+            sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
         if (eksisterendeAvviksvurdering != null) {
-            sessionContext.avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
+            sessionContext.avviksvurderingRepository.opprettKobling(
+                eksisterendeAvviksvurdering.unikId,
+                vilkårsgrunnlagId,
+            )
             return true
         }
         val avviksvurdering =
@@ -56,8 +64,18 @@ class VurderBehovForAvviksvurdering(
                 sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
                 beregningsgrunnlag = løsning.beregningsgrunnlag,
             )
+        if (!løsning.harAkseptabeltAvvik) {
+            val varsel =
+                Varsel.nytt(
+                    id = VarselId(UUID.randomUUID()),
+                    behandlingUnikId = behandlingUnikId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    kode = RV_IV_2.name,
+                    opprettetTidspunkt = LocalDateTime.now(),
+                )
+            sessionContext.varselRepository.lagre(varsel)
+        }
         sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
-        if (!løsning.harAkseptabeltAvvik) legacyBehandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(legacyBehandling.vedtaksperiodeId()))
         return true
     }
 
@@ -77,7 +95,7 @@ class VurderBehovForAvviksvurdering(
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = legacyBehandling.vedtaksperiodeId(),
+                vedtaksperiodeId = vedtaksperiodeId.value,
             ),
         )
         return false
