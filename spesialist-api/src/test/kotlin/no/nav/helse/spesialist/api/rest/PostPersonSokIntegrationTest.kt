@@ -41,7 +41,6 @@ class PostPersonSokIntegrationTest {
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
         assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
-        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -69,7 +68,6 @@ class PostPersonSokIntegrationTest {
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
         assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
-        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -98,7 +96,6 @@ class PostPersonSokIntegrationTest {
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
         assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
-        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -127,7 +124,6 @@ class PostPersonSokIntegrationTest {
         assertNotNull(actualJson)
         assertNotNull(actualJson["personPseudoId"])
         assertDoesNotThrow { UUID.fromString(actualJson["personPseudoId"].asString()) }
-        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -228,7 +224,6 @@ class PostPersonSokIntegrationTest {
         assertEquals(200, response.status)
         val actualJson = response.bodyAsJsonNode
         assertNotNull(actualJson)
-        assertEquals("true", actualJson["klarForVisning"].asString())
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -258,7 +253,6 @@ class PostPersonSokIntegrationTest {
             assertEquals(200, response.status)
             val actualJson = response.bodyAsJsonNode
             assertNotNull(actualJson)
-            assertEquals("true", actualJson["klarForVisning"].asString())
         }
 
         // Sjekk publiserte meldinger

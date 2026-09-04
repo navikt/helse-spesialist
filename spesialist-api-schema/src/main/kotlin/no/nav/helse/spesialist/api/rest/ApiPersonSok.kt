@@ -25,5 +25,4 @@ data class ApiPersonSokRequest(
 @Serializable
 data class ApiPersonSokResponse(
     val personPseudoId: UUID,
-    val klarForVisning: Boolean,
 )

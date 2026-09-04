@@ -74,7 +74,7 @@ class PostPersonSokBehandler(
             kallKontekst.transaksjon.personRepository.lagre(person)
 
             val personPseudoId = kallKontekst.personPseudoIdProvider.nyPersonPseudoId(person.id)
-            val body = ApiPersonSokResponse(personPseudoId = personPseudoId.value, klarForVisning = true)
+            val body = ApiPersonSokResponse(personPseudoId = personPseudoId.value)
 
             RestResponse.OK(body)
         }
