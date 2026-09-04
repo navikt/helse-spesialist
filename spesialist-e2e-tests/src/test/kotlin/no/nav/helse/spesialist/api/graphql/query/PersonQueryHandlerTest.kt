@@ -91,6 +91,17 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `enhet er ikke lenger et felt på person`() {
+        val body =
+            runQuery("""{ person(personPseudoId: "${PersonPseudoId.ny().value}") { enhet { id } } }""")
+
+        assertContains(
+            body["errors"].first()["message"].asString(),
+            "Field 'enhet' in type 'Person' is undefined",
+        )
+    }
+
+    @Test
     @ResourceLock("auditlogg-lytter")
     fun `får personens fødselsnummer-identer når hen har flere`() {
         // Given

@@ -43,7 +43,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
 import no.nav.helse.spesialist.api.graphql.schema.ApiEndrePaVent
-import no.nav.helse.spesialist.api.graphql.schema.ApiEnhet
 import no.nav.helse.spesialist.api.graphql.schema.ApiFaresignal
 import no.nav.helse.spesialist.api.graphql.schema.ApiFjernetFraPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
@@ -240,7 +239,6 @@ class PersonQueryHandler(
                 andreFodselsnummer = andreFødselsnumre(transaction, personEntity, personEntity.id),
                 dodsdato = null,
                 personinfo = personEntity.tilApiPersoninfo(),
-                enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),
                 tildeling = null,
                 tilleggsinfoForInntektskilder = emptyList(),
                 arbeidsgivere = emptyList(),
@@ -271,7 +269,6 @@ class PersonQueryHandler(
             andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
             dodsdato = snapshot.dodsdato,
             personinfo = personEntity.tilApiPersoninfo(),
-            enhet = ApiEnhet(personEntity.enhetRef!!.toString().padStart(4, '0')),
             tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilApiTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag

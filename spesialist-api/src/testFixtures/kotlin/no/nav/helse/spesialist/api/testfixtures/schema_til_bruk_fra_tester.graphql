@@ -222,10 +222,6 @@ type EndrePaVent implements Historikkinnslag {
     type: PeriodehistorikkType!
 }
 
-type Enhet {
-    id: String!
-}
-
 type Faresignal {
     beskrivelse: String!
     kategori: [String!]!
@@ -407,7 +403,6 @@ type Person {
     andreFodselsnummer: [AnnetFodselsnummer!]!
     arbeidsgivere: [Arbeidsgiver!]!
     dodsdato: LocalDate
-    enhet: Enhet!
     fodselsnummer: String!
     personinfo: Personinfo!
     selvstendigNaering: SelvstendigNaering

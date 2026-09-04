@@ -11,11 +11,6 @@ data class ApiSaksbehandler(
     val ident: String?,
 )
 
-@GraphQLName("Enhet")
-data class ApiEnhet(
-    val id: String,
-)
-
 @GraphQLName("Tildeling")
 data class ApiTildeling(
     val navn: String,
@@ -71,7 +66,6 @@ data class ApiPerson(
     val andreFodselsnummer: List<ApiAnnetFodselsnummer>,
     val dodsdato: LocalDate?,
     val personinfo: ApiPersoninfo,
-    val enhet: ApiEnhet,
     val tildeling: ApiTildeling?,
     val tilleggsinfoForInntektskilder: List<ApiTilleggsinfoForInntektskilde>,
     val arbeidsgivere: List<ApiArbeidsgiver>,
