@@ -9,4 +9,5 @@ enum class Brukerrolle {
     Utvikler,
     Dialogmelding,
     Porteføljestyring,
+    GraderteAndreYtelser,
 }

@@ -12,6 +12,7 @@ class TilgangsgrupperTilBrukerroller(
     val utvikler: List<UUID>,
     val dialogmelding: List<UUID>,
     val porteføljestyring: List<UUID>,
+    val graderteAndreYtelser: List<UUID>,
 ) {
     fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> {
         val roller = mutableSetOf<Brukerrolle>()
@@ -39,6 +40,9 @@ class TilgangsgrupperTilBrukerroller(
         if (tilgangsgrupper.any { it in porteføljestyring }) {
             roller.add(Brukerrolle.Porteføljestyring)
         }
+        if (tilgangsgrupper.any { it in graderteAndreYtelser }) {
+            roller.add(Brukerrolle.GraderteAndreYtelser)
+        }
         return roller
     }
 
@@ -50,5 +54,6 @@ class TilgangsgrupperTilBrukerroller(
             stikkprøve.toSet() +
             utvikler.toSet() +
             dialogmelding.toSet() +
-            porteføljestyring.toSet()
+            porteføljestyring.toSet() +
+            graderteAndreYtelser.toSet()
 }

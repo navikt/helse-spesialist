@@ -127,6 +127,7 @@ fun main() {
                         utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
                         dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
                         porteføljestyring = env.getUUIDList("ROLLE_PORTEFOLJESTYRING"),
+                        graderteAndreYtelser = env.getUUIDList("ROLLE_GRADERTE_ANDRE_YTELSER"),
                     ),
                 tilgangsgrupperTilTilganger =
                     TilgangsgrupperTilTilganger(

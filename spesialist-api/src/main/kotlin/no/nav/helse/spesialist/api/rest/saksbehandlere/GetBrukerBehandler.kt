@@ -27,6 +27,7 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
                                 Brukerrolle.Utvikler -> ApiBrukerrolle.UTVIKLER
                                 Brukerrolle.Dialogmelding -> ApiBrukerrolle.DIALOGMELDING
                                 Brukerrolle.Porteføljestyring -> ApiBrukerrolle.PORTEFØLJESTYRING
+                                Brukerrolle.GraderteAndreYtelser -> ApiBrukerrolle.GRADERTE_ANDRE_YTELSER
                             }
                         }.toSet(),
                 tilganger =

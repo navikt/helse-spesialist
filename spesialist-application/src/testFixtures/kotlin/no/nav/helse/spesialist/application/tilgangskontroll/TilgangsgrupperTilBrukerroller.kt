@@ -11,6 +11,7 @@ fun tilgangsgrupperTilBrukerroller(
     utvikler: List<UUID> = listOf(UUID.randomUUID()),
     dialogmelding: List<UUID> = listOf(UUID.randomUUID()),
     porteføljestyring: List<UUID> = listOf(UUID.randomUUID()),
+    graderteAndreYtelser: List<UUID> = listOf(UUID.randomUUID()),
 ): TilgangsgrupperTilBrukerroller =
     TilgangsgrupperTilBrukerroller(
         næringsdrivendeBeta = næringsdrivendeBeta,
@@ -21,4 +22,5 @@ fun tilgangsgrupperTilBrukerroller(
         utvikler = utvikler,
         dialogmelding = dialogmelding,
         porteføljestyring = porteføljestyring,
+        graderteAndreYtelser = graderteAndreYtelser,
     )

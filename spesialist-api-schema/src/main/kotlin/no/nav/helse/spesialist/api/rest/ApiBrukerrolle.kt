@@ -9,4 +9,5 @@ enum class ApiBrukerrolle {
     UTVIKLER,
     DIALOGMELDING,
     PORTEFØLJESTYRING,
+    GRADERTE_ANDRE_YTELSER,
 }
