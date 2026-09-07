@@ -129,6 +129,10 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     if (Brukerrolle.Porteføljestyring in brukerroller) {
         uuider.addAll(porteføljestyring)
     }
+
+    if (Brukerrolle.GraderteAndreYtelser in brukerroller) {
+        uuider.addAll(graderteAndreYtelser)
+    }
     return uuider
 }
 
