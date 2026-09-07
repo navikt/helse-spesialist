@@ -393,7 +393,6 @@ internal class GodkjenningsbehovCommand(
                 spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
             ),
             VurderVurderingsmomenter(
-                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
                 periode = Periode(godkjenningsbehovData.periodeFom, godkjenningsbehovData.periodeTom),
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,
@@ -401,7 +400,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
                 spleisVedtaksperioder = godkjenningsbehovData.spleisVedtaksperioder,
-                identitetsnummer = fødselsnummer,
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
             ),
             VurderAutomatiskAvvisning(
                 godkjenningsbehov = godkjenningsbehovData,
