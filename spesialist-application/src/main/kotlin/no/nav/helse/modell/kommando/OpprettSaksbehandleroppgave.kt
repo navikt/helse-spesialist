@@ -6,7 +6,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.person.Adressebeskyttelse.*
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.*
@@ -28,88 +27,93 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetaling: Utbetaling,
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : Command {
+    private val spleisBehandlingId = SpleisBehandlingId(behovData.spleisBehandlingId)
+
     override fun execute(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
         val fødselsnummer = behovData.fødselsnummer
-        return sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            val sykefraværstilfelle = this.sykefraværstilfelle(behovData.vedtaksperiodeId)
-            val vedtaksperiodeId = behovData.vedtaksperiodeId
-            val hendelseId = behovData.id
-            val utbetalingId = behovData.utbetalingId
-            val periodetype = behovData.periodetype
-            val inntektskilde = behovData.inntektskilde
-            val kanAvvises = behovData.kanAvvises
-            val oppgavetype = if (utbetalingtype == Utbetalingtype.REVURDERING) Oppgavetype.Revurdering else Oppgavetype.Søknad
-            val mottaker =
-                when {
-                    utbetaling.delvisRefusjon() -> Mottaker.DelvisRefusjon
-                    utbetaling.kunUtbetalingTilSykmeldt() -> Mottaker.UtbetalingTilSykmeldt
-                    utbetaling.kunUtbetalingTilArbeidsgiver() -> Mottaker.UtbetalingTilArbeidsgiver
-                    else -> Mottaker.IngenUtbetaling
-                }
-            val inntektsforhold =
-                when (behovData.yrkesaktivitetstype) {
-                    Yrkesaktivitetstype.SELVSTENDIG -> Inntektsforhold.SelvstendigNæringsdrivende
+        val behandling =
+            sessionContext.behandlingRepository.finn(spleisBehandlingId)
+                ?: error("Fant ikke behandling med id $spleisBehandlingId")
+        val behandlingspakke = sessionContext.behandlingRepository.finnBehandlingspakke(behandling, fødselsnummer)
+        val varslerForBehandlingspakke = sessionContext.varselRepository.finnAktiveVarslerFor(behandlingspakke)
 
-                    Yrkesaktivitetstype.ARBEIDSTAKER -> Inntektsforhold.Arbeidstaker
+        val vedtaksperiodeId = behovData.vedtaksperiodeId
+        val hendelseId = behovData.id
+        val utbetalingId = behovData.utbetalingId
+        val periodetype = behovData.periodetype
+        val inntektskilde = behovData.inntektskilde
+        val kanAvvises = behovData.kanAvvises
+        val oppgavetype = if (utbetalingtype == Utbetalingtype.REVURDERING) Oppgavetype.Revurdering else Oppgavetype.Søknad
+        val mottaker =
+            when {
+                utbetaling.delvisRefusjon() -> Mottaker.DelvisRefusjon
+                utbetaling.kunUtbetalingTilSykmeldt() -> Mottaker.UtbetalingTilSykmeldt
+                utbetaling.kunUtbetalingTilArbeidsgiver() -> Mottaker.UtbetalingTilArbeidsgiver
+                else -> Mottaker.IngenUtbetaling
+            }
+        val inntektsforhold =
+            when (behovData.yrkesaktivitetstype) {
+                Yrkesaktivitetstype.SELVSTENDIG -> Inntektsforhold.SelvstendigNæringsdrivende
 
-                    Yrkesaktivitetstype.FRILANS,
-                    Yrkesaktivitetstype.ARBEIDSLEDIG,
-                    -> error("Støtter ikke yrkesaktivitetstype ${behovData.yrkesaktivitetstype}")
-                }
+                Yrkesaktivitetstype.ARBEIDSTAKER -> Inntektsforhold.Arbeidstaker
 
-            val egenskaper =
-                buildSet {
-                    egenAnsatt(fødselsnummer, sessionContext)
-                    adressebeskyttelse(fødselsnummer, sessionContext)
-                    oppgavetype(oppgavetype)
-                    stikkprøve(vedtaksperiodeId, hendelseId)
-                    vurderingsmomenter(vedtaksperiodeId, utbetalingtype, sessionContext)
-                    vergemål(fødselsnummer, sessionContext)
-                    enhetUtland(fødselsnummer, sessionContext)
-                    mottaker(mottaker)
-                    inntektskilde(inntektskilde)
-                    inntektsforhold(inntektsforhold)
-                    arbeidssituasjon(behovData.arbeidssituasjon)
-                    periodetype(periodetype)
-                    påVent(vedtaksperiodeId, sessionContext)
-                    skjønnsfastsettelse(sykefraværstilfelle, vedtaksperiodeId)
-                    tilbakedatert(sykefraværstilfelle, vedtaksperiodeId)
-                    kunÅpenGosysOppgave(sykefraværstilfelle, vedtaksperiodeId)
-                    manglerIM(sykefraværstilfelle, vedtaksperiodeId)
-                    medlemskap(sykefraværstilfelle, vedtaksperiodeId)
-                    haster(sykefraværstilfelle, vedtaksperiodeId)
-                    grunnbeløpsregulering(behovData.tags, utbetalingtype)
-                    forsikring(behovData.forsikringsvurderingId)
-                }
+                Yrkesaktivitetstype.FRILANS,
+                Yrkesaktivitetstype.ARBEIDSLEDIG,
+                -> error("Støtter ikke yrkesaktivitetstype ${behovData.yrkesaktivitetstype}")
+            }
 
-            val behandlingId = behovData.spleisBehandlingId
-            oppgaveService.nyOppgave(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
-                behandlingId = SpleisBehandlingId(behandlingId),
-                utbetalingId = utbetalingId,
-                hendelseId = hendelseId,
-                kanAvvises = kanAvvises,
-                egenskaper = egenskaper,
-                mottaker = mottaker,
-                type = oppgavetype,
-                inntektskilde = inntektskilde,
-                inntektsforhold = inntektsforhold,
-                periodetype = periodetype,
+        val egenskaper =
+            buildSet {
+                egenAnsatt(fødselsnummer, sessionContext)
+                adressebeskyttelse(fødselsnummer, sessionContext)
+                oppgavetype(oppgavetype)
+                stikkprøve(vedtaksperiodeId, hendelseId)
+                vurderingsmomenter(vedtaksperiodeId, utbetalingtype, sessionContext)
+                vergemål(fødselsnummer, sessionContext)
+                enhetUtland(fødselsnummer, sessionContext)
+                mottaker(mottaker)
+                inntektskilde(inntektskilde)
+                inntektsforhold(inntektsforhold)
+                arbeidssituasjon(behovData.arbeidssituasjon)
+                periodetype(periodetype)
+                påVent(vedtaksperiodeId, sessionContext)
+                skjønnsfastsettelse(varslerForBehandlingspakke)
+                tilbakedatert(varslerForBehandlingspakke)
+                kunÅpenGosysOppgave(varslerForBehandlingspakke)
+                manglerIM(varslerForBehandlingspakke)
+                medlemskap(varslerForBehandlingspakke)
+                haster(varslerForBehandlingspakke)
+                grunnbeløpsregulering(behovData.tags, utbetalingtype)
+                forsikring(behovData.forsikringsvurderingId)
+            }
+
+        val behandlingId = behovData.spleisBehandlingId
+        oppgaveService.nyOppgave(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
+            behandlingId = SpleisBehandlingId(behandlingId),
+            utbetalingId = utbetalingId,
+            hendelseId = hendelseId,
+            kanAvvises = kanAvvises,
+            egenskaper = egenskaper,
+            mottaker = mottaker,
+            type = oppgavetype,
+            inntektskilde = inntektskilde,
+            inntektsforhold = inntektsforhold,
+            periodetype = periodetype,
+        )
+        val opptegnelse =
+            Opptegnelse.ny(
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
             )
-            val opptegnelse =
-                Opptegnelse.ny(
-                    identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-                    type = Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
-                )
-            Span.current().setAttribute("speil.saksbehandling.spesialist", "oppgave_opprettet")
-            sessionContext.opptegnelseRepository.lagre(opptegnelse)
-            true
-        }
+        Span.current().setAttribute("speil.saksbehandling.spesialist", "oppgave_opprettet")
+        sessionContext.opptegnelseRepository.lagre(opptegnelse)
+        return true
     }
 
     private fun MutableSet<Egenskap>.egenAnsatt(
@@ -218,39 +222,32 @@ internal class OpprettSaksbehandleroppgave(
         if (sessionContext.påVentDao.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
     }
 
-    private fun MutableSet<Egenskap>.skjønnsfastsettelse(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        vedtaksperiodeId: UUID,
-    ) {
-        if (sykefraværstilfelle.kreverSkjønnsfastsettelse(vedtaksperiodeId)) add(SKJØNNSFASTSETTELSE)
+    private fun MutableSet<Egenskap>.skjønnsfastsettelse(varsler: List<Varsel>) {
+        if (varsler.any { it.erVarselOmAvvik() }) add(SKJØNNSFASTSETTELSE)
     }
 
     private fun MutableSet<Egenskap>.tilbakedatert(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        vedtaksperiodeId: UUID,
+        varsler: List<Varsel>,
     ) {
-        if (sykefraværstilfelle.erTilbakedatert(vedtaksperiodeId)) add(TILBAKEDATERT)
+        if (varsler.any { it.erVarselOmTilbakedatering() }) add(TILBAKEDATERT)
     }
 
     private fun MutableSet<Egenskap>.kunÅpenGosysOppgave(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        vedtaksperiodeId: UUID,
+        varsler: List<Varsel>,
     ) {
-        if (sykefraværstilfelle.harKunÅpenGosysOppgave(vedtaksperiodeId)) add(GOSYS)
+        if (varsler.any { it.erVarselOmÅpenGosysoppgave() }) add(GOSYS)
     }
 
     private fun MutableSet<Egenskap>.medlemskap(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        vedtaksperiodeId: UUID,
+        varsler: List<Varsel>,
     ) {
-        if (sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)) add(MEDLEMSKAP)
+        if (varsler.any { it.erVarselOmMedlemskap() }) add(MEDLEMSKAP)
     }
 
     private fun MutableSet<Egenskap>.manglerIM(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        vedtaksperiodeId: UUID,
+        varsler: List<Varsel>,
     ) {
-        if (sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId)) add(MANGLER_IM)
+        if (varsler.any { it.erVarselOmManglendeInntektsmelding() }) add(MANGLER_IM)
     }
 
     private fun MutableSet<Egenskap>.grunnbeløpsregulering(
@@ -265,10 +262,9 @@ internal class OpprettSaksbehandleroppgave(
     }
 
     private fun MutableSet<Egenskap>.haster(
-        sykefraværstilfelle: Sykefraværstilfelle,
-        vedtaksperiodeId: UUID,
+        varsler: List<Varsel>,
     ) {
-        if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) add(HASTER)
+        if (varsler.any { it.erVarselOmNegativtBeløp() } && utbetaling.harEndringIUtbetalingTilSykmeldt()) add(HASTER)
     }
 
     private fun MutableSet<Egenskap>.forsikring(forsikringsvurderingId: UUID?) {

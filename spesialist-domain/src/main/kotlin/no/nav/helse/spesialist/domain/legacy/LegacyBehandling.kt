@@ -10,7 +10,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.innehold
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderMedlemskapsvarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmNegativtBeløp
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
@@ -270,12 +269,6 @@ class LegacyBehandling private constructor(
         return inneholderAvviksvarsel
     }
 
-    private fun erTilbakedatert(): Boolean {
-        val inneholderTilbakedateringsvarsel = varsler.inneholderVarselOmTilbakedatering()
-        logg.info("Behandling $this har varsel om tilbakedatering: $inneholderTilbakedateringsvarsel")
-        return inneholderTilbakedateringsvarsel
-    }
-
     private fun harKunVarselOmÅpenGosysOppgave(): Boolean {
         val inneholderKunÅpenGosysOppgaveVarsel = varsler.inneholderVarselOmÅpenGosysOppgave() && varsler.size == 1
         logg.info("Behandling $this har kun varsel om åpen Gosys-oppgave: $inneholderKunÅpenGosysOppgaveVarsel")
@@ -342,10 +335,6 @@ class LegacyBehandling private constructor(
 
         internal fun List<LegacyBehandling>.finnBehandlingForVedtaksperiode(vedtaksperiodeId: UUID): LegacyBehandling? = this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-        internal fun List<LegacyBehandling>.finnBehandlingForSpleisBehandling(spleisBehandlingId: UUID): LegacyBehandling? = this.find { it.spleisBehandlingId == spleisBehandlingId }
-
-        internal fun List<LegacyBehandling>.finnSisteBehandlingUtenSpleisBehandlingId(): LegacyBehandling? = this.lastOrNull { it.spleisBehandlingId == null }
-
         fun fraLagring(
             id: UUID,
             vedtaksperiodeId: UUID,
@@ -389,18 +378,6 @@ class LegacyBehandling private constructor(
                     it.tilhører(legacyBehandling.periode.tom)
                 }.any { it.forhindrerAutomatisering() }
 
-        internal fun List<LegacyBehandling>.harKunGosysvarsel(legacyBehandling: LegacyBehandling): Boolean =
-            this
-                .filter {
-                    it.tilhører(legacyBehandling.periode.tom)
-                }.filter { it.varsler.isNotEmpty() }
-                .all { it.harKunGosysvarsel() }
-
-        internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(legacyBehandling: LegacyBehandling): Boolean =
-            filter { it.tilhører(legacyBehandling.periode.tom) }
-                .filter { it.varsler.isNotEmpty() }
-                .any { it.harVarselOmManglendeInntektsmelding() }
-
         internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(vedtaksperiodeId: UUID): Boolean = finnBehandlingForVedtaksperiode(vedtaksperiodeId)?.harVarselOmManglendeInntektsmelding() == true
 
         internal fun List<LegacyBehandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
@@ -411,11 +388,6 @@ class LegacyBehandling private constructor(
         internal fun List<LegacyBehandling>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.kreverSkjønnsfastsettelse()
-            }
-
-        internal fun List<LegacyBehandling>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.erTilbakedatert()
             }
 
         internal fun List<LegacyBehandling>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =

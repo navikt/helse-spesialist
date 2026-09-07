@@ -96,8 +96,6 @@ class LegacyVarsel(
 
         fun List<LegacyVarsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
 
-        internal fun List<LegacyVarsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
-
         internal fun List<LegacyVarsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
 
         internal fun List<LegacyVarsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }

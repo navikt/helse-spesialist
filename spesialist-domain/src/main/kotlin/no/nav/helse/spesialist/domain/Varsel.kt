@@ -45,6 +45,16 @@ class Varsel private constructor(
 
     fun erVarselOmAvvik(): Boolean = this.kode == "RV_IV_2"
 
+    fun erVarselOmTilbakedatering(): Boolean = this.kode == "RV_SØ_3"
+
+    fun erVarselOmÅpenGosysoppgave(): Boolean = this.kode == "SB_EX_1"
+
+    fun erVarselOmMedlemskap(): Boolean = this.kode == "RV_MV_1"
+
+    fun erVarselOmManglendeInntektsmelding(): Boolean = this.kode == "RV_IV_10"
+
+    fun erVarselOmNegativtBeløp(): Boolean = this.kode == "RV_UT_23"
+
     fun erInaktivt(): Boolean = this.status == Status.INAKTIV
 
     fun kanAvvises() = status in listOf(Status.AKTIV, Status.VURDERT)
