@@ -7,32 +7,27 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.Totrinnsvurdering
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
-import no.nav.helse.spesialist.domain.Varsel
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random.Default.nextLong
 
 internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val commandContext: CommandContext = CommandContext(UUID.randomUUID())
 
-    private fun command(vedtaksperiodeId: VedtaksperiodeId = vedtaksperiode1.id) =
+    private fun command(behandlingId: SpleisBehandlingId = behandling1.spleisBehandlingId!!) =
         VurderBehovForTotrinnskontroll(
             fødselsnummer = person.id.value,
             oppgaveService = oppgaveService,
-            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = behandlingId,
         )
 
     @Test
@@ -61,18 +56,18 @@ internal class VurderBehovForTotrinnskontrollTest : ApplicationTest() {
         behandling1.nyttVarsel("RV_MV_1", status)
         every { oppgaveService.harFerdigstiltOppgave(vedtaksperiode2.id.value) } returns false
 
-        assertTrue(command(vedtaksperiodeId = vedtaksperiode1.id).execute(commandContext, sessionContext, outbox))
+        assertTrue(command(behandlingId = behandling1.spleisBehandlingId!!).execute(commandContext, sessionContext, outbox))
         assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @ParameterizedTest
-    @EnumSource(value = Varsel.Status::class)
-    fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for manglende inntektsmelding`(status: Varsel.Status) {
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for manglende inntektsmelding når status på varselet er`(status: Varsel.Status) {
         behandling1.nyttVarsel("RV_IV_10", status)
 
         every { oppgaveService.harFerdigstiltOppgave(vedtaksperiode2.id.value) } returns false
 
-        assertTrue(command(vedtaksperiode2.id).execute(commandContext, sessionContext, outbox))
+        assertTrue(command(behandling2.spleisBehandlingId!!).execute(commandContext, sessionContext, outbox))
         assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
