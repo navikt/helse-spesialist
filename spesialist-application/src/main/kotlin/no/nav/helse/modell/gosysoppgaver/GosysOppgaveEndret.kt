@@ -11,10 +11,9 @@ import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
-import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import tools.jackson.databind.JsonNode
@@ -31,15 +30,14 @@ class GosysOppgaveEndret(
         json = jsonNode.toString(),
     )
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val identitetsnummer = Identitetsnummer.fraString(person.fødselsnummer)
+        val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         kommandostarter {
             val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
-            gosysOppgaveEndret(person, oppgave, sessionContext)
+            gosysOppgaveEndret(oppgave, sessionContext)
         }
     }
 
@@ -50,7 +48,6 @@ class GosysOppgaveEndret(
 
 internal class GosysOppgaveEndretCommand(
     utbetaling: Utbetaling,
-    sykefraværstilfelle: Sykefraværstilfelle,
     harTildeltOppgave: Boolean,
     oppgave: Oppgave,
     automatisering: Automatisering,
@@ -62,9 +59,10 @@ internal class GosysOppgaveEndretCommand(
         listOf(
             VurderÅpenGosysoppgave(
                 vedtaksperiodeId = oppgave.vedtaksperiodeId.value,
-                sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
+                skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt,
+                fødselsnummer = Fødselsnummer(godkjenningsbehov.fødselsnummer),
             ),
             SjekkAtOppgaveFortsattErÅpenCommand(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
@@ -79,7 +77,6 @@ internal class GosysOppgaveEndretCommand(
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
-                sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
             ),
         )

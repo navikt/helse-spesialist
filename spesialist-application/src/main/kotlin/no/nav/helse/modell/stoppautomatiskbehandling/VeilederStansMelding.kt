@@ -4,7 +4,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.Outbox
 import java.time.LocalDateTime
 import java.util.*
@@ -19,8 +18,7 @@ class VeilederStansMelding(
     val originalMelding: String,
     private val json: String,
 ) : Personmelding {
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

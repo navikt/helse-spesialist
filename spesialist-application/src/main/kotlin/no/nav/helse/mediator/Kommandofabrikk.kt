@@ -10,7 +10,6 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.kommando.*
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
@@ -33,7 +32,6 @@ class Kommandofabrikk(
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) {
     internal fun gosysOppgaveEndret(
-        person: LegacyPerson,
         oppgave: Oppgave?,
         sessionContext: SessionContext,
     ): Command {
@@ -50,7 +48,6 @@ class Kommandofabrikk(
 
         return GosysOppgaveEndretCommand(
             utbetaling = utbetaling,
-            sykefraværstilfelle = person.sykefraværstilfelle(oppgave.vedtaksperiodeId.value),
             harTildeltOppgave = harTildeltOppgave,
             oppgave = oppgave,
             automatisering = transaksjonellAutomatisering(sessionContext),
@@ -62,18 +59,15 @@ class Kommandofabrikk(
 
     internal fun tilbakedateringGodkjent(
         melding: TilbakedateringBehandlet,
-        person: LegacyPerson,
         oppgave: Oppgave,
         sessionContext: SessionContext,
     ): TilbakedateringGodkjentCommand {
         val godkjenningsbehovData =
             sessionContext.meldingDao.finnSisteGodkjenningsbehov(oppgave.behandlingId.value)?.data()
                 ?: error("Fant ikke godkjenningsbehov")
-        val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
         return TilbakedateringGodkjentCommand(
-            sykefraværstilfelle = sykefraværstilfelle,
             utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
             oppgave = oppgave,
@@ -86,7 +80,6 @@ class Kommandofabrikk(
 
     internal fun godkjenningsbehov(
         godkjenningsbehovData: GodkjenningsbehovData,
-        person: LegacyPerson,
         sessionContext: SessionContext,
     ): GodkjenningsbehovCommand {
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
@@ -96,7 +89,6 @@ class Kommandofabrikk(
             automatisering = transaksjonellAutomatisering(sessionContext),
             oppgaveService = oppgaveServiceProvider(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseRepository),
-            person = person,
             forsikringsvurderingHenter = forsikringsvurderingHenter,
         )
     }

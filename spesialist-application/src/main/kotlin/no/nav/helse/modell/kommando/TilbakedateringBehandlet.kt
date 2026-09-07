@@ -8,8 +8,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
-import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
@@ -40,13 +38,15 @@ class TilbakedateringBehandlet(
         json = jsonNode.toString(),
     )
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val identitetsnummer = Identitetsnummer.fraString(person.fødselsnummer)
-        person.behandleTilbakedateringBehandlet(perioder)
+        val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
+            this.behandleTilbakedateringBehandlet(perioder)
+        }
+
         kommandostarter {
             val oppgave =
                 sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
@@ -54,7 +54,7 @@ class TilbakedateringBehandlet(
                 loggInfo("Ingen aktiv oppgave for personen, avslutter behandling av meldingen")
                 return@kommandostarter null
             }
-            tilbakedateringGodkjent(this@TilbakedateringBehandlet, person, oppgave, sessionContext)
+            tilbakedateringGodkjent(this@TilbakedateringBehandlet, oppgave, sessionContext)
         }
     }
 
@@ -64,7 +64,6 @@ class TilbakedateringBehandlet(
 }
 
 internal class TilbakedateringGodkjentCommand(
-    sykefraværstilfelle: Sykefraværstilfelle,
     utbetaling: Utbetaling,
     automatisering: Automatisering,
     oppgave: Oppgave,
@@ -90,7 +89,6 @@ internal class TilbakedateringGodkjentCommand(
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
-                sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
             ),
         )

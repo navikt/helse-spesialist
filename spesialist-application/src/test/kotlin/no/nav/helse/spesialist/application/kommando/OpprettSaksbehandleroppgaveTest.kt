@@ -23,7 +23,6 @@ import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.testfixtures.lagForsikringsvurdering
 import no.nav.helse.spesialist.application.testfixtures.lagKollektivForsikring
 import no.nav.helse.spesialist.domain.DialogId
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
@@ -52,8 +51,6 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIV
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
 import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
-import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
-import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -64,10 +61,6 @@ import java.util.*
 import kotlin.test.assertEquals
 
 internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
-    private val FNR = lagFødselsnummer()
-    private val VEDTAKSPERIODE_ID = lagVedtaksperiodeId()
-    private val BEHANDLING_ID = lagSpleisBehandlingId()
-    private val UTBETALING_ID = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
     private val contextId = UUID.randomUUID()
     private val context = CommandContext(contextId)
@@ -80,10 +73,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     private val command get() = opprettSaksbehandlerOppgaveCommand()
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
 
-    init {
-        lagrePerson()
-    }
-
     @Test
     fun `oppretter oppgave`() {
         assertTrue(command.execute(context, sessionContext, outbox))
@@ -93,7 +82,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter stikkprøve`() {
-        every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID.value, any()) } returns true
+        every { automatisering.erStikkprøve(vedtaksperiode1.id.value, any()) } returns true
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -238,7 +227,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     @Test
     fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
         every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID.value) } returns true
+        every { sykefraværstilfelle.haster(vedtaksperiode1.id.value) } returns true
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -252,7 +241,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     @Test
     fun `oppretter oppgave med egenskap haster dersom det er endring i utbetaling til sykmeldte`() {
         every { utbetaling.harEndringIUtbetalingTilSykmeldt() } returns true
-        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID.value) } returns true
+        behandling1.nyttVarsel("RV_UT_23") // varsel om negativt beløp, som trigger at saken haster
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -266,7 +255,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() {
-        every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID.value) } returns true
+        behandling1.nyttVarsel("RV_IV_2")
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -280,7 +269,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     @Test
     fun `oppretter oppgave med egenskap tilbakedatert dersom det finnes varsel om tilbakedatering`() {
-        every { sykefraværstilfelle.erTilbakedatert(VEDTAKSPERIODE_ID.value) } returns true
+        behandling1.nyttVarsel("RV_SØ_3")
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,
@@ -354,7 +343,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     fun `oppretter oppgave med egenskap PÅ_VENT`() {
         sessionContext.påVentRepository.lagre(
             lagPåVent(
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                vedtaksperiodeId = vedtaksperiode1.id,
                 saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
                 dialogId = DialogId(1L),
             ),
@@ -451,7 +440,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     ) {
         sessionContext.personRepository.lagre(
             lagPerson(
-                id = Identitetsnummer.fraString(FNR),
+                id = person.id,
                 adressebeskyttelse = adressebeskyttelse,
                 erEgenAnsatt = erEgenAnsatt,
                 enhet = enhet ?: 100,
@@ -461,7 +450,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     private fun lagreRisikovurdering(kanGodkjennesAutomatisk: Boolean) {
         sessionContext.risikovurderingDao.lagre(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID.value,
+            vedtaksperiodeId = vedtaksperiode1.id.value,
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
             data = ObjectNode(JsonNodeFactory.instance),
             opprettet = LocalDateTime.now(),
@@ -474,13 +463,13 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     ) {
         verify(exactly = 1) {
             oppgaveService.nyOppgave(
-                FNR,
-                VEDTAKSPERIODE_ID,
-                BEHANDLING_ID,
-                UTBETALING_ID,
-                HENDELSE_ID,
-                kanAvvises,
-                egenskaper.toSet(),
+                fødselsnummer = person.id.value,
+                vedtaksperiodeId = vedtaksperiode1.id,
+                behandlingId = behandling1.spleisBehandlingId!!,
+                utbetalingId = behandling1.utbetalingId!!.value,
+                hendelseId = HENDELSE_ID,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper.toSet(),
                 mottaker = egenskaper.finnMottaker(),
                 type = egenskaper.finnOppgavetype(),
                 inntektskilde = egenskaper.finnInntektskilde(),
@@ -503,10 +492,10 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
         behovData =
             godkjenningsbehovData(
                 id = HENDELSE_ID,
-                fødselsnummer = FNR,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID.value,
-                spleisBehandlingId = BEHANDLING_ID.value,
-                utbetalingId = UTBETALING_ID,
+                fødselsnummer = person.id.value,
+                vedtaksperiodeId = vedtaksperiode1.id.value,
+                spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
+                utbetalingId = behandling1.utbetalingId!!.value,
                 inntektskilde = inntektskilde,
                 periodetype = periodetype,
                 utbetalingtype = utbetalingtype,
@@ -519,7 +508,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
         oppgaveService = oppgaveService,
         automatisering = automatisering,
         utbetalingtype = utbetalingtype,
-        sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
         forsikringsvurderingHenter = forsikringsvurderingHenter,
     )

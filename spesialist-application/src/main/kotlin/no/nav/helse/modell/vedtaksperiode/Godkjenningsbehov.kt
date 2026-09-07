@@ -11,7 +11,6 @@ import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -19,7 +18,10 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
+import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
@@ -62,12 +64,11 @@ class Godkjenningsbehov(
 
     override fun toJson() = json
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { godkjenningsbehov(data(), person, sessionContext) }
+        kommandostarter { godkjenningsbehov(data(), sessionContext) }
     }
 
     fun data(): GodkjenningsbehovData =
@@ -330,15 +331,14 @@ internal class GodkjenningsbehovCommand(
     automatisering: Automatisering,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
-    person: LegacyPerson,
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : MacroCommand() {
-    private val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
+    private val fødselsnummer = Fødselsnummer(godkjenningsbehovData.fødselsnummer)
+    private val vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId)
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
                 godkjenningsbehovData = godkjenningsbehovData,
-                person = person,
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 godkjenningsbehovData = godkjenningsbehovData,
@@ -355,12 +355,10 @@ internal class GodkjenningsbehovCommand(
                 skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
                 vilkårsgrunnlagId = godkjenningsbehovData.vilkårsgrunnlagId,
-                legacyBehandling =
-                    person
-                        .vedtaksperiode(godkjenningsbehovData.vedtaksperiodeId)
-                        .finnBehandling(godkjenningsbehovData.spleisBehandlingId),
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
@@ -382,18 +380,17 @@ internal class GodkjenningsbehovCommand(
             VurderVergemålOgFullmakt(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderEnhetUtland(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderÅpenGosysoppgave(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                sykefraværstilfelle = sykefraværstilfelle,
                 harTildeltOppgave = false,
                 oppgaveService = oppgaveService,
+                skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
+                fødselsnummer = fødselsnummer,
             ),
             VurderVurderingsmomenter(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
@@ -401,25 +398,23 @@ internal class GodkjenningsbehovCommand(
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,
                 førstegangsbehandling = godkjenningsbehovData.førstegangsbehandling,
-                sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
                 spleisVedtaksperioder = godkjenningsbehovData.spleisVedtaksperioder,
+                identitetsnummer = fødselsnummer,
             ),
             VurderAutomatiskAvvisning(
                 godkjenningsbehov = godkjenningsbehovData,
             ),
             VurderBehovForTotrinnskontroll(
-                fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vedtaksperiode = person.vedtaksperiode(godkjenningsbehovData.vedtaksperiodeId),
+                fødselsnummer = fødselsnummer.value,
                 oppgaveService = oppgaveService,
-                sykefraværstilfelle = sykefraværstilfelle,
+                vedtaksperiodeId = vedtaksperiodeId,
             ),
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
-                sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehovData,
                 oppgaveService = oppgaveService,
             ),
@@ -428,7 +423,6 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
                 automatisering = automatisering,
                 utbetalingtype = godkjenningsbehovData.utbetalingtype,
-                sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
                 forsikringsvurderingHenter = forsikringsvurderingHenter,
             ),

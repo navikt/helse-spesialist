@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -16,8 +15,7 @@ class KommandokjedeTilstandsendringTest {
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val testmelding =
         object : Personmelding {
-            override fun behandleMedLegacyPerson(
-                person: LegacyPerson,
+            override fun behandle(
                 kommandostarter: Kommandostarter,
                 sessionContext: SessionContext,
             ) {}

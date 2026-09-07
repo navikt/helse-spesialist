@@ -4,7 +4,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.*
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -30,18 +29,22 @@ class VedtaksperiodeForkastet(
 
     override fun vedtaksperiodeId() = vedtaksperiodeId
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        person.vedtaksperiodeForkastet(vedtaksperiodeId)
+        val forkastedeVedtaksperiodeIder =
+            sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
+                this.vedtaksperiodeForkastet(vedtaksperiodeId)
+                this.forkastedeVedtaksperiodeIder()
+            }
+
         kommandostarter {
             VedtaksperiodeForkastetCommand(
-                fødselsnummer = fødselsnummer(),
-                vedtaksperiodeId = vedtaksperiodeId(),
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
-                alleForkastedeVedtaksperiodeIder = person.forkastedeVedtaksperiodeIder(),
+                alleForkastedeVedtaksperiodeIder = forkastedeVedtaksperiodeIder,
             )
         }
     }

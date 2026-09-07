@@ -21,14 +21,14 @@ class DelegatingLegacyPersonRepository(
     private val varselRepository: InMemoryVarselRepository,
     private val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
 ) : LegacyPersonRepository {
-    override fun brukPersonHvisFinnes(
+    override fun <T> brukPersonHvisFinnes(
         fødselsnummer: String,
-        personScope: LegacyPerson.() -> Unit,
-    ) {
+        personScope: LegacyPerson.() -> T,
+    ): T? {
         val person = personRepository.alle().find { it.id.value == fødselsnummer }
         if (person == null) {
             logg.info("Person med fødselsnummer $fødselsnummer er ikke lagt til i testen")
-            return
+            return null
         }
 
         val legacyPerson =
@@ -109,9 +109,10 @@ class DelegatingLegacyPersonRepository(
                         },
             )
         val dtoFør = legacyPerson.toDto()
-        legacyPerson.personScope()
+        val returverdi = legacyPerson.personScope()
         val dtoEtter = legacyPerson.toDto()
         if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
+        return returverdi
     }
 
     private fun lagrePerson(

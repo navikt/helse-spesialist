@@ -19,22 +19,23 @@ class PgLegacyPersonRepository(
     private val sykefraværstilfelleDao: SykefraværstilfelleDao,
     private val personDao: PersonDao,
 ) : LegacyPersonRepository {
-    override fun brukPersonHvisFinnes(
+    override fun <T> brukPersonHvisFinnes(
         fødselsnummer: String,
-        personScope: LegacyPerson.() -> Unit,
-    ) {
+        personScope: LegacyPerson.() -> T,
+    ): T? {
         val person =
             hentPerson(fødselsnummer) ?: run {
                 "Behandler ikke melding for ukjent person".let { melding ->
                     logg.info(melding)
                     teamLogs.info("$melding med fødselsnummer={}", fødselsnummer)
                 }
-                return
+                return null
             }
         val dtoFør = person.toDto()
-        personScope(person)
+        val returverdi = personScope(person)
         val dtoEtter = person.toDto()
         if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
+        return returverdi
     }
 
     private fun finnEndredeVedtaksperioder(

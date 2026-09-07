@@ -60,7 +60,7 @@ class AvsluttetMedVedtakRiver(
         val erSelvstendig = packet["yrkesaktivitetstype"].asString() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
 
         lateinit var vedtakFattetMelding: VedtakFattetMelding
-        transaksjon.legacyPersonRepository.brukPersonHvisFinnes(identitetsnummer.value) {
+        transaksjon.legacyPersonRepository.brukPerson(identitetsnummer.value) {
             vedtakFattetMelding =
                 if (erSelvstendig) {
                     vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForSelvstendig()

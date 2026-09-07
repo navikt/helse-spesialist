@@ -23,12 +23,8 @@ class SøknadSendt(
 
     override fun toJson() = json
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
-    ) {
-        // Ikke i bruk, SøknadSendt har egen sti inn da det muligens ikke finnes noen person enda
-        // På sikt ønsker vi kanskje å opprette personen dersom den ikke finnes enda, og da kan denne tas i bruk
-    }
+    ) {}
 }

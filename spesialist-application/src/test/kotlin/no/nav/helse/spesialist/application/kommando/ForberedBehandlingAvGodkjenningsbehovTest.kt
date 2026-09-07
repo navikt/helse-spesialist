@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.ForberedBehandlingAvGodkjenningsbehov
-import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Testdata
@@ -11,14 +9,13 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
     @Test
     fun `skjæringstidspunkt for behandling i VedtakFattet oppdateres ikke ved mottak av nytt godkjenningsbehov`() {
         val spleisBehandlingId1 = UUID.randomUUID()
         val vedtaksperiodeId1 = UUID.randomUUID()
-        val orgnr = "987654321"
 
         val behandling1 =
             LegacyBehandling.fraLagring(
@@ -35,24 +32,8 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             )
 
-        val person =
-            LegacyPerson(
-                aktørId = "1234567890123",
-                fødselsnummer = "12345678901",
-                vedtaksperioder =
-                    listOf(
-                        LegacyVedtaksperiode(
-                            vedtaksperiodeId = vedtaksperiodeId1,
-                            organisasjonsnummer = orgnr,
-                            forkastet = false,
-                            behandlinger = listOf(behandling1),
-                        ),
-                    ),
-                skjønnsfastsatteSykepengegrunnlag = emptyList(),
-            )
-
         val godkjenningsbehovData =
-            Testdata.godkjenningsbehovData().copy(
+            Testdata.godkjenningsbehovData(fødselsnummer = person.id.value).copy(
                 spleisVedtaksperioder =
                     listOf(
                         SpleisVedtaksperiode(
@@ -65,7 +46,7 @@ internal class ForberedBehandlingAvGodkjenningsbehovTest : ApplicationTest() {
                     ),
             )
 
-        ForberedBehandlingAvGodkjenningsbehov(godkjenningsbehovData, person).execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
+        ForberedBehandlingAvGodkjenningsbehov(godkjenningsbehovData).execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
 
         Assertions.assertEquals(1 jan 2018, behandling1.skjæringstidspunkt())
     }
