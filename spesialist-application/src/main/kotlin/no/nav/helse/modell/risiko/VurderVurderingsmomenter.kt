@@ -7,7 +7,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.melding.StpPeriodeTilRisk
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -15,12 +14,12 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
-import java.util.UUID
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 internal class VurderVurderingsmomenter(
-    private val vedtaksperiodeId: UUID,
     private val periode: Periode,
     private val organisasjonsnummer: String,
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
@@ -28,7 +27,7 @@ internal class VurderVurderingsmomenter(
     private val utbetaling: Utbetaling,
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
-    private val identitetsnummer: Identitetsnummer,
+    private val spleisBehandlingId: SpleisBehandlingId,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -46,72 +45,73 @@ internal class VurderVurderingsmomenter(
         commandContext: CommandContext,
         sessionContext: SessionContext,
     ): Boolean {
-        return sessionContext.legacyPersonRepository.brukPerson(identitetsnummer.value) {
-            if (risikovurderingAlleredeGjort(sessionContext)) return@brukPerson true
-            val sykefraværstilfelle = this.sykefraværstilfelle(vedtaksperiodeId)
+        val behandling =
+            sessionContext.behandlingRepository.finn(spleisBehandlingId)
+                ?: error("Fant ikke behandling med id $spleisBehandlingId")
 
-            val løsning = commandContext.get<Risikovurderingløsning>()
-            if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
-                loggInfo("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
-                commandContext.behov(
-                    Behov.Risikovurdering(
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        organisasjonsnummer = organisasjonsnummer,
-                        yrkesaktivitetstype = yrkesaktivitetstype,
-                        førstegangsbehandling = førstegangsbehandling,
-                        kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
-                        inntekt =
-                            when (sykepengegrunnlagsfakta) {
-                                is Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd -> {
-                                    null
-                                }
+        if (risikovurderingAlleredeGjort(sessionContext, behandling.vedtaksperiodeId)) return true
 
-                                is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker -> {
-                                    sykepengegrunnlagsfakta.arbeidsgivere
-                                        .find { it.organisasjonsnummer == organisasjonsnummer }
-                                        ?.let { sykepengegrunnlagsArbeidsgiver ->
-                                            InntektTilRisk(
-                                                omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
-                                                inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
-                                            )
-                                        }
-                                }
+        val løsning = commandContext.get<Risikovurderingløsning>()
+        if (løsning == null || !løsning.gjelderVedtaksperiode(behandling.vedtaksperiodeId.value)) {
+            loggInfo("Trenger risikovurdering av vedtaksperiode ${behandling.vedtaksperiodeId.value}")
+            commandContext.behov(
+                Behov.Risikovurdering(
+                    vedtaksperiodeId = behandling.vedtaksperiodeId.value,
+                    organisasjonsnummer = organisasjonsnummer,
+                    yrkesaktivitetstype = yrkesaktivitetstype,
+                    førstegangsbehandling = førstegangsbehandling,
+                    kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
+                    inntekt =
+                        when (sykepengegrunnlagsfakta) {
+                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd -> {
+                                null
+                            }
 
-                                is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende -> {
-                                    InntektTilRisk(
-                                        omregnetÅrsinntekt = sykepengegrunnlagsfakta.selvstendig.beregningsgrunnlag.toDouble(),
-                                        inntektskilde = "Sigrun", // TODO: Hardkodet, verdi - avklar med Risk og Spleis
-                                    )
-                                }
-                            },
-                        periode = periode,
-                        skjæringstidspunkt = sykefraværstilfelle.skjæringstidspunkt,
-                        perioderMedSammeSkjæringstidspunkt =
-                            spleisVedtaksperioder.map {
-                                StpPeriodeTilRisk(
-                                    fom = it.fom,
-                                    tom = it.tom,
-                                    organisasjonsnummer = it.yrkesaktivitet?.organisasjonsnummer,
-                                    yrkesaktivitetstype = it.yrkesaktivitet?.yrkesaktivitetstype,
-                                    vedtaksperiodeId = it.vedtaksperiodeId,
+                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker -> {
+                                sykepengegrunnlagsfakta.arbeidsgivere
+                                    .find { it.organisasjonsnummer == organisasjonsnummer }
+                                    ?.let { sykepengegrunnlagsArbeidsgiver ->
+                                        InntektTilRisk(
+                                            omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
+                                            inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
+                                        )
+                                    }
+                            }
+
+                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende -> {
+                                InntektTilRisk(
+                                    omregnetÅrsinntekt = sykepengegrunnlagsfakta.selvstendig.beregningsgrunnlag.toDouble(),
+                                    inntektskilde = "Sigrun", // TODO: Hardkodet, verdi - avklar med Risk og Spleis
                                 )
-                            },
-                    ),
-                )
-                return@brukPerson false
-            }
-
-            løsning.lagre(sessionContext.risikovurderingDao)
-            løsning.leggTilVarsler(sykefraværstilfelle)
-            return@brukPerson true
+                            }
+                        },
+                    periode = periode,
+                    skjæringstidspunkt = behandling.skjæringstidspunkt,
+                    perioderMedSammeSkjæringstidspunkt =
+                        spleisVedtaksperioder.map {
+                            StpPeriodeTilRisk(
+                                fom = it.fom,
+                                tom = it.tom,
+                                organisasjonsnummer = it.yrkesaktivitet?.organisasjonsnummer,
+                                yrkesaktivitetstype = it.yrkesaktivitet?.yrkesaktivitetstype,
+                                vedtaksperiodeId = it.vedtaksperiodeId,
+                            )
+                        },
+                ),
+            )
+            return false
         }
+
+        løsning.lagre(sessionContext.risikovurderingDao)
+        if (!løsning.kanGodkjennesAutomatisk) {
+            val varsel = Varsel.nytt(behandlingUnikId = behandling.id, behandling.spleisBehandlingId, SB_RV_1.name)
+            sessionContext.varselRepository.lagre(varsel)
+        }
+        return true
     }
 
-    private fun risikovurderingAlleredeGjort(sessionContext: SessionContext) = sessionContext.risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
-
-    private fun Risikovurderingløsning.leggTilVarsler(sykefraværstilfelle: Sykefraværstilfelle) {
-        if (!kanGodkjennesAutomatisk) {
-            sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
-        }
-    }
+    private fun risikovurderingAlleredeGjort(
+        sessionContext: SessionContext,
+        vedtaksperiodeId: VedtaksperiodeId,
+    ) = sessionContext.risikovurderingDao.hentRisikovurdering(vedtaksperiodeId.value) != null
 }

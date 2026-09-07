@@ -195,11 +195,6 @@ class LegacyBehandling private constructor(
         eksisterendeVarsel.reaktiver()
     }
 
-    internal fun håndterDeaktivertVarsel(varsel: LegacyVarsel) {
-        val funnetVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return
-        funnetVarsel.deaktiver()
-    }
-
     internal fun deaktiverVarsel(varselkode: String) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varselkode) ?: return
         sikkerlogg.info("Deaktiverer varsel: {}", funnetVarsel)
@@ -388,10 +383,6 @@ class LegacyBehandling private constructor(
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.harKunVarselOmÅpenGosysOppgave()
             }
-
-        internal fun List<LegacyBehandling>.deaktiver(varsel: LegacyVarsel) {
-            find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
-        }
 
         internal fun List<LegacyBehandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
             val behandlingForPeriodeTilGodkjenning =

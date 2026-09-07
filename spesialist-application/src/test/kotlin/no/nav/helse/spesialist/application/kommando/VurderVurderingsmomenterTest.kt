@@ -14,6 +14,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -162,12 +163,11 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     }
 
     private fun risikoCommand(
-        vedtaksperiodeId: UUID = vedtaksperiode1.id.value,
+        spleisBehandlingId: SpleisBehandlingId = behandling1.spleisBehandlingId!!,
         organisasjonsnummer: String = vedtaksperiode1.organisasjonsnummer,
         førstegangsbehandling: Boolean = true,
     ) = VurderVurderingsmomenter(
-        vedtaksperiodeId = vedtaksperiodeId,
-        identitetsnummer = person.id,
+        spleisBehandlingId = spleisBehandlingId,
         periode = Periode(behandling1.fom, behandling1.tom),
         organisasjonsnummer = organisasjonsnummer,
         yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,

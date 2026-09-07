@@ -70,17 +70,6 @@ internal class LegacyBehandlingTest {
     }
 
     @Test
-    fun `deaktiverer enkelt varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        behandling.håndterNyttVarsel(varsel)
-        behandling.håndterDeaktivertVarsel(varsel)
-        behandling.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
-        behandling.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
-    }
-
-    @Test
     fun `deaktiverer enkelt varsel basert på varselkode`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
@@ -109,38 +98,6 @@ internal class LegacyBehandlingTest {
         behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
 
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
-    }
-
-    @Test
-    fun `kan reaktivere deaktivert varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        behandling.håndterNyttVarsel(varsel)
-        behandling.håndterDeaktivertVarsel(varsel)
-        behandling.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
-
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-
-        behandling.assertVarsler(0, VarselStatusDto.INAKTIV, SB_EX_1)
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
-    }
-
-    @Test
-    fun `kan deaktivere reaktivert varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        behandling.håndterNyttVarsel(varsel)
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
-        behandling.håndterDeaktivertVarsel(varsel)
-        behandling.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
-        behandling.håndterNyttVarsel(varsel)
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
-        behandling.håndterDeaktivertVarsel(varsel)
-
-        behandling.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
-        behandling.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
     @Test
