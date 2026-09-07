@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
-import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.application.InMemoryPersoninfoHenter
 import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -157,18 +157,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
-    private val personinfoHenter =
-        PersoninfoHenter {
-            Personinfo(
-                fornavn = "PersoninfoHenter",
-                mellomnavn = "Mellomnavn",
-                etternavn = "Etternavn",
-                fødselsdato = LocalDate.now().minusYears(20),
-                dødsdato = null,
-                kjønn = Personinfo.Kjønn.Ukjent,
-                adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
-            )
-        }
+    private val personinfoHenter = InMemoryPersoninfoHenter()
 
     private val personQuery =
         PersonQuery(

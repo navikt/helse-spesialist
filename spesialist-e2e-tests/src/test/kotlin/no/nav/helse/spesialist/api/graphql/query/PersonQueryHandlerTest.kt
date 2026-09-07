@@ -515,7 +515,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val body = runPersonQuery(Identitetsnummer.fraString(fødselsnummer))
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
-        assertEquals("PersoninfoHenter", body["data"]["person"]["personinfo"]["fornavn"].asString())
+        assertEquals(personinfoHenter.personinfo!!.fornavn, body["data"]["person"]["personinfo"]["fornavn"].asString())
         logglytter.assertBleLogget(
             "suid=${SAKSBEHANDLER.ident.value} duid=$fødselsnummer",
             Level.INFO,
@@ -525,7 +525,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `får 404-feil når personinfo mangler i databasen og ikke finnes i PDL`() {
         val fødselsnummer = lagFødselsnummer()
-        every { personinfoHenter.hentPersoninfo(Identitetsnummer.fraString(fødselsnummer)) } returns null
+        personinfoHenter.personinfo = null
 
         opprettMinimalPerson(fødselsnummer = fødselsnummer)
 
@@ -541,7 +541,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `får 500-feil når henting av personinfo fra PDL feiler`() {
         val fødselsnummer = lagFødselsnummer()
-        every { personinfoHenter.hentPersoninfo(Identitetsnummer.fraString(fødselsnummer)) } throws GraphQLException("Oops")
+        personinfoHenter.feil = GraphQLException("Oops")
 
         opprettMinimalPerson(fødselsnummer = fødselsnummer)
 
