@@ -69,20 +69,22 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
                     spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
                 ),
             oppgaveService = mockk(relaxed = true),
+            spleisBehandlingId = behandling1.spleisBehandlingId!!,
+            identitetsnummer = person.id,
         )
 
     @Test
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         verify(exactly = 1) {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
@@ -99,7 +101,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
 
     @Test
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(commandContext, sessionContext, outbox))
         val vedtak = vedtakRepository.finn(behandling1.spleisBehandlingId!!)
         assertIs<Vedtak.Automatisk>(vedtak)
@@ -110,7 +112,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     @Test
     fun `automatiserer ikke når resultat er at perioden kan ikke automatiseres`() {
         val problemer = listOf("Problem 1", "Problem 2")
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
             Automatiseringsresultat.KanIkkeAutomatiseres(
                 problemer,
             )
@@ -132,7 +134,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
 
     @Test
     fun `automatiserer ikke når resultat er at perioden er stikkprøve`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
             Automatiseringsresultat.Stikkprøve(
                 "En årsak",
             )
@@ -144,7 +146,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
 
     @Test
     fun `Ferdigstiller kjede når perioden kan behandles automatisk`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         commandContext.utfør(commandContextDao, sessionContext, outbox, UUID.randomUUID(), command)
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
@@ -152,7 +154,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     @Test
     fun `prøver på nytt selv om det har vært forsøkt fattet vedtak før, så lenge spleis ikke har kvittert`() {
         vedtakRepository.lagre(Vedtak.automatisk(behandling1.spleisBehandlingId!!))
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
@@ -162,7 +164,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     @Test
     fun `prøver ikke på nytt hvis spleis har kvittert ut tidligere svar`() {
         vedtakRepository.lagre(Vedtak.automatisk(behandling1.spleisBehandlingId!!).also { it.markerSomBehandletAvSpleis() })
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 

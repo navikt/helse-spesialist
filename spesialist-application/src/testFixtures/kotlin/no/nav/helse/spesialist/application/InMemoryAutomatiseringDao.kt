@@ -8,6 +8,7 @@ class InMemoryAutomatiseringDao : AutomatiseringDao {
     val automatisert = mutableListOf<UUID>()
     val manuellSaksbehandling = mutableListOf<ManuellSaksbehandling>()
     val stikkprøver = mutableListOf<UUID>()
+    private val tvungneVedtaksperioder = mutableSetOf<UUID>()
 
     data class ManuellSaksbehandling(
         val problemer: List<String>,
@@ -15,6 +16,10 @@ class InMemoryAutomatiseringDao : AutomatiseringDao {
         val hendelseId: UUID,
         val utbetalingId: UUID,
     )
+
+    fun tvingAutomatisering(vedtaksperiodeId: UUID) {
+        tvungneVedtaksperioder.add(vedtaksperiodeId)
+    }
 
     override fun plukketUtTilStikkprøve(
         vedtaksperiodeId: UUID,
@@ -80,7 +85,5 @@ class InMemoryAutomatiseringDao : AutomatiseringDao {
         TODO("Not yet implemented")
     }
 
-    override fun skalTvingeAutomatisering(vedtaksperiodeId: UUID): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun skalTvingeAutomatisering(vedtaksperiodeId: UUID): Boolean = vedtaksperiodeId in tvungneVedtaksperioder
 }

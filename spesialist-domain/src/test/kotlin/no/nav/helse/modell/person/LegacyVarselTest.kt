@@ -2,9 +2,6 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.finnEksisterendeVarsel
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderMedlemskapsvarsel
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -91,46 +88,6 @@ internal class LegacyVarselTest {
         val varsel = nyttVarsel(status = status)
         varsel.deaktiver()
         varsel.assertStatus(status.toDto())
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV", "VURDERT", "AVVIST"], mode = EnumSource.Mode.EXCLUDE)
-    fun `forhindrer ikke automatisering`(status: LegacyVarsel.Status) {
-        val varsel = nyttVarsel(status = status)
-        assertFalse(listOf(varsel).forhindrerAutomatisering())
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV", "VURDERT", "AVVIST"])
-    fun `forhindrer automatisering`(status: LegacyVarsel.Status) {
-        val varsel = nyttVarsel(status = status)
-        assertTrue(listOf(varsel).forhindrerAutomatisering())
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `inneholder ikke medlemskapsvarsel`(status: LegacyVarsel.Status) {
-        val varsel = nyttVarsel(status = status, kode = "RV_MV_1")
-        assertFalse(listOf(varsel).inneholderMedlemskapsvarsel())
-    }
-
-    @Test
-    fun `inneholder medlemskapsvarsel`() {
-        val varsel = nyttVarsel(status = LegacyVarsel.Status.AKTIV, kode = "RV_MV_1")
-        assertTrue(listOf(varsel).inneholderMedlemskapsvarsel())
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `inneholder ikke varsel om negativt beløp`(status: LegacyVarsel.Status) {
-        val varsel = nyttVarsel(status = status, kode = "RV_UT_23")
-        assertFalse(listOf(varsel).inneholderVarselOmNegativtBeløp())
-    }
-
-    @Test
-    fun `inneholder varsel om negativt beløp`() {
-        val varsel = nyttVarsel(status = LegacyVarsel.Status.AKTIV, kode = "RV_UT_23")
-        assertTrue(listOf(varsel).inneholderVarselOmNegativtBeløp())
     }
 
     @Test

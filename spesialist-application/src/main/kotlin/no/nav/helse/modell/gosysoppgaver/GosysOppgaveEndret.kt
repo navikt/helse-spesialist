@@ -55,6 +55,8 @@ internal class GosysOppgaveEndretCommand(
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
 ) : MacroCommand() {
+    val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId)
+    val identitetsnummer = Identitetsnummer.fraString(godkjenningsbehov.fødselsnummer)
     override val commands: List<Command> =
         listOf(
             VurderÅpenGosysoppgave(
@@ -62,7 +64,7 @@ internal class GosysOppgaveEndretCommand(
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
                 skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt,
-                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId),
+                spleisBehandlingId = spleisBehandlingId,
             ),
             SjekkAtOppgaveFortsattErÅpenCommand(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
@@ -78,6 +80,8 @@ internal class GosysOppgaveEndretCommand(
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
                 godkjenningsbehov = godkjenningsbehov,
+                spleisBehandlingId = spleisBehandlingId,
+                identitetsnummer = identitetsnummer,
             ),
         )
 }
