@@ -63,7 +63,7 @@ spec:
           - id: {{ENTRAID_UUID_SPEIL_RIKSREVISJONEN}}
           - id: {{ENTRAID_UUID_SPEIL_LESETILGANG}}
           - id: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}}
-          - id: {{ENTRAID_UUID_GRADERTE_ANDRE_YLTELSER}}
+          - id: {{ENTRAID_UUID_GRADERTE_ANDRE_YTELSER}}
   accessPolicy:
     inbound:
       rules:
@@ -160,7 +160,7 @@ spec:
     - name: ROLLE_PORTEFOLJESTYRING
       value: {{ENTRAID_UUID_PORTEFOLJESTYRING}},{{ENTRAID_UUID_NAIS_TBD}},{{ENTRAID_UUID_TBD}}
     - name: ROLLE_GRADERTE_ANDRE_YTELSER
-      value: {{ENTRAID_UUID_GRADERTE_ANDRE_YLTELSER}}
+      value: {{ENTRAID_UUID_GRADERTE_ANDRE_YTELSER}}
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
