@@ -4,7 +4,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.*
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -33,17 +32,19 @@ class VedtaksperiodeReberegnet(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
         val vedtaksperiode =
-            checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) { "Fant ikke vedtaksperiode med id: $vedtaksperiodeId" }
+            sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
+                this.vedtaksperiode(vedtaksperiodeId)
+            }
+
         kommandostarter {
             VedtaksperiodeReberegnetCommand(
-                fødselsnummer = fødselsnummer(),
-                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
                 spesialistBehandlingId = vedtaksperiode.gjeldendeUnikId,
             )

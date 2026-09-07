@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.application.logg.medMdc
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.kafka.objectMapper
 import tools.jackson.databind.JsonNode
 import java.time.Duration
@@ -267,17 +268,19 @@ class MeldingMediator(
         val outbox = Outbox(versjonAvKode = versjonAvKode)
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
-                sessionContext.legacyPersonRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                    loggInfo("Personen finnes i databasen, behandler melding $meldingnavn", "fødselsnummer" to melding.fødselsnummer())
-                    val kommandostarter =
-                        kommandofabrikk.lagKommandostarter(
-                            setOf(utgåendeMeldingerMediator),
-                            commandContext(sessionContext.commandContextDao),
-                            sessionContext,
-                            outbox,
-                        )
-                    melding.behandleMedLegacyPerson(this, kommandostarter, sessionContext)
+                if (sessionContext.personRepository.finn(Identitetsnummer.fraString(melding.fødselsnummer())) == null) {
+                    loggInfo("Behandler ikke melding for ukjent person", "fødselsnummer" to melding.fødselsnummer())
+                    return@transactionalSessionScope
                 }
+                loggInfo("Personen finnes i databasen, behandler melding $meldingnavn", "fødselsnummer" to melding.fødselsnummer())
+                val kommandostarter =
+                    kommandofabrikk.lagKommandostarter(
+                        setOf(utgåendeMeldingerMediator),
+                        commandContext(sessionContext.commandContextDao),
+                        sessionContext,
+                        outbox,
+                    )
+                melding.behandle(kommandostarter, sessionContext)
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
             outbox.sendAlle(kontekstbasertPubliserer)

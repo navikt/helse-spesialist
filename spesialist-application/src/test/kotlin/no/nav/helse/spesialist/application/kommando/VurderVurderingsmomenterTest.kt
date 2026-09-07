@@ -8,52 +8,33 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.melding.StpPeriodeTilRisk
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.TestPerson
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Varsel
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.node.JsonNodeFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class VurderVurderingsmomenterTest : ApplicationTest() {
     private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
 
-    private companion object {
-        private val testperson = TestPerson()
+    private fun behovløsning(
+        vedtaksperiodeId: UUID = vedtaksperiode1.id.value,
+        kanGodkjennesAutomatisk: Boolean = true,
+    ) = Risikovurderingløsning(
+        vedtaksperiodeId = vedtaksperiodeId,
+        opprettet = LocalDateTime.now(),
+        kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+        løsning = JsonNodeFactory.instance.objectNode(),
+    )
 
-        private fun behovløsning(
-            vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-            kanGodkjennesAutomatisk: Boolean = true,
-        ) = Risikovurderingløsning(
-            vedtaksperiodeId = vedtaksperiodeId,
-            opprettet = LocalDateTime.now(),
-            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-            løsning = JsonNodeFactory.instance.objectNode(),
-        )
-    }
-
-    private val legacyBehandling =
-        LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        )
-    private val sykefraværstilfelle =
-        Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
     private val observer =
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
@@ -121,7 +102,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
         sessionContext.risikovurderingDao.lagre(
-            testperson.vedtaksperiodeId1,
+            vedtaksperiode1.id.value,
             true,
             JsonNodeFactory.instance.objectNode(),
             LocalDateTime.now(),
@@ -139,7 +120,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(commandContext, sessionContext, outbox))
         assertTrue(observer.behov.isEmpty())
-        assertEquals(1, sessionContext.risikovurderingDao.antallLagret(testperson.vedtaksperiodeId1))
+        assertEquals(1, sessionContext.risikovurderingDao.antallLagret(vedtaksperiode1.id.value))
     }
 
     @Test
@@ -176,20 +157,21 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
         risikoCommand().execute(commandContext, sessionContext, outbox)
 
-        assertEquals(listOf("SB_RV_1"), legacyBehandling.toDto().varsler.map { it.varselkode })
+        behandling1.assertAntallVarsler(1)
+        behandling1.assertHarVarsel(forventetKode = "SB_RV_1", forventetStatus = Varsel.Status.AKTIV)
     }
 
     private fun risikoCommand(
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        organisasjonsnummer: String = testperson.orgnummer,
+        vedtaksperiodeId: UUID = vedtaksperiode1.id.value,
+        organisasjonsnummer: String = vedtaksperiode1.organisasjonsnummer,
         førstegangsbehandling: Boolean = true,
     ) = VurderVurderingsmomenter(
         vedtaksperiodeId = vedtaksperiodeId,
-        periode = legacyBehandling.periode,
+        identitetsnummer = person.id,
+        periode = Periode(behandling1.fom, behandling1.tom),
         organisasjonsnummer = organisasjonsnummer,
         yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         førstegangsbehandling = førstegangsbehandling,
-        sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
         sykepengegrunnlagsfakta =
             Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
@@ -197,7 +179,7 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                     listOf(
                         Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                             omregnetÅrsinntekt = 123456.7,
-                            organisasjonsnummer = testperson.orgnummer,
+                            organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
                             inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
                         ),
                     ),
@@ -207,31 +189,31 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
         spleisVedtaksperioder =
             listOf(
                 SpleisVedtaksperiode(
-                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                    spleisBehandlingId = UUID.randomUUID(),
-                    fom = legacyBehandling.periode.fom,
-                    tom = legacyBehandling.periode.tom,
-                    skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+                    vedtaksperiodeId = vedtaksperiode1.id.value,
+                    spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
+                    fom = behandling1.fom,
+                    tom = behandling1.tom,
+                    skjæringstidspunkt = behandling1.skjæringstidspunkt,
                     yrkesaktivitet =
                         SpleisVedtaksperiode.Yrkesaktivitet(
-                            organisasjonsnummer = testperson.orgnummer,
+                            organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
                             yrkesaktivitetstype = "ARBEIDSTAKER",
                         ),
                 ),
                 SpleisVedtaksperiode(
-                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                    spleisBehandlingId = UUID.randomUUID(),
-                    fom = legacyBehandling.periode.fom,
-                    tom = legacyBehandling.periode.tom,
-                    skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+                    vedtaksperiodeId = vedtaksperiode1.id.value,
+                    spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
+                    fom = behandling1.fom,
+                    tom = behandling1.tom,
+                    skjæringstidspunkt = behandling1.skjæringstidspunkt,
                     yrkesaktivitet = null,
                 ),
                 SpleisVedtaksperiode(
-                    vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                    spleisBehandlingId = UUID.randomUUID(),
-                    fom = legacyBehandling.periode.fom,
-                    tom = legacyBehandling.periode.tom,
-                    skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+                    vedtaksperiodeId = vedtaksperiode1.id.value,
+                    spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
+                    fom = behandling1.fom,
+                    tom = behandling1.tom,
+                    skjæringstidspunkt = behandling1.skjæringstidspunkt,
                     yrkesaktivitet =
                         SpleisVedtaksperiode.Yrkesaktivitet(
                             organisasjonsnummer = null,
@@ -243,34 +225,34 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
 
     private fun risikovurdering(kunRefusjon: Boolean) =
         Behov.Risikovurdering(
-            vedtaksperiodeId = testperson.vedtaksperiodeId1,
-            organisasjonsnummer = testperson.orgnummer,
+            vedtaksperiodeId = vedtaksperiode1.id.value,
+            organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             førstegangsbehandling = true,
             kunRefusjon = kunRefusjon,
             inntekt = inntekt(),
-            periode = legacyBehandling.periode,
-            skjæringstidspunkt = legacyBehandling.skjæringstidspunkt,
+            periode = Periode(behandling1.fom, behandling1.tom),
+            skjæringstidspunkt = behandling1.skjæringstidspunkt,
             perioderMedSammeSkjæringstidspunkt =
                 listOf(
                     StpPeriodeTilRisk(
-                        vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                        fom = legacyBehandling.periode.fom,
-                        tom = legacyBehandling.periode.tom,
-                        organisasjonsnummer = testperson.orgnummer,
+                        vedtaksperiodeId = vedtaksperiode1.id.value,
+                        fom = behandling1.fom,
+                        tom = behandling1.tom,
+                        organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
                         yrkesaktivitetstype = "ARBEIDSTAKER",
                     ),
                     StpPeriodeTilRisk(
-                        vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                        fom = legacyBehandling.periode.fom,
-                        tom = legacyBehandling.periode.tom,
+                        vedtaksperiodeId = vedtaksperiode1.id.value,
+                        fom = behandling1.fom,
+                        tom = behandling1.tom,
                         organisasjonsnummer = null,
                         yrkesaktivitetstype = null,
                     ),
                     StpPeriodeTilRisk(
-                        vedtaksperiodeId = testperson.vedtaksperiodeId1,
-                        fom = legacyBehandling.periode.fom,
-                        tom = legacyBehandling.periode.tom,
+                        vedtaksperiodeId = vedtaksperiode1.id.value,
+                        fom = behandling1.fom,
+                        tom = behandling1.tom,
                         organisasjonsnummer = null,
                         yrkesaktivitetstype = "SELVSTENDIG",
                     ),

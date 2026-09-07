@@ -12,19 +12,14 @@ import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.InMemoryAutomatiseringDao
 import no.nav.helse.spesialist.application.InMemoryCommandContextDao
 import no.nav.helse.spesialist.application.InMemoryMeldingDao
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -34,28 +29,10 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
-    private companion object {
-        private val vedtaksperiodeId = UUID.randomUUID()
-        private val utbetalingId = UUID.randomUUID()
-        private const val fødselsnummer = "12345678910"
-        private const val orgnummer = "123456789"
-        private val hendelseId = UUID.randomUUID()
-        private val periodetype = Periodetype.FORLENGELSE
-    }
-
-    private val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+    private val hendelseId = UUID.randomUUID()
+    private val periodetype = Periodetype.FORLENGELSE
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val legacyBehandling =
-        LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            spleisBehandlingId = spleisBehandlingId.value,
-        )
     private val automatiseringDao = sessionContext.automatiseringDao
     private val vedtakRepository = sessionContext.vedtakRepository
     private val observatør =
@@ -79,22 +56,17 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
             GodkjenningMediator(
                 opptegnelseRepository = mockk(relaxed = true),
             ),
-            utbetaling = Utbetaling(utbetalingId, 0, 0, Utbetalingtype.UTBETALING),
-            sykefraværstilfelle =
-                Sykefraværstilfelle(
-                    fødselsnummer = fødselsnummer,
-                    skjæringstidspunkt = 1 jan 2018,
-                    gjeldendeBehandlinger = listOf(legacyBehandling),
-                ),
+            utbetaling = Utbetaling(behandling1.utbetalingId!!.value, 0, 0, Utbetalingtype.UTBETALING),
             godkjenningsbehov =
                 godkjenningsbehovData(
                     id = hendelseId,
-                    organisasjonsnummer = orgnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingId = utbetalingId,
+                    fødselsnummer = person.id.value,
+                    organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiode1.id.value,
+                    utbetalingId = behandling1.utbetalingId!!.value,
                     periodetype = periodetype,
                     json = """{ "@event_name": "behov" }""",
-                    spleisBehandlingId = spleisBehandlingId.value,
+                    spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
                 ),
             oppgaveService = mockk(relaxed = true),
         )
@@ -129,9 +101,9 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        val vedtak = vedtakRepository.finn(spleisBehandlingId)
+        val vedtak = vedtakRepository.finn(behandling1.spleisBehandlingId!!)
         assertIs<Vedtak.Automatisk>(vedtak)
-        assertEquals(listOf(utbetalingId), automatiseringDao.automatisert)
+        assertEquals(listOf(behandling1.utbetalingId!!.value), automatiseringDao.automatisert)
         assertTrue(automatiseringDao.manuellSaksbehandling.isEmpty())
     }
 
@@ -143,10 +115,17 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
                 problemer,
             )
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertNull(vedtakRepository.finn(spleisBehandlingId))
+        assertNull(vedtakRepository.finn(behandling1.spleisBehandlingId!!))
         assertTrue(automatiseringDao.automatisert.isEmpty())
         assertEquals(
-            listOf(InMemoryAutomatiseringDao.ManuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)),
+            listOf(
+                InMemoryAutomatiseringDao.ManuellSaksbehandling(
+                    problemer,
+                    vedtaksperiode1.id.value,
+                    hendelseId,
+                    behandling1.utbetalingId!!.value,
+                ),
+            ),
             automatiseringDao.manuellSaksbehandling,
         )
     }
@@ -158,9 +137,9 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
                 "En årsak",
             )
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertNull(vedtakRepository.finn(spleisBehandlingId))
+        assertNull(vedtakRepository.finn(behandling1.spleisBehandlingId!!))
         assertTrue(automatiseringDao.automatisert.isEmpty())
-        assertEquals(listOf(utbetalingId), automatiseringDao.stikkprøver)
+        assertEquals(listOf(behandling1.utbetalingId!!.value), automatiseringDao.stikkprøver)
     }
 
     @Test
@@ -172,17 +151,17 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
 
     @Test
     fun `prøver på nytt selv om det har vært forsøkt fattet vedtak før, så lenge spleis ikke har kvittert`() {
-        vedtakRepository.lagre(Vedtak.automatisk(spleisBehandlingId))
+        vedtakRepository.lagre(Vedtak.automatisk(behandling1.spleisBehandlingId!!))
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))
 
-        assertEquals(listOf(utbetalingId), automatiseringDao.automatisert)
+        assertEquals(listOf(behandling1.utbetalingId!!.value), automatiseringDao.automatisert)
     }
 
     @Test
     fun `prøver ikke på nytt hvis spleis har kvittert ut tidligere svar`() {
-        vedtakRepository.lagre(Vedtak.automatisk(spleisBehandlingId).also { it.markerSomBehandletAvSpleis() })
+        vedtakRepository.lagre(Vedtak.automatisk(behandling1.spleisBehandlingId!!).also { it.markerSomBehandletAvSpleis() })
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(commandContext, sessionContext, outbox))

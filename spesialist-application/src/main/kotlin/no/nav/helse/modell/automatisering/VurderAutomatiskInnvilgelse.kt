@@ -8,7 +8,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
@@ -21,7 +20,6 @@ internal class VurderAutomatiskInnvilgelse(
     private val automatisering: Automatisering,
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val oppgaveService: OppgaveService,
 ) : Command {
@@ -34,51 +32,54 @@ internal class VurderAutomatiskInnvilgelse(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val resultat =
-            automatisering.utfør(
-                fødselsnummer = godkjenningsbehov.fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetaling = utbetaling,
-                periodetype = godkjenningsbehov.periodetype,
-                sykefraværstilfelle = sykefraværstilfelle,
-                organisasjonsnummer = godkjenningsbehov.organisasjonsnummer,
-                yrkesaktivitetstype = godkjenningsbehov.yrkesaktivitetstype,
-                maksdato = godkjenningsbehov.foreløpigBeregnetSluttPåSykepenger,
-                tags = godkjenningsbehov.tags,
-            )
-
-        when (resultat) {
-            is Automatiseringsresultat.KanIkkeAutomatiseres -> {
-                loggInfo(
-                    "Behandler ikke perioden ferdig automatisk, den kan ikke automatiseres",
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "utbetalingId" to utbetalingId,
-                    "problemer" to resultat.problemer.joinToString(),
+        return sessionContext.legacyPersonRepository.brukPerson(godkjenningsbehov.fødselsnummer) {
+            val sykefraværstilfelle = this.sykefraværstilfelle(vedtaksperiodeId)
+            val resultat =
+                automatisering.utfør(
+                    fødselsnummer = godkjenningsbehov.fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetaling = utbetaling,
+                    periodetype = godkjenningsbehov.periodetype,
+                    sykefraværstilfelle = sykefraværstilfelle,
+                    organisasjonsnummer = godkjenningsbehov.organisasjonsnummer,
+                    yrkesaktivitetstype = godkjenningsbehov.yrkesaktivitetstype,
+                    maksdato = godkjenningsbehov.foreløpigBeregnetSluttPåSykepenger,
+                    tags = godkjenningsbehov.tags,
                 )
-                manuellSaksbehandling(sessionContext.automatiseringDao, resultat.problemer)
+
+            when (resultat) {
+                is Automatiseringsresultat.KanIkkeAutomatiseres -> {
+                    loggInfo(
+                        "Behandler ikke perioden ferdig automatisk, den kan ikke automatiseres",
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "utbetalingId" to utbetalingId,
+                        "problemer" to resultat.problemer.joinToString(),
+                    )
+                    manuellSaksbehandling(sessionContext.automatiseringDao, resultat.problemer)
+                }
+
+                is Automatiseringsresultat.Stikkprøve -> {
+                    loggInfo(
+                        "Behandler ikke perioden ferdig automatisk, plukket ut til stikkprøve for ${resultat.årsak}",
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "utbetalingId" to utbetalingId,
+                    )
+                    stikkprøve(sessionContext.automatiseringDao)
+                }
+
+                is Automatiseringsresultat.KanAutomatiseres -> {
+                    loggInfo(
+                        "Behandler perioden ferdig automatisk",
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "utbetalingId" to utbetalingId,
+                    )
+                    automatiserSaksbehandling(commandContext, sessionContext)
+                    return@brukPerson ferdigstill(commandContext)
+                }
             }
 
-            is Automatiseringsresultat.Stikkprøve -> {
-                loggInfo(
-                    "Behandler ikke perioden ferdig automatisk, plukket ut til stikkprøve for ${resultat.årsak}",
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "utbetalingId" to utbetalingId,
-                )
-                stikkprøve(sessionContext.automatiseringDao)
-            }
-
-            is Automatiseringsresultat.KanAutomatiseres -> {
-                loggInfo(
-                    "Behandler perioden ferdig automatisk",
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "utbetalingId" to utbetalingId,
-                )
-                automatiserSaksbehandling(commandContext, sessionContext)
-                return ferdigstill(commandContext)
-            }
+            return@brukPerson true
         }
-
-        return true
     }
 
     private fun manuellSaksbehandling(

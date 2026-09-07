@@ -4,36 +4,22 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
-import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
-import no.nav.helse.modell.vilkårsprøving.Inntekt
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.modell.vilkårsprøving.*
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.api.assertNotNull
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class VurderBehovForAvviksvurderingTest : ApplicationTest() {
-    private val fødselsnummer = lagFødselsnummer()
-    private val organisasjonsnummer = lagOrganisasjonsnummer()
     private val vilkårsgrunnlagId = UUID.randomUUID()
-    private val skjæringstidspunkt = 1 jan 2018
     private val opprettet = LocalDateTime.now()
     private val avviksvurderingId = UUID.randomUUID()
     private val maksimaltTillattAvvik = 25.0
@@ -47,14 +33,14 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             arbeidsgivere =
                 listOf(
                     Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                        organisasjonsnummer = organisasjonsnummer,
+                        organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
                         omregnetÅrsinntekt = beregningsgrunnlagTotalbeløp,
                         inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
                     ),
                 ),
             sykepengegrunnlag = BigDecimal("666666.0"),
         )
-    private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
+    private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(vedtaksperiode1.organisasjonsnummer, beregningsgrunnlagTotalbeløp))
     private val beregningsgrunnlag =
         Beregningsgrunnlag(
             totalbeløp = beregningsgrunnlagTotalbeløp,
@@ -67,22 +53,10 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             innrapporterteInntekter =
                 listOf(
                     InnrapportertInntekt(
-                        arbeidsgiverreferanse = organisasjonsnummer,
+                        arbeidsgiverreferanse = vedtaksperiode1.organisasjonsnummer,
                         inntekter = listOf(Inntekt(YearMonth.of(2018, 1), sammenligningsgrunnlagTotalbeløp)),
                     ),
                 ),
-        )
-
-    private val legacyBehandling =
-        LegacyBehandling(
-            id = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            skjæringstidspunkt = 1 jan 2018,
-            spleisBehandlingId = UUID.randomUUID(),
-            utbetalingId = null,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
 
     private val repository = sessionContext.avviksvurderingRepository
@@ -134,10 +108,10 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         val behov = observer.behov.single()
         assertInstanceOf<Behov.Avviksvurdering>(behov)
         assertEquals(expectedOmregnedeÅrsinntekter, behov.omregnedeÅrsinntekter)
-        assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
+        assertEquals(vedtaksperiode1.organisasjonsnummer, behov.organisasjonsnummer)
         assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
-        assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
-        assertEquals(legacyBehandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
+        assertEquals(behandling1.skjæringstidspunkt, behov.skjæringstidspunkt)
+        assertEquals(vedtaksperiode1.id.value, behov.vedtaksperiodeId)
     }
 
     @Test
@@ -156,14 +130,14 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             ),
         )
         command.resume(context, sessionContext, outbox)
-        val avviksvurderinger = repository.finnAvviksvurderinger(fødselsnummer)
+        val avviksvurderinger = repository.finnAvviksvurderinger(person.id.value)
         assertEquals(1, avviksvurderinger.size)
         assertEquals(
             Avviksvurdering(
                 unikId = avviksvurderingId,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
+                fødselsnummer = person.id.value,
+                skjæringstidspunkt = behandling1.skjæringstidspunkt,
                 opprettet = opprettet,
                 avviksprosent = avviksprosent,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -189,7 +163,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             ),
         )
         command.resume(context, sessionContext, outbox)
-        assertTrue(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        behandling1.assertHarVarsel("RV_IV_2", Varsel.Status.AKTIV)
     }
 
     @Test
@@ -208,7 +182,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
             ),
         )
         command.resume(context, sessionContext, outbox)
-        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        behandling1.assertHarIkkeVarsel("RV_IV_2")
     }
 
     @Test
@@ -223,7 +197,7 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         command.resume(context, sessionContext, outbox)
 
         // then
-        val avviksvurderinger = repository.finnAvviksvurderinger(fødselsnummer)
+        val avviksvurderinger = repository.finnAvviksvurderinger(person.id.value)
         assertEquals(1, avviksvurderinger.size)
         assertNotNull(repository.hentAvviksvurdering(vilkårsgrunnlagId))
     }
@@ -240,15 +214,15 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         command.resume(context, sessionContext, outbox)
 
         // then
-        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
+        behandling1.assertHarIkkeVarsel("RV_IV_2")
     }
 
     private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering =
         Avviksvurdering(
             unikId = avviksvurderingId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
+            fødselsnummer = person.id.value,
+            skjæringstidspunkt = behandling1.skjæringstidspunkt,
             opprettet = opprettet,
             avviksprosent = avviksprosent,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -269,14 +243,15 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
     private fun vurderBehovForAvviksvurderingCommand(
         sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-        organisasjonsnummer: String = this.organisasjonsnummer,
+        organisasjonsnummer: String = vedtaksperiode1.organisasjonsnummer,
     ) = VurderBehovForAvviksvurdering(
-        fødselsnummer = fødselsnummer,
-        skjæringstidspunkt = skjæringstidspunkt,
+        fødselsnummer = person.id.value,
+        skjæringstidspunkt = behandling1.skjæringstidspunkt,
         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
         vilkårsgrunnlagId = vilkårsgrunnlagId,
-        legacyBehandling = legacyBehandling,
         yrkesaktivitetstype = yrkesaktivitetstype,
         organisasjonsnummer = organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiode1.id,
+        spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
     )
 }

@@ -30,8 +30,7 @@ class EndretEgenAnsattStatus(
         json = jsonNode.toString(),
     )
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

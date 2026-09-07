@@ -6,7 +6,6 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
-import no.nav.helse.modell.person.LegacyPerson
 import tools.jackson.databind.JsonNode
 import java.util.*
 
@@ -29,15 +28,16 @@ class VedtaksperiodeNyUtbetaling(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        person.nyUtbetalingForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
+            this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        }
         kommandostarter {
             VedtaksperiodeNyUtbetalingCommand(
-                vedtaksperiodeId = vedtaksperiodeId(),
+                vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
             )
         }

@@ -5,7 +5,6 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.person.LegacyPerson
 import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.*
@@ -35,12 +34,13 @@ class UtbetalingEndret(
         json = jsonNode.toString(),
     )
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
+        sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
+            if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) this.utbetalingForkastet(utbetalingId)
+        }
         this.kommandostarter {
             UtbetalingEndretCommand(
                 fødselsnummer = fødselsnummer(),

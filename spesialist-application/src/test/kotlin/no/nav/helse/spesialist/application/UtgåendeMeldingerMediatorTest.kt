@@ -11,7 +11,6 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.intellij.lang.annotations.Language
@@ -105,12 +104,10 @@ internal class UtgåendeMeldingerMediatorTest {
 
         override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
-        override fun behandleMedLegacyPerson(
-            person: LegacyPerson,
+        override fun behandle(
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,
-        ) {
-        }
+        ) {}
 
         @Language("JSON")
         override fun toJson(): String = """{ "@id": "${UUID.randomUUID()}", "@event_name": "testhendelse", "@opprettet": "${LocalDateTime.now()}" }"""

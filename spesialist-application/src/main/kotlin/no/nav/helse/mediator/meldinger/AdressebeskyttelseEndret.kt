@@ -7,7 +7,6 @@ import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCo
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersoninfoCommand
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import tools.jackson.databind.JsonNode
 import java.util.*
@@ -27,8 +26,7 @@ class AdressebeskyttelseEndret(
 
     override fun toJson(): String = json
 
-    override fun behandleMedLegacyPerson(
-        person: LegacyPerson,
+    override fun behandle(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

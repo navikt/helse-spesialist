@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
@@ -34,6 +35,9 @@ class DelegatingLegacyVedtaksperiodeRepository(
         vedtaksperiodeRepository.alle().filter { it.identitetsnummer == identitetsnummer }.forEach { vedtaksperiode ->
             behandlingRepository.alle().filter { it.vedtaksperiodeId == vedtaksperiode.id }.forEach { behandling ->
                 behandlingRepository.slett(behandling.id)
+                varselRepository.finnVarslerFor(listOf(behandling.id)).forEach { varsel ->
+                    varselRepository.slett(varsel.id)
+                }
             }
             vedtaksperiodeRepository.slett(vedtaksperiode.id)
         }
@@ -69,6 +73,27 @@ class DelegatingLegacyVedtaksperiodeRepository(
                         yrkesaktivitetstype = behandling.yrkesaktivitetstype,
                     ),
                 )
+                behandling.varsler.forEach { varsel ->
+                    varselRepository.lagre(
+                        Varsel.fraLagring(
+                            id = VarselId(varsel.id),
+                            behandlingUnikId = BehandlingUnikId(behandling.id),
+                            spleisBehandlingId = behandling.spleisBehandlingId?.let(::SpleisBehandlingId),
+                            kode = varsel.varselkode,
+                            status =
+                                when (varsel.status) {
+                                    VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
+                                    VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
+                                    VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
+                                    VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
+                                    VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
+                                    VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
+                                },
+                            opprettetTidspunkt = varsel.opprettet,
+                            vurdering = null,
+                        ),
+                    )
+                }
             }
         }
     }

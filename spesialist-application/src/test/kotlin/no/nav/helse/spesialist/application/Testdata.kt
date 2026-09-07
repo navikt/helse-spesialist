@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.*
 
 class TestPerson {
@@ -78,6 +79,7 @@ object Testdata {
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         inntektsopplysningkilde: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde = Arbeidsgiver,
         json: String = "{}",
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
     ): GodkjenningsbehovData =
         GodkjenningsbehovData(
             id = id,
@@ -100,7 +102,7 @@ object Testdata {
             kanAvvises = kanAvvises,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
-            skjæringstidspunkt = 1 jan 2018,
+            skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlagsfakta =
                 Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                     seksG = 6 * 118620.0,
