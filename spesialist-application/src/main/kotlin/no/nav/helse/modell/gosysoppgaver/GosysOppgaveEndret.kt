@@ -13,8 +13,8 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import tools.jackson.databind.JsonNode
 import java.util.UUID
@@ -62,7 +62,7 @@ internal class GosysOppgaveEndretCommand(
                 harTildeltOppgave = harTildeltOppgave,
                 oppgaveService = oppgaveService,
                 skjæringstidspunkt = godkjenningsbehov.skjæringstidspunkt,
-                fødselsnummer = Fødselsnummer(godkjenningsbehov.fødselsnummer),
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId),
             ),
             SjekkAtOppgaveFortsattErÅpenCommand(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,

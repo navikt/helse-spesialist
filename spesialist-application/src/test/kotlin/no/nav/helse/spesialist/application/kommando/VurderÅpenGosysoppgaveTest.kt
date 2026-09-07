@@ -8,10 +8,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.Varsel
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +29,7 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         harTildeltOppgave = harTildeltOppgave,
         oppgaveService = oppgaveService,
         skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
-        fødselsnummer = Fødselsnummer(godkjenningsbehovData.fødselsnummer),
+        spleisBehandlingId = behandling1.spleisBehandlingId!!,
     )
 
     private fun commandContext(behovsamler: MutableList<Behov>? = null) =
@@ -145,8 +142,4 @@ internal class VurderÅpenGosysoppgaveTest : ApplicationTest() {
         behandling1.assertAntallVarsler(1)
         behandling1.assertHarVarsel("SB_EX_1", Varsel.Status.AKTIV)
     }
-}
-
-internal fun LegacyBehandling.inspektør(block: BehandlingDto.() -> Unit) {
-    this.toDto().block()
 }

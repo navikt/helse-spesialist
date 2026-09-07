@@ -50,11 +50,6 @@ internal class SykefraværstilfelleTest {
         assertTrue(listOf(gjeldendeBehandling1, gjeldendeBehandling2).forhindrerAutomatisering(28 feb 2018))
     }
 
-    @Test
-    fun `thrower hvis behandling ikke finnes`() {
-        assertThrows<IllegalArgumentException> { sykefraværstilfelle().haster(UUID.randomUUID()) }
-    }
-
     private fun legacyBehandling(vedtaksperiodeId: UUID = UUID.randomUUID()) =
         LegacyBehandling(
             id = UUID.randomUUID(),

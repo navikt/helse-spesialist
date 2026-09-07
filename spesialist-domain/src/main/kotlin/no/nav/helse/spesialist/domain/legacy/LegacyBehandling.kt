@@ -109,8 +109,6 @@ class LegacyBehandling private constructor(
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
-    internal fun harKunGosysvarsel() = varsler.size == 1 && varsler.single().erGosysvarsel()
-
     internal fun harVarselOmManglendeInntektsmelding() = varsler.any { it.erVarselOmManglendeInntektsmelding() }
 
     internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {

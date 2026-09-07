@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.domain
 
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
@@ -142,6 +143,21 @@ class Varsel private constructor(
                 status = Status.AKTIV,
             )
 
+        fun nytt(
+            behandlingUnikId: BehandlingUnikId,
+            spleisBehandlingId: SpleisBehandlingId?,
+            kode: String,
+        ): Varsel =
+            Varsel(
+                id = VarselId(UUID.randomUUID()),
+                spleisBehandlingId = spleisBehandlingId,
+                behandlingUnikId = behandlingUnikId,
+                kode = kode,
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = null,
+                status = Status.AKTIV,
+            )
+
         fun fraLagring(
             id: VarselId,
             spleisBehandlingId: SpleisBehandlingId?,
@@ -160,5 +176,25 @@ class Varsel private constructor(
                 opprettetTidspunkt = opprettetTidspunkt,
                 vurdering = vurdering,
             )
+
+        fun Collection<Varsel>.oppdatertEllerNyttVarsel(
+            varselkode: Varselkode,
+            behandling: Behandling,
+        ): Varsel? {
+            val eksisterendeVarsel = this.find { it.kode == varselkode.name } ?: return nytt(behandling.id, behandling.spleisBehandlingId, varselkode.name)
+            return when (eksisterendeVarsel.status) {
+                Status.GODKJENT,
+                Status.VURDERT,
+                Status.AVVIKLET,
+                Status.AVVIST,
+                Status.AKTIV,
+                -> null
+
+                Status.INAKTIV -> {
+                    eksisterendeVarsel.reaktiver()
+                    eksisterendeVarsel
+                }
+            }
+        }
     }
 }
