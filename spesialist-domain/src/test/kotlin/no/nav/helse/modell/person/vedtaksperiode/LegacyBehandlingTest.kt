@@ -50,30 +50,6 @@ internal class LegacyBehandlingTest {
     }
 
     @Test
-    fun `behandling har kun gosysvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        assertTrue(behandling.harKunGosysvarsel())
-    }
-
-    @Test
-    fun `behandling har ingen varsler og dermed ikke kun gosysvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        assertFalse(behandling.harKunGosysvarsel())
-    }
-
-    @Test
-    fun `behandling har flere varsler og dermed ikke kun gosysvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId))
-        assertFalse(behandling.harKunGosysvarsel())
-    }
-
-    @Test
     fun `behandling har ikke aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)

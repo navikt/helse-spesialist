@@ -56,8 +56,6 @@ class LegacyVarsel(
         this.status = INAKTIV
     }
 
-    internal fun erGosysvarsel() = varselkode == "SB_EX_1"
-
     internal fun erVarselOmManglendeInntektsmelding() = varselkode == "RV_IV_10"
 
     override fun toString(): String = "varselkode=$varselkode, vedtaksperiodeId=$vedtaksperiodeId, status=${status.name}"

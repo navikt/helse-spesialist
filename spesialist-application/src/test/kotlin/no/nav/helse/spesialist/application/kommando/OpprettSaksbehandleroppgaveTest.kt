@@ -7,7 +7,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
@@ -67,7 +66,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val forsikringsvurderingHenter = MockForsikringsvurderingHenter()
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
@@ -227,7 +225,7 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     @Test
     fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
         every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
-        every { sykefraværstilfelle.haster(vedtaksperiode1.id.value) } returns true
+        behandling1.nyttVarsel("RV_UT_23") // varsel om negativt beløp, som trigger at saken haster
         assertTrue(command.execute(context, sessionContext, outbox))
         assertForventedeEgenskaper(
             SØKNAD,

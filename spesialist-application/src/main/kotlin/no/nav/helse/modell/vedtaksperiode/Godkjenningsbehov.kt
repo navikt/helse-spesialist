@@ -390,7 +390,7 @@ internal class GodkjenningsbehovCommand(
                 harTildeltOppgave = false,
                 oppgaveService = oppgaveService,
                 skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
-                fødselsnummer = fødselsnummer,
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
             ),
             VurderVurderingsmomenter(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
