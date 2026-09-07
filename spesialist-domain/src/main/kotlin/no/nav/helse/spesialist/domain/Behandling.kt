@@ -162,5 +162,8 @@ class Behandling private constructor(
             skjæringstidspunkt = tidligereBehandling.skjæringstidspunkt,
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
+
+        // Alle behandlinger som må sees i sammenheng når saksbehandler behandler saken. Dvs. alle behandlinger som overlapper i tid eller ligger før og har samme skjæringstidspunkt som behandlingen som er til godkjenning.
+        fun Collection<Behandling>.behandlingspakke(behandling: Behandling): Set<Behandling> = this.filter { it.fom <= behandling.tom && it.skjæringstidspunkt == behandling.skjæringstidspunkt }.toSet() + behandling
     }
 }

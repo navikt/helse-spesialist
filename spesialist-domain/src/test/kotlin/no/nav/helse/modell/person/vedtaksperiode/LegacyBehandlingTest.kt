@@ -5,9 +5,7 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
@@ -260,36 +258,6 @@ internal class LegacyBehandlingTest {
         val behandlingV2 = behandling(vedtaksperiodeId = vedtaksperiodeId2)
 
         assertNotNull(listOf(behandlingV1, behandlingV2).finnBehandlingForVedtaksperiode(vedtaksperiodeId1))
-    }
-
-    @Test
-    fun `finn behandling med spleisBehandlingId`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        val behandlingDetSøkesEtter = behandling(spleisBehandlingId = spleisBehandlingId)
-        val behandlinger =
-            listOf(
-                behandlingDetSøkesEtter,
-                behandling(spleisBehandlingId = UUID.randomUUID()),
-                behandling(spleisBehandlingId = null),
-            )
-        assertEquals(behandlingDetSøkesEtter, behandlinger.finnBehandlingForSpleisBehandling(spleisBehandlingId))
-        assertNull(behandlinger.finnBehandlingForSpleisBehandling(UUID.randomUUID()))
-    }
-
-    @Test
-    fun `finn siste behandling uten spleisBehandlingId`() {
-        val behandlingMedBehandlingIdNull = behandling(spleisBehandlingId = null)
-        val behandlinger =
-            mutableListOf(
-                behandling(spleisBehandlingId = UUID.randomUUID()),
-                behandlingMedBehandlingIdNull,
-                behandling(spleisBehandlingId = UUID.randomUUID()),
-            )
-        assertEquals(behandlingMedBehandlingIdNull, behandlinger.finnSisteBehandlingUtenSpleisBehandlingId())
-
-        val nybehandlingMedBehandlingIdNull = behandling(spleisBehandlingId = null)
-        behandlinger.add(nybehandlingMedBehandlingIdNull)
-        assertEquals(nybehandlingMedBehandlingIdNull, behandlinger.finnSisteBehandlingUtenSpleisBehandlingId())
     }
 
     @Test
