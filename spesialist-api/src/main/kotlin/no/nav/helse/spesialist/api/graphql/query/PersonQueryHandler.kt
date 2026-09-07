@@ -4,7 +4,7 @@ import com.github.navikt.tbd_libs.populasjonstilgang.api.Populasjonstilgangskont
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import io.ktor.utils.io.core.toByteArray
+import io.ktor.utils.io.core.*
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
@@ -18,116 +18,24 @@ import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodehistorikkType
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
-import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlagV2
-import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
-import no.nav.helse.spesialist.api.graphql.schema.ApiAdressebeskyttelse
-import no.nav.helse.spesialist.api.graphql.schema.ApiAlder
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnetFodselsnummer
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringskandidat
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverInntekterFraAOrdningen
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
-import no.nav.helse.spesialist.api.graphql.schema.ApiBehandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
-import no.nav.helse.spesialist.api.graphql.schema.ApiEndrePaVent
-import no.nav.helse.spesialist.api.graphql.schema.ApiFaresignal
-import no.nav.helse.spesialist.api.graphql.schema.ApiFjernetFraPaVent
-import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
-import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiHistorikkinnslag
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiKjonn
-import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
-import no.nav.helse.spesialist.api.graphql.schema.ApiLagtPaVent
-import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveForPeriodevisning
-import no.nav.helse.spesialist.api.graphql.schema.ApiOpphevStansAutomatiskBehandlingSaksbehandler
-import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
-import no.nav.helse.spesialist.api.graphql.schema.ApiPensjonsgivendeInntekt
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodeHistorikkElementNy
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodevilkar
-import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
-import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
-import no.nav.helse.spesialist.api.graphql.schema.ApiRisikovurdering
-import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
-import no.nav.helse.spesialist.api.graphql.schema.ApiSelvstendigNaering
-import no.nav.helse.spesialist.api.graphql.schema.ApiSimulering
-import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsdetaljer
-import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringslinje
-import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsperiode
-import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsutbetaling
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
-import no.nav.helse.spesialist.api.graphql.schema.ApiStansAutomatiskBehandlingSaksbehandler
-import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengedager
-import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
-import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
-import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurdering
-import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurderingRetur
-import no.nav.helse.spesialist.api.graphql.schema.ApiUberegnetPeriode
-import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetaling
-import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingtype
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
-import no.nav.helse.spesialist.api.graphql.schema.ApiVurdering
+import no.nav.helse.spesialist.api.graphql.mapping.*
+import no.nav.helse.spesialist.api.graphql.schema.*
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
-import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
-import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
-import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
-import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
-import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
-import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
+import no.nav.helse.spesialist.api.overstyring.*
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.application.DialogRepository
-import no.nav.helse.spesialist.application.PersonPseudoId
-import no.nav.helse.spesialist.application.PersonPseudoIdProvider
-import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.logg.MdcKey
-import no.nav.helse.spesialist.application.logg.loggError
-import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggWarn
-import no.nav.helse.spesialist.application.logg.medMdc
-import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
-import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
-import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetaling
-import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
-import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
-import no.nav.helse.spesialist.application.snapshot.SnapshotVurdering
-import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
-import no.nav.helse.spesialist.domain.DialogId
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.Personinfo
-import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.application.*
+import no.nav.helse.spesialist.application.logg.*
+import no.nav.helse.spesialist.application.snapshot.*
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class PersonQueryHandler(
     private val daos: Daos,
@@ -136,7 +44,10 @@ class PersonQueryHandler(
     private val sessionFactory: SessionFactory,
     private val personPseudoIdProvider: PersonPseudoIdProvider,
     private val populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
+    personinfoHenter: PersoninfoHenter,
 ) : PersonQuerySchema {
+    private val personinfoKlargjører = PersoninfoKlargjører(personinfoHenter)
+
     override fun person(
         personPseudoId: String,
         env: DataFetchingEnvironment,
@@ -192,11 +103,35 @@ class PersonQueryHandler(
             is TilgangskontrollResultat.ManglerTilgang -> manglerTilgangTilPerson(saksbehandler, identitetsnummer)
 
             TilgangskontrollResultat.Ok -> {
+                klargjørPersoninfoOmNødvendig(personEntity, transaction, identitetsnummer)
                 hentPerson(personEntity, transaction, identitetsnummer, saksbehandler)
             }
             is TilgangskontrollResultat.UventetFeil -> {
                 loggError("Uventet feil fra Tilgangsmaskinen", "feil" to resultat.menneskeligLesbarForklaring)
                 internalServerError("Uventet feil fra Tilgangsmaskinen")
+            }
+        }
+    }
+
+    private fun klargjørPersoninfoOmNødvendig(
+        personEntity: Person,
+        transaction: SessionContext,
+        identitetsnummer: Identitetsnummer,
+    ) {
+        if (personEntity.info != null) return
+
+        when (val resultat = personinfoKlargjører.klargjør(personEntity)) {
+            PersoninfoKlargjører.KlargjøringResultat.Klargjort -> {
+                transaction.personRepository.lagre(personEntity)
+            }
+
+            PersoninfoKlargjører.KlargjøringResultat.IkkeFunnet -> {
+                notFound("Fant ikke personinfo for person")
+            }
+
+            is PersoninfoKlargjører.KlargjøringResultat.OppslagFeilet -> {
+                loggError("Klarte ikke å hente personinfo", resultat.feil, "identitetsnummer" to identitetsnummer)
+                internalServerError("Feil ved henting av personinfo")
             }
         }
     }

@@ -12,18 +12,15 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.Personinfo
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.application.PersoninfoHenter
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertNotNull
 
 class TilgangsstyringE2ETest : AbstractE2ETest() {
@@ -160,6 +157,18 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
+    private val personinfoHenter =
+        PersoninfoHenter {
+            Personinfo(
+                fornavn = "PersoninfoHenter",
+                mellomnavn = "Mellomnavn",
+                etternavn = "Etternavn",
+                fødselsdato = LocalDate.now().minusYears(20),
+                dødsdato = null,
+                kjønn = Personinfo.Kjønn.Ukjent,
+                adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
+            )
+        }
 
     private val personQuery =
         PersonQuery(
@@ -171,6 +180,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                     sessionFactory = sessionFactory,
                     personPseudoIdProvider = personPseudoIdProvider,
                     populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
+                    personinfoHenter = personinfoHenter,
                 ),
         )
 }

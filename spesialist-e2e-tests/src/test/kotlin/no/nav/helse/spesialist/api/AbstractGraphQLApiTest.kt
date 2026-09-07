@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
+import no.nav.helse.spesialist.application.PersoninfoHenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.teamLogs
@@ -32,11 +33,13 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.tilgangsgrupperTilTilganger
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.intellij.lang.annotations.Language
 import tools.jackson.databind.JsonNode
 import java.time.Duration.ofNanos
+import java.time.LocalDate
 import java.util.*
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
@@ -75,6 +78,20 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
             tilgangsgrupperTilTilganger = tilgangsgrupperTilTilganger,
         )
 
+    protected val personinfoHenter =
+        mockk<PersoninfoHenter> {
+            every { hentPersoninfo(any()) } returns
+                Personinfo(
+                    fornavn = "PersoninfoHenter",
+                    mellomnavn = "Mellomnavn",
+                    etternavn = "Etternavn",
+                    fødselsdato = LocalDate.now().minusYears(20),
+                    dødsdato = null,
+                    kjønn = Personinfo.Kjønn.Ukjent,
+                    adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert,
+                )
+        }
+
     private fun ApplicationTestBuilder.graphQL() {
         val spesialistSchema =
             SpesialistSchema(
@@ -88,6 +105,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
                                 populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
+                                personinfoHenter = personinfoHenter,
                             ),
                     ),
             )

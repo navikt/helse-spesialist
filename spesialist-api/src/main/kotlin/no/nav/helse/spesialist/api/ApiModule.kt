@@ -76,6 +76,7 @@ class ApiModule(
                             sessionFactory = sessionFactory,
                             personPseudoIdProvider = personPseudoIdProvider,
                             populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
+                            personinfoHenter = personinfoHenter,
                         ),
                 ),
         )
