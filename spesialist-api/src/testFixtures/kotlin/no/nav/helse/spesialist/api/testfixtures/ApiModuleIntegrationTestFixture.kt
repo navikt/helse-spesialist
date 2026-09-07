@@ -1,11 +1,9 @@
 package no.nav.helse.spesialist.api.testfixtures
 
-import io.ktor.http.ContentType
-import io.ktor.server.application.Application
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
@@ -14,7 +12,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import java.util.UUID
+import java.util.*
 
 class ApiModuleIntegrationTestFixture(
     private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
@@ -127,6 +125,9 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
     }
     if (Brukerrolle.Dialogmelding in brukerroller) {
         uuider.addAll(dialogmelding)
+    }
+    if (Brukerrolle.Porteføljestyring in brukerroller) {
+        uuider.addAll(porteføljestyring)
     }
     return uuider
 }
