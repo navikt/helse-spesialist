@@ -5,8 +5,6 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.deaktiver
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.forhindrerAutomatisering
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harVarselOmManglendeInntektsmelding
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.håndterNyttVarsel
 import java.time.LocalDate
 import java.util.UUID
@@ -34,11 +32,4 @@ class Sykefraværstilfelle(
     fun deaktiver(varsel: LegacyVarsel) {
         gjeldendeBehandlinger.deaktiver(varsel)
     }
-
-    fun harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean = gjeldendeBehandlinger.harMedlemskapsvarsel(vedtaksperiodeId)
-
-    fun manglerInntektsmelding(vedtaksperiodeId: UUID): Boolean =
-        gjeldendeBehandlinger.harVarselOmManglendeInntektsmelding(
-            vedtaksperiodeId,
-        )
 }

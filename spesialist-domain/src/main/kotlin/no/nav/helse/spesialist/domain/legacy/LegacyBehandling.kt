@@ -109,8 +109,6 @@ class LegacyBehandling private constructor(
 
     internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
-    internal fun harVarselOmManglendeInntektsmelding() = varsler.any { it.erVarselOmManglendeInntektsmelding() }
-
     internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {
         when (tilstand) {
             Tilstand.VedtakFattet -> {
@@ -375,8 +373,6 @@ class LegacyBehandling private constructor(
                 .filter {
                     it.tilhører(legacyBehandling.periode.tom)
                 }.any { it.forhindrerAutomatisering() }
-
-        internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(vedtaksperiodeId: UUID): Boolean = finnBehandlingForVedtaksperiode(vedtaksperiodeId)?.harVarselOmManglendeInntektsmelding() == true
 
         internal fun List<LegacyBehandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {

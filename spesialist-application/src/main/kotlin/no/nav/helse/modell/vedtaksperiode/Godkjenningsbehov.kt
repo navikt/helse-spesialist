@@ -409,7 +409,7 @@ internal class GodkjenningsbehovCommand(
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = fødselsnummer.value,
                 oppgaveService = oppgaveService,
-                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
             ),
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,
