@@ -1,14 +1,11 @@
 package no.nav.helse.spesialist.client.entraid.testfixtures
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.okJson
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
-import java.util.UUID
+import java.util.*
 
 class ClientEntraIDModuleIntegrationTestFixture(
     val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller =
@@ -20,6 +17,7 @@ class ClientEntraIDModuleIntegrationTestFixture(
             stikkprøve = (1..2).map { UUID.randomUUID() },
             utvikler = (1..2).map { UUID.randomUUID() },
             dialogmelding = (1..2).map { UUID.randomUUID() },
+            porteføljestyring = (1..2).map { UUID.randomUUID() },
         ),
 ) {
     val msGraphWireMockServer: WireMockServer =

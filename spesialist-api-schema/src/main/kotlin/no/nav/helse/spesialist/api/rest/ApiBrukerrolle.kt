@@ -8,4 +8,5 @@ enum class ApiBrukerrolle {
     STIKKPRØVE,
     UTVIKLER,
     DIALOGMELDING,
+    PORTEFØLJESTYRING,
 }

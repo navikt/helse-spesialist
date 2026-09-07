@@ -4,16 +4,18 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 class TilgangsgrupperTilBrukerrollerTest {
     private val næringsdrivendeGruppeId = UUID.randomUUID()
+    private val porteføljestyringGruppeId = UUID.randomUUID()
     private val annenGruppeId1 = UUID.randomUUID()
     private val annenGruppeId2 = UUID.randomUUID()
 
     private val tilgangsgrupperTilBrukerroller =
         tilgangsgrupperTilBrukerroller(
             næringsdrivendeBeta = listOf(næringsdrivendeGruppeId),
+            porteføljestyring = listOf(porteføljestyringGruppeId),
         )
 
     @Test
@@ -30,6 +32,15 @@ class TilgangsgrupperTilBrukerrollerTest {
 
         assertEquals(1, roller.size)
         assertTrue(roller.contains(Brukerrolle.SelvstendigNæringsdrivendeBeta))
+    }
+
+    @Test
+    fun `har porteføljestyring-gruppe blant flere grupper`() {
+        val grupper = listOf(annenGruppeId1, porteføljestyringGruppeId)
+        val roller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(grupper)
+
+        assertEquals(1, roller.size)
+        assertTrue(roller.contains(Brukerrolle.Porteføljestyring))
     }
 
     @Test

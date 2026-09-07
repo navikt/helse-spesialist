@@ -1,8 +1,7 @@
 package no.nav.helse.spesialist.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationStopped
+import io.ktor.server.application.*
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -25,7 +24,7 @@ import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
 import no.nav.helse.spesialist.valkey.ValkeyModule
 import java.net.URI
-import java.util.UUID
+import java.util.*
 
 fun main() {
     val env = System.getenv()
@@ -127,6 +126,7 @@ fun main() {
                         stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
                         utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
                         dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
+                        porteføljestyring = env.getUUIDList("ROLLE_PORTEFOLJESTYRING"),
                     ),
                 tilgangsgrupperTilTilganger =
                     TilgangsgrupperTilTilganger(

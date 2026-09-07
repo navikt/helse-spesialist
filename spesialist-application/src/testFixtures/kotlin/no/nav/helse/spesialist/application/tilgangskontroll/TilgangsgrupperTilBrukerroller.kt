@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
-import java.util.UUID
+import java.util.*
 
 fun tilgangsgrupperTilBrukerroller(
     næringsdrivendeBeta: List<UUID> = listOf(UUID.randomUUID()),
@@ -10,6 +10,7 @@ fun tilgangsgrupperTilBrukerroller(
     stikkprøve: List<UUID> = listOf(UUID.randomUUID()),
     utvikler: List<UUID> = listOf(UUID.randomUUID()),
     dialogmelding: List<UUID> = listOf(UUID.randomUUID()),
+    porteføljestyring: List<UUID> = listOf(UUID.randomUUID()),
 ): TilgangsgrupperTilBrukerroller =
     TilgangsgrupperTilBrukerroller(
         næringsdrivendeBeta = næringsdrivendeBeta,
@@ -19,4 +20,5 @@ fun tilgangsgrupperTilBrukerroller(
         stikkprøve = stikkprøve,
         utvikler = utvikler,
         dialogmelding = dialogmelding,
+        porteføljestyring = porteføljestyring,
     )

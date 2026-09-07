@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import java.util.UUID
+import java.util.*
 
 class TilgangsgrupperTilBrukerroller(
     val næringsdrivendeBeta: List<UUID>,
@@ -11,6 +11,7 @@ class TilgangsgrupperTilBrukerroller(
     val stikkprøve: List<UUID>,
     val utvikler: List<UUID>,
     val dialogmelding: List<UUID>,
+    val porteføljestyring: List<UUID>,
 ) {
     fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> {
         val roller = mutableSetOf<Brukerrolle>()
@@ -35,6 +36,9 @@ class TilgangsgrupperTilBrukerroller(
         if (tilgangsgrupper.any { it in dialogmelding }) {
             roller.add(Brukerrolle.Dialogmelding)
         }
+        if (tilgangsgrupper.any { it in porteføljestyring }) {
+            roller.add(Brukerrolle.Porteføljestyring)
+        }
         return roller
     }
 
@@ -45,5 +49,6 @@ class TilgangsgrupperTilBrukerroller(
             kode7.toSet() +
             stikkprøve.toSet() +
             utvikler.toSet() +
-            dialogmelding.toSet()
+            dialogmelding.toSet() +
+            porteføljestyring.toSet()
 }

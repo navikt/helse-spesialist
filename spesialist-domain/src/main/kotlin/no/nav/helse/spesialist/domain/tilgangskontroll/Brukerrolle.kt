@@ -8,4 +8,5 @@ enum class Brukerrolle {
     Stikkprøve,
     Utvikler,
     Dialogmelding,
+    Porteføljestyring,
 }

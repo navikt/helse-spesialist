@@ -1,13 +1,6 @@
 package no.nav.helse.spesialist.api.rest.saksbehandlere
 
-import no.nav.helse.spesialist.api.rest.ApiBruker
-import no.nav.helse.spesialist.api.rest.ApiBrukerrolle
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiTilgang
-import no.nav.helse.spesialist.api.rest.GetBehandler
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Bruker
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -33,6 +26,7 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
                                 Brukerrolle.Stikkprøve -> ApiBrukerrolle.STIKKPRØVE
                                 Brukerrolle.Utvikler -> ApiBrukerrolle.UTVIKLER
                                 Brukerrolle.Dialogmelding -> ApiBrukerrolle.DIALOGMELDING
+                                Brukerrolle.Porteføljestyring -> ApiBrukerrolle.PORTEFØLJESTYRING
                             }
                         }.toSet(),
                 tilganger =
