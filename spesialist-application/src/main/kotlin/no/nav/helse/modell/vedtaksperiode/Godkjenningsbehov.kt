@@ -335,6 +335,7 @@ internal class GodkjenningsbehovCommand(
 ) : MacroCommand() {
     private val fødselsnummer = Fødselsnummer(godkjenningsbehovData.fødselsnummer)
     private val vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId)
+    val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
@@ -358,7 +359,7 @@ internal class GodkjenningsbehovCommand(
                 yrkesaktivitetstype = godkjenningsbehovData.yrkesaktivitetstype,
                 organisasjonsnummer = godkjenningsbehovData.organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
+                spleisBehandlingId = spleisBehandlingId,
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
@@ -390,7 +391,7 @@ internal class GodkjenningsbehovCommand(
                 harTildeltOppgave = false,
                 oppgaveService = oppgaveService,
                 skjæringstidspunkt = godkjenningsbehovData.skjæringstidspunkt,
-                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
+                spleisBehandlingId = spleisBehandlingId,
             ),
             VurderVurderingsmomenter(
                 periode = Periode(godkjenningsbehovData.periodeFom, godkjenningsbehovData.periodeTom),
@@ -400,7 +401,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
                 spleisVedtaksperioder = godkjenningsbehovData.spleisVedtaksperioder,
-                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
+                spleisBehandlingId = spleisBehandlingId,
             ),
             VurderAutomatiskAvvisning(
                 godkjenningsbehov = godkjenningsbehovData,
@@ -408,7 +409,7 @@ internal class GodkjenningsbehovCommand(
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = fødselsnummer.value,
                 oppgaveService = oppgaveService,
-                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId),
+                spleisBehandlingId = spleisBehandlingId,
             ),
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,
@@ -416,6 +417,8 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 godkjenningsbehov = godkjenningsbehovData,
                 oppgaveService = oppgaveService,
+                spleisBehandlingId = spleisBehandlingId,
+                identitetsnummer = fødselsnummer,
             ),
             OpprettSaksbehandleroppgave(
                 behovData = godkjenningsbehovData,

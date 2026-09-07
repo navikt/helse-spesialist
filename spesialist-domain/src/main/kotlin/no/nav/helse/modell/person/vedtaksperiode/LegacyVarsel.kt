@@ -1,9 +1,7 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AVVIST
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.INAKTIV
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.VURDERT
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -84,17 +82,7 @@ class LegacyVarsel(
 
         internal fun List<LegacyVarsel>.finnEksisterendeVarsel(varselkode: String): LegacyVarsel? = find { it.varselkode == varselkode }
 
-        internal fun List<LegacyVarsel>.inneholderMedlemskapsvarsel(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
-
-        internal fun List<LegacyVarsel>.inneholderVarselOmNegativtBeløp(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
-
-        internal fun List<LegacyVarsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
-
         fun List<LegacyVarsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
-
-        internal fun List<LegacyVarsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
-
-        internal fun List<LegacyVarsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
     }
 }
 

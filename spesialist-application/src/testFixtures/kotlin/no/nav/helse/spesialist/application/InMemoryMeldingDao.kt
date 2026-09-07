@@ -8,12 +8,29 @@ import java.util.UUID
 class InMemoryMeldingDao : MeldingDao {
     val godkjenningsbehov = mutableListOf<Godkjenningsbehov>()
     internal val vedtaksperiodemeldinger = mutableListOf<Vedtaksperiodemelding>()
+    private val automatiseringKorrigertSøknad = mutableListOf<AutomatiseringKorrigertSøknad>()
+    private val behandlingOpprettetKorrigertSøknad = mutableMapOf<Pair<String, UUID>, MeldingDao.BehandlingOpprettetKorrigertSøknad>()
 
     internal data class Vedtaksperiodemelding(
         val id: UUID,
         val meldingtype: MeldingDao.Meldingtype,
         val vedtaksperiodeId: UUID,
     )
+
+    private data class AutomatiseringKorrigertSøknad(
+        val vedtaksperiodeId: UUID,
+        val hendelseRef: UUID,
+    )
+
+    // Test-hjelpemetode: registrerer at det finnes en behandling opprettet pga. korrigert søknad for gitt vedtaksperiode.
+    fun registrerBehandlingOpprettetKorrigertSøknad(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        meldingId: UUID,
+    ) {
+        behandlingOpprettetKorrigertSøknad[fødselsnummer to vedtaksperiodeId] =
+            MeldingDao.BehandlingOpprettetKorrigertSøknad(meldingId = meldingId, vedtaksperiodeId = vedtaksperiodeId)
+    }
 
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov = godkjenningsbehov.first { it.id == meldingId }
 
@@ -42,22 +59,16 @@ class InMemoryMeldingDao : MeldingDao {
     override fun sisteBehandlingOpprettetOmKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-    ): MeldingDao.BehandlingOpprettetKorrigertSøknad? {
-        TODO("Not yet implemented")
-    }
+    ): MeldingDao.BehandlingOpprettetKorrigertSøknad? = behandlingOpprettetKorrigertSøknad[fødselsnummer to vedtaksperiodeId]
 
-    override fun erKorrigertSøknadTidligereAutomatiskBehandlet(meldingId: UUID): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun erKorrigertSøknadTidligereAutomatiskBehandlet(meldingId: UUID): Boolean = automatiseringKorrigertSøknad.any { it.hendelseRef == meldingId }
 
-    override fun antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId: UUID): Int {
-        TODO("Not yet implemented")
-    }
+    override fun antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId: UUID): Int = automatiseringKorrigertSøknad.count { it.vedtaksperiodeId == vedtaksperiodeId }
 
     override fun opprettAutomatiseringMedKorrigertSøknad(
         vedtaksperiodeId: UUID,
         meldingId: UUID,
     ) {
-        TODO("Not yet implemented")
+        automatiseringKorrigertSøknad.add(AutomatiseringKorrigertSøknad(vedtaksperiodeId, meldingId))
     }
 }

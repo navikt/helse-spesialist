@@ -1,24 +1,12 @@
 package no.nav.helse.spesialist.application.modell
 
-import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.LegacyBehandlingDao
-import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
-import no.nav.helse.db.PersonDao
-import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.VedtakDao
-import no.nav.helse.db.VergemålDao
-import no.nav.helse.db.ÅpneGosysOppgaverDao
+import no.nav.helse.db.VergemålOgFremtidsfullmakt
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.Automatiseringsresultat
-import no.nav.helse.modell.automatisering.sjekker.Risikovurdering
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver.Configuration
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.stoppautomatiskbehandling.VeilederStansSubsumsjonmelder
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -29,66 +17,30 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.PersonRepository
-import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.VeilederStansRepository
+import no.nav.helse.spesialist.application.kommando.ApplicationTest
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Totrinnsvurdering
-import no.nav.helse.spesialist.domain.VeilederStans
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.JsonNodeFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
-internal class AutomatiseringTest {
-    private val fødselsnummer = lagFødselsnummer()
-    private val orgnummer = lagOrganisasjonsnummer()
-    private val vedtaksperiodeId = UUID.randomUUID()
+internal class AutomatiseringTest : ApplicationTest() {
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
 
-    private val vedtakDaoMock = mockk<VedtakDao>()
-    private val risikovurderingDaoMock =
-        mockk<RisikovurderingDao> {
-            every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
-        }
-    private val veilederStansRepositoryMock =
-        mockk<VeilederStansRepository>(relaxed = true) {
-            every { finnAktiv(any()) } returns null
-        }
-    private val saksbehandlerStansRepositoryMock =
-        mockk<SaksbehandlerStansRepository>(relaxed = true) {
-            every { finnAktiv(any()) } returns null
-        }
     private val veilederStansSubsumsjonmelder = VeilederStansSubsumsjonmelder { mockk(relaxed = true) }
-    private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
-    private val personRepository =
-        mockk<PersonRepository>(relaxed = true) {
-            every { finn(any()) } returns lagPerson(erEgenAnsatt = false)
-        }
-    private val totrinnsvurderingRepositoryMock = mockk<TotrinnsvurderingRepository>(relaxed = true)
-    private val personDaoMock =
-        mockk<PersonDao>(relaxed = true) {
-            every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
-        }
-    private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
-    private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
-    private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
-    private val legacyBehandlingDaoMock = mockk<LegacyBehandlingDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
@@ -116,48 +68,27 @@ internal class AutomatiseringTest {
 
     private val automatisering =
         Automatisering(
-            risikovurderingDao = risikovurderingDaoMock,
             veilederStansSubsumsjonmelder = veilederStansSubsumsjonmelder,
-            automatiseringDao = automatiseringDaoMock,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
-            vergemålDao = vergemålDaoMock,
-            personDao = personDaoMock,
-            vedtakDao = vedtakDaoMock,
             stikkprøver = stikkprøver,
-            meldingDao = meldingDaoMock,
-            legacyBehandlingDao = legacyBehandlingDaoMock,
-            personRepository = personRepository,
-            totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
-            veilederStansRepository = veilederStansRepositoryMock,
-            saksbehandlerStansRepository = saksbehandlerStansRepositoryMock,
+            sessionContext = sessionContext,
         )
 
     @BeforeEach
     fun setupDefaultTilHappyCase() {
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
-        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
-        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
-        every { totrinnsvurderingRepositoryMock.finnAktivForPerson(fødselsnummer = any()) } returns null
-        every { meldingDaoMock.sisteBehandlingOpprettetOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
-            BehandlingOpprettetKorrigertSøknad(
-                meldingId = hendelseId,
-                vedtaksperiodeId = vedtaksperiodeId,
-            )
-        every { meldingDaoMock.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId) } returns 1
-        every { meldingDaoMock.erKorrigertSøknadTidligereAutomatiskBehandlet(hendelseId) } returns false
-        every {
-            legacyBehandlingDaoMock.førsteLegacyBehandlingVedtakFattetTidspunkt(
-                vedtaksperiodeId,
-            )
-        } returns LocalDateTime.now().minusMonths(6).plusDays(1)
+        sessionContext.risikovurderingDao.lagre(vedtaksperiode1.id.value, true, JsonNodeFactory.instance.objectNode(), LocalDateTime.now())
+        sessionContext.vedtakDao.leggTilVedtaksperiodetype(vedtaksperiode1.id.value, FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER)
+        sessionContext.åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(ÅpneGosysOppgaverDto(person.id.value, 0, false, LocalDateTime.now()))
+        sessionContext.legacyBehandlingDao.settFørsteLegacyBehandlingVedtakFattetTidspunkt(
+            vedtaksperiode1.id.value,
+            LocalDateTime.now().minusMonths(6).plusDays(1),
+        )
         stikkprøveFullRefusjonEnArbeidsgiver = false
         stikkprøveUtsEnArbeidsgiverForlengelse = false
     }
 
     @Test
     fun `tvinger automatisering hvis vedtaksperiodeId ligger i force_automatisering tabellen`() {
-        every { automatiseringDaoMock.skalTvingeAutomatisering(vedtaksperiodeId) } returns true
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
+        sessionContext.automatiseringDao.tvingAutomatisering(vedtaksperiode1.id.value)
         blirAutomatiskBehandlet()
     }
 
@@ -169,16 +100,23 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         val gjeldendeBehandling = enBehandling()
-        gjeldendeBehandling.håndterNyttVarsel(etVarsel())
-        blirManuellOppgave(legacyBehandling = gjeldendeBehandling)
+        sessionContext.varselRepository.lagre(Varsel.nytt(gjeldendeBehandling.id, gjeldendeBehandling.spleisBehandlingId, "RV_IM_1"))
+        blirManuellOppgave(gjeldendeBehandling = gjeldendeBehandling)
     }
 
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
-        every { meldingDaoMock.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId) } returns 3
         val gjeldendeBehandling = enBehandling()
+        sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
+            person.id.value,
+            vedtaksperiode1.id.value,
+            hendelseId,
+        )
+        repeat(3) {
+            sessionContext.meldingDao.opprettAutomatiseringMedKorrigertSøknad(vedtaksperiode1.id.value, UUID.randomUUID())
+        }
         blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = gjeldendeBehandling,
+            gjeldendeBehandling = gjeldendeBehandling,
             problems = listOf("Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer"),
             varselkode = Varselkode.SB_SØ_1,
         )
@@ -186,35 +124,45 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode som mottok første søknad for mer enn 6 måneder er ikke automatiserbar`() {
-        every { legacyBehandlingDaoMock.førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId) } returns
-            LocalDateTime
-                .now()
-                .minusMonths(6)
+        sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
+            person.id.value,
+            vedtaksperiode1.id.value,
+            hendelseId,
+        )
+        sessionContext.legacyBehandlingDao.settFørsteLegacyBehandlingVedtakFattetTidspunkt(
+            vedtaksperiode1.id.value,
+            LocalDateTime.now().minusMonths(6),
+        )
         blirManuellOppgaveMedFeil(problems = listOf("Mer enn 6 måneder siden vedtak på første mottatt søknad"))
     }
 
     @Test
     fun `Automatisering av korrigert søknad er allerede håndtert for tidligere sykefraværstilfelle`() {
-        every { meldingDaoMock.erKorrigertSøknadTidligereAutomatiskBehandlet(hendelseId) } returns true
+        sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
+            person.id.value,
+            vedtaksperiode1.id.value,
+            hendelseId,
+        )
+        sessionContext.meldingDao.opprettAutomatiseringMedKorrigertSøknad(vedtaksperiode1.id.value, hendelseId)
         blirAutomatiskBehandlet()
     }
 
     @Test
     fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
+        sessionContext.risikovurderingDao.lagre(vedtaksperiode1.id.value, false, JsonNodeFactory.instance.objectNode(), LocalDateTime.now())
         blirManuellOppgave()
     }
 
     @Test
     fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
+        sessionContext.risikovurderingDao.slett(vedtaksperiode1.id.value)
         blirManuellOppgave()
     }
 
     @Test
     fun `vedtaksperiode med nådd maksdato og refusjon fra AG er ikke automatiserbar`() {
         blirManuellOppgaveMedFeilOgVarsel(
-            legacyBehandling = enBehandling(skjæringstidspunkt = 1 jan 2018),
+            gjeldendeBehandling = enBehandling(skjæringstidspunkt = 1 jan 2018),
             tags = listOf("ArbeidsgiverØnskerRefusjon"),
             maksdato = 1 des 2017,
             varselkode = Varselkode.RV_OV_5,
@@ -224,13 +172,13 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med åpne oppgaver er ikke automatiserbar`() {
-        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 1
+        sessionContext.åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(ÅpneGosysOppgaverDto(person.id.value, 1, false, LocalDateTime.now()))
         blirManuellOppgave()
     }
 
     @Test
     fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
-        every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns null
+        sessionContext.åpneGosysOppgaverDao.slett(person.id.value)
         blirManuellOppgave()
     }
 
@@ -242,7 +190,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `person med flere arbeidsgivere skal automatisk godkjennes`() {
-        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
+        sessionContext.vedtakDao.leggTilVedtaksperiodetype(vedtaksperiode1.id.value, FØRSTEGANGSBEHANDLING, Inntektskilde.FLERE_ARBEIDSGIVERE)
         blirAutomatiskBehandlet()
     }
 
@@ -269,7 +217,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med vergemål skal ikke automatisk godkjennes`() {
-        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
+        sessionContext.vergemålDao.lagre(person.id.value, VergemålOgFremtidsfullmakt(harVergemål = true, harFremtidsfullmakter = false), false)
         blirManuellOppgave()
     }
 
@@ -318,7 +266,7 @@ internal class AutomatiseringTest {
     fun `egenansatt går ikke til stikkprøve`() {
         stikkprøveFullRefusjonEnArbeidsgiver = true
         blirStikkprøve()
-        every { personRepository.finn(any()) } returns lagPerson(erEgenAnsatt = true)
+        sessionContext.personRepository.lagre(lagPerson(id = person.id, erEgenAnsatt = true))
         blirAutomatiskBehandlet()
     }
 
@@ -326,7 +274,7 @@ internal class AutomatiseringTest {
     fun `tar ikke stikkprøve når det er gradert adresse`() {
         stikkprøveFullRefusjonEnArbeidsgiver = true
         blirStikkprøve()
-        every { personDaoMock.finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Fortrolig
+        sessionContext.personRepository.lagre(lagPerson(id = person.id, adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig))
         blirAutomatiskBehandlet()
     }
 
@@ -337,10 +285,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
-        every { totrinnsvurderingRepositoryMock.finnAktivForPerson(fødselsnummer = any()) } returns
-            Totrinnsvurdering.ny(
-                fødselsnummer,
-            )
+        sessionContext.totrinnsvurderingRepository.lagre(Totrinnsvurdering.ny(person.id.value))
         blirManuellOppgave()
     }
 
@@ -348,33 +293,32 @@ internal class AutomatiseringTest {
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
         val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0, type = REVURDERING)
         blirAutomatiskBehandlet(utbetaling)
-        every { totrinnsvurderingRepositoryMock.finnAktivForPerson(fødselsnummer = any()) } returns
-            Totrinnsvurdering.ny(
-                fødselsnummer,
-            )
+        sessionContext.totrinnsvurderingRepository.lagre(Totrinnsvurdering.ny(person.id.value))
         blirManuellOppgave()
     }
 
     @Test
     fun `veileder har stanset automatisk behandling`() {
-        every { veilederStansRepositoryMock.finnAktiv(any()) } returns
+        sessionContext.veilederStansRepository.lagre(
             VeilederStans.ny(
-                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                identitetsnummer = Identitetsnummer.fraString(person.id.value),
                 årsaker = setOf(VeilederStans.StansÅrsak.MEDISINSK_VILKAR),
                 opprettet = Instant.now(),
                 originalMeldingId = UUID.randomUUID(),
-            )
+            ),
+        )
         blirManuellOppgave()
     }
 
     @Test
     fun `saksbehandler har stanset automatisk behandling`() {
-        every { saksbehandlerStansRepositoryMock.finnAktiv(any()) } returns
+        sessionContext.saksbehandlerStansRepository.lagre(
             SaksbehandlerStans.ny(
                 utførtAvSaksbehandlerIdent = lagSaksbehandler().ident,
                 begrunnelse = "Begrunnelse",
-                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-            )
+                identitetsnummer = Identitetsnummer.fraString(person.id.value),
+            ),
+        )
         blirManuellOppgave()
     }
 
@@ -408,27 +352,18 @@ internal class AutomatiseringTest {
     private fun forsøkAutomatisering(
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         periodetype: Periodetype = FORLENGELSE,
-        behandlinger: List<LegacyBehandling> =
-            listOf(
-                LegacyBehandling(
-                    id = UUID.randomUUID(),
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    fom = 1 jan 2018,
-                    tom = 31 jan 2018,
-                    skjæringstidspunkt = 1 jan 2018,
-                    yrkesaktivitetstype = yrkesaktivitetstype,
-                ),
-            ),
+        gjeldendeBehandling: Behandling = enBehandling(yrkesaktivitetstype = yrkesaktivitetstype),
         utbetaling: Utbetaling = enUtbetaling(),
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
     ) = automatisering.utfør(
-        fødselsnummer = fødselsnummer,
-        vedtaksperiodeId = vedtaksperiodeId,
+        fødselsnummer = person.id.value,
+        vedtaksperiodeId = vedtaksperiode1.id,
         utbetaling = utbetaling,
         periodetype = periodetype,
-        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, behandlinger),
-        organisasjonsnummer = orgnummer,
+        behandlingspakke = setOf(gjeldendeBehandling),
+        gjeldendeBehandling = gjeldendeBehandling,
+        organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
         yrkesaktivitetstype = yrkesaktivitetstype,
         maksdato = maksdato,
         tags = tags,
@@ -444,26 +379,18 @@ internal class AutomatiseringTest {
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
         skjæringstidspunkt: LocalDate = fom,
-        vedtaksperiodeId: UUID = this.vedtaksperiodeId,
-        behandlingId: UUID = UUID.randomUUID(),
-    ) = LegacyBehandling(
-        id = behandlingId,
-        vedtaksperiodeId = vedtaksperiodeId,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+    ) = lagBehandling(
+        vedtaksperiodeId = vedtaksperiode1.id,
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,
-        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        yrkesaktivitetstype = yrkesaktivitetstype,
     )
-
-    private fun etVarsel(
-        varselId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = this.vedtaksperiodeId,
-        varselkode: String = "RV_IM_1",
-    ) = LegacyVarsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun blirManuellOppgave(
         utbetaling: Utbetaling = enUtbetaling(),
-        legacyBehandling: LegacyBehandling = enBehandling(),
+        gjeldendeBehandling: Behandling = enBehandling(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
@@ -472,7 +399,7 @@ internal class AutomatiseringTest {
         forsøkAutomatisering(
             yrkesaktivitetstype = yrkesaktivitetstype,
             utbetaling = utbetaling,
-            behandlinger = listOf(legacyBehandling),
+            gjeldendeBehandling = gjeldendeBehandling,
             maksdato = maksdato,
             tags = tags,
             periodetype = periodetype,
@@ -509,7 +436,7 @@ internal class AutomatiseringTest {
     private fun blirManuellOppgaveMedFeilOgVarsel(
         utbetaling: Utbetaling = enUtbetaling(),
         problems: List<String>,
-        legacyBehandling: LegacyBehandling = enBehandling(),
+        gjeldendeBehandling: Behandling = enBehandling(),
         varselkode: Varselkode,
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
@@ -517,13 +444,19 @@ internal class AutomatiseringTest {
         val resultat =
             forsøkAutomatisering(
                 utbetaling = utbetaling,
-                behandlinger = listOf(legacyBehandling),
+                gjeldendeBehandling = gjeldendeBehandling,
                 maksdato = maksdato,
                 tags = tags,
             )
         assertKanIkkeAutomatiseres(resultat)
         check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
         assertEquals(problems.toSet(), resultat.problemer.toSet())
-        assertEquals(varselkode.name, legacyBehandling.varsler().first().varselkode)
+        assertEquals(
+            varselkode.name,
+            sessionContext.varselRepository
+                .finnVarslerFor(gjeldendeBehandling.id)
+                .first()
+                .kode,
+        )
     }
 }

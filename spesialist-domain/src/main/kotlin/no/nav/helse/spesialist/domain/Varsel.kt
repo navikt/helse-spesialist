@@ -177,6 +177,8 @@ class Varsel private constructor(
                 vurdering = vurdering,
             )
 
+        fun Collection<Varsel>.forhindrerAutomatisering() = this.any { it.status in listOf(Status.AKTIV, Status.VURDERT, Status.AVVIST) }
+
         fun Collection<Varsel>.oppdatertEllerNyttVarsel(
             varselkode: Varselkode,
             behandling: Behandling,

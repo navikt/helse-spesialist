@@ -5,12 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.finnEksisterendeVarsel
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderAktivtVarselOmAvvik
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderMedlemskapsvarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmAvvik
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmNegativtBeløp
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
@@ -84,8 +79,6 @@ class LegacyBehandling private constructor(
 
     internal fun unikId() = id
 
-    internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
-
     fun fom() = periode.fom
 
     fun tom() = periode.tom
@@ -106,8 +99,6 @@ class LegacyBehandling private constructor(
         )
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom <= dato
-
-    internal fun forhindrerAutomatisering(): Boolean = varsler.forhindrerAutomatisering()
 
     internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {
         when (tilstand) {
@@ -248,24 +239,6 @@ class LegacyBehandling private constructor(
         }
     }
 
-    private fun harMedlemskapsvarsel(): Boolean {
-        val inneholderMedlemskapsvarsel = varsler.inneholderMedlemskapsvarsel()
-        logg.info("Behandling $this har medlemskapsvarsel: $inneholderMedlemskapsvarsel")
-        return inneholderMedlemskapsvarsel
-    }
-
-    private fun kreverSkjønnsfastsettelse(): Boolean {
-        val inneholderAvviksvarsel = varsler.inneholderAktivtVarselOmAvvik()
-        logg.info("Behandling $this har varsel om avvik: $inneholderAvviksvarsel")
-        return inneholderAvviksvarsel
-    }
-
-    private fun harKunVarselOmÅpenGosysOppgave(): Boolean {
-        val inneholderKunÅpenGosysOppgaveVarsel = varsler.inneholderVarselOmÅpenGosysOppgave() && varsler.size == 1
-        logg.info("Behandling $this har kun varsel om åpen Gosys-oppgave: $inneholderKunÅpenGosysOppgaveVarsel")
-        return inneholderKunÅpenGosysOppgaveVarsel
-    }
-
     enum class Tilstand {
         VidereBehandlingAvklares,
         KlarTilBehandling,
@@ -357,33 +330,6 @@ class LegacyBehandling private constructor(
             }
         }
 
-        fun List<LegacyBehandling>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean =
-            this
-                .filter {
-                    it.tilhører(tilOgMed)
-                }.any { it.forhindrerAutomatisering() }
-
-        internal fun List<LegacyBehandling>.forhindrerAutomatisering(legacyBehandling: LegacyBehandling): Boolean =
-            this
-                .filter {
-                    it.tilhører(legacyBehandling.periode.tom)
-                }.any { it.forhindrerAutomatisering() }
-
-        internal fun List<LegacyBehandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.harMedlemskapsvarsel()
-            }
-
-        internal fun List<LegacyBehandling>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.kreverSkjønnsfastsettelse()
-            }
-
-        internal fun List<LegacyBehandling>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
-                it.harKunVarselOmÅpenGosysOppgave()
-            }
-
         internal fun List<LegacyBehandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
             val behandlingForPeriodeTilGodkjenning =
                 finnBehandlingForVedtaksperiode(vedtaksperiodeId) ?: run {
@@ -401,12 +347,6 @@ class LegacyBehandling private constructor(
             )
             behandlingMedVarsel.varsler.remove(varsel)
             behandlingForPeriodeTilGodkjenning.varsler.add(varsel)
-        }
-
-        private fun List<LegacyBehandling>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<LegacyBehandling> {
-            val gjeldende = find { it.vedtaksperiodeId == vedtaksperiodeId } ?: return emptyList()
-            return sortedByDescending { it.periode.tom }
-                .filter { it.periode.fom <= gjeldende.periode.tom }
         }
     }
 }

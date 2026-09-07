@@ -7,9 +7,20 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class UnimplementedLegacyBehandlingDao : LegacyBehandlingDao {
-    override fun førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
-        TODO("Not yet implemented")
+    private val førsteVedtakFattetTidspunkt = mutableMapOf<UUID, LocalDateTime>()
+
+    fun settFørsteLegacyBehandlingVedtakFattetTidspunkt(
+        vedtaksperiodeId: UUID,
+        tidspunkt: LocalDateTime?,
+    ) {
+        if (tidspunkt == null) {
+            førsteVedtakFattetTidspunkt.remove(vedtaksperiodeId)
+        } else {
+            førsteVedtakFattetTidspunkt[vedtaksperiodeId] = tidspunkt
+        }
     }
+
+    override fun førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? = førsteVedtakFattetTidspunkt[vedtaksperiodeId]
 
     override fun finnLegacyBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto> {
         TODO("Not yet implemented")

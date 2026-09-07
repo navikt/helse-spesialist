@@ -22,6 +22,10 @@ class InMemoryRisikovurderingDao : RisikovurderingDao {
 
     fun antallLagret(vedtaksperiodeId: UUID): Int = risikovurderinger.count { it.vedtaksperiodeId == vedtaksperiodeId }
 
+    fun slett(vedtaksperiodeId: UUID) {
+        risikovurderinger.removeIf { it.vedtaksperiodeId == vedtaksperiodeId }
+    }
+
     override fun lagre(
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean,

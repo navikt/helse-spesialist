@@ -10,5 +10,9 @@ class InMemoryÅpneGosysOppgaverDao : ÅpneGosysOppgaverDao {
         persisterteÅpneGosysOppgaver.add(åpneGosysOppgaver)
     }
 
+    fun slett(fødselsnummer: String) {
+        persisterteÅpneGosysOppgaver.removeIf { it.fødselsnummer == fødselsnummer }
+    }
+
     override fun antallÅpneOppgaver(fødselsnummer: String): Int? = persisterteÅpneGosysOppgaver.lastOrNull { it.fødselsnummer == fødselsnummer }?.antall
 }

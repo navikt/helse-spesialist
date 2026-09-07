@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
@@ -90,6 +91,8 @@ internal class TilbakedateringGodkjentCommand(
                 oppgaveService = oppgaveService,
                 utbetaling = utbetaling,
                 godkjenningsbehov = godkjenningsbehov,
+                spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId),
+                identitetsnummer = Identitetsnummer.fraString(godkjenningsbehov.fødselsnummer),
             ),
         )
 }

@@ -1,14 +1,10 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -39,34 +35,6 @@ internal class LegacyBehandlingTest {
         assertTrue(legacyBehandling.tilhører(1 feb 2018))
         assertFalse(legacyBehandling.tilhører(1 jan 2018))
         assertFalse(legacyBehandling.tilhører(31 des 2017))
-    }
-
-    @Test
-    fun `behandling har aktive varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        assertTrue(behandling.forhindrerAutomatisering())
-    }
-
-    @Test
-    fun `behandling har ikke aktive varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        assertFalse(behandling.forhindrerAutomatisering())
-    }
-
-    @Test
-    fun `behandling forhindrer automatisering når den har vurdert - ikke godkjente - varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(
-            LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
-        )
-        behandling.håndterNyttVarsel(
-            LegacyVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
-        )
-        assertTrue(behandling.forhindrerAutomatisering())
     }
 
     @Test
@@ -197,64 +165,6 @@ internal class LegacyBehandlingTest {
     fun `finner ikke behandling`() {
         val behandlingV1 = behandling()
         assertNull(listOf(behandlingV1).finnBehandlingForVedtaksperiode(UUID.randomUUID()))
-    }
-
-    @Test
-    fun `har behandling medlemskapsvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "RV_MV_1")
-        assertTrue(listOf(behandling1).harMedlemskapsvarsel(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `har minst en behandling medlemskapsvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "RV_MV_1")
-        val behandling2 = behandling(fom = 1 jan 2018, tom = 31 jan 2018, skjæringstidspunkt = 1 jan 2018)
-        assertTrue(listOf(behandling1, behandling2).harMedlemskapsvarsel(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `har kun åpen oppgave i gosys`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "SB_EX_1")
-        assertTrue(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `flere varsler enn kun åpen oppgave i gosys`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "SB_EX_1")
-        assertTrue(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
-
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId))
-        assertFalse(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `behandling mangler medlemskapsvarsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandling(vedtaksperiodeId)
-        assertFalse(listOf(behandling1).harMedlemskapsvarsel(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `haster å behandle hvis behandlingen har varsel om negativt beløp`() {
-        val behandling1 = behandlingMedVarsel(varselkode = "RV_UT_23")
-        assertTrue(behandling1.hasterÅBehandle())
-    }
-
-    @Test
-    fun `krever skjønnsfastsettelse hvis behandling har varsel om avvik`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = listOf(behandlingMedVarsel(vedtaksperiodeId = vedtaksperiodeId, varselkode = "RV_IV_2"))
-        assertTrue(behandling1.kreverSkjønnsfastsettelse(vedtaksperiodeId = vedtaksperiodeId))
-    }
-
-    @Test
-    fun `haster ikke å behandle hvis behandlingen ikke har varsel om negativt beløp`() {
-        val behandling1 = behandling()
-        assertFalse(behandling1.hasterÅBehandle())
     }
 
     @Test
@@ -444,16 +354,6 @@ internal class LegacyBehandlingTest {
         assertEquals(TilstandDto.AvsluttetUtenVedtak, LegacyBehandling.Tilstand.AvsluttetUtenVedtak.toDto())
         assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, LegacyBehandling.Tilstand.AvsluttetUtenVedtakMedVarsler.toDto())
     }
-
-    private fun behandlingMedVarsel(
-        fom: LocalDate = 1 jan 2018,
-        tom: LocalDate = 31 jan 2018,
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        varselkode: String = "SB_EX_1",
-    ): LegacyBehandling =
-        behandling(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
-            it.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
-        }
 
     private fun behandling(
         behandlingId: UUID = UUID.randomUUID(),

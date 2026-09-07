@@ -118,9 +118,9 @@ class Kommandofabrikk(
 
     private fun transaksjonellAutomatisering(sessionContext: SessionContext): Automatisering =
         Automatisering.Factory.automatisering(
-            sessionContext,
-            subsumsjonsmelderProvider,
-            stikkprøver,
+            sessionContext = sessionContext,
+            subsumsjonsmelderProvider = subsumsjonsmelderProvider,
+            stikkprøver = stikkprøver,
         )
 
     private fun iverksett(
