@@ -324,12 +324,6 @@ class LegacyBehandling private constructor(
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
 
-        internal fun List<LegacyBehandling>.håndterNyttVarsel(varsler: List<LegacyVarsel>) {
-            forEach { behandling ->
-                varsler.forEach { behandling.håndterNyttVarsel(it) }
-            }
-        }
-
         internal fun List<LegacyBehandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
             val behandlingForPeriodeTilGodkjenning =
                 finnBehandlingForVedtaksperiode(vedtaksperiodeId) ?: run {

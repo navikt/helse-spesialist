@@ -10,11 +10,13 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_4
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
-import java.util.UUID
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 
 internal class VurderVergemålOgFullmakt(
-    private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
+    private val identitetsnummer: Identitetsnummer,
+    private val spleisBehandlingId: SpleisBehandlingId,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -32,36 +34,35 @@ internal class VurderVergemålOgFullmakt(
         commandContext: CommandContext,
         sessionContext: SessionContext,
     ): Boolean {
-        return sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            val vergemålløsning = commandContext.get<Vergemålløsning>()
-            val fullmaktløsning = commandContext.get<Fullmaktløsning>()
+        val vergemålløsning = commandContext.get<Vergemålløsning>()
+        val fullmaktløsning = commandContext.get<Fullmaktløsning>()
 
-            if (vergemålløsning == null || fullmaktløsning == null) {
-                logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
-                commandContext.behov(Behov.Vergemål)
-                commandContext.behov(Behov.Fullmakt)
-                return@brukPerson false
-            }
-
-            sessionContext.vergemålDao.lagre(
-                fødselsnummer = fødselsnummer,
-                vergemålOgFremtidsfullmakt =
-                    VergemålOgFremtidsfullmakt(
-                        harVergemål = vergemålløsning.vergemålOgFremtidsfullmakt.harVergemål,
-                        harFremtidsfullmakter = vergemålløsning.vergemålOgFremtidsfullmakt.harFremtidsfullmakter,
-                    ),
-                fullmakt = fullmaktløsning.harFullmakt,
-            )
-
-            if (vergemålløsning.harVergemål()) {
-                val sykefraværstilfelle = this.sykefraværstilfelle(vedtaksperiodeId)
-                logg.info("Legger til varsel om vergemål på vedtaksperiode $vedtaksperiodeId")
-                sykefraværstilfelle.håndter(SB_EX_4.nyttVarsel(vedtaksperiodeId))
-                return@brukPerson true
-            }
-
-            return@brukPerson true
+        if (vergemålløsning == null || fullmaktløsning == null) {
+            logg.info("Trenger informasjon om vergemål, fremtidsfullmakter og fullmakt")
+            commandContext.behov(Behov.Vergemål)
+            commandContext.behov(Behov.Fullmakt)
+            return false
         }
+
+        sessionContext.vergemålDao.lagre(
+            fødselsnummer = identitetsnummer.value,
+            vergemålOgFremtidsfullmakt =
+                VergemålOgFremtidsfullmakt(
+                    harVergemål = vergemålløsning.vergemålOgFremtidsfullmakt.harVergemål,
+                    harFremtidsfullmakter = vergemålløsning.vergemålOgFremtidsfullmakt.harFremtidsfullmakter,
+                ),
+            fullmakt = fullmaktløsning.harFullmakt,
+        )
+
+        if (vergemålløsning.harVergemål()) {
+            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling med id $spleisBehandlingId")
+            logg.info("Legger til varsel om vergemål på vedtaksperiode ${behandling.vedtaksperiodeId.value}")
+            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, SB_EX_4.name)
+            sessionContext.varselRepository.lagre(varsel)
+            return true
+        }
+
+        return true
     }
 
     private fun Vergemålløsning.harVergemål() = vergemålOgFremtidsfullmakt.harVergemål

@@ -16,8 +16,8 @@ import java.util.UUID
 class VurderVergemålOgFullmaktTest : ApplicationTest() {
     private val command =
         VurderVergemålOgFullmakt(
-            fødselsnummer = person.id.value,
-            vedtaksperiodeId = vedtaksperiode1.id.value,
+            identitetsnummer = person.id,
+            spleisBehandlingId = behandling1.spleisBehandlingId!!,
         )
     private val observer =
         object : CommandContextObserver {
