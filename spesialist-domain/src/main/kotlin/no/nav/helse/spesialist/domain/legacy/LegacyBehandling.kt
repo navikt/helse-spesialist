@@ -6,7 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmAvvik
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
@@ -71,18 +70,6 @@ class LegacyBehandling private constructor(
 
     internal fun spleisBehandlingId() = spleisBehandlingId
 
-    fun skjæringstidspunkt() = skjæringstidspunkt
-
-    fun vedtaksperiodeId() = vedtaksperiodeId
-
-    fun varsler(): List<LegacyVarsel> = varsler.toList()
-
-    internal fun unikId() = id
-
-    fun fom() = periode.fom
-
-    fun tom() = periode.tom
-
     fun toDto(): BehandlingDto =
         BehandlingDto(
             id = id,
@@ -99,34 +86,6 @@ class LegacyBehandling private constructor(
         )
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom <= dato
-
-    internal fun håndter(spleisVedtaksperiode: SpleisVedtaksperiode) {
-        when (tilstand) {
-            Tilstand.VedtakFattet -> {
-                if (
-                    periode != Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom) ||
-                    skjæringstidspunkt != spleisVedtaksperiode.skjæringstidspunkt ||
-                    spleisBehandlingId != spleisVedtaksperiode.spleisBehandlingId
-                ) {
-                    logg.warn(
-                        """
-                        Mottar spleis-info som avviker fra lagret info. Det betyr kanskje at noe uforutsett har skjedd? Kanskje spesialist har gått glipp av noe spleis har gjort?
-
-                        Ignorerer informasjonen.
-
-                        Mottatt info: $spleisVedtaksperiode
-                        Lagret info: $this
-                        """.trimIndent(),
-                    )
-                }
-            }
-            else -> {
-                this.periode = Periode(spleisVedtaksperiode.fom, spleisVedtaksperiode.tom)
-                this.skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt
-                this.spleisBehandlingId = spleisVedtaksperiode.spleisBehandlingId
-            }
-        }
-    }
 
     fun håndterNyUtbetaling(utbetalingId: UUID) {
         when (tilstand) {
@@ -186,12 +145,6 @@ class LegacyBehandling private constructor(
         eksisterendeVarsel.reaktiver()
     }
 
-    internal fun deaktiverVarsel(varselkode: String) {
-        val funnetVarsel = varsler.finnEksisterendeVarsel(varselkode) ?: return
-        sikkerlogg.info("Deaktiverer varsel: {}", funnetVarsel)
-        funnetVarsel.deaktiver()
-    }
-
     internal fun oppdaterBehandlingsinformasjon(
         tags: List<String>,
         spleisBehandlingId: UUID,
@@ -217,10 +170,6 @@ class LegacyBehandling private constructor(
             else -> sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", tilstand.navn()))
         }
     }
-
-    fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
-
-    fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
 
     private fun nyTilstand(ny: Tilstand) {
         this.tilstand = ny
@@ -323,24 +272,5 @@ class LegacyBehandling private constructor(
             varsler = varsler,
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
-
-        internal fun List<LegacyBehandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
-            val behandlingForPeriodeTilGodkjenning =
-                finnBehandlingForVedtaksperiode(vedtaksperiodeId) ?: run {
-                    logg.warn("Finner ikke behandling for vedtaksperiode $vedtaksperiodeId, sjekker ikke om avviksvarsel skal flyttes")
-                    return
-                }
-            val varsel =
-                filterNot {
-                    it == behandlingForPeriodeTilGodkjenning
-                }.flatMap { it.varsler }.find { it.erVarselOmAvvik() && it.erAktiv() } ?: return
-
-            val behandlingMedVarsel = first { behandling -> behandling.varsler.contains(varsel) }
-            logg.info(
-                "Flytter et ikke-vurdert avviksvarsel fra vedtaksperiode ${behandlingMedVarsel.vedtaksperiodeId} til vedtaksperiode $vedtaksperiodeId",
-            )
-            behandlingMedVarsel.varsler.remove(varsel)
-            behandlingForPeriodeTilGodkjenning.varsler.add(varsel)
-        }
     }
 }

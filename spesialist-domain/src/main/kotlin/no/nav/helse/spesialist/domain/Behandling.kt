@@ -90,6 +90,24 @@ class Behandling private constructor(
 
     fun overlapperMed(perioder: List<Periode>): Boolean = perioder.any { it.overlapper(Periode(fom = fom, tom = tom)) }
 
+    fun oppdaterDatoer(
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate,
+    ) {
+        this.fom = fom
+        this.tom = tom
+        this.skjæringstidspunkt = skjæringstidspunkt
+    }
+
+    fun oppdaterTags(tags: List<String>) {
+        this.tags = tags.toSet()
+    }
+
+    fun oppdaterUtbetalingId(utbetalingId: UtbetalingId) {
+        this.utbetalingId = utbetalingId
+    }
+
     companion object {
         fun fraLagring(
             id: BehandlingUnikId,
