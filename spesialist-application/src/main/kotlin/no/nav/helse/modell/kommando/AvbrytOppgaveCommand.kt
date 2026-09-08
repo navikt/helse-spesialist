@@ -5,11 +5,11 @@ import no.nav.helse.mediator.oppgave.tilUtgåendeHendelse
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import java.util.UUID
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 internal class AvbrytOppgaveCommand(
     private val identitetsnummer: Identitetsnummer,
-    private val vedtaksperiodeId: UUID,
+    private val vedtaksperiodeId: VedtaksperiodeId,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -24,7 +24,7 @@ internal class AvbrytOppgaveCommand(
                 "fødselsnummer" to identitetsnummer.value,
             )
             return true
-        } else if (oppgave.vedtaksperiodeId.value != vedtaksperiodeId) {
+        } else if (oppgave.vedtaksperiodeId != vedtaksperiodeId) {
             loggInfo("Avbryter ikke oppgave med id ${oppgave.id} fordi den tilhører en annen vedtaksperiode")
             return true
         }

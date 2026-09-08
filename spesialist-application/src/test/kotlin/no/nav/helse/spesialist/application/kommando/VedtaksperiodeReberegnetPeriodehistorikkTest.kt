@@ -11,10 +11,9 @@ class VedtaksperiodeReberegnetPeriodehistorikkTest : ApplicationTest() {
     @Test
     fun `Lagrer historikkinnslag når vedtaksperioden er reberegnet`() {
         val context = CommandContext(UUID.randomUUID())
-        val spesialistBehandlingId = UUID.randomUUID()
-        val command = VedtaksperiodeReberegnetPeriodehistorikk(spesialistBehandlingId)
+        val command = VedtaksperiodeReberegnetPeriodehistorikk(behandling1.id)
         assertTrue(command.execute(context, sessionContext, outbox))
-        val innslag = sessionContext.periodehistorikkDao.behandlingData[spesialistBehandlingId]
+        val innslag = sessionContext.periodehistorikkDao.behandlingData[behandling1.id.value]
         assertTrue(innslag?.singleOrNull() is VedtaksperiodeReberegnet)
     }
 }

@@ -10,6 +10,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.util.UUID
 
 class CommandContext(
@@ -75,9 +76,9 @@ class CommandContext(
 
     internal fun avbrytAlleForPeriode(
         commandContextDao: CommandContextDao,
-        vedtaksperiodeId: UUID,
+        vedtaksperiodeId: VedtaksperiodeId,
     ) {
-        val avbrutteKommandokjeder = commandContextDao.avbryt(vedtaksperiodeId, id)
+        val avbrutteKommandokjeder = commandContextDao.avbryt(vedtaksperiodeId.value, id)
         avbrutteKommandokjeder.forEach { (contextId, hendelseId) ->
             kommandokjedetilstandEndret(KommandokjedeEndretEvent.Avbrutt(contextId, hendelseId))
         }

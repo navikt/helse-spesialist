@@ -357,12 +357,15 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         gjeldendeTilstand: String? = null,
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
+        val spleisBehandlingId = behandlinger[vedtaksperiodeId]?.last() ?: error("Fant ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId")
+
         sisteMeldingId =
             meldingssender.sendVedtaksperiodeEndret(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = SpleisBehandlingId(spleisBehandlingId),
                 forrigeTilstand =
                     forrigeTilstand
                         ?: if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_SIMULERING",
@@ -381,6 +384,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         forårsaketAvId: UUID = UUID.randomUUID(),
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
+        val spleisBehandlingId = behandlinger[vedtaksperiodeId]?.last() ?: UUID.randomUUID()
+
         sisteMeldingId =
             meldingssender.sendVedtaksperiodeEndret(
                 aktørId = aktørId,
@@ -390,6 +395,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 forrigeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
                 gjeldendeTilstand = if (erRevurdering) "AVVENTER_HISTORIKK_REVURDERING" else "AVVENTER_HISTORIKK",
                 forårsaketAvId = forårsaketAvId,
+                spleisBehandlingId = SpleisBehandlingId(spleisBehandlingId),
             )
         assertIngenEtterspurteBehov()
     }
