@@ -76,18 +76,6 @@ class LegacyPerson(
         return checkNotNull(vedtaksperiode)
     }
 
-    fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
-        val skjæringstidspunkt =
-            vedtaksperiodeOrNull(vedtaksperiodeId)?.gjeldendeSkjæringstidspunkt
-                ?: throw IllegalStateException("Forventer å finne vedtaksperiode med id=$vedtaksperiodeId")
-        val gjeldendeBehandlinger = vedtaksperioder.relevanteFor(skjæringstidspunkt)
-        return Sykefraværstilfelle(
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            gjeldendeBehandlinger = gjeldendeBehandlinger,
-        )
-    }
-
     fun utbetalingForkastet(utbetalingId: UUID) {
         vedtaksperioder.forEach {
             it.utbetalingForkastet(utbetalingId)

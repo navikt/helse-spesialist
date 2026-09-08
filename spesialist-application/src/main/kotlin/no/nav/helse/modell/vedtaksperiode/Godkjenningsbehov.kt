@@ -379,8 +379,8 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,
             ),
             VurderVergemålOgFullmakt(
-                fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
+                identitetsnummer = identitetsnummer,
+                spleisBehandlingId = spleisBehandlingId,
             ),
             VurderEnhetUtland(
                 identitetsnummer = identitetsnummer,
