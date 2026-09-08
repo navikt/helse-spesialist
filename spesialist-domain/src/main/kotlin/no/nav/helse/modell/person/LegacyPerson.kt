@@ -30,12 +30,6 @@ class LegacyPerson(
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
-    fun utbetalingForkastet(utbetalingId: UUID) {
-        vedtaksperioder.forEach {
-            it.utbetalingForkastet(utbetalingId)
-        }
-    }
-
     fun nyUtbetalingForVedtaksperiode(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
