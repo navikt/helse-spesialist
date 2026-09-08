@@ -1,9 +1,9 @@
 {
   "collection": "nav-pilot",
-  "version": "2026.09.05-151219-a1035b0",
+  "version": "2026.09.07-123459-010d883",
   "scope": "repo",
   "source_repo": "navikt/copilot",
-  "source_sha": "a1035b0b05624af03cd675ae1e0a7d031c7ce1b5",
+  "source_sha": "a94b64767c89db41a1ea220216f744cde9dada8f",
   "installed_at": "2026-08-19T19:47:57Z",
   "files": [
     {
@@ -37,7 +37,7 @@
     },
     {
       "path": ".github/agents/nav-pilot.agent.md",
-      "hash": "f381cdcba7fcb644"
+      "hash": "eed57b0a1dd623bf"
     },
     {
       "path": ".github/agents/research.agent.md",
