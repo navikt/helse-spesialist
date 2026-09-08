@@ -88,6 +88,8 @@ class Behandling private constructor(
         tilstand = Tilstand.AvsluttetUtenVedtakMedVarsler
     }
 
+    fun overlapperMed(perioder: List<Periode>): Boolean = perioder.any { it.overlapper(Periode(fom = fom, tom = tom)) }
+
     companion object {
         fun fraLagring(
             id: BehandlingUnikId,

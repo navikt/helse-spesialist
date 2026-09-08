@@ -1,7 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg
 import java.time.LocalDate
@@ -17,8 +16,6 @@ class LegacyVedtaksperiode(
         private set
     private val behandlinger = behandlinger.toMutableList()
     private val gjeldendeBehandling get() = behandlinger.last()
-    private val fom get() = gjeldendeBehandling.fom()
-    private val tom get() = gjeldendeBehandling.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeBehandling.skjæringstidspunkt()
 
@@ -33,22 +30,6 @@ class LegacyVedtaksperiode(
             forkastet = forkastet,
             behandlinger = behandlinger.map { it.toDto() },
         )
-
-    internal fun erForkastet() = forkastet
-
-    internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
-        if (forkastet || perioder.none { it.overlapper(Periode(fom, tom)) }) return
-        logg.info(
-            "Godkjent tilbakedatert sykmelding overlapper med vedtaksperiode med fom=$fom, tom=$tom - perioder i sykmeldingen: $perioder",
-        )
-        deaktiverVarselMedKode("RV_SØ_3")
-    }
-
-    private fun deaktiverVarselMedKode(
-        @Suppress("SameParameterValue") varselkode: String,
-    ) {
-        gjeldendeBehandling.deaktiverVarsel(varselkode)
-    }
 
     internal fun nyttGodkjenningsbehov(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
         if (forkastet) return

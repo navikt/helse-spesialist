@@ -6,7 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEventueltAvviksvarselTil
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -35,10 +34,6 @@ class LegacyPerson(
         skjæringstidspunkt: LocalDate,
     ) {
         vedtaksperioder.relevanteFor(skjæringstidspunkt).flyttEventueltAvviksvarselTil(vedtaksperiodeId)
-    }
-
-    fun behandleTilbakedateringBehandlet(perioder: List<Periode>) {
-        vedtaksperioder.forEach { it.behandleTilbakedateringGodkjent(perioder) }
     }
 
     fun mottaSpleisVedtaksperioder(perioder: List<SpleisVedtaksperiode>) {
