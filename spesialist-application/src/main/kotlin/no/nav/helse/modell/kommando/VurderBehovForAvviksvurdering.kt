@@ -10,6 +10,7 @@ import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
 import java.util.UUID
@@ -39,34 +40,32 @@ class VurderBehovForAvviksvurdering(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        return sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            val legacyBehandling =
-                this
-                    .vedtaksperiode(vedtaksperiodeId.value)
-                    .finnBehandling(spleisBehandlingId.value)
-            if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return@brukPerson true
-            val løsning = commandContext.get<AvviksvurderingBehovLøsning>() ?: return@brukPerson behov(commandContext, sykepengegrunnlagsfakta)
-            val eksisterendeAvviksvurdering = sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
+        if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
+        val løsning = commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
+        val eksisterendeAvviksvurdering = sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
-            if (eksisterendeAvviksvurdering != null) {
-                sessionContext.avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
-                return@brukPerson true
-            }
-            val avviksvurdering =
-                Avviksvurdering.ny(
-                    id = løsning.avviksvurderingId,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
-                    fødselsnummer = fødselsnummer,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    opprettet = løsning.opprettet,
-                    avviksprosent = løsning.avviksprosent,
-                    sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
-                    beregningsgrunnlag = løsning.beregningsgrunnlag,
-                )
-            sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
-            if (!løsning.harAkseptabeltAvvik) legacyBehandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(legacyBehandling.vedtaksperiodeId()))
-            return@brukPerson true
+        if (eksisterendeAvviksvurdering != null) {
+            sessionContext.avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
+            return true
         }
+        val avviksvurdering =
+            Avviksvurdering.ny(
+                id = løsning.avviksvurderingId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                opprettet = løsning.opprettet,
+                avviksprosent = løsning.avviksprosent,
+                sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
+                beregningsgrunnlag = løsning.beregningsgrunnlag,
+            )
+        sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
+        if (!løsning.harAkseptabeltAvvik) {
+            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Finner ikke behandling med id $spleisBehandlingId")
+            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, RV_IV_2.name)
+            sessionContext.varselRepository.lagre(varsel)
+        }
+        return true
     }
 
     private fun behov(
