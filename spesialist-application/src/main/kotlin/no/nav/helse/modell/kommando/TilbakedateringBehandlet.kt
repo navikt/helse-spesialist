@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class TilbakedateringBehandlet(
     override val id: UUID,
@@ -44,8 +44,26 @@ class TilbakedateringBehandlet(
         sessionContext: SessionContext,
     ) {
         val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
-        sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            this.behandleTilbakedateringBehandlet(perioder)
+        val vedtaksperioder =
+            sessionContext.vedtaksperiodeRepository
+                .finnAlleIderForPerson(identitetsnummer)
+                .mapNotNull { sessionContext.vedtaksperiodeRepository.finn(it) }
+                .filterNot { it.forkastet }
+
+        val gjeldendeBehandlingerSomOverlapper =
+            vedtaksperioder
+                .mapNotNull {
+                    sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(it.id)
+                }.filter { it.overlapperMed(perioder) }
+
+        val tilbakedateringsvarslerForGjeldendeBehandlinger =
+            sessionContext.varselRepository
+                .finnAktiveVarslerFor(gjeldendeBehandlingerSomOverlapper)
+                .filter { it.kode == "RV_SØ_3" }
+
+        tilbakedateringsvarslerForGjeldendeBehandlinger.forEach {
+            it.deaktiver()
+            sessionContext.varselRepository.lagre(it)
         }
 
         kommandostarter {

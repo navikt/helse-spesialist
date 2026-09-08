@@ -7,13 +7,14 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.time.LocalDate
 import java.util.stream.Stream
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class BehandlingTest {
-    @ParameterizedTest()
+    @ParameterizedTest
     @MethodSource("utfallGittTagsSource")
     fun `tags gir utfall`(
         tags: Set<String>,
@@ -44,6 +45,72 @@ class BehandlingTest {
         val tags = setOf("Innvilget")
         val behandling = lagBehandling(tags = tags)
         assertFalse(behandling.overlapperMedInfotrygd())
+    }
+
+    @Test
+    fun `overlapperMed er true når en periode overlapper helt`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 31))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 31)))
+        assertTrue(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er true når en periode overlapper delvis i starten`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 10), tom = LocalDate.of(2023, 1, 31))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 10)))
+        assertTrue(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er true når en periode overlapper delvis på slutten`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 10))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 1, 10), tom = LocalDate.of(2023, 1, 31)))
+        assertTrue(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er true når behandlingens periode ligger innenfor en av periodene`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 10), tom = LocalDate.of(2023, 1, 20))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 31)))
+        assertTrue(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er true når en av flere perioder overlapper`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 31))
+        val perioder =
+            listOf(
+                Periode(fom = LocalDate.of(2022, 1, 1), tom = LocalDate.of(2022, 1, 31)),
+                Periode(fom = LocalDate.of(2023, 1, 20), tom = LocalDate.of(2023, 2, 10)),
+            )
+        assertTrue(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er false når ingen perioder overlapper`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 31))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 2, 1), tom = LocalDate.of(2023, 2, 28)))
+        assertFalse(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er false når perioden ligger rett før behandlingens periode`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 11), tom = LocalDate.of(2023, 1, 31))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 10)))
+        assertFalse(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er false når perioden ligger rett etter behandlingens periode`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 10))
+        val perioder = listOf(Periode(fom = LocalDate.of(2023, 1, 11), tom = LocalDate.of(2023, 1, 31)))
+        assertFalse(behandling.overlapperMed(perioder))
+    }
+
+    @Test
+    fun `overlapperMed er false når det ikke finnes noen perioder`() {
+        val behandling = lagBehandling(fom = LocalDate.of(2023, 1, 1), tom = LocalDate.of(2023, 1, 31))
+        assertFalse(behandling.overlapperMed(emptyList()))
     }
 
     private companion object {
