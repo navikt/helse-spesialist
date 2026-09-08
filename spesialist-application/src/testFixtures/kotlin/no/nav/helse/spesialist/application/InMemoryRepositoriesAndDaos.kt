@@ -44,7 +44,7 @@ class InMemoryRepositoriesAndDaos {
     private val personDao = DelegatingPersonDao(personRepository, inntektRepository)
     private val påVentDao = DelegatingPåVentDao(påVentRepository, oppgaveRepository)
     private val saksbehandlerDao = DelegatingSaksbehandlerDao(saksbehandlerRepository)
-    private val sykefraværstilfelleDao = DelegatingSykefraværstilfelleDao(overstyringRepository)
+    private val sykefraværstilfelleDao = DelegatingBegrunnelseForSkjønnsfastsettelseRepository(overstyringRepository)
 
     private val legacyVedtaksperiodeRepository =
         DelegatingLegacyVedtaksperiodeRepository(
@@ -146,7 +146,7 @@ class InMemoryRepositoriesAndDaos {
             risikovurderingDao = risikovurderingDao,
             saksbehandlerDao = saksbehandlerDao,
             saksbehandlerRepository = saksbehandlerRepository,
-            sykefraværstilfelleDao = sykefraværstilfelleDao,
+            begrunnelseForSkjønnsfastsettelseRepository = sykefraværstilfelleDao,
             tildelingDao = tildelingDao,
             tilkommenInntektRepository = tilkommenInntektRepository,
             totrinnsvurderingRepository = totrinnsvurderingRepository,

@@ -34,7 +34,7 @@ class InMemorySessionContext(
     override val risikovurderingDao: InMemoryRisikovurderingDao,
     override val saksbehandlerDao: DelegatingSaksbehandlerDao,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
-    override val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
+    override val begrunnelseForSkjønnsfastsettelseRepository: DelegatingBegrunnelseForSkjønnsfastsettelseRepository,
     override val tildelingDao: DelegatingTildelingDao,
     override val tilkommenInntektRepository: InMemoryTilkommenInntektRepository,
     override val totrinnsvurderingRepository: InMemoryTotrinnsvurderingRepository,

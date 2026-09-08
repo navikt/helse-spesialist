@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
-import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
+import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
+import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Arbeidsgiver
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
+internal class PgBegrunnelseForSkjønnsfastsettelseRepositoryTest : AbstractDBIntegrationTest() {
     private val arbeidsgiver = opprettArbeidsgiver()
     private val person = opprettPerson()
     private val vedtaksperiode =
@@ -27,7 +27,7 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         }
 
     private val saksbehandler = opprettSaksbehandler()
-    private val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
+    private val sykefraværstilfelleDao = PgBegrunnelseForSkjønnsfastsettelseRepository(session)
 
     @Test
     fun `Finner skjønnsfastsatt sykepengegrunnlag`() {
@@ -44,15 +44,15 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
             totrinnsvurderingId,
         )
 
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(person.id.value)
+        val funnet = sykefraværstilfelleDao.finnBegrunnelseForSkjønnsfastsattSykepengegrunnlag(person.id)
         assertEquals(1, funnet.size)
         val skjønnsfastsattSykepengegrunnlag = funnet.single()
-        assertEquals(skjønnsfastsattSykepengegrunnlag.type, SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT)
-        assertEquals(skjønnsfastsattSykepengegrunnlag.årsak, SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT)
-        assertEquals(skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt, 1 jan 2018)
-        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal, "mal")
-        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst, "fritekst")
-        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon, "konklusjon")
+        assertEquals(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, skjønnsfastsattSykepengegrunnlag.type)
+        assertEquals(Skjønnsfastsettingsårsak.ANDRE_AVSNITT, skjønnsfastsattSykepengegrunnlag.årsak)
+        assertEquals(1 jan 2018, skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt)
+        assertEquals("mal", skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal)
+        assertEquals("fritekst", skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst)
+        assertEquals("konklusjon", skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon)
     }
 
     @Test
@@ -92,15 +92,15 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
             totrinnsvurderingId2,
         )
 
-        val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(person.id.value)
+        val funnet = sykefraværstilfelleDao.finnBegrunnelseForSkjønnsfastsattSykepengegrunnlag(person.id)
         assertEquals(1, funnet.size)
         val skjønnsfastsattSykepengegrunnlag = funnet.single()
-        assertEquals(skjønnsfastsattSykepengegrunnlag.type, SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT)
-        assertEquals(skjønnsfastsattSykepengegrunnlag.årsak, SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT)
-        assertEquals(skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt, 1 jan 2018)
-        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal, "mal")
-        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst, "fritekst")
-        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon, "konklusjon")
+        assertEquals(Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT, skjønnsfastsattSykepengegrunnlag.type)
+        assertEquals(Skjønnsfastsettingsårsak.ANDRE_AVSNITT, skjønnsfastsattSykepengegrunnlag.årsak)
+        assertEquals(1 jan 2018, skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt)
+        assertEquals("mal", skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal)
+        assertEquals("fritekst", skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst)
+        assertEquals("konklusjon", skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon)
     }
 
     private fun skjønnsfastsattSykepengegrunnlag(

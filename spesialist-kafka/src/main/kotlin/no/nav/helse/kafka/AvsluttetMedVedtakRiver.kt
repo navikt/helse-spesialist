@@ -57,7 +57,7 @@ class AvsluttetMedVedtakRiver(
             )
         val erSelvstendig = packet["yrkesaktivitetstype"].asString() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
 
-        val begrunnelseForSkjønnsfastsattSykepengegrunnlag = transaksjon.sykefraværstilfelleDao.finnBegrunnelseForSkjønnsfastsattSykepengegrunnlag(identitetsnummer)
+        val begrunnelseForSkjønnsfastsattSykepengegrunnlag = transaksjon.begrunnelseForSkjønnsfastsettelseRepository.finnBegrunnelseForSkjønnsfastsattSykepengegrunnlag(identitetsnummer)
         val vedtakFattetMelding =
             if (erSelvstendig) {
                 vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForSelvstendig()

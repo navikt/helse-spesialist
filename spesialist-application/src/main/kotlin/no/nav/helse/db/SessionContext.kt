@@ -37,7 +37,7 @@ interface SessionContext {
     val reservasjonDao: ReservasjonDao
     val risikovurderingDao: RisikovurderingDao
     val saksbehandlerDao: SaksbehandlerDao
-    val sykefraværstilfelleDao: SykefraværstilfelleDao
+    val begrunnelseForSkjønnsfastsettelseRepository: BegrunnelseForSkjønnsfastsettelseRepository
     val tildelingDao: TildelingDao
     val utbetalingDao: UtbetalingDao
     val vedtakDao: VedtakDao
