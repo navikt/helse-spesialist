@@ -115,6 +115,11 @@ class Behandling private constructor(
         }
     }
 
+    fun nyUtbetaling(utbetalingId: UtbetalingId) {
+        this.utbetalingId = utbetalingId
+        tilstand = Tilstand.KlarTilBehandling
+    }
+
     companion object {
         fun fraLagring(
             id: BehandlingUnikId,

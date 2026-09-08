@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.JsonNode
@@ -336,6 +337,7 @@ internal class GodkjenningsbehovCommand(
     private val identitetsnummer = Identitetsnummer.fraString(godkjenningsbehovData.fødselsnummer)
     private val vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId)
     val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)
+    val utbetalingId = UtbetalingId(godkjenningsbehovData.utbetalingId)
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
@@ -367,8 +369,8 @@ internal class GodkjenningsbehovCommand(
                 inntektskilde = godkjenningsbehovData.inntektskilde,
             ),
             OpprettKoblingTilUtbetalingCommand(
-                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
-                utbetalingId = godkjenningsbehovData.utbetalingId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
             ),
             ForberedVisningCommand(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,

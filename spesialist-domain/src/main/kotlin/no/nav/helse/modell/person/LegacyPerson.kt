@@ -4,8 +4,6 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import org.slf4j.LoggerFactory
-import java.util.UUID
 
 class LegacyPerson(
     val aktørId: String,
@@ -25,22 +23,7 @@ class LegacyPerson(
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
 
-    fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): LegacyVedtaksperiode? {
-        return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
-            ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
-    }
-
-    fun nyUtbetalingForVedtaksperiode(
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    ) {
-        vedtaksperiodeOrNull(vedtaksperiodeId)
-            ?.nyUtbetaling(utbetalingId)
-    }
-
     companion object {
-        private val logg = LoggerFactory.getLogger(this::class.java)
-
         fun gjenopprett(
             aktørId: String,
             fødselsnummer: String,
