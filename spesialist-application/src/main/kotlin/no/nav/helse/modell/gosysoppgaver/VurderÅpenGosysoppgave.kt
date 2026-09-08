@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.Varsel.Companion.oppdatertEllerNyttVarsel
+import no.nav.helse.spesialist.domain.Varsel.Companion.reaktiverEksisterendeEllerOpprettNytt
 import java.time.LocalDate
 import java.util.*
 
@@ -85,7 +85,7 @@ internal class VurderÅpenGosysoppgave(
     ) {
         val varslerForBehandling = sessionContext.varselRepository.finnVarslerFor(behandling.id)
         if (oppslagFeilet) {
-            varslerForBehandling.oppdatertEllerNyttVarsel(SB_EX_3, behandling)?.also {
+            varslerForBehandling.reaktiverEksisterendeEllerOpprettNytt(SB_EX_3, behandling)?.also {
                 sessionContext.varselRepository.lagre(it)
             }
         } else {
@@ -107,7 +107,7 @@ internal class VurderÅpenGosysoppgave(
         when {
             antall > 0 -> {
                 val varslerForBehandling = sessionContext.varselRepository.finnVarslerFor(behandling.id)
-                varslerForBehandling.oppdatertEllerNyttVarsel(SB_EX_1, behandling)?.also {
+                varslerForBehandling.reaktiverEksisterendeEllerOpprettNytt(SB_EX_1, behandling)?.also {
                     sessionContext.varselRepository.lagre(it)
                 }
 
