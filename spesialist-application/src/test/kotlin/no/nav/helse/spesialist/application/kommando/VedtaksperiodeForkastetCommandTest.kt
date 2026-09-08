@@ -33,7 +33,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 identitetsnummer = person.id,
                 vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
-                alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
@@ -62,7 +61,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 identitetsnummer = person.id,
                 vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
-                alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(CommandContext(randomUUID()), sessionContext, outbox)
 
         // then
@@ -102,7 +100,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 identitetsnummer = person.id,
                 vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
-                alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then
@@ -139,7 +136,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
                 identitetsnummer = person.id,
                 vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
-                alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
 
         // then

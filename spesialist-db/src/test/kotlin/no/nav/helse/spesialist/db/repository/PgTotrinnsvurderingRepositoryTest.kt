@@ -71,7 +71,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
         checkNotNull(hentetTotrinnsvurdering)
-        hentetTotrinnsvurdering.vedtaksperiodeForkastet(listOf(vedtaksperiode.id.value))
+        hentetTotrinnsvurdering.forkast()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
 

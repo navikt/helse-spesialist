@@ -4,11 +4,10 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import java.util.UUID
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 internal class AvbrytTotrinnsvurderingCommand(
     private val identitetsnummer: Identitetsnummer,
-    private val alleForkastedeVedtaksperiodeIder: List<UUID>,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
@@ -22,7 +21,16 @@ internal class AvbrytTotrinnsvurderingCommand(
 
         val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value) ?: return true
 
-        totrinnsvurdering.vedtaksperiodeForkastet(alleForkastedeVedtaksperiodeIder)
+        val vedtaksperiodeIderForOverstyringer = totrinnsvurdering.overstyringer.map { VedtaksperiodeId(it.vedtaksperiodeId) }
+
+        val erAlleVedtaksperiodeneForkastet =
+            vedtaksperiodeIderForOverstyringer
+                .mapNotNull { sessionContext.vedtaksperiodeRepository.finn(it) }
+                .all { it.forkastet }
+
+        if (erAlleVedtaksperiodeneForkastet) {
+            totrinnsvurdering.forkast()
+        }
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return true
     }

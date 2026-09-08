@@ -30,12 +30,6 @@ class LegacyPerson(
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
 
-    fun forkastedeVedtaksperiodeIder() =
-        vedtaksperioder
-            .filter {
-                it.erForkastet()
-            }.map { it.vedtaksperiodeId() }
-
     fun flyttEventuelleAvviksvarsler(
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
@@ -58,12 +52,6 @@ class LegacyPerson(
         utbetalingId: UUID,
     ) {
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
-    }
-
-    fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
-        vedtaksperioder
-            .find { it.vedtaksperiodeId() == vedtaksperiodeId }
-            ?.vedtaksperiodeForkastet()
     }
 
     fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): LegacyVedtaksperiode? {
