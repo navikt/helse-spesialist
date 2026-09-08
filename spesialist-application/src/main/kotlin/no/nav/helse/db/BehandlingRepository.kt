@@ -3,6 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Behandling.Companion.behandlingspakke
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
@@ -22,6 +23,14 @@ interface BehandlingRepository {
     ): Set<Behandling> =
         finnAndreBehandlingerISykefraværstilfelle(behandling, fødselsnummer)
             .behandlingspakke(behandling)
+
+    fun finnBehandlingspakke(
+        spleisBehandlingId: SpleisBehandlingId,
+        identitetsnummer: Identitetsnummer,
+    ): Set<Behandling> {
+        val behandling = finn(spleisBehandlingId) ?: return emptySet()
+        return finnBehandlingspakke(behandling, identitetsnummer.value)
+    }
 
     fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling?
 

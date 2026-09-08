@@ -7,26 +7,27 @@ import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
-import java.util.UUID
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 
 internal class VurderEnhetUtland(
-    private val fødselsnummer: String,
-    private val vedtaksperiodeId: UUID,
+    private val identitetsnummer: Identitetsnummer,
+    private val spleisBehandlingId: SpleisBehandlingId,
 ) : Command {
     override fun execute(
         commandContext: CommandContext,
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        return sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(fødselsnummer))
-            if (tilhørerEnhetUtland) {
-                val sykefraværstilfelle = this.sykefraværstilfelle(vedtaksperiodeId)
-                logg.info("Håndterer varsel om utland på vedtaksperiode $vedtaksperiodeId")
-                sykefraværstilfelle.håndter(Varselkode.SB_EX_5.nyttVarsel(vedtaksperiodeId))
-            }
-
-            return@brukPerson true
+        val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(identitetsnummer.value))
+        if (tilhørerEnhetUtland) {
+            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling med id $spleisBehandlingId")
+            logg.info("Håndterer varsel om utland på vedtaksperiode ${behandling.vedtaksperiodeId.value}")
+            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, Varselkode.SB_EX_5.name)
+            sessionContext.varselRepository.lagre(varsel)
         }
+
+        return true
     }
 }
