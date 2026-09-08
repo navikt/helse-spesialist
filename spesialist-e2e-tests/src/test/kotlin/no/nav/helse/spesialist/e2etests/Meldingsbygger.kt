@@ -4,12 +4,14 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -102,6 +104,11 @@ object Meldingsbygger {
         kanAvvises: Boolean = true,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        maksdato: LocalDate = LocalDate.of(2018, 12, 1),
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -113,15 +120,17 @@ object Meldingsbygger {
             periodeFom = vedtaksperiode.fom,
             periodeTom = vedtaksperiode.tom,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            førstegangsbehandling = true,
-            utbetalingtype = Utbetalingtype.UTBETALING,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            periodetype = periodetype,
+            førstegangsbehandling = periodetype == Periodetype.FØRSTEGANGSBEHANDLING,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            utbetalingtype = utbetalingtype,
+            inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             kanAvvises = kanAvvises,
             spleisBehandlingId = vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             tags = tags,
+            foreløpigBeregnetSluttPåSykepenger = maksdato,
             perioderMedSammeSkjæringstidspunkt =
                 (perioderMedSammeSkjæringstidspunkt ?: listOf(vedtaksperiode)).map { periode ->
                     mapOf(
@@ -132,40 +141,57 @@ object Meldingsbygger {
                     )
                 },
             sykepengegrunnlagsfakta =
-                when (sykepengegrunnlagsfakta.fastsatt) {
-                    Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> {
-                        Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
-                            sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }.toBigDecimal(),
-                            arbeidsgivere =
-                                sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                    buildMap {
-                                        put("arbeidsgiver", it.organisasjonsnummer)
-                                        put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
-                                        put("inntektskilde", it.inntektskilde)
-                                    }
-                                },
-                        )
-                    }
+                if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) {
+                    Testmeldingfabrikk.godkjenningsbehovSelvstendigNæringsdrivende(
+                        sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }.toBigDecimal(),
+                        seksG = BigDecimal("666666.66"),
+                        beregningsgrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }.toBigDecimal(),
+                        pensjonsgivendeInntekter = emptyList(),
+                    )
+                } else {
+                    when (sykepengegrunnlagsfakta.fastsatt) {
+                        Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> {
+                            Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
+                                sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }.toBigDecimal(),
+                                arbeidsgivere =
+                                    sykepengegrunnlagsfakta.arbeidsgivere.map {
+                                        buildMap {
+                                            put("arbeidsgiver", it.organisasjonsnummer)
+                                            put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                                            put("inntektskilde", it.inntektskilde)
+                                        }
+                                    },
+                            )
+                        }
 
-                    Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> {
-                        Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
-                            sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }.toBigDecimal(),
-                            arbeidsgivere =
-                                sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                    buildMap {
-                                        put("arbeidsgiver", it.organisasjonsnummer)
-                                        put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
-                                        put("inntektskilde", it.inntektskilde)
-                                        if (it is SkjønnsfastsattArbeidsgiver) put("skjønnsfastsatt", it.skjønnsfastsatt)
-                                    }
-                                },
-                        )
+                        Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> {
+                            Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
+                                sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }.toBigDecimal(),
+                                arbeidsgivere =
+                                    sykepengegrunnlagsfakta.arbeidsgivere.map {
+                                        buildMap {
+                                            put("arbeidsgiver", it.organisasjonsnummer)
+                                            put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                                            put("inntektskilde", it.inntektskilde)
+                                            if (it is SkjønnsfastsattArbeidsgiver) put("skjønnsfastsatt", it.skjønnsfastsatt)
+                                        }
+                                    },
+                            )
+                        }
                     }
                 },
         )
     }
 
     fun byggGosysOppgaveEndret(person: Person) = Testmeldingfabrikk.lagGosysOppgaveEndret(fødselsnummer = person.fødselsnummer)
+
+    fun byggStansAutomatiskBehandling(
+        person: Person,
+        årsaker: List<String> = listOf("MEDISINSK_VILKAR"),
+    ) = Testmeldingfabrikk.lagStansAutomatiskBehandling(
+        fødselsnummer = person.fødselsnummer,
+        årsaker = årsaker,
+    )
 
     fun byggAktivitetsloggNyAktivitetMedVarsler(
         varselkoder: List<String>,
@@ -187,13 +213,19 @@ object Meldingsbygger {
         arbeidsgiver: Arbeidsgiver,
         forrigeStatus: String,
         gjeldendeStatus: String,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
     ) = Testmeldingfabrikk.lagUtbetalingEndret(
         aktørId = person.aktørId,
         fødselsnummer = person.fødselsnummer,
         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
         utbetalingId = vedtaksperiode.utbetalingIdForÅByggeMelding("utbetaling_endret"),
+        type = utbetalingtype.name,
         forrigeStatus = enumValueOf(forrigeStatus),
         gjeldendeStatus = enumValueOf(gjeldendeStatus),
+        arbeidsgiverbeløp = arbeidsgiverbeløp,
+        personbeløp = personbeløp,
         opprettet = LocalDateTime.now(),
         id = UUID.randomUUID(),
     )
@@ -202,6 +234,7 @@ object Meldingsbygger {
         person: Person,
         arbeidsgiver: Arbeidsgiver,
         vedtaksperiode: Vedtaksperiode,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
     ) = Testmeldingfabrikk.lagAvsluttetMedVedtak(
         aktørId = person.aktørId,
         fødselsnummer = person.fødselsnummer,
@@ -212,44 +245,55 @@ object Meldingsbygger {
         fom = vedtaksperiode.fom,
         tom = vedtaksperiode.tom,
         skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+        yrkesaktivitetstype = yrkesaktivitetstype,
         sykepengegrunnlagsfakta =
-            when (vedtaksperiode.sykepengegrunnlagsfakta.fastsatt) {
-                Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> {
-                    Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterHovedregel(
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        omregnetÅrsinntektTotalt = 600000.0,
-                        innrapportertÅrsinntekt = 600000.0,
-                        avviksprosent = 0.0,
-                        sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
-                        arbeidsgivere =
-                            vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                buildMap {
-                                    put("arbeidsgiver", it.organisasjonsnummer)
-                                    put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
-                                    put("inntektskilde", it.inntektskilde)
-                                }
-                            },
-                    )
-                }
+            if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG.name) {
+                Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterHovedregelSelvstendig(
+                    sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
+                    beregningsgrunnlag =
+                        vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere
+                            .sumOf { it.omregnetÅrsinntekt }
+                            .toBigDecimal(),
+                )
+            } else {
+                when (vedtaksperiode.sykepengegrunnlagsfakta.fastsatt) {
+                    Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> {
+                        Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterHovedregel(
+                            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                            omregnetÅrsinntektTotalt = 600000.0,
+                            innrapportertÅrsinntekt = 600000.0,
+                            avviksprosent = 0.0,
+                            sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
+                            arbeidsgivere =
+                                vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
+                                    buildMap {
+                                        put("arbeidsgiver", it.organisasjonsnummer)
+                                        put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                                        put("inntektskilde", it.inntektskilde)
+                                    }
+                                },
+                        )
+                    }
 
-                Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> {
-                    Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterSkjønn(
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        omregnetÅrsinntektTotalt = 600000.0,
-                        innrapportertÅrsinntekt = 600000.0,
-                        avviksprosent = 0.0,
-                        skjønnsfastsatt = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
-                        sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
-                        arbeidsgivere =
-                            vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                buildMap {
-                                    put("arbeidsgiver", it.organisasjonsnummer)
-                                    put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
-                                    put("inntektskilde", it.inntektskilde)
-                                    if (it is SkjønnsfastsattArbeidsgiver) put("skjønnsfastsatt", it.skjønnsfastsatt)
-                                }
-                            },
-                    )
+                    Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> {
+                        Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterSkjønn(
+                            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                            omregnetÅrsinntektTotalt = 600000.0,
+                            innrapportertÅrsinntekt = 600000.0,
+                            avviksprosent = 0.0,
+                            skjønnsfastsatt = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
+                            sykepengegrunnlag = vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
+                            arbeidsgivere =
+                                vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
+                                    buildMap {
+                                        put("arbeidsgiver", it.organisasjonsnummer)
+                                        put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                                        put("inntektskilde", it.inntektskilde)
+                                        if (it is SkjønnsfastsattArbeidsgiver) put("skjønnsfastsatt", it.skjønnsfastsatt)
+                                    }
+                                },
+                        )
+                    }
                 }
             },
         id = UUID.randomUUID(),

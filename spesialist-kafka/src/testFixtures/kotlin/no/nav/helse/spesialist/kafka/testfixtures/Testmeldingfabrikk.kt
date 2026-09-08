@@ -321,6 +321,7 @@ object Testmeldingfabrikk {
         arbeidssituasjon: Arbeidssituasjon? = null,
         relevanteSøknader: List<UUID> = listOf(UUID.randomUUID()),
         forsikringsvurderingId: UUID? = null,
+        foreløpigBeregnetSluttPåSykepenger: LocalDate = LocalDate.of(2018, 12, 1),
     ) = nyHendelse(
         id,
         "behov",
@@ -349,7 +350,7 @@ object Testmeldingfabrikk {
                     "tags" to tags,
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
                     "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
-                    "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1).toString(),
+                    "foreløpigBeregnetSluttPåSykepenger" to foreløpigBeregnetSluttPåSykepenger.toString(),
                     "relevanteSøknader" to relevanteSøknader,
                     "arbeidssituasjon" to arbeidssituasjon,
                     "utbetalingsdager" to listOf(mapOf("utbetaling" to "medFriStruktur")),
@@ -698,19 +699,6 @@ object Testmeldingfabrikk {
         ),
     )
 
-    fun lagOppdaterPersondata(
-        aktørId: String,
-        fødselsnummer: String,
-        id: UUID,
-    ) = nyHendelse(
-        id,
-        "oppdater_persondata",
-        mutableMapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-        ),
-    )
-
     fun lagAvviksvurderingløsning(
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -725,7 +713,6 @@ object Testmeldingfabrikk {
         id,
         "behov",
         mapOf(
-            "@besvart" to LocalDateTime.now(),
             "@besvart" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("Avviksvurdering"),
@@ -1026,13 +1013,14 @@ object Testmeldingfabrikk {
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlagsfakta: Map<String, Any> = avsluttetMedVedtakFastsattEtterHovedregel(organisasjonsnummer),
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
         id: UUID,
     ): String =
         nyHendelse(
             id,
             "avsluttet_med_vedtak",
             mutableMapOf(
-                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "yrkesaktivitetstype" to yrkesaktivitetstype,
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
@@ -1158,6 +1146,29 @@ object Testmeldingfabrikk {
             }
         }
 
+    fun avsluttetMedVedtakFastsattEtterHovedregelSelvstendig(
+        sykepengegrunnlag: Double = 600000.0,
+        seksG: Double = 666666.66,
+        beregningsgrunnlag: BigDecimal = BigDecimal("600000.0"),
+        pensjonsgivendeInntekter: List<Pair<Int, BigDecimal>> = emptyList(),
+    ): Map<String, Any> =
+        mapOf(
+            "fastsatt" to "EtterHovedregel",
+            "sykepengegrunnlag" to sykepengegrunnlag,
+            "6G" to seksG,
+            "selvstendig" to
+                mapOf(
+                    "beregningsgrunnlag" to beregningsgrunnlag,
+                    "pensjonsgivendeInntekter" to
+                        pensjonsgivendeInntekter.map { (årstall, beløp) ->
+                            mapOf(
+                                "årstall" to årstall,
+                                "beløp" to beløp,
+                            )
+                        },
+                ),
+        )
+
     fun avsluttetMedVedtakFastsattIInfotrygd(
         omregnetÅrsinntektTotalt: Double = 500000.0,
         sykepengegrunnlag: Double = 600000.0,
@@ -1250,6 +1261,25 @@ object Testmeldingfabrikk {
         mapOf(
             "commandContextId" to commandContextId,
             "meldingId" to meldingId,
+        ),
+    )
+
+    fun lagStansAutomatiskBehandling(
+        fødselsnummer: String,
+        status: String = "STOPP_AUTOMATIKK",
+        årsaker: List<String> = listOf("MEDISINSK_VILKAR"),
+        opprettet: LocalDateTime = LocalDateTime.now(),
+        originalMeldingUuid: UUID = UUID.randomUUID(),
+        id: UUID = UUID.randomUUID(),
+    ) = nyHendelse(
+        id,
+        "stans_automatisk_behandling",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "status" to status,
+            "årsaker" to årsaker,
+            "opprettet" to opprettet,
+            "originalMelding" to """{"uuid":"$originalMeldingUuid"}""",
         ),
     )
 
