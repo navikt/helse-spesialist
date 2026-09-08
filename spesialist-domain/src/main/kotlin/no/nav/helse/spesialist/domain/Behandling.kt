@@ -108,6 +108,13 @@ class Behandling private constructor(
         this.utbetalingId = utbetalingId
     }
 
+    fun forkastUtbetaling() {
+        if (tilstand == Tilstand.KlarTilBehandling) {
+            this.utbetalingId = null
+            tilstand = Tilstand.VidereBehandlingAvklares
+        }
+    }
+
     companion object {
         fun fraLagring(
             id: BehandlingUnikId,

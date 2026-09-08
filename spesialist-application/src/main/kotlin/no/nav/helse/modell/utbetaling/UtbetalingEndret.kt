@@ -5,6 +5,8 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.UtbetalingId
 import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.*
@@ -38,12 +40,21 @@ class UtbetalingEndret(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) this.utbetalingForkastet(utbetalingId)
+        val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        val utbetalingId = UtbetalingId(utbetalingId)
+        if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) {
+            val vedtaksperiodeIder = sessionContext.vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
+            val gjeldendeBehandlinger = vedtaksperiodeIder.mapNotNull { sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(it) }
+            gjeldendeBehandlinger
+                .filter { utbetalingId == it.utbetalingId }
+                .onEach {
+                    it.forkastUtbetaling()
+                    sessionContext.behandlingRepository.lagre(it)
+                }
         }
         this.kommandostarter {
             UtbetalingEndretCommand(
-                fødselsnummer = fødselsnummer(),
+                identitetsnummer = identitetsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 utbetalingId = utbetalingId,
                 utbetalingstype = type,
@@ -62,9 +73,9 @@ class UtbetalingEndret(
 }
 
 internal class UtbetalingEndretCommand(
-    fødselsnummer: String,
+    identitetsnummer: Identitetsnummer,
     organisasjonsnummer: String,
-    utbetalingId: UUID,
+    utbetalingId: UtbetalingId,
     utbetalingstype: String,
     gjeldendeStatus: Utbetalingsstatus,
     opprettet: LocalDateTime,
@@ -75,7 +86,7 @@ internal class UtbetalingEndretCommand(
     override val commands: List<Command> =
         mutableListOf(
             LagreUtbetalingCommand(
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
                 orgnummer = organisasjonsnummer,
                 utbetalingId = utbetalingId,
                 type = Utbetalingtype.valueOf(utbetalingstype),

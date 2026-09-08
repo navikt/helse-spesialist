@@ -13,7 +13,6 @@ class LegacyVedtaksperiode(
         private set
     private val behandlinger = behandlinger.toMutableList()
     private val gjeldendeBehandling get() = behandlinger.last()
-    private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -24,13 +23,6 @@ class LegacyVedtaksperiode(
             forkastet = forkastet,
             behandlinger = behandlinger.map { it.toDto() },
         )
-
-    internal fun utbetalingForkastet(forkastetUtbetalingId: UUID) {
-        if (forkastet) return
-        val utbetalingId = gjeldendeUtbetalingId
-        if (utbetalingId == null || gjeldendeUtbetalingId != forkastetUtbetalingId) return
-        gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
-    }
 
     internal fun nyUtbetaling(utbetalingId: UUID) {
         if (forkastet) return

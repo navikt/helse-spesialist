@@ -3,22 +3,18 @@ package no.nav.helse.modell.utbetaling
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
+import no.nav.helse.spesialist.domain.UtbetalingId
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.UUID
 
 class LagreUtbetalingCommand(
-    private val fødselsnummer: String,
+    private val identitetsnummer: Identitetsnummer,
     private val orgnummer: String,
-    private val utbetalingId: UUID,
+    private val utbetalingId: UtbetalingId,
     private val type: Utbetalingtype,
     private val status: Utbetalingsstatus,
     private val opprettet: LocalDateTime,
@@ -44,10 +40,10 @@ class LagreUtbetalingCommand(
     private fun lagre(sessionContext: SessionContext) {
         val utbetalingDao = sessionContext.utbetalingDao
         val utbetalingIdRef =
-            utbetalingDao.finnUtbetalingIdRef(utbetalingId)
+            utbetalingDao.finnUtbetalingIdRef(utbetalingId.value)
                 ?: utbetalingDao.opprettUtbetalingId(
-                    utbetalingId,
-                    fødselsnummer,
+                    utbetalingId.value,
+                    identitetsnummer.value,
                     orgnummer,
                     type,
                     opprettet,
@@ -86,7 +82,7 @@ class LagreUtbetalingCommand(
 
         val opptegnelse =
             Opptegnelse.ny(
-                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                identitetsnummer = identitetsnummer,
                 type = opptegnelseType,
             )
         sessionContext.opptegnelseRepository.lagre(opptegnelse)

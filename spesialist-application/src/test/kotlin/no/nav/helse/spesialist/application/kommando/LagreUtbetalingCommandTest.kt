@@ -5,8 +5,9 @@ import no.nav.helse.modell.utbetaling.LagreUtbetalingCommand
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDateTime
 import java.util.UUID
@@ -18,7 +19,7 @@ class LagreUtbetalingCommandTest : ApplicationTest() {
         // given
         val arbeidsgiverbeløp = 40000
         val personbeløp = 30000
-        val utbetalingId = UUID.randomUUID()
+        val utbetalingId = UtbetalingId(UUID.randomUUID())
         val command = command(utbetalingId = utbetalingId, arbeidsgiverbeløp = arbeidsgiverbeløp, personbeløp = personbeløp)
 
         // when
@@ -27,20 +28,20 @@ class LagreUtbetalingCommandTest : ApplicationTest() {
         // then
         val forventetUtbetaling =
             Utbetaling(
-                utbetalingId = utbetalingId,
+                utbetalingId = utbetalingId.value,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
                 personbeløp = personbeløp,
                 type = Utbetalingtype.UTBETALING,
             )
-        assertEquals(forventetUtbetaling, sessionContext.utbetalingDao.hentUtbetaling(utbetalingId))
+        assertEquals(forventetUtbetaling, sessionContext.utbetalingDao.hentUtbetaling(utbetalingId.value))
     }
 
     private fun command(
-        utbetalingId: UUID = UUID.randomUUID(),
+        utbetalingId: UtbetalingId = UtbetalingId(UUID.randomUUID()),
         arbeidsgiverbeløp: Int,
         personbeløp: Int,
     ): LagreUtbetalingCommand {
-        val fødselsnummer = lagFødselsnummer()
+        val fødselsnummer = lagIdentitetsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         return LagreUtbetalingCommand(
             fødselsnummer,
