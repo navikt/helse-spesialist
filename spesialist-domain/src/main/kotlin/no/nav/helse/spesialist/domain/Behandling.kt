@@ -5,7 +5,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @JvmInline
 value class SpleisBehandlingId(
@@ -118,6 +118,11 @@ class Behandling private constructor(
     fun nyUtbetaling(utbetalingId: UtbetalingId) {
         this.utbetalingId = utbetalingId
         tilstand = Tilstand.KlarTilBehandling
+    }
+
+    fun vedtakFattet() {
+        checkNotNull(utbetalingId) { "Mottatt vedtak_fattet i tilstand=${tilstand.name}, men mangler utbetalingId" }
+        tilstand = Tilstand.VedtakFattet
     }
 
     companion object {

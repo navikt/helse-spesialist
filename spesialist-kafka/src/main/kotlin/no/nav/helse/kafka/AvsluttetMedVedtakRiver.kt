@@ -7,8 +7,6 @@ import no.nav.helse.VedtakFattetMeldingBuilder.Companion.YRKESAKTIVITETSTYPE_SEL
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.melding.VedtakFattetMelding
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -59,20 +57,17 @@ class AvsluttetMedVedtakRiver(
             )
         val erSelvstendig = packet["yrkesaktivitetstype"].asString() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
 
-        lateinit var vedtakFattetMelding: VedtakFattetMelding
-        transaksjon.legacyPersonRepository.brukPerson(identitetsnummer.value) {
-            vedtakFattetMelding =
-                if (erSelvstendig) {
-                    vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForSelvstendig()
-                } else {
-                    vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForArbeidstaker(this.skjønnsfastsatteSykepengegrunnlag)
-                }
-            val vedtaksperiode =
-                vedtaksperioder().finnBehandling(spleisBehandlingId.value)
-                    ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
-            val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId.value)
-            behandling.håndterVedtakFattet()
-        }
+        val begrunnelseForSkjønnsfastsattSykepengegrunnlag = transaksjon.sykefraværstilfelleDao.finnBegrunnelseForSkjønnsfastsattSykepengegrunnlag(identitetsnummer)
+        val vedtakFattetMelding =
+            if (erSelvstendig) {
+                vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForSelvstendig()
+            } else {
+                vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForArbeidstaker(begrunnelseForSkjønnsfastsattSykepengegrunnlag)
+            }
+        val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId) ?: error("Finner ikke behandling for spleisBehandlingId $spleisBehandlingId")
+        behandling.vedtakFattet()
+        transaksjon.behandlingRepository.lagre(behandling)
+
         outbox.leggTil(
             identitetsnummer = identitetsnummer,
             hendelse = vedtakFattetMelding,

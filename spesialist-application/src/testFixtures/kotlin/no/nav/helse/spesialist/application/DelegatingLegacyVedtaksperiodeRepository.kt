@@ -7,14 +7,8 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.BehandlingUnikId
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.Varsel
-import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class DelegatingLegacyVedtaksperiodeRepository(
     private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
@@ -26,77 +20,6 @@ class DelegatingLegacyVedtaksperiodeRepository(
             .alle()
             .filter { it.identitetsnummer.value == fødselsnummer }
             .map { vedtaksperiode -> vedtaksperiode.toVedtaksperiodeDto() }
-
-    override fun lagreVedtaksperioder(
-        fødselsnummer: String,
-        vedtaksperioder: List<VedtaksperiodeDto>,
-    ) {
-        val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
-        vedtaksperiodeRepository.alle().filter { it.identitetsnummer == identitetsnummer }.forEach { vedtaksperiode ->
-            behandlingRepository.alle().filter { it.vedtaksperiodeId == vedtaksperiode.id }.forEach { behandling ->
-                behandlingRepository.slett(behandling.id)
-                varselRepository.finnVarslerFor(listOf(behandling.id)).forEach { varsel ->
-                    varselRepository.slett(varsel.id)
-                }
-            }
-            vedtaksperiodeRepository.slett(vedtaksperiode.id)
-        }
-        vedtaksperioder.forEach { vedtaksperiode ->
-            val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiode.vedtaksperiodeId)
-            vedtaksperiodeRepository.lagre(
-                Vedtaksperiode(
-                    id = vedtaksperiodeId,
-                    identitetsnummer = identitetsnummer,
-                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                    forkastet = vedtaksperiode.forkastet,
-                ),
-            )
-            vedtaksperiode.behandlinger.forEach { behandling ->
-                behandlingRepository.lagre(
-                    Behandling.fraLagring(
-                        id = BehandlingUnikId(behandling.id),
-                        spleisBehandlingId = behandling.spleisBehandlingId?.let(::SpleisBehandlingId),
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        utbetalingId = behandling.utbetalingId?.let(::UtbetalingId),
-                        tags = behandling.tags.toSet(),
-                        fom = behandling.fom,
-                        tom = behandling.tom,
-                        skjæringstidspunkt = behandling.skjæringstidspunkt,
-                        tilstand =
-                            when (behandling.tilstand) {
-                                TilstandDto.VedtakFattet -> Behandling.Tilstand.VedtakFattet
-                                TilstandDto.VidereBehandlingAvklares -> Behandling.Tilstand.VidereBehandlingAvklares
-                                TilstandDto.AvsluttetUtenVedtak -> Behandling.Tilstand.AvsluttetUtenVedtak
-                                TilstandDto.AvsluttetUtenVedtakMedVarsler -> Behandling.Tilstand.AvsluttetUtenVedtakMedVarsler
-                                TilstandDto.KlarTilBehandling -> Behandling.Tilstand.KlarTilBehandling
-                            },
-                        yrkesaktivitetstype = behandling.yrkesaktivitetstype,
-                    ),
-                )
-                behandling.varsler.forEach { varsel ->
-                    varselRepository.lagre(
-                        Varsel.fraLagring(
-                            id = VarselId(varsel.id),
-                            behandlingUnikId = BehandlingUnikId(behandling.id),
-                            spleisBehandlingId = behandling.spleisBehandlingId?.let(::SpleisBehandlingId),
-                            kode = varsel.varselkode,
-                            status =
-                                when (varsel.status) {
-                                    VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
-                                    VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
-                                    VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
-                                    VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
-                                    VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
-                                    VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
-                                },
-                            opprettetTidspunkt = varsel.opprettet,
-                            vurdering = null,
-                        ),
-                    )
-                }
-            }
-        }
-    }
 
     fun alle(): List<VedtaksperiodeDto> = vedtaksperiodeRepository.alle().map { it.toVedtaksperiodeDto() }
 

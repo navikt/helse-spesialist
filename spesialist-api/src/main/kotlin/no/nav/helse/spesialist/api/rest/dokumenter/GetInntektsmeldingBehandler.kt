@@ -56,8 +56,9 @@ class GetInntektsmeldingBehandler(
             fødselsnummerForIM +
                 aktørIdForIM
                     ?.let {
-                        kallKontekst.transaksjon.legacyPersonRepository
-                            .finnFødselsnumre(aktørIdForIM)
+                        kallKontekst.transaksjon.personRepository
+                            .finnAlleMedAktørId(aktørIdForIM)
+                            .map { it.id.value }
                             .toSet()
                     }.orEmpty()
 

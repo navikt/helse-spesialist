@@ -26,10 +26,6 @@ class UnimplementedLegacyBehandlingDao : LegacyBehandlingDao {
         TODO("Not yet implemented")
     }
 
-    override fun lagreLegacyBehandling(behandlingDto: BehandlingDto) {
-        TODO("Not yet implemented")
-    }
-
     override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
         TODO("Not yet implemented")
     }

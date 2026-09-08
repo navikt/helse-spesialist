@@ -10,8 +10,6 @@ interface LegacyBehandlingDao {
 
     fun finnLegacyBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto>
 
-    fun lagreLegacyBehandling(behandlingDto: BehandlingDto)
-
     fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID>
 
     fun førsteKjenteDag(fødselsnummer: String): LocalDate?
