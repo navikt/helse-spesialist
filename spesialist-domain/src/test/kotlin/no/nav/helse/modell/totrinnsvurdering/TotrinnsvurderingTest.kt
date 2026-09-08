@@ -218,7 +218,7 @@ internal class TotrinnsvurderingTest {
     fun `kan sette vedtaksperiodeForkastet til true`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val totrinnsvurdering = nyTotrinnsvurdering(overstyringer = listOf(nyOverstyring(vedtaksperiodeId)))
-        totrinnsvurdering.vedtaksperiodeForkastet(listOf(vedtaksperiodeId))
+        totrinnsvurdering.forkast()
         assertTrue(totrinnsvurdering.vedtaksperiodeForkastet)
     }
 

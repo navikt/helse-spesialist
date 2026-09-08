@@ -34,18 +34,15 @@ class VedtaksperiodeForkastet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val forkastedeVedtaksperiodeIder =
-            sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-                this.vedtaksperiodeForkastet(vedtaksperiodeId)
-                this.forkastedeVedtaksperiodeIder()
-            }
+        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.finn(VedtaksperiodeId(vedtaksperiodeId)) ?: return
+        vedtaksperiode.forkast()
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
 
         kommandostarter {
             VedtaksperiodeForkastetCommand(
                 identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
                 vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
                 spleisBehandlingId = spleisBehandlingId,
-                alleForkastedeVedtaksperiodeIder = forkastedeVedtaksperiodeIder,
             )
         }
     }
@@ -57,7 +54,6 @@ class VedtaksperiodeForkastetCommand(
     val identitetsnummer: Identitetsnummer,
     val vedtaksperiodeId: VedtaksperiodeId,
     val spleisBehandlingId: SpleisBehandlingId?,
-    val alleForkastedeVedtaksperiodeIder: List<UUID>,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -68,7 +64,6 @@ class VedtaksperiodeForkastetCommand(
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
             AvbrytTotrinnsvurderingCommand(
                 identitetsnummer = identitetsnummer,
-                alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
             ),
             ikkesuspenderendeCommand("opprettOpptegnelse") { sessionContext, _ ->
                 sessionContext.opptegnelseRepository.lagre(

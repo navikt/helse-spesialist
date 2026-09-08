@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import no.nav.helse.spesialist.domain.overstyringer.Overstyring
 import java.time.LocalDateTime
-import java.util.UUID
 
 enum class TotrinnsvurderingTilstand {
     AVVENTER_SAKSBEHANDLER,
@@ -96,15 +95,9 @@ class Totrinnsvurdering private constructor(
             this._overstyringer.forEach { it.ferdigstill() }
         }
 
-    fun vedtaksperiodeForkastet(alleForkastedeVedtaksperiodeIder: List<UUID>) =
+    fun forkast() =
         oppdatering {
-            // Må ta inn forkastede vedtaksperioder fordi endringene i vedtaksperiode ikke lagres til databasen
-            // før man kommer ut av brukPersonHvisFinnes scopet, så totrinnsvurderingen som hentes i
-            // AvbrytTotrinnsvurderingCommand får med seg overstyringer som er knyttet til vedtaksperioder som nettopp
-            // kan ha blitt forkastet.
-            if (_overstyringer.all { it.vedtaksperiodeId in alleForkastedeVedtaksperiodeIder }) {
-                vedtaksperiodeForkastet = true
-            }
+            vedtaksperiodeForkastet = true
         }
 
     private fun <T> oppdatering(block: () -> T): T =

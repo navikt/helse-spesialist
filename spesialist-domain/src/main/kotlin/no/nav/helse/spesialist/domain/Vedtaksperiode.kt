@@ -13,8 +13,15 @@ class Vedtaksperiode(
     id: VedtaksperiodeId,
     val identitetsnummer: Identitetsnummer,
     val organisasjonsnummer: String,
-    val forkastet: Boolean,
+    forkastet: Boolean,
 ) : AggregateRoot<VedtaksperiodeId>(id) {
+    var forkastet: Boolean = forkastet
+        private set
+
+    fun forkast() {
+        forkastet = true
+    }
+
     companion object {
         fun ny(
             id: VedtaksperiodeId,

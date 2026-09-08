@@ -21,7 +21,6 @@ class LegacyVedtaksperiode(
     private val tom get() = gjeldendeBehandling.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeBehandling.skjæringstidspunkt()
-    val gjeldendeUnikId get() = gjeldendeBehandling.unikId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -71,10 +70,6 @@ class LegacyVedtaksperiode(
         val utbetalingId = gjeldendeUtbetalingId
         if (utbetalingId == null || gjeldendeUtbetalingId != forkastetUtbetalingId) return
         gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
-    }
-
-    internal fun vedtaksperiodeForkastet() {
-        forkastet = true
     }
 
     internal fun mottaBehandlingsinformasjon(
