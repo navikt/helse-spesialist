@@ -16,6 +16,7 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -143,7 +144,7 @@ internal class CommandContextTest : ApplicationTest() {
         }).apply {
             commandContext.utfør(commandContextDao, sessionContext, outbox, this.id, this)
         }
-        commandContext.avbrytAlleForPeriode(commandContextDao, UUID.randomUUID())
+        commandContext.avbrytAlleForPeriode(commandContextDao, VedtaksperiodeId(UUID.randomUUID()))
         val result = observer.utgåendeTilstandEndringer
         assertTrue(result.isNotEmpty())
         assertTrue(result.last() is KommandokjedeEndretEvent.Avbrutt)

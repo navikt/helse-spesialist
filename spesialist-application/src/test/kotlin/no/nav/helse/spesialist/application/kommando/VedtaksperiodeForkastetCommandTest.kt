@@ -30,8 +30,8 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
         val kommandoFerdig =
             VedtaksperiodeForkastetCommand(
-                fødselsnummer = person.id.value,
-                vedtaksperiodeId = vedtaksperiode.id.value,
+                identitetsnummer = person.id,
+                vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
@@ -59,8 +59,8 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
         val kommandoFerdig =
             VedtaksperiodeForkastetCommand(
-                fødselsnummer = person.id.value,
-                vedtaksperiodeId = vedtaksperiode.id.value,
+                identitetsnummer = person.id,
+                vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(CommandContext(randomUUID()), sessionContext, outbox)
@@ -99,8 +99,8 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         sessionContext.commandContextDao.opprett(hendelseId, commandContextIdForGodkjenningsbehov)
         val kommandoFerdig =
             VedtaksperiodeForkastetCommand(
-                fødselsnummer = person.id.value,
-                vedtaksperiodeId = vedtaksperiode.id.value,
+                identitetsnummer = person.id,
+                vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)
@@ -136,8 +136,8 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         sessionContext.commandContextDao.opprett(hendelseId, randomUUID())
         val kommandoFerdig =
             VedtaksperiodeForkastetCommand(
-                fødselsnummer = person.id.value,
-                vedtaksperiodeId = vedtaksperiode.id.value,
+                identitetsnummer = person.id,
+                vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = behandling.spleisBehandlingId!!,
                 alleForkastedeVedtaksperiodeIder = emptyList(),
             ).execute(contextForVedtaksperiodeForkastet, sessionContext, outbox)

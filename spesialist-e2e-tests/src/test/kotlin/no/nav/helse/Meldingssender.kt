@@ -8,6 +8,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.siste
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -48,6 +49,7 @@ class Meldingssender(
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
+        spleisBehandlingId: SpleisBehandlingId,
         forrigeTilstand: String = "FORRIGE_TILSTAND",
         gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
         forårsaketAvId: UUID = UUID.randomUUID(),
@@ -63,6 +65,7 @@ class Meldingssender(
                     forrigeTilstand = forrigeTilstand,
                     gjeldendeTilstand = gjeldendeTilstand,
                     forårsaketAvId = forårsaketAvId,
+                    spleisBehandlingId = spleisBehandlingId,
                 ),
             )
         }

@@ -7,6 +7,7 @@ import no.nav.helse.modell.kommando.*
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Opptegnelse
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import tools.jackson.databind.JsonNode
 import java.util.*
 
@@ -41,8 +42,8 @@ class VedtaksperiodeForkastet(
 
         kommandostarter {
             VedtaksperiodeForkastetCommand(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId),
                 spleisBehandlingId = spleisBehandlingId,
                 alleForkastedeVedtaksperiodeIder = forkastedeVedtaksperiodeIder,
             )
@@ -53,26 +54,26 @@ class VedtaksperiodeForkastet(
 }
 
 class VedtaksperiodeForkastetCommand(
-    val fødselsnummer: String,
-    val vedtaksperiodeId: UUID,
+    val identitetsnummer: Identitetsnummer,
+    val vedtaksperiodeId: VedtaksperiodeId,
     val spleisBehandlingId: SpleisBehandlingId?,
     val alleForkastedeVedtaksperiodeIder: List<UUID>,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             AvbrytOppgaveCommand(
-                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                identitetsnummer = identitetsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
             ),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
             AvbrytTotrinnsvurderingCommand(
-                fødselsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
                 alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
             ),
             ikkesuspenderendeCommand("opprettOpptegnelse") { sessionContext, _ ->
                 sessionContext.opptegnelseRepository.lagre(
                     Opptegnelse.ny(
-                        identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                        identitetsnummer = identitetsnummer,
                         type = Opptegnelse.Type.PERSONDATA_OPPDATERT,
                     ),
                 )

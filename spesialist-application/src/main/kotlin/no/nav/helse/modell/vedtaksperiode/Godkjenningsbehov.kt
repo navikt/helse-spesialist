@@ -349,7 +349,7 @@ internal class GodkjenningsbehovCommand(
                 godkjenningsbehovData = godkjenningsbehovData,
             ),
             AvbrytContextCommand(
-                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
+                vedtaksperiodeId = vedtaksperiodeId,
             ),
             VurderBehovForAvviksvurdering(
                 fødselsnummer = godkjenningsbehovData.fødselsnummer,

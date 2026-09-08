@@ -5,6 +5,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
@@ -73,6 +74,7 @@ object Meldingsbygger {
         vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
         forrigeTilstand = forrigeTilstand,
         gjeldendeTilstand = gjeldendeTilstand,
+        spleisBehandlingId = SpleisBehandlingId(vedtaksperiode.spleisBehandlingId!!),
     )
 
     fun byggVedtaksperiodeForkastet(

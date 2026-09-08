@@ -5,8 +5,10 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
 import java.util.*
@@ -36,36 +38,33 @@ class VedtaksperiodeReberegnet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val vedtaksperiode =
-            sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-                this.vedtaksperiode(vedtaksperiodeId)
-            }
+        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: return
 
         kommandostarter {
             VedtaksperiodeReberegnetCommand(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
+                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                vedtaksperiodeId = behandling.vedtaksperiodeId,
                 spleisBehandlingId = spleisBehandlingId,
-                spesialistBehandlingId = vedtaksperiode.gjeldendeUnikId,
+                behandlingUnikId = behandling.id,
             )
         }
     }
 }
 
 internal class VedtaksperiodeReberegnetCommand(
-    fødselsnummer: String,
-    vedtaksperiodeId: UUID,
+    identitetsnummer: Identitetsnummer,
+    vedtaksperiodeId: VedtaksperiodeId,
     spleisBehandlingId: SpleisBehandlingId,
-    spesialistBehandlingId: UUID,
+    behandlingUnikId: BehandlingUnikId,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
             VedtaksperiodeReberegnetPeriodehistorikk(
-                spesialistBehandlingId = spesialistBehandlingId,
+                behandlingUnikId = behandlingUnikId,
             ),
-            ReserverPersonHvisTildeltCommand(fødselsnummer = fødselsnummer),
+            ReserverPersonHvisTildeltCommand(identitetsnummer = identitetsnummer),
             AvbrytOppgaveCommand(
-                identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+                identitetsnummer = identitetsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
             ),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
