@@ -103,38 +103,20 @@ class ApiModuleIntegrationTestFixture(
     }
 }
 
-fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): List<UUID> {
-    val uuider = mutableListOf<UUID>()
-    if (Brukerrolle.EgenAnsatt in brukerroller) {
-        uuider.addAll(egenAnsatt)
+fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): List<UUID> =
+    brukerroller.flatMap { rolle ->
+        when (rolle) {
+            Brukerrolle.EgenAnsatt -> egenAnsatt
+            Brukerrolle.Kode7 -> kode7
+            Brukerrolle.Beslutter -> beslutter
+            Brukerrolle.SelvstendigNæringsdrivendeBeta -> næringsdrivendeBeta
+            Brukerrolle.Stikkprøve -> stikkprøve
+            Brukerrolle.Utvikler -> utvikler
+            Brukerrolle.Dialogmelding -> dialogmelding
+            Brukerrolle.Porteføljestyring -> porteføljestyring
+            Brukerrolle.GraderteAndreYtelser -> graderteAndreYtelser
+        }
     }
-    if (Brukerrolle.Kode7 in brukerroller) {
-        uuider.addAll(kode7)
-    }
-    if (Brukerrolle.Beslutter in brukerroller) {
-        uuider.addAll(beslutter)
-    }
-    if (Brukerrolle.SelvstendigNæringsdrivendeBeta in brukerroller) {
-        uuider.addAll(næringsdrivendeBeta)
-    }
-    if (Brukerrolle.Stikkprøve in brukerroller) {
-        uuider.addAll(stikkprøve)
-    }
-    if (Brukerrolle.Utvikler in brukerroller) {
-        uuider.addAll(utvikler)
-    }
-    if (Brukerrolle.Dialogmelding in brukerroller) {
-        uuider.addAll(dialogmelding)
-    }
-    if (Brukerrolle.Porteføljestyring in brukerroller) {
-        uuider.addAll(porteføljestyring)
-    }
-
-    if (Brukerrolle.GraderteAndreYtelser in brukerroller) {
-        uuider.addAll(graderteAndreYtelser)
-    }
-    return uuider
-}
 
 fun TilgangsgrupperTilTilganger.uuiderFor(tilganger: Set<Tilgang>): List<UUID> {
     val uuider = mutableListOf<UUID>()
