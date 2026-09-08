@@ -14,46 +14,20 @@ class TilgangsgrupperTilBrukerroller(
     val porteføljestyring: List<UUID>,
     val graderteAndreYtelser: List<UUID>,
 ) {
-    fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> {
-        val roller = mutableSetOf<Brukerrolle>()
-        if (tilgangsgrupper.any { it in næringsdrivendeBeta }) {
-            roller.add(Brukerrolle.SelvstendigNæringsdrivendeBeta)
-        }
-        if (tilgangsgrupper.any { it in beslutter }) {
-            roller.add(Brukerrolle.Beslutter)
-        }
-        if (tilgangsgrupper.any { it in egenAnsatt }) {
-            roller.add(Brukerrolle.EgenAnsatt)
-        }
-        if (tilgangsgrupper.any { it in kode7 }) {
-            roller.add(Brukerrolle.Kode7)
-        }
-        if (tilgangsgrupper.any { it in stikkprøve }) {
-            roller.add(Brukerrolle.Stikkprøve)
-        }
-        if (tilgangsgrupper.any { it in utvikler }) {
-            roller.add(Brukerrolle.Utvikler)
-        }
-        if (tilgangsgrupper.any { it in dialogmelding }) {
-            roller.add(Brukerrolle.Dialogmelding)
-        }
-        if (tilgangsgrupper.any { it in porteføljestyring }) {
-            roller.add(Brukerrolle.Porteføljestyring)
-        }
-        if (tilgangsgrupper.any { it in graderteAndreYtelser }) {
-            roller.add(Brukerrolle.GraderteAndreYtelser)
-        }
-        return roller
-    }
+    fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> = Brukerrolle.entries.filter { rolle -> tilgangsgrupper.any { it in uuiderFor(rolle) } }.toSet()
 
-    fun alleUuider(): Set<UUID> =
-        næringsdrivendeBeta.toSet() +
-            beslutter.toSet() +
-            egenAnsatt.toSet() +
-            kode7.toSet() +
-            stikkprøve.toSet() +
-            utvikler.toSet() +
-            dialogmelding.toSet() +
-            porteføljestyring.toSet() +
-            graderteAndreYtelser.toSet()
+    private fun uuiderFor(rolle: Brukerrolle): List<UUID> =
+        when (rolle) {
+            Brukerrolle.SelvstendigNæringsdrivendeBeta -> næringsdrivendeBeta
+            Brukerrolle.Beslutter -> beslutter
+            Brukerrolle.EgenAnsatt -> egenAnsatt
+            Brukerrolle.Kode7 -> kode7
+            Brukerrolle.Stikkprøve -> stikkprøve
+            Brukerrolle.Utvikler -> utvikler
+            Brukerrolle.Dialogmelding -> dialogmelding
+            Brukerrolle.Porteføljestyring -> porteføljestyring
+            Brukerrolle.GraderteAndreYtelser -> graderteAndreYtelser
+        }
+
+    fun alleUuider(): Set<UUID> = Brukerrolle.entries.flatMap(::uuiderFor).toSet()
 }

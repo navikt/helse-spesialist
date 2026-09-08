@@ -117,18 +117,7 @@ fun main() {
                             password = env.getValue("VALKEY_PASSWORD_SPESIALIST_CACHE"),
                         ),
                     ),
-                tilgangsgrupperTilBrukerroller =
-                    TilgangsgrupperTilBrukerroller(
-                        næringsdrivendeBeta = env.getUUIDList("ROLLE_SELVSTENDIG_BETA"),
-                        beslutter = env.getUUIDList("ROLLE_BESLUTTER"),
-                        egenAnsatt = env.getUUIDList("ROLLE_EGEN_ANSATT"),
-                        kode7 = env.getUUIDList("ROLLE_KODE_7"),
-                        stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
-                        utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
-                        dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
-                        porteføljestyring = env.getUUIDList("ROLLE_PORTEFOLJESTYRING"),
-                        graderteAndreYtelser = env.getUUIDList("ROLLE_GRADERTE_ANDRE_YTELSER"),
-                    ),
+                tilgangsgrupperTilBrukerroller = tilgangsgrupperTilBrukerroller(env),
                 tilgangsgrupperTilTilganger =
                     TilgangsgrupperTilTilganger(
                         skrivetilgang = env.getUUIDList("TILGANG_SKRIV"),
@@ -150,6 +139,19 @@ fun main() {
             ),
     )
 }
+
+private fun tilgangsgrupperTilBrukerroller(env: Map<String, String>): TilgangsgrupperTilBrukerroller =
+    TilgangsgrupperTilBrukerroller(
+        næringsdrivendeBeta = env.getUUIDList("ROLLE_SELVSTENDIG_BETA"),
+        beslutter = env.getUUIDList("ROLLE_BESLUTTER"),
+        egenAnsatt = env.getUUIDList("ROLLE_EGEN_ANSATT"),
+        kode7 = env.getUUIDList("ROLLE_KODE_7"),
+        stikkprøve = env.getUUIDList("ROLLE_STIKKPROVE"),
+        utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
+        dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
+        porteføljestyring = env.getUUIDList("ROLLE_PORTEFOLJESTYRING"),
+        graderteAndreYtelser = env.getUUIDList("ROLLE_GRADERTE_ANDRE_YTELSER"),
+    )
 
 private fun Map<String, String>.getUUIDList(key: String): List<UUID> = this[key]?.split(",")?.map { UUID.fromString(it.trim()) } ?: emptyList()
 
