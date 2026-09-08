@@ -248,10 +248,11 @@ class SpleisStub(
                     ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
 
             val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
+            val yrkesaktivitetstype = jsonNode["yrkesaktivitetstype"]?.asString() ?: "ARBEIDSTAKER"
             if (godkjent) {
                 spleisLukkerBehandlingen(vedtaksperiode, testContext.person)
                 utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
-                spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
+                spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver, yrkesaktivitetstype)
             } else {
                 spleisForkasterPerioden(testContext, vedtaksperiode)
             }
@@ -283,10 +284,11 @@ class SpleisStub(
             vedtaksperiode: Vedtaksperiode,
             person: Person,
             arbeidsgiver: Arbeidsgiver,
+            yrkesaktivitetstype: String,
         ) {
             rapidsConnection.publish(
                 person.fødselsnummer,
-                Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode),
+                Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode, yrkesaktivitetstype),
             )
         }
 

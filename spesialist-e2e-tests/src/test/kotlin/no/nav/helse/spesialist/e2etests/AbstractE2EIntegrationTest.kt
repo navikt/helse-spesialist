@@ -5,6 +5,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.VedtakFattetMelding
+import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -91,17 +95,35 @@ abstract class AbstractE2EIntegrationTest {
         kanAvvises: Boolean = true,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
+        maksdato: LocalDate = LocalDate.of(2018, 12, 1),
         tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {},
     ): Vedtaksperiode {
         personSenderSøknad()
         val vedtaksperiode = førsteVedtaksperiode()
-        spleisForberederBehandling(vedtaksperiode, tilleggsmeldinger)
+        spleisForberederBehandling(
+            vedtaksperiode = vedtaksperiode,
+            utbetalingtype = utbetalingtype,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+            tilleggsmeldinger = tilleggsmeldinger,
+        )
         spleisSenderGodkjenningsbehov(
             vedtaksperiode,
             tags = tags,
             kanAvvises = kanAvvises,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             perioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt,
+            periodetype = periodetype,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            inntektskilde = inntektskilde,
+            utbetalingtype = utbetalingtype,
+            maksdato = maksdato,
         )
         return vedtaksperiode
     }
@@ -115,6 +137,9 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun spleisForberederBehandling(
         vedtaksperiode: Vedtaksperiode,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
         tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit,
     ) {
         spleisOppretterBehandling(
@@ -128,7 +153,14 @@ abstract class AbstractE2EIntegrationTest {
             arbeidsgiver = testContext.arbeidsgiver,
         )
         TilleggsmeldingReceiver(testRapid, testContext, vedtaksperiode).tilleggsmeldinger()
-        utbetalingEndres(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
+        utbetalingEndres(
+            vedtaksperiode = vedtaksperiode,
+            person = testContext.person,
+            arbeidsgiver = testContext.arbeidsgiver,
+            utbetalingtype = utbetalingtype,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+        )
     }
 
     protected fun spleisReberegnerAutomatisk(vedtaksperiode: Vedtaksperiode) {
@@ -137,6 +169,24 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun spleisKasterUtSaken(vedtaksperiode: Vedtaksperiode) {
         spleisStub.spleisForkasterPerioden(testContext, vedtaksperiode)
+    }
+
+    protected fun detPubliseresEnStansAutomatiskBehandlingMelding(årsaker: List<String> = listOf("MEDISINSK_VILKAR")) {
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggStansAutomatiskBehandling(testContext.person, årsaker),
+        )
+    }
+
+    protected fun tvingAutomatisering(vedtaksperiode: Vedtaksperiode = førsteVedtaksperiode()) {
+        sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+            session.run(
+                asSQL(
+                    "INSERT INTO force_automatisering(vedtaksperiode_id) VALUES (:vedtaksperiode_id)",
+                    "vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId,
+                ).asUpdate,
+            )
+        }
     }
 
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
@@ -414,6 +464,9 @@ abstract class AbstractE2EIntegrationTest {
         vedtaksperiode: Vedtaksperiode,
         person: Person,
         arbeidsgiver: Arbeidsgiver,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
     ) {
         testRapid.publish(
             person.fødselsnummer,
@@ -423,6 +476,9 @@ abstract class AbstractE2EIntegrationTest {
                 arbeidsgiver = arbeidsgiver,
                 forrigeStatus = "NY",
                 gjeldendeStatus = "IKKE_UTBETALT",
+                utbetalingtype = utbetalingtype,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
             ),
         )
     }
@@ -433,6 +489,11 @@ abstract class AbstractE2EIntegrationTest {
         kanAvvises: Boolean = true,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         perioderMedSammeSkjæringstidspunkt: List<Vedtaksperiode>? = null,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        maksdato: LocalDate = LocalDate.of(2018, 12, 1),
     ) {
         testRapid.publish(
             testContext.person.fødselsnummer,
@@ -445,6 +506,11 @@ abstract class AbstractE2EIntegrationTest {
                 kanAvvises = kanAvvises,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 perioderMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt,
+                periodetype = periodetype,
+                yrkesaktivitetstype = yrkesaktivitetstype,
+                inntektskilde = inntektskilde,
+                utbetalingtype = utbetalingtype,
+                maksdato = maksdato,
             ),
         )
     }
