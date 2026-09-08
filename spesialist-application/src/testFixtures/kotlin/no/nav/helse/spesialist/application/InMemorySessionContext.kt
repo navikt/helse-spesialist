@@ -17,7 +17,6 @@ class InMemorySessionContext(
     override val dialogRepository: InMemoryDialogRepository,
     override val dokumentDao: InMemoryDokumentDao,
     override val legacyBehandlingDao: UnimplementedLegacyBehandlingDao,
-    override val legacyPersonRepository: DelegatingLegacyPersonRepository,
     override val legacyVedtaksperiodeRepository: DelegatingLegacyVedtaksperiodeRepository,
     override val meldingDao: InMemoryMeldingDao,
     override val metrikkDao: UnimplementedMetrikkDao,

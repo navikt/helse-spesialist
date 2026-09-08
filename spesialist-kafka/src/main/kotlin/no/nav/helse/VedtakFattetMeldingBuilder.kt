@@ -9,7 +9,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.SaksbehandlerIdentOgNavn
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.vedtak.BegrunnelseForSkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Utfall
@@ -232,7 +232,7 @@ class VedtakFattetMeldingBuilder(
 
     private fun byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
         packet: JsonMessage,
-        skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag,
+        begrunnelseForSkjønnsfastsattSykepengegrunnlag: BegrunnelseForSkjønnsfastsattSykepengegrunnlag,
         avviksvurdering: Avviksvurdering,
         tags: Set<String>,
     ) = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
@@ -243,13 +243,13 @@ class VedtakFattetMeldingBuilder(
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
         skjønnsfastsatt = packet["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asBigDecimal(),
         skjønnsfastsettingtype =
-            when (skjønnsfastsattSykepengegrunnlag.type) {
+            when (begrunnelseForSkjønnsfastsattSykepengegrunnlag.type) {
                 Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
                 Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT -> VedtakFattetMelding.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT
                 Skjønnsfastsettingstype.ANNET -> VedtakFattetMelding.Skjønnsfastsettingstype.ANNET
             },
         skjønnsfastsettingsårsak =
-            when (skjønnsfastsattSykepengegrunnlag.årsak) {
+            when (begrunnelseForSkjønnsfastsattSykepengegrunnlag.årsak) {
                 Skjønnsfastsettingsårsak.ANDRE_AVSNITT -> VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
                 Skjønnsfastsettingsårsak.TREDJE_AVSNITT -> VedtakFattetMelding.Skjønnsfastsettingsårsak.TREDJE_AVSNITT
             },
@@ -282,7 +282,7 @@ class VedtakFattetMeldingBuilder(
             .maxBy { it.opprettet }
 
     fun byggVedtakFattetMeldingForArbeidstaker(
-        skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
+        skjønnsfastsatteSykepengegrunnlag: List<BegrunnelseForSkjønnsfastsattSykepengegrunnlag>,
     ): VedtakFattetMelding {
         val vedtaksperiode =
             sessionContext.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
@@ -306,7 +306,7 @@ class VedtakFattetMeldingBuilder(
                     byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
                         packet = packet,
                         tags = behandling.tags,
-                        skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag,
+                        begrunnelseForSkjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag,
                         avviksvurdering = finnAvviksvurdering(),
                     )
                 }

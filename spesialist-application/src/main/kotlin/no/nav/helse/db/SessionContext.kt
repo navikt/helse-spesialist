@@ -2,7 +2,6 @@ package no.nav.helse.db
 
 import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.GraderteAndreYtelserRepository
@@ -46,7 +45,6 @@ interface SessionContext {
     val dokumentDao: DokumentDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val legacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository
-    val legacyPersonRepository: LegacyPersonRepository
     val saksbehandlerStansRepository: SaksbehandlerStansRepository
     val veilederStansRepository: VeilederStansRepository
 

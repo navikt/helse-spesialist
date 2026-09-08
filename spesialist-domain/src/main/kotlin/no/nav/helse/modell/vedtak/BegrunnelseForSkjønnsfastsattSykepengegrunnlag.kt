@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtak
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class SkjønnsfastsattSykepengegrunnlag(
+class BegrunnelseForSkjønnsfastsattSykepengegrunnlag(
     val type: Skjønnsfastsettingstype,
     val årsak: Skjønnsfastsettingsårsak,
     val skjæringstidspunkt: LocalDate,
@@ -27,7 +27,7 @@ class SkjønnsfastsattSykepengegrunnlag(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as SkjønnsfastsattSykepengegrunnlag
+        other as BegrunnelseForSkjønnsfastsattSykepengegrunnlag
 
         if (type != other.type) return false
         if (årsak != other.årsak) return false
@@ -60,7 +60,7 @@ class SkjønnsfastsattSykepengegrunnlag(
             begrunnelseFraFritekst: String,
             begrunnelseFraKonklusjon: String,
             opprettet: LocalDateTime,
-        ) = SkjønnsfastsattSykepengegrunnlag(
+        ) = BegrunnelseForSkjønnsfastsattSykepengegrunnlag(
             type = type.tilSkjønnsfastsettingtype(),
             årsak = årsak.tilSkjønnsfastsettingårsak(),
             skjæringstidspunkt = skjæringstidspunkt,

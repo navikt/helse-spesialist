@@ -23,7 +23,6 @@ import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.*
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
@@ -502,28 +501,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertIngenEtterspurteBehov()
     }
 
-    protected fun håndterUtbetalingErstattet(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        utbetalingtype: String = "UTBETALING",
-        arbeidsgiverbeløp: Int = 20000,
-        personbeløp: Int = 0,
-        utbetalingId: UUID,
-    ) {
-        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
-        håndterUtbetalingEndret(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            utbetalingtype,
-            arbeidsgiverbeløp,
-            personbeløp,
-            utbetalingId = utbetalingId,
-        )
-        assertIngenEtterspurteBehov()
-    }
-
     protected fun håndterUtbetalingEndret(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -878,7 +855,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dbQuery.singleOrNull(
             """
             SELECT 1 FROM behandling
-            WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${LegacyBehandling.Tilstand.VedtakFattet.navn()}'
+            WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${Behandling.Tilstand.VedtakFattet.name}'
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ) { true } ?: false
