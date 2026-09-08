@@ -6,6 +6,8 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
+import no.nav.helse.spesialist.domain.UtbetalingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import tools.jackson.databind.JsonNode
 import java.util.*
 
@@ -32,9 +34,12 @@ class VedtaksperiodeNyUtbetaling(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        sessionContext.legacyPersonRepository.brukPerson(fødselsnummer) {
-            this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
-        }
+        val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
+        val utbetalingId = UtbetalingId(utbetalingId)
+        val gjeldendeBehandling = sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiodeId) ?: error("Finner ikke behandling for vedtaksperiodeId=$vedtaksperiodeId")
+        gjeldendeBehandling.nyUtbetaling(utbetalingId)
+        sessionContext.behandlingRepository.lagre(gjeldendeBehandling)
+
         kommandostarter {
             VedtaksperiodeNyUtbetalingCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -47,8 +52,8 @@ class VedtaksperiodeNyUtbetaling(
 }
 
 internal class VedtaksperiodeNyUtbetalingCommand(
-    vedtaksperiodeId: UUID,
-    utbetalingId: UUID,
+    vedtaksperiodeId: VedtaksperiodeId,
+    utbetalingId: UtbetalingId,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
