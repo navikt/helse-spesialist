@@ -18,7 +18,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
-import no.nav.helse.spesialist.domain.Fødselsnummer
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -333,7 +333,7 @@ internal class GodkjenningsbehovCommand(
     godkjenningMediator: GodkjenningMediator,
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
 ) : MacroCommand() {
-    private val fødselsnummer = Fødselsnummer(godkjenningsbehovData.fødselsnummer)
+    private val identitetsnummer = Identitetsnummer.fraString(godkjenningsbehovData.fødselsnummer)
     private val vedtaksperiodeId = VedtaksperiodeId(godkjenningsbehovData.vedtaksperiodeId)
     val spleisBehandlingId = SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)
     override val commands: List<Command> =
@@ -383,8 +383,8 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
             ),
             VurderEnhetUtland(
-                fødselsnummer = godkjenningsbehovData.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
+                identitetsnummer = identitetsnummer,
+                spleisBehandlingId = spleisBehandlingId,
             ),
             VurderÅpenGosysoppgave(
                 vedtaksperiodeId = godkjenningsbehovData.vedtaksperiodeId,
@@ -407,7 +407,7 @@ internal class GodkjenningsbehovCommand(
                 godkjenningsbehov = godkjenningsbehovData,
             ),
             VurderBehovForTotrinnskontroll(
-                fødselsnummer = fødselsnummer.value,
+                fødselsnummer = identitetsnummer.value,
                 oppgaveService = oppgaveService,
                 spleisBehandlingId = spleisBehandlingId,
             ),
@@ -418,7 +418,7 @@ internal class GodkjenningsbehovCommand(
                 godkjenningsbehov = godkjenningsbehovData,
                 oppgaveService = oppgaveService,
                 spleisBehandlingId = spleisBehandlingId,
-                identitetsnummer = fødselsnummer,
+                identitetsnummer = identitetsnummer,
             ),
             OpprettSaksbehandleroppgave(
                 behovData = godkjenningsbehovData,

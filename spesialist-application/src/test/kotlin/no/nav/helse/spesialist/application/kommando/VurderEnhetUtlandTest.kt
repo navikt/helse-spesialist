@@ -16,8 +16,8 @@ internal class VurderEnhetUtlandTest : ApplicationTest() {
         sessionContext.personRepository.lagre(person)
         assertTrue(
             VurderEnhetUtland(
-                fødselsnummer = person.id.value,
-                vedtaksperiodeId = vedtaksperiode1.id.value,
+                identitetsnummer = person.id,
+                spleisBehandlingId = behandling1.spleisBehandlingId!!,
             ).execute(commandContext, sessionContext, outbox),
         )
         behandling1.assertHarVarsel("SB_EX_5", Varsel.Status.AKTIV)
