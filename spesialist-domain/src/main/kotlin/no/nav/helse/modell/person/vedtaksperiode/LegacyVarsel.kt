@@ -80,8 +80,6 @@ class LegacyVarsel(
     companion object {
         internal fun List<LegacyVarsel>.finnEksisterendeVarsel(varsel: LegacyVarsel): LegacyVarsel? = find { it.varselkode == varsel.varselkode }
 
-        internal fun List<LegacyVarsel>.finnEksisterendeVarsel(varselkode: String): LegacyVarsel? = find { it.varselkode == varselkode }
-
         fun List<LegacyVarsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
     }
 }

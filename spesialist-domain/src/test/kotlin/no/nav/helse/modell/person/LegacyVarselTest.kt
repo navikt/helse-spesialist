@@ -42,13 +42,6 @@ internal class LegacyVarselTest {
     }
 
     @Test
-    fun `finner eksisterende varsel basert på varselkode`() {
-        val varsel = nyttVarsel()
-        val funnetVarsel = listOf(varsel).finnEksisterendeVarsel("EN_KODE")
-        assertEquals(varsel, funnetVarsel)
-    }
-
-    @Test
     fun `kan reaktivere varsel`() {
         val varselId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()

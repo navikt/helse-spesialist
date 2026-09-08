@@ -1,14 +1,10 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.relevanteFor
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEventueltAvviksvarselTil
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 
 class LegacyPerson(
@@ -29,34 +25,9 @@ class LegacyPerson(
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
 
-    fun flyttEventuelleAvviksvarsler(
-        vedtaksperiodeId: UUID,
-        skjæringstidspunkt: LocalDate,
-    ) {
-        vedtaksperioder.relevanteFor(skjæringstidspunkt).flyttEventueltAvviksvarselTil(vedtaksperiodeId)
-    }
-
-    fun mottaSpleisVedtaksperioder(perioder: List<SpleisVedtaksperiode>) {
-        vedtaksperioder.forEach { it.nyttGodkjenningsbehov(perioder) }
-    }
-
-    fun oppdaterPeriodeTilGodkjenning(
-        vedtaksperiodeId: UUID,
-        tags: List<String>,
-        spleisBehandlingId: UUID,
-        utbetalingId: UUID,
-    ) {
-        vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
-    }
-
     fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): LegacyVedtaksperiode? {
         return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
-    }
-
-    fun vedtaksperiode(vedtaksperiodeId: UUID): LegacyVedtaksperiode {
-        val vedtaksperiode = vedtaksperiodeOrNull(vedtaksperiodeId)
-        return checkNotNull(vedtaksperiode)
     }
 
     fun utbetalingForkastet(utbetalingId: UUID) {

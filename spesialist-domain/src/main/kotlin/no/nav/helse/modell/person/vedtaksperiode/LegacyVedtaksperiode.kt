@@ -1,9 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg
-import java.time.LocalDate
 import java.util.UUID
 
 class LegacyVedtaksperiode(
@@ -17,11 +14,8 @@ class LegacyVedtaksperiode(
     private val behandlinger = behandlinger.toMutableList()
     private val gjeldendeBehandling get() = behandlinger.last()
     private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
-    internal val gjeldendeSkjæringstidspunkt get() = gjeldendeBehandling.skjæringstidspunkt()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
-
-    fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun toDto(): VedtaksperiodeDto =
         VedtaksperiodeDto(
@@ -31,35 +25,11 @@ class LegacyVedtaksperiode(
             behandlinger = behandlinger.map { it.toDto() },
         )
 
-    internal fun nyttGodkjenningsbehov(spleisVedtaksperioder: List<SpleisVedtaksperiode>) {
-        if (forkastet) return
-        val spleisVedtaksperiode = spleisVedtaksperioder.find { it.erRelevant(vedtaksperiodeId) } ?: return
-        val aktuellBehandling = behandlinger.find { spleisVedtaksperiode.spleisBehandlingId == it.spleisBehandlingId() }
-        if (aktuellBehandling == null) {
-            logg.info(
-                "Fant ikke behandling med {} for vedtaksperiode med {}",
-                kv("behandlingId", spleisVedtaksperiode.spleisBehandlingId),
-                kv("vedtaksperiodeId", spleisVedtaksperiode.vedtaksperiodeId),
-            )
-            return
-        }
-        aktuellBehandling.håndter(spleisVedtaksperiode)
-    }
-
     internal fun utbetalingForkastet(forkastetUtbetalingId: UUID) {
         if (forkastet) return
         val utbetalingId = gjeldendeUtbetalingId
         if (utbetalingId == null || gjeldendeUtbetalingId != forkastetUtbetalingId) return
         gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
-    }
-
-    internal fun mottaBehandlingsinformasjon(
-        tags: List<String>,
-        spleisBehandlingId: UUID,
-        utbetalingId: UUID,
-    ) {
-        if (forkastet) return
-        gjeldendeBehandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
     internal fun nyUtbetaling(utbetalingId: UUID) {
@@ -91,10 +61,6 @@ class LegacyVedtaksperiode(
             find { vedtaksperiode ->
                 vedtaksperiode.behandlinger.any { it.spleisBehandlingId() == spleisBehandlingId }
             }
-
-        internal fun List<LegacyVedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =
-            filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
-                .map { it.gjeldendeBehandling }
 
         fun BehandlingDto.tilBehandling(): LegacyBehandling =
             LegacyBehandling.fraLagring(

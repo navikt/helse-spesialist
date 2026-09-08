@@ -1,7 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
@@ -38,37 +37,6 @@ internal class LegacyBehandlingTest {
     }
 
     @Test
-    fun `deaktiverer enkelt varsel basert på varselkode`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
-        behandling.håndterNyttVarsel(varsel)
-        behandling.deaktiverVarsel("SB_EX_1")
-        behandling.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
-        behandling.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
-    }
-
-    @Test
-    fun `sletter varsel om avvik og legger det til på nytt hvis det finnes fra før`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val varselId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.håndterNyttVarsel(LegacyVarsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IV_2")
-    }
-
-    @Test
-    fun `Lagrer kun én utgave av et aktivt varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
-    }
-
-    @Test
     fun `behandling kan motta ny utbetalingId`() {
         val behandling = behandling()
         val utbetalingId = UUID.randomUUID()
@@ -85,25 +53,6 @@ internal class LegacyBehandlingTest {
         behandling.håndterNyUtbetaling(nyUtbetalingId)
 
         assertEquals(nyUtbetalingId, behandling.toDto().utbetalingId)
-    }
-
-    @Test
-    fun `Lagrer varsel på behandling selvom den er ferdig behandlet`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId, behandlingId = behandlingId)
-        behandling.håndterVedtakFattet()
-        val varsel = LegacyVarsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)
-        behandling.håndterNyttVarsel(varsel)
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IM_1")
-    }
-
-    @Test
-    fun `Skal kunne opprette varsel på behandling`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId))
-        behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
     @Test
@@ -165,21 +114,6 @@ internal class LegacyBehandlingTest {
     fun `finner ikke behandling`() {
         val behandlingV1 = behandling()
         assertNull(listOf(behandlingV1).finnBehandlingForVedtaksperiode(UUID.randomUUID()))
-    }
-
-    @Test
-    fun `oppdaterer fom, tom, skjæringstidspunkt, behandlingId`() {
-        val behandlingId = UUID.randomUUID()
-        val behandling = behandling(fom = 1 jan 2018, tom = 31 jan 2018, skjæringstidspunkt = 1 jan 2018)
-        behandling.håndter(
-            SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2 jan 2018, 30 jan 2018, 2 jan 2018),
-        )
-        val dto = behandling.toDto()
-
-        assertEquals(2 jan 2018, dto.fom)
-        assertEquals(30 jan 2018, dto.tom)
-        assertEquals(2 jan 2018, dto.skjæringstidspunkt)
-        assertEquals(behandlingId, dto.spleisBehandlingId)
     }
 
     @Test
@@ -371,25 +305,6 @@ internal class LegacyBehandlingTest {
         skjæringstidspunkt = skjæringstidspunkt,
         yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     )
-
-    private fun LegacyBehandling.assertVarsler(
-        forventetAntall: Int,
-        status: VarselStatusDto,
-        varselkode: Varselkode,
-    ) {
-        this.assertVarsler(forventetAntall, status, varselkode.name)
-    }
-
-    private fun LegacyBehandling.assertVarsler(
-        forventetAntall: Int,
-        status: VarselStatusDto,
-        varselkode: String,
-    ) {
-        val dto = this.toDto()
-        val varsler = dto.varsler
-        val varsel = varsler.filter { it.varselkode == varselkode && it.status == status }
-        assertEquals(forventetAntall, varsel.size)
-    }
 
     private fun LegacyBehandling.assertUtbetalingId(utbetalingId: UUID?) {
         val dto = this.toDto()

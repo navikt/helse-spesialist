@@ -15,6 +15,4 @@ data class SpleisVedtaksperiode(
         val yrkesaktivitetstype: String,
         val organisasjonsnummer: String? = null,
     )
-
-    fun erRelevant(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 }
