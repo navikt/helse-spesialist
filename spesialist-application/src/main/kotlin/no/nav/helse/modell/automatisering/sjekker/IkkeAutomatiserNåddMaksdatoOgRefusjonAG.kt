@@ -19,8 +19,11 @@ internal class IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
     override fun erAutomatiserbar(): Boolean {
         val stopperAutomatisering = harNåddMaksdato && arbeidsgiverØnskerRefusjon
         if (stopperAutomatisering) {
-            val varsel = Varsel.nytt(behandling.id, behandling.spleisBehandlingId, Varselkode.RV_OV_5.name)
-            varselRepository.lagre(varsel)
+            val eksisterendeVarsel = varselRepository.finnVarslerFor(behandling.id).find { it.kode == Varselkode.RV_OV_5.name }
+            if (eksisterendeVarsel == null) {
+                val varsel = Varsel.nytt(behandling.id, behandling.spleisBehandlingId, Varselkode.RV_OV_5.name)
+                varselRepository.lagre(varsel)
+            }
         }
         return !stopperAutomatisering
     }
