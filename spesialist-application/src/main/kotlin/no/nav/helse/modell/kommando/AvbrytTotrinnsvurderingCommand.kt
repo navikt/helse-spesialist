@@ -24,8 +24,8 @@ internal class AvbrytTotrinnsvurderingCommand(
         val vedtaksperiodeIderForOverstyringer = totrinnsvurdering.overstyringer.map { VedtaksperiodeId(it.vedtaksperiodeId) }
 
         val erAlleVedtaksperiodeneForkastet =
-            vedtaksperiodeIderForOverstyringer
-                .mapNotNull { sessionContext.vedtaksperiodeRepository.finn(it) }
+            sessionContext.vedtaksperiodeRepository
+                .finn(vedtaksperiodeIderForOverstyringer)
                 .all { it.forkastet }
 
         if (erAlleVedtaksperiodeneForkastet) {
