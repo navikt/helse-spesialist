@@ -62,6 +62,11 @@ class VurderBehovForAvviksvurdering(
         sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
         if (!løsning.harAkseptabeltAvvik) {
             val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
+            val varslerForBehandling = sessionContext.varselRepository.finnVarslerFor(behandling.id)
+            val eksisterendeVarsel = varslerForBehandling.find { it.erVarselOmAvvik() }
+            if (eksisterendeVarsel != null) {
+                sessionContext.varselRepository.slett(eksisterendeVarsel.id)
+            }
             val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, RV_IV_2.name)
             sessionContext.varselRepository.lagre(varsel)
         }
