@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.domain.andreytelser
 
 import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Behandling.Companion.tilSykefraværstilfellePerioder
 import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 
 fun validerGraderteAndreYtelserPeriode(
@@ -77,18 +77,3 @@ private fun harOverlappMedSykefraværstilfelle(
 ) = nyGraderteAndreYtelserPerioder.all {
     it.periode overlapperEnAv behandlinger.tilSykefraværstilfellePerioder().filterNot { it.datoer().isEmpty() }
 }
-
-private fun List<Behandling>.tilSykefraværstilfellePerioder(): List<Periode> =
-    map { Periode(it.fom, it.tom) }
-        .sortedBy { it.fom }
-        .fold(listOf()) { sammenhengendePerioder, nestePeriode ->
-            val (overlappendePerioder, resten) =
-                sammenhengendePerioder.partition {
-                    nestePeriode overlapper Periode(it.fom, it.tom.plusDays(1))
-                }
-            if (overlappendePerioder.isEmpty()) {
-                resten + nestePeriode
-            } else {
-                resten + overlappendePerioder.first().let { it.copy(tom = maxOf(it.tom, nestePeriode.tom)) }
-            }
-        }

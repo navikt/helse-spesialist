@@ -128,6 +128,80 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `finn alle behandlinger for en person`() {
+        // given
+        val vedtaksperiode1 = opprettVedtaksperiode(person, arbeidsgiver)
+        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling1 = opprettBehandling(vedtaksperiode1)
+        val behandling2 = opprettBehandling(vedtaksperiode2)
+
+        // when
+        val funnet = repository.finnAlle(person.id).map { it.id }
+
+        // then
+        assertEquals(2, funnet.size)
+        assertContains(funnet, behandling1.id)
+        assertContains(funnet, behandling2.id)
+    }
+
+    @Test
+    fun `finn alle behandlinger returnerer nyeste behandling først`() {
+        // given
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val førsteBehandling = opprettBehandling(vedtaksperiode)
+        val andreBehandling = opprettBehandling(vedtaksperiode)
+
+        // when
+        val funnet = repository.finnAlle(person.id)
+
+        // then
+        assertEquals(listOf(andreBehandling.id, førsteBehandling.id), funnet.map { it.id })
+    }
+
+    @Test
+    fun `finn alle behandlinger ekskluderer behandlinger som hører til forkastet vedtaksperiode`() {
+        // given
+        val aktivVedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val forkastetVedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver, forkastet = true)
+        val aktivBehandling = opprettBehandling(aktivVedtaksperiode)
+        opprettBehandling(forkastetVedtaksperiode)
+
+        // when
+        val funnet = repository.finnAlle(person.id)
+
+        // then
+        assertEquals(listOf(aktivBehandling.id), funnet.map { it.id })
+    }
+
+    @Test
+    fun `finn alle behandlinger ekskluderer behandlinger som hører til annen person`() {
+        // given
+        val annenPerson = opprettPerson()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val annenVedtaksperiode = opprettVedtaksperiode(annenPerson, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        opprettBehandling(annenVedtaksperiode)
+
+        // when
+        val funnet = repository.finnAlle(person.id)
+
+        // then
+        assertEquals(listOf(behandling.id), funnet.map { it.id })
+    }
+
+    @Test
+    fun `finn alle behandlinger returnerer tom liste når personen ikke har noen behandlinger`() {
+        // given
+        opprettPerson()
+
+        // when
+        val funnet = repository.finnAlle(person.id)
+
+        // then
+        assertEquals(0, funnet.size)
+    }
+
+    @Test
     fun `lagre behandling`() {
         // given
         val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)

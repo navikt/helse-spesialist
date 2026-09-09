@@ -202,5 +202,20 @@ class Behandling private constructor(
 
         // Alle behandlinger som må sees i sammenheng når saksbehandler behandler saken. Dvs. alle behandlinger som overlapper i tid eller ligger før og har samme skjæringstidspunkt som behandlingen som er til godkjenning.
         fun Collection<Behandling>.behandlingspakke(behandling: Behandling): Set<Behandling> = this.filter { it.fom <= behandling.tom && it.skjæringstidspunkt == behandling.skjæringstidspunkt }.toSet() + behandling
+
+        fun List<Behandling>.tilSykefraværstilfellePerioder(): List<Periode> =
+            map { Periode(it.fom, it.tom) }
+                .sortedBy { it.fom }
+                .fold(listOf()) { sammenhengendePerioder, nestePeriode ->
+                    val (overlappendePerioder, resten) =
+                        sammenhengendePerioder.partition {
+                            nestePeriode overlapper Periode(it.fom, it.tom.plusDays(1))
+                        }
+                    if (overlappendePerioder.isEmpty()) {
+                        resten + nestePeriode
+                    } else {
+                        resten + overlappendePerioder.first().let { it.copy(tom = maxOf(it.tom, nestePeriode.tom)) }
+                    }
+                }
     }
 }

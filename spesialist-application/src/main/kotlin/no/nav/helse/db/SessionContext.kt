@@ -44,7 +44,6 @@ interface SessionContext {
     val vergemålDao: VergemålDao
     val dokumentDao: DokumentDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
-    val legacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository
     val saksbehandlerStansRepository: SaksbehandlerStansRepository
     val veilederStansRepository: VeilederStansRepository
 

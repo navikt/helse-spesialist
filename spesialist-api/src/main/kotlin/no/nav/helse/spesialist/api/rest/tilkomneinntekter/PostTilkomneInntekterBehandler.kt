@@ -43,8 +43,11 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             organisasjonsnummer = request.verdier.organisasjonsnummer,
             andreTilkomneInntekter =
                 kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForIdentitetsnummer(person.id),
-            vedtaksperioder =
-                kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(person.id.value),
+            behandlinger =
+                kallKontekst.transaksjon.vedtaksperiodeRepository.finnAlleIderForPerson(person.id).map {
+                    kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(it)
+                        ?: error("Finner ikke vedtaksperiode")
+                },
         )
 
         val tilkommenInntekt =

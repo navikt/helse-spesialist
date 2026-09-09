@@ -34,8 +34,9 @@ class GetInfotrygdperioderForPersonBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiInfotrygdperiode>, ApiGetInfotrygdperioderForPersonErrorCode> {
         val fom =
-            kallKontekst.transaksjon.legacyVedtaksperiodeRepository
-                .førsteKjenteDag(person.id.value)
+            kallKontekst.transaksjon.behandlingRepository
+                .finnAlle(person.id)
+                .minOfOrNull { it.fom }
                 ?.minusYears(3)
                 ?: return RestResponse.OK(emptyList())
 

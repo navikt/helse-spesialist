@@ -33,7 +33,6 @@ class DBSessionContext(
     override val vergemålDao = PgVergemålDao(session)
     override val dokumentDao = PgDokumentDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
-    override val legacyVedtaksperiodeRepository = PgLegacyVedtaksperiodeRepository(legacyBehandlingDao, vedtakDao)
     override val saksbehandlerStansRepository = PgSaksbehandlerStansRepository(session)
     override val veilederStansRepository = PgVeilederStansRepository(session)
 

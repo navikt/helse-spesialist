@@ -3,6 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Behandling.Companion.behandlingspakke
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
@@ -26,6 +27,8 @@ interface BehandlingRepository {
             .behandlingspakke(behandling)
 
     fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling?
+
+    fun finnAlle(identitetsnummer: Identitetsnummer): List<Behandling>
 
     fun lagre(behandling: Behandling)
 

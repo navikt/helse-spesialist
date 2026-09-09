@@ -46,13 +46,6 @@ class InMemoryRepositoriesAndDaos {
     private val saksbehandlerDao = DelegatingSaksbehandlerDao(saksbehandlerRepository)
     private val sykefraværstilfelleDao = DelegatingBegrunnelseForSkjønnsfastsettelseRepository(overstyringRepository)
 
-    private val legacyVedtaksperiodeRepository =
-        DelegatingLegacyVedtaksperiodeRepository(
-            vedtaksperiodeRepository,
-            behandlingRepository,
-            varselRepository,
-        )
-
     private val arbeidsforholdDao = InMemoryArbeidsforholdDao()
     private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
     private val automatiseringDao = InMemoryAutomatiseringDao()
@@ -129,7 +122,6 @@ class InMemoryRepositoriesAndDaos {
             dialogRepository = dialogRepository,
             dokumentDao = dokumentDao,
             legacyBehandlingDao = legacyBehandlingDao,
-            legacyVedtaksperiodeRepository = legacyVedtaksperiodeRepository,
             meldingDao = meldingDao,
             metrikkDao = metrikkDao,
             notatDao = notatDao,

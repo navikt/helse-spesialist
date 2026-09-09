@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -73,6 +74,20 @@ class PgBehandlingRepository(
     """,
             "vedtaksperiode_id" to vedtaksperiodeId.value,
         ).singleOrNull(::tilBehandling)
+
+    override fun finnAlle(identitetsnummer: Identitetsnummer): List<Behandling> =
+        asSQL(
+            """
+        SELECT unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, b.fom, b.tom, skjæringstidspunkt, opprettet_tidspunkt, tilstand, yrkesaktivitetstype
+        FROM behandling b
+            INNER JOIN vedtaksperiode v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            INNER JOIN person p on p.id = v.person_ref
+        WHERE p.fødselsnummer = :fodselsnummer
+          AND v.forkastet = false
+        ORDER BY b.id DESC
+    """,
+            "fodselsnummer" to identitetsnummer.value,
+        ).list(::tilBehandling)
 
     override fun lagre(behandling: Behandling) {
         asSQL(
