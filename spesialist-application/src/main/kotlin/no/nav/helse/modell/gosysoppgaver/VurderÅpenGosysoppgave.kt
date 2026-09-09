@@ -40,7 +40,7 @@ internal class VurderÅpenGosysoppgave(
         commandContext: CommandContext,
         sessionContext: SessionContext,
     ): Boolean {
-        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling med id $spleisBehandlingId")
+        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
 
         val løsning = commandContext.get<ÅpneGosysOppgaverløsning>()
         if (løsning == null) {

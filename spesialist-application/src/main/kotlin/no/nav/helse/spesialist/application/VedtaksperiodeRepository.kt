@@ -11,7 +11,7 @@ interface VedtaksperiodeRepository {
 
     fun finnAlleIderForPerson(identitetsnummer: Identitetsnummer): Set<VedtaksperiodeId>
 
-    fun finnAlleForPerson(identitetsnummer: Identitetsnummer): List<Vedtaksperiode> = finnAlleIderForPerson(identitetsnummer).map { finn(it) ?: error("Finner ikke vedtaksperiode med id ${it.value}") }
+    fun finnAlleForPerson(identitetsnummer: Identitetsnummer): List<Vedtaksperiode> = finnAlleIderForPerson(identitetsnummer).map { finn(it) ?: error("Fant ikke vedtaksperiode") }
 
-    fun finn(vedtaksperiodeIder: List<VedtaksperiodeId>): List<Vedtaksperiode> = vedtaksperiodeIder.map { finn(it) ?: error("Finner ikke vedtaksperiode med id ${it.value}") }
+    fun finn(vedtaksperiodeIder: List<VedtaksperiodeId>): List<Vedtaksperiode> = vedtaksperiodeIder.map { finn(it) ?: error("Fant ikke vedtaksperiode") }
 }

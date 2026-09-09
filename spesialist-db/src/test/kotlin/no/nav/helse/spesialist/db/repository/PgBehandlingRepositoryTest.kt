@@ -29,7 +29,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val behandling = opprettBehandling(vedtaksperiode, tags = tags, fom = fom, tom = tom)
 
         // when
-        val funnet = repository.finn(behandling.id)
+        val funnet = repository.finnOrNull(behandling.id)
 
         // then
         assertNotNull(funnet)
@@ -51,7 +51,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val behandling = opprettBehandling(vedtaksperiode, tags = tags, fom = fom, tom = tom)
 
         // when
-        val funnetMedBehandlingUnikId = repository.finn(behandling.id)
+        val funnetMedBehandlingUnikId = repository.finnOrNull(behandling.id)
 
         // then
         assertNotNull(funnetMedBehandlingUnikId)
@@ -137,7 +137,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(behandling)
 
         // then
-        val funnet = repository.finn(behandling.id)
+        val funnet = repository.finnOrNull(behandling.id)
         assertNotNull(funnet)
         assertEquals(behandling.id, funnet.id)
         assertEquals(behandling.spleisBehandlingId, funnet.spleisBehandlingId)
@@ -186,7 +186,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(oppdatertBehandling)
 
         // then
-        val funnet = repository.finn(orginalBehandling.id)
+        val funnet = repository.finnOrNull(orginalBehandling.id)
         assertNotNull(funnet)
         assertEquals(orginalBehandling.id, funnet.id)
         assertEquals(orginalBehandling.spleisBehandlingId, funnet.spleisBehandlingId)

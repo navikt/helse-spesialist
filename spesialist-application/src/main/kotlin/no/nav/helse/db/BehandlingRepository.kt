@@ -7,9 +7,11 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 interface BehandlingRepository {
-    fun finn(id: SpleisBehandlingId): Behandling?
+    fun finnOrNull(id: SpleisBehandlingId): Behandling?
 
-    fun finn(id: BehandlingUnikId): Behandling?
+    fun finn(id: SpleisBehandlingId): Behandling = finnOrNull(id) ?: error("Fant ikke behandling med spleisBehandlingId ${id.value}")
+
+    fun finnOrNull(id: BehandlingUnikId): Behandling?
 
     fun finnAndreBehandlingerISykefraværstilfelle(
         behandling: Behandling,

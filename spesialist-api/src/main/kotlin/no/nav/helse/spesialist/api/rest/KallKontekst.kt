@@ -63,7 +63,7 @@ class KallKontekst(
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.SPLEIS_BEHANDLING_ID to spleisBehandlingId.value.toString()) {
-            val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
+            val behandling = transaksjon.behandlingRepository.finnOrNull(spleisBehandlingId)
 
             if (behandling == null) {
                 loggWarn("Behandlingen ble ikke funnet", "spleisBehandlingId" to spleisBehandlingId)
@@ -86,7 +86,7 @@ class KallKontekst(
         block: (Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.BEHANDLING_UNIK_ID to behandlingUnikId.value.toString()) {
-            val behandling = transaksjon.behandlingRepository.finn(behandlingUnikId)
+            val behandling = transaksjon.behandlingRepository.finnOrNull(behandlingUnikId)
 
             if (behandling == null) {
                 loggWarn("Behandlingen ble ikke funnet", "behandlingUnikId" to behandlingUnikId)

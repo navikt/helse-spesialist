@@ -64,7 +64,7 @@ class AvsluttetMedVedtakRiver(
             } else {
                 vedtakFattetMeldingBuilder.byggVedtakFattetMeldingForArbeidstaker(begrunnelseForSkjønnsfastsattSykepengegrunnlag)
             }
-        val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId) ?: error("Finner ikke behandling for spleisBehandlingId $spleisBehandlingId")
+        val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
         behandling.vedtakFattet()
         transaksjon.behandlingRepository.lagre(behandling)
 

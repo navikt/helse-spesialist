@@ -47,7 +47,6 @@ internal class VurderVurderingsmomenter(
     ): Boolean {
         val behandling =
             sessionContext.behandlingRepository.finn(spleisBehandlingId)
-                ?: error("Fant ikke behandling med id $spleisBehandlingId")
 
         if (risikovurderingAlleredeGjort(sessionContext, behandling.vedtaksperiodeId)) return true
 

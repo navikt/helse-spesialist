@@ -22,7 +22,7 @@ internal class VurderEnhetUtland(
     ): Boolean {
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(identitetsnummer.value))
         if (tilhørerEnhetUtland) {
-            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling med id $spleisBehandlingId")
+            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
             logg.info("Håndterer varsel om utland på vedtaksperiode ${behandling.vedtaksperiodeId.value}")
             val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, Varselkode.SB_EX_5.name)
             sessionContext.varselRepository.lagre(varsel)
