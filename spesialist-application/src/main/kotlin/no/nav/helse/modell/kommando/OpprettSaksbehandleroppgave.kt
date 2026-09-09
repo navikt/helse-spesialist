@@ -37,7 +37,6 @@ internal class OpprettSaksbehandleroppgave(
         val fødselsnummer = behovData.fødselsnummer
         val behandling =
             sessionContext.behandlingRepository.finn(spleisBehandlingId)
-                ?: error("Fant ikke behandling med id $spleisBehandlingId")
         val behandlingspakke = sessionContext.behandlingRepository.finnBehandlingspakke(behandling, fødselsnummer)
         val varslerForBehandlingspakke = sessionContext.varselRepository.finnAktiveVarslerFor(behandlingspakke)
 

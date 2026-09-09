@@ -19,7 +19,7 @@ internal class VurderBehovForTotrinnskontroll(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling med id $spleisBehandlingId")
+        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
         val behandlingspakke = sessionContext.behandlingRepository.finnBehandlingspakke(behandling, fødselsnummer)
         val varslerForBehandlingspakke = sessionContext.varselRepository.finnAktiveVarslerFor(behandlingspakke)
         val varslerForBehandling = sessionContext.varselRepository.finnAktiveVarslerFor(listOf(behandling))

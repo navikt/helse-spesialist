@@ -23,7 +23,7 @@ class DelegatingOppgaveDao(
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID =
         behandlingRepository
-            .finn(oppgaveRepository.finn(oppgaveId)!!.behandlingId)!!
+            .finnOrNull(oppgaveRepository.finn(oppgaveId)!!.behandlingId)!!
             .spleisBehandlingId!!
             .value
 

@@ -38,7 +38,7 @@ class VedtaksperiodeReberegnet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: return
+        val behandling = sessionContext.behandlingRepository.finnOrNull(spleisBehandlingId) ?: return
 
         kommandostarter {
             VedtaksperiodeReberegnetCommand(

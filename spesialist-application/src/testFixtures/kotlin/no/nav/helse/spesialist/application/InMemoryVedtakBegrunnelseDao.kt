@@ -56,7 +56,7 @@ class InMemoryVedtakBegrunnelseDao(
             .filter { lagret ->
                 val oppgave = oppgaveRepository.finn(OppgaveId(lagret.oppgaveId)) ?: return@filter false
                 if (oppgave.vedtaksperiodeId.value != vedtaksperiodeId) return@filter false
-                val behandling = behandlingRepository.finn(oppgave.behandlingId) ?: return@filter false
+                val behandling = behandlingRepository.finnOrNull(oppgave.behandlingId) ?: return@filter false
                 behandling.utbetalingId?.value == utbetalingId
             }.sortedByDescending { it.opprettet }
             .map { lagret ->

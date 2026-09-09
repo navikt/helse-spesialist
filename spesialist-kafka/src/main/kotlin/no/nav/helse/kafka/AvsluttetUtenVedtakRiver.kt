@@ -35,7 +35,7 @@ class AvsluttetUtenVedtakRiver : TransaksjonellRiver() {
             meldingtype = MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK,
             vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         )
-        val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId) ?: error("Fant ikke behandling")
+        val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
         val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId) ?: error("Fant ikke vedtaksperiode")
         if (vedtaksperiode.forkastet) return
 

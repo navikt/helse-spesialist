@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 class InMemoryBehandlingRepository :
     AbstractInMemoryRepository<BehandlingUnikId, Behandling>(),
     BehandlingRepository {
-    override fun finn(id: SpleisBehandlingId): Behandling? = alle().firstOrNull { it.spleisBehandlingId == id }
+    override fun finnOrNull(id: SpleisBehandlingId): Behandling? = alle().firstOrNull { it.spleisBehandlingId == id }
 
     override fun finnAndreBehandlingerISykefraværstilfelle(
         behandling: Behandling,

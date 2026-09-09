@@ -34,7 +34,7 @@ internal class BehandlingOpprettetRiverTest {
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
             assertNotNull(it.vedtaksperiodeRepository.finn(vedtaksperiodeId))
-            assertNotNull(it.behandlingRepository.finn(spleisBehandlingId))
+            assertNotNull(it.behandlingRepository.finnOrNull(spleisBehandlingId))
         }
     }
 
@@ -54,7 +54,7 @@ internal class BehandlingOpprettetRiverTest {
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
             assertNull(it.vedtaksperiodeRepository.finn(vedtaksperiodeId))
-            assertNull(it.behandlingRepository.finn(spleisBehandlingId))
+            assertNull(it.behandlingRepository.finnOrNull(spleisBehandlingId))
         }
     }
 
@@ -74,7 +74,7 @@ internal class BehandlingOpprettetRiverTest {
         )
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
             assertNull(it.vedtaksperiodeRepository.finn(vedtaksperiodeId))
-            assertNull(it.behandlingRepository.finn(spleisBehandlingId))
+            assertNull(it.behandlingRepository.finnOrNull(spleisBehandlingId))
         }
     }
 }

@@ -36,7 +36,7 @@ class VedtaksperiodeNyUtbetaling(
     ) {
         val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiodeId)
         val utbetalingId = UtbetalingId(utbetalingId)
-        val gjeldendeBehandling = sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiodeId) ?: error("Finner ikke behandling for vedtaksperiodeId=$vedtaksperiodeId")
+        val gjeldendeBehandling = sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiodeId) ?: error("Fant ikke behandling")
         gjeldendeBehandling.nyUtbetaling(utbetalingId)
         sessionContext.behandlingRepository.lagre(gjeldendeBehandling)
 

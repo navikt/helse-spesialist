@@ -183,7 +183,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        val nyBehandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
+        val nyBehandling = sessionContext.behandlingRepository.finnOrNull(spleisBehandlingId)
         assertNotNull(nyBehandling)
         val varslerPåGammelBehandling = sessionContext.varselRepository.finnVarslerFor(eksisterendeBehandling.id)
         val varslerPåNyBehandling = sessionContext.varselRepository.finnVarslerFor(nyBehandling.id)

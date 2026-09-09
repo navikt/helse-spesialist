@@ -61,7 +61,7 @@ class VurderBehovForAvviksvurdering(
             )
         sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
         if (!løsning.harAkseptabeltAvvik) {
-            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId) ?: error("Finner ikke behandling med id $spleisBehandlingId")
+            val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
             val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, RV_IV_2.name)
             sessionContext.varselRepository.lagre(varsel)
         }

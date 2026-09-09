@@ -16,7 +16,7 @@ internal class ForberedBehandlingAvGodkjenningsbehov(
         outbox: Outbox,
     ): Boolean {
         oppdaterDatoer(sessionContext)
-        val behandlingTilGodkjenning = sessionContext.behandlingRepository.finn(SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)) ?: error("Fant ikke behandling med id ${godkjenningsbehovData.spleisBehandlingId}")
+        val behandlingTilGodkjenning = sessionContext.behandlingRepository.finn(SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId))
 
         flyttKanskjeAvviksvarsel(sessionContext, behandlingTilGodkjenning)
         behandlingTilGodkjenning.oppdaterTags(godkjenningsbehovData.tags)
@@ -45,7 +45,7 @@ internal class ForberedBehandlingAvGodkjenningsbehov(
     private fun oppdaterDatoer(sessionContext: SessionContext) {
         godkjenningsbehovData.spleisVedtaksperioder
             .mapNotNull { spleisVedtaksperiode ->
-                sessionContext.behandlingRepository.finn(SpleisBehandlingId(spleisVedtaksperiode.spleisBehandlingId))?.let {
+                sessionContext.behandlingRepository.finnOrNull(SpleisBehandlingId(spleisVedtaksperiode.spleisBehandlingId))?.let {
                     spleisVedtaksperiode to it
                 }
             }.onEach { (spleisVedtaksperiode, behandling) ->

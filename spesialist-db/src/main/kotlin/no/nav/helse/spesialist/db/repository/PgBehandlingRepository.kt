@@ -18,7 +18,7 @@ class PgBehandlingRepository(
     session: Session,
 ) : QueryRunner by MedSession(session),
     BehandlingRepository {
-    override fun finn(id: SpleisBehandlingId): Behandling? =
+    override fun finnOrNull(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
             SELECT b.unik_id, b.vedtaksperiode_id, b.utbetaling_id, b.spleis_behandling_id, b.tags, b.fom, b.tom, b.skjæringstidspunkt, b.tilstand, b.yrkesaktivitetstype
@@ -29,7 +29,7 @@ class PgBehandlingRepository(
             "spleis_behandling_id" to id.value,
         ).singleOrNull(::tilBehandling)
 
-    override fun finn(id: BehandlingUnikId): Behandling? =
+    override fun finnOrNull(id: BehandlingUnikId): Behandling? =
         asSQL(
             """
             SELECT unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, b.fom, b.tom, skjæringstidspunkt, tilstand, yrkesaktivitetstype

@@ -17,7 +17,6 @@ internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
     ): Boolean {
         val behandling =
             sessionContext.behandlingRepository.finn(oppgave.behandlingId)
-                ?: error("Fant ikke behandling")
         val søknadOverlapperMedBehandlingTilGodkjenning = søknadsperioder.any { it.overlapper(Periode(behandling.fom, behandling.tom)) }
         if (!søknadOverlapperMedBehandlingTilGodkjenning) return ferdigstill(commandContext)
         return true

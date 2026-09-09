@@ -44,7 +44,7 @@ class VedtakFattetMeldingBuilder(
     }
 
     private val person = sessionContext.personRepository.finn(identitetsnummer) ?: error("Fant ikke person")
-    private val behandling = sessionContext.behandlingRepository.finn(behandlingId) ?: error("Fant ikke behandling")
+    private val behandling = sessionContext.behandlingRepository.finn(behandlingId)
     private val vedtak = sessionContext.vedtakRepository.finn(behandlingId) ?: error("Fant ikke vedtaksinformasjon")
     private val godkjenningsbehov =
         sessionContext.meldingDao.finnSisteGodkjenningsbehov(behandlingId.value)

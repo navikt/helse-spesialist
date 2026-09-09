@@ -65,7 +65,7 @@ class BehandlingOpprettetRiver : TransaksjonellRiver() {
             vedtaksperiodeId = vedtaksperiodeId.value,
         )
 
-        if (transaksjon.behandlingRepository.finn(spleisBehandlingId) != null) return
+        if (transaksjon.behandlingRepository.finnOrNull(spleisBehandlingId) != null) return
 
         val eksisterendeVedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
 

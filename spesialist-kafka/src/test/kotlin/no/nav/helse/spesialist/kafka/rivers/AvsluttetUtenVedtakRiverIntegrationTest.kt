@@ -45,7 +45,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
         assertEquals(0, testRapid.publiserteMeldingerUtenGenererteFelter().size)
         assertEquals(
             Behandling.Tilstand.AvsluttetUtenVedtak,
-            sessionContext.behandlingRepository.finn(behandling.id)?.tilstand,
+            sessionContext.behandlingRepository.finnOrNull(behandling.id)?.tilstand,
         )
     }
 

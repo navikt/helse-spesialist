@@ -33,9 +33,7 @@ internal class VurderAutomatiskInnvilgelse(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val gjeldendeBehandling =
-            sessionContext.behandlingRepository.finn(spleisBehandlingId)
-                ?: error("Fant ikke behandling med id $spleisBehandlingId")
+        val gjeldendeBehandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
         val resultat =
             automatisering.utfør(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
