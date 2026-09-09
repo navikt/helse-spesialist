@@ -250,33 +250,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Finner varsler for en gitt behandling`() {
-        // Given:
-        val utbetalingId = UUID.randomUUID()
-        val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-
-        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
-        val varsel1 =
-            opprettVarsel(
-                varseldefinisjon = varseldefinisjoner[0],
-                behandlingId = behandlingId,
-                vedtaksperiodeId = vedtaksperiode.id,
-            )
-        val varsel2 =
-            opprettVarsel(
-                varseldefinisjon = varseldefinisjoner[1],
-                behandlingId = behandlingId,
-                vedtaksperiodeId = vedtaksperiode.id,
-            )
-
-        // When:
-        val varsler = apiVarselDao.finnVarslerFor(behandlingId = behandlingId.unikId)
-
-        // Then:
-        assertEquals(setOf(varsel1, varsel2), varsler)
-    }
-
-    @Test
     fun `Godkjenner vurderte varsler for en liste vedtaksperioder`() {
         // Given:
         val utbetalingId = UUID.randomUUID()

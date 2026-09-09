@@ -23,7 +23,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     private val saksbehandler = lagSaksbehandler().also { sessionContext.saksbehandlerRepository.lagre(it) }
     private val varseldefinisjon =
         lagVarseldefinisjon(kode = "RV_IV_1").also {
-            opprettVarseldefinisjon(it.tittel, it.kode, it.id.value)
+            sessionContext.varseldefinisjonRepository.lagre(it)
         }
 
     private val repository = sessionContext.varselRepository
@@ -224,6 +224,93 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         // then
         val funnet = repository.finnOrNull(varsel.id)
         assertNull(funnet)
+    }
+
+    @Test
+    fun `avvikle setter status til AVVIKLET for aktive varsler med matchende kode`() {
+        // given
+        val varseldefinisjon = lagVarseldefinisjon(kode = "XX_YY_1")
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+
+        val nyBehandling = opprettBehandling(vedtaksperiode)
+        val varsel1 = opprettVarsel(behandling, kode = varseldefinisjon.kode)
+        val varsel2 = opprettVarsel(nyBehandling, kode = varseldefinisjon.kode)
+
+        // when
+        repository.avvikle(varseldefinisjon)
+
+        // then
+        val funnet1 = repository.finnOrNull(varsel1.id)
+        val funnet2 = repository.finnOrNull(varsel2.id)
+        assertNotNull(funnet1)
+        assertNotNull(funnet2)
+        assertEquals(Varsel.Status.AVVIKLET, funnet1.status)
+        assertEquals(Varsel.Status.AVVIKLET, funnet2.status)
+    }
+
+    @Test
+    fun `avvikle setter definisjonsreferanse til den avviklede varseldefinisjonen`() {
+        // given
+        val varseldefinisjon = lagVarseldefinisjon(kode = "XX_YY_1")
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+
+        val varsel = opprettVarsel(behandling, kode = varseldefinisjon.kode)
+        varsel.vurder(saksbehandler.id, varseldefinisjon.id)
+        sessionContext.varselRepository.lagre(varsel)
+
+        // when
+        repository.avvikle(varseldefinisjon)
+
+        // then
+        val funnetVarsel = sessionContext.varselRepository.finnOrNull(varsel.id)
+        assertNotNull(funnetVarsel)
+        assertEquals(varseldefinisjon.id, funnetVarsel.vurdering?.vurdertDefinisjonId)
+    }
+
+    @Test
+    fun `avvikle påvirker ikke varsler med annen kode`() {
+        // given
+        val varseldefinisjon = lagVarseldefinisjon(kode = "XX_YY_1")
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+
+        val annenVarseldefinisjon = lagVarseldefinisjon(kode = "RV_IV_2")
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+
+        val varselMedMatchendeKode = opprettVarsel(behandling, kode = varseldefinisjon.kode)
+        val varselMedAnnenKode = opprettVarsel(behandling, kode = annenVarseldefinisjon.kode)
+
+        // when
+        repository.avvikle(varseldefinisjon)
+
+        // then
+        assertEquals(Varsel.Status.AVVIKLET, repository.finnOrNull(varselMedMatchendeKode.id)?.status)
+        assertEquals(Varsel.Status.AKTIV, repository.finnOrNull(varselMedAnnenKode.id)?.status)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `avvikle påvirker ikke varsler med matchende kode som ikke har status AKTIV`(status: Varsel.Status) {
+        // given
+        val varseldefinisjon = lagVarseldefinisjon(kode = "XX_YY_1")
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+
+        val varsel =
+            Varsel.fraLagring(
+                id = lagVarselId(),
+                spleisBehandlingId = behandling.spleisBehandlingId,
+                behandlingUnikId = behandling.id,
+                status = status,
+                kode = varseldefinisjon.kode,
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
+            )
+        sessionContext.varselRepository.lagre(varsel)
+
+        // when
+        repository.avvikle(varseldefinisjon)
+
+        // then
+        assertEquals(status, repository.finnOrNull(varsel.id)?.status)
     }
 
     @Test

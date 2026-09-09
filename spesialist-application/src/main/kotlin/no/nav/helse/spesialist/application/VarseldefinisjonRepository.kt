@@ -7,4 +7,6 @@ interface VarseldefinisjonRepository {
     fun finnGjeldendeForOrNull(kode: String): Varseldefinisjon?
 
     fun finnOrNull(id: VarseldefinisjonId): Varseldefinisjon?
+
+    fun lagre(varseldefinisjon: Varseldefinisjon)
 }

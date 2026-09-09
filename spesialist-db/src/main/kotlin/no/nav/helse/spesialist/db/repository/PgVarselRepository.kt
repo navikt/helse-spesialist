@@ -10,8 +10,10 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.Varselvurdering
+import java.time.LocalDateTime
 
 class PgVarselRepository private constructor(
     private val dbQuery: DbQuery,
@@ -181,6 +183,25 @@ class PgVarselRepository private constructor(
                  DELETE FROM selve_varsel WHERE unik_id = :id
             """,
             "id" to varselId.value,
+        )
+    }
+
+    override fun avvikle(varseldefinisjon: Varseldefinisjon) {
+        dbQuery.update(
+            """
+            UPDATE selve_varsel 
+            SET status = :avvikletStatus,
+                status_endret_tidspunkt = :endretTidspunkt,
+                status_endret_ident = :ident, 
+                definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjonId) 
+            WHERE kode = :varselkode AND status = :aktivStatus;
+            """.trimIndent(),
+            "avvikletStatus" to Varsel.Status.AVVIKLET.name,
+            "aktivStatus" to Varsel.Status.AKTIV.name,
+            "endretTidspunkt" to LocalDateTime.now(),
+            "ident" to "avviklet_fra_speaker",
+            "definisjonId" to varseldefinisjon.id.value,
+            "varselkode" to varseldefinisjon.kode,
         )
     }
 }

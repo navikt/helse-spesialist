@@ -9,7 +9,6 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
-import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.db.DBDaos
@@ -73,11 +72,6 @@ class TestMediator(
                 meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
                 kommandofabrikk = kommandofabrikk,
                 dokumentDao = daos.dokumentDao,
-                legacyVarselRepository =
-                    LegacyVarselRepository(
-                        legacyVarselDao = daos.legacyVarselDao,
-                        definisjonDao = daos.definisjonDao,
-                    ),
                 poisonPillDao = daos.poisonPillDao,
                 ignorerMeldingerForUkjentePersoner = false,
                 versjonAvKode = "1.0.0",

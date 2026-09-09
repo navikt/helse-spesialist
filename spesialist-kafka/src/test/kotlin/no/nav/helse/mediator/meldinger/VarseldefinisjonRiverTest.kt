@@ -1,53 +1,92 @@
 package no.nav.helse.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.kafka.VarseldefinisjonRiver
-import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.spesialist.kafka.medRivers
+import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandlingUnikId
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjonId
+import no.nav.helse.spesialist.kafka.medTransaksjonelleRivers
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.time.LocalDateTime
+import java.util.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 internal class VarseldefinisjonRiverTest {
-    private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().medRivers(VarseldefinisjonRiver(mediator))
-
-    @BeforeEach
-    fun beforeEach() {
-        testRapid.reset()
-    }
+    private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
+    private val testRapid = TestRapid().medTransaksjonelleRivers(inMemoryRepositoriesAndDaos, VarseldefinisjonRiver())
 
     @Test
     fun `leser definisjon fra kafka`() {
-        val id = UUID.fromString("ee7f8701-e70b-4752-a714-cfa76dba2f3a")
+        val id = VarseldefinisjonId(UUID.randomUUID())
         testRapid.sendTestMessage(varseldefinisjon(id))
-        verify(exactly = 1) { mediator.håndter(any<Varseldefinisjon>()) }
+        val definisjon = inMemoryRepositoriesAndDaos.sessionContext.varseldefinisjonRepository.finnOrNull(id)
+        assertNotNull(definisjon)
+        assertEquals(id, definisjon.id)
+        assertEquals("XX_YY_1", definisjon.kode)
+        assertEquals("En tittel", definisjon.tittel)
+        assertEquals("En forklaring", definisjon.forklaring)
+        assertEquals("En handling", definisjon.handling)
+        assertEquals(false, definisjon.avviklet)
+        assertEquals(LocalDateTime.of(2023, 3, 16, 0, 0), definisjon.opprettet)
     }
 
     @Test
     fun `leser definisjon fra kafka uten forklaring og handling`() {
-        val id = UUID.fromString("ee7f8701-e70b-4752-a714-cfa76dba2f3a")
+        val id = VarseldefinisjonId(UUID.randomUUID())
         testRapid.sendTestMessage(varseldefinisjonUtenForklaringOgHandling(id))
-        verify(exactly = 1) { mediator.håndter(any<Varseldefinisjon>()) }
+        val definisjon = inMemoryRepositoriesAndDaos.sessionContext.varseldefinisjonRepository.finnOrNull(id)
+        assertNotNull(definisjon)
+        assertEquals(id, definisjon.id)
+        assertEquals("XX_YY_1", definisjon.kode)
+        assertEquals("En tittel", definisjon.tittel)
+        assertNull(definisjon.forklaring)
+        assertNull(definisjon.handling)
+        assertEquals(false, definisjon.avviklet)
+        assertEquals(LocalDateTime.of(2023, 3, 16, 0, 0), definisjon.opprettet)
+    }
+
+    @Test
+    fun `alle varsler som tilhører koden blir avviklet hvis koden er avviklet`() {
+        // given
+        val varsel =
+            lagVarsel(
+                kode = "XX_YY_1",
+                behandlingUnikId = lagBehandlingUnikId(),
+                spleisBehandlingId = lagSpleisBehandlingId(),
+            )
+        inMemoryRepositoriesAndDaos.sessionContext.varselRepository.lagre(varsel)
+
+        // when
+        testRapid.sendTestMessage(varseldefinisjon(avviklet = true))
+
+        // then
+        val avvikletVarsel = inMemoryRepositoriesAndDaos.sessionContext.varselRepository.finnOrNull(varsel.id)
+        assertNotNull(avvikletVarsel)
+        assertEquals(Varsel.Status.AVVIKLET, avvikletVarsel.status)
     }
 
     @Language("JSON")
-    private fun varseldefinisjon(id: UUID) =
-        """
+    private fun varseldefinisjon(
+        id: VarseldefinisjonId = lagVarseldefinisjonId(),
+        avviklet: Boolean = false,
+    ) = """
     {
       "@event_name": "varselkode_ny_definisjon",
       "varselkode": "XX_YY_1",
       "gjeldende_definisjon": {
-        "id": "$id",
+        "id": "${id.value}",
         "kode": "XX_YY_1",
         "tittel": "En tittel",
         "forklaring": "En forklaring",
         "handling": "En handling",
-        "avviklet": false,
+        "avviklet": $avviklet,
         "opprettet": "2023-03-16T00:00:00.000000"
       },
       "@id": "0993678d-dded-4edb-b032-02f668787206",
@@ -63,13 +102,13 @@ internal class VarseldefinisjonRiverTest {
     """
 
     @Language("JSON")
-    private fun varseldefinisjonUtenForklaringOgHandling(id: UUID) =
+    private fun varseldefinisjonUtenForklaringOgHandling(id: VarseldefinisjonId) =
         """
     {
       "@event_name": "varselkode_ny_definisjon",
       "varselkode": "XX_YY_1",
       "gjeldende_definisjon": {
-        "id": "$id",
+        "id": "${id.value}",
         "kode": "XX_YY_1",
         "tittel": "En tittel",
         "forklaring": null,

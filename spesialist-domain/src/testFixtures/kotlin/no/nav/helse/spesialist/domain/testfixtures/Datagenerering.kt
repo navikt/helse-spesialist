@@ -286,6 +286,8 @@ fun lagVarseldefinisjon(
     tittel: String = "Dette er en tittel",
     forklaring: String? = "Dette er en forklaring",
     handling: String? = "Dette er en handling",
+    avviklet: Boolean = false,
+    opprettet: LocalDateTime = LocalDateTime.now(),
 ): Varseldefinisjon =
     Varseldefinisjon.fraLagring(
         id = VarseldefinisjonId(id),
@@ -293,6 +295,8 @@ fun lagVarseldefinisjon(
         tittel = tittel,
         forklaring = forklaring,
         handling = handling,
+        avviklet = avviklet,
+        opprettet = opprettet,
     )
 
 fun lagVedtakBegrunnelse(

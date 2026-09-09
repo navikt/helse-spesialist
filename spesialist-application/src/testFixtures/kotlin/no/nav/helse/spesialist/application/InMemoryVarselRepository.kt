@@ -4,6 +4,7 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.Varseldefinisjon
 
 class InMemoryVarselRepository :
     AbstractInMemoryRepository<VarselId, Varsel>(),
@@ -28,4 +29,20 @@ class InMemoryVarselRepository :
             opprettetTidspunkt = original.opprettetTidspunkt,
             vurdering = original.vurdering,
         )
+
+    override fun avvikle(varseldefinisjon: Varseldefinisjon) {
+        alle().filter { it.kode == varseldefinisjon.kode }.forEach {
+            lagre(
+                Varsel.fraLagring(
+                    id = it.id,
+                    spleisBehandlingId = it.spleisBehandlingId,
+                    behandlingUnikId = it.behandlingUnikId,
+                    status = Varsel.Status.AVVIKLET,
+                    kode = it.kode,
+                    opprettetTidspunkt = it.opprettetTidspunkt,
+                    vurdering = it.vurdering,
+                ),
+            )
+        }
+    }
 }

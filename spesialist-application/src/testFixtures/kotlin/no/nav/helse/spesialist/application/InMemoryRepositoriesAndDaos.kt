@@ -50,9 +50,7 @@ class InMemoryRepositoriesAndDaos {
     private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
     private val automatiseringDao = InMemoryAutomatiseringDao()
     private val behandlingsstatistikkDao = InMemoryBehandlingsstatistikkDao()
-    private val definisjonDao = UnimplementedDefinisjonDao()
     private val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
-    private val legacyVarselDao = UnimplementedLegacyVarselDao()
     private val metrikkDao = UnimplementedMetrikkDao()
     private val overstyringApiDao = UnimplementedOverstyringApiDao()
     private val periodehistorikkDao = InMemoryPeriodehistorikkDao()
@@ -77,11 +75,9 @@ class InMemoryRepositoriesAndDaos {
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             behandlingsstatistikkDao = behandlingsstatistikkDao,
             commandContextDao = commandContextDao,
-            definisjonDao = definisjonDao,
             dialogDao = dialogDao,
             dokumentDao = dokumentDao,
             legacyBehandlingDao = legacyBehandlingDao,
-            legacyVarselDao = legacyVarselDao,
             meldingDao = meldingDao,
             meldingDuplikatkontrollDao = meldingDuplikatkontrollDao,
             notatDao = notatDao,

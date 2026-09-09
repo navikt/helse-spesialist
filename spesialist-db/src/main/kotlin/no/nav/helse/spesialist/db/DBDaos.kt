@@ -4,11 +4,9 @@ import no.nav.helse.db.Daos
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
-import no.nav.helse.spesialist.db.dao.PgDefinisjonDao
 import no.nav.helse.spesialist.db.dao.PgDialogDao
 import no.nav.helse.spesialist.db.dao.PgDokumentDao
 import no.nav.helse.spesialist.db.dao.PgLegacyBehandlingDao
-import no.nav.helse.spesialist.db.dao.PgLegacyVarselDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
@@ -41,7 +39,6 @@ class DBDaos(
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)
-    override val definisjonDao = PgDefinisjonDao(dataSource)
     override val dialogDao = PgDialogDao(dataSource)
     override val dokumentDao = PgDokumentDao(dataSource)
     override val legacyBehandlingDao = PgLegacyBehandlingDao(dataSource)
@@ -56,7 +53,6 @@ class DBDaos(
     override val reservasjonDao = PgReservasjonDao(dataSource)
     override val saksbehandlerDao = PgSaksbehandlerDao(dataSource)
     override val tildelingDao = PgTildelingDao(dataSource)
-    override val legacyVarselDao = PgLegacyVarselDao(dataSource)
     override val vedtakDao = PgVedtakDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
 

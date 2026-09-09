@@ -15,8 +15,6 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.varsel.LegacyVarselRepository
-import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.MdcKey
 import no.nav.helse.spesialist.application.logg.loggError
@@ -37,7 +35,6 @@ class MeldingMediator(
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
-    private val legacyVarselRepository: LegacyVarselRepository,
     private val poisonPillDao: PoisonPillDao,
     private val ignorerMeldingerForUkjentePersoner: Boolean,
     private val versjonAvKode: String,
@@ -127,14 +124,6 @@ class MeldingMediator(
         ) {
             påminnelse(kontekstbasertPubliserer, hendelseId, contextId)?.fortsett(this)
                 ?: loggInfo("mottok påminnelse som ikke kan brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
-        }
-    }
-
-    fun håndter(varseldefinisjon: Varseldefinisjon) {
-        val varseldefinisjonDto = varseldefinisjon.toDto()
-        legacyVarselRepository.lagreDefinisjon(varseldefinisjonDto)
-        if (varseldefinisjonDto.avviklet) {
-            legacyVarselRepository.avvikleVarsel(varseldefinisjonDto)
         }
     }
 

@@ -16,7 +16,6 @@ interface Daos {
     val annulleringRepository: AnnulleringRepository
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
     val commandContextDao: CommandContextDao
-    val definisjonDao: DefinisjonDao
     val dialogDao: DialogDao
     val dokumentDao: DokumentDao
     val legacyBehandlingDao: LegacyBehandlingDao
@@ -31,7 +30,6 @@ interface Daos {
     val reservasjonDao: ReservasjonDao
     val saksbehandlerDao: SaksbehandlerDao
     val tildelingDao: TildelingDao
-    val legacyVarselDao: LegacyVarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
 

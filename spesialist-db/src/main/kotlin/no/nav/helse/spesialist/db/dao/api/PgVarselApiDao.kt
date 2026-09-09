@@ -90,56 +90,6 @@ class PgVarselApiDao internal constructor(
             *vedtaksperioder.toTypedArray(),
         ).update()
 
-    fun finnVarslerFor(behandlingId: UUID): Set<VarselDbDto> =
-        asSQL(
-            """
-            SELECT sv.unik_id as varsel_id, b.unik_id as behandling_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling
-            FROM selve_varsel sv 
-            INNER JOIN behandling b ON sv.behandling_ref = b.id
-            INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-            WHERE b.unik_id = :behandling_id;
-            """.trimIndent(),
-            "behandling_id" to behandlingId,
-        ).list(::mapVarsel).toSet()
-
-    private fun mapVarsel(row: Row): VarselDbDto {
-        val status = VarselDbDto.Varselstatus.valueOf(row.string("status"))
-        val dbDto =
-            VarselDbDto(
-                varselId = row.uuid("varsel_id"),
-                behandlingId = row.uuid("behandling_id"),
-                opprettet = row.localDateTime("opprettet"),
-                kode = row.string("kode"),
-                status = status,
-                varseldefinisjon =
-                    if (row.uuidOrNull("definisjon_id") != null) {
-                        VarselDbDto.VarseldefinisjonDbDto(
-                            definisjonId = row.uuid("definisjon_id"),
-                            tittel = row.string("tittel"),
-                            forklaring = row.stringOrNull("forklaring"),
-                            handling = row.stringOrNull("handling"),
-                        )
-                    } else {
-                        null
-                    },
-                varselvurdering =
-                    if (status in
-                        listOf(
-                            VarselDbDto.Varselstatus.VURDERT,
-                            VarselDbDto.Varselstatus.GODKJENT,
-                        )
-                    ) {
-                        VarselDbDto.VarselvurderingDbDto(
-                            ident = row.string("status_endret_ident"),
-                            tidsstempel = row.localDateTime("status_endret_tidspunkt"),
-                        )
-                    } else {
-                        null
-                    },
-            )
-        return dbDto
-    }
-
     private fun Query.listKomplett() =
         list { row -> sjekkForDefinisjonOgMapVerdier(row) }
             .filterNot { it.status == VarselDbDto.Varselstatus.AVVIKLET }

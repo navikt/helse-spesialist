@@ -55,7 +55,7 @@ class RiverSetup(
             EndretSkjermetinfoRiver(mediator),
             DokumentRiver(mediator),
             NyeVarslerRiver(),
-            VarseldefinisjonRiver(mediator),
+            VarseldefinisjonRiver(),
             VedtaksperiodeNyUtbetalingRiver(mediator),
             BehovtidsbrukMetrikkRiver(),
             AvsluttetMedVedtakRiver(

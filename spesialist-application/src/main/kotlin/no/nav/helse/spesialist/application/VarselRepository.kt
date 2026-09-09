@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.Varseldefinisjon
 
 interface VarselRepository {
     fun eksisterer(varselId: VarselId): Boolean
@@ -24,4 +25,6 @@ interface VarselRepository {
     fun lagre(varsler: List<Varsel>)
 
     fun slett(varselId: VarselId)
+
+    fun avvikle(varseldefinisjon: Varseldefinisjon)
 }

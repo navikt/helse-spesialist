@@ -12,7 +12,6 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
-import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Brukerrollehenter
 
@@ -63,11 +62,6 @@ class KafkaModule(
                             forsikringsvurderingHenter = forsikringsvurderingHenter,
                         ),
                     dokumentDao = daos.dokumentDao,
-                    legacyVarselRepository =
-                        LegacyVarselRepository(
-                            legacyVarselDao = daos.legacyVarselDao,
-                            definisjonDao = daos.definisjonDao,
-                        ),
                     poisonPillDao = daos.poisonPillDao,
                     versjonAvKode = configuration.versjonAvKode,
                     ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,

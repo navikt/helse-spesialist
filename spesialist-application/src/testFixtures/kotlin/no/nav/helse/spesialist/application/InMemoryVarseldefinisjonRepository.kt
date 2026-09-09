@@ -15,5 +15,7 @@ class InMemoryVarseldefinisjonRepository :
             tittel = original.tittel,
             forklaring = original.forklaring,
             handling = original.handling,
+            avviklet = original.avviklet,
+            opprettet = original.opprettet,
         )
 }

@@ -4,18 +4,15 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
-import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.meldinger.hendelser.VarseldefinisjonMessage
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Varseldefinisjon
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import tools.jackson.databind.JsonNode
 
-class VarseldefinisjonRiver(
-    private val mediator: MeldingMediator,
-) : SpesialistRiver {
+class VarseldefinisjonRiver : TransaksjonellRiver() {
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "varselkode_ny_definisjon")
@@ -36,24 +33,27 @@ class VarseldefinisjonRiver(
             it.interestedIn("gjeldende_definisjon.forklaring", "gjeldende_definisjon.handling")
         }
 
-    override fun onPacket(
+    override fun transaksjonellOnPacket(
         packet: JsonMessage,
-        context: MessageContext,
-        metadata: MessageMetadata,
-        meterRegistry: MeterRegistry,
+        outbox: Outbox,
+        transaksjon: SessionContext,
+        eventMetadata: EventMetadata,
     ) {
         loggInfo("Mottok melding om ny definisjon for varselkode: ${packet["varselkode"].asString()}")
 
-        val message =
-            VarseldefinisjonMessage(
-                id = packet["gjeldende_definisjon.id"].asUUID(),
-                varselkode = packet["varselkode"].asString(),
+        val varseldefinisjon =
+            Varseldefinisjon(
+                id = VarseldefinisjonId(packet["gjeldende_definisjon.id"].asUUID()),
+                kode = packet["varselkode"].asString(),
                 tittel = packet["gjeldende_definisjon.tittel"].asString(),
                 forklaring = packet["gjeldende_definisjon.forklaring"].takeUnless(JsonNode::isMissingOrNull)?.stringValue(),
                 handling = packet["gjeldende_definisjon.handling"].takeUnless(JsonNode::isMissingOrNull)?.stringValue(),
                 avviklet = packet["gjeldende_definisjon.avviklet"].asBoolean(),
                 opprettet = packet["gjeldende_definisjon.opprettet"].asLocalDateTime(),
             )
-        message.sendInnTil(mediator)
+        transaksjon.varseldefinisjonRepository.lagre(varseldefinisjon)
+        if (varseldefinisjon.avviklet) {
+            transaksjon.varselRepository.avvikle(varseldefinisjon)
+        }
     }
 }

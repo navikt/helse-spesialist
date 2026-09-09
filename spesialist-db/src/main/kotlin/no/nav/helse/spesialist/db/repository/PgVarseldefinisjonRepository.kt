@@ -26,13 +26,36 @@ class PgVarseldefinisjonRepository private constructor(
     override fun finnGjeldendeForOrNull(kode: String): Varseldefinisjon? =
         dbQuery.singleOrNull(
             """
-                SELECT DISTINCT ON (kode) kode, unik_id, tittel, forklaring, handling FROM api_varseldefinisjon WHERE kode = :kode
+                SELECT DISTINCT ON (kode) kode, unik_id, tittel, forklaring, handling, avviklet, opprettet FROM api_varseldefinisjon WHERE kode = :kode
                 ORDER BY kode, opprettet DESC
             """,
             "kode" to kode,
         ) {
             it.mapTilVarseldefinisjon()
         }
+
+    override fun lagre(varseldefinisjon: Varseldefinisjon) {
+        dbQuery.update(
+            """
+                INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
+                VALUES (:unik_id, :kode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
+                ON CONFLICT (unik_id) DO UPDATE SET
+                    kode = EXCLUDED.kode,
+                    tittel = EXCLUDED.tittel,
+                    forklaring = EXCLUDED.forklaring,
+                    handling = EXCLUDED.handling,
+                    avviklet = EXCLUDED.avviklet,
+                    opprettet = EXCLUDED.opprettet
+            """,
+            "unik_id" to varseldefinisjon.id.value,
+            "kode" to varseldefinisjon.kode,
+            "tittel" to varseldefinisjon.tittel,
+            "forklaring" to varseldefinisjon.forklaring,
+            "handling" to varseldefinisjon.handling,
+            "avviklet" to varseldefinisjon.avviklet,
+            "opprettet" to varseldefinisjon.opprettet,
+        )
+    }
 
     private fun Row.mapTilVarseldefinisjon(): Varseldefinisjon =
         Varseldefinisjon.fraLagring(
@@ -41,5 +64,7 @@ class PgVarseldefinisjonRepository private constructor(
             tittel = string("tittel"),
             forklaring = stringOrNull("forklaring"),
             handling = stringOrNull("handling"),
+            avviklet = boolean("avviklet"),
+            opprettet = localDateTime("opprettet"),
         )
 }
