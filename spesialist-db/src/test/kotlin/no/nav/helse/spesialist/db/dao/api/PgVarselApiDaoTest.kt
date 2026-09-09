@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VarselDbDto.VarseldefinisjonDbDto
 import no.nav.helse.db.api.VarselDbDto.Varselstatus
@@ -11,7 +9,6 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
-import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -19,10 +16,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
@@ -249,118 +243,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         assertEquals(1, varsler.size)
     }
 
-    @Test
-    fun `Godkjenner vurderte varsler for en liste vedtaksperioder`() {
-        // Given:
-        val utbetalingId = UUID.randomUUID()
-
-        val vedtaksperiode1 = opprettVedtaksperiode(skjæringstidspunkt = 1 jan 2021, utbetalingId = utbetalingId)
-        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode1, utbetalingId = utbetalingId)
-        opprettVarsel(
-            status = Varselstatus.VURDERT,
-            varseldefinisjon = varseldefinisjoner[0],
-            behandlingId = behandlingId1,
-            vedtaksperiodeId = vedtaksperiode1.id,
-        )
-
-        val vedtaksperiode2 = opprettVedtaksperiode(skjæringstidspunkt = 1 feb 2022, utbetalingId = utbetalingId)
-        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode2, utbetalingId = utbetalingId)
-        opprettVarsel(
-            status = Varselstatus.VURDERT,
-            varseldefinisjon = varseldefinisjoner[0],
-            behandlingId = behandlingId2,
-            vedtaksperiodeId = vedtaksperiode2.id,
-        )
-
-        // When:
-        apiVarselDao.godkjennVarslerFor(listOf(vedtaksperiode1, vedtaksperiode2).map(TestVedtaksperiodeDto::id))
-
-        // Then:
-        assertEquals(1, tellGodkjenteVarsel(behandlingId1))
-        assertEquals(1, tellGodkjenteVarsel(behandlingId2))
-    }
-
-    @Test
-    fun `Godkjenner ikke varsler med ulik utbetalingId gitt oppgaveId`() {
-        // Given:
-        val utbetalingId = UUID.randomUUID()
-
-        val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val behandlingId1 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
-        val behandlingId2 = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = UUID.randomUUID())
-        opprettVarsel(
-            status = Varselstatus.VURDERT,
-            endret = true,
-            varseldefinisjon = varseldefinisjoner[0],
-            behandlingId = behandlingId1,
-            vedtaksperiodeId = vedtaksperiode.id,
-        )
-        opprettVarsel(
-            varseldefinisjon = varseldefinisjoner[0],
-            behandlingId = behandlingId2,
-            vedtaksperiodeId = vedtaksperiode.id,
-        )
-
-        // When:
-        apiVarselDao.godkjennVarslerFor(listOf(vedtaksperiode.id))
-
-        // Then:
-        assertEquals(
-            1,
-            tellVarslerMedStatus(status = Varselstatus.GODKJENT, vedtaksperiodeId = vedtaksperiode.id),
-        )
-    }
-
-    @Test
-    fun `vurder varsel`() {
-        val utbetalingId = UUID.randomUUID()
-        val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
-        val varselId =
-            opprettVarsel(
-                status = Varselstatus.AKTIV,
-                varseldefinisjon = varseldefinisjoner[0],
-                behandlingId = behandlingId,
-                vedtaksperiodeId = vedtaksperiode.id,
-            ).varselId
-        val vurdering1 = finnVurderingFor(varselId)
-        assertEquals(Varselstatus.AKTIV, vurdering1?.status)
-        assertNull(vurdering1?.ident)
-        assertNull(vurdering1?.tidspunkt)
-
-        // When:
-        apiVarselDao.vurderVarselFor(varselId, Varselstatus.VURDERT, "ident")
-
-        // Then:
-        val vurdering2 = finnVurderingFor(varselId)
-        assertEquals(Varselstatus.VURDERT, vurdering2?.status)
-        assertEquals("ident", vurdering2?.ident)
-        assertNotNull(vurdering2?.tidspunkt)
-    }
-
-    @Test
-    fun `godkjenning av varsel setter ikke ident eller endret_tidspunkt`() {
-        val utbetalingId = UUID.randomUUID()
-        val vedtaksperiode = opprettVedtaksperiode(utbetalingId = utbetalingId)
-        val behandlingId = opprettBehandling(vedtaksperiode = vedtaksperiode, utbetalingId = utbetalingId)
-        val varselId =
-            opprettVarsel(
-                varseldefinisjon = varseldefinisjoner[0],
-                behandlingId = behandlingId,
-                vedtaksperiodeId = vedtaksperiode.id,
-            ).varselId
-        apiVarselDao.vurderVarselFor(varselId, Varselstatus.VURDERT, "ident")
-
-        // When:
-        apiVarselDao.vurderVarselFor(varselId, Varselstatus.GODKJENT, "annen ident")
-
-        // Then:
-        val vurdering = finnVurderingFor(varselId)
-        assertEquals(Varselstatus.GODKJENT, vurdering?.status)
-        assertEquals("ident", vurdering?.ident)
-        assertNotNull(vurdering?.tidspunkt)
-    }
-
     private fun opprettVedtaksperiode(
         utbetalingId: UUID,
         skjæringstidspunkt: LocalDate = 1 jan 2021,
@@ -389,42 +271,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
                 kanAvvises = true,
             )
         }
-
-    private fun tellVarslerMedStatus(
-        status: Varselstatus,
-        vedtaksperiodeId: UUID,
-    ): Int =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                "SELECT count(1) FROM selve_varsel WHERE status = :status and vedtaksperiode_id = :vedtaksperiodeId;"
-            return requireNotNull(
-                session.run(
-                    queryOf(
-                        query,
-                        mapOf("status" to status.name, "vedtaksperiodeId" to vedtaksperiodeId),
-                    ).map { it.int(1) }.asSingle,
-                ),
-            )
-        }
-
-    private fun finnVurderingFor(varselId: UUID): TestVurdering? {
-        @Language("PostgreSQL")
-        val query = "SELECT status, status_endret_ident, status_endret_tidspunkt FROM selve_varsel WHERE unik_id = ?;"
-
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, varselId)
-                    .map {
-                        TestVurdering(
-                            status = enumValueOf(it.string("status")),
-                            ident = it.stringOrNull("status_endret_ident"),
-                            tidspunkt = it.localDateTimeOrNull("status_endret_tidspunkt"),
-                        )
-                    }.asSingle,
-            )
-        }
-    }
 
     private fun opprettVedtaksperiode(
         personId: Long,
@@ -708,12 +554,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             "utbetalingId" to utbetalingId,
         )
 
-    private data class TestVurdering(
-        val status: Varselstatus,
-        val ident: String?,
-        val tidspunkt: LocalDateTime?,
-    )
-
     private fun opprettVarsel(
         status: Varselstatus = Varselstatus.AKTIV,
         endret: Boolean = false,
@@ -851,12 +691,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             ),
         )
     }
-
-    private fun tellGodkjenteVarsel(behandlingId: TestBehandlingId): Int =
-        dbQuery.single(
-            "SELECT COUNT(*) FROM selve_varsel sv WHERE sv.behandling_ref = :behandling_ref AND status = 'GODKJENT'",
-            "behandling_ref" to behandlingId.id,
-        ) { it.int(1) }
 
     class TestVedtaksperiodeDto(
         val id: UUID,

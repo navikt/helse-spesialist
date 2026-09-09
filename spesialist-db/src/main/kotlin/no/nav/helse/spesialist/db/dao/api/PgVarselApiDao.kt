@@ -5,7 +5,6 @@ import kotliquery.Row
 import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.spesialist.db.HelseDao
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -76,20 +75,6 @@ class PgVarselApiDao internal constructor(
             "status_godkjent" to VarselDbDto.Varselstatus.GODKJENT.name,
         ).listKomplett()
 
-    fun godkjennVarslerFor(vedtaksperioder: List<UUID>) =
-        asSQLWithQuestionMarks(
-            """
-            UPDATE selve_varsel 
-            SET status = ? 
-            WHERE status = ? 
-            AND behandling_ref IN (SELECT id FROM behandling b 
-                WHERE b.vedtaksperiode_id IN (${vedtaksperioder.joinToString { "?" }}));
-            """.trimIndent(),
-            VarselDbDto.Varselstatus.GODKJENT.name,
-            VarselDbDto.Varselstatus.VURDERT.name,
-            *vedtaksperioder.toTypedArray(),
-        ).update()
-
     private fun Query.listKomplett() =
         list { row -> sjekkForDefinisjonOgMapVerdier(row) }
             .filterNot { it.status == VarselDbDto.Varselstatus.AVVIKLET }
@@ -139,30 +124,4 @@ class PgVarselApiDao internal constructor(
                 },
         )
     }
-
-    fun vurderVarselFor(
-        varselId: UUID,
-        gjeldendeStatus: VarselDbDto.Varselstatus,
-        saksbehandlerIdent: String,
-    ): Int {
-        if (gjeldendeStatus == VarselDbDto.Varselstatus.GODKJENT) return godkjennVarsel(varselId)
-        return asSQL(
-            """
-            UPDATE selve_varsel 
-            SET status = :status, status_endret_ident = :saksbehandlerIdent, status_endret_tidspunkt = :endretTidspunkt
-            WHERE unik_id = :varselId
-            """.trimIndent(),
-            "status" to gjeldendeStatus.name,
-            "saksbehandlerIdent" to saksbehandlerIdent,
-            "endretTidspunkt" to LocalDateTime.now(),
-            "varselId" to varselId,
-        ).update()
-    }
-
-    private fun godkjennVarsel(varselId: UUID) =
-        asSQL(
-            " UPDATE selve_varsel SET status = :status WHERE unik_id = :varselId and status_endret_ident is not null and status_endret_tidspunkt is not null ",
-            "status" to VarselDbDto.Varselstatus.GODKJENT.name,
-            "varselId" to varselId,
-        ).update()
 }
