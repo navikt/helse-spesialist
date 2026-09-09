@@ -34,7 +34,7 @@ class PostSykepengegrunnlagBehandler : PostBehandler<Personer.PersonPseudoId.Syk
             val saksbehandler = kallKontekst.saksbehandler
             transaksjon.reservasjonDao.reserverPerson(saksbehandlerOid = saksbehandler.id.value, identitetsnummer.value)
             val totrinnsvurdering =
-                transaksjon.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value) ?: Totrinnsvurdering.ny(identitetsnummer.value)
+                transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value) ?: Totrinnsvurdering.ny(identitetsnummer.value)
             val overstyring =
                 when (val sykepengegrunnlagstype = request.sykepengegrunnlagstype) {
                     is ApiSkjønnsfastsatt -> {

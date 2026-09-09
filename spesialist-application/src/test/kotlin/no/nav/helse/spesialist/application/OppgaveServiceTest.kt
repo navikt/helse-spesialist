@@ -172,7 +172,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { oppgaveRepository.finn(OPPGAVE_ID) } returns oppgave()
+        every { oppgaveRepository.finnOrNull(OPPGAVE_ID) } returns oppgave()
         oppgaveService.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()

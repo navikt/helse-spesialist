@@ -143,7 +143,7 @@ internal class PgPersonRepository(
         ).update()
     }
 
-    override fun finn(id: Identitetsnummer): Person? =
+    override fun finnOrNull(id: Identitetsnummer): Person? =
         asSQL(
             """
             SELECT p.*, pi.id as person_info_id, pi.*, ea.person_ref as egen_ansatt_person_ref, ea.er_egen_ansatt, ea.opprettet as egen_ansatt_opprettet

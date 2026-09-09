@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest.totrinnsvurdering
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.Modellfeil
@@ -16,7 +15,6 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.OppgaverBase
-import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 
 class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Totrinnsvurdering.SendTilGodkjenning, ApiSendTilGodkjenningRequest, Unit, ApiPostSendTilGodkjenningErrorCode> {
@@ -43,7 +41,7 @@ class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Tot
             }
 
             val totrinnsvurdering =
-                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
                     ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.TOTRINNSVURDERING_IKKE_FUNNET)
             try {
                 håndterVedtakBegrunnelse(
@@ -55,7 +53,7 @@ class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Tot
                 )
                 val beslutter =
                     totrinnsvurdering.beslutter
-                        ?.let(kallKontekst.transaksjon.saksbehandlerRepository::finn)
+                        ?.let(kallKontekst.transaksjon.saksbehandlerRepository::finnOrNull)
                 oppgave.sendTilBeslutter(beslutter)
                 totrinnsvurdering.sendTilBeslutter(oppgave.id.value, kallKontekst.saksbehandler.id)
             } catch (modellfeil: Modellfeil) {
@@ -116,24 +114,6 @@ class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Tot
             is OppgaveKreverVurderingAvToSaksbehandlere -> ApiPostSendTilGodkjenningErrorCode.KREVER_TOTRINNSVURDERING_AV_ANNEN
             else -> ApiPostSendTilGodkjenningErrorCode.UVENTET_MODELLFEIL
         }
-
-    /**
-     * Alle behandlinger som hører til samme sykefraværstilfelle (dvs. samme skjæringstidspunkt) som [behandling],
-     * inkludert [behandling] selv. Brukes for å sikre at et uvurdert varsel på en tidligere behandling i samme
-     * tilfelle blokkerer innsending til godkjenning, på samme måte som ved fatting av vedtak (se
-     * PostVedtakBehandler).
-     */
-    private fun BehandlingRepository.finnBehandlingspakke(
-        behandling: Behandling,
-        fødselsnummer: String,
-    ): List<Behandling> =
-        finnAndreBehandlingerISykefraværstilfelle(
-            behandling = behandling,
-            fødselsnummer = fødselsnummer,
-        ).toList()
-            .sortedByDescending { it.tom }
-            .filter { it.fom <= behandling.tom }
-            .plus(behandling)
 }
 
 enum class ApiPostSendTilGodkjenningErrorCode(

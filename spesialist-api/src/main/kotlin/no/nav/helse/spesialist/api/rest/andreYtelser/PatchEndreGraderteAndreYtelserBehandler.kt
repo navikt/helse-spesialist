@@ -18,7 +18,7 @@ class PatchEndreGraderteAndreYtelserBehandler : PatchBehandler<GraderteAndreYtel
         kallKontekst: KallKontekst,
     ): RestResponse<ApiPatchEndreGraderteAndreYtelserResponse, ApiPatchEndreGraderteAndreYtelserErrorCode> {
         val eksisterendeGraderteAndreYtelser =
-            kallKontekst.transaksjon.graderteAndreYtelserRepository.finn(GraderteAndreYtelserId(resource.graderteAndreYtelserId))
+            kallKontekst.transaksjon.graderteAndreYtelserRepository.finnOrNull(GraderteAndreYtelserId(resource.graderteAndreYtelserId))
                 ?: return RestResponse.Error(ApiPatchEndreGraderteAndreYtelserErrorCode.GRADERTE_ANDRE_YTELSER_IKKE_FUNNET)
         if (eksisterendeGraderteAndreYtelser.fjernet) {
             return RestResponse.Error(ApiPatchEndreGraderteAndreYtelserErrorCode.GRADERTE_ANDRE_YTELSER_ER_FJERNET)

@@ -10,7 +10,9 @@ abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateId
 
     protected abstract fun deepCopy(original: T): T
 
-    fun finn(id: IDTYPE): T? = data.find { it.id() == id }?.let(::deepCopy)
+    fun finn(id: IDTYPE): T = data.find { it.id() == id }!!.let(::deepCopy)
+
+    fun finnOrNull(id: IDTYPE): T? = data.find { it.id() == id }?.let(::deepCopy)
 
     fun finnAlle(ider: Set<IDTYPE>): List<T> = data.filter { it.id() in ider }.map(::deepCopy)
 

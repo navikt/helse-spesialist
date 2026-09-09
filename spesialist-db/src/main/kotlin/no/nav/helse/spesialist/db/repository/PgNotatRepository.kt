@@ -27,7 +27,7 @@ internal class PgNotatRepository(
         }
     }
 
-    override fun finn(id: NotatId): Notat? =
+    override fun finnOrNull(id: NotatId): Notat? =
         asSQL(
             """
             SELECT * FROM notat

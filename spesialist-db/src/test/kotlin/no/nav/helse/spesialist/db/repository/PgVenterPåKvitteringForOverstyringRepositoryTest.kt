@@ -24,7 +24,7 @@ class PgVenterPåKvitteringForOverstyringRepositoryTest : AbstractDBIntegrationT
         repository.lagre(venterPåKvitteringForOverstyring)
 
         // Then
-        val lagret = repository.finn(meldingId)
+        val lagret = repository.finnOrNull(meldingId)
         assertNotNull(lagret)
         assertEquals(identitetsnummer, lagret.identitetsnummer)
     }
@@ -36,12 +36,12 @@ class PgVenterPåKvitteringForOverstyringRepositoryTest : AbstractDBIntegrationT
         val identitetsnummer = lagIdentitetsnummer()
         val venterPåKvitteringForOverstyring = VenterPåKvitteringForOverstyring.ny(meldingId, identitetsnummer)
         repository.lagre(venterPåKvitteringForOverstyring)
-        assertNotNull(repository.finn(meldingId))
+        assertNotNull(repository.finnOrNull(meldingId))
 
         // When
         repository.slett(meldingId)
 
         // Then
-        assertNull(repository.finn(meldingId))
+        assertNull(repository.finnOrNull(meldingId))
     }
 }

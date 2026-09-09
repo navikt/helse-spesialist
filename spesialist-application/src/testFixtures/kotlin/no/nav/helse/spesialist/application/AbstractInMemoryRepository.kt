@@ -10,7 +10,7 @@ abstract class AbstractInMemoryRepository<IDTYPE : ValueObject, T : AggregateRoo
 
     fun eksisterer(id: IDTYPE): Boolean = data.any { it.id == id }
 
-    fun finn(id: IDTYPE): T? = data.find { it.id == id }?.let(::deepCopy) // TODO: Denne kan skrives om til non-nullable så snart denne metoden er renamet til finnOrNull i alle repoer som i dag har denne metoden
+    fun finn(id: IDTYPE): T = data.find { it.id == id }!!.let(::deepCopy)
 
     fun finnOrNull(id: IDTYPE): T? = data.find { it.id == id }?.let(::deepCopy)
 

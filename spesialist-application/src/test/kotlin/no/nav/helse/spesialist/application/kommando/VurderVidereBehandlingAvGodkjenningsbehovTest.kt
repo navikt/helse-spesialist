@@ -50,7 +50,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehovTest : ApplicationTest()
         command.execute(CommandContext(UUID.randomUUID()), sessionContext, outbox)
 
         // then
-        val lagretOppgave = sessionContext.oppgaveRepository.finn(oppgave.id)
+        val lagretOppgave = sessionContext.oppgaveRepository.finnOrNull(oppgave.id)
         assertNotNull(lagretOppgave)
         assertEquals(newData.id, lagretOppgave.godkjenningsbehovId)
         assertEquals(Oppgave.Tilstand.Invalidert, lagretOppgave.tilstand)

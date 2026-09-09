@@ -25,7 +25,7 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         sessionContext.personRepository.lagre(person)
 
         // then
-        val funnet = sessionContext.personRepository.finn(person.id)
+        val funnet = sessionContext.personRepository.finnOrNull(person.id)
         assertNotNull(funnet)
         assertEquals(person.id, funnet.id)
         assertEquals(person.aktørId, funnet.aktørId)
@@ -58,7 +58,7 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         sessionContext.personRepository.lagre(person)
 
         // then
-        val funnet = sessionContext.personRepository.finn(person.id)
+        val funnet = sessionContext.personRepository.finnOrNull(person.id)
         assertNotNull(funnet)
         assertEquals(person.id, funnet.id)
         assertEquals(person.aktørId, funnet.aktørId)
@@ -93,7 +93,7 @@ class PgPersonRepositoryTest : AbstractDBIntegrationTest() {
         sessionContext.personRepository.lagre(person)
 
         // then
-        val funnet = sessionContext.personRepository.finn(person.id)
+        val funnet = sessionContext.personRepository.finnOrNull(person.id)
         assertNotNull(funnet)
         assertEquals(person.id, funnet.id)
         assertEquals(person.aktørId, funnet.aktørId)

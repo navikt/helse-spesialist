@@ -16,7 +16,7 @@ internal class ReserverPersonHvisTildeltCommand(
         outbox: Outbox,
     ): Boolean {
         val tildeltSaksbehandler = sessionContext.tildelingDao.tildelingForPerson(identitetsnummer.value) ?: return true
-        val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value)
+        val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
         val saksbehandlerOid: UUID =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 totrinnsvurdering.saksbehandler?.value ?: tildeltSaksbehandler.oid

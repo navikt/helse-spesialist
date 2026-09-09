@@ -22,7 +22,7 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(lagret)
 
         // then
-        val funnet = repository.finn(lagret.id)
+        val funnet = repository.finnOrNull(lagret.id)
         assertIs<Vedtak.Automatisk>(funnet)
         assertEquals(lagret.id, funnet.id)
         assertEqualsByMicrosecond(lagret.tidspunkt, funnet.tidspunkt)
@@ -42,7 +42,7 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(lagret)
 
         // then
-        val funnet = repository.finn(lagret.id)
+        val funnet = repository.finnOrNull(lagret.id)
         assertIs<Vedtak.ManueltMedTotrinnskontroll>(funnet)
         assertEquals(lagret.id, funnet.id)
         assertEquals(lagret.saksbehandlerIdent, funnet.saksbehandlerIdent)
@@ -63,7 +63,7 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(lagret)
 
         // then
-        val funnet = repository.finn(lagret.id)
+        val funnet = repository.finnOrNull(lagret.id)
         assertIs<Vedtak.ManueltUtenTotrinnskontroll>(funnet)
         assertEquals(lagret.id, funnet.id)
         assertEquals(lagret.saksbehandlerIdent, funnet.saksbehandlerIdent)
@@ -84,7 +84,7 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(oppdatertVedtak)
 
         // then
-        val funnet = repository.finn(vedtak.id)
+        val funnet = repository.finnOrNull(vedtak.id)
         assertIs<Vedtak.ManueltUtenTotrinnskontroll>(funnet)
         assertEquals(vedtak.id, funnet.id)
         assertEqualsByMicrosecond(oppdatertVedtak.tidspunkt, funnet.tidspunkt)
@@ -102,7 +102,7 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.slett(vedtak.id)
 
         // then
-        assertNull(repository.finn(vedtak.id))
+        assertNull(repository.finnOrNull(vedtak.id))
     }
 
     @Test
@@ -116,6 +116,6 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         repository.slett(vedtak.id)
 
         // then
-        assertNull(repository.finn(vedtak.id))
+        assertNull(repository.finnOrNull(vedtak.id))
     }
 }

@@ -15,20 +15,20 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
+        val oppgave = sessionContext.oppgaveRepository.finnAktivForPersonOrNull(identitetsnummer)
         if (oppgave == null) {
             loggInfo("Ingen aktiv oppgave for personen. Ingenting å avvise")
             return true
         }
         val godkjenningsbehov =
             sessionContext.meldingDao
-                .finnSisteGodkjenningsbehov(oppgave.behandlingId.value)
+                .finnSisteGodkjenningsbehovOrNull(oppgave.behandlingId.value)
                 ?.data()
                 ?: error("Fant ikke godkjenningsbehov")
 
         val adressebeskyttelse =
             sessionContext.personRepository
-                .finn(identitetsnummer)
+                .finnOrNull(identitetsnummer)
                 ?.info
                 ?.adressebeskyttelse
                 ?: error("Fant ikke adressebeskyttelse for person")

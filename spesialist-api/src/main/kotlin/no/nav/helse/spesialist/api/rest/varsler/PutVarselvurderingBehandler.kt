@@ -27,7 +27,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, PutVarselvurderingErrorCode> {
         val varsel =
-            kallKontekst.transaksjon.varselRepository.finn(VarselId(resource.parent.varselId))
+            kallKontekst.transaksjon.varselRepository.finnOrNull(VarselId(resource.parent.varselId))
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
         return kallKontekst.medBehandling(

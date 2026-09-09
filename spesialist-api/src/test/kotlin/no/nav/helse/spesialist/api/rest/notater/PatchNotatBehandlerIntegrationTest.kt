@@ -55,7 +55,7 @@ class PatchNotatBehandlerIntegrationTest {
         assertEquals("{}", response.bodyAsJsonNode.toString())
 
         // Bekreft persistert resultat
-        val lagretNotat = sessionContext.notatRepository.finn(notatId)
+        val lagretNotat = sessionContext.notatRepository.finnOrNull(notatId)
         assertNotNull(lagretNotat, "Lagret notat med ID $notatId ble ikke gjenfunnet i databasen")
 
         assertEquals(notatId, lagretNotat.id())

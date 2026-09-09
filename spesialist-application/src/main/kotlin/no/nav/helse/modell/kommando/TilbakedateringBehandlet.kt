@@ -67,7 +67,7 @@ class TilbakedateringBehandlet(
 
         kommandostarter {
             val oppgave =
-                sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
+                sessionContext.oppgaveRepository.finnAktivForPersonOrNull(identitetsnummer)
             if (oppgave == null) {
                 loggInfo("Ingen aktiv oppgave for personen, avslutter behandling av meldingen")
                 return@kommandostarter null

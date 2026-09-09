@@ -29,7 +29,7 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, DeleteVarselvurderingErrorCode> {
         val varsel =
-            kallKontekst.transaksjon.varselRepository.finn(VarselId(resource.parent.varselId))
+            kallKontekst.transaksjon.varselRepository.finnOrNull(VarselId(resource.parent.varselId))
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
         return kallKontekst.medBehandling(

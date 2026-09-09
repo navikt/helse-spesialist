@@ -22,7 +22,7 @@ class PostKommentarBehandler : PostBehandler<Dialoger.DialogId.Kommentar, ApiKom
     ): RestResponse<ApiKommentarResponse, ApiPostKommentarErrorCode> {
         // TODO: Mangler tilgangskontroll / relasjon til person
         val dialog =
-            kallKontekst.transaksjon.dialogRepository.finn(DialogId(resource.parent.dialogId))
+            kallKontekst.transaksjon.dialogRepository.finnOrNull(DialogId(resource.parent.dialogId))
                 ?: return RestResponse.Error(
                     ApiPostKommentarErrorCode.DIALOG_IKKE_FUNNET,
                 )

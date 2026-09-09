@@ -89,7 +89,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     private fun berikPersonMedPersoninfo(fødselsnummer: String = FØDSELSNUMMER) {
         sessionFactory.transactionalSessionScope { transaction ->
             val person =
-                transaction.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))
+                transaction.personRepository.finnOrNull(Identitetsnummer.fraString(fødselsnummer))
                     ?: error("Fant ikke person med fødselsnummer=$fødselsnummer")
             person.oppdaterInfo(
                 Personinfo(

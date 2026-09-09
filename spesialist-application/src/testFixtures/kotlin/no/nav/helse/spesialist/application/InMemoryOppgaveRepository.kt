@@ -33,20 +33,20 @@ class InMemoryOppgaveRepository(
         oppdatertTidspunkt[oppgave.id] = LocalDateTime.now()
     }
 
-    override fun finn(id: Long): Oppgave? = oppgaver[OppgaveId(id)]
+    override fun finnOrNull(id: Long): Oppgave? = oppgaver[OppgaveId(id)]
 
-    override fun finn(id: OppgaveId): Oppgave? = oppgaver[id]
+    override fun finnOrNull(id: OppgaveId): Oppgave? = oppgaver[id]
 
-    override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id }
+    override fun finnOrNull(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id }
 
-    override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
+    override fun finnAktivForPersonOrNull(identitetsnummer: Identitetsnummer): Oppgave? {
         val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
         return oppgaver.values
             .filter { it.tilstand in listOf(Oppgave.Tilstand.AvventerSaksbehandler) }
             .singleOrNull { it.vedtaksperiodeId in ider }
     }
 
-    override fun finnGjeldendeForPerson(identitetsnummer: Identitetsnummer): Oppgave? {
+    override fun finnGjeldendeForPersonOrNull(identitetsnummer: Identitetsnummer): Oppgave? {
         val ider = vedtaksperiodeRepository.finnAlleIderForPerson(identitetsnummer)
         return oppgaver.values
             .filter { it.tilstand in listOf(Oppgave.Tilstand.AvventerSystem, Oppgave.Tilstand.AvventerSaksbehandler) }
@@ -111,7 +111,7 @@ class InMemoryOppgaveRepository(
                 varselRepository
                     .finnVarsler(listOf(oppgave.behandlingId))
                     .any { it.kode == varselkode && it.status == Varsel.Status.AKTIV }
-            }.mapNotNull { oppgave -> vedtaksperiodeRepository.finn(oppgave.vedtaksperiodeId)?.identitetsnummer?.value }
+            }.mapNotNull { oppgave -> vedtaksperiodeRepository.finnOrNull(oppgave.vedtaksperiodeId)?.identitetsnummer?.value }
             .distinct()
             .toSet()
 }

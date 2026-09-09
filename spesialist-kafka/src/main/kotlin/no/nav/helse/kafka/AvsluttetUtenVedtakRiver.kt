@@ -36,7 +36,7 @@ class AvsluttetUtenVedtakRiver : TransaksjonellRiver() {
             vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
         )
         val behandling = transaksjon.behandlingRepository.finn(spleisBehandlingId)
-        val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId) ?: error("Fant ikke vedtaksperiode")
+        val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finnOrNull(behandling.vedtaksperiodeId) ?: error("Fant ikke vedtaksperiode")
         if (vedtaksperiode.forkastet) return
 
         val varsler = transaksjon.varselRepository.finnVarslerFor(behandling.id)

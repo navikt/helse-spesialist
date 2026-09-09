@@ -29,7 +29,7 @@ internal class PgDialogRepository(
         }
     }
 
-    override fun finn(id: DialogId): Dialog? {
+    override fun finnOrNull(id: DialogId): Dialog? {
         val kommentarer =
             asSQL("SELECT * FROM kommentarer WHERE dialog_ref = :dialogId", "dialogId" to id.value)
                 .list { it.tilKommentar() }

@@ -26,7 +26,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // When:
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
+        val actualArbeidsgiver = arbeidsgiverRepository.finnOrNull(arbeidsgiver.id)
 
         // Then:
         assertNotNull(actualArbeidsgiver)
@@ -44,14 +44,14 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
             )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(id = identifikator, navnString = lagOrganisasjonsnavn())
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val lagretArbeidsgiver = arbeidsgiverRepository.finn(identifikator)
+        val lagretArbeidsgiver = arbeidsgiverRepository.finnOrNull(identifikator)
         assertNotNull(lagretArbeidsgiver)
         val nyttOrganisasjonsnavn = lagOrganisasjonsnavn()
 
         // When:
         lagretArbeidsgiver!!.oppdaterMedNavn(nyttOrganisasjonsnavn)
         arbeidsgiverRepository.lagre(lagretArbeidsgiver)
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
+        val actualArbeidsgiver = arbeidsgiverRepository.finnOrNull(arbeidsgiver.id)
 
         // Then:
         assertNotNull(actualArbeidsgiver)
@@ -72,7 +72,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // When:
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(identifikator)
+        val actualArbeidsgiver = arbeidsgiverRepository.finnOrNull(identifikator)
 
         // Then:
         assertNotNull(actualArbeidsgiver)
@@ -116,7 +116,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         arbeidsgiverRepository.lagre(arbeidsgiver)
 
         // Then:
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
+        val actualArbeidsgiver = arbeidsgiverRepository.finnOrNull(arbeidsgiver.id)
         assertNotNull(actualArbeidsgiver)
         assertEquals(identifikator, actualArbeidsgiver!!.id)
     }
@@ -134,7 +134,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         arbeidsgiverRepository.lagre(arbeidsgiver)
 
         // Then:
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
+        val actualArbeidsgiver = arbeidsgiverRepository.finnOrNull(arbeidsgiver.id)
         assertNotNull(actualArbeidsgiver)
         assertEquals(identifikator, actualArbeidsgiver!!.id)
     }

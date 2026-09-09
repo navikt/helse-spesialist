@@ -23,7 +23,7 @@ class DelegatingOppgaveDao(
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID =
         behandlingRepository
-            .finnOrNull(oppgaveRepository.finn(oppgaveId)!!.behandlingId)!!
+            .finnOrNull(oppgaveRepository.finnOrNull(oppgaveId)!!.behandlingId)!!
             .spleisBehandlingId!!
             .value
 
@@ -39,7 +39,7 @@ class DelegatingOppgaveDao(
     override fun finnBehandlingId(oppgaveId: Long): UUID =
         behandlingRepository
             .alle()
-            .find { it.spleisBehandlingId?.value == oppgaveRepository.finn(oppgaveId)!!.behandlingId.value }!!
+            .find { it.spleisBehandlingId?.value == oppgaveRepository.finnOrNull(oppgaveId)!!.behandlingId.value }!!
             .id.value
 
     override fun finnOppgaveId(utbetalingId: UUID): Long? =
@@ -50,7 +50,7 @@ class DelegatingOppgaveDao(
             ?.id
             ?.value
 
-    override fun finnVedtaksperiodeId(oppgaveId: Long): UUID = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId.value
+    override fun finnVedtaksperiodeId(oppgaveId: Long): UUID = oppgaveRepository.finnOrNull(oppgaveId)!!.vedtaksperiodeId.value
 
     override fun reserverNesteId(): Long = (oppgaveRepository.alle().maxOfOrNull { it.id.value } ?: 0L) + 1L
 
@@ -75,7 +75,7 @@ class DelegatingOppgaveDao(
             ?.value
 
     override fun finnFødselsnummer(oppgaveId: Long): String {
-        val vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId
+        val vedtaksperiodeId = oppgaveRepository.finnOrNull(oppgaveId)!!.vedtaksperiodeId
         return vedtaksperiodeRepository
             .alle()
             .find { it.id.value == vedtaksperiodeId.value }!!

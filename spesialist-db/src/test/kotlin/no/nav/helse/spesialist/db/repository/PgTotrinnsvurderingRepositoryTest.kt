@@ -29,7 +29,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `hvis det ikke finnes totrinnsvurdering, returnerer null`() {
-        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
 
         assertNull(totrinnsvurdering)
     }
@@ -41,7 +41,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         assertTrue(totrinnsvurdering.harFåttTildeltId())
 
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
 
         assertEquals(totrinnsvurdering, hentetTotrinnsvurdering)
     }
@@ -49,13 +49,13 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `oppdater totrinnsvurdering`() {
         totrinnsvurderingRepository.lagre(nyTotrinnsvurdering())
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.nyOverstyring(nyOverstyring())
         hentetTotrinnsvurdering.settBeslutter(beslutter.id)
         hentetTotrinnsvurdering.settAvventerSaksbehandler()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
-        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
         checkNotNull(oppdatertTotrinnsvurdering)
 
         assertEquals(1, oppdatertTotrinnsvurdering.overstyringer.size)
@@ -69,11 +69,11 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val totrinnsvurdering = nyTotrinnsvurdering()
         totrinnsvurdering.nyOverstyring(nyOverstyring())
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.forkast()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
-        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
 
         assertNull(oppdatertTotrinnsvurdering)
     }

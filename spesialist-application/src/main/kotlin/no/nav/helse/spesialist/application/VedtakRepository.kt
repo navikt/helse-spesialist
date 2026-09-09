@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.Vedtak
 interface VedtakRepository {
     fun lagre(vedtak: Vedtak)
 
-    fun finn(spleisBehandlingId: SpleisBehandlingId): Vedtak?
+    fun finnOrNull(spleisBehandlingId: SpleisBehandlingId): Vedtak?
 
     fun slett(spleisBehandlingId: SpleisBehandlingId)
 }

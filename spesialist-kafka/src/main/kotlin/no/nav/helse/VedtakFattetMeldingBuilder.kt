@@ -43,11 +43,11 @@ class VedtakFattetMeldingBuilder(
         private const val TAG_6G_BEGRENSET = "6GBegrenset"
     }
 
-    private val person = sessionContext.personRepository.finn(identitetsnummer) ?: error("Fant ikke person")
+    private val person = sessionContext.personRepository.finnOrNull(identitetsnummer) ?: error("Fant ikke person")
     private val behandling = sessionContext.behandlingRepository.finn(behandlingId)
-    private val vedtak = sessionContext.vedtakRepository.finn(behandlingId) ?: error("Fant ikke vedtaksinformasjon")
+    private val vedtak = sessionContext.vedtakRepository.finnOrNull(behandlingId) ?: error("Fant ikke vedtaksinformasjon")
     private val godkjenningsbehov =
-        sessionContext.meldingDao.finnSisteGodkjenningsbehov(behandlingId.value)
+        sessionContext.meldingDao.finnSisteGodkjenningsbehovOrNull(behandlingId.value)
             ?: error("Fant ikke siste godkjenningsbehov")
     private val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asString()
 
@@ -74,10 +74,10 @@ class VedtakFattetMeldingBuilder(
 
             is Vedtak.ManueltMedTotrinnskontroll -> {
                 val saksbehandler =
-                    sessionContext.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent)
+                    sessionContext.saksbehandlerRepository.finnOrNull(vedtak.saksbehandlerIdent)
                         ?: error("Finner ikke saksbehandler")
                 val beslutter =
-                    sessionContext.saksbehandlerRepository.finn(vedtak.beslutterIdent)
+                    sessionContext.saksbehandlerRepository.finnOrNull(vedtak.beslutterIdent)
                         ?: error("Finner ikke beslutter")
                 byggFellesdel(
                     organisasjonsnummer = organisasjonsnummer,
@@ -93,7 +93,7 @@ class VedtakFattetMeldingBuilder(
 
             is Vedtak.ManueltUtenTotrinnskontroll -> {
                 val saksbehandler =
-                    sessionContext.saksbehandlerRepository.finn(vedtak.saksbehandlerIdent)
+                    sessionContext.saksbehandlerRepository.finnOrNull(vedtak.saksbehandlerIdent)
                         ?: error("Finner ikke saksbehandler")
                 byggFellesdel(
                     organisasjonsnummer = organisasjonsnummer,
@@ -120,7 +120,7 @@ class VedtakFattetMeldingBuilder(
     ): VedtakFattetMelding {
         val utbetalingId = checkNotNull(behandling.utbetalingId)
         val individuellBegrunnelse =
-            sessionContext.individuellBegrunnelseRepository.finn(behandlingId)?.let {
+            sessionContext.individuellBegrunnelseRepository.finnOrNull(behandlingId)?.let {
                 VedtakFattetMelding.Begrunnelse(
                     type =
                         when (it.utfall) {
@@ -285,7 +285,7 @@ class VedtakFattetMeldingBuilder(
         skjønnsfastsatteSykepengegrunnlag: List<BegrunnelseForSkjønnsfastsattSykepengegrunnlag>,
     ): VedtakFattetMelding {
         val vedtaksperiode =
-            sessionContext.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
+            sessionContext.vedtaksperiodeRepository.finnOrNull(behandling.vedtaksperiodeId)
                 ?: error("Fant ikke vedtaksperiode")
         val sykepengegrunnlagsfakta =
             when (fastsatt) {

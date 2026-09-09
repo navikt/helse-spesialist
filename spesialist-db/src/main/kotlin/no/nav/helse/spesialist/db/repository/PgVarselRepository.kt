@@ -24,7 +24,7 @@ class PgVarselRepository private constructor(
             "unik_id" to varselId.value,
         ) { true } ?: false
 
-    override fun finn(varselId: VarselId): Varsel? =
+    override fun finnOrNull(varselId: VarselId): Varsel? =
         dbQuery.singleOrNull(
             """
                 SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 

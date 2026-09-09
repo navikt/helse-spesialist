@@ -28,12 +28,12 @@ class PostSendIReturBehandler : PostBehandler<OppgaverBase.OppgaveId.Totrinnsvur
             manglerTilgangTilPerson = { ApiPostSendIReturErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { oppgave, _, _, person ->
             val totrinnsvurdering =
-                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
                     ?: return@medOppgave RestResponse.Error(ApiPostSendIReturErrorCode.TOTRINNSVURDERING_IKKE_FUNNET)
 
             val opprinneligSaksbehandler =
                 totrinnsvurdering.saksbehandler
-                    ?.let(kallKontekst.transaksjon.saksbehandlerRepository::finn)
+                    ?.let(kallKontekst.transaksjon.saksbehandlerRepository::finnOrNull)
                     ?: return@medOppgave RestResponse.Error(ApiPostSendIReturErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
 
             try {

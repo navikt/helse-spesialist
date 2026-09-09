@@ -38,7 +38,7 @@ internal class KontrollerEgenAnsattstatusTest : ApplicationTest() {
         )
     }
 
-    private fun egenAnsattStatus() = sessionContext.personRepository.finn(Identitetsnummer.fraString(FNR))?.egenAnsattStatus
+    private fun egenAnsattStatus() = sessionContext.personRepository.finnOrNull(Identitetsnummer.fraString(FNR))?.egenAnsattStatus
 
     @Test
     fun `ber om informasjon om egen ansatt`() {

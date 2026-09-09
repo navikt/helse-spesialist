@@ -69,7 +69,7 @@ internal class VedtaksperiodeReberegnetCommand(
             ),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId),
             ikkesuspenderendeCommand("fjernVedtak") { sessionContext: SessionContext, _: Outbox ->
-                val vedtak = sessionContext.vedtakRepository.finn(spleisBehandlingId) ?: return@ikkesuspenderendeCommand
+                val vedtak = sessionContext.vedtakRepository.finnOrNull(spleisBehandlingId) ?: return@ikkesuspenderendeCommand
                 if (vedtak.behandletAvSpleis) {
                     log.warn("Spleis har behandlet svar på godkjenningsbehov for perioden, det er merkelig at spesialist behandler godkjenningsbehov etterpå")
                     return@ikkesuspenderendeCommand

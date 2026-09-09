@@ -16,7 +16,7 @@ class PgIndividuellBegrunnelseRepository private constructor(
 ) : IndividuellBegrunnelseRepository {
     internal constructor(session: Session) : this(SessionDbQuery(session))
 
-    override fun finn(spleisBehandlingId: SpleisBehandlingId): IndividuellBegrunnelse? =
+    override fun finnOrNull(spleisBehandlingId: SpleisBehandlingId): IndividuellBegrunnelse? =
         dbQuery.singleOrNull(
             """
             SELECT b.id, b.type, b.tekst, b.saksbehandler_ref, vb.invalidert FROM begrunnelse b 

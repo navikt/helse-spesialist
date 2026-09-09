@@ -25,7 +25,7 @@ class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, Ap
             personPseudoIdIkkeFunnet = { ApiPutTildelingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
-            val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPerson(it.id) ?: error("Fant ikke oppgave")
+            val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPersonOrNull(it.id) ?: error("Fant ikke oppgave")
 
             if (!oppgave.kanTildelesTil(brukerroller = kallKontekst.brukerroller)) {
                 return@medPerson RestResponse.Error(ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_OPPGAVE)

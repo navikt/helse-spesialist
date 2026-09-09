@@ -30,7 +30,7 @@ class PgGraderteAndreYtelserRepository(
             .groupBy { it.metadata.graderteAndreYtelserId }
             .map { (_, events) -> events.tilGraderteAndreYtelser() }
 
-    override fun finn(id: GraderteAndreYtelserId): GraderteAndreYtelser? {
+    override fun finnOrNull(id: GraderteAndreYtelserId): GraderteAndreYtelser? {
         val events =
             asSQL(
                 """

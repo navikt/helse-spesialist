@@ -23,7 +23,7 @@ class DelegatingNotatDao(
             type = notatType,
             tekst = tekst,
             dialogRef = DialogId(dialogRef),
-            vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId.value,
+            vedtaksperiodeId = oppgaveRepository.finnOrNull(oppgaveId)!!.vedtaksperiodeId.value,
             saksbehandlerOid = SaksbehandlerOid(saksbehandlerOid),
         ).also(notatRepository::lagre)
         .id()

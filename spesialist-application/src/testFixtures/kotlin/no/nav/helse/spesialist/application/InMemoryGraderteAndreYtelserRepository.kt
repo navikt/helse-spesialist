@@ -9,7 +9,7 @@ class InMemoryGraderteAndreYtelserRepository : GraderteAndreYtelserRepository {
 
     override fun finnAlleForIdentitetsnummer(identitetsnummer: Identitetsnummer): List<GraderteAndreYtelser> = data.filter { it.identitetsnummer == identitetsnummer }
 
-    override fun finn(id: GraderteAndreYtelserId): GraderteAndreYtelser? = data.find { it.id == id }
+    override fun finnOrNull(id: GraderteAndreYtelserId): GraderteAndreYtelser? = data.find { it.id == id }
 
     override fun lagre(graderteAndreYtelser: GraderteAndreYtelser) {
         data.add(graderteAndreYtelser)

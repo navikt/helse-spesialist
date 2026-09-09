@@ -49,7 +49,7 @@ class PgGraderteAndreYtelserRepositoryTest : AbstractDBIntegrationTest() {
         // When:
         repository.lagre(graderteAndreYtelser)
 
-        val hentet = repository.finn(graderteAndreYtelser.id)
+        val hentet = repository.finnOrNull(graderteAndreYtelser.id)
         val hentetForPerson = repository.finnAlleForIdentitetsnummer(identitetsnummer)
         val lagretType =
             dbQuery.single(
@@ -126,7 +126,7 @@ class PgGraderteAndreYtelserRepositoryTest : AbstractDBIntegrationTest() {
         // When:
         repository.lagre(graderteAndreYtelser)
 
-        val hentet = repository.finn(graderteAndreYtelser.id)
+        val hentet = repository.finnOrNull(graderteAndreYtelser.id)
         val lagredeTyper =
             dbQuery.list(
                 """
@@ -193,7 +193,7 @@ class PgGraderteAndreYtelserRepositoryTest : AbstractDBIntegrationTest() {
         // When:
         repository.lagre(graderteAndreYtelser)
 
-        val hentet = repository.finn(graderteAndreYtelser.id)
+        val hentet = repository.finnOrNull(graderteAndreYtelser.id)
 
         // Then:
         assertNotNull(hentet)

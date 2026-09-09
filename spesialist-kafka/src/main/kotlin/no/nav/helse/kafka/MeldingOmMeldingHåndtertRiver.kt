@@ -43,7 +43,7 @@ class MeldingOmMeldingHåndtertRiver(
         sessionFactory.transactionalSessionScope { sessionContext ->
             val overstyringMeldingId = packet["original_id"].asUUID().let(::MeldingId)
             val venterPåKvitteringForOverstyring =
-                sessionContext.venterPåKvitteringForOverstyringRepository.finn(overstyringMeldingId)
+                sessionContext.venterPåKvitteringForOverstyringRepository.finnOrNull(overstyringMeldingId)
                     ?: return@transactionalSessionScope
 
             sessionContext.opptegnelseRepository.lagre(

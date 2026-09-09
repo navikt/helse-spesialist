@@ -190,7 +190,7 @@ class PostStatusendringGraderteAndreYtelserIntegrationTest {
         ).also(sessionContext.behandlingRepository::lagre)
     }
 
-    private fun hentFraRepository(graderteAndreYtelser: GraderteAndreYtelser): GraderteAndreYtelser = requireNotNull(sessionContext.graderteAndreYtelserRepository.finn(graderteAndreYtelser.id))
+    private fun hentFraRepository(graderteAndreYtelser: GraderteAndreYtelser): GraderteAndreYtelser = requireNotNull(sessionContext.graderteAndreYtelserRepository.finnOrNull(graderteAndreYtelser.id))
 
     private fun opprettEnGradertAnnenYtelse(
         person: Person,

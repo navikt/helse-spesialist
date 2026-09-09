@@ -33,7 +33,7 @@ class PgIndividuellBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
                 saksbehandlerOid = saksbehandlerOid,
             ),
         )
-        val vedtakBegrunnelse = repository.finn(spleisBehandlingId)
+        val vedtakBegrunnelse = repository.finnOrNull(spleisBehandlingId)
 
         // then
         assertNotNull(vedtakBegrunnelse)
@@ -56,11 +56,11 @@ class PgIndividuellBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
                 saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
             ),
         )
-        val vedtakBegrunnelse = repository.finn(spleisBehandlingId)
+        val vedtakBegrunnelse = repository.finnOrNull(spleisBehandlingId)
         checkNotNull(vedtakBegrunnelse)
         vedtakBegrunnelse.invalider()
         repository.lagre(vedtakBegrunnelse)
-        val oppdatertVedtakBegrunnelse = repository.finn(spleisBehandlingId)
+        val oppdatertVedtakBegrunnelse = repository.finnOrNull(spleisBehandlingId)
 
         // then
         assertNull(oppdatertVedtakBegrunnelse)

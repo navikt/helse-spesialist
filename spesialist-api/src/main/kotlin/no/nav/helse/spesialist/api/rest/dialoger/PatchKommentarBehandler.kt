@@ -24,7 +24,7 @@ class PatchKommentarBehandler : PatchBehandler<Dialoger.DialogId.Kommentar.Komme
         if (!request.feilregistrert) return RestResponse.Error(ApiPatchKommentarErrorCode.KAN_IKKE_FJERNE_FEILREGISTRERING)
 
         val dialog =
-            kallKontekst.transaksjon.dialogRepository.finn(DialogId(resource.parent.parent.dialogId))
+            kallKontekst.transaksjon.dialogRepository.finnOrNull(DialogId(resource.parent.parent.dialogId))
                 ?: return RestResponse.Error(ApiPatchKommentarErrorCode.DIALOG_IKKE_FUNNET)
 
         val kommentar =

@@ -10,7 +10,7 @@ class DelegatingPåVentDao(
     override fun erPåVent(vedtaksperiodeId: UUID): Boolean = påVentRepository.alle().any { it.vedtaksperiodeId.value == vedtaksperiodeId }
 
     override fun slettPåVent(oppgaveId: Long): Int {
-        val vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId
+        val vedtaksperiodeId = oppgaveRepository.finnOrNull(oppgaveId)!!.vedtaksperiodeId
         val påVenter =
             påVentRepository
                 .alle()

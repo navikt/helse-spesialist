@@ -37,7 +37,7 @@ internal class OvervåkOverstyringerRiverTest {
         // Then
         assertEquals(
             person.id,
-            sessionContext.venterPåKvitteringForOverstyringRepository.finn(MeldingId(meldingId))?.identitetsnummer,
+            sessionContext.venterPåKvitteringForOverstyringRepository.finnOrNull(MeldingId(meldingId))?.identitetsnummer,
         )
     }
 
@@ -59,7 +59,7 @@ internal class OvervåkOverstyringerRiverTest {
 
         // Then
         assertNull(
-            sessionContext.venterPåKvitteringForOverstyringRepository.finn(MeldingId(meldingId))?.identitetsnummer,
+            sessionContext.venterPåKvitteringForOverstyringRepository.finnOrNull(MeldingId(meldingId))?.identitetsnummer,
         )
     }
 

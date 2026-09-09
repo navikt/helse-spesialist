@@ -30,7 +30,7 @@ class PgVenterPåKvitteringForOverstyringRepository(
         ).update()
     }
 
-    override fun finn(meldingId: MeldingId): VenterPåKvitteringForOverstyring? =
+    override fun finnOrNull(meldingId: MeldingId): VenterPåKvitteringForOverstyring? =
         asSQL(
             """
             SELECT * FROM venter_paa_kvittering_for_overstyring 

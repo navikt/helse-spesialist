@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.Person
 interface PersonRepository {
     fun lagre(person: Person)
 
-    fun finn(id: Identitetsnummer): Person?
+    fun finnOrNull(id: Identitetsnummer): Person?
 
     fun finnAlleMedAktørId(aktørId: String): List<Person>
 

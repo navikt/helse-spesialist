@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 interface TotrinnsvurderingRepository {
     fun lagre(totrinnsvurdering: Totrinnsvurdering)
 
-    fun finn(id: TotrinnsvurderingId): Totrinnsvurdering?
+    fun finnOrNull(id: TotrinnsvurderingId): Totrinnsvurdering?
 
-    fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering?
+    fun finnAktivForPersonOrNull(fødselsnummer: String): Totrinnsvurdering?
 }

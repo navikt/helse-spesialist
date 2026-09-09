@@ -19,7 +19,7 @@ internal class AvbrytTotrinnsvurderingCommand(
             "fødselsnummer" to identitetsnummer.value,
         )
 
-        val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value) ?: return true
+        val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value) ?: return true
 
         val vedtaksperiodeIderForOverstyringer = totrinnsvurdering.overstyringer.map { VedtaksperiodeId(it.vedtaksperiodeId) }
 

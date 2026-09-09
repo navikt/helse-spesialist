@@ -120,7 +120,7 @@ internal class OpprettSaksbehandleroppgave(
         sessionContext: SessionContext,
     ) {
         if (sessionContext.personRepository
-                .finn(Identitetsnummer.fraString(fødselsnummer))
+                .finnOrNull(Identitetsnummer.fraString(fødselsnummer))
                 ?.egenAnsattStatus
                 ?.erEgenAnsatt == true
         ) {

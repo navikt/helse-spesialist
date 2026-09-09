@@ -34,7 +34,7 @@ class VedtaksperiodeForkastet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.finn(VedtaksperiodeId(vedtaksperiodeId)) ?: return
+        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.finnOrNull(VedtaksperiodeId(vedtaksperiodeId)) ?: return
         vedtaksperiode.forkast()
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
 

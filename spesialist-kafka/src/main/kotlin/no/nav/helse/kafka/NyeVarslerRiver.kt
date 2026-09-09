@@ -55,7 +55,7 @@ class NyeVarslerRiver : TransaksjonellRiver() {
         nyeVarsler
             .groupBy { it.vedtaksperiodeId }
             .mapNotNull { (vedtaksperiodeId, varsler) ->
-                transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)?.let { vedtaksperiode -> vedtaksperiode to varsler }
+                transaksjon.vedtaksperiodeRepository.finnOrNull(vedtaksperiodeId)?.let { vedtaksperiode -> vedtaksperiode to varsler }
             }.filterNot { (vedtaksperiode) -> vedtaksperiode.forkastet }
             .forEach { (vedtaksperiode, nyeVarsler) ->
                 val nyesteBehandling = transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) ?: error("Fant ikke behandling")

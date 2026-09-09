@@ -23,7 +23,7 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         )
 
         // when
-        val gjeldende = repository.finnGjeldendeFor(kode)
+        val gjeldende = repository.finnGjeldendeForOrNull(kode)
 
         // then
         assertNotNull(gjeldende)

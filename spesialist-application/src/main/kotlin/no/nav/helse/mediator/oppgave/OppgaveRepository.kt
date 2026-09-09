@@ -18,17 +18,17 @@ import java.util.UUID
 interface OppgaveRepository {
     fun lagre(oppgave: Oppgave)
 
-    fun finn(id: Long): Oppgave?
+    fun finnOrNull(id: Long): Oppgave?
 
-    fun finn(id: OppgaveId): Oppgave?
+    fun finnOrNull(id: OppgaveId): Oppgave?
 
-    fun finn(id: SpleisBehandlingId): Oppgave?
+    fun finnOrNull(id: SpleisBehandlingId): Oppgave?
 
     // finner oppgave i tilstand AvventerSaksbehandler
-    fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave?
+    fun finnAktivForPersonOrNull(identitetsnummer: Identitetsnummer): Oppgave?
 
     // finner oppgave i tilstand AvventerSaksbehandler eller AvventerSystem
-    fun finnGjeldendeForPerson(identitetsnummer: Identitetsnummer): Oppgave?
+    fun finnGjeldendeForPersonOrNull(identitetsnummer: Identitetsnummer): Oppgave?
 
     fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime?
 

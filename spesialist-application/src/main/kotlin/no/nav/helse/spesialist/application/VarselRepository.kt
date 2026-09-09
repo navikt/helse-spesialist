@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.domain.VarselId
 interface VarselRepository {
     fun eksisterer(varselId: VarselId): Boolean
 
-    fun finn(varselId: VarselId): Varsel?
+    fun finnOrNull(varselId: VarselId): Varsel?
 
     fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel>
 

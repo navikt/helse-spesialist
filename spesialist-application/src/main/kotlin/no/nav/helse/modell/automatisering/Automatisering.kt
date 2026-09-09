@@ -119,7 +119,7 @@ internal class Automatisering(
 
     private fun erEgenAnsattEllerSkjermet(fødselsnummer: String) =
         sessionContext.personRepository
-            .finn(Identitetsnummer.fraString(fødselsnummer))
+            .finnOrNull(Identitetsnummer.fraString(fødselsnummer))
             ?.egenAnsattStatus
             ?.erEgenAnsatt == true ||
             sessionContext.personDao.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
@@ -220,7 +220,7 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(sessionContext.personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = sessionContext.åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harKravOmTotrinnsvurdering =
-            sessionContext.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
+            sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val selvstendigNæringsdrivendeFGB =
             yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && periodetype == FØRSTEGANGSBEHANDLING

@@ -74,7 +74,7 @@ class PostOverstyrTidslinjeBehandler : PostBehandler<Vedtaksperioder.Vedtaksperi
         kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, person.id.value)
 
         val totrinnsvurdering =
-            kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+            kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
                 ?: Totrinnsvurdering.ny(person.id.value)
         totrinnsvurdering.nyOverstyring(overstyring = overstyring)
         kallKontekst.transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)

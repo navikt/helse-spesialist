@@ -42,7 +42,7 @@ class KallKontekst(
         block: (Oppgave, Behandling, Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.OPPGAVE_ID to oppgaveId.value.toString()) {
-            val oppgave = transaksjon.oppgaveRepository.finn(oppgaveId)
+            val oppgave = transaksjon.oppgaveRepository.finnOrNull(oppgaveId)
 
             if (oppgave == null) {
                 loggWarn("Oppgaven ble ikke funnet", "oppgaveId" to oppgaveId)
@@ -118,7 +118,7 @@ class KallKontekst(
         block: (Vedtaksperiode, Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.VEDTAKSPERIODE_ID to vedtaksperiodeId.value.toString()) {
-            val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finn(vedtaksperiodeId)
+            val vedtaksperiode = transaksjon.vedtaksperiodeRepository.finnOrNull(vedtaksperiodeId)
 
             if (vedtaksperiode == null) {
                 loggWarn("Vedtaksperioden ble ikke funnet", "vedtaksperiodeId" to vedtaksperiodeId)
@@ -161,7 +161,7 @@ class KallKontekst(
         block: (Person) -> RestResponse<RESPONSE, ERROR>,
     ): RestResponse<RESPONSE, ERROR> =
         medMdcOgAttribute(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
-            val person = transaksjon.personRepository.finn(identitetsnummer)
+            val person = transaksjon.personRepository.finnOrNull(identitetsnummer)
 
             if (person == null) {
                 loggWarn("Personen ble ikke funnet", "identitetsnummer" to identitetsnummer)

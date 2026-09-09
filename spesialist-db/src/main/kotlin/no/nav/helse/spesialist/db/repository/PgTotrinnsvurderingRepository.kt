@@ -16,7 +16,7 @@ class PgTotrinnsvurderingRepository(
     TotrinnsvurderingRepository {
     private val overstyringRepository = PgOverstyringRepository(session)
 
-    override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? =
+    override fun finnOrNull(id: TotrinnsvurderingId): Totrinnsvurdering? =
         asSQL(
             """
             SELECT tv.id,
@@ -34,7 +34,7 @@ class PgTotrinnsvurderingRepository(
             "id" to id.value,
         ).singleOrNull { it.toTotrinnsvurdering() }
 
-    override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? =
+    override fun finnAktivForPersonOrNull(fødselsnummer: String): Totrinnsvurdering? =
         asSQL(
             """
             SELECT tv.id,

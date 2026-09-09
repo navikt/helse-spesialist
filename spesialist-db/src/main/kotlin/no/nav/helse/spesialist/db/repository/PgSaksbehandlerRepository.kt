@@ -21,7 +21,7 @@ class PgSaksbehandlerRepository private constructor(
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun finn(oid: SaksbehandlerOid): Saksbehandler? =
+    override fun finnOrNull(oid: SaksbehandlerOid): Saksbehandler? =
         asSQL(
             """ 
             SELECT * FROM saksbehandler WHERE oid = :oid
@@ -29,7 +29,7 @@ class PgSaksbehandlerRepository private constructor(
             "oid" to oid.value,
         ).singleOrNull { it.toSaksbehandler() }
 
-    override fun finn(ident: NAVIdent): Saksbehandler? =
+    override fun finnOrNull(ident: NAVIdent): Saksbehandler? =
         asSQL(
             """ 
             SELECT * FROM saksbehandler WHERE ident = :ident

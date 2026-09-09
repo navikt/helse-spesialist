@@ -7,11 +7,11 @@ import java.util.UUID
 interface AnnulleringRepository {
     fun lagreAnnullering(annullering: Annullering)
 
-    fun finnAnnullering(id: AnnulleringId): Annullering?
+    fun finnOrNull(id: AnnulleringId): Annullering?
 
-    fun finnAnnullering(vedtaksperiodeId: UUID): Annullering?
+    fun finnOrNull(vedtaksperiodeId: UUID): Annullering?
 
-    fun finnAnnulleringMedEnAv(
+    fun finnMedEnAvOrNull(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering?

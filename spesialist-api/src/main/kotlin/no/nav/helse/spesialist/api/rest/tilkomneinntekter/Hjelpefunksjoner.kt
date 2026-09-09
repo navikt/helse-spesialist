@@ -8,5 +8,5 @@ internal fun finnEllerOpprettTotrinnsvurdering(
     identitetsnummer: Identitetsnummer,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ): Totrinnsvurdering =
-    totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value)
+    totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
         ?: Totrinnsvurdering.ny(fødselsnummer = identitetsnummer.value).also(totrinnsvurderingRepository::lagre)

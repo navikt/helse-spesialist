@@ -66,7 +66,7 @@ internal class OppdaterPersoninfoCommandTest : ApplicationTest() {
         assertTrue(command.execute(context, sessionContext, outbox))
 
         // then
-        val funnet = personRepository.finn(person.id)
+        val funnet = personRepository.finnOrNull(person.id)
         assertNotNull(funnet)
         val personinfo = funnet.info
         assertNotNull(personinfo)

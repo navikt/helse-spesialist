@@ -141,6 +141,6 @@ internal class VedtaksperiodeForkastetCommandTest : ApplicationTest() {
         // then
         assertTrue(kommandoFerdig)
         assertEquals(emptyMap(), sessionContext.commandContextDao.avbrutteKommandokjeder)
-        assertEquals(vedtaksperiode.id, sessionContext.oppgaveRepository.finn(behandling.spleisBehandlingId!!)?.vedtaksperiodeId)
+        assertEquals(vedtaksperiode.id, sessionContext.oppgaveRepository.finnOrNull(behandling.spleisBehandlingId!!)?.vedtaksperiodeId)
     }
 }

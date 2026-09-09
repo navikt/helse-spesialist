@@ -146,13 +146,13 @@ class PgMeldingDao private constructor(
 
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
         val melding =
-            finn(meldingId)
+            finnOrNull(meldingId)
                 ?: throw IllegalArgumentException("Forventer å finne godkjenningsbehov for meldingId=$meldingId")
         check(melding is Godkjenningsbehov) { "Forventer at melding funnet med meldingId=$meldingId er et godkjenningsbehov" }
         return melding
     }
 
-    override fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov? =
+    override fun finnSisteGodkjenningsbehovOrNull(spleisBehandlingId: UUID): Godkjenningsbehov? =
         asSQL(
             """
                 SELECT id, type, data 
@@ -173,7 +173,7 @@ class PgMeldingDao private constructor(
                 ?: error("Forventer at melding funnet med meldingId=${it.uuid("id")} er et godkjenningsbehov")
         }
 
-    override fun finn(id: UUID): Personmelding? =
+    override fun finnOrNull(id: UUID): Personmelding? =
         asSQL(
             "SELECT type, data FROM hendelse WHERE id = :id",
             "id" to id,

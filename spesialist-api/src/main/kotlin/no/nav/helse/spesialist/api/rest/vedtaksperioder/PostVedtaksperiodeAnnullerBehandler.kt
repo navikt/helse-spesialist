@@ -35,7 +35,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Vedtak
         vedtaksperiode: Vedtaksperiode,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
-        if (kallKontekst.transaksjon.annulleringRepository.finnAnnullering(vedtaksperiodeId = vedtaksperiode.id.value) != null) {
+        if (kallKontekst.transaksjon.annulleringRepository.finnOrNull(vedtaksperiodeId = vedtaksperiode.id.value) != null) {
             return RestResponse.Error(ApiPostVedtaksperiodeAnnullerErrorCode.ALLEREDE_ANNULLERT)
         }
 

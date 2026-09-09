@@ -7,9 +7,9 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 interface SaksbehandlerRepository {
     fun lagre(saksbehandler: Saksbehandler)
 
-    fun finn(oid: SaksbehandlerOid): Saksbehandler?
+    fun finnOrNull(oid: SaksbehandlerOid): Saksbehandler?
 
-    fun finn(ident: NAVIdent): Saksbehandler?
+    fun finnOrNull(ident: NAVIdent): Saksbehandler?
 
     fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler>
 }

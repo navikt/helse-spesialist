@@ -57,7 +57,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostForkastingErrorCode> {
         val oppgave =
-            kallKontekst.transaksjon.oppgaveRepository.finn(behandling.spleisBehandlingId!!)
+            kallKontekst.transaksjon.oppgaveRepository.finnOrNull(behandling.spleisBehandlingId!!)
                 ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
 
         if (oppgave.tilstand != Oppgave.Tilstand.AvventerSaksbehandler) {
@@ -71,7 +71,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
         kallKontekst.transaksjon.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering =
-            kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+            kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
         if (totrinnsvurdering != null) {
             if (totrinnsvurdering.tilstand == TotrinnsvurderingTilstand.AVVENTER_BESLUTTER) {
                 return RestResponse.Error(TOTRINNSVURDERING_SENDT_TIL_BESLUTTER)
@@ -90,7 +90,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
                 val gammelStatus = it.status
                 it.avvis()
                 val varseldefinisjon =
-                    kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(it.kode)
+                    kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeForOrNull(it.kode)
                         ?: error("Varsel mangler varseldefinisjon")
                 kallKontekst.outbox.leggTilAvvistVarsel(
                     gammelStatus = gammelStatus,

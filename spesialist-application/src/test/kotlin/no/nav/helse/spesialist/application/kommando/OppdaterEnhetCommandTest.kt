@@ -54,7 +54,7 @@ internal class OppdaterEnhetCommandTest : ApplicationTest() {
         assertTrue(command.execute(context, sessionContext, outbox))
 
         // then
-        val funnet = sessionContext.personRepository.finn(person.id)
+        val funnet = sessionContext.personRepository.finnOrNull(person.id)
         assertNotNull(funnet)
         val enhet = funnet.enhetRef
         assertNotNull(enhet)

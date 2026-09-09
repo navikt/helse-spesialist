@@ -27,7 +27,7 @@ internal class PgArbeidsgiverRepository(
         ).update()
     }
 
-    override fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver? =
+    override fun finnOrNull(id: ArbeidsgiverIdentifikator): Arbeidsgiver? =
         asSQL(
             "SELECT * FROM arbeidsgiver WHERE identifikator = :identifikator",
             "identifikator" to id.tilDbIdentifikator(),

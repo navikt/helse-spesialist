@@ -81,12 +81,12 @@ class PostVedtakBehandler(
             }
 
             val totrinnsvurdering =
-                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+                kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
             val saksbehandlerSomFattetVedtaket: Saksbehandler
             val beslutter: Saksbehandler?
 
             var vedtak: Vedtak? =
-                kallKontekst.transaksjon.vedtakRepository.finn(spleisBehandlingId)?.also {
+                kallKontekst.transaksjon.vedtakRepository.finnOrNull(spleisBehandlingId)?.also {
                     if (it.behandletAvSpleis) {
                         logg.info("Det er allerede fattet vedtak for behandlingen, og spleis har behandlet det")
                         return RestResponse.Error(VEDTAK_ALLEREDE_FATTET)
@@ -96,7 +96,7 @@ class PostVedtakBehandler(
                     }
                 }
             val oppgave =
-                kallKontekst.transaksjon.oppgaveRepository.finn(spleisBehandlingId)
+                kallKontekst.transaksjon.oppgaveRepository.finnOrNull(spleisBehandlingId)
                     ?: return RestResponse.Error(OPPGAVE_IKKE_FUNNET)
             if (oppgave.tilstand !in setOf(Oppgave.Tilstand.AvventerSaksbehandler, Oppgave.Tilstand.AvventerSystem)) {
                 return RestResponse.Error(OPPGAVE_FEIL_TILSTAND)
@@ -105,7 +105,7 @@ class PostVedtakBehandler(
             if (totrinnsvurdering != null) {
                 beslutter = kallKontekst.saksbehandler
                 saksbehandlerSomFattetVedtaket =
-                    totrinnsvurdering.saksbehandler?.let { kallKontekst.transaksjon.saksbehandlerRepository.finn(it) }
+                    totrinnsvurdering.saksbehandler?.let { kallKontekst.transaksjon.saksbehandlerRepository.finnOrNull(it) }
                         ?: return RestResponse.Error(TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
                 vedtak = vedtak ?: Vedtak.manueltMedTotrinnskontroll(
                     id = spleisBehandlingId,
@@ -192,7 +192,7 @@ class PostVedtakBehandler(
         spleisBehandlingId: SpleisBehandlingId,
     ) {
         val repo = transaksjon.individuellBegrunnelseRepository
-        val eksisterende = repo.finn(spleisBehandlingId)
+        val eksisterende = repo.finnOrNull(spleisBehandlingId)
         val nyBegrunnelse = IndividuellBegrunnelse.ny(spleisBehandlingId, begrunnelse.orEmpty(), utfall(), saksbehandlerOid)
         if (eksisterende == null) {
             repo.lagre(nyBegrunnelse)
@@ -239,7 +239,7 @@ class PostVedtakBehandler(
         val gammelStatus = status
         godkjenn()
         val varseldefinisjon =
-            varseldefinisjonRepository.finnGjeldendeFor(kode)
+            varseldefinisjonRepository.finnGjeldendeForOrNull(kode)
                 ?: throw FattVedtakException(VARSEL_MANGLER_VARSELDEFINISJON)
         outbox.leggTil(
             identitetsnummer = identitetsnummer,

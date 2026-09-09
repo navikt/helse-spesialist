@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 interface ArbeidsgiverRepository {
     fun lagre(arbeidsgiver: Arbeidsgiver)
 
-    fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver?
+    fun finnOrNull(id: ArbeidsgiverIdentifikator): Arbeidsgiver?
 
     fun finnAlle(ider: Set<ArbeidsgiverIdentifikator>): List<Arbeidsgiver>
 }

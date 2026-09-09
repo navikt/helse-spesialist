@@ -108,7 +108,7 @@ class PgMeldingDaoTest {
         meldingDao.lagre(godkjenningsbehov)
 
         // Then:
-        val actual = meldingDao.finn(hendelseId) ?: fail { "Forventet å finne en hendelse med id $hendelseId" }
+        val actual = meldingDao.finnOrNull(hendelseId) ?: fail { "Forventet å finne en hendelse med id $hendelseId" }
         assertEquals(fødselsnummer, actual.fødselsnummer())
     }
 

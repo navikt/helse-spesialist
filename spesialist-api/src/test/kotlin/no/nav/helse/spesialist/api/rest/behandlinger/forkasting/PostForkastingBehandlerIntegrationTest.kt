@@ -70,9 +70,9 @@ class PostForkastingBehandlerIntegrationTest {
             )
 
         // Then:
-        val funnetVarsel = varselRepository.finn(varsel.id)
-        val funnetTotrinnsvurdering = totrinnsvurderingRepository.finn(totrinnsvurdering.id())
-        val funnetOppgave = oppgaveRepository.finn(oppgave.id)
+        val funnetVarsel = varselRepository.finnOrNull(varsel.id)
+        val funnetTotrinnsvurdering = totrinnsvurderingRepository.finnOrNull(totrinnsvurdering.id())
+        val funnetOppgave = oppgaveRepository.finnOrNull(oppgave.id)
         val reservasjon = integrationTestFixture.sessionContext.reservasjonDao.hentReservasjonFor(person.id.value)
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         assertEquals(Varsel.Status.AVVIST, funnetVarsel?.status)

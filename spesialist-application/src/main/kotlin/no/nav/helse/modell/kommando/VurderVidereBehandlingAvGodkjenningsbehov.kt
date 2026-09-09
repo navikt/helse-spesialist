@@ -33,7 +33,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             return ferdigstill(commandContext)
         }
 
-        val oppgave = sessionContext.oppgaveRepository.finn(SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)) ?: return true
+        val oppgave = sessionContext.oppgaveRepository.finnOrNull(SpleisBehandlingId(godkjenningsbehovData.spleisBehandlingId)) ?: return true
         if (oppgave.tilstand == Oppgave.Tilstand.Invalidert) return true
 
         val gammelGodkjenningsbehovId = oppgave.godkjenningsbehovId

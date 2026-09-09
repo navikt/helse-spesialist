@@ -261,11 +261,11 @@ class PostSendIReturIntegrationTest {
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         assertTrue(response.bodyAsText.isEmpty())
 
-        val oppdatertOppgave = sessionContext.oppgaveRepository.finn(oppgave.id)!!
+        val oppdatertOppgave = sessionContext.oppgaveRepository.finnOrNull(oppgave.id)!!
         assertTrue(Egenskap.RETUR in oppdatertOppgave.egenskaper)
         assertFalse(Egenskap.BESLUTTER in oppdatertOppgave.egenskaper)
 
-        val oppdatertTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)!!
+        val oppdatertTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)!!
         assertEquals(TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER, oppdatertTotrinnsvurdering.tilstand)
         assertEquals(opprinneligSaksbehandler.id, oppdatertTotrinnsvurdering.saksbehandler)
         assertEquals(beslutter.id, oppdatertTotrinnsvurdering.beslutter)

@@ -184,7 +184,7 @@ class MeldingMediator(
     }
 
     private fun finnMelding(meldingId: UUID): Personmelding? =
-        meldingDao.finn(meldingId) ?: run {
+        meldingDao.finnOrNull(meldingId) ?: run {
             loggInfo("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
             return null
         }
@@ -268,7 +268,7 @@ class MeldingMediator(
         val outbox = Outbox(versjonAvKode = versjonAvKode)
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
-                if (sessionContext.personRepository.finn(Identitetsnummer.fraString(melding.fødselsnummer())) == null) {
+                if (sessionContext.personRepository.finnOrNull(Identitetsnummer.fraString(melding.fødselsnummer())) == null) {
                     loggInfo("Behandler ikke melding for ukjent person", "fødselsnummer" to melding.fødselsnummer())
                     return@transactionalSessionScope
                 }

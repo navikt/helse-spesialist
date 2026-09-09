@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 interface TilkommenInntektRepository {
     fun finnAlleForIdentitetsnummer(identitetsnummer: Identitetsnummer): List<TilkommenInntekt>
 
-    fun finn(id: TilkommenInntektId): TilkommenInntekt?
+    fun finnOrNull(id: TilkommenInntektId): TilkommenInntekt?
 
     fun lagre(tilkommenInntekt: TilkommenInntekt)
 }

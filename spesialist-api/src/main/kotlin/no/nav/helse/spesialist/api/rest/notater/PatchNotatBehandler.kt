@@ -24,7 +24,7 @@ class PatchNotatBehandler : PatchBehandler<Notater.NotatId, ApiPatchNotatRequest
         if (!request.feilregistrert) return RestResponse.Error(ApiPatchNotatErrorCode.KAN_IKKE_FJERNE_FEILREGISTRERING)
 
         val notat =
-            kallKontekst.transaksjon.notatRepository.finn(NotatId(resource.notatId))
+            kallKontekst.transaksjon.notatRepository.finnOrNull(NotatId(resource.notatId))
                 ?: return RestResponse.Error(ApiPatchNotatErrorCode.NOTAT_IKKE_FUNNET)
 
         return kallKontekst.medVedtaksperiode(

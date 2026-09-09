@@ -20,7 +20,7 @@ class PgVedtaksperiodeRepositoryTest : AbstractDBIntegrationTest() {
             }
 
         // when
-        val funnet = repository.finn(vedtaksperiode.id)
+        val funnet = repository.finnOrNull(vedtaksperiode.id)
 
         // then
         assertNotNull(funnet)
@@ -39,7 +39,7 @@ class PgVedtaksperiodeRepositoryTest : AbstractDBIntegrationTest() {
             }
 
         // when
-        val funnet = repository.finn(vedtaksperiode.id)
+        val funnet = repository.finnOrNull(vedtaksperiode.id)
 
         // then
         assertNotNull(funnet)

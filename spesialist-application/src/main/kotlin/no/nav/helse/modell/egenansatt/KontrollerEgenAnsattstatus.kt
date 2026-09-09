@@ -41,5 +41,5 @@ internal class KontrollerEgenAnsattstatus(
     }
 
     // Hvis vi har informasjon i databasen er den "garantert" oppdatert, pga. at vi lytter på endringer på topic fra NOM.
-    private fun viHarInformasjon(sessionContext: SessionContext) = sessionContext.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus != null
+    private fun viHarInformasjon(sessionContext: SessionContext) = sessionContext.personRepository.finnOrNull(Identitetsnummer.fraString(fødselsnummer))?.egenAnsattStatus != null
 }

@@ -61,7 +61,7 @@ class PgVedtakRepository private constructor(
 
     private fun Vedtak.beslutterIdent(): String? = (this as? Vedtak.ManueltMedTotrinnskontroll)?.beslutterIdent?.value
 
-    override fun finn(spleisBehandlingId: SpleisBehandlingId): Vedtak? =
+    override fun finnOrNull(spleisBehandlingId: SpleisBehandlingId): Vedtak? =
         dbQuery.singleOrNull(
             """
             SELECT fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt, behandlet_av_spleis

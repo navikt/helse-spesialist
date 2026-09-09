@@ -27,7 +27,7 @@ internal class VurderBehovForTotrinnskontroll(
             varslerForBehandlingspakke.any { it.erVarselOmMedlemskap() } || varslerForBehandling.any { it.erVarselOmManglendeInntektsmelding() }
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(behandling.vedtaksperiodeId.value)
 
-        val eksisterendeTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
+        val eksisterendeTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(fødselsnummer)
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
             logg.info("Vedtaksperioden: ${behandling.vedtaksperiodeId.value} trenger totrinnsvurdering")

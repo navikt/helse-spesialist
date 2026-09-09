@@ -22,7 +22,7 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
         kallKontekst: KallKontekst,
     ): RestResponse<ApiVarsel, GetVarselErrorCode> {
         val varsel =
-            kallKontekst.transaksjon.varselRepository.finn(VarselId(resource.varselId))
+            kallKontekst.transaksjon.varselRepository.finnOrNull(VarselId(resource.varselId))
                 ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
 
         return kallKontekst.medBehandling(
@@ -41,10 +41,10 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
         val varselvurdering = varsel.vurdering
         val varseldefinisjon =
             if (varselvurdering != null) {
-                kallKontekst.transaksjon.varseldefinisjonRepository.finn(varselvurdering.vurdertDefinisjonId)
+                kallKontekst.transaksjon.varseldefinisjonRepository.finnOrNull(varselvurdering.vurdertDefinisjonId)
                     ?: error("Fant ikke varseldefinisjon brukt i vurdering av varsel")
             } else {
-                kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeFor(varsel.kode)
+                kallKontekst.transaksjon.varseldefinisjonRepository.finnGjeldendeForOrNull(varsel.kode)
                     ?: error("Fant ikke gjeldende varseldefinisjon for aktuell varselkode")
             }
 
@@ -66,7 +66,7 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
                 vurdering =
                     varsel.vurdering?.let { vurdering ->
                         val saksbehandler =
-                            kallKontekst.transaksjon.saksbehandlerRepository.finn(vurdering.saksbehandlerId)
+                            kallKontekst.transaksjon.saksbehandlerRepository.finnOrNull(vurdering.saksbehandlerId)
                                 ?: error("Finner ikke saksbehandler som vurderte varselet")
                         ApiVarsel.ApiVarselvurdering(
                             ident = saksbehandler.ident.value,

@@ -13,7 +13,7 @@ class PgVarseldefinisjonRepository private constructor(
 ) : VarseldefinisjonRepository {
     internal constructor(session: Session) : this(SessionDbQuery(session))
 
-    override fun finn(id: VarseldefinisjonId): Varseldefinisjon? =
+    override fun finnOrNull(id: VarseldefinisjonId): Varseldefinisjon? =
         dbQuery.singleOrNull(
             """
                 SELECT kode, unik_id, tittel, forklaring, handling FROM api_varseldefinisjon WHERE unik_id = :unik_id
@@ -23,7 +23,7 @@ class PgVarseldefinisjonRepository private constructor(
             it.mapTilVarseldefinisjon()
         }
 
-    override fun finnGjeldendeFor(kode: String): Varseldefinisjon? =
+    override fun finnGjeldendeForOrNull(kode: String): Varseldefinisjon? =
         dbQuery.singleOrNull(
             """
                 SELECT DISTINCT ON (kode) kode, unik_id, tittel, forklaring, handling FROM api_varseldefinisjon WHERE kode = :kode

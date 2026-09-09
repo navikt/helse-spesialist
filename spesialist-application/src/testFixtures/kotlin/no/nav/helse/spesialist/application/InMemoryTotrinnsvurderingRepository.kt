@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegru
 class InMemoryTotrinnsvurderingRepository :
     AbstractLateIdInMemoryRepository<TotrinnsvurderingId, Totrinnsvurdering>(),
     TotrinnsvurderingRepository {
-    override fun finnAktivForPerson(fødselsnummer: String) = alle().find { it.fødselsnummer == fødselsnummer }
+    override fun finnAktivForPersonOrNull(fødselsnummer: String) = alle().find { it.fødselsnummer == fødselsnummer }
 
     override fun tildelIderSomMangler(root: Totrinnsvurdering) {
         if (!root.harFåttTildeltId()) {

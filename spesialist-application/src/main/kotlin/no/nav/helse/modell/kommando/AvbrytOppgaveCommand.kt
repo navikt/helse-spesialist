@@ -16,7 +16,7 @@ internal class AvbrytOppgaveCommand(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        val oppgave = sessionContext.oppgaveRepository.finnGjeldendeForPerson(identitetsnummer)
+        val oppgave = sessionContext.oppgaveRepository.finnGjeldendeForPersonOrNull(identitetsnummer)
 
         if (oppgave == null) {
             loggInfo(

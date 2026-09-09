@@ -54,7 +54,7 @@ class InMemoryVedtakBegrunnelseDao(
     ): List<VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase> =
         begrunnelser
             .filter { lagret ->
-                val oppgave = oppgaveRepository.finn(OppgaveId(lagret.oppgaveId)) ?: return@filter false
+                val oppgave = oppgaveRepository.finnOrNull(OppgaveId(lagret.oppgaveId)) ?: return@filter false
                 if (oppgave.vedtaksperiodeId.value != vedtaksperiodeId) return@filter false
                 val behandling = behandlingRepository.finnOrNull(oppgave.behandlingId) ?: return@filter false
                 behandling.utbetalingId?.value == utbetalingId
@@ -65,7 +65,7 @@ class InMemoryVedtakBegrunnelseDao(
                     begrunnelse = lagret.vedtakBegrunnelse.tekst,
                     opprettet = lagret.opprettet,
                     saksbehandlerIdent =
-                        saksbehandlerRepository.finn(SaksbehandlerOid(lagret.saksbehandlerOid))?.ident?.value
+                        saksbehandlerRepository.finnOrNull(SaksbehandlerOid(lagret.saksbehandlerOid))?.ident?.value
                             ?: lagret.saksbehandlerOid.toString(),
                     invalidert = lagret.invalidert,
                 )

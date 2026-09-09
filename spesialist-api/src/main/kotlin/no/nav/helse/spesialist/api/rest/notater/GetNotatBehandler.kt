@@ -21,7 +21,7 @@ class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorC
         kallKontekst: KallKontekst,
     ): RestResponse<ApiNotat, GetNotatErrorCode> {
         val notat =
-            kallKontekst.transaksjon.notatRepository.finn(NotatId(resource.notatId))
+            kallKontekst.transaksjon.notatRepository.finnOrNull(NotatId(resource.notatId))
                 ?: return RestResponse.Error(GetNotatErrorCode.NOTAT_IKKE_FUNNET)
 
         return kallKontekst.medVedtaksperiode(
@@ -38,7 +38,7 @@ class GetNotatBehandler : GetBehandler<Notater.NotatId, ApiNotat, GetNotatErrorC
         kallKontekst: KallKontekst,
     ): RestResponse<ApiNotat, GetNotatErrorCode> {
         val dialog =
-            kallKontekst.transaksjon.dialogRepository.finn(notat.dialogRef)
+            kallKontekst.transaksjon.dialogRepository.finnOrNull(notat.dialogRef)
                 ?: error("Kunne ikke finne dialog med id ${notat.dialogRef}")
 
         val apiNotat = notat.tilApiNotat(kallKontekst.saksbehandler, dialog)

@@ -103,7 +103,7 @@ internal class VurderAutomatiskInnvilgelse(
         spleisBehandlingId: SpleisBehandlingId,
     ) {
         val vedtak =
-            sessionContext.vedtakRepository.finn(spleisBehandlingId).let { vedtak ->
+            sessionContext.vedtakRepository.finnOrNull(spleisBehandlingId).let { vedtak ->
                 when (vedtak?.behandletAvSpleis) {
                     null -> {
                         Vedtak.automatisk(spleisBehandlingId)

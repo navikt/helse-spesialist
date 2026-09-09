@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 
 interface VarseldefinisjonRepository {
-    fun finnGjeldendeFor(kode: String): Varseldefinisjon?
+    fun finnGjeldendeForOrNull(kode: String): Varseldefinisjon?
 
-    fun finn(id: VarseldefinisjonId): Varseldefinisjon?
+    fun finnOrNull(id: VarseldefinisjonId): Varseldefinisjon?
 }

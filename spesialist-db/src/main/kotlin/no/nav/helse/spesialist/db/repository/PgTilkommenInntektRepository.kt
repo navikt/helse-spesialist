@@ -38,7 +38,7 @@ class PgTilkommenInntektRepository(
             .groupBy { it.metadata.tilkommenInntektId }
             .map { (_, events) -> events.tilTilkommenInntekt() }
 
-    override fun finn(id: TilkommenInntektId): TilkommenInntekt? {
+    override fun finnOrNull(id: TilkommenInntektId): TilkommenInntekt? {
         val events =
             asSQL(
                 """

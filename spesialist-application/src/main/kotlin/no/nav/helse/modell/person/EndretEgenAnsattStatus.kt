@@ -56,7 +56,7 @@ internal class EndretEgenAnsattStatusCommand(
     override val commands: List<Command> =
         listOf(
             ikkesuspenderendeCommand("lagreEgenAnsattStatus") { sessionContext: SessionContext, _: Outbox ->
-                val person = sessionContext.personRepository.finn(Identitetsnummer.fraString(fødselsnummer)) ?: return@ikkesuspenderendeCommand
+                val person = sessionContext.personRepository.finnOrNull(Identitetsnummer.fraString(fødselsnummer)) ?: return@ikkesuspenderendeCommand
                 person.oppdaterEgenAnsattStatus(
                     erEgenAnsatt = erEgenAnsatt,
                     oppdatertTidspunkt = opprettet.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
@@ -65,7 +65,7 @@ internal class EndretEgenAnsattStatusCommand(
             },
             ikkesuspenderendeCommand("endretEgenAnsattStatus") { sessionContext: SessionContext, outbox: Outbox ->
                 val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
-                val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer) ?: return@ikkesuspenderendeCommand
+                val oppgave = sessionContext.oppgaveRepository.finnAktivForPersonOrNull(identitetsnummer) ?: return@ikkesuspenderendeCommand
                 if (erEgenAnsatt) {
                     loggInfo("Legger til egenskap EGEN_ANSATT", "fødselsnummer" to fødselsnummer, "oppgaveId" to oppgave.id.value)
                     oppgave.leggTilEgenAnsatt()

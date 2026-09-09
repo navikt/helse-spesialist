@@ -34,9 +34,9 @@ class InMemoryMeldingDao : MeldingDao {
 
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov = godkjenningsbehov.first { it.id == meldingId }
 
-    override fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov? = godkjenningsbehov.filter { it.spleisBehandlingId == spleisBehandlingId }.maxByOrNull { it.opprettet }
+    override fun finnSisteGodkjenningsbehovOrNull(spleisBehandlingId: UUID): Godkjenningsbehov? = godkjenningsbehov.filter { it.spleisBehandlingId == spleisBehandlingId }.maxByOrNull { it.opprettet }
 
-    override fun finn(id: UUID): Personmelding? {
+    override fun finnOrNull(id: UUID): Personmelding? {
         TODO("Not yet implemented")
     }
 

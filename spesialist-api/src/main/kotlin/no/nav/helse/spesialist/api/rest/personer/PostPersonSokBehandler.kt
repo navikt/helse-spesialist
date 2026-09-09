@@ -47,7 +47,7 @@ class PostPersonSokBehandler(
                     loggInfo("Søker etter person med identitetsnummer", "identitetsnummer" to identitetsnummer)
 
                     val identitet = Identitetsnummer.fraString(identitetsnummer)
-                    kallKontekst.transaksjon.personRepository.finn(identitet)
+                    kallKontekst.transaksjon.personRepository.finnOrNull(identitet)
                         ?: when (val resultat = opprettPerson(identitet)) {
                             is Either.Failure -> return RestResponse.Error(resultat.error)
                             is Either.Success -> resultat.result

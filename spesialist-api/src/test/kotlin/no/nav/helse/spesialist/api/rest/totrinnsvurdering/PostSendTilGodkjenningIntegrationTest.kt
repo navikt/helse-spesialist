@@ -213,10 +213,10 @@ class PostSendTilGodkjenningIntegrationTest {
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
 
-        val oppdatertOppgave = sessionContext.oppgaveRepository.finn(oppgave.id)!!
+        val oppdatertOppgave = sessionContext.oppgaveRepository.finnOrNull(oppgave.id)!!
         assertTrue(Egenskap.BESLUTTER in oppdatertOppgave.egenskaper)
 
-        val oppdatertTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPerson(person.id.value)!!
+        val oppdatertTotrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)!!
         assertEquals(TotrinnsvurderingTilstand.AVVENTER_BESLUTTER, oppdatertTotrinnsvurdering.tilstand)
         assertEquals(saksbehandler.id, oppdatertTotrinnsvurdering.saksbehandler)
 

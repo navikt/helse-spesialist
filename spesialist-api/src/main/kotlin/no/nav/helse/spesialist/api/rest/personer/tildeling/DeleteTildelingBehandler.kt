@@ -23,7 +23,7 @@ class DeleteTildelingBehandler : DeleteBehandler<Personer.PersonPseudoId.Tildeli
             personPseudoIdIkkeFunnet = { ApiDeleteTildelingErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiDeleteTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
-            val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPerson(it.id) ?: error("Fant ikke oppgave")
+            val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPersonOrNull(it.id) ?: error("Fant ikke oppgave")
             if (!oppgave.erTildelt()) {
                 loggInfo("Oppgaven er ikke tildelt, gjør ikke noe videre")
                 return@medPerson RestResponse.NoContent()

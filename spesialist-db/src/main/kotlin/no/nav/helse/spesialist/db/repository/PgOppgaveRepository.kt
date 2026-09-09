@@ -42,13 +42,13 @@ class PgOppgaveRepository private constructor(
         lagreTildeling(oppgave)
     }
 
-    override fun finn(id: Long): Oppgave? = finnOppgave(id)
+    override fun finnOrNull(id: Long): Oppgave? = finnOppgave(id)
 
-    override fun finn(id: OppgaveId): Oppgave? = finnOppgave(id.value)
+    override fun finnOrNull(id: OppgaveId): Oppgave? = finnOppgave(id.value)
 
-    override fun finn(id: SpleisBehandlingId): Oppgave? = finnOppgave(id)
+    override fun finnOrNull(id: SpleisBehandlingId): Oppgave? = finnOppgave(id)
 
-    override fun finnAktivForPerson(identitetsnummer: Identitetsnummer): Oppgave? =
+    override fun finnAktivForPersonOrNull(identitetsnummer: Identitetsnummer): Oppgave? =
         asSQL(
             """
             SELECT 
@@ -83,7 +83,7 @@ class PgOppgaveRepository private constructor(
             row.rowTilOppgave()
         }
 
-    override fun finnGjeldendeForPerson(identitetsnummer: Identitetsnummer): Oppgave? =
+    override fun finnGjeldendeForPersonOrNull(identitetsnummer: Identitetsnummer): Oppgave? =
         asSQL(
             """
             SELECT 

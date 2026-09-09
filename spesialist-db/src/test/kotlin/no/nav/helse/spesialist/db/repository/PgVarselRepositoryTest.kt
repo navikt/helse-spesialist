@@ -36,7 +36,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         sessionContext.varselRepository.lagre(varsel)
 
         // when
-        val funnet = repository.finn(varsel.id)
+        val funnet = repository.finnOrNull(varsel.id)
 
         // then
         assertNotNull(funnet)
@@ -64,7 +64,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         sessionContext.varselRepository.lagre(varsel)
 
         // when
-        val funnet = repository.finn(varsel.id)
+        val funnet = repository.finnOrNull(varsel.id)
 
         // then
         assertNotNull(funnet)
@@ -94,7 +94,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         sessionContext.varselRepository.lagre(varsel)
 
         // when
-        val funnet = repository.finn(varsel.id)
+        val funnet = repository.finnOrNull(varsel.id)
 
         // then
         assertNotNull(funnet)
@@ -222,7 +222,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         repository.slett(varsel.id)
 
         // then
-        val funnet = repository.finn(varsel.id)
+        val funnet = repository.finnOrNull(varsel.id)
         assertNull(funnet)
     }
 

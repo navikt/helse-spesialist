@@ -9,9 +9,9 @@ class DelegatingTildelingDao(
     private val saksbehandlerRepository: InMemorySaksbehandlerRepository,
 ) : TildelingDao {
     override fun tildelingForPerson(fødselsnummer: String): TildelingDto? {
-        val oppgave = oppgaveRepository.finnAktivForPerson(Identitetsnummer.fraString(fødselsnummer)) ?: return null
+        val oppgave = oppgaveRepository.finnAktivForPersonOrNull(Identitetsnummer.fraString(fødselsnummer)) ?: return null
         val tildeltTil = oppgave.tildeltTil ?: return null
-        val saksbehandler = saksbehandlerRepository.finn(tildeltTil) ?: error("Finner ikke saksbehandler")
+        val saksbehandler = saksbehandlerRepository.finnOrNull(tildeltTil) ?: error("Finner ikke saksbehandler")
         return TildelingDto(
             navn = saksbehandler.navn,
             epost = saksbehandler.epost,

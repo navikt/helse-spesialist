@@ -25,7 +25,7 @@ internal class OppdaterEnhetCommand(
         outbox: Outbox,
     ): Boolean {
         val person =
-            sessionContext.personRepository.finn(identitetsnummer)
+            sessionContext.personRepository.finnOrNull(identitetsnummer)
                 ?: error("Fant ikke person")
         val sistOppdatert = person.enhetRefOppdatert
         if (sistOppdatert != null && sistOppdatert > datoForUtdatert) return ignorer()
@@ -38,7 +38,7 @@ internal class OppdaterEnhetCommand(
         outbox: Outbox,
     ): Boolean {
         val person =
-            sessionContext.personRepository.finn(identitetsnummer)
+            sessionContext.personRepository.finnOrNull(identitetsnummer)
                 ?: error("Fant ikke person")
         return behandle(commandContext, sessionContext.personRepository, person)
     }

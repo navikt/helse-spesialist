@@ -96,7 +96,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
             fjernet = tilkommenInntekt.fjernet,
             erDelAvAktivTotrinnsvurdering =
                 kallKontekst.transaksjon.totrinnsvurderingRepository
-                    .finn(id = tilkommenInntekt.totrinnsvurderingId)
+                    .finnOrNull(id = tilkommenInntekt.totrinnsvurderingId)
                     ?.tilstand != TotrinnsvurderingTilstand.GODKJENT,
             events = tilkommenInntekt.events.map { it.tilApiTilkommenInntektEvent() },
         )

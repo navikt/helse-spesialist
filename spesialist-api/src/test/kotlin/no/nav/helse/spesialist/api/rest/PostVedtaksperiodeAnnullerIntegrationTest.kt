@@ -72,7 +72,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         // Sjekk persistert data
         val lagretAnnullering =
             annulleringRepository
-                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+                .finnMedEnAvOrNull(arbeidsgiverFagsystemId, personFagsystemId)
 
         assertNotNull(lagretAnnullering)
 
@@ -157,7 +157,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         // Sjekk persistert data
         val lagretAnnullering =
             annulleringRepository
-                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+                .finnMedEnAvOrNull(arbeidsgiverFagsystemId, personFagsystemId)
 
         assertNotNull(lagretAnnullering)
 
@@ -267,7 +267,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         // Sjekk persistert data
         val lagretAnnullering =
             annulleringRepository
-                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+                .finnMedEnAvOrNull(arbeidsgiverFagsystemId, personFagsystemId)
 
         assertNotNull(lagretAnnullering)
 

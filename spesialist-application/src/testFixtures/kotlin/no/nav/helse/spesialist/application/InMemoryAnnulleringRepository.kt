@@ -12,11 +12,9 @@ class InMemoryAnnulleringRepository :
         lagre(annullering)
     }
 
-    override fun finnAnnullering(id: AnnulleringId): Annullering? = finn(id)
+    override fun finnOrNull(vedtaksperiodeId: UUID): Annullering? = alle().find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-    override fun finnAnnullering(vedtaksperiodeId: UUID): Annullering? = alle().find { it.vedtaksperiodeId == vedtaksperiodeId }
-
-    override fun finnAnnulleringMedEnAv(
+    override fun finnMedEnAvOrNull(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering? = alle().find { it.arbeidsgiverFagsystemId == arbeidsgiverFagsystemId || it.personFagsystemId == personFagsystemId }

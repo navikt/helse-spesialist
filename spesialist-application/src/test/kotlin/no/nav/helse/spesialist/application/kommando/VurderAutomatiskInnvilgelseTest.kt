@@ -102,7 +102,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        val vedtak = vedtakRepository.finn(behandling1.spleisBehandlingId!!)
+        val vedtak = vedtakRepository.finnOrNull(behandling1.spleisBehandlingId!!)
         assertIs<Vedtak.Automatisk>(vedtak)
         assertEquals(listOf(behandling1.utbetalingId!!.value), automatiseringDao.automatisert)
         assertTrue(automatiseringDao.manuellSaksbehandling.isEmpty())
@@ -116,7 +116,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
                 problemer,
             )
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertNull(vedtakRepository.finn(behandling1.spleisBehandlingId!!))
+        assertNull(vedtakRepository.finnOrNull(behandling1.spleisBehandlingId!!))
         assertTrue(automatiseringDao.automatisert.isEmpty())
         assertEquals(
             listOf(
@@ -138,7 +138,7 @@ internal class VurderAutomatiskInnvilgelseTest : ApplicationTest() {
                 "En årsak",
             )
         assertTrue(command.execute(commandContext, sessionContext, outbox))
-        assertNull(vedtakRepository.finn(behandling1.spleisBehandlingId!!))
+        assertNull(vedtakRepository.finnOrNull(behandling1.spleisBehandlingId!!))
         assertTrue(automatiseringDao.automatisert.isEmpty())
         assertEquals(listOf(behandling1.utbetalingId!!.value), automatiseringDao.stikkprøver)
     }

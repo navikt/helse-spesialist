@@ -56,8 +56,8 @@ class DeletePåVentBehandlerTest {
         val funnedeHistorikkinnslag = periodehistorikkDao.behandlingData[behandling.id.value] ?: emptyList()
         assertEquals(1, funnedeHistorikkinnslag.size)
         assertIs<FjernetFraPåVent>(funnedeHistorikkinnslag.single())
-        assertEquals(oppgaveRepository.finn(oppgave.id)?.egenskaper?.contains(Egenskap.PÅ_VENT), false)
-        assertNull(påVentRepository.finn(påVent.id()))
+        assertEquals(false, oppgaveRepository.finnOrNull(oppgave.id)?.egenskaper?.contains(Egenskap.PÅ_VENT))
+        assertNull(påVentRepository.finnOrNull(påVent.id()))
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
                 fødselsnummer = person.id.value,

@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.domain.VedtakBegrunnelseId
 class InMemoryIndividuellBegrunnelseRepository :
     AbstractLateIdInMemoryRepository<VedtakBegrunnelseId, IndividuellBegrunnelse>(),
     IndividuellBegrunnelseRepository {
-    override fun finn(spleisBehandlingId: SpleisBehandlingId): IndividuellBegrunnelse? = alle().find { it.spleisBehandlingId == spleisBehandlingId }
+    override fun finnOrNull(spleisBehandlingId: SpleisBehandlingId): IndividuellBegrunnelse? = alle().find { it.spleisBehandlingId == spleisBehandlingId }
 
     override fun tildelIderSomMangler(root: IndividuellBegrunnelse) {
         if (!root.harFåttTildeltId()) {

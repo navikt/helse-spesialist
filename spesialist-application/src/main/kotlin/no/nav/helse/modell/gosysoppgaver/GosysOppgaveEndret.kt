@@ -36,7 +36,7 @@ class GosysOppgaveEndret(
     ) {
         val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         kommandostarter {
-            val oppgave = sessionContext.oppgaveRepository.finnAktivForPerson(identitetsnummer)
+            val oppgave = sessionContext.oppgaveRepository.finnAktivForPersonOrNull(identitetsnummer)
             gosysOppgaveEndret(oppgave, sessionContext)
         }
     }

@@ -8,7 +8,7 @@ import java.util.UUID
 interface NotatRepository {
     fun lagre(notat: Notat)
 
-    fun finn(id: NotatId): Notat?
+    fun finnOrNull(id: NotatId): Notat?
 
     fun finnAlleForVedtaksperiode(vedtaksperiodeId: UUID): List<Notat>
 

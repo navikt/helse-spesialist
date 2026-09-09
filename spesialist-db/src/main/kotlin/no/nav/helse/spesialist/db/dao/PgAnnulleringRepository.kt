@@ -58,7 +58,7 @@ class PgAnnulleringRepository private constructor(
         "saksbehandler_ref" to saksbehandlerOid.value,
     )
 
-    override fun finnAnnullering(id: AnnulleringId): Annullering? =
+    override fun finnOrNull(id: AnnulleringId): Annullering? =
         dbQuery.singleOrNull(
             """
             select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, aas.saksbehandler_ref, aas.årsaker, b.tekst, vedtaksperiode_id
@@ -69,7 +69,7 @@ class PgAnnulleringRepository private constructor(
             "id" to id.value,
         ) { it.tilAnnullering() }
 
-    override fun finnAnnullering(vedtaksperiodeId: UUID): Annullering? =
+    override fun finnOrNull(vedtaksperiodeId: UUID): Annullering? =
         dbQuery.singleOrNull(
             """
             select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, aas.saksbehandler_ref, aas.årsaker, b.tekst, vedtaksperiode_id
@@ -80,7 +80,7 @@ class PgAnnulleringRepository private constructor(
             "vedtaksperiodeId" to vedtaksperiodeId,
         ) { it.tilAnnullering() }
 
-    override fun finnAnnulleringMedEnAv(
+    override fun finnMedEnAvOrNull(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering? =

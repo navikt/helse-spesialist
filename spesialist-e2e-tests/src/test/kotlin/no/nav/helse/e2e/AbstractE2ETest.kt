@@ -969,7 +969,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val erEgenAnsatt =
             sessionFactory.transactionalSessionScope {
                 it.personRepository
-                    .finn(Identitetsnummer.fraString(fødselsnummer))
+                    .finnOrNull(Identitetsnummer.fraString(fødselsnummer))
                     ?.egenAnsattStatus
                     ?.erEgenAnsatt
             }

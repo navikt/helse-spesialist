@@ -46,7 +46,7 @@ class BehandlingLukketRiver : TransaksjonellRiver() {
         )
 
         transaksjon.oppgaveRepository
-            .finn(spleisBehandlingId)
+            .finnOrNull(spleisBehandlingId)
             ?.let {
                 it.ferdigstill()
                 outbox.leggTil(identitetsnummer, OppgaveOppdatert(it), "behandling_lukket")
@@ -54,7 +54,7 @@ class BehandlingLukketRiver : TransaksjonellRiver() {
             }
 
         val vedtak =
-            transaksjon.vedtakRepository.finn(spleisBehandlingId) ?: run {
+            transaksjon.vedtakRepository.finnOrNull(spleisBehandlingId) ?: run {
                 logg.info("Fant ikke vedtak for $spleisBehandlingId - satser på at det betyr at det ikke er noe å gjøre her.")
                 return
             }

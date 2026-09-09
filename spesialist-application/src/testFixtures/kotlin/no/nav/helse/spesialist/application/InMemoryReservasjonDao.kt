@@ -15,7 +15,7 @@ class InMemoryReservasjonDao(
         fødselsnummer: String,
     ) {
         val reservertTil =
-            saksbehandlerRepository.finn(SaksbehandlerOid(saksbehandlerOid))
+            saksbehandlerRepository.finnOrNull(SaksbehandlerOid(saksbehandlerOid))
                 ?: error("Fant ikke saksbehandler i saksbehandlerRepository")
         data[fødselsnummer] = Reservasjon(reservertTil)
     }

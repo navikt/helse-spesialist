@@ -27,7 +27,7 @@ class PgVedtaksperiodeRepository private constructor(
         )
     }
 
-    override fun finn(vedtaksperiodeId: VedtaksperiodeId): Vedtaksperiode? =
+    override fun finnOrNull(vedtaksperiodeId: VedtaksperiodeId): Vedtaksperiode? =
         dbQuery.singleOrNull(
             """
                 SELECT vedtaksperiode_id, fødselsnummer, arbeidsgiver_identifikator, forkastet

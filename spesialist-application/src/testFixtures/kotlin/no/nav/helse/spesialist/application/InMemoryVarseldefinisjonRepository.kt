@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.VarseldefinisjonId
 class InMemoryVarseldefinisjonRepository :
     AbstractInMemoryRepository<VarseldefinisjonId, Varseldefinisjon>(),
     VarseldefinisjonRepository {
-    override fun finnGjeldendeFor(kode: String): Varseldefinisjon? = alle().find { it.kode == kode }
+    override fun finnGjeldendeForOrNull(kode: String): Varseldefinisjon? = alle().find { it.kode == kode }
 
     override fun deepCopy(original: Varseldefinisjon): Varseldefinisjon =
         Varseldefinisjon.fraLagring(

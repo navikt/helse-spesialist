@@ -74,7 +74,7 @@ class OppgaveService(
         id: Long,
         oppgaveBlock: Oppgave.() -> T,
     ): T {
-        val oppgave = oppgaveRepository.finn(id) ?: error("Forventer å finne oppgave med oppgaveId=$id")
+        val oppgave = oppgaveRepository.finnOrNull(id) ?: error("Forventer å finne oppgave med oppgaveId=$id")
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         val returverdi = oppgaveBlock(oppgave)
         oppgaveRepository.lagre(oppgave)

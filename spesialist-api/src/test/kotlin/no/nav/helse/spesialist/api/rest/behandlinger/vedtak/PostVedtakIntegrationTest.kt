@@ -72,7 +72,7 @@ class PostVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
-        val vedtak = sessionContext.vedtakRepository.finn(behandling.spleisBehandlingId!!)
+        val vedtak = sessionContext.vedtakRepository.finnOrNull(behandling.spleisBehandlingId!!)
         assertIs<Vedtak.ManueltUtenTotrinnskontroll>(vedtak)
         assertEquals(saksbehandler.ident, vedtak.saksbehandlerIdent)
     }
@@ -109,7 +109,7 @@ class PostVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
-        val vedtak = sessionContext.vedtakRepository.finn(behandling.spleisBehandlingId!!)
+        val vedtak = sessionContext.vedtakRepository.finnOrNull(behandling.spleisBehandlingId!!)
         assertIs<Vedtak.ManueltMedTotrinnskontroll>(vedtak)
         assertEquals(saksbehandler.ident, vedtak.saksbehandlerIdent)
         assertEquals(beslutter.ident, vedtak.beslutterIdent)
@@ -266,7 +266,7 @@ class PostVedtakIntegrationTest {
         )
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
         sessionContext.oppgaveRepository.lagre(oppgave)
-        val førsteTidspunkt = sessionContext.vedtakRepository.finn(spleisBehandlingId)!!.tidspunkt
+        val førsteTidspunkt = sessionContext.vedtakRepository.finnOrNull(spleisBehandlingId)!!.tidspunkt
 
         // When:
         val response =
@@ -278,7 +278,7 @@ class PostVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NoContent.value, response.status)
-        val tidspunkt = sessionContext.vedtakRepository.finn(spleisBehandlingId)!!.tidspunkt
+        val tidspunkt = sessionContext.vedtakRepository.finnOrNull(spleisBehandlingId)!!.tidspunkt
         assertNotEqualsByMicrosecond(tidspunkt, førsteTidspunkt)
     }
 

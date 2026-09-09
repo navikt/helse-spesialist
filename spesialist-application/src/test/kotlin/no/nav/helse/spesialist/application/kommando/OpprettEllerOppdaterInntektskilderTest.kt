@@ -349,11 +349,11 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         val ferdig = command.resume(context, sessionContext, outbox)
         assertTrue(ferdig)
         assertEquals(2, sessionContext.arbeidsgiverRepository.alle().size)
-        sessionContext.arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
+        sessionContext.arbeidsgiverRepository.finnOrNull(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn,
         )
-        sessionContext.arbeidsgiverRepository.finn(fødselsnummer).assertArbeidsgiver(
+        sessionContext.arbeidsgiverRepository.finnOrNull(fødselsnummer).assertArbeidsgiver(
             forventetIdentifikator = fødselsnummer,
             forventetNavn = "$fornavn $etternavn",
         )
@@ -387,7 +387,7 @@ class OpprettEllerOppdaterInntektskilderTest : ApplicationTest() {
         assertFalse(ferdig)
 
         assertEquals(2, sessionContext.arbeidsgiverRepository.alle().size)
-        sessionContext.arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
+        sessionContext.arbeidsgiverRepository.finnOrNull(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn,
         )

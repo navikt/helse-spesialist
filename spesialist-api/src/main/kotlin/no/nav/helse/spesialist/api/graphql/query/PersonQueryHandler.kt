@@ -95,7 +95,7 @@ class PersonQueryHandler(
         loggInfo("Personoppslag på person", "identitetsnummer" to identitetsnummer)
 
         val personEntity =
-            transaction.personRepository.finn(identitetsnummer)
+            transaction.personRepository.finnOrNull(identitetsnummer)
                 ?: notFound("Fant ikke data for person")
 
         return when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, personEntity.id.value)) {
@@ -142,7 +142,7 @@ class PersonQueryHandler(
         identitetsnummer: Identitetsnummer,
         saksbehandler: Saksbehandler,
     ): DataFetcherResult<ApiPerson?> {
-        val oppgave = transaction.oppgaveRepository.finnAktivForPerson(identitetsnummer)
+        val oppgave = transaction.oppgaveRepository.finnAktivForPersonOrNull(identitetsnummer)
 
         val snapshot =
             try {
@@ -183,7 +183,7 @@ class PersonQueryHandler(
         val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgave?.id?.value)
         val alleOverstyringer = daos.overstyringApiDao.finnOverstyringer(identitetsnummer.value)
         val risikovurderinger = daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
-        val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPerson(identitetsnummer.value)
+        val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
 
         return ApiPerson(
             aktorId = snapshot.aktorId,
@@ -428,10 +428,10 @@ class PersonQueryHandler(
                                                                 annullering =
                                                                     if (behandlingIndex == 0) {
                                                                         daos.annulleringRepository
-                                                                            .finnAnnullering(periode.vedtaksperiodeId)
+                                                                            .finnOrNull(periode.vedtaksperiodeId)
                                                                             ?.let {
                                                                                 val saksbehandler =
-                                                                                    daos.saksbehandlerRepository.finn(it.saksbehandlerOid)
+                                                                                    daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
                                                                                         ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                                                                                 ApiAnnullering(
                                                                                     saksbehandlerIdent = saksbehandler.ident.value,
@@ -732,10 +732,10 @@ class PersonQueryHandler(
                                                             annullering =
                                                                 if (behandlingIndex == 0) {
                                                                     daos.annulleringRepository
-                                                                        .finnAnnullering(periode.vedtaksperiodeId)
+                                                                        .finnOrNull(periode.vedtaksperiodeId)
                                                                         ?.let {
                                                                             val saksbehandler =
-                                                                                daos.saksbehandlerRepository.finn(it.saksbehandlerOid)
+                                                                                daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
                                                                                     ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                                                                             ApiAnnullering(
                                                                                 saksbehandlerIdent = saksbehandler.ident.value,
@@ -919,7 +919,7 @@ class PersonQueryHandler(
         dialogRef
             ?.toLong()
             ?.let(::DialogId)
-            ?.let(dialogRepository::finn)
+            ?.let(dialogRepository::finnOrNull)
             ?.kommentarer
             .orEmpty()
             .map { kommentar ->
@@ -979,7 +979,7 @@ class PersonQueryHandler(
         transaction: SessionContext,
     ): String? =
         transaction.arbeidsgiverRepository
-            .finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
+            .finnOrNull(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
             ?.navn
             ?.navn
 

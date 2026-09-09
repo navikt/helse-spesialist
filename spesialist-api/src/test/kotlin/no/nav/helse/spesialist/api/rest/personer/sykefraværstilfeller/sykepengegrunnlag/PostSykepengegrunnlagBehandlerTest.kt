@@ -87,7 +87,7 @@ class PostSykepengegrunnlagBehandlerTest {
 
         // then
         assertEquals(HttpStatusCode.OK.value, response.status)
-        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(person.id.value)
+        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
         assertNotNull(totrinnsvurdering)
         assertEquals(1, totrinnsvurdering.overstyringer.size)
         val overstyring = totrinnsvurdering.overstyringer.single()

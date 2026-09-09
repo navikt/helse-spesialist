@@ -64,7 +64,7 @@ class MeldingOmMeldingHåndtertRiverTest {
                 .single()
                 .type,
         )
-        assertNull(sessionContext.venterPåKvitteringForOverstyringRepository.finn(meldingId))
+        assertNull(sessionContext.venterPåKvitteringForOverstyringRepository.finnOrNull(meldingId))
     }
 
     @Language("JSON")

@@ -21,7 +21,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchTilkommenInntektErrorCode> {
         val tilkommenInntekt =
-            kallKontekst.transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.tilkommenInntektId))
+            kallKontekst.transaksjon.tilkommenInntektRepository.finnOrNull(TilkommenInntektId(resource.tilkommenInntektId))
                 ?: return RestResponse.Error(ApiPatchTilkommenInntektErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT)
 
         return kallKontekst.medPerson(

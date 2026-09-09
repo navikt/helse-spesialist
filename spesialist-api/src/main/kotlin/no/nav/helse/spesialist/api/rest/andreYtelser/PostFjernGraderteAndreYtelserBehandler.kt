@@ -16,7 +16,7 @@ class PostFjernGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelse
         kallKontekst: KallKontekst,
     ): RestResponse<ApiPostFjernGraderteAndreYtelserResponse, ApiPostFjernGraderteAndreYtelserErrorCode> {
         val graderteAndreYtelser =
-            kallKontekst.transaksjon.graderteAndreYtelserRepository.finn(GraderteAndreYtelserId(resource.parent.graderteAndreYtelserId))
+            kallKontekst.transaksjon.graderteAndreYtelserRepository.finnOrNull(GraderteAndreYtelserId(resource.parent.graderteAndreYtelserId))
                 ?: return RestResponse.Error(ApiPostFjernGraderteAndreYtelserErrorCode.GRADERTE_ANDRE_YTELSER_IKKE_FUNNET)
         if (graderteAndreYtelser.fjernet) {
             return RestResponse.Error(ApiPostFjernGraderteAndreYtelserErrorCode.GRADERTE_ANDRE_YTELSER_ALLEREDE_FJERNET)

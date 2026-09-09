@@ -15,5 +15,5 @@ class InMemorySaksbehandlerRepository :
             ident = original.ident,
         )
 
-    override fun finn(ident: NAVIdent): Saksbehandler? = alle().find { it.ident == ident }
+    override fun finnOrNull(ident: NAVIdent): Saksbehandler? = alle().find { it.ident == ident }
 }

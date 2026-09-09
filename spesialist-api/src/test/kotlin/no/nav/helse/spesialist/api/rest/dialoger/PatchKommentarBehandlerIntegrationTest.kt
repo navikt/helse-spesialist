@@ -44,7 +44,7 @@ class PatchKommentarBehandlerIntegrationTest {
         assertEquals("{}", response.bodyAsJsonNode.toString())
 
         // Bekreft persistert resultat
-        val lagretDialog = sessionContext.dialogRepository.finn(dialog.id())
+        val lagretDialog = sessionContext.dialogRepository.finnOrNull(dialog.id())
         assertNotNull(lagretDialog, "Lagret dialog med ID ${dialog.id()} ble ikke gjenfunnet i databasen")
 
         assertEquals(dialog.id(), lagretDialog.id())

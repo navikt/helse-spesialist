@@ -11,7 +11,7 @@ class EgenAnsattløsning(
     private val erEgenAnsatt: Boolean,
 ) {
     internal fun lagre(personRepository: PersonRepository) {
-        val person = personRepository.finn(Identitetsnummer.fraString(fødselsnummer)) ?: return
+        val person = personRepository.finnOrNull(Identitetsnummer.fraString(fødselsnummer)) ?: return
         person.oppdaterEgenAnsattStatus(
             erEgenAnsatt = erEgenAnsatt,
             oppdatertTidspunkt = opprettet.atZone(ZoneId.of("Europe/Oslo")).toInstant(),

@@ -24,7 +24,7 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
                 årsaker = årsaker,
             ),
         )
-        val annullering = annulleringRepository.finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
+        val annullering = annulleringRepository.finnMedEnAvOrNull(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
         assertEquals(arbeidsgiverFagsystemId, annullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering.personFagsystemId)
         assertEquals(saksbehandler.id, annullering.saksbehandlerOid)
@@ -44,7 +44,7 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
                 begrunnelse = null, // Vi burde kanskje egentlig ha validering på at årsaker må ha innhold.. 🤔
             ),
         )
-        val annullering = annulleringRepository.finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+        val annullering = annulleringRepository.finnMedEnAvOrNull(arbeidsgiverFagsystemId, personFagsystemId)
         assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering?.personFagsystemId)
         assertEquals(saksbehandler.id, annullering?.saksbehandlerOid)
@@ -65,7 +65,7 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
                 begrunnelse = null,
             ),
         )
-        val annullering = annulleringRepository.finnAnnullering(vedtaksperiodeId)
+        val annullering = annulleringRepository.finnOrNull(vedtaksperiodeId)
         assertEquals(vedtaksperiodeId, annullering?.vedtaksperiodeId)
         assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering?.personFagsystemId)
