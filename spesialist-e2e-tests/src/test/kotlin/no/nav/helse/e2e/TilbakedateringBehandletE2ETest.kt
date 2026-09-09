@@ -130,7 +130,7 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         val antallVarsler =
             sessionOf(dataSource).use { session ->
                 @Language("PostgreSQL")
-                val query = "SELECT count(*) FROM selve_varsel WHERE kode = ? AND vedtaksperiode_id = ? AND status = ?"
+                val query = "SELECT count(*) FROM varsel WHERE kode = ? AND vedtaksperiode_id = ? AND status = ?"
                 requireNotNull(
                     session.run(
                         queryOf(

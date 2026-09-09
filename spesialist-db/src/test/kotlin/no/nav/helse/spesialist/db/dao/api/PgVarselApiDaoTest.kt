@@ -650,7 +650,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     ) {
         dbQuery.update(
             """
-            INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+            INSERT INTO varsel (unik_id, kode, vedtaksperiode_id, behandling_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
             VALUES (:unik_id, :kode, :vedtaksperiode_id, :behandling_ref, :opprettet, :status, :status_endret_ident, :status_endret_tidspunkt)
             """.trimIndent(),
             "unik_id" to dto.varselId,

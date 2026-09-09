@@ -22,14 +22,14 @@ class PgVarselRepository private constructor(
 
     override fun eksisterer(varselId: VarselId): Boolean =
         dbQuery.singleOrNull(
-            "SELECT 1 FROM selve_varsel WHERE unik_id = :unik_id LIMIT 1",
+            "SELECT 1 FROM varsel WHERE unik_id = :unik_id LIMIT 1",
             "unik_id" to varselId.value,
         ) { true } ?: false
 
     override fun finnOrNull(varselId: VarselId): Varsel? =
         dbQuery.singleOrNull(
             """
-                SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -43,7 +43,7 @@ class PgVarselRepository private constructor(
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -57,7 +57,7 @@ class PgVarselRepository private constructor(
     override fun finnVarslerFor(behandlingUnikId: BehandlingUnikId): List<Varsel> =
         dbQuery.list(
             """
-                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -72,7 +72,7 @@ class PgVarselRepository private constructor(
         if (behandlingUnikIder.isEmpty()) return emptyList()
         return dbQuery.listWithListParameter(
             """
-                    SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                    SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                     JOIN behandling b ON sv.behandling_ref = b.id
                     LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                     LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -110,7 +110,7 @@ class PgVarselRepository private constructor(
         if (eksisterer(varsel.id)) {
             dbQuery.update(
                 """
-                UPDATE selve_varsel
+                UPDATE varsel
                 SET
                   kode=:kode,
                   vedtaksperiode_id=(SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
@@ -140,7 +140,7 @@ class PgVarselRepository private constructor(
         } else {
             dbQuery.update(
                 """
-                    INSERT INTO selve_varsel (unik_id, kode, status, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
+                    INSERT INTO varsel (unik_id, kode, status, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
                     VALUES (
                         :unikId, 
                         :kode, 
@@ -180,7 +180,7 @@ class PgVarselRepository private constructor(
     override fun slett(varselId: VarselId) {
         dbQuery.update(
             """
-                 DELETE FROM selve_varsel WHERE unik_id = :id
+                 DELETE FROM varsel WHERE unik_id = :id
             """,
             "id" to varselId.value,
         )
@@ -189,7 +189,7 @@ class PgVarselRepository private constructor(
     override fun avvikle(varseldefinisjon: Varseldefinisjon) {
         dbQuery.update(
             """
-            UPDATE selve_varsel 
+            UPDATE varsel 
             SET status = :avvikletStatus,
                 status_endret_tidspunkt = :endretTidspunkt,
                 status_endret_ident = :ident, 

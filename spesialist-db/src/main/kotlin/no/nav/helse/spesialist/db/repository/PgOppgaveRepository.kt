@@ -295,11 +295,11 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND EXISTS (
-                            SELECT 1 FROM selve_varsel sv2
+                            SELECT 1 FROM varsel sv2
                             WHERE sv2.behandling_ref = b.id
                         )
                         AND NOT EXISTS (
-                            SELECT 1 FROM selve_varsel sv3
+                            SELECT 1 FROM varsel sv3
                             WHERE sv3.behandling_ref = b.id
                             AND sv3.kode = ANY(:ekskluderVarsler::varchar[])
                         )
@@ -311,13 +311,13 @@ class PgOppgaveRepository private constructor(
                     append(
                         """
                         AND EXISTS (
-                            SELECT 1 FROM selve_varsel sv_inc
+                            SELECT 1 FROM varsel sv_inc
                             WHERE sv_inc.behandling_ref = b.id
                             AND sv_inc.status = 'AKTIV'
                             AND sv_inc.kode = ANY(:tillatteVarsler::varchar[])
                         )
                         AND NOT EXISTS (
-                            SELECT 1 FROM selve_varsel sv_exc
+                            SELECT 1 FROM varsel sv_exc
                             WHERE sv_exc.behandling_ref = b.id
                             AND sv_exc.status = 'AKTIV'
                             AND NOT (sv_exc.kode = ANY(:tillatteVarsler::varchar[]))
@@ -486,10 +486,10 @@ class PgOppgaveRepository private constructor(
             SELECT p.fødselsnummer
             FROM oppgave o
             JOIN vedtaksperiode v ON o.vedtak_ref = v.id
-            JOIN selve_varsel sv ON sv.vedtaksperiode_id = v.vedtaksperiode_id
+            JOIN varsel sv ON sv.vedtaksperiode_id = v.vedtaksperiode_id
             JOIN person p ON v.person_ref = p.id
 --            JOIN behandling b ON b.unik_id = o.spesialist_behandling_id
---            JOIN selve_varsel sv ON sv.behandling_ref = b.id
+--            JOIN varsel sv ON sv.behandling_ref = b.id
 --            JOIN vedtaksperiode v ON o.vedtak_ref = v.id
 --            JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'

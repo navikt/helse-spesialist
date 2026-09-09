@@ -310,7 +310,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettVarsler(personRef: Int) {
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM selve_varsel sv USING vedtaksperiode v WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+             DELETE FROM varsel sv USING vedtaksperiode v WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }

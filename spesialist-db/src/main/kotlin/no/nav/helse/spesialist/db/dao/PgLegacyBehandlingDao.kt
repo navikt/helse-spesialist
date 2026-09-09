@@ -31,7 +31,7 @@ class PgLegacyBehandlingDao private constructor(
             """
                 SELECT b.id, b.unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags, yrkesaktivitetstype, json_agg(DISTINCT to_jsonb(sv.*)) FILTER (WHERE sv.løpenummer IS NOT NULL) AS varsler
                 FROM behandling b
-                LEFT JOIN selve_varsel sv ON b.id = sv.behandling_ref
+                LEFT JOIN varsel sv ON b.id = sv.behandling_ref
                 WHERE b.vedtaksperiode_id = :vedtaksperiode_id
                 GROUP BY b.id
                 ORDER BY b.id

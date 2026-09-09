@@ -21,7 +21,7 @@ class PgVarselApiDao internal constructor(
     ): Set<VarselDbDto> =
         asSQL(
             """
-            SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
+            SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM varsel sv 
                 INNER JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                 WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND b.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv; 
@@ -36,7 +36,7 @@ class PgVarselApiDao internal constructor(
         utbetalingId: UUID,
     ) = asSQL(
         """
-        SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
+        SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM varsel sv 
             INNER JOIN behandling b ON sv.behandling_ref = b.id
             LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
             WHERE sv.vedtaksperiode_id = :vedtaksperiode_id 
@@ -54,7 +54,7 @@ class PgVarselApiDao internal constructor(
     fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> =
         asSQL(
             """
-            SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
+            SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM varsel sv
                  INNER JOIN behandling b ON sv.behandling_ref = b.id
                  LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                  WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status != :status_inaktiv; 
@@ -66,7 +66,7 @@ class PgVarselApiDao internal constructor(
     fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> =
         asSQL(
             """
-            SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
+            SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM varsel sv
                  INNER JOIN behandling b ON sv.behandling_ref = b.id
                  LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                  WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status = :status_godkjent; 

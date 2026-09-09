@@ -60,7 +60,7 @@ internal abstract class AbstractDatabaseTest {
             VALUES ('$spleisBehandlingId', true, null, null, now());
             INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
             VALUES ('${vedtaksperiode_id}', gen_random_uuid(), now(), now(), now(), now());
-            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, behandling_ref)
+            INSERT INTO varsel(unik_id, kode, vedtaksperiode_id, opprettet, behandling_ref)
             VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now(), ${sequence_number});
             INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde)
             VALUES (${sequence_number}, 'SØKNAD', ${sequence_number}, 'EN_ARBEIDSGIVER');
