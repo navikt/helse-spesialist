@@ -46,8 +46,7 @@ class TilbakedateringBehandlet(
         val identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         val vedtaksperioder =
             sessionContext.vedtaksperiodeRepository
-                .finnAlleIderForPerson(identitetsnummer)
-                .mapNotNull { sessionContext.vedtaksperiodeRepository.finn(it) }
+                .finnAlleForPerson(identitetsnummer)
                 .filterNot { it.forkastet }
 
         val gjeldendeBehandlingerSomOverlapper =
