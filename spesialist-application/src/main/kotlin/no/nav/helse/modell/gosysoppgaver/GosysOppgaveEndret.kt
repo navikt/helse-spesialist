@@ -81,7 +81,6 @@ internal class GosysOppgaveEndretCommand(
                 utbetaling = utbetaling,
                 godkjenningsbehov = godkjenningsbehov,
                 spleisBehandlingId = spleisBehandlingId,
-                identitetsnummer = identitetsnummer,
             ),
         )
 }

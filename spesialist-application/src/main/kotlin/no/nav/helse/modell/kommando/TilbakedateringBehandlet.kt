@@ -110,7 +110,6 @@ internal class TilbakedateringGodkjentCommand(
                 utbetaling = utbetaling,
                 godkjenningsbehov = godkjenningsbehov,
                 spleisBehandlingId = SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId),
-                identitetsnummer = Identitetsnummer.fraString(godkjenningsbehov.fødselsnummer),
             ),
         )
 }

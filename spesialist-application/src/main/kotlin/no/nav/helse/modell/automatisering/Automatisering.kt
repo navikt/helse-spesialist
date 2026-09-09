@@ -60,13 +60,13 @@ internal class Automatisering(
         vedtaksperiodeId: VedtaksperiodeId,
         utbetaling: Utbetaling,
         periodetype: Periodetype,
-        behandlingspakke: Set<Behandling>,
         gjeldendeBehandling: Behandling,
         organisasjonsnummer: String,
         yrkesaktivitetstype: Yrkesaktivitetstype,
         maksdato: LocalDate,
         tags: List<String>,
     ): Automatiseringsresultat {
+        val behandlingspakke = sessionContext.behandlingRepository.finnBehandlingspakke(gjeldendeBehandling, fødselsnummer)
         if (sessionContext.automatiseringDao.skalTvingeAutomatisering(vedtaksperiodeId.value)) {
             logg.info("Tvinger automatisering for vedtaksperiode ${vedtaksperiodeId.value}")
             return Automatiseringsresultat.KanAutomatiseres

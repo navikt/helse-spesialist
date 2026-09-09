@@ -361,7 +361,6 @@ internal class AutomatiseringTest : ApplicationTest() {
         vedtaksperiodeId = vedtaksperiode1.id,
         utbetaling = utbetaling,
         periodetype = periodetype,
-        behandlingspakke = setOf(gjeldendeBehandling),
         gjeldendeBehandling = gjeldendeBehandling,
         organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
         yrkesaktivitetstype = yrkesaktivitetstype,
