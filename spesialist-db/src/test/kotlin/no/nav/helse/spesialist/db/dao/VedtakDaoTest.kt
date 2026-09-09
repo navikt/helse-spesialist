@@ -2,118 +2,18 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.UtbetalingId
-import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 internal class VedtakDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
     private val arbeidsgiver = opprettArbeidsgiver()
-    private val organisasjonsnummer =
-        when (val id = arbeidsgiver.id) {
-            is ArbeidsgiverIdentifikator.Fødselsnummer -> id.fødselsnummer
-            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> id.organisasjonsnummer
-        }
     private val vedtaksperiodeId = UUID.randomUUID()
-
-    @Test
-    fun `lagre og finn vedtaksperiode`() {
-        sessionOf(dataSource).use {
-            it.transaction {
-                PgVedtakDao(it).lagreVedtaksperiode(
-                    fødselsnummer = person.id.value,
-                    vedtaksperiodeDto =
-                        VedtaksperiodeDto(
-                            organisasjonsnummer = organisasjonsnummer,
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            forkastet = false,
-                            behandlinger =
-                                listOf(
-                                    BehandlingDto(
-                                        id = UUID.randomUUID(),
-                                        vedtaksperiodeId = vedtaksperiodeId,
-                                        utbetalingId = null,
-                                        spleisBehandlingId = UUID.randomUUID(),
-                                        skjæringstidspunkt = 1 jan 2018,
-                                        fom = 1 jan 2018,
-                                        tom = 31 jan 2018,
-                                        tilstand = TilstandDto.VidereBehandlingAvklares,
-                                        tags = emptyList(),
-                                        varsler = emptyList(),
-                                        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                                    ),
-                                ),
-                        ),
-                )
-            }
-        }
-        val vedtaksperiode =
-            sessionOf(dataSource).use {
-                it.transaction {
-                    PgVedtakDao(it).finnVedtaksperiode(vedtaksperiodeId)
-                }
-            }
-        assertNotNull(vedtaksperiode)
-        assertEquals(vedtaksperiodeId, vedtaksperiode?.vedtaksperiodeId)
-        assertEquals(organisasjonsnummer, vedtaksperiode?.organisasjonsnummer)
-        assertEquals(false, vedtaksperiode?.forkastet)
-    }
-
-    @Test
-    fun `finn forkastet vedtaksperiode`() {
-        sessionOf(dataSource).use {
-            it.transaction {
-                PgVedtakDao(it).lagreVedtaksperiode(
-                    fødselsnummer = person.id.value,
-                    vedtaksperiodeDto =
-                        VedtaksperiodeDto(
-                            organisasjonsnummer = organisasjonsnummer,
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            forkastet = true,
-                            behandlinger =
-                                listOf(
-                                    BehandlingDto(
-                                        id = UUID.randomUUID(),
-                                        vedtaksperiodeId = vedtaksperiodeId,
-                                        utbetalingId = null,
-                                        spleisBehandlingId = UUID.randomUUID(),
-                                        skjæringstidspunkt = 1 jan 2018,
-                                        fom = 1 jan 2018,
-                                        tom = 31 jan 2018,
-                                        tilstand = TilstandDto.VidereBehandlingAvklares,
-                                        tags = emptyList(),
-                                        varsler = emptyList(),
-                                        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-                                    ),
-                                ),
-                        ),
-                )
-            }
-        }
-        val vedtaksperiode =
-            sessionOf(dataSource).use {
-                it.transaction {
-                    PgVedtakDao(it).finnVedtaksperiode(vedtaksperiodeId)
-                }
-            }
-        assertNotNull(vedtaksperiode)
-        assertEquals(vedtaksperiodeId, vedtaksperiode?.vedtaksperiodeId)
-        assertEquals(organisasjonsnummer, vedtaksperiode?.organisasjonsnummer)
-        assertEquals(true, vedtaksperiode?.forkastet)
-    }
 
     @Test
     fun `lagrer og leser vedtaksperiodetype hvis den er satt`() {

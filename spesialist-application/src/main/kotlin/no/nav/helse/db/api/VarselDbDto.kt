@@ -38,29 +38,4 @@ data class VarselDbDto(
     )
 
     fun erAktiv(): Boolean = status == Varselstatus.AKTIV
-
-    fun vurder(
-        godkjent: Boolean,
-        fødselsnummer: String,
-        behandlingId: UUID,
-        vedtaksperiodeId: UUID,
-        ident: String,
-        vurderer: (
-            fødselsnummer: String,
-            behandlingId: UUID,
-            vedtaksperiodeId: UUID,
-            varselId: UUID,
-            varselTittel: String,
-            varselkode: String,
-            forrigeStatus: Varselstatus,
-            gjeldendeStatus: Varselstatus,
-            saksbehandlerIdent: String,
-        ) -> Unit,
-    ) {
-        if (status !in (listOf(Varselstatus.AKTIV, Varselstatus.VURDERT))) return
-
-        val forrigeStatus = status
-        status = if (godkjent) Varselstatus.GODKJENT else Varselstatus.AVVIST
-        vurderer(fødselsnummer, behandlingId, vedtaksperiodeId, varselId, varseldefinisjon!!.tittel, kode, forrigeStatus, status, ident)
-    }
 }

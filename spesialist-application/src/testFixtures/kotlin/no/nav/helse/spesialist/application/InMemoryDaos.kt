@@ -5,7 +5,6 @@ import no.nav.helse.db.Daos
 class InMemoryDaos(
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val arbeidsgiverApiDao: UnimplementedArbeidsgiverApiDao,
-    override val behandlingApiRepository: UnimplementedBehandlingApiRepository,
     override val behandlingsstatistikkDao: InMemoryBehandlingsstatistikkDao,
     override val commandContextDao: InMemoryCommandContextDao,
     override val definisjonDao: UnimplementedDefinisjonDao,

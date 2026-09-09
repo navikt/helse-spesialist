@@ -1,8 +1,5 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import java.time.LocalDateTime
-import java.util.UUID
-
 // Alle Varselkoder må følge formatet
 internal const val VARSELKODEFORMAT = "(SB_|RV_)\\D{2}_\\d{1,3}"
 private val regex = "^$VARSELKODEFORMAT$".toRegex()
@@ -45,8 +42,6 @@ enum class Varselkode(
     init {
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
-
-    fun nyttVarsel(vedtaksperiodeId: UUID): LegacyVarsel = LegacyVarsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
 
     override fun toString() = "${this.name}: $varseltekst"
 }

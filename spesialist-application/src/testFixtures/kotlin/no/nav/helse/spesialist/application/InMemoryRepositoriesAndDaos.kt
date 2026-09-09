@@ -49,7 +49,6 @@ class InMemoryRepositoriesAndDaos {
     private val arbeidsforholdDao = InMemoryArbeidsforholdDao()
     private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
     private val automatiseringDao = InMemoryAutomatiseringDao()
-    private val behandlingApiRepository = UnimplementedBehandlingApiRepository()
     private val behandlingsstatistikkDao = InMemoryBehandlingsstatistikkDao()
     private val definisjonDao = UnimplementedDefinisjonDao()
     private val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
@@ -76,7 +75,6 @@ class InMemoryRepositoriesAndDaos {
         InMemoryDaos(
             annulleringRepository = annulleringRepository,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
-            behandlingApiRepository = behandlingApiRepository,
             behandlingsstatistikkDao = behandlingsstatistikkDao,
             commandContextDao = commandContextDao,
             definisjonDao = definisjonDao,

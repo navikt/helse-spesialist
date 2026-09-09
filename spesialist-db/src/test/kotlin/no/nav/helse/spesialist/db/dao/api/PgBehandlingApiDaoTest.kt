@@ -85,18 +85,4 @@ internal class PgBehandlingApiDaoTest : AbstractDBIntegrationTest() {
 
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
-
-    @Test
-    fun `Finner ikke behandlinger for forkastede perioder - med varselSupplier`() {
-        val vedtaksperiode1 = vedtaksperiode
-        val behandling1 = behandling
-        val vedtaksperiode2 = opprettVedtaksperiode(person, arbeidsgiver, forkastet = true)
-        opprettBehandling(vedtaksperiode2)
-        val oppgave = opprettOppgave(vedtaksperiode1, behandling1)
-
-        val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(oppgave.id.value) { emptySet() }
-        val forventetVedtaksperiode = VedtaksperiodeDbDto(vedtaksperiode.id.value, behandling1.fom, behandling1.tom, behandling1.skjæringstidspunkt, emptySet(), emptySet())
-
-        assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
-    }
 }

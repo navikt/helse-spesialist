@@ -2,9 +2,9 @@ package no.nav.helse.e2e
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
 import no.nav.helse.util.februar
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
-import java.util.UUID
+import java.util.*
 
 class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     @Test
@@ -66,10 +66,10 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterInntektløsning()
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, LegacyVarsel.Status.AKTIV)
+        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
 
         håndterTilbakedateringBehandlet(perioder = listOf(Periode(1.januar, 31.januar)))
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, LegacyVarsel.Status.INAKTIV)
+        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
     }
 
     @Test
@@ -89,12 +89,12 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = vedtaksperiodeId2,
         )
 
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, LegacyVarsel.Status.AKTIV)
-        assertVarsel("RV_SØ_3", vedtaksperiodeId2, LegacyVarsel.Status.AKTIV)
+        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
+        assertVarsel("RV_SØ_3", vedtaksperiodeId2, Varsel.Status.AKTIV)
 
         håndterTilbakedateringBehandlet(perioder = listOf(Periode(1.januar, 31.januar)))
-        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, LegacyVarsel.Status.INAKTIV)
-        assertVarsel("RV_SØ_3", vedtaksperiodeId2, LegacyVarsel.Status.INAKTIV)
+        assertVarsel("RV_SØ_3", VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
+        assertVarsel("RV_SØ_3", vedtaksperiodeId2, Varsel.Status.INAKTIV)
     }
 
     @Test
@@ -103,7 +103,7 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = listOf(RV_SØ_3))
-        assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, LegacyVarsel.Status.AKTIV)
+        assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         håndterInntektløsning()
@@ -114,18 +114,18 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
 
         assertThrows<AssertionFailedError> {
             // TODO: Denne asserten skal ikke throwe
-            assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, LegacyVarsel.Status.AKTIV)
+            assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, Varsel.Status.AKTIV)
         }
         assertDoesNotThrow {
             // Dette er IKKE sånn vi vil ha det:
-            assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, LegacyVarsel.Status.INAKTIV)
+            assertVarsel(RV_SØ_3, VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
         }
     }
 
     private fun assertVarsel(
         varselkode: String,
         vedtaksperiodeId: UUID,
-        status: LegacyVarsel.Status,
+        status: Varsel.Status,
     ) {
         val antallVarsler =
             sessionOf(dataSource).use { session ->

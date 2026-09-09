@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import no.nav.helse.db.api.ArbeidsgiverApiDao
-import no.nav.helse.db.api.BehandlingApiRepository
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.OverstyringApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
@@ -37,7 +36,6 @@ interface Daos {
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
 
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
-    val behandlingApiRepository: BehandlingApiRepository
     val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao
     val periodehistorikkApiDao: PeriodehistorikkApiDao

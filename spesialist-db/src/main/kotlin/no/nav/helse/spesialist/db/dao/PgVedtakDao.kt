@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.VedtakDao
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -18,43 +17,6 @@ class PgVedtakDao private constructor(
     QueryRunner by queryRunner {
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
-
-    override fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto? =
-        asSQL(
-            """
-            SELECT 
-                vedtaksperiode_id,
-                arbeidsgiver_identifikator,
-                forkastet
-            FROM vedtaksperiode
-            WHERE vedtaksperiode_id = :vedtaksperiode_id
-            """,
-            "vedtaksperiode_id" to vedtaksperiodeId,
-        ).singleOrNull {
-            VedtaksperiodeDto(
-                organisasjonsnummer = it.string("arbeidsgiver_identifikator"),
-                vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
-                forkastet = it.boolean("forkastet"),
-                behandlinger = emptyList(),
-            )
-        }
-
-    override fun lagreVedtaksperiode(
-        fødselsnummer: String,
-        vedtaksperiodeDto: VedtaksperiodeDto,
-    ) {
-        asSQL(
-            """
-            INSERT INTO vedtaksperiode(vedtaksperiode_id, arbeidsgiver_identifikator, person_ref, forkastet)
-            VALUES (:vedtaksperiode_id, :arbeidsgiver_identifikator, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
-            ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
-            """,
-            "fodselsnummer" to fødselsnummer,
-            "arbeidsgiver_identifikator" to vedtaksperiodeDto.organisasjonsnummer,
-            "vedtaksperiode_id" to vedtaksperiodeDto.vedtaksperiodeId,
-            "forkastet" to vedtaksperiodeDto.forkastet,
-        ).update()
-    }
 
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
@@ -100,17 +62,6 @@ class PgVedtakDao private constructor(
             "hendelseId" to hendelseId,
         ).update()
     }
-
-    override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? =
-        asSQL(
-            """
-            SELECT arbeidsgiver_identifikator FROM vedtaksperiode
-            WHERE vedtaksperiode_id = :vedtaksperiodeId
-            """,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ).singleOrNull {
-            it.string("arbeidsgiver_identifikator")
-        }
 
     override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         asSQL(

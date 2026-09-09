@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.util.UUID
@@ -20,13 +19,4 @@ interface VedtakDao {
     )
 
     fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde?
-
-    fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String?
-
-    fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto?
-
-    fun lagreVedtaksperiode(
-        fødselsnummer: String,
-        vedtaksperiodeDto: VedtaksperiodeDto,
-    )
 }
