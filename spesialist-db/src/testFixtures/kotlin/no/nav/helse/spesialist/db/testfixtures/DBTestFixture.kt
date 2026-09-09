@@ -37,7 +37,7 @@ open class ModuleIsolatedDBTestFixture(
                         INTO truncate_statement
                     FROM pg_tables
                     WHERE schemaname='public'
-                    AND tablename not in ('enhet', 'flyway_schema_history', 'api_varseldefinisjon');
+                    AND tablename not in ('enhet', 'flyway_schema_history', 'varseldefinisjon');
 
                     EXECUTE truncate_statement;
                 END;

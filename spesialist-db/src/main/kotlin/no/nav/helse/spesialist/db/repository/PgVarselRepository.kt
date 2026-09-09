@@ -31,7 +31,7 @@ class PgVarselRepository private constructor(
             """
                 SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
-                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE sv.unik_id = :unikId
             """,
@@ -45,7 +45,7 @@ class PgVarselRepository private constructor(
             """
                 SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
-                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.spleis_behandling_id IN (${behandlingIder.joinToString { "?" }})
             """,
@@ -59,7 +59,7 @@ class PgVarselRepository private constructor(
             """
                 SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
-                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.unik_id = :behandlingUnikId
             """,
@@ -74,7 +74,7 @@ class PgVarselRepository private constructor(
             """
                     SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
                     JOIN behandling b ON sv.behandling_ref = b.id
-                    LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                    LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                     LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                     WHERE b.unik_id IN (${behandlingUnikIder.joinToString { "?" }})
                 """,
@@ -115,7 +115,7 @@ class PgVarselRepository private constructor(
                   kode=:kode,
                   vedtaksperiode_id=(SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
                   behandling_ref=(SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
-                  definisjon_ref=(SELECT id FROM api_varseldefinisjon av WHERE av.unik_id = :definisjonId),
+                  definisjon_ref=(SELECT id FROM varseldefinisjon av WHERE av.unik_id = :definisjonId),
                   status=:status,
                   status_endret_ident=(SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
                   status_endret_tidspunkt=:statusEndretTidspunkt
@@ -147,7 +147,7 @@ class PgVarselRepository private constructor(
                         :status,
                         (SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId), 
                         (SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId), 
-                        (SELECT id FROM api_varseldefinisjon av WHERE av.unik_id = :definisjonId),
+                        (SELECT id FROM varseldefinisjon av WHERE av.unik_id = :definisjonId),
                         :opprettet, 
                         (SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
                         :statusEndretTidspunkt
@@ -193,7 +193,7 @@ class PgVarselRepository private constructor(
             SET status = :avvikletStatus,
                 status_endret_tidspunkt = :endretTidspunkt,
                 status_endret_ident = :ident, 
-                definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjonId) 
+                definisjon_ref = (SELECT id FROM varseldefinisjon WHERE unik_id = :definisjonId) 
             WHERE kode = :varselkode AND status = :aktivStatus;
             """.trimIndent(),
             "avvikletStatus" to Varsel.Status.AVVIKLET.name,

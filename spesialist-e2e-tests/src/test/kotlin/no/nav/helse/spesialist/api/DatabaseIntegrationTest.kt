@@ -201,7 +201,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         requireNotNull(
             dbQuery.updateAndReturnGeneratedKey(
                 """
-                INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
+                INSERT INTO varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
                 VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)
                 """.trimIndent(),
                 "definisjonId" to definisjonId,

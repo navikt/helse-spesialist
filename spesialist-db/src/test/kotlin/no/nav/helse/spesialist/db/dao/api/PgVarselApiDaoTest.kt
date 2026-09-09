@@ -679,7 +679,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         requireNotNull(
             dbQuery.updateAndReturnGeneratedKey(
                 """
-                INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
+                INSERT INTO varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
                 VALUES (:unik_id, :kode, :tittel, :forklaring, :handling, :opprettet)
                 """.trimIndent(),
                 "unik_id" to dto.definisjonId,

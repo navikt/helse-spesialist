@@ -297,7 +297,7 @@ abstract class AbstractDBIntegrationTest {
     ) = dbQuery
         .updateAndReturnGeneratedKey(
             """
-            insert into api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
+            insert into varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
             values (:definisjonId, :kode, :tittel, null, null, :opprettet)
             """.trimIndent(),
             "definisjonId" to definisjonId,

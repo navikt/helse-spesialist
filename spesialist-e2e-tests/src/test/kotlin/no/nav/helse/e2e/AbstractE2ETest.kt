@@ -1059,7 +1059,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun lagVarseldefinisjon(varselkode: String) {
         dbQuery.update(
             """
-            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
+            INSERT INTO varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
             VALUES (:unikId, :varselkode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
             ON CONFLICT (unik_id) DO NOTHING
             """.trimIndent(),

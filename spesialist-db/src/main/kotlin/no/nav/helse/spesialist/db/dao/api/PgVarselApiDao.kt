@@ -23,7 +23,7 @@ class PgVarselApiDao internal constructor(
             """
             SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN behandling b ON sv.behandling_ref = b.id
-                LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
+                LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                 WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND b.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv; 
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
@@ -38,7 +38,7 @@ class PgVarselApiDao internal constructor(
         """
         SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
             INNER JOIN behandling b ON sv.behandling_ref = b.id
-            LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
+            LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
             WHERE sv.vedtaksperiode_id = :vedtaksperiode_id 
                 AND sv.status != :status_inaktiv 
                 AND b.id >= (
@@ -56,7 +56,7 @@ class PgVarselApiDao internal constructor(
             """
             SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
                  INNER JOIN behandling b ON sv.behandling_ref = b.id
-                 LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
+                 LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                  WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status != :status_inaktiv; 
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
@@ -68,7 +68,7 @@ class PgVarselApiDao internal constructor(
             """
             SELECT b.unik_id as behandling_id, sv.unik_id as varsel_id, sv.opprettet, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv
                  INNER JOIN behandling b ON sv.behandling_ref = b.id
-                 LEFT JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
+                 LEFT JOIN varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
                  WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND sv.status = :status_godkjent; 
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,

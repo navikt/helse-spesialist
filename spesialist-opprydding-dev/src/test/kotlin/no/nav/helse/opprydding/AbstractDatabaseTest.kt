@@ -200,7 +200,7 @@ internal abstract class AbstractDatabaseTest {
                 "enhet",
                 "saksbehandler",
                 "arbeidsgiver",
-                "api_varseldefinisjon",
+                "varseldefinisjon",
                 "saksbehandler_opptegnelse_sekvensnummer",
                 "inntekt",
                 "temp_manglende_varsler",

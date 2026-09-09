@@ -16,7 +16,7 @@ class PgVarseldefinisjonRepository private constructor(
     override fun finnOrNull(id: VarseldefinisjonId): Varseldefinisjon? =
         dbQuery.singleOrNull(
             """
-                SELECT kode, unik_id, tittel, forklaring, handling, avviklet, opprettet FROM api_varseldefinisjon WHERE unik_id = :unik_id
+                SELECT kode, unik_id, tittel, forklaring, handling, avviklet, opprettet FROM varseldefinisjon WHERE unik_id = :unik_id
             """,
             "unik_id" to id.value,
         ) {
@@ -26,7 +26,7 @@ class PgVarseldefinisjonRepository private constructor(
     override fun finnGjeldendeForOrNull(kode: String): Varseldefinisjon? =
         dbQuery.singleOrNull(
             """
-                SELECT DISTINCT ON (kode) kode, unik_id, tittel, forklaring, handling, avviklet, opprettet FROM api_varseldefinisjon WHERE kode = :kode
+                SELECT DISTINCT ON (kode) kode, unik_id, tittel, forklaring, handling, avviklet, opprettet FROM varseldefinisjon WHERE kode = :kode
                 ORDER BY kode, opprettet DESC
             """,
             "kode" to kode,
@@ -37,7 +37,7 @@ class PgVarseldefinisjonRepository private constructor(
     override fun lagre(varseldefinisjon: Varseldefinisjon) {
         dbQuery.update(
             """
-                INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
+                INSERT INTO varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
                 VALUES (:unik_id, :kode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
                 ON CONFLICT (unik_id) DO UPDATE SET
                     kode = EXCLUDED.kode,
