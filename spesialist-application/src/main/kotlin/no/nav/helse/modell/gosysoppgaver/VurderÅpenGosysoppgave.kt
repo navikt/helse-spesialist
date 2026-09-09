@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varsel.Companion.reaktiverEksisterendeEllerOpprettNytt
 import java.time.LocalDate
 import java.util.*
@@ -89,7 +90,7 @@ internal class VurderÅpenGosysoppgave(
                 sessionContext.varselRepository.lagre(it)
             }
         } else {
-            val eksisterendeVarsel = varslerForBehandling.find { it.kode == SB_EX_3.name } ?: return
+            val eksisterendeVarsel = varslerForBehandling.find { it.kode == SB_EX_3.name && it.status == Varsel.Status.AKTIV } ?: return
             eksisterendeVarsel.deaktiver()
             sessionContext.varselRepository.lagre(eksisterendeVarsel)
         }
@@ -121,7 +122,7 @@ internal class VurderÅpenGosysoppgave(
             antall == 0 && !harTildeltOppgave -> {
                 val varslerForBehandling = sessionContext.varselRepository.finnVarslerFor(behandling.id)
                 oppgaveService.fjernGosysEgenskap(vedtaksperiodeId)
-                val eksisterendeVarsel = varslerForBehandling.find { it.kode == SB_EX_1.name } ?: return
+                val eksisterendeVarsel = varslerForBehandling.find { it.erVarselOmÅpenGosysoppgave() && it.status == Varsel.Status.AKTIV } ?: return
                 eksisterendeVarsel.deaktiver()
                 sessionContext.varselRepository.lagre(eksisterendeVarsel)
             }
