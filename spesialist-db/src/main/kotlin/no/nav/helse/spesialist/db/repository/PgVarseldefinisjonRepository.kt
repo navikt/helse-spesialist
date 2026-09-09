@@ -16,7 +16,7 @@ class PgVarseldefinisjonRepository private constructor(
     override fun finnOrNull(id: VarseldefinisjonId): Varseldefinisjon? =
         dbQuery.singleOrNull(
             """
-                SELECT kode, unik_id, tittel, forklaring, handling FROM api_varseldefinisjon WHERE unik_id = :unik_id
+                SELECT kode, unik_id, tittel, forklaring, handling, avviklet, opprettet FROM api_varseldefinisjon WHERE unik_id = :unik_id
             """,
             "unik_id" to id.value,
         ) {
