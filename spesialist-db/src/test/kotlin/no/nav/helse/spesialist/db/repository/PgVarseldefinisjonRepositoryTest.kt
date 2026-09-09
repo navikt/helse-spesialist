@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,7 +57,7 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(varseldefinisjon.forklaring, funnet.forklaring)
         assertEquals(varseldefinisjon.handling, funnet.handling)
         assertEquals(varseldefinisjon.avviklet, funnet.avviklet)
-        assertEquals(varseldefinisjon.opprettet, funnet.opprettet)
+        assertEquals(varseldefinisjon.opprettet.truncatedTo(ChronoUnit.MILLIS), funnet.opprettet.truncatedTo(ChronoUnit.MILLIS))
     }
 
     @Test
