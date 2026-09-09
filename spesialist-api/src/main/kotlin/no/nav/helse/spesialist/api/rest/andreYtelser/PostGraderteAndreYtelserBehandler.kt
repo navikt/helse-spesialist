@@ -45,8 +45,10 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
                         grad = it.grad,
                     )
                 },
-            vedtaksperioder =
-                kallKontekst.transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(person.id.value),
+            behandlinger =
+                kallKontekst.transaksjon.vedtaksperiodeRepository.finnAlleIderForPerson(person.id).map {
+                    kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(it) ?: error("Finner ikke vedtaksperiode")
+                },
         )
 
         val graderteAndreYtelser =

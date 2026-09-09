@@ -33,6 +33,9 @@ internal fun KallKontekst.validerGraderteAndreYtelserEndring(
                 .filterNot { it.id == graderteAndreYtelserId },
         nyGraderteAndreYtelserType = type,
         nyGraderteAndreYtelserPerioder = perioder,
-        vedtaksperioder = transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(person.id.value),
+        behandlinger =
+            transaksjon.vedtaksperiodeRepository.finnAlleIderForPerson(person.id).map {
+                transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(it) ?: error("Finner ikke vedtaksperiode")
+            },
     )
 }

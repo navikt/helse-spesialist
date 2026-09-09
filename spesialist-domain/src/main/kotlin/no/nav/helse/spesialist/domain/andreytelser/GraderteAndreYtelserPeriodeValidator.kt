@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain.andreytelser
 
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 
@@ -8,7 +8,7 @@ fun validerGraderteAndreYtelserPeriode(
     nyGraderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
     nyGraderteAndreYtelserType: GraderteAndreYtelserType,
     eksisterendeGraderteAndreYtelser: List<GraderteAndreYtelser>,
-    vedtaksperioder: List<VedtaksperiodeDto>,
+    behandlinger: List<Behandling>,
 ) {
     val sortertePerioder = nyGraderteAndreYtelserPerioder.map { it.periode }.sortedBy { it.fom }
     if (sortertePerioder.zipWithNext().any { (a, b) -> b.fom <= a.tom }) {
@@ -16,7 +16,7 @@ fun validerGraderteAndreYtelserPeriode(
     }
     if (!harOverlappMedSykefraværstilfelle(
             nyGraderteAndreYtelserPerioder = nyGraderteAndreYtelserPerioder,
-            vedtaksperioder = vedtaksperioder,
+            behandlinger = behandlinger,
         )
     ) {
         error("Ingen sykefraværstilfeller overlapper med perioden(e) i gradert annen ytelse ($nyGraderteAndreYtelserPerioder)")
@@ -73,14 +73,13 @@ private fun validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
 
 private fun harOverlappMedSykefraværstilfelle(
     nyGraderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
-    vedtaksperioder: List<VedtaksperiodeDto>,
+    behandlinger: List<Behandling>,
 ) = nyGraderteAndreYtelserPerioder.all {
-    it.periode overlapperEnAv vedtaksperioder.tilSykefraværstilfellePerioder().filterNot { it.datoer().isEmpty() }
+    it.periode overlapperEnAv behandlinger.tilSykefraværstilfellePerioder().filterNot { it.datoer().isEmpty() }
 }
 
-private fun List<VedtaksperiodeDto>.tilSykefraværstilfellePerioder(): List<Periode> =
-    map { it.behandlinger.last() }
-        .map { Periode(it.fom, it.tom) }
+private fun List<Behandling>.tilSykefraværstilfellePerioder(): List<Periode> =
+    map { Periode(it.fom, it.tom) }
         .sortedBy { it.fom }
         .fold(listOf()) { sammenhengendePerioder, nestePeriode ->
             val (overlappendePerioder, resten) =
