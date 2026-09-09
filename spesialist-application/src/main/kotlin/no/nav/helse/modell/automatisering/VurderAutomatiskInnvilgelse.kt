@@ -13,7 +13,6 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
@@ -25,7 +24,6 @@ internal class VurderAutomatiskInnvilgelse(
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val oppgaveService: OppgaveService,
     private val spleisBehandlingId: SpleisBehandlingId,
-    private val identitetsnummer: Identitetsnummer,
 ) : Command {
     private val utbetalingId = godkjenningsbehov.utbetalingId
     private val hendelseId = godkjenningsbehov.id
@@ -38,14 +36,12 @@ internal class VurderAutomatiskInnvilgelse(
         val gjeldendeBehandling =
             sessionContext.behandlingRepository.finn(spleisBehandlingId)
                 ?: error("Fant ikke behandling med id $spleisBehandlingId")
-        val behandlingspakke = sessionContext.behandlingRepository.finnBehandlingspakke(gjeldendeBehandling, identitetsnummer.value)
         val resultat =
             automatisering.utfør(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
                 vedtaksperiodeId = gjeldendeBehandling.vedtaksperiodeId,
                 utbetaling = utbetaling,
                 periodetype = godkjenningsbehov.periodetype,
-                behandlingspakke = behandlingspakke,
                 gjeldendeBehandling = gjeldendeBehandling,
                 organisasjonsnummer = godkjenningsbehov.organisasjonsnummer,
                 yrkesaktivitetstype = godkjenningsbehov.yrkesaktivitetstype,

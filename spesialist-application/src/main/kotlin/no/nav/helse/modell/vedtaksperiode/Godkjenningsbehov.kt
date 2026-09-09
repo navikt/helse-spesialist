@@ -420,7 +420,6 @@ internal class GodkjenningsbehovCommand(
                 godkjenningsbehov = godkjenningsbehovData,
                 oppgaveService = oppgaveService,
                 spleisBehandlingId = spleisBehandlingId,
-                identitetsnummer = identitetsnummer,
             ),
             OpprettSaksbehandleroppgave(
                 behovData = godkjenningsbehovData,
