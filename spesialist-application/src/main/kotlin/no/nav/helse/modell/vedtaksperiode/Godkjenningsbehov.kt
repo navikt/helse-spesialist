@@ -11,7 +11,7 @@ import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -37,7 +37,7 @@ class Godkjenningsbehov(
     val organisasjonsnummer: String,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val vedtaksperiodeId: UUID,
-    private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
+    private val spleisBehandlinger: List<SpleisBehandling>,
     private val utbetalingId: UUID,
     val spleisBehandlingId: UUID,
     private val vilkårsgrunnlagId: UUID,
@@ -80,7 +80,7 @@ class Godkjenningsbehov(
             yrkesaktivitetstype = yrkesaktivitetstype,
             arbeidssituasjon = arbeidssituasjon,
             vedtaksperiodeId = vedtaksperiodeId,
-            spleisVedtaksperioder = spleisVedtaksperioder,
+            spleisBehandlinger = spleisBehandlinger,
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
@@ -113,9 +113,9 @@ class Godkjenningsbehov(
                 organisasjonsnummer = jsonNode["organisasjonsnummer"].asString(),
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
-                spleisVedtaksperioder =
+                spleisBehandlinger =
                     godkjenning["perioderMedSammeSkjæringstidspunkt"].toList().map { periode ->
-                        periode.asSpleisVedtaksperiode(
+                        periode.asSpleisBehandling(
                             skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
                         )
                     },
@@ -154,8 +154,8 @@ class Godkjenningsbehov(
             )
         }
 
-        private fun JsonNode.asSpleisVedtaksperiode(skjæringstidspunkt: LocalDate): SpleisVedtaksperiode =
-            SpleisVedtaksperiode(
+        private fun JsonNode.asSpleisBehandling(skjæringstidspunkt: LocalDate): SpleisBehandling =
+            SpleisBehandling(
                 vedtaksperiodeId = this["vedtaksperiodeId"].asUUID(),
                 spleisBehandlingId = this["behandlingId"].asUUID(),
                 fom = this["fom"].asLocalDate(),
@@ -163,7 +163,7 @@ class Godkjenningsbehov(
                 skjæringstidspunkt = skjæringstidspunkt,
                 yrkesaktivitet =
                     this["yrkesaktivitet"]?.let { ya ->
-                        SpleisVedtaksperiode.Yrkesaktivitet(
+                        SpleisBehandling.Yrkesaktivitet(
                             yrkesaktivitetstype = ya["yrkesaktivitetstype"].asString(),
                             organisasjonsnummer = ya["organisasjonsnummer"]?.asString(),
                         )
@@ -402,7 +402,7 @@ internal class GodkjenningsbehovCommand(
                 førstegangsbehandling = godkjenningsbehovData.førstegangsbehandling,
                 utbetaling = utbetaling,
                 sykepengegrunnlagsfakta = godkjenningsbehovData.sykepengegrunnlagsfakta,
-                spleisVedtaksperioder = godkjenningsbehovData.spleisVedtaksperioder,
+                spleisVedtaksperioder = godkjenningsbehovData.spleisBehandlinger,
                 spleisBehandlingId = spleisBehandlingId,
             ),
             VurderAutomatiskAvvisning(

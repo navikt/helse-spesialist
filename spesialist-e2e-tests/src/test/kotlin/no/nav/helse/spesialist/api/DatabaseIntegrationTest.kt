@@ -405,22 +405,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun opprettSaksbehandler(
-        oid: UUID = SAKSBEHANDLER.id.value,
-        navn: String = SAKSBEHANDLER.navn,
-        epost: String = SAKSBEHANDLER.epost,
-        ident: String = SAKSBEHANDLER.ident.value,
-    ): UUID {
-        dbQuery.update(
-            "INSERT INTO saksbehandler (oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)",
-            "oid" to oid,
-            "navn" to navn,
-            "epost" to epost,
-            "ident" to ident,
-        )
-        return oid
-    }
-
     private fun opprettOppgave(
         vedtaksperiodeId: VedtaksperiodeId,
         utbetalingId: UUID = UUID.randomUUID(),
@@ -484,12 +468,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "stikkproeve" to stikkprøve,
         "utbetalingId" to utbetalingId,
     )
-
-    protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long =
-        dbQuery.single(
-            "SELECT o.id FROM oppgave o JOIN vedtaksperiode v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;",
-            "vedtaksperiode_id" to vedtaksperiodeId,
-        ) { it.long("id") }
 
     protected data class Navn(
         val fornavn: String,

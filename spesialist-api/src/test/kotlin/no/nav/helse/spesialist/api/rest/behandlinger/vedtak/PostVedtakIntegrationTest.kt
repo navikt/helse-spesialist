@@ -827,7 +827,7 @@ class PostVedtakIntegrationTest {
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
             yrkesaktivitetstype = behandling.yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiode.id.value,
-            spleisVedtaksperioder = emptyList(),
+            spleisBehandlinger = emptyList(),
             utbetalingId = behandling.utbetalingId?.value!!,
             spleisBehandlingId = behandling.spleisBehandlingId!!.value,
             vilkårsgrunnlagId = UUID.randomUUID(),

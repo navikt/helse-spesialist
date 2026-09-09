@@ -8,7 +8,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.melding.StpPeriodeTilRisk
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -188,19 +188,19 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
             ),
         spleisVedtaksperioder =
             listOf(
-                SpleisVedtaksperiode(
+                SpleisBehandling(
                     vedtaksperiodeId = vedtaksperiode1.id.value,
                     spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
                     fom = behandling1.fom,
                     tom = behandling1.tom,
                     skjæringstidspunkt = behandling1.skjæringstidspunkt,
                     yrkesaktivitet =
-                        SpleisVedtaksperiode.Yrkesaktivitet(
+                        SpleisBehandling.Yrkesaktivitet(
                             organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
                             yrkesaktivitetstype = "ARBEIDSTAKER",
                         ),
                 ),
-                SpleisVedtaksperiode(
+                SpleisBehandling(
                     vedtaksperiodeId = vedtaksperiode1.id.value,
                     spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
                     fom = behandling1.fom,
@@ -208,14 +208,14 @@ internal class VurderVurderingsmomenterTest : ApplicationTest() {
                     skjæringstidspunkt = behandling1.skjæringstidspunkt,
                     yrkesaktivitet = null,
                 ),
-                SpleisVedtaksperiode(
+                SpleisBehandling(
                     vedtaksperiodeId = vedtaksperiode1.id.value,
                     spleisBehandlingId = behandling1.spleisBehandlingId!!.value,
                     fom = behandling1.fom,
                     tom = behandling1.tom,
                     skjæringstidspunkt = behandling1.skjæringstidspunkt,
                     yrkesaktivitet =
-                        SpleisVedtaksperiode.Yrkesaktivitet(
+                        SpleisBehandling.Yrkesaktivitet(
                             organisasjonsnummer = null,
                             yrkesaktivitetstype = "SELVSTENDIG",
                         ),

@@ -7,7 +7,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.melding.StpPeriodeTilRisk
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
@@ -26,7 +26,7 @@ internal class VurderVurderingsmomenter(
     private val førstegangsbehandling: Boolean,
     private val utbetaling: Utbetaling,
     private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
-    private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
+    private val spleisVedtaksperioder: List<SpleisBehandling>,
     private val spleisBehandlingId: SpleisBehandlingId,
 ) : Command {
     override fun execute(

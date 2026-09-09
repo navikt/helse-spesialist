@@ -43,13 +43,13 @@ internal class ForberedBehandlingAvGodkjenningsbehov(
     }
 
     private fun oppdaterDatoer(sessionContext: SessionContext) {
-        godkjenningsbehovData.spleisVedtaksperioder
-            .mapNotNull { spleisVedtaksperiode ->
-                sessionContext.behandlingRepository.finnOrNull(SpleisBehandlingId(spleisVedtaksperiode.spleisBehandlingId))?.let {
-                    spleisVedtaksperiode to it
+        godkjenningsbehovData.spleisBehandlinger
+            .mapNotNull { spleisBehandling ->
+                sessionContext.behandlingRepository.finnOrNull(SpleisBehandlingId(spleisBehandling.spleisBehandlingId))?.let {
+                    spleisBehandling to it
                 }
-            }.onEach { (spleisVedtaksperiode, behandling) ->
-                behandling.oppdaterDatoer(fom = spleisVedtaksperiode.fom, tom = spleisVedtaksperiode.tom, skjæringstidspunkt = spleisVedtaksperiode.skjæringstidspunkt)
+            }.onEach { (spleisBehandling, behandling) ->
+                behandling.oppdaterDatoer(fom = spleisBehandling.fom, tom = spleisBehandling.tom, skjæringstidspunkt = spleisBehandling.skjæringstidspunkt)
                 sessionContext.behandlingRepository.lagre(behandling)
             }
     }

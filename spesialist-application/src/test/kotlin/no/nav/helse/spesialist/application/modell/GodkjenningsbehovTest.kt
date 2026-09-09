@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.application.modell
 
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
@@ -10,21 +10,21 @@ class GodkjenningsbehovTest {
     @Test
     fun `skal kunne parse godkjenningsbehov med perioderMedSammeSkjæringstidspunkt uten yrkesaktivitet`() {
         val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderUtenYrkesaktivitet)
-        behov.data().spleisVedtaksperioder.first().let { periode ->
-            assertNull(periode.yrkesaktivitet)
+        behov.data().spleisBehandlinger.first().let { spleisBehandling ->
+            assertNull(spleisBehandling.yrkesaktivitet)
         }
     }
 
     @Test
     fun `skal kunne parse godkjenningsbehov med perioderMedSammeSkjæringstidspunkt med yrkesaktivitet`() {
         val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderMedYrkesaktivitet)
-        behov.data().spleisVedtaksperioder.first().let { periode ->
+        behov.data().spleisBehandlinger.first().let { spleisBehandling ->
             assertEquals(
-                SpleisVedtaksperiode.Yrkesaktivitet(
+                SpleisBehandling.Yrkesaktivitet(
                     yrkesaktivitetstype = "ARBEIDSTAKER",
                     organisasjonsnummer = "987654321",
                 ),
-                periode.yrkesaktivitet,
+                spleisBehandling.yrkesaktivitet,
             )
         }
     }
@@ -32,12 +32,12 @@ class GodkjenningsbehovTest {
     @Test
     fun `skal kunne parse godkjenningsbehov med perioderMedSammeSkjæringstidspunkt med yrkesaktivitet uten orgnr`() {
         val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderMedYrkesaktivitetMenUtenOrgnr)
-        behov.data().spleisVedtaksperioder.first().let { periode ->
+        behov.data().spleisBehandlinger.first().let { spleisBehandling ->
             assertEquals(
-                SpleisVedtaksperiode.Yrkesaktivitet(
+                SpleisBehandling.Yrkesaktivitet(
                     yrkesaktivitetstype = "SJØLVSTENDIG",
                 ),
-                periode.yrkesaktivitet,
+                spleisBehandling.yrkesaktivitet,
             )
         }
     }

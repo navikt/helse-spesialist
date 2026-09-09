@@ -3,7 +3,7 @@ package no.nav.helse.modell.person.vedtaksperiode
 import java.time.LocalDate
 import java.util.UUID
 
-data class SpleisVedtaksperiode(
+data class SpleisBehandling(
     val vedtaksperiodeId: UUID,
     val spleisBehandlingId: UUID,
     val fom: LocalDate,

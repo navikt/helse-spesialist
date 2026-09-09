@@ -3,7 +3,7 @@ package no.nav.helse.modell.vedtaksperiode
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
-import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.domain.NAVIdent
 import java.time.LocalDate
@@ -17,7 +17,7 @@ data class GodkjenningsbehovData(
     val yrkesaktivitetstype: Yrkesaktivitetstype,
     val arbeidssituasjon: Arbeidssituasjon?,
     val vedtaksperiodeId: UUID,
-    val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
+    val spleisBehandlinger: List<SpleisBehandling>,
     val utbetalingId: UUID,
     val spleisBehandlingId: UUID,
     val vilkårsgrunnlagId: UUID,
