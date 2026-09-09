@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -13,9 +14,71 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.varseldefinisjonRepository
 
     @Test
+    fun `finnOrNull returnerer null når varseldefinisjon ikke finnes`() {
+        // given
+        val idSomIkkeFinnes = VarseldefinisjonId(UUID.randomUUID())
+
+        // when
+        val funnet = repository.finnOrNull(idSomIkkeFinnes)
+
+        // then
+        assertNull(funnet)
+    }
+
+    @Test
+    fun `finnOrNull returnerer varseldefinisjon med gitt id`() {
+        // given
+        val varseldefinisjon =
+            lagVarseldefinisjon(
+                kode = "EN_KODE_${UUID.randomUUID()}",
+                tittel = "En tittel",
+                forklaring = "En forklaring",
+                handling = "En handling",
+                avviklet = false,
+            )
+        repository.lagre(varseldefinisjon)
+
+        // when
+        val funnet = repository.finnOrNull(varseldefinisjon.id)
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(varseldefinisjon.id, funnet.id)
+        assertEquals(varseldefinisjon.kode, funnet.kode)
+        assertEquals(varseldefinisjon.tittel, funnet.tittel)
+        assertEquals(varseldefinisjon.forklaring, funnet.forklaring)
+        assertEquals(varseldefinisjon.handling, funnet.handling)
+        assertEquals(varseldefinisjon.avviklet, funnet.avviklet)
+        assertEquals(varseldefinisjon.opprettet.truncatedTo(ChronoUnit.MILLIS), funnet.opprettet.truncatedTo(ChronoUnit.MILLIS))
+    }
+
+    @Test
+    fun `finnOrNull henter riktig versjon når flere definisjoner har samme kode`() {
+        // given
+        val kode = "EN_KODE_${UUID.randomUUID()}"
+        val gammelDefinisjon = lagVarseldefinisjon(kode = kode, tittel = "Gammel tittel")
+        val nyDefinisjon = lagVarseldefinisjon(kode = kode, tittel = "Ny tittel")
+        repository.lagre(gammelDefinisjon)
+        repository.lagre(nyDefinisjon)
+
+        // when
+        val funnetGammel = repository.finnOrNull(gammelDefinisjon.id)
+        val funnetNy = repository.finnOrNull(nyDefinisjon.id)
+
+        // then
+        assertNotNull(funnetGammel)
+        assertEquals(gammelDefinisjon.id, funnetGammel.id)
+        assertEquals("Gammel tittel", funnetGammel.tittel)
+
+        assertNotNull(funnetNy)
+        assertEquals(nyDefinisjon.id, funnetNy.id)
+        assertEquals("Ny tittel", funnetNy.tittel)
+    }
+
+    @Test
     fun `finn gjeldende varseldefinisjon for gitt kode`() {
         // given
-        val kode = "EN_KODE"
+        val kode = "EN_KODE_${UUID.randomUUID()}"
         val nyTittel = "Ny varseldefinisjon"
 
         val gammelDefinisjon = lagVarseldefinisjon(tittel = "Gammel varseldefinisjon", kode = kode)
@@ -38,7 +101,7 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         // given
         val varseldefinisjon =
             lagVarseldefinisjon(
-                kode = "EN_KODE",
+                kode = "EN_KODE_${UUID.randomUUID()}",
                 tittel = "En tittel",
                 forklaring = "En forklaring",
                 handling = "En handling",
@@ -65,7 +128,7 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         // given
         val varseldefinisjon =
             lagVarseldefinisjon(
-                kode = "EN_KODE",
+                kode = "EN_KODE_${UUID.randomUUID()}",
                 forklaring = null,
                 handling = null,
             )
@@ -84,10 +147,11 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
     fun `lagre oppdaterer eksisterende varseldefinisjon i stedet for å duplisere`() {
         // given
         val id = UUID.randomUUID()
+        val kode = "EN_KODE_${UUID.randomUUID()}"
         val original =
             lagVarseldefinisjon(
                 id = id,
-                kode = "EN_KODE",
+                kode = kode,
                 tittel = "Original tittel",
                 forklaring = "Original forklaring",
                 handling = "Original handling",
@@ -99,7 +163,7 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         val oppdatert =
             lagVarseldefinisjon(
                 id = id,
-                kode = "EN_KODE",
+                kode = kode,
                 tittel = "Oppdatert tittel",
                 forklaring = "Oppdatert forklaring",
                 handling = "Oppdatert handling",
@@ -108,7 +172,7 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(oppdatert)
 
         // then
-        val funnet = repository.finnGjeldendeForOrNull("EN_KODE")
+        val funnet = repository.finnGjeldendeForOrNull(kode)
         assertNotNull(funnet)
         assertEquals(original.id, funnet.id)
         assertEquals("Oppdatert tittel", funnet.tittel)
@@ -120,16 +184,16 @@ class PgVarseldefinisjonRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagre to varseldefinisjoner med ulik kode påvirker ikke hverandre`() {
         // given
-        val førsteVarseldefinisjon = lagVarseldefinisjon(kode = "FORSTE_KODE", tittel = "Første tittel")
-        val andreVarseldefinisjon = lagVarseldefinisjon(kode = "ANDRE_KODE", tittel = "Andre tittel")
+        val førsteVarseldefinisjon = lagVarseldefinisjon(kode = "FORSTE_KODE_${UUID.randomUUID()}", tittel = "Første tittel")
+        val andreVarseldefinisjon = lagVarseldefinisjon(kode = "ANDRE_KODE_${UUID.randomUUID()}", tittel = "Andre tittel")
 
         // when
         repository.lagre(førsteVarseldefinisjon)
         repository.lagre(andreVarseldefinisjon)
 
         // then
-        val funnetFørste = repository.finnGjeldendeForOrNull("FORSTE_KODE")
-        val funnetAndre = repository.finnGjeldendeForOrNull("ANDRE_KODE")
+        val funnetFørste = repository.finnGjeldendeForOrNull(førsteVarseldefinisjon.kode)
+        val funnetAndre = repository.finnGjeldendeForOrNull(andreVarseldefinisjon.kode)
         assertNotNull(funnetFørste)
         assertNotNull(funnetAndre)
         assertEquals(førsteVarseldefinisjon.id, funnetFørste.id)
