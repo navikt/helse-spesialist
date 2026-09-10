@@ -76,11 +76,7 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                 kallKontekst.transaksjon.tilkommenInntektRepository
                     .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
                     .minus(tilkommenInntekt),
-            behandlinger =
-                kallKontekst.transaksjon.vedtaksperiodeRepository.finnAlleIderForPerson(tilkommenInntekt.identitetsnummer).map {
-                    kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(it)
-                        ?: error("Finner ikke vedtaksperiode")
-                },
+            behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(tilkommenInntekt.identitetsnummer),
         )
 
         if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {

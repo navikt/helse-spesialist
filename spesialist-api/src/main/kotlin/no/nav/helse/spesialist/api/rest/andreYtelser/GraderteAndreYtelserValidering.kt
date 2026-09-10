@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserType
 import no.nav.helse.spesialist.api.rest.KallKontekst
+import no.nav.helse.spesialist.api.rest.tilkomneinntekter.alleGjeldendeBehandlingerForPerson
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
@@ -33,9 +34,6 @@ internal fun KallKontekst.validerGraderteAndreYtelserEndring(
                 .filterNot { it.id == graderteAndreYtelserId },
         nyGraderteAndreYtelserType = type,
         nyGraderteAndreYtelserPerioder = perioder,
-        behandlinger =
-            transaksjon.vedtaksperiodeRepository.finnAlleIderForPerson(person.id).map {
-                transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(it) ?: error("Finner ikke vedtaksperiode")
-            },
+        behandlinger = this.alleGjeldendeBehandlingerForPerson(person.id),
     )
 }

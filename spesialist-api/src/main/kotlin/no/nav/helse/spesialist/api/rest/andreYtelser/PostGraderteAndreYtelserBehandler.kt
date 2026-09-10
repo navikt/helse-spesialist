@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource
+import no.nav.helse.spesialist.api.rest.tilkomneinntekter.alleGjeldendeBehandlingerForPerson
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -45,10 +46,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
                         grad = it.grad,
                     )
                 },
-            behandlinger =
-                kallKontekst.transaksjon.vedtaksperiodeRepository.finnAlleIderForPerson(person.id).map {
-                    kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(it) ?: error("Finner ikke vedtaksperiode")
-                },
+            behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(person.id),
         )
 
         val graderteAndreYtelser =
