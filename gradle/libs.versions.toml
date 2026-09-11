@@ -63,7 +63,7 @@ postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.30.0"
 rapidsAndRivers = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsAndRivers" }
 rapidsAndRiversTest = { module = "com.github.navikt.rapids-and-rivers:rapids-and-rivers-test", version.ref = "rapidsAndRivers" }
 
-slf4jApi = "org.slf4j:slf4j-api:2.0.18"
+slf4jApi = "org.slf4j:slf4j-api:2.0.19"
 
 smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
 smiley4-ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "smiley4KtorOpenapiTools" }
