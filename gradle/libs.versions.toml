@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.0"
+kotlin = "2.4.20"
 flyway = "13.5.0"
 graphqlKotlin = "10.2.2"
 kotlinx-coroutines = "1.11.0"
