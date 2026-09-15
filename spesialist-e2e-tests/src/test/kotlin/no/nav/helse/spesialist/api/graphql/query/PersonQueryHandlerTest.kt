@@ -29,7 +29,10 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
 import no.nav.helse.spesialist.domain.testfixtures.*
-import no.nav.helse.spesialist.domain.testfixtures.testdata.*
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -502,54 +505,6 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         )
     }
 
-    @Test
-    fun `henting av person uten personinfo i databasen fører til henting og oppdatering av personinfo`() {
-        val fødselsnummer = lagFødselsnummer()
-        val logglytter = Logglytter()
-
-        opprettMinimalPerson(
-            fødselsnummer = fødselsnummer,
-        )
-        mockSnapshot(fødselsnummer = fødselsnummer)
-
-        val body = runPersonQuery(Identitetsnummer.fraString(fødselsnummer))
-
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
-        assertEquals(personinfoHenter.personinfo!!.fornavn, body["data"]["person"]["personinfo"]["fornavn"].asString())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$fødselsnummer",
-            Level.INFO,
-        )
-    }
-
-    @Test
-    fun `får 404-feil når personinfo mangler i databasen og ikke finnes i PDL`() {
-        val fødselsnummer = lagFødselsnummer()
-        personinfoHenter.personinfo = null
-
-        opprettMinimalPerson(fødselsnummer = fødselsnummer)
-
-        val body = runPersonQuery(Identitetsnummer.fraString(fødselsnummer))
-
-        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            "Exception while fetching data (/person) : Fant ikke personinfo for person",
-            body["errors"].first()["message"].asString(),
-        )
-    }
-
-    @Test
-    fun `får 500-feil når henting av personinfo fra PDL feiler`() {
-        val fødselsnummer = lagFødselsnummer()
-        personinfoHenter.feil = GraphQLException("Oops")
-
-        opprettMinimalPerson(fødselsnummer = fødselsnummer)
-
-        val body = runPersonQuery(Identitetsnummer.fraString(fødselsnummer))
-
-        assertEquals(500, body["errors"].first()["extensions"]["code"].asInt())
-    }
-
     private fun runPersonQuery(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)) =
         runQuery(
             """
@@ -559,15 +514,6 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                     andreFodselsnummer {
                         fodselsnummer
                         personPseudoId
-                    }
-                    personinfo {
-                        fornavn
-                        mellomnavn
-                        etternavn
-                        adressebeskyttelse
-                        fodselsdato
-                        kjonn
-                        fullmakt
                     }
                     arbeidsgivere {
                         behandlinger {

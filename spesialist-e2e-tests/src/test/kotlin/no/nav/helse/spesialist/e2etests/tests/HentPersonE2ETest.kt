@@ -43,16 +43,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
         {
           "fodselsnummer" : "${testContext.person.fødselsnummer}",
           "dodsdato" : null,
-          "personinfo" : {
-            "fornavn" : "${testContext.person.fornavn}",
-            "mellomnavn" : ${testContext.person.mellomnavn?.let { "\"$it\"" }},
-            "etternavn" : "${testContext.person.etternavn}",
-            "adressebeskyttelse" : "Ugradert",
-            "fodselsdato" : "${testContext.person.fødselsdato}",
-            "kjonn" : "${testContext.person.kjønn}",
-            "fullmakt" : false,
-            "__typename" : "Personinfo"
-          },
           "tildeling" : null,
           "vilkarsgrunnlagV2" : [ {
             "sykepengegrunnlag" : 180000.0,

@@ -96,9 +96,7 @@ class GodkjenningE2ETest : AbstractE2EIntegrationTest() {
 
         søknadOgGodkjenningbehovKommerInn()
 
-        medPersonISpeil {
-            assertAdressebeskyttelse("Fortrolig")
-        }
+        assertAdressegradering("Fortrolig", testContext.person.fødselsnummer)
     }
 
     @Test

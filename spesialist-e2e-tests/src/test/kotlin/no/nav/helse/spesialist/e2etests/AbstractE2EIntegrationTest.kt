@@ -401,6 +401,26 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(forventetSkjæringstidspunkt, lagretSkjæringstidspunkt)
     }
 
+    protected fun assertAdressegradering(
+        gradering: String,
+        fødselsnummer: String,
+    ) {
+        val lagretGradering =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        """
+                        select adressebeskyttelse from person_info
+                        join person p on person_info.id = p.info_ref
+                        where p.fødselsnummer = :foedselsnummer
+                        """.trimIndent(),
+                        "foedselsnummer" to fødselsnummer,
+                    ).map { it.string(1) }.asSingle,
+                )
+            }
+        assertEquals(gradering, lagretGradering)
+    }
+
     protected fun leggTilVedtaksperiode() {
         testContext.leggTilVedtaksperiode()
     }

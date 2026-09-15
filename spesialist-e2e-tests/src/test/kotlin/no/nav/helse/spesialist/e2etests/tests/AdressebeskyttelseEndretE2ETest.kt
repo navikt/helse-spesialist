@@ -7,48 +7,6 @@ import org.junit.jupiter.api.Test
 
 class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
-    fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
-        // Given:
-        saksbehandlerHarRolle(Brukerrolle.Kode7)
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
-        søknadOgGodkjenningbehovKommerInn()
-        medPersonISpeil {
-            assertAdressebeskyttelse("Ugradert")
-        }
-
-        // When:
-        hentPersoninfoV2BehovLøser.adressebeskyttelse = "Fortrolig"
-        detPubliseresEnAdressebeskyttelseEndretMelding()
-
-        // Then:
-        medPersonISpeil {
-            assertAdressebeskyttelse("Fortrolig")
-        }
-    }
-
-    @Test
-    fun `oppdaterer ikke adressebeskyttelse dersom personen er ukjent`() {
-        // Given:
-        saksbehandlerHarRolle(Brukerrolle.Kode7)
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
-        søknadOgGodkjenningbehovKommerInn()
-        medPersonISpeil {
-            assertAdressebeskyttelse("Ugradert")
-        }
-
-        // When:
-        hentPersoninfoV2BehovLøser.adressebeskyttelse = "Fortrolig"
-        detPubliseresEnAdressebeskyttelseEndretMelding()
-
-        // Then:
-        medPersonISpeil {
-            assertAdressebeskyttelse("Fortrolig")
-        }
-    }
-
-    @Test
     fun `oppdaterer adressebeskyttelse dersom personen er kjent, men forsøker ikke å forkaste periode`() {
         // Given:
         saksbehandlerHarRolle(Brukerrolle.Kode7)
@@ -56,7 +14,6 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
         hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
         søknadOgGodkjenningbehovKommerInn()
         medPersonISpeil {
-            assertAdressebeskyttelse("Ugradert")
             saksbehandlerTildelerSegSaken()
             saksbehandlerGodkjennerAlleVarsler()
             saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
@@ -67,9 +24,6 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
         detPubliseresEnAdressebeskyttelseEndretMelding()
 
         // Then:
-        medPersonISpeil {
-            assertAdressebeskyttelse("Fortrolig")
-        }
         assertTrue(meldinger().none { it["@event_name"].asString() == "vedtaksperiode_avvist" })
     }
 }

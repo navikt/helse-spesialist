@@ -1,34 +1,8 @@
 package no.nav.helse.spesialist.db
 
 import no.nav.helse.db.Daos
-import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
-import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
-import no.nav.helse.spesialist.db.dao.PgCommandContextDao
-import no.nav.helse.spesialist.db.dao.PgDialogDao
-import no.nav.helse.spesialist.db.dao.PgDokumentDao
-import no.nav.helse.spesialist.db.dao.PgLegacyBehandlingDao
-import no.nav.helse.spesialist.db.dao.PgMeldingDao
-import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
-import no.nav.helse.spesialist.db.dao.PgNotatDao
-import no.nav.helse.spesialist.db.dao.PgOppgaveDao
-import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
-import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.PgPoisonPillDao
-import no.nav.helse.spesialist.db.dao.PgPåVentDao
-import no.nav.helse.spesialist.db.dao.PgReservasjonDao
-import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
-import no.nav.helse.spesialist.db.dao.PgTildelingDao
-import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
-import no.nav.helse.spesialist.db.dao.PgVedtakDao
-import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
-import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
-import no.nav.helse.spesialist.db.dao.api.PgOverstyringApiDao
-import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
-import no.nav.helse.spesialist.db.dao.api.PgPåVentApiDao
-import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
-import no.nav.helse.spesialist.db.dao.api.PgTildelingApiDao
-import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
-import no.nav.helse.spesialist.db.dao.api.PgVergemålApiDao
+import no.nav.helse.spesialist.db.dao.*
+import no.nav.helse.spesialist.db.dao.api.*
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import javax.sql.DataSource
@@ -64,7 +38,6 @@ class DBDaos(
     override val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
     override val tildelingApiDao = PgTildelingApiDao(dataSource)
     override val varselApiRepository = PgVarselApiRepository(dataSource)
-    override val vergemålApiDao = PgVergemålApiDao(dataSource)
     override val oppgaveRepository = PgOppgaveRepository(dataSource)
     override val saksbehandlerRepository = PgSaksbehandlerRepository(dataSource)
 }

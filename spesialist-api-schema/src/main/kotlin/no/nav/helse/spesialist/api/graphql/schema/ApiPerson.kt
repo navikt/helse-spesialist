@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @GraphQLName("Saksbehandler")
 data class ApiSaksbehandler(
@@ -64,7 +64,6 @@ data class ApiPerson(
     val fodselsnummer: String,
     val andreFodselsnummer: List<ApiAnnetFodselsnummer>,
     val dodsdato: LocalDate?,
-    val personinfo: ApiPersoninfo,
     val tildeling: ApiTildeling?,
     val tilleggsinfoForInntektskilder: List<ApiTilleggsinfoForInntektskilde>,
     val arbeidsgivere: List<ApiArbeidsgiver>,

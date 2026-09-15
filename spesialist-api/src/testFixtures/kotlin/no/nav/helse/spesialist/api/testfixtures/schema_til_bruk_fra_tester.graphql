@@ -397,21 +397,10 @@ type Person {
     arbeidsgivere: [Arbeidsgiver!]!
     dodsdato: LocalDate
     fodselsnummer: String!
-    personinfo: Personinfo!
     selvstendigNaering: SelvstendigNaering
     tildeling: Tildeling
     tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
     vilkarsgrunnlagV2: [VilkarsgrunnlagV2!]!
-}
-
-type Personinfo {
-    adressebeskyttelse: Adressebeskyttelse!
-    etternavn: String!
-    fodselsdato: LocalDate!
-    fornavn: String!
-    fullmakt: Boolean
-    kjonn: Kjonn!
-    mellomnavn: String
 }
 
 type Query {
@@ -735,14 +724,6 @@ type Vurdering {
     tidsstempel: LocalDateTime!
 }
 
-enum Adressebeskyttelse {
-    Fortrolig
-    StrengtFortrolig
-    StrengtFortroligUtland
-    Ugradert
-    Ukjent
-}
-
 enum Avslagstype {
     AVSLAG
     DELVIS_AVSLAG
@@ -866,12 +847,6 @@ enum Kildetype {
     SOKNAD
     SYKMELDING
     UKJENT
-}
-
-enum Kjonn {
-    Kvinne
-    Mann
-    Ukjent
 }
 
 enum Periodehandling {

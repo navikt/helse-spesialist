@@ -631,10 +631,6 @@ class SpeilPersonReceiver(
         )
     }
 
-    fun assertAdressebeskyttelse(expected: String) {
-        assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asString())
-    }
-
     private fun fetchPerson(personPseudoId: String): JsonNode {
         val fetchPersonResponse =
             callGraphQL(

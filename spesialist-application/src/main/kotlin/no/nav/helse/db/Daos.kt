@@ -1,14 +1,6 @@
 package no.nav.helse.db
 
-import no.nav.helse.db.api.ArbeidsgiverApiDao
-import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.db.api.OverstyringApiDao
-import no.nav.helse.db.api.PeriodehistorikkApiDao
-import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.RisikovurderingApiDao
-import no.nav.helse.db.api.TildelingApiDao
-import no.nav.helse.db.api.VarselApiRepository
-import no.nav.helse.db.api.VergemålApiDao
+import no.nav.helse.db.api.*
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 
@@ -41,7 +33,6 @@ interface Daos {
     val risikovurderingApiDao: RisikovurderingApiDao
     val tildelingApiDao: TildelingApiDao
     val varselApiRepository: VarselApiRepository
-    val vergemålApiDao: VergemålApiDao
     val oppgaveRepository: OppgaveRepository
     val saksbehandlerRepository: SaksbehandlerRepository
 }

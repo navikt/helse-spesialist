@@ -125,13 +125,10 @@ class PersonQueryHandler(
                 transaction.personRepository.lagre(personEntity)
             }
 
-            PersoninfoKlargjører.KlargjøringResultat.IkkeFunnet -> {
-                notFound("Fant ikke personinfo for person")
-            }
+            PersoninfoKlargjører.KlargjøringResultat.IkkeFunnet -> {}
 
             is PersoninfoKlargjører.KlargjøringResultat.OppslagFeilet -> {
                 loggError("Klarte ikke å hente personinfo", resultat.feil, "identitetsnummer" to identitetsnummer)
-                internalServerError("Feil ved henting av personinfo")
             }
         }
     }
@@ -161,7 +158,6 @@ class PersonQueryHandler(
                 fodselsnummer = personEntity.id.value,
                 andreFodselsnummer = andreFødselsnumre(transaction, personEntity, personEntity.id),
                 dodsdato = null,
-                personinfo = personEntity.tilApiPersoninfo(),
                 tildeling = null,
                 tilleggsinfoForInntektskilder = emptyList(),
                 arbeidsgivere = emptyList(),
@@ -190,7 +186,6 @@ class PersonQueryHandler(
             fodselsnummer = identitetsnummer.value,
             andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
             dodsdato = snapshot.dodsdato,
-            personinfo = personEntity.tilApiPersoninfo(),
             tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilApiTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag
@@ -983,20 +978,6 @@ class PersonQueryHandler(
             ?.navn
             ?.navn
 
-    private fun Person.tilApiPersoninfo(): ApiPersoninfo {
-        val personinfo = info ?: error("Fant ikke personinfo i databasen")
-
-        return ApiPersoninfo(
-            fornavn = personinfo.fornavn,
-            mellomnavn = personinfo.mellomnavn,
-            etternavn = personinfo.etternavn,
-            fodselsdato = personinfo.fødselsdato!!,
-            kjonn = personinfo.kjønn.tilApiKjonn(),
-            adressebeskyttelse = personinfo.adressebeskyttelse.tilApiAdressebeskyttelse(),
-            fullmakt = daos.vergemålApiDao.harFullmakt(id.value),
-        )
-    }
-
     private fun manglerTilgangTilPerson(
         saksbehandler: Saksbehandler,
         identitetsnummer: Identitetsnummer,
@@ -1325,19 +1306,3 @@ private fun TildelingApiDto.tilApiTildeling(): ApiTildeling =
         epost = epost,
         oid = oid,
     )
-
-private fun Personinfo.Adressebeskyttelse.tilApiAdressebeskyttelse(): ApiAdressebeskyttelse =
-    when (this) {
-        Personinfo.Adressebeskyttelse.Ugradert -> ApiAdressebeskyttelse.Ugradert
-        Personinfo.Adressebeskyttelse.Fortrolig -> ApiAdressebeskyttelse.Fortrolig
-        Personinfo.Adressebeskyttelse.StrengtFortrolig -> ApiAdressebeskyttelse.StrengtFortrolig
-        Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> ApiAdressebeskyttelse.StrengtFortroligUtland
-        Personinfo.Adressebeskyttelse.Ukjent -> ApiAdressebeskyttelse.Ukjent
-    }
-
-private fun Personinfo.Kjønn?.tilApiKjonn(): ApiKjonn =
-    when (this) {
-        Personinfo.Kjønn.Kvinne -> ApiKjonn.Kvinne
-        Personinfo.Kjønn.Mann -> ApiKjonn.Mann
-        Personinfo.Kjønn.Ukjent, null -> ApiKjonn.Ukjent
-    }

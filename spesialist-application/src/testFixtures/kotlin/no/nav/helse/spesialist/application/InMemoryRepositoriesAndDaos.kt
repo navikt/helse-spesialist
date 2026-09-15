@@ -66,7 +66,6 @@ class InMemoryRepositoriesAndDaos {
         InMemoryVedtakBegrunnelseDao(oppgaveRepository, behandlingRepository, saksbehandlerRepository)
     private val vedtakDao = DelegatingVedtakDao(automatiseringDao)
     private val vergemålDao = InMemoryVergemålDao()
-    private val vergemålApiDao = UnimplementedVergemålApiDao()
     private val åpneGosysOppgaverDao = InMemoryÅpneGosysOppgaverDao()
 
     val daos =
@@ -100,7 +99,6 @@ class InMemoryRepositoriesAndDaos {
             varselApiRepository = varselApiRepository,
             vedtakBegrunnelseDao = vedtakBegrunnelseDao,
             vedtakDao = vedtakDao,
-            vergemålApiDao = vergemålApiDao,
         )
 
     val sessionContext =
