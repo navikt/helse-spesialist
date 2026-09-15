@@ -10,9 +10,11 @@ import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans.Veileder, ApiStansRequest, Unit, ApiPatchVeilederStansErrorCode> {
     override val tag = Tags.PERSONER
@@ -52,14 +54,31 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
                 begrunnelse = begrunnelse,
             )
             kallKontekst.transaksjon.veilederStansRepository.lagre(aktivVeilederStans)
-            kallKontekst.transaksjon.notatDao.lagreForOppgaveId(
-                oppgaveId =
-                    kallKontekst.transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = person.id.value)
-                        ?: kallKontekst.transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = person.id.value),
-                tekst = begrunnelse,
-                saksbehandlerOid = kallKontekst.saksbehandler.id.value,
-                notatType = NotatType.OpphevStans,
-                dialogRef = kallKontekst.transaksjon.dialogDao.lagre(),
+            val oppgaveId =
+                kallKontekst.transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = person.id.value)
+            val vedtaksperiodeId =
+                if (oppgaveId !== null) {
+                    kallKontekst.transaksjon.oppgaveDao
+                        .finnVedtaksperiodeId(oppgaveId = oppgaveId)
+                        .let { VedtaksperiodeId(it) }
+                } else {
+                    kallKontekst.transaksjon.vedtaksperiodeRepository
+                        .finnAlleForPerson(person.id)
+                        .mapNotNull { vedtaksperiode ->
+                            kallKontekst.transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id)
+                        }.maxByOrNull { it.tom }
+                        ?.vedtaksperiodeId ?: error("Kan ikke oppheve stans for person uten behandlinger")
+                }
+
+            kallKontekst.transaksjon.notatRepository.lagre(
+                notat =
+                    no.nav.helse.spesialist.domain.Notat.Factory.ny(
+                        type = NotatType.OpphevStans,
+                        tekst = begrunnelse,
+                        dialogRef = DialogId(kallKontekst.transaksjon.dialogDao.lagre()),
+                        vedtaksperiodeId = vedtaksperiodeId.value,
+                        saksbehandlerOid = kallKontekst.saksbehandler.id,
+                    ),
             )
             loggInfo("Opphevet veileder-stans for person")
         }
