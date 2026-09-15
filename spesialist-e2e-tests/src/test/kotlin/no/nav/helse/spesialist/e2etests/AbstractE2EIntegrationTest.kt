@@ -2,15 +2,13 @@ package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import kotliquery.action.NullableResultQueryAction
-import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
@@ -57,6 +55,7 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     private val testRapid = E2ETestApplikasjon.testRapid
+    protected val dbQuery = DataSourceDbQuery(E2ETestApplikasjon.dbModule.dataSource)
 
     protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
     protected val risikovurderingBehovLøser = finnLøserForDenneTesten<RisikovurderingBehovLøser>()
@@ -180,14 +179,10 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun tvingAutomatisering(vedtaksperiode: Vedtaksperiode = førsteVedtaksperiode()) {
-        sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-            session.run(
-                asSQL(
-                    "INSERT INTO force_automatisering(vedtaksperiode_id) VALUES (:vedtaksperiode_id)",
-                    "vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId,
-                ).asUpdate,
-            )
-        }
+        dbQuery.update(
+            "INSERT INTO force_automatisering(vedtaksperiode_id) VALUES (:vedtaksperiode_id)",
+            "vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId,
+        )
     }
 
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
@@ -284,23 +279,21 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {
         val actualTilstand =
-            runQuery(
-                asSQL(
-                    "SELECT tilstand FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id",
-                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
-                ).map { it.string("tilstand") }.asSingle,
-            )
+            dbQuery.single(
+                "SELECT tilstand FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+            ) { it.string("tilstand") }
+
         assertEquals(expectedTilstand, actualTilstand)
     }
 
     protected fun assertPeriodeForkastet(expectedForkastet: Boolean) {
         val actualForkastet =
-            runQuery(
-                asSQL(
-                    "SELECT forkastet FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiode_id",
-                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
-                ).map { it.boolean("forkastet") }.asSingle,
-            )
+            dbQuery.single(
+                "SELECT forkastet FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+            ) { it.boolean("forkastet") }
+
         assertEquals(expectedForkastet, actualForkastet)
     }
 
@@ -309,36 +302,30 @@ abstract class AbstractE2EIntegrationTest {
         vedtaksperiode: Vedtaksperiode = førsteVedtaksperiode(),
     ) {
         val actualStatus =
-            runQuery(
-                asSQL(
-                    """
-                    SELECT o.status
-                    FROM oppgave o, vedtaksperiode v
-                    WHERE o.vedtak_ref = v.id
-                    AND v.vedtaksperiode_id = :vedtaksperiode_id
-                    """.trimIndent(),
-                    "vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId,
-                ).map { it.string("status") }.asSingle,
-            )
+            dbQuery.single(
+                """
+                SELECT o.status
+                FROM oppgave o, vedtaksperiode v
+                WHERE o.vedtak_ref = v.id
+                AND v.vedtaksperiode_id = :vedtaksperiode_id
+                """.trimIndent(),
+                "vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId,
+            ) { it.string("status") }
         assertEquals(expectedStatus, actualStatus)
     }
 
     protected fun assertOppgavestatuserKronoligisk(vararg expectedStatuses: String) {
         val actualStatus =
-            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-                session.run(
-                    asSQL(
-                        """
-                        SELECT o.status
-                        FROM oppgave o, vedtaksperiode v
-                        WHERE o.vedtak_ref = v.id
-                        AND v.vedtaksperiode_id = :vedtaksperiode_id
-                        ORDER BY o.oppdatert
-                        """.trimIndent(),
-                        "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
-                    ).map { it.string("status") }.asList,
-                )
-            }
+            dbQuery.list(
+                """
+                SELECT o.status
+                FROM oppgave o, vedtaksperiode v
+                WHERE o.vedtak_ref = v.id
+                AND v.vedtaksperiode_id = :vedtaksperiode_id
+                ORDER BY o.oppdatert
+                """.trimIndent(),
+                "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+            ) { it.string("status") }
         assertEquals(expectedStatuses.toList(), actualStatus)
     }
 
@@ -364,13 +351,12 @@ abstract class AbstractE2EIntegrationTest {
                 "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
             }
         val tags =
-            runQuery(
-                asSQL(
-                    "SELECT tags FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId AND spleis_behandling_id = :spleisBehandlingId",
-                    "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
-                    "spleisBehandlingId" to spleisBehandlingId,
-                ).map { it.array<String>("tags").toList() }.asSingle,
-            )
+            dbQuery.single(
+                "SELECT tags FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId AND spleis_behandling_id = :spleisBehandlingId",
+                "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
+                "spleisBehandlingId" to spleisBehandlingId,
+            ) { it.array<String>("tags").toList() }
+
         assertEquals(forventedeTags, tags)
     }
 
@@ -383,12 +369,11 @@ abstract class AbstractE2EIntegrationTest {
                 "spleisBehandlingId er ikke satt for vedtaksperiode ${vedtaksperiode.vedtaksperiodeId}"
             }
         val lagretSkjæringstidspunkt =
-            runQuery(
-                asSQL(
-                    "SELECT skjæringstidspunkt FROM behandling WHERE spleis_behandling_id = :spleisBehandlingId",
-                    "spleisBehandlingId" to spleisBehandlingId,
-                ).map { it.localDate("skjæringstidspunkt") }.asSingle,
-            )
+            dbQuery.single(
+                "SELECT skjæringstidspunkt FROM behandling WHERE spleis_behandling_id = :spleisBehandlingId",
+                "spleisBehandlingId" to spleisBehandlingId,
+            ) { it.localDate("skjæringstidspunkt") }
+
         assertEquals(forventetSkjæringstidspunkt, lagretSkjæringstidspunkt)
     }
 
@@ -397,16 +382,15 @@ abstract class AbstractE2EIntegrationTest {
         fødselsnummer: String,
     ) {
         val lagretGradering =
-            runQuery(
-                asSQL(
-                    """
-                    select adressebeskyttelse from person_info
-                    join person p on person_info.id = p.info_ref
-                    where p.fødselsnummer = :foedselsnummer
-                    """.trimIndent(),
-                    "foedselsnummer" to fødselsnummer,
-                ).map { it.string(1) }.asSingle,
-            )
+            dbQuery.single(
+                """
+                select adressebeskyttelse from person_info
+                join person p on person_info.id = p.info_ref
+                where p.fødselsnummer = :foedselsnummer
+                """.trimIndent(),
+                "foedselsnummer" to fødselsnummer,
+            ) { it.string(1) }
+
         assertEquals(gradering, lagretGradering)
     }
 
@@ -541,11 +525,6 @@ abstract class AbstractE2EIntegrationTest {
             Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet),
         )
     }
-
-    private fun <T> runQuery(action: NullableResultQueryAction<T>): T? =
-        sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-            session.run(action)
-        }
 
     protected fun callHttpGet(
         relativeUrl: String,

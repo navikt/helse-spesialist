@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -68,20 +66,14 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
     }
 
     private fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype =
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf("SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = ?)", vedtaksperiodeId)
-                    .map { row -> enumValueOf<Periodetype>(row.string("type")) }
-                    .asSingle,
-            )!!
-        }
+        dbQuery.single(
+            "SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId)",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { row -> enumValueOf<Periodetype>(row.string("type")) }
 
     private fun finnKobling(hendelseId: UUID) =
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                    .map { row -> row.uuid("vedtaksperiode_id") }
-                    .asSingle,
-            )
-        }
+        dbQuery.singleOrNull(
+            "SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = :hendelseId",
+            "hendelseId" to hendelseId,
+        ) { row -> row.uuid("vedtaksperiode_id") }
 }

@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.UtbetalingId
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -163,49 +161,35 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
         problems: List<String> = emptyList(),
         utbetalingId: UUID?,
     ) {
-        sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                transactionalSession.run(
-                    queryOf(
-                        """
-                            INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
-                            VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
-                        """,
-                        vedtaksperiodeId,
-                        hendelseId,
-                        automatisert,
-                        stikkprøve,
-                        utbetalingId,
-                    ).asUpdate,
-                )
+        dbQuery.update(
+            """
+                INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
+                VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :automatisert, :stikkproeve, :utbetalingId)
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "hendelseId" to hendelseId,
+            "automatisert" to automatisert,
+            "stikkproeve" to stikkprøve,
+            "utbetalingId" to utbetalingId,
+        )
 
-                problems.forEach { problem ->
-                    transactionalSession.run(
-                        queryOf(
-                            "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = ?), ?, ?)",
-                            vedtaksperiodeId,
-                            hendelseId,
-                            problem,
-                        ).asUpdate,
-                    )
-                }
-            }
+        problems.forEach { problem ->
+            dbQuery.update(
+                "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :problem)",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "hendelseId" to hendelseId,
+                "problem" to problem,
+            )
         }
     }
 
     private fun insertForceAutomatisering(vedtaksperiodeId: UUID) {
-        sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                transactionalSession.run(
-                    queryOf(
-                        """
-                            INSERT INTO force_automatisering (vedtaksperiode_id)
-                            VALUES (?)
-                        """,
-                        vedtaksperiodeId,
-                    ).asUpdate,
-                )
-            }
-        }
+        dbQuery.update(
+            """
+                INSERT INTO force_automatisering (vedtaksperiode_id)
+                VALUES (:vedtaksperiodeId)
+            """,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        )
     }
 }

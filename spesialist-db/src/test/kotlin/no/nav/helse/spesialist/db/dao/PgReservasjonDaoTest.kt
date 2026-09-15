@@ -1,10 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Person
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -15,22 +12,21 @@ import java.util.UUID
 
 internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
-    private val saksbehandler = opprettSaksbehandler()
 
     @Test
     fun `reserverer person`() {
-        val saksbehandler =
-            sessionOf(dataSource).use {
-                reservasjonDao.reserverPerson(saksbehandler.id.value, person.id.value)
-                reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil
-                    ?: fail("Forventet at det skulle finnes en reservasjon i basen")
-            }
-        assertEquals(saksbehandler.id.value, saksbehandler.id.value)
+        val saksbehandler = opprettSaksbehandler()
+        reservasjonDao.reserverPerson(saksbehandler.id.value, person.id.value)
+        val saksbehandlerMedReservasjone =
+            reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil
+                ?: fail("Forventet at det skulle finnes en reservasjon i basen")
+        assertEquals(saksbehandler.id.value, saksbehandlerMedReservasjone.id.value)
         assertRiktigVarighet(finnGyldigTil(person))
     }
 
     @Test
     fun `ny reservasjon forlenger ikke fristen`() {
+        val saksbehandler = opprettSaksbehandler()
         val enAnnenSaksbehandler = UUID.randomUUID()
         saksbehandlerDao.opprettEllerOppdater(
             enAnnenSaksbehandler,
@@ -39,17 +35,16 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
             "S666666",
         )
 
-        val saksbehandler =
-            sessionOf(dataSource).use {
-                reservasjonDao.reserverPerson(enAnnenSaksbehandler, person.id.value)
-                val gyldigTil1 = finnGyldigTil(person)
-                reservasjonDao.reserverPerson(saksbehandler.id.value, person.id.value)
-                val gyldigTil2 = finnGyldigTil(person)
-                assertTrue(gyldigTil2.isEqual(gyldigTil1))
-                reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil
-                    ?: fail("Forventet at det skulle finnes en reservasjon i basen")
-            }
-        assertEquals(saksbehandler.id.value, saksbehandler.id.value)
+        reservasjonDao.reserverPerson(enAnnenSaksbehandler, person.id.value)
+        val gyldigTil1 = finnGyldigTil(person)
+        reservasjonDao.reserverPerson(saksbehandler.id.value, person.id.value)
+        val gyldigTil2 = finnGyldigTil(person)
+        assertTrue(gyldigTil2.isEqual(gyldigTil1))
+
+        val saksbehandlerMedReservasjon =
+            reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil
+                ?: fail("Forventet at det skulle finnes en reservasjon i basen")
+        assertEquals(saksbehandler.id.value, saksbehandlerMedReservasjon.id.value)
         assertRiktigVarighet(finnGyldigTil(person))
     }
 
@@ -57,20 +52,14 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
         assertEquals(LocalDate.now().atTime(23, 59, 59), gyldigTil)
     }
 
-    private fun finnGyldigTil(person: Person): LocalDateTime {
-        @Language("PostgreSQL")
-        val query = """
+    private fun finnGyldigTil(person: Person): LocalDateTime =
+        dbQuery.single(
+            """
             SELECT r.gyldig_til
             FROM reserver_person r
             JOIN person p ON p.id = r.person_ref
-            WHERE p.fødselsnummer = :fnr AND r.gyldig_til > now();
-            """
-        return sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(query, mapOf("fnr" to person.id.value))
-                    .map { it.localDateTime("gyldig_til") }
-                    .asSingle,
-            )
-        }!!
-    }
+            WHERE p.fødselsnummer = :fnr AND r.gyldig_til > now()
+            """,
+            "fnr" to person.id.value,
+        ) { it.localDateTime("gyldig_til") }
 }

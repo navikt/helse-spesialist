@@ -1,9 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -32,19 +29,11 @@ class PgPoisonPillDaoTest : AbstractDBIntegrationTest() {
     private fun Pair<String, String>.somJsonNode() = objectMapper.valueToTree<JsonNode>(mapOf(first to second))
 
     private fun insertPoisonPills(vararg meldinger: Pair<String, String>) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """ INSERT INTO poison_pill(feltnavn, identifikator) VALUES (:feltnavn, :identifikator) """
-            meldinger.forEach { (feltnavn, identifikator) ->
-                session.run(
-                    queryOf(
-                        query,
-                        mapOf(
-                            "feltnavn" to feltnavn,
-                            "identifikator" to identifikator,
-                        ),
-                    ).asUpdate,
-                )
-            }
+        meldinger.forEach { (feltnavn, identifikator) ->
+            dbQuery.update(
+                "INSERT INTO poison_pill(feltnavn, identifikator) VALUES (:feltnavn, :identifikator)",
+                "feltnavn" to feltnavn,
+                "identifikator" to identifikator,
+            )
         }
 }

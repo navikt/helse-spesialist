@@ -1,7 +1,6 @@
 package no.nav.helse.opprydding
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,6 +10,7 @@ import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
     protected val dataSource = OppryddingDevDBTestFixture.fixture.module.dataSource
+    protected val dbQuery = DataSourceDbQuery(dataSource)
     protected val personRepository = PersonRepository(dataSource)
 
     protected fun opprettPerson(
@@ -184,9 +184,7 @@ internal abstract class AbstractDatabaseTest {
             VALUES (gen_random_uuid(), '$fødselsnummer', '{MEDISINSK_VILKAR}', now(), gen_random_uuid(), 'I123456', 'En begrunnelse', now());
             
             """.trimIndent()
-        sessionOf(dataSource).use { session ->
-            session.update(queryOf(sql))
-        }
+        dbQuery.update(sql)
     }
 
     protected fun assertTabellinnhold(
@@ -239,19 +237,9 @@ internal abstract class AbstractDatabaseTest {
         }
     }
 
-    protected fun finnTabeller(): List<String> =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
-            session.run(queryOf(query).map { it.string("table_name") }.asList)
-        }
+    protected fun finnTabeller(): List<String> = dbQuery.list("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'") { it.string("table_name") }
 
-    private fun finnRowCount(tabellnavn: String): Int =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT COUNT(1) FROM $tabellnavn"
-            session.run(queryOf(query).map { it.int(1) }.asSingle) ?: 0
-        }
+    private fun finnRowCount(tabellnavn: String): Int = dbQuery.singleOrNull("SELECT COUNT(*) FROM $tabellnavn") { it.int(1) } ?: 0
 
     @BeforeEach
     fun resetDatabase() {

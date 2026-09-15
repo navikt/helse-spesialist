@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -26,6 +25,7 @@ import java.util.UUID
 
 class PgMeldingDaoTest {
     private val meldingDao = DBTestFixture.module.daos.meldingDao
+    private val dbQuery = DataSourceDbQuery(DBTestFixture.module.dataSource)
 
     @Test
     fun `finn siste behandling opprettet om det er korrigert søknad`() {
@@ -124,14 +124,10 @@ class PgMeldingDaoTest {
 
         // Then:
         val actualVedtaksperiodeId =
-            sessionOf(DBTestFixture.module.dataSource).use { session ->
-                session.run(
-                    queryOf(
-                        "SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?",
-                        hendelseId,
-                    ).map { UUID.fromString(it.string(1)) }.asSingle,
-                )
-            }
+            dbQuery.single(
+                "SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = :hendelseId",
+                "hendelseId" to hendelseId,
+            ) { UUID.fromString(it.string(1)) }
         assertEquals(vedtaksperiodeId, actualVedtaksperiodeId)
     }
 

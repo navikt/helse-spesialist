@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.rest.ApiLovhjemmel
 import no.nav.helse.spesialist.api.rest.ApiOverstyrArbeidsforholdRequest
 import no.nav.helse.spesialist.api.rest.ApiOverstyrInntektOgRefusjonRequest
@@ -9,8 +7,6 @@ import no.nav.helse.spesialist.api.rest.ApiOverstyrTidslinjeRequest
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
-import no.nav.helse.spesialist.e2etests.E2ETestApplikasjon
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -152,46 +148,35 @@ class TotrinnsvurderingOverstyringE2ETest : AbstractE2EIntegrationTest() {
     }
 
     private fun assertTotrinnsvurderingHarAktivOverstyring() {
-        @Language("SQL")
-        val query =
-            """
-            select count(*) as antall
-            from overstyring o
-                inner join totrinnsvurdering tv on tv.id = o.totrinnsvurdering_ref
-                inner join person p on p.id = tv.person_ref
-            where p.fødselsnummer = :fodselsnummer
-                and tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
-            """.trimIndent()
         val antall =
-            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-                session.run(
-                    queryOf(query, mapOf("fodselsnummer" to fødselsnummer()))
-                        .map { it.int("antall") }
-                        .asSingle,
-                )
-            }
+            dbQuery.singleOrNull(
+                """
+                select count(*) as antall
+                from overstyring o
+                    inner join totrinnsvurdering tv on tv.id = o.totrinnsvurdering_ref
+                    inner join person p on p.id = tv.person_ref
+                where p.fødselsnummer = :fodselsnummer
+                    and tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
+                """.trimIndent(),
+                "fodselsnummer" to fødselsnummer(),
+            ) { it.int("antall") }
         assertTrue((antall ?: 0) > 0) {
             "Forventet at det finnes minst én aktiv overstyring knyttet til totrinnsvurderingen for fødselsnummer=${fødselsnummer()}"
         }
     }
 
     private fun assertTotrinnsvurderingErForkastet() {
-        @Language("SQL")
-        val query =
-            """
-            select tv.vedtaksperiode_forkastet
-            from totrinnsvurdering tv
-                inner join person p on p.id = tv.person_ref
-            where p.fødselsnummer = :fodselsnummer
-            """.trimIndent()
         val vedtaksperiodeForkastet =
-            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-                session.run(
-                    queryOf(query, mapOf("fodselsnummer" to fødselsnummer()))
-                        .map { it.boolean("vedtaksperiode_forkastet") }
-                        .asSingle,
-                )
-            } ?: error("Finner ikke totrinnsvurdering for fødselsnummer=${fødselsnummer()}")
+            dbQuery.singleOrNull(
+                """
+                select tv.vedtaksperiode_forkastet
+                from totrinnsvurdering tv
+                    inner join person p on p.id = tv.person_ref
+                where p.fødselsnummer = :fodselsnummer
+                """.trimIndent(),
+                "fodselsnummer" to fødselsnummer(),
+            ) { it.boolean("vedtaksperiode_forkastet") }
+                ?: error("Finner ikke totrinnsvurdering for fødselsnummer=${fødselsnummer()}")
         assertTrue(vedtaksperiodeForkastet) {
             "Forventer at totrinnsvurdering er markert som forkastet"
         }

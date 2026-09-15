@@ -1,9 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.JsonNode
@@ -66,20 +63,15 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
     }
 
     private fun risikovurdering(vedtaksperiodeId: UUID) =
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val statement =
-                "SELECT * FROM risikovurdering_2021 WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC"
-            it.run(
-                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
-                    .map { row ->
-                        RisikovurderingAssertions(
-                            vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                            kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
-                            data = objectMapper.readTree(row.string("data")),
-                            opprettet = row.localDateTime("opprettet"),
-                        )
-                    }.asList,
+        dbQuery.list(
+            "SELECT * FROM risikovurdering_2021 WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { row ->
+            RisikovurderingAssertions(
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
+                data = objectMapper.readTree(row.string("data")),
+                opprettet = row.localDateTime("opprettet"),
             )
         }
 

@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Melding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -121,17 +119,12 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
         contextId: UUID,
         vararg expectedTilstand: String,
     ) {
-        sessionOf(dataSource)
-            .use { session ->
-                session.run(
-                    queryOf(
-                        "SELECT tilstand FROM command_context WHERE context_id = ? ORDER BY id ASC",
-                        contextId,
-                    ).map { it.string("tilstand") }.asList,
-                )
-            }.also {
-                assertEquals(expectedTilstand.toList(), it)
-            }
+        val tilstander =
+            dbQuery.list(
+                "SELECT tilstand FROM command_context WHERE context_id = :contextId ORDER BY id ASC",
+                "contextId" to contextId,
+            ) { it.string("tilstand") }
+        assertEquals(expectedTilstand.toList(), tilstander)
     }
 
     private fun assertContextRad(
@@ -139,14 +132,10 @@ internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
         contextId: UUID,
     ) {
         val count =
-            sessionOf(dataSource).use {
-                it.run(
-                    queryOf(
-                        "SELECT COUNT(1) FROM command_context WHERE context_id = ?",
-                        contextId,
-                    ).map { it.int(1) }.asSingle,
-                )!!
-            }
+            dbQuery.single(
+                "SELECT COUNT(*) FROM command_context WHERE context_id = :contextId",
+                "contextId" to contextId,
+            ) { it.int(1) }
         assertEquals(finnes, count > 0)
     }
 }

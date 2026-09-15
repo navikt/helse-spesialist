@@ -1,14 +1,10 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.rest.ApiLovhjemmel
 import no.nav.helse.spesialist.api.rest.ApiOverstyrArbeidsforholdRequest
 import no.nav.helse.spesialist.api.rest.ApiOverstyrInntektOgRefusjonRequest
 import no.nav.helse.spesialist.api.rest.ApiOverstyrTidslinjeRequest
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
-import no.nav.helse.spesialist.e2etests.E2ETestApplikasjon
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -261,22 +257,15 @@ class OverstyringE2ETest : AbstractE2EIntegrationTest() {
         tabell: String,
         forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query =
-            """
-                SELECT COUNT(1) FROM overstyring o 
+        val antall =
+            dbQuery.singleOrNull(
+                """
+                SELECT COUNT(*) FROM overstyring o 
                 INNER JOIN $tabell t on o.id = t.overstyring_ref 
                 WHERE o.person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
-            """
-        val antall =
-            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-                session.run(
-                    queryOf(
-                        query,
-                        mapOf("fodselsnummer" to fødselsnummer()),
-                    ).map { it.int(1) }.asSingle,
-                )
-            } ?: 0
+                """.trimIndent(),
+                "fodselsnummer" to fødselsnummer(),
+            ) { it.int(1) } ?: 0
 
         assertEquals(forventetAntall, antall)
     }

@@ -1,7 +1,5 @@
 package no.nav.helse.e2e
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Varsel
@@ -9,7 +7,6 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -128,20 +125,12 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
         status: Varsel.Status,
     ) {
         val antallVarsler =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query = "SELECT count(*) FROM varsel WHERE kode = ? AND vedtaksperiode_id = ? AND status = ?"
-                requireNotNull(
-                    session.run(
-                        queryOf(
-                            query,
-                            varselkode,
-                            vedtaksperiodeId,
-                            status.name,
-                        ).map { it.int(1) }.asSingle,
-                    ),
-                )
-            }
+            dbQuery.single(
+                "SELECT count(*) FROM varsel WHERE kode = :kode AND vedtaksperiode_id = :vedtaksperiodeId AND status = :status",
+                "kode" to varselkode,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "status" to status.name,
+            ) { it.int(1) }
         assertEquals(1, antallVarsler)
     }
 }

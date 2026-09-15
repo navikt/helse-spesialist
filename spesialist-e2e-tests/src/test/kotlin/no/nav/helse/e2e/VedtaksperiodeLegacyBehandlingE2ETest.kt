@@ -1,8 +1,5 @@
 package no.nav.helse.e2e
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -75,16 +72,15 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         forventetAntall: Int,
     ) {
         val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query =
-                    """
-                    SELECT COUNT(1) FROM behandling b 
-                    INNER JOIN varsel sv on b.id = sv.behandling_ref 
-                    WHERE b.vedtaksperiode_id = ? AND utbetaling_id = ? AND sv.status = 'AKTIV'
-                    """
-                session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
-            }
+            dbQuery.single(
+                """
+                SELECT COUNT(*) FROM behandling b 
+                INNER JOIN varsel sv on b.id = sv.behandling_ref 
+                WHERE b.vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id = :utbetalingId AND sv.status = 'AKTIV'
+                """,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "utbetalingId" to utbetalingId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall) { "Forventet $forventetAntall varsler for $vedtaksperiodeId, $utbetalingId, fant $antall" }
     }
 
@@ -93,11 +89,10 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         forventetAntall: Int,
     ) {
         val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query = "SELECT COUNT(1) FROM behandling WHERE vedtaksperiode_id = ?"
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-            }
+            dbQuery.single(
+                "SELECT COUNT(*) FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall) { "Forventet $forventetAntall behandlinger for $vedtaksperiodeId, fant $antall" }
     }
 
@@ -107,11 +102,11 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         forventetAntall: Int,
     ) {
         val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query = "SELECT COUNT(1) FROM behandling WHERE vedtaksperiode_id = ? AND utbetaling_id = ?"
-                session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
-            }
+            dbQuery.single(
+                "SELECT COUNT(*) FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id = :utbetalingId",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "utbetalingId" to utbetalingId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall) {
             "Forventet $forventetAntall behandlinger med utbetalingId=$utbetalingId for $vedtaksperiodeId, fant $antall"
         }

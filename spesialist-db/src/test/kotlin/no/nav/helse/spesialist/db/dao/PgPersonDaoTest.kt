@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -18,9 +16,7 @@ import java.time.YearMonth
 internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     @BeforeEach
     fun tømTabeller() {
-        sessionOf(dataSource).use {
-            it.run(queryOf("truncate person_info, inntekt restart identity cascade").asExecute)
-        }
+        dbQuery.execute("truncate person_info, inntekt restart identity cascade")
     }
 
     @Test
@@ -93,12 +89,7 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     }
 
     private fun inntekter(): List<Inntekter> =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf("SELECT inntekter from inntekt")
-                    .map { row ->
-                        objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
-                    }.asSingle,
-            ) ?: emptyList()
-        }
+        dbQuery.singleOrNull("SELECT inntekter from inntekt") { row ->
+            objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
+        } ?: emptyList()
 }

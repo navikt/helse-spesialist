@@ -1,7 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -12,7 +10,6 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -237,13 +234,11 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         avviksvurderingUnikId: UUID,
         forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query = """select count(1) from vilkarsgrunnlag_per_avviksvurdering where avviksvurdering_ref = :unik_id;"""
-
         val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, mapOf("unik_id" to avviksvurderingUnikId)).map { it.int(1) }.asSingle)
-            }
+            dbQuery.single(
+                "select count(*) from vilkarsgrunnlag_per_avviksvurdering where avviksvurdering_ref = :unik_id",
+                "unik_id" to avviksvurderingUnikId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -251,22 +246,19 @@ internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
         avviksvurderingUnikId: UUID,
         @Suppress("SameParameterValue") forventetAntall: Int,
     ) {
-        @Language("PostgreSQL")
-        val query = """select count(1) from avviksvurdering where unik_id = :unik_id;"""
-
         val antall =
-            sessionOf(dataSource).use { session ->
-                session.run(queryOf(query, mapOf("unik_id" to avviksvurderingUnikId)).map { it.int(1) }.asSingle)
-            }
+            dbQuery.single(
+                "select count(*) from avviksvurdering where unik_id = :unik_id",
+                "unik_id" to avviksvurderingUnikId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
     private fun slettAvviksvurdering(avviksvurderingUnikId: UUID) {
-        @Language("PostgreSQL")
-        val query = """update avviksvurdering set slettet = now() where unik_id = :unik_id;"""
-        sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("unik_id" to avviksvurderingUnikId)).asUpdate)
-        }
+        dbQuery.update(
+            "update avviksvurdering set slettet = now() where unik_id = :unik_id",
+            "unik_id" to avviksvurderingUnikId,
+        )
     }
 
     private fun forventetAvviksvurdering(
