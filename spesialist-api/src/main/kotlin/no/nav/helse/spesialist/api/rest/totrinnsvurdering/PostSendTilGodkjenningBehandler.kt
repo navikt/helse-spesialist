@@ -51,8 +51,15 @@ class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Tot
                     saksbehandlerOid = kallKontekst.saksbehandler.id.value,
                     kallKontekst = kallKontekst,
                 )
+                if (totrinnsvurdering.beslutter == kallKontekst.saksbehandler.id) {
+                    // Dette kan skje hvis saksbehandleren har vært inne på saken som beslutter, og totrinnsvurderingen
+                    // har blitt liggende åpen. Deretter kan det dukke opp en ny sak, og så finner spesialist den gamle
+                    // totrinnsvurderingen når saken sendes til godkjenning.
+                    totrinnsvurdering.fjernBeslutter()
+                }
                 val beslutter =
                     totrinnsvurdering.beslutter
+                        ?.takeIf { it != kallKontekst.saksbehandler.id }
                         ?.let(kallKontekst.transaksjon.saksbehandlerRepository::finnOrNull)
                 oppgave.sendTilBeslutter(beslutter)
                 totrinnsvurdering.sendTilBeslutter(oppgave.id.value, kallKontekst.saksbehandler.id)

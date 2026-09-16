@@ -100,6 +100,11 @@ class Totrinnsvurdering private constructor(
             vedtaksperiodeForkastet = true
         }
 
+    fun fjernBeslutter() =
+        oppdatering {
+            beslutter = null
+        }
+
     private fun <T> oppdatering(block: () -> T): T =
         block().also {
             oppdatert = LocalDateTime.now()
