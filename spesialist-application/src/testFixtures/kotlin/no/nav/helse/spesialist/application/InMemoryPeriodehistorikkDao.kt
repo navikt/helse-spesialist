@@ -2,7 +2,8 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import java.util.UUID
+import no.nav.helse.spesialist.domain.BehandlingUnikId
+import java.util.*
 
 class InMemoryPeriodehistorikkDao : PeriodehistorikkDao {
     val behandlingData = mutableMapOf<UUID, List<Historikkinnslag>>()
@@ -23,4 +24,6 @@ class InMemoryPeriodehistorikkDao : PeriodehistorikkDao {
     }
 
     fun finnForOppgave(oppgaveId: Long): List<Historikkinnslag> = oppgaveData[oppgaveId] ?: emptyList()
+
+    fun finnForBehandling(behandlingId: BehandlingUnikId): List<Historikkinnslag> = behandlingData[behandlingId.value] ?: emptyList()
 }

@@ -1,11 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.BehandlingRepository
-import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.BehandlingUnikId
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.*
 
 class InMemoryBehandlingRepository :
     AbstractInMemoryRepository<BehandlingUnikId, Behandling>(),
@@ -23,6 +19,8 @@ class InMemoryBehandlingRepository :
     override fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling? = alle().lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }
 
     override fun finnAlle(identitetsnummer: Identitetsnummer): List<Behandling> = alle()
+
+    override fun finnNyeste(identitetsnummer: Identitetsnummer): Behandling? = alle().lastOrNull()
 
     override fun deepCopy(original: Behandling): Behandling =
         Behandling.fraLagring(

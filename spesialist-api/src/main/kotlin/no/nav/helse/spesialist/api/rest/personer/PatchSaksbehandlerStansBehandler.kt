@@ -1,14 +1,8 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.ktor.http.HttpStatusCode
-import no.nav.helse.db.OppgaveDao
+import io.ktor.http.*
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiStansRequest
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PatchBehandler
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -84,7 +78,7 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
         person: Person,
         begrunnelse: String,
     ) {
-        val oppgaveId = kallKontekst.transaksjon.oppgaveDao.oppgaveId(fødselsnummer = person.id.value)
+        val behandling = kallKontekst.transaksjon.behandlingRepository.finnNyeste(person.id) ?: error("Finner ikke behandling for person")
         val dialog = Dialog.Factory.ny()
         kallKontekst.transaksjon.dialogRepository.lagre(dialog)
 
@@ -94,7 +88,7 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
                 begrunnelse = begrunnelse,
                 dialogId = dialog.id(),
             )
-        kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
+        kallKontekst.transaksjon.periodehistorikkDao.lagre(innslag, behandling.id.value)
     }
 
     private fun lagrePeriodehistorikkForOpphevelseAvSaksbehandlerstans(
@@ -102,7 +96,7 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
         person: Person,
         begrunnelse: String,
     ) {
-        val oppgaveId = kallKontekst.transaksjon.oppgaveDao.oppgaveId(fødselsnummer = person.id.value)
+        val behandling = kallKontekst.transaksjon.behandlingRepository.finnNyeste(person.id) ?: error("Finner ikke behandling for person")
         val dialog = Dialog.Factory.ny()
         kallKontekst.transaksjon.dialogRepository.lagre(dialog)
 
@@ -112,10 +106,8 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
                 begrunnelse = begrunnelse,
                 dialogId = dialog.id(),
             )
-        kallKontekst.transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
+        kallKontekst.transaksjon.periodehistorikkDao.lagre(innslag, behandling.id.value)
     }
-
-    private fun OppgaveDao.oppgaveId(fødselsnummer: String) = this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
 }
 
 enum class ApiPatchSaksbehandlerStansErrorCode(

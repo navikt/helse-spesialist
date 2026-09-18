@@ -2,17 +2,11 @@ package no.nav.helse.spesialist.api.rest.personer
 
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStansetAvSaksbehandler
 import no.nav.helse.modell.periodehistorikk.OpphevStansAvSaksbehandler
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
-import no.nav.helse.spesialist.domain.oppgave.Mottaker
-import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
-import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -21,7 +15,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.assertInstanceOf
-import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -49,25 +42,11 @@ class PatchSaksbehandlerStansBehandlerTest {
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        val oppgave =
-            Oppgave.ny(
-                id = 1,
-                førsteOpprettet = null,
+        val behandling =
+            lagBehandling(
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = lagSpleisBehandlingId(),
-                utbetalingId = UUID.randomUUID(),
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = emptySet(),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        sessionContext.oppgaveRepository.lagre(
-            oppgave,
-        )
+            ).also(sessionContext.behandlingRepository::lagre)
+
         val begrunnelse = "begrunnelse"
 
         sessionContext.saksbehandlerStansRepository.lagre(
@@ -94,7 +73,7 @@ class PatchSaksbehandlerStansBehandlerTest {
 
         assertFalse(erStanset)
 
-        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
+        val historikk = sessionContext.periodehistorikkDao.finnForBehandling(behandling.id)
         assertEquals(1, historikk.size)
         val historikkinnslag = historikk.first()
         assertInstanceOf<OpphevStansAvSaksbehandler>(historikkinnslag)
@@ -121,25 +100,11 @@ class PatchSaksbehandlerStansBehandlerTest {
             identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        val oppgave =
-            Oppgave.ny(
-                id = 1,
-                førsteOpprettet = null,
+        val behandling =
+            lagBehandling(
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = lagSpleisBehandlingId(),
-                utbetalingId = UUID.randomUUID(),
-                hendelseId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = emptySet(),
-                mottaker = Mottaker.UtbetalingTilArbeidsgiver,
-                oppgavetype = Oppgavetype.Søknad,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                inntektsforhold = Inntektsforhold.Arbeidstaker,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-            )
-        sessionContext.oppgaveRepository.lagre(
-            oppgave,
-        )
+            ).also(sessionContext.behandlingRepository::lagre)
+
         val begrunnelse = "begrunnelse"
 
         // When:
@@ -157,7 +122,7 @@ class PatchSaksbehandlerStansBehandlerTest {
         val erStanset = sessionContext.saksbehandlerStansRepository.finnAktiv(Identitetsnummer.fraString(fødselsnummer))?.erStanset == true
         assertTrue(erStanset)
 
-        val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
+        val historikk = sessionContext.periodehistorikkDao.finnForBehandling(behandling.id)
         assertEquals(1, historikk.size)
         val historikkinnslag = historikk.first()
         assertInstanceOf<AutomatiskBehandlingStansetAvSaksbehandler>(historikkinnslag)

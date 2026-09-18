@@ -1,11 +1,7 @@
 package no.nav.helse.db
 
-import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.Behandling.Companion.behandlingspakke
-import no.nav.helse.spesialist.domain.BehandlingUnikId
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 interface BehandlingRepository {
     fun finnOrNull(id: SpleisBehandlingId): Behandling?
@@ -29,6 +25,8 @@ interface BehandlingRepository {
     fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling?
 
     fun finnAlle(identitetsnummer: Identitetsnummer): List<Behandling>
+
+    fun finnNyeste(identitetsnummer: Identitetsnummer): Behandling?
 
     fun lagre(behandling: Behandling)
 

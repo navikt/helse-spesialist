@@ -3,13 +3,17 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPersoninfo
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -108,6 +112,29 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         // then
         assertEquals(1, funnet.size)
         assertEquals(behandling1.id, funnet.first().id)
+    }
+
+    @Test
+    fun `finn kun siste behandling for et gitt fødselsnummer`() {
+        // given
+        val fnr = lagFødselsnummer()
+        val person1 = opprettPerson(Person.Factory.ny(Identitetsnummer.fraString(fnr), lagAktørId(), lagPersoninfo(), egenAnsattStatus = null))
+        val vedtaksperiode1 = opprettVedtaksperiode(person1, arbeidsgiver)
+        val vedtaksperiode2 = opprettVedtaksperiode(person1, arbeidsgiver)
+        val vedtaksperiode3 = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling1 = opprettBehandling(vedtaksperiode1)
+        val behandling2 = opprettBehandling(vedtaksperiode2)
+        val behandling3 = opprettBehandling(vedtaksperiode3)
+
+        // when
+        val funnet =
+            repository.finnNyeste(
+                person1.id,
+            )
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(behandling2.id, funnet.id)
     }
 
     @Test
