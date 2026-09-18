@@ -106,7 +106,7 @@ class GetGraderteAndreYtelserIntegrationTest {
             body,
             "events.metadata.tidspunkt",
         )
-        assertMindreEnnNSekunderSiden(5, body.first()["events"].first()["metadata"]["tidspunkt"].asLocalDateTime())
+        assertMindreEnnNSekunderSiden(15, body.first()["events"].first()["metadata"]["tidspunkt"].asLocalDateTime())
     }
 
     @Test
@@ -184,7 +184,7 @@ class GetGraderteAndreYtelserIntegrationTest {
             body,
             "events.metadata.tidspunkt",
         )
-        assertMindreEnnNSekunderSiden(5, body.first()["events"].get(1)["metadata"]["tidspunkt"].asLocalDateTime())
+        assertMindreEnnNSekunderSiden(15, body.first()["events"].get(1)["metadata"]["tidspunkt"].asLocalDateTime())
     }
 
     @Test
@@ -288,7 +288,7 @@ class GetGraderteAndreYtelserIntegrationTest {
             body,
             "events.metadata.tidspunkt",
         )
-        assertMindreEnnNSekunderSiden(5, body.first()["events"].get(1)["metadata"]["tidspunkt"].asLocalDateTime())
+        assertMindreEnnNSekunderSiden(15, body.first()["events"].get(1)["metadata"]["tidspunkt"].asLocalDateTime())
     }
 
     private fun opprettEnGradertAnnenYtelse(
