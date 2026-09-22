@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class VurderBehovForAvviksvurdering(
     private val fødselsnummer: String,
@@ -41,26 +41,31 @@ class VurderBehovForAvviksvurdering(
         outbox: Outbox,
     ): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
-        val løsning = commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
-        val eksisterendeAvviksvurdering = sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
+        val løsning =
+            commandContext.get<AvviksvurderingBehovLøsning>() ?: return behov(commandContext, sykepengegrunnlagsfakta)
+        val eksisterendeAvviksvurdering =
+            sessionContext.avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
         if (eksisterendeAvviksvurdering != null) {
-            sessionContext.avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
-            return true
-        }
-        val avviksvurdering =
-            Avviksvurdering.ny(
-                id = løsning.avviksvurderingId,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
-                opprettet = løsning.opprettet,
-                avviksprosent = løsning.avviksprosent,
-                sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
-                beregningsgrunnlag = løsning.beregningsgrunnlag,
+            sessionContext.avviksvurderingRepository.opprettKobling(
+                eksisterendeAvviksvurdering.unikId,
+                vilkårsgrunnlagId,
             )
-        sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
-        if (!løsning.harAkseptabeltAvvik) {
+        } else {
+            val avviksvurdering =
+                Avviksvurdering.ny(
+                    id = løsning.avviksvurderingId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    opprettet = løsning.opprettet,
+                    avviksprosent = løsning.avviksprosent,
+                    sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
+                    beregningsgrunnlag = løsning.beregningsgrunnlag,
+                )
+            sessionContext.avviksvurderingRepository.lagre(avviksvurdering)
+        }
+        if (!løsning.harAkseptabeltAvvik && sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn) {
             val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
             val varslerForBehandling = sessionContext.varselRepository.finnVarslerFor(behandling.id)
             val eksisterendeVarsel = varslerForBehandling.find { it.erVarselOmAvvik() }

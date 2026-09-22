@@ -40,7 +40,8 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
                 ),
             sykepengegrunnlag = BigDecimal("666666.0"),
         )
-    private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(vedtaksperiode1.organisasjonsnummer, beregningsgrunnlagTotalbeløp))
+    private val expectedOmregnedeÅrsinntekter =
+        listOf(OmregnetÅrsinntekt(vedtaksperiode1.organisasjonsnummer, beregningsgrunnlagTotalbeløp))
     private val beregningsgrunnlag =
         Beregningsgrunnlag(
             totalbeløp = beregningsgrunnlagTotalbeløp,
@@ -203,9 +204,25 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
     }
 
     @Test
-    fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
+    fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering og sykepengegrunnlaget er fastsatt etter skjønn`() {
         // given
-        val command = vurderBehovForAvviksvurderingCommand()
+        val command =
+            vurderBehovForAvviksvurderingCommand(
+                sykepengegrunnlagsfakta =
+                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
+                        seksG = 666666.00,
+                        arbeidsgivere =
+                            listOf(
+                                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                    organisasjonsnummer = vedtaksperiode1.organisasjonsnummer,
+                                    omregnetÅrsinntekt = beregningsgrunnlagTotalbeløp,
+                                    inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
+                                    skjønnsfastsatt = 666999.0,
+                                ),
+                            ),
+                        sykepengegrunnlag = BigDecimal("666666.0"),
+                    ),
+            )
         val context = CommandContext(UUID.randomUUID())
         repository.lagre(enAvviksvurdering(avviksvurderingId = avviksvurderingId))
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
@@ -215,6 +232,21 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
 
         // then
         behandling1.assertHarIkkeVarsel("RV_IV_2")
+    }
+
+    @Test
+    fun `lagrer varsel om avvik dersom eksisterende avviksvurdering har avvik og sykepengegrunnlaget er fastsatt etter hovedregel`() {
+        // given
+        val command = vurderBehovForAvviksvurderingCommand()
+        repository.lagre(enAvviksvurdering(avviksvurderingId = avviksvurderingId))
+        val context = CommandContext(UUID.randomUUID())
+        context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
+
+        // when
+        command.resume(context, sessionContext, outbox)
+
+        // then
+        behandling1.assertHarVarsel("RV_IV_2", Varsel.Status.AKTIV)
     }
 
     private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering =
