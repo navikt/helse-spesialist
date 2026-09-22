@@ -24,7 +24,7 @@ internal class VurderEnhetUtland(
         if (tilhørerEnhetUtland) {
             val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
             logg.info("Håndterer varsel om utland på vedtaksperiode ${behandling.vedtaksperiodeId.value}")
-            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, Varselkode.SB_EX_5.name)
+            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, Varselkode.SB_EX_5)
             sessionContext.varselRepository.lagre(varsel)
         }
 

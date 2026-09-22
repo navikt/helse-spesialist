@@ -57,7 +57,7 @@ internal class VurderVergemålOgFullmakt(
         if (vergemålløsning.harVergemål()) {
             val behandling = sessionContext.behandlingRepository.finn(spleisBehandlingId)
             logg.info("Legger til varsel om vergemål på vedtaksperiode ${behandling.vedtaksperiodeId.value}")
-            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, SB_EX_4.name)
+            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, SB_EX_4)
             sessionContext.varselRepository.lagre(varsel)
             return true
         }

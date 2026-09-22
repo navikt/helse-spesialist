@@ -146,13 +146,13 @@ class Varsel private constructor(
         fun nytt(
             behandlingUnikId: BehandlingUnikId,
             spleisBehandlingId: SpleisBehandlingId?,
-            kode: String,
+            kode: Varselkode,
         ): Varsel =
             Varsel(
                 id = VarselId(UUID.randomUUID()),
                 spleisBehandlingId = spleisBehandlingId,
                 behandlingUnikId = behandlingUnikId,
-                kode = kode,
+                kode = kode.name,
                 opprettetTidspunkt = LocalDateTime.now(),
                 vurdering = null,
                 status = Status.AKTIV,
@@ -183,7 +183,7 @@ class Varsel private constructor(
             varselkode: Varselkode,
             behandling: Behandling,
         ): Varsel? {
-            val eksisterendeVarsel = this.find { it.kode == varselkode.name } ?: return nytt(behandling.id, behandling.spleisBehandlingId, varselkode.name)
+            val eksisterendeVarsel = this.find { it.kode == varselkode.name } ?: return nytt(behandling.id, behandling.spleisBehandlingId, varselkode)
             return when (eksisterendeVarsel.status) {
                 Status.GODKJENT,
                 Status.VURDERT,

@@ -21,7 +21,7 @@ internal class IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
         if (stopperAutomatisering) {
             val eksisterendeVarsel = varselRepository.finnVarslerFor(behandling.id).find { it.kode == Varselkode.RV_OV_5.name }
             if (eksisterendeVarsel == null) {
-                val varsel = Varsel.nytt(behandling.id, behandling.spleisBehandlingId, Varselkode.RV_OV_5.name)
+                val varsel = Varsel.nytt(behandling.id, behandling.spleisBehandlingId, Varselkode.RV_OV_5)
                 varselRepository.lagre(varsel)
             }
         }

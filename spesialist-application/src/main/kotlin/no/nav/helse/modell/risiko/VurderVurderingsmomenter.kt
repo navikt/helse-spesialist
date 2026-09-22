@@ -103,7 +103,7 @@ internal class VurderVurderingsmomenter(
 
         løsning.lagre(sessionContext.risikovurderingDao)
         if (!løsning.kanGodkjennesAutomatisk) {
-            val varsel = Varsel.nytt(behandlingUnikId = behandling.id, behandling.spleisBehandlingId, SB_RV_1.name)
+            val varsel = Varsel.nytt(behandlingUnikId = behandling.id, behandling.spleisBehandlingId, SB_RV_1)
             sessionContext.varselRepository.lagre(varsel)
         }
         return true

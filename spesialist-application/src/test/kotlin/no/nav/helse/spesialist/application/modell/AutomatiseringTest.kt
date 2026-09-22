@@ -100,7 +100,13 @@ internal class AutomatiseringTest : ApplicationTest() {
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         val gjeldendeBehandling = enBehandling()
-        sessionContext.varselRepository.lagre(Varsel.nytt(gjeldendeBehandling.id, gjeldendeBehandling.spleisBehandlingId, "RV_IM_1"))
+        sessionContext.varselRepository.lagre(
+            Varsel.nytt(
+                gjeldendeBehandling.id,
+                gjeldendeBehandling.spleisBehandlingId,
+                Varselkode.SB_SØ_1,
+            ),
+        )
         blirManuellOppgave(gjeldendeBehandling = gjeldendeBehandling)
     }
 

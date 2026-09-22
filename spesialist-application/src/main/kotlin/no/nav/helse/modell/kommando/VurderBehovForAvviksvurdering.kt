@@ -72,7 +72,7 @@ class VurderBehovForAvviksvurdering(
             if (eksisterendeVarsel != null) {
                 sessionContext.varselRepository.slett(eksisterendeVarsel.id)
             }
-            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, RV_IV_2.name)
+            val varsel = Varsel.nytt(behandling.id, spleisBehandlingId, RV_IV_2)
             sessionContext.varselRepository.lagre(varsel)
         }
         return true

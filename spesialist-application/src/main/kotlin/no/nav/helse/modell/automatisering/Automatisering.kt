@@ -180,7 +180,7 @@ internal class Automatisering(
         val antallTidligereKorrigeringer =
             sessionContext.meldingDao.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId)
         if (antallTidligereKorrigeringer >= 2) {
-            val varsel = Varsel.nytt(gjeldendeBehandling.id, gjeldendeBehandling.spleisBehandlingId, Varselkode.SB_SØ_1.name)
+            val varsel = Varsel.nytt(gjeldendeBehandling.id, gjeldendeBehandling.spleisBehandlingId, Varselkode.SB_SØ_1)
             sessionContext.varselRepository.lagre(varsel)
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer",
