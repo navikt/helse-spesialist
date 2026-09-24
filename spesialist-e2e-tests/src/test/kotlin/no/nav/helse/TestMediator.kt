@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.Kommandofabrikk
@@ -19,7 +18,6 @@ class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
-    environmentToggles: EnvironmentToggles,
 ) {
     private val daos = DBDaos(dataSource)
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
@@ -82,7 +80,6 @@ class TestMediator(
             sessionFactory = sessionFactory,
             versjonAvKode = "en_versjon",
             forsikringsvurderingHenter = forsikringsvurderingHenter,
-            environmentToggles = environmentToggles,
         ).registrerRivers(testRapid)
     }
 }

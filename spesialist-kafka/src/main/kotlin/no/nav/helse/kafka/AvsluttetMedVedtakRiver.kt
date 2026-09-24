@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import no.nav.helse.VedtakFattetMeldingBuilder
 import no.nav.helse.VedtakFattetMeldingBuilder.Companion.YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
@@ -14,7 +13,6 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 
 class AvsluttetMedVedtakRiver(
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
-    private val environmentToggles: EnvironmentToggles,
 ) : TransaksjonellRiver() {
     private val eventName = "avsluttet_med_vedtak"
 
@@ -53,7 +51,6 @@ class AvsluttetMedVedtakRiver(
                 behandlingId = spleisBehandlingId,
                 packet = packet,
                 forsikringsvurderingHenter = forsikringsvurderingHenter,
-                environmentToggles = environmentToggles,
             )
         val erSelvstendig = packet["yrkesaktivitetstype"].asString() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE
 

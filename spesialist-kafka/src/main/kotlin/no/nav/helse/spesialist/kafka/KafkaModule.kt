@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -23,7 +22,6 @@ class KafkaModule(
     stikkprøver: Stikkprøver.Configuration,
     brukerrollehenter: Brukerrollehenter,
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
-    environmentToggles: EnvironmentToggles,
 ) {
     data class Configuration(
         val versjonAvKode: String,
@@ -70,7 +68,6 @@ class KafkaModule(
             sessionFactory = sessionFactory,
             versjonAvKode = configuration.versjonAvKode,
             forsikringsvurderingHenter = forsikringsvurderingHenter,
-            environmentToggles = environmentToggles,
         )
 
     fun kobleOppRivers() {

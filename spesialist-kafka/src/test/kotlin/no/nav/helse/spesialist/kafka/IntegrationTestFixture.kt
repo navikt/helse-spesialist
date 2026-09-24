@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.stikkprøve.Stikkprøver
 import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
@@ -16,12 +15,6 @@ class IntegrationTestFixture(
     private val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
     val sessionContext = sessionFactory.sessionContext
     val forsikringHenter = MockForsikringsvurderingHenter()
-    val environmentToggles =
-        object : EnvironmentToggles {
-            override val kanBeslutteEgneSaker: Boolean = false
-            override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-            override val devGcp: Boolean = false
-        }
 
     init {
         KafkaModule(
@@ -49,7 +42,6 @@ class IntegrationTestFixture(
                 },
             brukerrollehenter = { Either.Success(emptySet()) },
             forsikringsvurderingHenter = forsikringHenter,
-            environmentToggles = environmentToggles,
         ).also(KafkaModule::kobleOppRivers)
     }
 }

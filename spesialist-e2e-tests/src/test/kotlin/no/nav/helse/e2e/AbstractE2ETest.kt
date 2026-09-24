@@ -9,7 +9,6 @@ import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestMediator
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -102,12 +101,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                             individuelleForsikringer = emptyList(),
                             vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
                         )
-                },
-            environmentToggles =
-                object : EnvironmentToggles {
-                    override val kanBeslutteEgneSaker: Boolean = false
-                    override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-                    override val devGcp: Boolean = false
                 },
         )
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()

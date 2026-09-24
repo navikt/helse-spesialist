@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
@@ -28,7 +27,6 @@ class RiverSetup(
     sessionFactory: SessionFactory,
     versjonAvKode: String,
     forsikringsvurderingHenter: ForsikringsvurderingHenter,
-    environmentToggles: EnvironmentToggles,
 ) {
     private val rivers =
         listOf(
@@ -58,10 +56,7 @@ class RiverSetup(
             VarseldefinisjonRiver(),
             VedtaksperiodeNyUtbetalingRiver(mediator),
             BehovtidsbrukMetrikkRiver(),
-            AvsluttetMedVedtakRiver(
-                forsikringsvurderingHenter,
-                environmentToggles,
-            ),
+            AvsluttetMedVedtakRiver(forsikringsvurderingHenter),
             AvsluttetUtenVedtakRiver(),
             MidnattRiver(sessionFactory),
             MinuttRiver(sessionFactory),

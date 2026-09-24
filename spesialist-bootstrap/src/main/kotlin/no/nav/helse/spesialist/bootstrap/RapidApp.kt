@@ -243,7 +243,6 @@ class RapidApp {
                 stikkprøver = configuration.stikkprøver,
                 brukerrollehenter = clientEntraIdModule.tilgangsgruppehenter,
                 forsikringsvurderingHenter = clientSpForsikringModule.spForsikringClientForsikringsvurderingHenter,
-                environmentToggles = configuration.environmentToggles,
             )
 
         val apiModule =
