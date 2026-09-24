@@ -7,19 +7,33 @@ import io.mockk.mockk
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
+import no.nav.helse.TestMediator
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
+import no.nav.helse.spesialist.application.Forsikringsvurdering
+import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
-import no.nav.helse.spesialist.domain.*
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.ForsikringsvurderingId
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsning
@@ -28,9 +42,12 @@ import no.nav.helse.spesialist.e2etests.TestRapidHelpers.sisteBehov
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -71,6 +88,28 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val meldingssender = Meldingssender(testRapid)
     protected lateinit var sisteMeldingId: UUID
     protected lateinit var sisteGodkjenningsbehovId: UUID
+    private val testMediator =
+        TestMediator(
+            testRapid = testRapid,
+            dataSource = dataSource,
+            forsikringsvurderingHenter =
+                object : ForsikringsvurderingHenter {
+                    override fun hent(forsikringsvurderingId: ForsikringsvurderingId) =
+                        Forsikringsvurdering(
+                            identitetsnummer = lagIdentitetsnummer(),
+                            samletDekning = null,
+                            kollektivForsikring = null,
+                            individuelleForsikringer = emptyList(),
+                            vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                        )
+                },
+            environmentToggles =
+                object : EnvironmentToggles {
+                    override val kanBeslutteEgneSaker: Boolean = false
+                    override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+                    override val devGcp: Boolean = false
+                },
+        )
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"
