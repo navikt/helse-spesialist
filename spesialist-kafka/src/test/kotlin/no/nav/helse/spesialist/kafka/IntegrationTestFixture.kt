@@ -20,7 +20,6 @@ class IntegrationTestFixture(
         object : EnvironmentToggles {
             override val kanBeslutteEgneSaker: Boolean = false
             override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-            override val kanSeForsikring: Boolean get() = true
             override val devGcp: Boolean = false
         }
 

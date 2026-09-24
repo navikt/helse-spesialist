@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.asBigDecimal
 import no.nav.helse.mediator.asUUID
@@ -31,7 +30,6 @@ class VedtakFattetMeldingBuilder(
     private val behandlingId: SpleisBehandlingId,
     private val packet: JsonMessage,
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
-    private val environmentToggles: EnvironmentToggles,
 ) {
     companion object {
         private const val FASTSATT_ETTER_HOVEDREGEL = "EtterHovedregel"
@@ -197,7 +195,6 @@ class VedtakFattetMeldingBuilder(
 
     private fun finnDekning(): VedtakFattetMelding.Dekning =
         godkjenningsbehov.forsikringsvurderingId
-            ?.takeIf { environmentToggles.kanSeForsikring }
             ?.let { forsikringsvurderingId ->
                 forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
                     ?: error("Fant ikke forsikringsvurdering med id $forsikringsvurderingId")

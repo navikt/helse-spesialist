@@ -177,7 +177,5 @@ spec:
       value: "true"
     - name: IGNORER_MELDINGER_FOR_UKJENTE_PERSONER
       value: "true"
-    - name: TILLAT_SE_FORSIKRING
-      value: "true"
     - name: EKSPONER_OPENAPI
       value: "true"

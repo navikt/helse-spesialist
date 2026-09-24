@@ -58,7 +58,6 @@ object E2ETestApplikasjon {
                         object : EnvironmentToggles {
                             override val kanBeslutteEgneSaker = false
                             override val kanGodkjenneUtenBesluttertilgang = false
-                            override val kanSeForsikring = false
                             override val devGcp = false
                         },
                     stikkprøver =
