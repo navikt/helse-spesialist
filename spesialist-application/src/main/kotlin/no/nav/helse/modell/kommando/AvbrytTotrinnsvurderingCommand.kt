@@ -14,22 +14,31 @@ internal class AvbrytTotrinnsvurderingCommand(
         sessionContext: SessionContext,
         outbox: Outbox,
     ): Boolean {
-        loggInfo(
-            "setter vedtaksperiode_forkastet i totrinnsvurdering for person",
-            "fødselsnummer" to identitetsnummer.value,
-        )
-
         val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value) ?: return true
 
         val vedtaksperiodeIderForOverstyringer = totrinnsvurdering.overstyringer.map { VedtaksperiodeId(it.vedtaksperiodeId) }
 
-        val erAlleVedtaksperiodeneForkastet =
-            sessionContext.vedtaksperiodeRepository
-                .finn(vedtaksperiodeIderForOverstyringer)
-                .all { it.forkastet }
+        val relaterteVedtaksperioder = sessionContext.vedtaksperiodeRepository.finn(vedtaksperiodeIderForOverstyringer)
+        val erAlleVedtaksperiodeneForkastet = relaterteVedtaksperioder.all { it.forkastet }
 
         if (erAlleVedtaksperiodeneForkastet) {
+            loggInfo(
+                "forkaster totrinnsvurderingen fordi alle relaterte vedtaksperioder er forkastet",
+                "fødselsnummer" to identitetsnummer.value,
+            )
             totrinnsvurdering.forkast()
+        } else {
+            val melding =
+                if (totrinnsvurdering.beslutter == null) {
+                    "Totrinnsvurderingen har ikke beslutter"
+                } else {
+                    "Beholder beslutter"
+                }
+
+            loggInfo(
+                "Forkaster ikke totrinnsvurderingen, fordi den henger sammen med vedtaksperioder som ikke er forkastet: ${relaterteVedtaksperioder.filterNot { it.forkastet }}. $melding",
+                "fødselsnummer" to identitetsnummer.value,
+            )
         }
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return true
