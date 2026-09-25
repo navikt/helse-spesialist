@@ -45,5 +45,19 @@ jobs:
       - name: Installer Nav-tilpasninger i brukerscope
         run: nav-pilot install --user --all
 
+      # nav-pilot skriver instruksjoner til ~/.copilot/.github/instructions/, som bare
+      # leses når COPILOT_CUSTOM_INSTRUCTIONS_DIRS peker dit. Klienten leser derimot
+      # ~/.copilot/instructions/ av seg selv. Symlinken gjør dem lesbare uten env-var.
+      - name: Eksponer instruksjoner på stien klienten leser selv
+        run: |
+          set -euo pipefail
+          src="$HOME/.copilot/.github/instructions"
+          dst="$HOME/.copilot/instructions"
+          if [ -d "$src" ] && [ ! -e "$dst" ]; then
+            ln -s "$src" "$dst"
+          fi
+
       - name: Vis hva som ble installert
-        run: nav-pilot list --installed
+        run: |
+          nav-pilot list --installed
+          ls -la "$HOME/.copilot" "$HOME/.copilot/instructions/" || true
