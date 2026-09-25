@@ -49,6 +49,7 @@ jobs:
           /.github/agents/
           /.github/skills/
           /.github/prompts/
+          /.github/hooks/
           /.github/instructions/
           /.github/.nav-pilot-state.json
           EOF
@@ -56,7 +57,12 @@ jobs:
       - name: Installer Nav-tilpasninger
         run: nav-pilot install --repo --all
 
-      - name: Vis hva som ble installert
+      # Sletter først staten til nav-pilot, ettersom den nekter å blande sources
+      - name: Installer skills fra sas-meta
         run: |
-          nav-pilot list --installed
-          git status --short
+          set -euo pipefail
+          rm -f .github/.nav-pilot-state.json
+          nav-pilot install --repo --all --source navikt/helse-sas-meta
+
+      - name: Vis hva som ble installert
+        run: find .github -type f | sort
