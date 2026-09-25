@@ -1,13 +1,7 @@
 package no.nav.helse.spesialist.api.rest.tilkomneinntekter
 
-import io.ktor.http.HttpStatusCode
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektRequest
-import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektResponse
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PostBehandler
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import io.ktor.http.*
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -38,13 +32,27 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
         kallKontekst: KallKontekst,
     ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
         val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
-        TilkommenInntektPeriodeValidator.validerPeriode(
-            periode = periode,
-            organisasjonsnummer = request.verdier.organisasjonsnummer,
-            andreTilkomneInntekter =
-                kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForIdentitetsnummer(person.id),
-            behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(person.id),
-        )
+        val valideringResultat =
+            TilkommenInntektPeriodeValidator.validerPeriode(
+                periode = periode,
+                organisasjonsnummer = request.verdier.organisasjonsnummer,
+                andreTilkomneInntekter =
+                    kallKontekst.transaksjon.tilkommenInntektRepository.finnAlleForIdentitetsnummer(person.id),
+                behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(person.id),
+            )
+
+        when (valideringResultat) {
+            is TilkommenInntektPeriodeValidator.Resultat.OK -> {}
+            is TilkommenInntektPeriodeValidator.Resultat.GårUtenforSykefraværstilfelle ->
+                return RestResponse.Error(
+                    ApiPostTilkomneInntekterErrorCode.GÅR_UTENFOR_SYKEFRAVÆRSTILFELLE,
+                )
+
+            is TilkommenInntektPeriodeValidator.Resultat.OverlapperAnnenTilkommenInntekt ->
+                return RestResponse.Error(
+                    ApiPostTilkomneInntekterErrorCode.OVERLAPPER_ANNEN_TILKOMMEN_INNTEKT,
+                )
+        }
 
         val tilkommenInntekt =
             TilkommenInntekt.ny(
@@ -86,4 +94,12 @@ enum class ApiPostTilkomneInntekterErrorCode(
 ) : ApiErrorCode {
     PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.BadRequest),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    GÅR_UTENFOR_SYKEFRAVÆRSTILFELLE(
+        "Kan ikke legge til tilkommen inntekt som går utenfor et sykefraværstilfelle",
+        HttpStatusCode.BadRequest,
+    ),
+    OVERLAPPER_ANNEN_TILKOMMEN_INNTEKT(
+        "Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde",
+        HttpStatusCode.BadRequest,
+    ),
 }

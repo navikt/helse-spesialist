@@ -10,11 +10,11 @@ object TilkommenInntektPeriodeValidator {
         organisasjonsnummer: String,
         andreTilkomneInntekter: List<TilkommenInntekt>,
         behandlinger: List<Behandling>,
-    ) {
+    ): Resultat {
         if (!erInnenforEtSykefraværstilfelle(periode = periode, behandlinger = behandlinger)) {
-            error("Kan ikke legge til tilkommen inntekt som går utenfor et sykefraværstilfelle")
+            return Resultat.GårUtenforSykefraværstilfelle
         }
-        validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
+        return validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
             periode = periode,
             organisasjonsnummer = organisasjonsnummer,
             andreTilkomneInntekter = andreTilkomneInntekter,
@@ -25,16 +25,25 @@ object TilkommenInntektPeriodeValidator {
         periode: Periode,
         organisasjonsnummer: String,
         andreTilkomneInntekter: List<TilkommenInntekt>,
-    ) {
+    ): Resultat {
         val andreTilkomneInntekterForInntektskilde =
             andreTilkomneInntekter.filter { it.organisasjonsnummer == organisasjonsnummer }
         if (andreTilkomneInntekterForInntektskilde.any { it.periode overlapper periode }) {
-            error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde")
+            return Resultat.OverlapperAnnenTilkommenInntekt
         }
+        return Resultat.OK
     }
 
     fun erInnenforEtSykefraværstilfelle(
         periode: Periode,
         behandlinger: List<Behandling>,
     ) = periode erInnenforEnAv behandlinger.tilSykefraværstilfellePerioder().filterNot { it.datoer().isEmpty() }
+
+    sealed interface Resultat {
+        object OK : Resultat
+
+        object GårUtenforSykefraværstilfelle : Resultat
+
+        object OverlapperAnnenTilkommenInntekt : Resultat
+    }
 }

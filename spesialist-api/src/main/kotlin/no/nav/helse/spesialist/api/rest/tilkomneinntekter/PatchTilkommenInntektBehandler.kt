@@ -63,21 +63,41 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
         val notatTilBeslutter = request.notatTilBeslutter
         if (endringer.fjernet?.fra == true && endringer.fjernet?.til == false) {
             // Gjenopprettelse har endringer bakt inn i seg, så vi kaller bare endre hvis vi ikke gjenoppretter samtidig
-            loggInfo("Behandler forespørselen som gjenoppretting av tilkommen inntekt", "tilkommenInntektId" to tilkommenInntekt.id)
+            loggInfo(
+                "Behandler forespørselen som gjenoppretting av tilkommen inntekt",
+                "tilkommenInntektId" to tilkommenInntekt.id,
+            )
             gjenopprett(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         } else {
-            loggInfo("Behandler forespørselen som endring av tilkommen inntekt", "tilkommenInntektId" to tilkommenInntekt.id)
+            loggInfo(
+                "Behandler forespørselen som endring av tilkommen inntekt",
+                "tilkommenInntektId" to tilkommenInntekt.id,
+            )
             endre(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         }
-        TilkommenInntektPeriodeValidator.validerPeriode(
-            periode = tilkommenInntekt.periode,
-            organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
-            andreTilkomneInntekter =
-                kallKontekst.transaksjon.tilkommenInntektRepository
-                    .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
-                    .minus(tilkommenInntekt),
-            behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(tilkommenInntekt.identitetsnummer),
-        )
+        val valideringResultat =
+            TilkommenInntektPeriodeValidator.validerPeriode(
+                periode = tilkommenInntekt.periode,
+                organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
+                andreTilkomneInntekter =
+                    kallKontekst.transaksjon.tilkommenInntektRepository
+                        .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
+                        .minus(tilkommenInntekt),
+                behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(tilkommenInntekt.identitetsnummer),
+            )
+
+        when (valideringResultat) {
+            is TilkommenInntektPeriodeValidator.Resultat.OK -> {}
+            is TilkommenInntektPeriodeValidator.Resultat.GårUtenforSykefraværstilfelle ->
+                return RestResponse.Error(
+                    ApiPatchTilkommenInntektErrorCode.GÅR_UTENFOR_SYKEFRAVÆRSTILFELLE,
+                )
+
+            is TilkommenInntektPeriodeValidator.Resultat.OverlapperAnnenTilkommenInntekt ->
+                return RestResponse.Error(
+                    ApiPatchTilkommenInntektErrorCode.OVERLAPPER_ANNEN_TILKOMMEN_INNTEKT,
+                )
+        }
 
         if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {
             fjern(tilkommenInntekt, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
@@ -193,4 +213,12 @@ enum class ApiPatchTilkommenInntektErrorCode(
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_TILKOMMEN_INNTEKT("Fant ikke tilkommen inntekt", HttpStatusCode.NotFound),
     FEIL_UTGANGSPUNKT("Fra-verdier stemmer ikke med nåværende tilstand", HttpStatusCode.Conflict),
+    GÅR_UTENFOR_SYKEFRAVÆRSTILFELLE(
+        "Kan ikke legge til tilkommen inntekt som går utenfor et sykefraværstilfelle",
+        HttpStatusCode.BadRequest,
+    ),
+    OVERLAPPER_ANNEN_TILKOMMEN_INNTEKT(
+        "Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde",
+        HttpStatusCode.BadRequest,
+    ),
 }

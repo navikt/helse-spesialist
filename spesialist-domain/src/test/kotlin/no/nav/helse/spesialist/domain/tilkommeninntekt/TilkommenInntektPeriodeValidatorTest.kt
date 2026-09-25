@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.domain.testfixtures.*
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import kotlin.random.Random
 import kotlin.test.Test
@@ -30,13 +29,13 @@ class TilkommenInntektPeriodeValidatorTest {
                 organisasjonsnummer = organisasjonsnummer,
             )
 
-        assertThrows<IllegalStateException> {
+        val resultat =
             TilkommenInntektPeriodeValidator.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
                 periode = (15 jan 2018) tilOgMed (31 jan 2018),
                 organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
                 andreTilkomneInntekter = listOf(tilkommenInntekt),
             )
-        }
+        assertTrue(resultat is TilkommenInntektPeriodeValidator.Resultat.OverlapperAnnenTilkommenInntekt)
     }
 
     @Test
