@@ -1079,9 +1079,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
         every { snapshothenter.hentPerson(fødselsnummer) } returns
             snapshot(
-                versjon = 1,
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                aktørId = godkjenningsbehovTestdata.aktørId,
                 organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
                 utbetalingId = godkjenningsbehovTestdata.utbetalingId,
