@@ -39,11 +39,9 @@ class SpleisRestClientTest {
             okJson(
                 """
                 {
-                  "aktorId": "1234567890123",
                   "fodselsnummer": "11111111111",
                   "arbeidsgivere": [],
                   "dodsdato": null,
-                  "versjon": 1,
                   "vilkarsgrunnlag": []
                 }
                 """.trimIndent(),
@@ -53,9 +51,7 @@ class SpleisRestClientTest {
         val result = lagKlient().hentPerson("11111111111")
 
         assertNotNull(result)
-        assertEquals("1234567890123", result.aktorId)
         assertEquals("11111111111", result.fodselsnummer)
-        assertEquals(1, result.versjon)
     }
 
     @Test
@@ -96,11 +92,9 @@ class SpleisRestClientTest {
             okJson(
                 """
                 {
-                  "aktorId": "1234567890123",
                   "fodselsnummer": "11111111111",
                   "arbeidsgivere": [],
                   "dodsdato": null,
-                  "versjon": 1,
                   "vilkarsgrunnlag": [],
                   "etHeltNyttFeltViIkkeKjennerTilEnna": "noe verdi",
                   "enNyStruktur": { "med": ["nestede", "verdier"] }
@@ -112,7 +106,6 @@ class SpleisRestClientTest {
         val result = lagKlient().hentPerson("11111111111")
 
         assertNotNull(result)
-        assertEquals("1234567890123", result.aktorId)
         assertEquals("11111111111", result.fodselsnummer)
     }
 
@@ -158,10 +151,8 @@ class SpleisRestClientTest {
         private val REALISTISK_PERSON_RESPONS =
             """
             {
-              "aktorId": "1234567890123",
               "fodselsnummer": "11111111111",
               "dodsdato": null,
-              "versjon": 1,
               "arbeidsgivere": [
                 {
                   "organisasjonsnummer": "987654321",

@@ -9,11 +9,9 @@ import java.util.UUID
  * `RestTilSnapshotMapping.kt` for hvordan disse mappes til `Snapshot*`-modellen.
  */
 internal data class Person(
-    val aktorId: String,
     val fodselsnummer: String,
     val arbeidsgivere: List<Arbeidsgiver>,
     val dodsdato: LocalDate?,
-    val versjon: Int,
     val vilkarsgrunnlag: List<Vilkarsgrunnlag>,
 )
 

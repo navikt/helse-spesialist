@@ -99,13 +99,19 @@ class PersonQueryHandler(
                 ?: notFound("Fant ikke data for person")
 
         return when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, personEntity.id.value)) {
-            TilgangskontrollResultat.IdentIkkeFunnet -> internalServerError("Tilgangsmaskinen fant ikke saksbehandlers ident")
-            is TilgangskontrollResultat.ManglerTilgang -> manglerTilgangTilPerson(saksbehandler, identitetsnummer)
+            TilgangskontrollResultat.IdentIkkeFunnet -> {
+                internalServerError("Tilgangsmaskinen fant ikke saksbehandlers ident")
+            }
+
+            is TilgangskontrollResultat.ManglerTilgang -> {
+                manglerTilgangTilPerson(saksbehandler, identitetsnummer)
+            }
 
             TilgangskontrollResultat.Ok -> {
                 klargjørPersoninfoOmNødvendig(personEntity, transaction, identitetsnummer)
                 hentPerson(personEntity, transaction, identitetsnummer, saksbehandler)
             }
+
             is TilgangskontrollResultat.UventetFeil -> {
                 loggError("Uventet feil fra Tilgangsmaskinen", "feil" to resultat.menneskeligLesbarForklaring)
                 internalServerError("Uventet feil fra Tilgangsmaskinen")
@@ -182,7 +188,7 @@ class PersonQueryHandler(
         val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
 
         return ApiPerson(
-            aktorId = snapshot.aktorId,
+            aktorId = personEntity.aktørId,
             fodselsnummer = identitetsnummer.value,
             andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
             dodsdato = snapshot.dodsdato,

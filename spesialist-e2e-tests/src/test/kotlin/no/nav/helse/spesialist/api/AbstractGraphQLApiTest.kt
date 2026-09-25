@@ -122,11 +122,9 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGANISASJONSNUMMER, vilkårsgrunnlagId)
 
         return SnapshotPerson(
-            aktorId = AKTØRID,
             arbeidsgivere = arbeidsgivere,
             dodsdato = null,
             fodselsnummer = fødselsnummer,
-            versjon = 1,
             vilkarsgrunnlag = listOf(vilkårsgrunnlag),
         )
     }

@@ -26,8 +26,6 @@ object Testdata {
     private val testperson = TestPerson()
 
     fun snapshot(
-        versjon: Int = 1,
-        aktørId: String = testperson.aktørId,
         organisasjonsnummer: String = testperson.orgnummer,
         fødselsnummer: String,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -49,9 +47,7 @@ object Testdata {
             ),
     ): SnapshotPerson =
         SnapshotPerson(
-            aktorId = aktørId,
             fodselsnummer = fødselsnummer,
-            versjon = versjon,
             arbeidsgivere =
                 listOf(
                     SnapshotArbeidsgiver(

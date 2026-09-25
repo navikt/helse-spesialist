@@ -105,11 +105,9 @@ import java.math.BigDecimal
  */
 internal fun Person.tilSnapshotPerson() =
     SnapshotPerson(
-        aktorId = aktorId,
         arbeidsgivere = arbeidsgivere.map { it.tilSnapshotArbeidsgiver() },
         dodsdato = dodsdato,
         fodselsnummer = fodselsnummer,
-        versjon = versjon,
         vilkarsgrunnlag = vilkarsgrunnlag.map { it.tilSnapshotVilkarsgrunnlag() },
     )
 
