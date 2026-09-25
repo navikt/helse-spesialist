@@ -1,19 +1,10 @@
 package no.nav.helse.spesialist.client.spleis
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
-import com.github.tomakehurst.wiremock.client.WireMock.notFound
-import com.github.tomakehurst.wiremock.client.WireMock.okJson
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.serverError
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
-import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotInfotrygdVilkarsgrunnlag
-import no.nav.helse.spesialist.application.snapshot.SnapshotInntektsmelding
-import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadNav
-import no.nav.helse.spesialist.application.snapshot.SnapshotSpleisVilkarsgrunnlag
-import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
+import no.nav.helse.spesialist.application.snapshot.*
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -22,7 +13,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class SpleisRestClientTest {
     @Suppress("JUnitMalformedDeclaration")
@@ -110,12 +100,16 @@ class SpleisRestClientTest {
     }
 
     @Test
-    fun `returnerer null ved 404`() {
+    fun `feiler ved 404`() {
         setupStub(notFound())
 
-        val result = lagKlient().hentPerson("11111111111")
+        val exception =
+            runCatching {
+                lagKlient().hentPerson("11111111111")
+            }.exceptionOrNull()
 
-        assertNull(result)
+        assertNotNull(exception)
+        assertIs<IllegalStateException>(exception)
     }
 
     @Test

@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.application.InMemoryPersoninfoHenter
+import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,7 +34,12 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         berikPersonMedPersoninfo()
 
-        every { snapshothenter.hentPerson(FØDSELSNUMMER) } returns null
+        every { snapshothenter.hentPerson(FØDSELSNUMMER) } returns SnapshotPerson(
+            arbeidsgivere = emptyList(),
+            dodsdato = null,
+            fodselsnummer = FØDSELSNUMMER,
+            vilkarsgrunnlag = emptyList(),
+        )
 
         assertKanHentePerson()
         assertIkkeUtgåendeMelding("klargjør_person_for_visning")
