@@ -1,0 +1,49 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # Jobbnavnet må være copilot-setup-steps, ellers plukker Copilot den ikke opp.
+  copilot-setup-steps:
+    name: Sett opp miljø for Copilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Last ned nav-pilot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "$(mktemp -d)"
+          gh release download --repo navikt/copilot \
+            --pattern 'nav-pilot-linux-amd64' --pattern 'SHA256SUMS'
+          grep ' nav-pilot-linux-amd64$' SHA256SUMS | sha256sum --check --strict -
+          gh attestation verify nav-pilot-linux-amd64 --repo navikt/copilot
+          install -m 0755 nav-pilot-linux-amd64 /usr/local/bin/nav-pilot
+
+      - name: Installer Nav-tilpasninger i brukerscope
+        run: nav-pilot install --user --all
+
+      - name: Vis hva som ble installert
+        run: nav-pilot list --installed
