@@ -68,8 +68,8 @@ class PgTotrinnsvurderingRepository(
     private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
         asSQL(
             """
-            INSERT INTO totrinnsvurdering (vedtaksperiode_id, saksbehandler, beslutter, person_ref, tilstand, opprettet, oppdatert)
-            SELECT :vedtaksperiodeId, :saksbehandler, :beslutter, p.id, CAST(:tilstand AS totrinnsvurdering_tilstand), :opprettet, null
+            INSERT INTO totrinnsvurdering (saksbehandler, beslutter, person_ref, tilstand, opprettet, oppdatert)
+            SELECT :saksbehandler, :beslutter, p.id, CAST(:tilstand AS totrinnsvurdering_tilstand), :opprettet, null
             FROM person p 
             WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
