@@ -28,7 +28,10 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.*
-import no.nav.helse.spesialist.application.logg.*
+import no.nav.helse.spesialist.application.logg.MdcKey
+import no.nav.helse.spesialist.application.logg.loggError
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.medMdc
 import no.nav.helse.spesialist.application.snapshot.*
 import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
@@ -74,12 +77,12 @@ class PersonQueryHandler(
         accessToken: AccessToken,
     ): DataFetcherResult<ApiPerson?> {
         val identitetsnummer = (
-            personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
-                ?: run {
-                    loggInfo("Fant ikke person basert på personPseudoId: ${personPseudoId.value}")
-                    notFound("PseudoId er ugyldig eller utgått")
-                }
-        )
+                personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
+                    ?: run {
+                        loggInfo("Fant ikke person basert på personPseudoId: ${personPseudoId.value}")
+                        notFound("PseudoId er ugyldig eller utgått")
+                    }
+                )
 
         return medMdc(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
             hentPerson(identitetsnummer, transaction, saksbehandler, accessToken)
@@ -98,7 +101,8 @@ class PersonQueryHandler(
             transaction.personRepository.finnOrNull(identitetsnummer)
                 ?: notFound("Fant ikke data for person")
 
-        return when (val resultat = populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, personEntity.id.value)) {
+        return when (val resultat =
+            populasjonstilgangskontrollProvider.kontrollerKjerneTilgang(accessToken.value, personEntity.id.value)) {
             TilgangskontrollResultat.IdentIkkeFunnet -> {
                 internalServerError("Tilgangsmaskinen fant ikke saksbehandlers ident")
             }
@@ -151,32 +155,10 @@ class PersonQueryHandler(
             try {
                 loggInfo("Henter snapshot for person", "identitetsnummer" to identitetsnummer)
                 snapshothenter.hentPerson(identitetsnummer.value)
-                    ?: null.also { loggWarn("Fikk ikke personsnapshot fra Spleis") }
             } catch (e: Exception) {
                 loggError("Klarte ikke hente snapshot fra Spleis", e, "identitetsnummer" to identitetsnummer)
                 internalServerError("Feil ved henting av snapshot for person")
             }
-
-        if (snapshot == null) {
-            loggInfo("Fant ikke snapshot fra Spleis, returnerer en minimal person")
-            return ApiPerson(
-                aktorId = personEntity.aktørId,
-                fodselsnummer = personEntity.id.value,
-                andreFodselsnummer = andreFødselsnumre(transaction, personEntity, personEntity.id),
-                dodsdato = null,
-                tildeling = null,
-                tilleggsinfoForInntektskilder = emptyList(),
-                arbeidsgivere = emptyList(),
-                selvstendigNaering = null,
-                vilkarsgrunnlagV2 = emptyList(),
-            ).let {
-                AuditLogger.loggOk(
-                    saksbehandler = saksbehandler,
-                    identitetsnummer = identitetsnummer,
-                )
-                byggRespons(it)
-            }
-        }
 
         if (snapshot.fodselsnummer != identitetsnummer.value) {
             error("Fikk snapshot for et annet identitetsnummer enn det som ble etterspurt")
@@ -187,344 +169,72 @@ class PersonQueryHandler(
         val risikovurderinger = daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
         val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
 
-        return ApiPerson(
-            aktorId = personEntity.aktørId,
-            fodselsnummer = identitetsnummer.value,
-            andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
-            dodsdato = snapshot.dodsdato,
-            tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilApiTildeling(),
-            tilleggsinfoForInntektskilder =
-                snapshot.vilkarsgrunnlag
-                    .flatMap { vilkårsgrunnlag ->
-                        transaction.avviksvurderingRepository
-                            .hentAvviksvurdering(vilkårsgrunnlag.id)
-                            ?.sammenligningsgrunnlag
-                            ?.innrapporterteInntekter
-                            ?.map(InnrapportertInntekt::arbeidsgiverreferanse)
-                            .orEmpty()
-                            .plus(vilkårsgrunnlag.inntekter.map(SnapshotArbeidsgiverinntekt::arbeidsgiver))
-                    }.distinct()
-                    .map { organisasjonsnummer ->
-                        ApiTilleggsinfoForInntektskilde(
-                            orgnummer = organisasjonsnummer,
-                            navn = finnArbeidsgivernavn(organisasjonsnummer, transaction) ?: "navn er utilgjengelig",
-                        )
-                    },
-            arbeidsgivere =
-                run {
-                    snapshot.arbeidsgivere
-                        .filterNot { it.organisasjonsnummer == "SELVSTENDIG" }
-                        .map { arbeidsgiver ->
-                            ApiArbeidsgiver(
-                                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                                navn =
-                                    finnArbeidsgivernavn(arbeidsgiver.organisasjonsnummer, transaction)
-                                        ?: "navn er utilgjengelig",
-                                ghostPerioder = arbeidsgiver.ghostPerioder.map { it.tilGhostPeriode(arbeidsgiver.organisasjonsnummer) },
-                                behandlinger =
-                                    arbeidsgiver.behandlinger.mapIndexed { behandlingIndex, behandling ->
-                                        ApiBehandling(
-                                            id = behandling.id,
-                                            perioder =
-                                                behandling.perioder.map { periode ->
-                                                    when (periode) {
-                                                        is SnapshotUberegnetPeriode -> {
-                                                            periode.tilUberegnetPeriode(
-                                                                behandlingIndex = behandlingIndex,
-                                                                perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
-                                                                transaction,
-                                                            )
-                                                        }
 
-                                                        is SnapshotBeregnetPeriode -> {
-                                                            val periodetilstand =
-                                                                periode.periodetilstand.tilApiPeriodetilstand(
-                                                                    behandlingIndex == 0,
-                                                                )
-                                                            val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-                                                                if (behandlingIndex == 0) {
-                                                                    daos.oppgaveApiDao.finnPeriodeoppgave(
-                                                                        periode.vedtaksperiodeId,
-                                                                    )
-                                                                } else {
-                                                                    null
-                                                                }
-                                                            }
+        val response = byggRespons(
+            mapTilApiPerson(
+                personEntity = personEntity,
+                identitetsnummer = identitetsnummer,
+                transaction = transaction,
+                snapshot = snapshot,
+                perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
+                risikovurderinger = risikovurderinger,
+                totrinnsvurdering = totrinnsvurdering,
+                alleOverstyringer = alleOverstyringer
+            )
+        )
+        AuditLogger.loggOk(
+            saksbehandler = saksbehandler,
+            identitetsnummer = identitetsnummer,
+        )
+        return response
 
-                                                            ApiBeregnetPeriode(
-                                                                behandlingId = periode.behandlingId,
-                                                                erForkastet = periode.erForkastet,
-                                                                fom = periode.fom,
-                                                                tom = periode.tom,
-                                                                id =
-                                                                    genererPeriodeid(
-                                                                        vedtaksperiodeId = periode.vedtaksperiodeId,
-                                                                        behandlingIndex = behandlingIndex,
-                                                                    ),
-                                                                inntektstype = periode.inntektstype.tilApiInntektstype(),
-                                                                opprettet = periode.opprettet,
-                                                                periodetype = periode.tilApiPeriodetype(),
-                                                                tidslinje = periode.tidslinje.map { it.tilApiDag() },
-                                                                vedtaksperiodeId = periode.vedtaksperiodeId,
-                                                                periodetilstand = periodetilstand,
-                                                                skjaeringstidspunkt = periode.skjaeringstidspunkt,
-                                                                varsler =
-                                                                    if (behandlingIndex == 0) {
-                                                                        daos.varselApiRepository
-                                                                            .finnVarslerSomIkkeErInaktiveForSisteBehandling(
-                                                                                periode.vedtaksperiodeId,
-                                                                                periode.utbetaling.id,
-                                                                            ).map { it.toVarselDto() }
-                                                                    } else {
-                                                                        daos.varselApiRepository
-                                                                            .finnVarslerSomIkkeErInaktiveFor(
-                                                                                periode.vedtaksperiodeId,
-                                                                                periode.utbetaling.id,
-                                                                            ).map { it.toVarselDto() }
-                                                                    },
-                                                                hendelser = periode.hendelser.map { it.tilApiHendelse() },
-                                                                oppgave =
-                                                                    oppgaveDto?.let { oppgaveDto ->
-                                                                        ApiOppgaveForPeriodevisning(
-                                                                            id = oppgaveDto.id,
-                                                                        )
-                                                                    },
-                                                                handlinger =
-                                                                    if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
-                                                                        listOf(
-                                                                            ApiHandling(
-                                                                                ApiPeriodehandling.UTBETALE,
-                                                                                false,
-                                                                                "perioden er ikke til godkjenning",
-                                                                            ),
-                                                                        )
-                                                                    } else {
-                                                                        val handlinger =
-                                                                            listOf(
-                                                                                ApiHandling(
-                                                                                    ApiPeriodehandling.UTBETALE,
-                                                                                    true,
-                                                                                ),
-                                                                            )
-                                                                        handlinger +
-                                                                            when (oppgaveDto?.kanAvvises) {
-                                                                                true -> {
-                                                                                    ApiHandling(
-                                                                                        ApiPeriodehandling.AVVISE,
-                                                                                        true,
-                                                                                    )
-                                                                                }
+    }
 
-                                                                                else -> {
-                                                                                    ApiHandling(
-                                                                                        ApiPeriodehandling.AVVISE,
-                                                                                        false,
-                                                                                        "Spleis støtter ikke å avvise perioden",
-                                                                                    )
-                                                                                }
-                                                                            }
-                                                                    },
-                                                                egenskaper =
-                                                                    apiOppgaveService.hentEgenskaper(
-                                                                        periode.vedtaksperiodeId,
-                                                                        periode.utbetaling.id,
-                                                                    ),
-                                                                historikkinnslag =
-                                                                    daos.periodehistorikkApiDao
-                                                                        .finn(
-                                                                            utbetalingId = periode.utbetaling.id,
-                                                                            spleisBehandlingId = periode.behandlingId,
-                                                                        ).map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
-                                                                forbrukteSykedager = periode.forbrukteSykedager,
-                                                                gjenstaendeSykedager = periode.gjenstaendeSykedager,
-                                                                maksdato = periode.maksdato,
-                                                                periodevilkar =
-                                                                    ApiPeriodevilkar(
-                                                                        alder =
-                                                                            periode.periodevilkar.alder.let {
-                                                                                ApiAlder(
-                                                                                    alderSisteSykedag = it.alderSisteSykedag,
-                                                                                    oppfylt = it.oppfylt,
-                                                                                )
-                                                                            },
-                                                                        sykepengedager =
-                                                                            periode.periodevilkar.sykepengedager.let {
-                                                                                ApiSykepengedager(
-                                                                                    forbrukteSykedager = it.forbrukteSykedager,
-                                                                                    gjenstaendeSykedager = it.gjenstaendeSykedager,
-                                                                                    maksdato = it.maksdato,
-                                                                                    oppfylt = it.oppfylt,
-                                                                                    skjaeringstidspunkt = it.skjaeringstidspunkt,
-                                                                                )
-                                                                            },
-                                                                    ),
-                                                                utbetaling = periode.utbetaling.tilApiUtbetaling(),
-                                                                vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
-                                                                risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                                totrinnsvurdering =
-                                                                    if (oppgaveDto == null) {
-                                                                        null
-                                                                    } else {
-                                                                        totrinnsvurdering?.let {
-                                                                            ApiTotrinnsvurdering(
-                                                                                erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                                                                                saksbehandler = it.saksbehandler?.value,
-                                                                                beslutter = it.beslutter?.value,
-                                                                                erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
-                                                                            )
-                                                                        }
-                                                                    },
-                                                                paVent =
-                                                                    daos.påVentApiDao
-                                                                        .hentAktivPåVent(periode.vedtaksperiodeId)
-                                                                        ?.let {
-                                                                            ApiPaVent(
-                                                                                frist = it.frist,
-                                                                                oid = it.oid,
-                                                                            )
-                                                                        },
-                                                                avslag =
-                                                                    daos.vedtakBegrunnelseDao
-                                                                        .finnAlleVedtakBegrunnelser(
-                                                                            vedtaksperiodeId = periode.vedtaksperiodeId,
-                                                                            utbetalingId = periode.utbetaling.id,
-                                                                        ).filter {
-                                                                            it.type in
-                                                                                setOf(
-                                                                                    VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-                                                                                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
-                                                                                )
-                                                                        }.map { vedtakBegrunnelse ->
-                                                                            ApiAvslag(
-                                                                                type =
-                                                                                    when (vedtakBegrunnelse.type) {
-                                                                                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
-                                                                                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
-                                                                                        else -> error("")
-                                                                                    },
-                                                                                begrunnelse = vedtakBegrunnelse.begrunnelse,
-                                                                                opprettet = vedtakBegrunnelse.opprettet,
-                                                                                saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
-                                                                                invalidert = vedtakBegrunnelse.invalidert,
-                                                                            )
-                                                                        },
-                                                                vedtakBegrunnelser =
-                                                                    daos.vedtakBegrunnelseDao
-                                                                        .finnAlleVedtakBegrunnelser(
-                                                                            vedtaksperiodeId = periode.vedtaksperiodeId,
-                                                                            utbetalingId = periode.utbetaling.id,
-                                                                        ).map { vedtakBegrunnelse ->
-                                                                            ApiVedtakBegrunnelse(
-                                                                                utfall =
-                                                                                    when (vedtakBegrunnelse.type) {
-                                                                                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
-                                                                                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
-                                                                                        VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
-                                                                                    },
-                                                                                begrunnelse = vedtakBegrunnelse.begrunnelse,
-                                                                                opprettet = vedtakBegrunnelse.opprettet,
-                                                                                saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
-                                                                            )
-                                                                        },
-                                                                annullering =
-                                                                    if (behandlingIndex == 0) {
-                                                                        daos.annulleringRepository
-                                                                            .finnOrNull(periode.vedtaksperiodeId)
-                                                                            ?.let {
-                                                                                val saksbehandler =
-                                                                                    daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
-                                                                                        ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
-                                                                                ApiAnnullering(
-                                                                                    saksbehandlerIdent = saksbehandler.ident.value,
-                                                                                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-                                                                                    personFagsystemId = it.personFagsystemId,
-                                                                                    tidspunkt = it.tidspunkt,
-                                                                                    arsaker = it.årsaker,
-                                                                                    begrunnelse = it.kommentar,
-                                                                                    vedtaksperiodeId = it.vedtaksperiodeId,
-                                                                                )
-                                                                            }
-                                                                    } else {
-                                                                        null
-                                                                    },
-                                                                pensjonsgivendeInntekter =
-                                                                    periode.pensjonsgivendeInntekter.map {
-                                                                        ApiPensjonsgivendeInntekt(
-                                                                            arligBelop = it.arligBelop,
-                                                                            inntektsar = it.inntektsar,
-                                                                        )
-                                                                    },
-                                                                annulleringskandidater =
-                                                                    periode.annulleringskandidater.map {
-                                                                        ApiAnnulleringskandidat(
-                                                                            fom = it.fom,
-                                                                            organisasjonsnummer = it.organisasjonsnummer,
-                                                                            tom = it.tom,
-                                                                            vedtaksperiodeId = it.vedtaksperiodeId,
-                                                                        )
-                                                                    },
-                                                            )
-                                                        }
-
-                                                        else -> {
-                                                            throw Exception("Ukjent tidslinjeperiode")
-                                                        }
-                                                    }
-                                                },
-                                        )
-                                    },
-                                overstyringer =
-                                    alleOverstyringer
-                                        .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
-                                        .map { overstyring ->
-                                            when (overstyring) {
-                                                is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
-                                                is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
-                                                is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
-                                                is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
-                                                is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
-                                            }
-                                        },
-                                arbeidsforhold =
-                                    daos.arbeidsgiverApiDao
-                                        .finnArbeidsforhold(
-                                            identitetsnummer.value,
-                                            arbeidsgiver.organisasjonsnummer,
-                                        ).map {
-                                            ApiArbeidsforhold(
-                                                stillingstittel = it.stillingstittel,
-                                                stillingsprosent = it.stillingsprosent,
-                                                startdato = it.startdato,
-                                                sluttdato = it.sluttdato,
-                                            )
-                                        },
-                                inntekterFraAordningen =
-                                    daos.arbeidsgiverApiDao
-                                        .finnArbeidsgiverInntekterFraAordningen(
-                                            identitetsnummer.value,
-                                            arbeidsgiver.organisasjonsnummer,
-                                        ).map { fraAO ->
-                                            ApiArbeidsgiverInntekterFraAOrdningen(
-                                                skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
-                                                inntekter =
-                                                    fraAO.inntekter.map { inntekt ->
-                                                        ApiInntektFraAOrdningen(
-                                                            maned = inntekt.maned,
-                                                            sum = inntekt.sum,
-                                                        )
-                                                    },
-                                            )
-                                        },
-                            )
-                        }
+    private fun mapTilApiPerson(
+        personEntity: Person,
+        identitetsnummer: Identitetsnummer,
+        transaction: SessionContext,
+        snapshot: SnapshotPerson,
+        perioderSomSkalViseAktiveVarsler: Set<UUID>,
+        risikovurderinger: Map<UUID, RisikovurderingApiDto>,
+        totrinnsvurdering: Totrinnsvurdering?,
+        alleOverstyringer: List<OverstyringDto>
+    ): ApiPerson = ApiPerson(
+        aktorId = personEntity.aktørId,
+        fodselsnummer = identitetsnummer.value,
+        andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
+        dodsdato = snapshot.dodsdato,
+        tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilApiTildeling(),
+        tilleggsinfoForInntektskilder =
+            snapshot.vilkarsgrunnlag
+                .flatMap { vilkårsgrunnlag ->
+                    transaction.avviksvurderingRepository
+                        .hentAvviksvurdering(vilkårsgrunnlag.id)
+                        ?.sammenligningsgrunnlag
+                        ?.innrapporterteInntekter
+                        ?.map(InnrapportertInntekt::arbeidsgiverreferanse)
+                        .orEmpty()
+                        .plus(vilkårsgrunnlag.inntekter.map(SnapshotArbeidsgiverinntekt::arbeidsgiver))
+                }.distinct()
+                .map { organisasjonsnummer ->
+                    ApiTilleggsinfoForInntektskilde(
+                        orgnummer = organisasjonsnummer,
+                        navn = finnArbeidsgivernavn(organisasjonsnummer, transaction) ?: "navn er utilgjengelig",
+                    )
                 },
-            selvstendigNaering =
+        arbeidsgivere =
+            run {
                 snapshot.arbeidsgivere
-                    .firstOrNull { it.organisasjonsnummer == "SELVSTENDIG" }
-                    ?.let { selvstendig ->
-                        ApiSelvstendigNaering(
+                    .filterNot { it.organisasjonsnummer == "SELVSTENDIG" }
+                    .map { arbeidsgiver ->
+                        ApiArbeidsgiver(
+                            organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                            navn =
+                                finnArbeidsgivernavn(arbeidsgiver.organisasjonsnummer, transaction)
+                                    ?: "navn er utilgjengelig",
+                            ghostPerioder = arbeidsgiver.ghostPerioder.map { it.tilGhostPeriode(arbeidsgiver.organisasjonsnummer) },
                             behandlinger =
-                                selvstendig.behandlinger.mapIndexed { behandlingIndex, behandling ->
+                                arbeidsgiver.behandlinger.mapIndexed { behandlingIndex, behandling ->
                                     ApiBehandling(
                                         id = behandling.id,
                                         perioder =
@@ -545,47 +255,13 @@ class PersonQueryHandler(
                                                             )
                                                         val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
                                                             if (behandlingIndex == 0) {
-                                                                daos.oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
+                                                                daos.oppgaveApiDao.finnPeriodeoppgave(
+                                                                    periode.vedtaksperiodeId,
+                                                                )
                                                             } else {
                                                                 null
                                                             }
                                                         }
-
-                                                        fun byggHandlinger(): List<ApiHandling> =
-                                                            if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
-                                                                listOf(
-                                                                    ApiHandling(
-                                                                        ApiPeriodehandling.UTBETALE,
-                                                                        false,
-                                                                        "perioden er ikke til godkjenning",
-                                                                    ),
-                                                                )
-                                                            } else {
-                                                                val handlinger =
-                                                                    listOf(
-                                                                        ApiHandling(
-                                                                            ApiPeriodehandling.UTBETALE,
-                                                                            true,
-                                                                        ),
-                                                                    )
-                                                                handlinger +
-                                                                    when (oppgaveDto?.kanAvvises) {
-                                                                        true -> {
-                                                                            ApiHandling(
-                                                                                ApiPeriodehandling.AVVISE,
-                                                                                true,
-                                                                            )
-                                                                        }
-
-                                                                        else -> {
-                                                                            ApiHandling(
-                                                                                ApiPeriodehandling.AVVISE,
-                                                                                false,
-                                                                                "Spleis støtter ikke å avvise perioden",
-                                                                            )
-                                                                        }
-                                                                    }
-                                                            }
 
                                                         ApiBeregnetPeriode(
                                                             behandlingId = periode.behandlingId,
@@ -625,7 +301,41 @@ class PersonQueryHandler(
                                                                         id = oppgaveDto.id,
                                                                     )
                                                                 },
-                                                            handlinger = byggHandlinger(),
+                                                            handlinger =
+                                                                if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
+                                                                    listOf(
+                                                                        ApiHandling(
+                                                                            ApiPeriodehandling.UTBETALE,
+                                                                            false,
+                                                                            "perioden er ikke til godkjenning",
+                                                                        ),
+                                                                    )
+                                                                } else {
+                                                                    val handlinger =
+                                                                        listOf(
+                                                                            ApiHandling(
+                                                                                ApiPeriodehandling.UTBETALE,
+                                                                                true,
+                                                                            ),
+                                                                        )
+                                                                    handlinger +
+                                                                            when (oppgaveDto?.kanAvvises) {
+                                                                                true -> {
+                                                                                    ApiHandling(
+                                                                                        ApiPeriodehandling.AVVISE,
+                                                                                        true,
+                                                                                    )
+                                                                                }
+
+                                                                                else -> {
+                                                                                    ApiHandling(
+                                                                                        ApiPeriodehandling.AVVISE,
+                                                                                        false,
+                                                                                        "Spleis støtter ikke å avvise perioden",
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                },
                                                             egenskaper =
                                                                 apiOppgaveService.hentEgenskaper(
                                                                     periode.vedtaksperiodeId,
@@ -636,7 +346,8 @@ class PersonQueryHandler(
                                                                     .finn(
                                                                         utbetalingId = periode.utbetaling.id,
                                                                         spleisBehandlingId = periode.behandlingId,
-                                                                    ).map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
+                                                                    )
+                                                                    .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
                                                             forbrukteSykedager = periode.forbrukteSykedager,
                                                             gjenstaendeSykedager = periode.gjenstaendeSykedager,
                                                             maksdato = periode.maksdato,
@@ -664,18 +375,16 @@ class PersonQueryHandler(
                                                             vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                             risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
                                                             totrinnsvurdering =
-                                                                run {
-                                                                    if (oppgaveDto == null) {
-                                                                        null
-                                                                    } else {
-                                                                        totrinnsvurdering?.let {
-                                                                            ApiTotrinnsvurdering(
-                                                                                erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                                                                                saksbehandler = it.saksbehandler?.value,
-                                                                                beslutter = it.beslutter?.value,
-                                                                                erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
-                                                                            )
-                                                                        }
+                                                                if (oppgaveDto == null) {
+                                                                    null
+                                                                } else {
+                                                                    totrinnsvurdering?.let {
+                                                                        ApiTotrinnsvurdering(
+                                                                            erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
+                                                                            saksbehandler = it.saksbehandler?.value,
+                                                                            beslutter = it.beslutter?.value,
+                                                                            erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
+                                                                        )
                                                                     }
                                                                 },
                                                             paVent =
@@ -694,10 +403,10 @@ class PersonQueryHandler(
                                                                         utbetalingId = periode.utbetaling.id,
                                                                     ).filter {
                                                                         it.type in
-                                                                            setOf(
-                                                                                VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-                                                                                VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
-                                                                            )
+                                                                                setOf(
+                                                                                    VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                                                                                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+                                                                                )
                                                                     }.map { vedtakBegrunnelse ->
                                                                         ApiAvslag(
                                                                             type =
@@ -736,7 +445,9 @@ class PersonQueryHandler(
                                                                         .finnOrNull(periode.vedtaksperiodeId)
                                                                         ?.let {
                                                                             val saksbehandler =
-                                                                                daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
+                                                                                daos.saksbehandlerRepository.finnOrNull(
+                                                                                    it.saksbehandlerOid
+                                                                                )
                                                                                     ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                                                                             ApiAnnullering(
                                                                                 saksbehandlerIdent = saksbehandler.ident.value,
@@ -779,7 +490,7 @@ class PersonQueryHandler(
                                 },
                             overstyringer =
                                 alleOverstyringer
-                                    .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
+                                    .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
                                     .map { overstyring ->
                                         when (overstyring) {
                                             is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
@@ -789,17 +500,315 @@ class PersonQueryHandler(
                                             is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
                                         }
                                     },
+                            arbeidsforhold =
+                                daos.arbeidsgiverApiDao
+                                    .finnArbeidsforhold(
+                                        identitetsnummer.value,
+                                        arbeidsgiver.organisasjonsnummer,
+                                    ).map {
+                                        ApiArbeidsforhold(
+                                            stillingstittel = it.stillingstittel,
+                                            stillingsprosent = it.stillingsprosent,
+                                            startdato = it.startdato,
+                                            sluttdato = it.sluttdato,
+                                        )
+                                    },
+                            inntekterFraAordningen =
+                                daos.arbeidsgiverApiDao
+                                    .finnArbeidsgiverInntekterFraAordningen(
+                                        identitetsnummer.value,
+                                        arbeidsgiver.organisasjonsnummer,
+                                    ).map { fraAO ->
+                                        ApiArbeidsgiverInntekterFraAOrdningen(
+                                            skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
+                                            inntekter =
+                                                fraAO.inntekter.map { inntekt ->
+                                                    ApiInntektFraAOrdningen(
+                                                        maned = inntekt.maned,
+                                                        sum = inntekt.sum,
+                                                    )
+                                                },
+                                        )
+                                    },
                         )
-                    },
-            vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },
-        ).let {
-            AuditLogger.loggOk(
-                saksbehandler = saksbehandler,
-                identitetsnummer = identitetsnummer,
-            )
-            byggRespons(it)
-        }
-    }
+                    }
+            },
+        selvstendigNaering =
+            snapshot.arbeidsgivere
+                .firstOrNull { it.organisasjonsnummer == "SELVSTENDIG" }
+                ?.let { selvstendig ->
+                    ApiSelvstendigNaering(
+                        behandlinger =
+                            selvstendig.behandlinger.mapIndexed { behandlingIndex, behandling ->
+                                ApiBehandling(
+                                    id = behandling.id,
+                                    perioder =
+                                        behandling.perioder.map { periode ->
+                                            when (periode) {
+                                                is SnapshotUberegnetPeriode -> {
+                                                    periode.tilUberegnetPeriode(
+                                                        behandlingIndex = behandlingIndex,
+                                                        perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
+                                                        transaction,
+                                                    )
+                                                }
+
+                                                is SnapshotBeregnetPeriode -> {
+                                                    val periodetilstand =
+                                                        periode.periodetilstand.tilApiPeriodetilstand(
+                                                            behandlingIndex == 0,
+                                                        )
+                                                    val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
+                                                        if (behandlingIndex == 0) {
+                                                            daos.oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
+                                                        } else {
+                                                            null
+                                                        }
+                                                    }
+
+                                                    fun byggHandlinger(): List<ApiHandling> =
+                                                        if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
+                                                            listOf(
+                                                                ApiHandling(
+                                                                    ApiPeriodehandling.UTBETALE,
+                                                                    false,
+                                                                    "perioden er ikke til godkjenning",
+                                                                ),
+                                                            )
+                                                        } else {
+                                                            val handlinger =
+                                                                listOf(
+                                                                    ApiHandling(
+                                                                        ApiPeriodehandling.UTBETALE,
+                                                                        true,
+                                                                    ),
+                                                                )
+                                                            handlinger +
+                                                                    when (oppgaveDto?.kanAvvises) {
+                                                                        true -> {
+                                                                            ApiHandling(
+                                                                                ApiPeriodehandling.AVVISE,
+                                                                                true,
+                                                                            )
+                                                                        }
+
+                                                                        else -> {
+                                                                            ApiHandling(
+                                                                                ApiPeriodehandling.AVVISE,
+                                                                                false,
+                                                                                "Spleis støtter ikke å avvise perioden",
+                                                                            )
+                                                                        }
+                                                                    }
+                                                        }
+
+                                                    ApiBeregnetPeriode(
+                                                        behandlingId = periode.behandlingId,
+                                                        erForkastet = periode.erForkastet,
+                                                        fom = periode.fom,
+                                                        tom = periode.tom,
+                                                        id =
+                                                            genererPeriodeid(
+                                                                vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                behandlingIndex = behandlingIndex,
+                                                            ),
+                                                        inntektstype = periode.inntektstype.tilApiInntektstype(),
+                                                        opprettet = periode.opprettet,
+                                                        periodetype = periode.tilApiPeriodetype(),
+                                                        tidslinje = periode.tidslinje.map { it.tilApiDag() },
+                                                        vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                        periodetilstand = periodetilstand,
+                                                        skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                        varsler =
+                                                            if (behandlingIndex == 0) {
+                                                                daos.varselApiRepository
+                                                                    .finnVarslerSomIkkeErInaktiveForSisteBehandling(
+                                                                        periode.vedtaksperiodeId,
+                                                                        periode.utbetaling.id,
+                                                                    ).map { it.toVarselDto() }
+                                                            } else {
+                                                                daos.varselApiRepository
+                                                                    .finnVarslerSomIkkeErInaktiveFor(
+                                                                        periode.vedtaksperiodeId,
+                                                                        periode.utbetaling.id,
+                                                                    ).map { it.toVarselDto() }
+                                                            },
+                                                        hendelser = periode.hendelser.map { it.tilApiHendelse() },
+                                                        oppgave =
+                                                            oppgaveDto?.let { oppgaveDto ->
+                                                                ApiOppgaveForPeriodevisning(
+                                                                    id = oppgaveDto.id,
+                                                                )
+                                                            },
+                                                        handlinger = byggHandlinger(),
+                                                        egenskaper =
+                                                            apiOppgaveService.hentEgenskaper(
+                                                                periode.vedtaksperiodeId,
+                                                                periode.utbetaling.id,
+                                                            ),
+                                                        historikkinnslag =
+                                                            daos.periodehistorikkApiDao
+                                                                .finn(
+                                                                    utbetalingId = periode.utbetaling.id,
+                                                                    spleisBehandlingId = periode.behandlingId,
+                                                                )
+                                                                .map { it.toApiHistorikkinnslag(transaction.dialogRepository) },
+                                                        forbrukteSykedager = periode.forbrukteSykedager,
+                                                        gjenstaendeSykedager = periode.gjenstaendeSykedager,
+                                                        maksdato = periode.maksdato,
+                                                        periodevilkar =
+                                                            ApiPeriodevilkar(
+                                                                alder =
+                                                                    periode.periodevilkar.alder.let {
+                                                                        ApiAlder(
+                                                                            alderSisteSykedag = it.alderSisteSykedag,
+                                                                            oppfylt = it.oppfylt,
+                                                                        )
+                                                                    },
+                                                                sykepengedager =
+                                                                    periode.periodevilkar.sykepengedager.let {
+                                                                        ApiSykepengedager(
+                                                                            forbrukteSykedager = it.forbrukteSykedager,
+                                                                            gjenstaendeSykedager = it.gjenstaendeSykedager,
+                                                                            maksdato = it.maksdato,
+                                                                            oppfylt = it.oppfylt,
+                                                                            skjaeringstidspunkt = it.skjaeringstidspunkt,
+                                                                        )
+                                                                    },
+                                                            ),
+                                                        utbetaling = periode.utbetaling.tilApiUtbetaling(),
+                                                        vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
+                                                        risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
+                                                        totrinnsvurdering =
+                                                            run {
+                                                                if (oppgaveDto == null) {
+                                                                    null
+                                                                } else {
+                                                                    totrinnsvurdering?.let {
+                                                                        ApiTotrinnsvurdering(
+                                                                            erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
+                                                                            saksbehandler = it.saksbehandler?.value,
+                                                                            beslutter = it.beslutter?.value,
+                                                                            erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
+                                                                        )
+                                                                    }
+                                                                }
+                                                            },
+                                                        paVent =
+                                                            daos.påVentApiDao
+                                                                .hentAktivPåVent(periode.vedtaksperiodeId)
+                                                                ?.let {
+                                                                    ApiPaVent(
+                                                                        frist = it.frist,
+                                                                        oid = it.oid,
+                                                                    )
+                                                                },
+                                                        avslag =
+                                                            daos.vedtakBegrunnelseDao
+                                                                .finnAlleVedtakBegrunnelser(
+                                                                    vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                    utbetalingId = periode.utbetaling.id,
+                                                                ).filter {
+                                                                    it.type in
+                                                                            setOf(
+                                                                                VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                                                                                VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+                                                                            )
+                                                                }.map { vedtakBegrunnelse ->
+                                                                    ApiAvslag(
+                                                                        type =
+                                                                            when (vedtakBegrunnelse.type) {
+                                                                                VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
+                                                                                VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
+                                                                                else -> error("")
+                                                                            },
+                                                                        begrunnelse = vedtakBegrunnelse.begrunnelse,
+                                                                        opprettet = vedtakBegrunnelse.opprettet,
+                                                                        saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                                                                        invalidert = vedtakBegrunnelse.invalidert,
+                                                                    )
+                                                                },
+                                                        vedtakBegrunnelser =
+                                                            daos.vedtakBegrunnelseDao
+                                                                .finnAlleVedtakBegrunnelser(
+                                                                    vedtaksperiodeId = periode.vedtaksperiodeId,
+                                                                    utbetalingId = periode.utbetaling.id,
+                                                                ).map { vedtakBegrunnelse ->
+                                                                    ApiVedtakBegrunnelse(
+                                                                        utfall =
+                                                                            when (vedtakBegrunnelse.type) {
+                                                                                VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
+                                                                                VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
+                                                                                VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
+                                                                            },
+                                                                        begrunnelse = vedtakBegrunnelse.begrunnelse,
+                                                                        opprettet = vedtakBegrunnelse.opprettet,
+                                                                        saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                                                                    )
+                                                                },
+                                                        annullering =
+                                                            if (behandlingIndex == 0) {
+                                                                daos.annulleringRepository
+                                                                    .finnOrNull(periode.vedtaksperiodeId)
+                                                                    ?.let {
+                                                                        val saksbehandler =
+                                                                            daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
+                                                                                ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
+                                                                        ApiAnnullering(
+                                                                            saksbehandlerIdent = saksbehandler.ident.value,
+                                                                            arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                                                                            personFagsystemId = it.personFagsystemId,
+                                                                            tidspunkt = it.tidspunkt,
+                                                                            arsaker = it.årsaker,
+                                                                            begrunnelse = it.kommentar,
+                                                                            vedtaksperiodeId = it.vedtaksperiodeId,
+                                                                        )
+                                                                    }
+                                                            } else {
+                                                                null
+                                                            },
+                                                        pensjonsgivendeInntekter =
+                                                            periode.pensjonsgivendeInntekter.map {
+                                                                ApiPensjonsgivendeInntekt(
+                                                                    arligBelop = it.arligBelop,
+                                                                    inntektsar = it.inntektsar,
+                                                                )
+                                                            },
+                                                        annulleringskandidater =
+                                                            periode.annulleringskandidater.map {
+                                                                ApiAnnulleringskandidat(
+                                                                    fom = it.fom,
+                                                                    organisasjonsnummer = it.organisasjonsnummer,
+                                                                    tom = it.tom,
+                                                                    vedtaksperiodeId = it.vedtaksperiodeId,
+                                                                )
+                                                            },
+                                                    )
+                                                }
+
+                                                else -> {
+                                                    throw Exception("Ukjent tidslinjeperiode")
+                                                }
+                                            }
+                                        },
+                                )
+                            },
+                        overstyringer =
+                            alleOverstyringer
+                                .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
+                                .map { overstyring ->
+                                    when (overstyring) {
+                                        is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
+                                        is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
+                                        is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
+                                        is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
+                                        is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
+                                    }
+                                },
+                    )
+                },
+        vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },
+    )
 
     private fun andreFødselsnumre(
         transaction: SessionContext,
@@ -1228,7 +1237,8 @@ private fun SnapshotOppdrag.tilSimulering(): ApiSimulering =
             },
     )
 
-private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { objectMapper.treeToValue(it, ApiFaresignal::class.java) }
+private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> =
+    map { objectMapper.treeToValue(it, ApiFaresignal::class.java) }
 
 private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
     val node = objectMapper.readTree(json)

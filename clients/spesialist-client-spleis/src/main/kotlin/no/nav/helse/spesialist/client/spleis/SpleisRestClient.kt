@@ -17,7 +17,7 @@ import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.jacksonMapperBuilder
 import tools.jackson.module.kotlin.readValue
 import java.net.URI
-import java.util.UUID
+import java.util.*
 
 /**
  * Klient for spleis sitt REST-endepunkt (`POST /api/person`) for å hente et snapshot av en person.
@@ -35,7 +35,7 @@ internal class SpleisRestClient(
 
     private val retryStrategy = SpleisRestRetryStrategy()
 
-    fun hentPerson(fødselsnummer: String): Person? =
+    fun hentPerson(fødselsnummer: String): Person =
         HttpClientBuilder.create().setRetryStrategy(retryStrategy).build().use { client ->
             val callId = UUID.randomUUID().toString()
             val uri = spleisUrl.resolve("/api/person")
@@ -51,7 +51,6 @@ internal class SpleisRestClient(
                     .execute(client)
                     .handleResponse { response ->
                         when (response.code) {
-                            404 -> null
                             in 200..299 -> {
                                 val responseBody = EntityUtils.toString(response.entity)
                                 mapper.readValue<Person>(responseBody)
