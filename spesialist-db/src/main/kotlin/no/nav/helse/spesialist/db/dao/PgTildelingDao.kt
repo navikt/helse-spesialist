@@ -23,8 +23,8 @@ class PgTildelingDao internal constructor(
     ) {
         asSQL(
             """
-            INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgave_id)
-            ON CONFLICT (oppgave_id_ref) DO UPDATE SET saksbehandler_ref = :oid
+            INSERT INTO tildeling (saksbehandler_ref, oppgave_ref) VALUES (:oid, :oppgave_id)
+            ON CONFLICT (oppgave_ref) DO UPDATE SET saksbehandler_ref = :oid
             """.trimIndent(),
             "oid" to saksbehandlerOid.value,
             "oppgave_id" to oppgaveId,
@@ -34,7 +34,7 @@ class PgTildelingDao internal constructor(
     fun avmeld(oppgaveId: Long) {
         asSQL(
             """
-            DELETE FROM tildeling WHERE oppgave_id_ref = :oppgave_id
+            DELETE FROM tildeling WHERE oppgave_ref = :oppgave_id
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
         ).update()
@@ -46,7 +46,7 @@ class PgTildelingDao internal constructor(
             SELECT s.epost, s.oid, s.navn FROM person p
             JOIN vedtaksperiode v on p.id = v.person_ref
             JOIN oppgave o on v.id = o.vedtak_ref
-            JOIN tildeling t on o.id = t.oppgave_id_ref
+            JOIN tildeling t on o.id = t.oppgave_ref
             JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE fødselsnummer = :foedselsnummer AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;

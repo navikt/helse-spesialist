@@ -360,7 +360,7 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettTildeling(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM tildeling WHERE oppgave_id_ref IN (SELECT o.id FROM oppgave o INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id WHERE v.person_ref = ?)"
+        val query = "DELETE FROM tildeling WHERE oppgave_ref IN (SELECT o.id FROM oppgave o INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id WHERE v.person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 

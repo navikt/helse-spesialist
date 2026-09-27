@@ -1,10 +1,7 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.db.SorteringsnøkkelForDatabase
-import no.nav.helse.db.SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
-import no.nav.helse.db.SorteringsnøkkelForDatabase.OPPRETTET
-import no.nav.helse.db.SorteringsnøkkelForDatabase.TIDSFRIST
-import no.nav.helse.db.SorteringsnøkkelForDatabase.TILDELT_TIL
+import no.nav.helse.db.SorteringsnøkkelForDatabase.*
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.db.Sorteringsrekkefølge.STIGENDE
 import no.nav.helse.db.Sorteringsrekkefølge.SYNKENDE
@@ -13,16 +10,8 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.UtbetalingId
-import no.nav.helse.spesialist.domain.Vedtaksperiode
-import no.nav.helse.spesialist.domain.oppgave.Egenskap
-import no.nav.helse.spesialist.domain.oppgave.Inntektsforhold
-import no.nav.helse.spesialist.domain.oppgave.Mottaker
-import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.oppgave.Oppgavetype
+import no.nav.helse.spesialist.domain.*
+import no.nav.helse.spesialist.domain.oppgave.*
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,7 +21,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.test.assertEquals
@@ -199,7 +188,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
         dbQuery.list(
             """
             select navn from tildeling
-            join oppgave on oppgave_id_ref = id
+            join oppgave on oppgave_ref = id
             join saksbehandler on saksbehandler_ref = oid
             where id = any(:ider::bigint[])
             """.trimIndent(),

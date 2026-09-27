@@ -86,7 +86,7 @@ internal abstract class AbstractDatabaseTest {
                                 hendelse_id_godkjenningsbehov, utbetaling_id, kan_avvises)
             VALUES (${sequence_number}, now(), now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${hendelse_id}', '${utbetaling_id}', true);
             
-            INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref)
+            INSERT INTO tildeling(saksbehandler_ref, oppgave_ref)
             VALUES ('${saksbehandler_oid}', ${sequence_number});
             INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til)
             VALUES ('${saksbehandler_oid}', ${sequence_number}, now());

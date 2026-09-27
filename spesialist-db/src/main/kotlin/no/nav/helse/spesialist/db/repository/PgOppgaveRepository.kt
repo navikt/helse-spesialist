@@ -73,7 +73,7 @@ class PgOppgaveRepository private constructor(
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             INNER JOIN person p on p.id = v.person_ref
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN tildeling t on o.id = t.oppgave_ref
             WHERE p.fødselsnummer = :fodselsnummer
             AND status = 'AvventerSaksbehandler'
             ORDER BY o.id DESC LIMIT 1
@@ -108,7 +108,7 @@ class PgOppgaveRepository private constructor(
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             INNER JOIN person p on p.id = v.person_ref
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN tildeling t on o.id = t.oppgave_ref
             WHERE p.fødselsnummer = :fodselsnummer
             AND status in ('AvventerSaksbehandler', 'AvventerSystem')
             ORDER BY o.id DESC LIMIT 1
@@ -240,7 +240,7 @@ class PgOppgaveRepository private constructor(
                     INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
                     INNER JOIN person p ON v.person_ref = p.id
                     INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
-                    LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                    LEFT JOIN tildeling t ON o.id = t.oppgave_ref
                     LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
                     """,
                 )
@@ -287,7 +287,7 @@ class PgOppgaveRepository private constructor(
                 if (erTildelt != null) {
                     append(
                         """
-                        AND ${if (erTildelt) "" else "NOT"} EXISTS (SELECT 1 FROM tildeling WHERE oppgave_id_ref = o.id)
+                        AND ${if (erTildelt) "" else "NOT"} EXISTS (SELECT 1 FROM tildeling WHERE oppgave_ref = o.id)
                         """,
                     )
                 }
@@ -465,7 +465,7 @@ class PgOppgaveRepository private constructor(
                 count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker_på_vent,
                 count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) AND pv.frist <= current_date) AS antall_mine_saker_på_vent_nådd_frist
             from oppgave o
-                INNER JOIN tildeling t ON o.id = t.oppgave_id_ref
+                INNER JOIN tildeling t ON o.id = t.oppgave_ref
                 INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
                 LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
             WHERE o.status = 'AvventerSaksbehandler'
@@ -656,7 +656,7 @@ class PgOppgaveRepository private constructor(
                 o.periodetype
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN tildeling t on o.id = t.oppgave_ref
             WHERE o.id = :oppgaveId
             ORDER BY o.id DESC LIMIT 1
             """,
@@ -689,7 +689,7 @@ class PgOppgaveRepository private constructor(
                 o.periodetype
             FROM oppgave o
             INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            LEFT JOIN tildeling t on o.id = t.oppgave_ref
             WHERE o.behandling_id = :spleisBehandlingId
             ORDER BY o.id DESC LIMIT 1
             """,

@@ -4,7 +4,7 @@ import kotliquery.Row
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.db.HelseDao
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 class PgTildelingApiDao internal constructor(
@@ -17,7 +17,7 @@ class PgTildelingApiDao internal constructor(
             SELECT s.epost, s.oid, s.navn FROM person
                  RIGHT JOIN vedtaksperiode v on person.id = v.person_ref
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
-                 RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref
+                 RIGHT JOIN tildeling t on o.id = t.oppgave_ref
                  RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE fødselsnummer = :fnr AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
