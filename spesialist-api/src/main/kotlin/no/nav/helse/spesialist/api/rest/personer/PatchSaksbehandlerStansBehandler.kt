@@ -6,7 +6,9 @@ import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.saksbehandlerstans.SaksbehandlerStans
@@ -77,36 +79,40 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
         kallKontekst: KallKontekst,
         person: Person,
         begrunnelse: String,
-    ) {
-        val behandling = kallKontekst.transaksjon.behandlingRepository.finnNyeste(person.id) ?: error("Finner ikke behandling for person")
-        val dialog = Dialog.Factory.ny()
-        kallKontekst.transaksjon.dialogRepository.lagre(dialog)
-
-        val innslag =
-            Historikkinnslag.automatiskBehandlingStansetAvSaksbehandler(
-                saksbehandler = kallKontekst.saksbehandler,
-                begrunnelse = begrunnelse,
-                dialogId = dialog.id(),
-            )
-        kallKontekst.transaksjon.periodehistorikkDao.lagre(innslag, behandling.id.value)
+    ) = lagrePeriodehistorikk(kallKontekst, person) { dialogId ->
+        Historikkinnslag.automatiskBehandlingStansetAvSaksbehandler(
+            saksbehandler = kallKontekst.saksbehandler,
+            begrunnelse = begrunnelse,
+            dialogId = dialogId,
+        )
     }
 
     private fun lagrePeriodehistorikkForOpphevelseAvSaksbehandlerstans(
         kallKontekst: KallKontekst,
         person: Person,
         begrunnelse: String,
+    ) = lagrePeriodehistorikk(kallKontekst, person) { dialogId ->
+        Historikkinnslag.opphevStansAvSaksbehandler(
+            saksbehandler = kallKontekst.saksbehandler,
+            begrunnelse = begrunnelse,
+            dialogId = dialogId,
+        )
+    }
+
+    private fun lagrePeriodehistorikk(
+        kallKontekst: KallKontekst,
+        person: Person,
+        innslag: (DialogId) -> Historikkinnslag,
     ) {
-        val behandling = kallKontekst.transaksjon.behandlingRepository.finnNyeste(person.id) ?: error("Finner ikke behandling for person")
+        val behandling = kallKontekst.transaksjon.behandlingRepository.finnNyeste(person.id)
+        if (behandling == null) {
+            loggWarn("Fant ingen behandling for personen, lagrer ikke periodehistorikk for saksbehandler-stans")
+            return
+        }
         val dialog = Dialog.Factory.ny()
         kallKontekst.transaksjon.dialogRepository.lagre(dialog)
 
-        val innslag =
-            Historikkinnslag.opphevStansAvSaksbehandler(
-                saksbehandler = kallKontekst.saksbehandler,
-                begrunnelse = begrunnelse,
-                dialogId = dialog.id(),
-            )
-        kallKontekst.transaksjon.periodehistorikkDao.lagre(innslag, behandling.id.value)
+        kallKontekst.transaksjon.periodehistorikkDao.lagre(innslag(dialog.id()), behandling.id.value)
     }
 }
 

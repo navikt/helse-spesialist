@@ -129,4 +129,31 @@ class PatchSaksbehandlerStansBehandlerTest {
         assertEquals(saksbehandler, historikkinnslag.saksbehandler)
         assertEquals(begrunnelse, historikkinnslag.notattekst)
     }
+
+    @Test
+    fun `Lagrer stans selv om personen ikke har noen behandling`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = lagSaksbehandler()
+
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
+
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
+
+        // When:
+        val response =
+            integrationTestFixture.patch(
+                "/api/personer/${personPseudoId.value}/stans/saksbehandler",
+                body = """{ "begrunnelse": "begrunnelse", "stans": true }""",
+                saksbehandler = saksbehandler,
+                tilganger = setOf(Tilgang.Skriv),
+            )
+
+        // Then:
+        assertEquals(204, response.status)
+        assertTrue(sessionContext.saksbehandlerStansRepository.finnAktiv(Identitetsnummer.fraString(fødselsnummer))?.erStanset == true)
+    }
 }
