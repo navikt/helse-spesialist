@@ -84,7 +84,11 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                         ),
                     ),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
-                sistHentet = null,
+                sistHentet =
+                    Forsikringsvurdering.SistHentet(
+                        tidspunkt = Instant.parse("2020-02-01T10:00:00Z"),
+                        utførtAvSaksbehandlerIdent = saksbehandler.ident.value,
+                    ),
             )
 
         // When:
@@ -141,7 +145,11 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                      "lagtTilGrunn" : false
                   }
                ],
-               "vurdertTidspunkt" : "2020-02-01T09:30:00Z"
+               "vurdertTidspunkt" : "2020-02-01T09:30:00Z",
+               "sistHentet" : {
+                  "tidspunkt" : "2020-02-01T10:00:00Z",
+                  "utførtAvSaksbehandlerIdent" : "${saksbehandler.ident.value}"
+               }
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,
@@ -184,7 +192,8 @@ class GetForsikringsvurderingForPersonIntegrationTest {
               "samletDekning" : null,
               "kollektivForsikring" : null,
               "individuelleForsikringer" : [],
-              "vurdertTidspunkt" : "2020-02-01T09:30:00Z"
+              "vurdertTidspunkt" : "2020-02-01T09:30:00Z",
+              "sistHentet" : null
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!,

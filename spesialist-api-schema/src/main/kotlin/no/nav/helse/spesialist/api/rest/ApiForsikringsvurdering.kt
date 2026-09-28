@@ -14,7 +14,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Serializable
 data class ApiFolketrygdlovenreferanse(
@@ -54,9 +54,16 @@ data class ApiDekning(
 )
 
 @Serializable
+data class ApiSistHentet(
+    val tidspunkt: Instant,
+    val utførtAvSaksbehandlerIdent: String,
+)
+
+@Serializable
 data class ApiForsikringsvurdering(
     val samletDekning: ApiDekning?,
     val kollektivForsikring: ApiKollektivForsikring?,
     val individuelleForsikringer: List<ApiIndividuellForsikring>,
     val vurdertTidspunkt: Instant,
+    val sistHentet: ApiSistHentet?,
 )

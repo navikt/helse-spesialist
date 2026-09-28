@@ -1,28 +1,13 @@
 package no.nav.helse.spesialist.api.rest.forsikringer
 
-import io.ktor.http.HttpStatusCode
-import no.nav.helse.spesialist.api.rest.ApiDekning
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiFolketrygdlovenreferanse
-import no.nav.helse.spesialist.api.rest.ApiForsikringsvurdering
-import no.nav.helse.spesialist.api.rest.ApiIndividuellForsikring
-import no.nav.helse.spesialist.api.rest.ApiIndividuellForsikringKonklusjon
-import no.nav.helse.spesialist.api.rest.ApiKollektivForsikring
-import no.nav.helse.spesialist.api.rest.GetBehandler
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import io.ktor.http.*
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
-import no.nav.helse.spesialist.application.Forsikringsvurdering
-import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
-import no.nav.helse.spesialist.application.IndividuellForsikring
-import no.nav.helse.spesialist.application.KollektivForsikring
-import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.Person
-import java.util.UUID
+import java.util.*
 
 class GetForsikringsvurderingForPersonBehandler(
     private val forsikringsvurderingHenter: ForsikringsvurderingHenter,
@@ -81,6 +66,13 @@ private fun Forsikringsvurdering.tilApiForsikringsvurdering(): ApiForsikringsvur
         kollektivForsikring = kollektivForsikring?.tilApiKollektivForsikring(),
         individuelleForsikringer = individuelleForsikringer.map { it.tilApiIndividuellForsikring() },
         vurdertTidspunkt = vurdertTidspunkt,
+        sistHentet =
+            sistHentet?.let {
+                ApiSistHentet(
+                    tidspunkt = it.tidspunkt,
+                    utførtAvSaksbehandlerIdent = it.utførtAvSaksbehandlerIdent,
+                )
+            },
     )
 
 private fun KollektivForsikring.tilApiKollektivForsikring(): ApiKollektivForsikring =
