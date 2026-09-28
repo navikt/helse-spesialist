@@ -15,6 +15,7 @@ fun lagForsikringsvurdering(
     kollektivForsikring: KollektivForsikring? = null,
     individuelleForsikringer: List<IndividuellForsikring> = emptyList(),
     vurdertTidspunkt: Instant = Instant.parse("2018-01-01T12:00:00Z"),
+    sistHentet: Forsikringsvurdering.SistHentet? = null,
 ): Forsikringsvurdering =
     Forsikringsvurdering(
         identitetsnummer = identitetsnummer,
@@ -22,6 +23,7 @@ fun lagForsikringsvurdering(
         kollektivForsikring = kollektivForsikring,
         individuelleForsikringer = individuelleForsikringer,
         vurdertTidspunkt = vurdertTidspunkt,
+        sistHentet = sistHentet,
     )
 
 fun lagKollektivForsikring(

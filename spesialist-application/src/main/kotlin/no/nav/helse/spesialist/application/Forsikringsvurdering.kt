@@ -37,6 +37,7 @@ data class Forsikringsvurdering(
     val kollektivForsikring: KollektivForsikring?,
     val individuelleForsikringer: List<IndividuellForsikring>,
     val vurdertTidspunkt: Instant,
+    val sistHentet: SistHentet?,
 ) {
     // Speiler sp-forsikring sin egen definisjon: Forsikringsvurdering.harForsikring()
     // (individuelleForsikringer.any { it.erGyldig() } || kollektivForsikring != null).
@@ -46,5 +47,10 @@ data class Forsikringsvurdering(
     data class Dekning(
         val grad: Int,
         val fraDag: Int,
+    )
+
+    data class SistHentet(
+        val tidspunkt: Instant,
+        val utførtAvSaksbehandlerIdent: String,
     )
 }

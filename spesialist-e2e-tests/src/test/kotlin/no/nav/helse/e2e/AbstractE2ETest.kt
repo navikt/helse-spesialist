@@ -12,11 +12,7 @@ import no.nav.helse.Testdata.snapshot
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
@@ -25,12 +21,7 @@ import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.DataSourceDbQuery
-import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
-import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.ForsikringsvurderingId
-import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
@@ -41,9 +32,7 @@ import no.nav.helse.spesialist.e2etests.TestRapidHelpers.sisteBehov
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.fail
 import java.time.Instant
@@ -100,6 +89,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                             kollektivForsikring = null,
                             individuelleForsikringer = emptyList(),
                             vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                            sistHentet = null,
                         )
                 },
         )
@@ -359,7 +349,9 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         gjeldendeTilstand: String? = null,
     ) {
         val erRevurdering = erRevurdering(vedtaksperiodeId)
-        val spleisBehandlingId = behandlinger[vedtaksperiodeId]?.last() ?: error("Fant ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId")
+        val spleisBehandlingId =
+            behandlinger[vedtaksperiodeId]?.last()
+                ?: error("Fant ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId")
 
         sisteMeldingId =
             meldingssender.sendVedtaksperiodeEndret(

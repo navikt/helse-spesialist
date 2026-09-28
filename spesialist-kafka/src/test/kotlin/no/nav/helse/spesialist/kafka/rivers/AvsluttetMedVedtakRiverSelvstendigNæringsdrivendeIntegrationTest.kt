@@ -8,12 +8,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.testfixtures.lagIndividuellForsikring
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
-import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
-import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.Vedtak
-import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtakBegrunnelse
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
@@ -29,7 +24,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
     private val testRapid = TestRapid()
@@ -56,6 +51,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 kollektivForsikring = null,
                 individuelleForsikringer = emptyList(),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                sistHentet = null,
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -149,6 +145,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 kollektivForsikring = null,
                 individuelleForsikringer = listOf(lagIndividuellForsikring()),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                sistHentet = null,
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
@@ -242,6 +239,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 kollektivForsikring = null,
                 individuelleForsikringer = emptyList(),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                sistHentet = null,
             )
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 

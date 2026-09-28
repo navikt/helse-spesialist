@@ -2,10 +2,7 @@ package no.nav.helse.spesialist.client.spforsikring
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.okJson
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.stubbing.Scenario
@@ -19,7 +16,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -102,7 +99,11 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                                     "lagtTilGrunn": false
                                 }
                             ],
-                            "vurdertTidspunkt": "2020-02-01T09:31:00Z"
+                            "vurdertTidspunkt": "2020-02-01T09:31:00Z",
+                            "sistHentet": {
+                                "tidspunkt": "2020-02-01T09:30:00Z",
+                                "utførtAvSaksbehandlerIdent": "Z123456"
+                            }
                         }
                         """.trimIndent(),
                     ),
@@ -152,12 +153,24 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                         IndividuellForsikring.Konklusjon(
                             forklaring = "Forsikringen opphørte før skjæringstidspunktet",
                             folketrygdlovenreferanse =
-                                Folketrygdlovenreferanse(kapittel = 8, paragrafIKapittel = 37, ledd = null, bokstav = null),
+                                Folketrygdlovenreferanse(
+                                    kapittel = 8,
+                                    paragrafIKapittel = 37,
+                                    ledd = null,
+                                    bokstav = null,
+                                ),
                         ),
                     lagtTilGrunn = false,
                 ),
             ),
             actualForsikring.individuelleForsikringer,
+        )
+        assertEquals(
+            Forsikringsvurdering.SistHentet(
+                tidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                utførtAvSaksbehandlerIdent = "Z123456",
+            ),
+            actualForsikring.sistHentet,
         )
     }
 
@@ -175,7 +188,8 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                             "samletDekning": null,
                             "kollektivForsikring": null,
                             "individuelleForsikringer": [],
-                            "vurdertTidspunkt": "2020-02-01T09:30:00Z"
+                            "vurdertTidspunkt": "2020-02-01T09:30:00Z",
+                            "sistHentet": null
                         }
                         """.trimIndent(),
                     ),
@@ -194,6 +208,7 @@ class SpForsikringClientForsikringsvurderingHenterTest {
                     kollektivForsikring = null,
                     individuelleForsikringer = emptyList(),
                     vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                    sistHentet = null,
                 ),
             actual = actualForsikring,
         )

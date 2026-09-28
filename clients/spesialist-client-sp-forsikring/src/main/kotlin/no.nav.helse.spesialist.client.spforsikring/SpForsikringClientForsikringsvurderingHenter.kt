@@ -4,11 +4,7 @@ import com.github.navikt.tbd_libs.access_token.AccessTokenProvider
 import io.micrometer.core.instrument.Metrics
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.modell.objectMapper
-import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
-import no.nav.helse.spesialist.application.Forsikringsvurdering
-import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
-import no.nav.helse.spesialist.application.IndividuellForsikring
-import no.nav.helse.spesialist.application.KollektivForsikring
+import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.client.spforsikring.ClientUtils.Companion.retryMedBackoff
@@ -19,7 +15,7 @@ import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import tools.jackson.databind.JsonNode
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 class SpForsikringClientForsikringsvurderingHenter(
     private val configuration: ClientSpForsikringModule.Configuration,
@@ -41,7 +37,10 @@ class SpForsikringClientForsikringsvurderingHenter(
                     .execute()
                     .handleResponse { response ->
                         val responseBody = EntityUtils.toString(response.entity)
-                        loggInfo("Mottok svar HTTP ${response.code}-svar fra sp-forsikring", "responseBody" to responseBody)
+                        loggInfo(
+                            "Mottok svar HTTP ${response.code}-svar fra sp-forsikring",
+                            "responseBody" to responseBody,
+                        )
                         when (response.code) {
                             200 -> {
                                 val responseJson = objectMapper.readTree(responseBody)
@@ -55,15 +54,17 @@ class SpForsikringClientForsikringsvurderingHenter(
                                             )
                                         },
                                     kollektivForsikring =
-                                        responseJson["kollektivForsikring"]?.takeUnless { it.isNull }?.let { kollektivForsikring ->
-                                            KollektivForsikring(
-                                                navn = kollektivForsikring["navn"].asString(),
-                                                dekningFolketrygdlovenreferanse =
-                                                    kollektivForsikring["dekningFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
-                                                kollektivFolketrygdlovenreferanse =
-                                                    kollektivForsikring["kollektivFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
-                                            )
-                                        },
+                                        responseJson["kollektivForsikring"]
+                                            ?.takeUnless { it.isNull }
+                                            ?.let { kollektivForsikring ->
+                                                KollektivForsikring(
+                                                    navn = kollektivForsikring["navn"].asString(),
+                                                    dekningFolketrygdlovenreferanse =
+                                                        kollektivForsikring["dekningFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
+                                                    kollektivFolketrygdlovenreferanse =
+                                                        kollektivForsikring["kollektivFolketrygdlovenreferanse"].tilFolketrygdlovenreferanse(),
+                                                )
+                                            },
                                     individuelleForsikringer =
                                         responseJson["individuelleForsikringer"]
                                             ?.takeUnless { it.isNull }
@@ -93,6 +94,15 @@ class SpForsikringClientForsikringsvurderingHenter(
                                                 )
                                             },
                                     vurdertTidspunkt = Instant.parse(responseJson["vurdertTidspunkt"].asString()),
+                                    sistHentet =
+                                        responseJson["sistHentet"]
+                                            ?.takeUnless { it.isNull }
+                                            ?.let { sistHentet ->
+                                                Forsikringsvurdering.SistHentet(
+                                                    tidspunkt = Instant.parse(sistHentet["tidspunkt"].asString()),
+                                                    utførtAvSaksbehandlerIdent = sistHentet["utførtAvSaksbehandlerIdent"].asString(),
+                                                )
+                                            },
                                 )
                             }
 

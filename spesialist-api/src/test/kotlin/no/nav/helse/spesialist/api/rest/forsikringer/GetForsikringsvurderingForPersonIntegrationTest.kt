@@ -1,13 +1,9 @@
 package no.nav.helse.spesialist.api.rest.forsikringer
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.mockk.coEvery
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.application.Folketrygdlovenreferanse
-import no.nav.helse.spesialist.application.Forsikringsvurdering
-import no.nav.helse.spesialist.application.IndividuellForsikring
-import no.nav.helse.spesialist.application.KollektivForsikring
-import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.ForsikringsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
@@ -15,7 +11,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -88,6 +84,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                         ),
                     ),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                sistHentet = null,
             )
 
         // When:
@@ -169,6 +166,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                 kollektivForsikring = null,
                 individuelleForsikringer = emptyList(),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                sistHentet = null,
             )
 
         // When:
@@ -280,6 +278,7 @@ class GetForsikringsvurderingForPersonIntegrationTest {
                 kollektivForsikring = null,
                 individuelleForsikringer = emptyList(),
                 vurdertTidspunkt = Instant.parse("2020-02-01T09:30:00Z"),
+                sistHentet = null,
             )
 
         // When:
