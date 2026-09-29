@@ -129,4 +129,59 @@ class PatchSaksbehandlerStansBehandlerTest {
         assertEquals(saksbehandler, historikkinnslag.saksbehandler)
         assertEquals(begrunnelse, historikkinnslag.notattekst)
     }
+
+    @Test
+    fun `Lagrer historikk og stans når alle vedtaksperioder er forkastet`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = lagSaksbehandler()
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
+
+        val eldreVedtaksperiodeId = lagVedtaksperiodeId()
+        lagVedtaksperiode(
+            id = eldreVedtaksperiodeId,
+            identitetsnummer = person.id,
+            forkastet = true,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+        val eldreBehandling =
+            lagBehandling(vedtaksperiodeId = eldreVedtaksperiodeId)
+                .also(sessionContext.behandlingRepository::lagre)
+
+        val nyesteVedtaksperiodeId = lagVedtaksperiodeId()
+        lagVedtaksperiode(
+            id = nyesteVedtaksperiodeId,
+            identitetsnummer = person.id,
+            forkastet = true,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+        val nyesteBehandling =
+            lagBehandling(vedtaksperiodeId = nyesteVedtaksperiodeId)
+                .also(sessionContext.behandlingRepository::lagre)
+        val begrunnelse = "begrunnelse"
+
+        // When:
+        val response =
+            integrationTestFixture.patch(
+                "/api/personer/${personPseudoId.value}/stans/saksbehandler",
+                body = """{ "begrunnelse": "$begrunnelse", "stans": true }""",
+                saksbehandler = saksbehandler,
+                tilganger = setOf(Tilgang.Skriv),
+            )
+
+        // Then:
+        assertEquals(204, response.status)
+        assertEquals("", response.bodyAsText)
+        assertTrue(sessionContext.saksbehandlerStansRepository.finnAktiv(person.id)?.erStanset == true)
+
+        assertTrue(sessionContext.periodehistorikkDao.finnForBehandling(eldreBehandling.id).isEmpty())
+        val historikk = sessionContext.periodehistorikkDao.finnForBehandling(nyesteBehandling.id)
+        assertEquals(1, historikk.size)
+        val historikkinnslag = historikk.first()
+        assertInstanceOf<AutomatiskBehandlingStansetAvSaksbehandler>(historikkinnslag)
+        assertEquals(saksbehandler, historikkinnslag.saksbehandler)
+        assertEquals(begrunnelse, historikkinnslag.notattekst)
+    }
 }

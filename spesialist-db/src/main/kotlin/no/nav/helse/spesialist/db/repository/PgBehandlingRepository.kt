@@ -92,7 +92,6 @@ class PgBehandlingRepository(
             INNER JOIN vedtaksperiode v on v.vedtaksperiode_id = b.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
         WHERE p.fødselsnummer = :fodselsnummer
-          AND v.forkastet = false
           ORDER BY b.id DESC LIMIT 1
             """,
             "fodselsnummer" to identitetsnummer.value,
