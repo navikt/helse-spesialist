@@ -1,11 +1,15 @@
 package no.nav.helse.spesialist.api
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.sse.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson3.*
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.embeddedServer
 import io.ktor.server.testing.*
 import io.ktor.sse.*
 import io.mockk.mockk
@@ -120,36 +124,50 @@ class IntegrationTestFixture {
         brukerroller: Set<Brukerrolle> = emptySet(),
         block: suspend (List<ServerSentEvent>) -> Unit,
     ) {
-        testApplication {
-            application { apiModule.setUpApi(this) }
-            client = createClient { install(SSE) }
+        // Bruker ekte server i stedet for testApplication, siden testmotoren i Ktor 3.6.0 holder igjen
+        // strømmende responser til de er ferdige (se KTOR-9790 / ktorio/ktor#5880)
+        val server = embeddedServer(CIO, port = 0) { apiModule.setUpApi(this) }.start(wait = false)
+        val client = HttpClient(Apache5) { install(SSE) }
 
-            logg.info("Starter SSE-tilkobling til $url")
-            val events = Collections.synchronizedList(mutableListOf<ServerSentEvent>())
-            coroutineScope {
-                val started = CompletableDeferred<Unit>()
-                val sseJob =
-                    launch {
-                        client.sse(urlString = url, request = {
-                            bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
-                        }) {
-                            started.complete(Unit)
-                            incoming.collect { event ->
-                                logg.info("Mottok server sent event: $event")
-                                events.add(event)
+        try {
+            runBlocking {
+                val port =
+                    server.engine
+                        .resolvedConnectors()
+                        .first()
+                        .port
+                val fullUrl = "http://localhost:$port$url"
+
+                logg.info("Starter SSE-tilkobling til $fullUrl")
+                val events = Collections.synchronizedList(mutableListOf<ServerSentEvent>())
+                coroutineScope {
+                    val started = CompletableDeferred<Unit>()
+                    val sseJob =
+                        launch {
+                            client.sse(urlString = fullUrl, request = {
+                                bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilganger, brukerroller))
+                            }) {
+                                started.complete(Unit)
+                                incoming.collect { event ->
+                                    logg.info("Mottok server sent event: $event")
+                                    events.add(event)
+                                }
                             }
                         }
-                    }
-                // Vent til tilkoblingen er aktiv
-                started.await()
+                    // Vent til tilkoblingen er aktiv
+                    started.await()
 
-                try {
-                    block(events)
-                } finally {
-                    sseJob.cancelAndJoin()
-                    logg.info("Avsluttet SSE-tilkobling til $url")
+                    try {
+                        block(events)
+                    } finally {
+                        sseJob.cancelAndJoin()
+                        logg.info("Avsluttet SSE-tilkobling til $fullUrl")
+                    }
                 }
             }
+        } finally {
+            client.close()
+            server.stop(gracePeriodMillis = 0, timeoutMillis = 1000)
         }
     }
 
