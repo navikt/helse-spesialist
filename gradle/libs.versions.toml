@@ -5,7 +5,7 @@ graphqlKotlin = "10.2.2"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026091610031789545782"
 tbdLibs = "20260930.1309"
-sasGradlePlugins = "20260925.1602"
+sykepengerGradlePlugins = "20261001.1830"
 testcontainers = "2.0.5"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
@@ -136,7 +136,7 @@ smiley4-ktor-openapi-tools = [
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-sas-deployable = { id = "no.nav.helse.sas.sas-deployable", version.ref = "sasGradlePlugins" }
-sas-kotlin = { id = "no.nav.helse.sas.sas-kotlin", version.ref = "sasGradlePlugins" }
-sas-module = { id = "no.nav.helse.sas.sas-module", version.ref = "sasGradlePlugins" }
-sas-root = { id = "no.nav.helse.sas.sas-root", version.ref = "sasGradlePlugins" }
+sykepenger-deployable = { id = "no.nav.sykepenger.deployable", version.ref = "sykepengerGradlePlugins" }
+sykepenger-kotlin = { id = "no.nav.sykepenger.kotlin", version.ref = "sykepengerGradlePlugins" }
+sykepenger-module = { id = "no.nav.sykepenger.module", version.ref = "sykepengerGradlePlugins" }
+sykepenger-root = { id = "no.nav.sykepenger.root", version.ref = "sykepengerGradlePlugins" }
