@@ -19,50 +19,6 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: navikt/sykepenger-github-workflows/.github/actions/copilot-setup-steps@dd5786587510808b74a5f9d43f965b619470db15 # v1.0.6
         with:
-          persist-credentials: false
-
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: 25
-
-      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
-
-      - name: Last ned nav-pilot
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          cd "$(mktemp -d)"
-          gh release download --repo navikt/copilot \
-            --pattern 'nav-pilot-linux-amd64' --pattern 'SHA256SUMS'
-          grep ' nav-pilot-linux-amd64$' SHA256SUMS | sha256sum --check --strict -
-          gh attestation verify nav-pilot-linux-amd64 --repo navikt/copilot
-          install -m 0755 nav-pilot-linux-amd64 /usr/local/bin/nav-pilot
-
-      - name: Hold Nav-tilpasningene utenfor git
-        run: |
-          set -euo pipefail
-          cat >> .git/info/exclude <<'EOF'
-          /.github/agents/
-          /.github/skills/
-          /.github/prompts/
-          /.github/hooks/
-          /.github/instructions/
-          /.github/.nav-pilot-state.json
-          EOF
-
-      - name: Installer Nav-tilpasninger
-        run: nav-pilot install --repo --all
-
-      # Sletter først staten til nav-pilot, ettersom den nekter å blande sources
-      - name: Installer skills fra sas-meta
-        run: |
-          set -euo pipefail
-          rm -f .github/.nav-pilot-state.json
-          nav-pilot install --repo --all --source navikt/helse-sas-meta
-
-      - name: Vis hva som ble installert
-        run: find .github -type f | sort
+          kotlin: true
