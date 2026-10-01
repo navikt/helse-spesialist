@@ -24,7 +24,7 @@ include(
 
 pluginManagement {
     repositories {
-        if (providers.environmentVariable("GITHUB_ACTIONS").orNull == "true") {
+        if (providers.environmentVariable("GITHUB_ACTIONS").orNull == "true" && providers.environmentVariable("AI_AGENT").orNull == null) {
             maven("https://maven.pkg.github.com/navikt/maven-release") {
                 credentials {
                     username = "token"
@@ -44,7 +44,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 
     repositories {
-        if (providers.environmentVariable("GITHUB_ACTIONS").orNull == "true") {
+        if (providers.environmentVariable("GITHUB_ACTIONS").orNull == "true" && providers.environmentVariable("AI_AGENT").orNull == null) {
             maven("https://maven.pkg.github.com/navikt/maven-release") {
                 credentials {
                     username = "token"
