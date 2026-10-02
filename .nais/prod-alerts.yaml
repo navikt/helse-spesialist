@@ -10,7 +10,7 @@ spec:
     - name: applikasjon-alerts
       rules:
         - alert: Pod restartet
-          expr: >-
+          expr: |-
             sum(
               changes(
                 kube_pod_container_status_restarts_total{container="spesialist"}[5m]

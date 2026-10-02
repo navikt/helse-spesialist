@@ -11,13 +11,16 @@ on:
       - '!CODEOWNERS'
       - '!LICENSE'
       - '!docs/**'
-      - '!deploy/**'
-      - '!.github/**'
+      - '!.nais/**'
+      - '!.github/workflows/standard-dependabot-auto-merge.yml'
+      - '!.github/workflows/standard-dependency-submission.yml'
       # Ressursene som deployes av denne workflowen
-      - 'deploy/dev-db-migrations.yml'
-      - 'deploy/prod-db-migrations.yml'
+      - '.nais/spesialist-db-migrations.yaml'
       # Spesielt for denne tjenesten ellers
-      - '.github/workflows/main-db-migrations.yml'
+      - '!.github/workflows/standard-pr.yml'
+      - '!.github/workflows/main-alerts.yml'
+      - '!.github/workflows/main-opprydding-dev.yml'
+      - '!.github/workflows/main-spesialist.yml'
       - '!clients/**'
       - '!spesialist-*/**'
       - 'spesialist-db-migrations/**'
@@ -60,11 +63,11 @@ jobs:
   deploy-dev:
     name: Deploy til dev
     needs: bygg-image
-    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
     with:
-      CLUSTER: dev-gcp
-      RESOURCE: deploy/dev-db-migrations.yml
-      WORKLOAD_IMAGE: ${{ needs.bygg-image.outputs.image_ref }}
+      manifest: .nais/spesialist-db-migrations.yaml
+      environment: dev-gcp
+      image: ${{ needs.bygg-image.outputs.image_ref }}
     permissions:
       contents: read
       id-token: write # for nais login
@@ -72,11 +75,11 @@ jobs:
   deploy-prod:
     name: Deploy til prod
     needs: bygg-image
-    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
     with:
-      CLUSTER: prod-gcp
-      RESOURCE: deploy/prod-db-migrations.yml
-      WORKLOAD_IMAGE: ${{ needs.bygg-image.outputs.image_ref }}
+      manifest: .nais/spesialist-db-migrations.yaml
+      environment: prod-gcp
+      image: ${{ needs.bygg-image.outputs.image_ref }}
     permissions:
       contents: read
       id-token: write # for nais login

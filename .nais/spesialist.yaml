@@ -1,0 +1,73 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: spesialist
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  port: 8080
+  startup:
+    path: isready
+    initialDelay: 20
+    periodSeconds: 5
+    failureThreshold: 9
+  liveness:
+    path: isalive
+  readiness:
+    path: isready
+  preStopHook:
+    http:
+      path: /stop
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  prometheus:
+    enabled: true
+    path: /metrics
+  azure:
+    application:
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudprofiler.agent
+  valkey:
+    - instance: spesialist-cache
+      access: readwrite
+    - instance: personpseudoid
+      access: readwrite
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: tbd.rapid.v1
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: tbd-spesialist-v1
+    - name: SPLEIS_API_URL
+      value: "http://spleis-api"
+    - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
+      value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
+    - name: SP_FORSIKRING_API_URL
+      value: "http://sp-forsikring"
+    - name: SPEED_API_URL
+      value: "http://speed-api"
+    - name: SPARKEL_NORG_API_URL
+      value: "http://sparkel-norg"
+    - name: TILGANGSMASKINEN_BASE_URL
+      value: "http://populasjonstilgangskontroll.tilgangsmaskin"

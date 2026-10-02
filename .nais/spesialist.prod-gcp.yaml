@@ -1,70 +1,36 @@
-apiVersion: nais.io/v1alpha1
-kind: Application
-metadata:
-  name: spesialist
-  namespace: tbd
-  labels:
-    team: tbd
 spec:
-  port: 8080
-  startup:
-    path: isready
-    initialDelay: 20
-    periodSeconds: 5
-    failureThreshold: 9
-  liveness:
-    path: isalive
-  readiness:
-    path: isready
-  preStopHook:
-    http:
-      path: /stop
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
   resources:
     limits:
       memory: 2Gi
     requests:
       cpu: 100m
       memory: 2Gi
-  strategy:
-    rollingUpdate:
-      maxSurge: 100%
-      maxUnavailable: 50%
   replicas:
     min: 8
     max: 8
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
-    logging:
-      destinations:
-        - id: elastic
-        - id: loki
-  prometheus:
-    enabled: true
-    path: /metrics
   kafka:
     pool: nav-prod
   azure:
     application:
-      enabled: true
       claims:
-        extra:
-          - "NAVident"
         groups:
-          - id: {{ENTRAID_UUID_SAKSBEHANDLER}}
-          - id: {{ENTRAID_UUID_TBD}}
-          - id: {{ENTRAID_UUID_NAIS_TBD}}
-          - id: {{ENTRAID_UUID_KODE_7}}
-          - id: {{ENTRAID_UUID_EGEN_ANSATT}}
-          - id: {{ENTRAID_UUID_BESLUTTER}}
-          - id: {{ENTRAID_UUID_STIKKPROVE}}
-          - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}}
-          - id: {{ENTRAID_UUID_SPEIL_RIKSREVISJONEN}}
-          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG}}
-          - id: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}}
-          - id: {{ENTRAID_UUID_GRADERTE_ANDRE_YTELSER}}
-          - id: {{ENTRAID_UUID_PORTEFOLJESTYRING}}
+          - id: 611669fa-de5c-4dc2-a0e8-6041a019992a # 0000-AZ-speil-brukere
+          - id: f787f900-6697-440d-a086-d5bb56e26a9c # tbd
+          - id: c0227409-2085-4eb2-b487-c4ba270986a3 # nais-team-tbd
+          - id: e98efc34-12d1-401f-b059-f17e62834065 # 0000-GA-Fortrolig_Adresse
+          - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
+          - id: 59f26eef-0a4f-4038-bf46-3a5b2f252155 # 0000-GA-SYK-BESLUTTER
+          - id: e382880a-e12f-4d56-a92e-2283d7da43af # 0000-AZ-speil-stikkprøvekontroll
+          - id: 08d345c6-e369-4065-b202-6209c9f31987 # speil-saksbehandler-næringsdrivende-beta
+          - id: 54273224-e40a-4e3d-b3cb-2219603058f9 # speil-riksrevisjonen-lesetilgang
+          - id: c5f26254-c6fa-4942-b81b-5cdff847d3df # 0000-CA-Speil_Lesetilgang
+          - id: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0 # 4448-CA-speil-dialogmelding_til_behandler
+          - id: e98138a8-d4fa-4414-9ebc-c95539cadfe5 # graderte-andre-ytelser
+          - id: 5224b99d-6c30-4b22-9151-4acac288087f # porteføljestyring
   accessPolicy:
     inbound:
       rules:
@@ -88,18 +54,9 @@ spec:
         - application: sparkel-norg
           namespace: tbd
           cluster: prod-gcp
-        - application: logging
-          namespace: nais-system
-        - application: populasjonstilgangskontroll
-          namespace: tilgangsmaskin
       external:
         - host: sykepengeperioder-api.prod-fss-pub.nais.io
   gcp:
-    permissions:
-      - resource:
-          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
-          kind: Project
-        role: roles/cloudprofiler.agent
     sqlInstances:
       - type: POSTGRES_17
         diskAutoresize: true
@@ -128,40 +85,31 @@ spec:
             users:
               - name: bigquery_connection_user
               - name: spesialist-db-migrations
-  valkey:
-    - instance: spesialist-cache
-      access: readwrite
-    - instance: personpseudoid
-      access: readwrite
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: tbd.rapid.v1
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: tbd-spesialist-v1
     - name: KAFKA_RESET_POLICY
       value: none
     - name: TILGANG_SKRIV
-      value: {{ENTRAID_UUID_SAKSBEHANDLER}}
+      value: 611669fa-de5c-4dc2-a0e8-6041a019992a # 0000-AZ-speil-brukere
     - name: TILGANG_LES
-      value: {{ENTRAID_UUID_TBD}},{{ENTRAID_UUID_SPEIL_RIKSREVISJONEN}},{{ENTRAID_UUID_SPEIL_LESETILGANG}}
+      value: f787f900-6697-440d-a086-d5bb56e26a9c,54273224-e40a-4e3d-b3cb-2219603058f9,c5f26254-c6fa-4942-b81b-5cdff847d3df # tbd, speil-riksrevisjonen-lesetilgang, 0000-CA-Speil_Lesetilgang
     - name: ROLLE_BESLUTTER
-      value: {{ENTRAID_UUID_BESLUTTER}}
+      value: 59f26eef-0a4f-4038-bf46-3a5b2f252155 # 0000-GA-SYK-BESLUTTER
     - name: ROLLE_EGEN_ANSATT
-      value: {{ENTRAID_UUID_EGEN_ANSATT}}
+      value: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
     - name: ROLLE_KODE_7
-      value: {{ENTRAID_UUID_KODE_7}}
+      value: e98efc34-12d1-401f-b059-f17e62834065 # 0000-GA-Fortrolig_Adresse
     - name: ROLLE_STIKKPROVE
-      value: {{ENTRAID_UUID_STIKKPROVE}}
+      value: e382880a-e12f-4d56-a92e-2283d7da43af # 0000-AZ-speil-stikkprøvekontroll
     - name: ROLLE_SELVSTENDIG_BETA
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_SELVSTENDIG_BETA}},{{ENTRAID_UUID_TBD}}
+      value: 08d345c6-e369-4065-b202-6209c9f31987,f787f900-6697-440d-a086-d5bb56e26a9c # speil-saksbehandler-næringsdrivende-beta, tbd
     - name: ROLLE_UTVIKLER
-      value: {{ENTRAID_UUID_NAIS_TBD}}
+      value: c0227409-2085-4eb2-b487-c4ba270986a3 # nais-team-tbd
     - name: ROLLE_DIALOGMELDING
-      value: {{ENTRAID_UUID_SPEIL_DIALOGMELDING}},{{ENTRAID_UUID_NAIS_TBD}}
+      value: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0,c0227409-2085-4eb2-b487-c4ba270986a3 # 4448-CA-speil-dialogmelding_til_behandler, nais-team-tbd
     - name: ROLLE_PORTEFOLJESTYRING
-      value: {{ENTRAID_UUID_PORTEFOLJESTYRING}},{{ENTRAID_UUID_NAIS_TBD}},{{ENTRAID_UUID_TBD}}
+      value: 5224b99d-6c30-4b22-9151-4acac288087f,c0227409-2085-4eb2-b487-c4ba270986a3,f787f900-6697-440d-a086-d5bb56e26a9c # porteføljestyring, nais-team-tbd, tbd
     - name: ROLLE_GRADERTE_ANDRE_YTELSER
-      value: {{ENTRAID_UUID_GRADERTE_ANDRE_YTELSER}}
+      value: e98138a8-d4fa-4414-9ebc-c95539cadfe5 # graderte-andre-ytelser
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering
@@ -180,29 +128,17 @@ spec:
       value: "1000"
     - name: STIKKPROEVER_SN_FORLENGELSE_DIVISOR
       value: "50"
-    - name: SPLEIS_API_URL
-      value: "http://spleis-api"
-    - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
-      value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
-    - name: SP_FORSIKRING_API_URL
-      value: "http://sp-forsikring"
     - name: SP_FORSIKRING_SCOPE
       value: "api://prod-gcp.tbd.sp-forsikring/.default"
-    - name: SPEED_API_URL
-      value: "http://speed-api"
     - name: SPEED_SCOPE
       value: "api://prod-gcp.tbd.speed-api/.default"
-    - name: SPARKEL_NORG_API_URL
-      value: "http://sparkel-norg"
     - name: SPARKEL_NORG_SCOPE
       value: "api://prod-gcp.tbd.sparkel-norg/.default"
     - name: SPARKEL_SYKEPENGEPERIODER_API_URL
       value: "https://sykepengeperioder-api.prod-fss-pub.nais.io"
     - name: SPARKEL_SYKEPENGEPERIODER_SCOPE
       value: "api://prod-fss.tbd.sparkel-sykepengeperioder-api/.default"
-    - name: TILGANGSMASKINEN_BASE_URL
-      value: "http://populasjonstilgangskontroll.tilgangsmaskin"
     - name: TILGANGSMASKINEN_SCOPE
       value: "api://prod-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default"

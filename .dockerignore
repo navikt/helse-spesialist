@@ -1,7 +1,0 @@
-# Ignore everything
-**
-
-# Except jar files
-!spesialist-bootstrap/build/install/app
-!spesialist-db-migrations/build/install/app
-!spesialist-opprydding-dev/build/install/app

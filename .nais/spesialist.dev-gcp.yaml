@@ -1,28 +1,8 @@
-apiVersion: nais.io/v1alpha1
-kind: Application
-metadata:
-  name: spesialist
-  namespace: tbd
-  labels:
-    team: tbd
 spec:
-  port: 8080
   ingresses:
     - https://spesialist.intern.dev.nav.no
   strategy:
     type: Recreate
-  startup:
-    path: isready
-    initialDelay: 20
-    periodSeconds: 5
-    failureThreshold: 9
-  liveness:
-    path: isalive
-  readiness:
-    path: isready
-  preStopHook:
-    http:
-      path: /stop
   resources:
     limits:
       memory: 1Gi
@@ -32,32 +12,18 @@ spec:
   replicas:
     min: 2
     max: 3
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
-    logging:
-      destinations:
-        - id: elastic
-        - id: loki
-  prometheus:
-    enabled: true
-    path: /metrics
   kafka:
     pool: nav-dev
   azure:
     application:
-      enabled: true
       tenant: trygdeetaten.no
       claims:
-        extra:
-          - "NAVident"
         groups:
-          - id: {{ENTRAID_UUID_KODE_7_DEV}}
-          - id: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}}
-          - id: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
-          - id: {{ENTRAID_UUID_SPEIL_STIKKPROVE_DEV}}
-          - id: {{ENTRAID_UUID_SPEIL_LESETILGANG_DEV}}
+          - id: 2e1dc582-f762-4510-a660-88bf68fb7128 # 0000-GA-Fortrolig_Adresse
+          - id: 602c1187-a92c-4fce-a983-3a1258161d4f # 0000-CA-Speil-Beslutter
+          - id: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+          - id: eb0c8da8-e73b-4be2-bd09-1fa71001eb29 # 0000-CA-Speil-Stikkprove
+          - id: 216b7219-3906-43c5-8e22-03fb74133b42 # 0000-CA-Speil_Lesetilgang
   accessPolicy:
     inbound:
       rules:
@@ -80,18 +46,9 @@ spec:
         - application: sparkel-norg
           namespace: tbd
           cluster: dev-gcp
-        - application: logging
-          namespace: nais-system
-        - application: populasjonstilgangskontroll
-          namespace: tilgangsmaskin
       external:
         - host: sykepengeperioder-api.dev-fss-pub.nais.io
   gcp:
-    permissions:
-      - resource:
-          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
-          kind: Project
-        role: roles/cloudprofiler.agent
     sqlInstances:
       - type: POSTGRES_17
         diskAutoresize: true
@@ -107,68 +64,47 @@ spec:
             users:
               - name: spesialist-db-migrations
               - name: spesialist-opprydding-dev
-  valkey:
-    - instance: spesialist-cache
-      access: readwrite
-    - instance: personpseudoid
-      access: readwrite
   env:
-    - name: KAFKA_RAPID_TOPIC
-      value: tbd.rapid.v1
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: tbd-spesialist-v1
     - name: KAFKA_EXTRA_TOPIC
       value: tbd.sis
     - name: TILGANG_SKRIV
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: TILGANG_LES
-      value: {{ENTRAID_UUID_SPEIL_LESETILGANG_DEV}}
+      value: 216b7219-3906-43c5-8e22-03fb74133b42 # 0000-CA-Speil_Lesetilgang
     - name: ROLLE_BESLUTTER
-      value: {{ENTRAID_UUID_SPEIL_BESLUTTERE_DEV}},{{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: 602c1187-a92c-4fce-a983-3a1258161d4f,cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Beslutter, 0000-CA-Speil-Saksbehandler
     - name: ROLLE_EGEN_ANSATT
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_KODE_7
-      value: {{ENTRAID_UUID_KODE_7_DEV}}
+      value: 2e1dc582-f762-4510-a660-88bf68fb7128 # 0000-GA-Fortrolig_Adresse
     - name: ROLLE_STIKKPROVE
-      value: {{ENTRAID_UUID_SPEIL_STIKKPROVE_DEV}}
+      value: eb0c8da8-e73b-4be2-bd09-1fa71001eb29 # 0000-CA-Speil-Stikkprove
     - name: ROLLE_SELVSTENDIG_BETA
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_UTVIKLER
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_DIALOGMELDING
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_PORTEFOLJESTYRING
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_GRADERTE_ANDRE_YTELSER
-      value: {{ENTRAID_UUID_SPEIL_SAKSBEHANDLER_DEV}}
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
-    - name: SPLEIS_API_URL
-      value: "http://spleis-api"
     - name: SPLEIS_CLIENT_LOGG_RESPONS
       value: "true"
-    - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
-      value: "http://digdir-krr-proxy.team-rocket.svc.cluster.local"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: "api://dev-gcp.team-rocket.digdir-krr-proxy/.default"
-    - name: SP_FORSIKRING_API_URL
-      value: "http://sp-forsikring"
     - name: SP_FORSIKRING_SCOPE
       value: "api://dev-gcp.tbd.sp-forsikring/.default"
-    - name: SPEED_API_URL
-      value: "http://speed-api"
     - name: SPEED_SCOPE
       value: "api://dev-gcp.tbd.speed-api/.default"
-    - name: SPARKEL_NORG_API_URL
-      value: "http://sparkel-norg"
     - name: SPARKEL_NORG_SCOPE
       value: "api://dev-gcp.tbd.sparkel-norg/.default"
     - name: SPARKEL_SYKEPENGEPERIODER_API_URL
       value: "https://sykepengeperioder-api.dev-fss-pub.nais.io"
     - name: SPARKEL_SYKEPENGEPERIODER_SCOPE
       value: "api://dev-fss.tbd.sparkel-sykepengeperioder-api/.default"
-    - name: TILGANGSMASKINEN_BASE_URL
-      value: "http://populasjonstilgangskontroll.tilgangsmaskin"
     - name: TILGANGSMASKINEN_SCOPE
       value: "api://dev-gcp.tilgangsmaskin.populasjonstilgangskontroll/.default"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
