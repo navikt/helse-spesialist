@@ -5,6 +5,7 @@ import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
@@ -13,6 +14,8 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.overstyringer.OverstyringId
+import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.domain.testfixtures.lagAvviksvurderingMedEnArbeidsgiver
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -381,6 +384,98 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             }
             """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
+    fun `fastsatt etter skjønn - velger begrunnelsen med nyeste opprettet, uavhengig av lagringsrekkefølge (nyeste lagret sist)`() {
+        // Given:
+        this.utfall = Utfall.INNVILGELSE
+        this.omregnetÅrsinntekt = BigDecimal("800000.00")
+        this.innrapportertÅrsinntekt = BigDecimal("1200000.00")
+        this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
+        initGodkjenningsbehov()
+
+        val skjønnsfastsattBeløp = BigDecimal("650000.00")
+        setupSkjønnsfastsettelse(
+            skjønnsfastsattBeløp = skjønnsfastsattBeløp,
+            opprettet = LocalDateTime.of(2023, 1, 1, 0, 0),
+            begrunnelseMal = "Eldre begrunnelse fra mal",
+            begrunnelseFritekst = "Eldre begrunnelse fra fritekst",
+            begrunnelseKonklusjon = "Eldre begrunnelse fra konklusjon",
+        )
+        val nyere =
+            setupSkjønnsfastsettelse(
+                skjønnsfastsattBeløp = skjønnsfastsattBeløp,
+                opprettet = LocalDateTime.of(2024, 1, 1, 0, 0),
+                begrunnelseMal = "Nyere begrunnelse fra mal",
+                begrunnelseFritekst = "Nyere begrunnelse fra fritekst",
+                begrunnelseKonklusjon = "Nyere begrunnelse fra konklusjon",
+            )
+
+        // When:
+        testRapid.sendTestMessage(fastsattEtterSkjønnMelding(skjønnsfastsattSykepengegrunnlag = skjønnsfastsattBeløp))
+
+        // Then:
+        assertBegrunnelserKommerFra(nyere)
+    }
+
+    @Test
+    fun `fastsatt etter skjønn - velger begrunnelsen med nyeste opprettet, uavhengig av lagringsrekkefølge (nyeste lagret først)`() {
+        // Given:
+        this.utfall = Utfall.INNVILGELSE
+        this.omregnetÅrsinntekt = BigDecimal("800000.00")
+        this.innrapportertÅrsinntekt = BigDecimal("1200000.00")
+        this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
+        setup()
+        sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
+        initGodkjenningsbehov()
+
+        val skjønnsfastsattBeløp = BigDecimal("650000.00")
+        val nyere =
+            setupSkjønnsfastsettelse(
+                skjønnsfastsattBeløp = skjønnsfastsattBeløp,
+                opprettet = LocalDateTime.of(2024, 1, 1, 0, 0),
+                begrunnelseMal = "Nyere begrunnelse fra mal",
+                begrunnelseFritekst = "Nyere begrunnelse fra fritekst",
+                begrunnelseKonklusjon = "Nyere begrunnelse fra konklusjon",
+            )
+        setupSkjønnsfastsettelse(
+            skjønnsfastsattBeløp = skjønnsfastsattBeløp,
+            opprettet = LocalDateTime.of(2023, 1, 1, 0, 0),
+            begrunnelseMal = "Eldre begrunnelse fra mal",
+            begrunnelseFritekst = "Eldre begrunnelse fra fritekst",
+            begrunnelseKonklusjon = "Eldre begrunnelse fra konklusjon",
+        )
+
+        // When:
+        testRapid.sendTestMessage(fastsattEtterSkjønnMelding(skjønnsfastsattSykepengegrunnlag = skjønnsfastsattBeløp))
+
+        // Then:
+        assertBegrunnelserKommerFra(nyere)
+    }
+
+    private fun assertBegrunnelserKommerFra(forventet: SkjønnsfastsattSykepengegrunnlag) {
+        val begrunnelser =
+            testRapid
+                .publiserteMeldingerUtenGenererteFelter()
+                .single()
+                .json
+                .path("begrunnelser")
+                .toList()
+        assertEquals(
+            forventet.begrunnelseMal,
+            begrunnelser.single { it.path("type").asString() == "SkjønnsfastsattSykepengegrunnlagMal" }.path("begrunnelse").asString(),
+        )
+        assertEquals(
+            forventet.begrunnelseFritekst,
+            begrunnelser.single { it.path("type").asString() == "SkjønnsfastsattSykepengegrunnlagFritekst" }.path("begrunnelse").asString(),
+        )
+        assertEquals(
+            forventet.begrunnelseKonklusjon,
+            begrunnelser.single { it.path("type").asString() == "SkjønnsfastsattSykepengegrunnlagKonklusjon" }.path("begrunnelse").asString(),
+        )
     }
 
     @Test
@@ -786,6 +881,62 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                         .id(),
             )
         }
+
+    private var nesteOverstyringId = 1L
+
+    // Lik setupSkjønnsfastsettelse over, men med eksplisitt (ikke LocalDateTime.now())
+    // opprettet-tidspunkt og egne begrunnelsestekster, slik at vi kan lagre flere
+    // skjønnsfastsettelser for samme skjæringstidspunkt i kontrollert rekkefølge og
+    // deterministisk verifisere at den med nyeste opprettet blir valgt.
+    private fun setupSkjønnsfastsettelse(
+        skjønnsfastsattBeløp: BigDecimal,
+        opprettet: LocalDateTime,
+        begrunnelseMal: String,
+        begrunnelseFritekst: String,
+        begrunnelseKonklusjon: String,
+    ): SkjønnsfastsattSykepengegrunnlag =
+        SkjønnsfastsattSykepengegrunnlag
+            .fraLagring(
+                id = OverstyringId(nesteOverstyringId++),
+                eksternHendelseId = UUID.randomUUID(),
+                opprettet = opprettet,
+                ferdigstilt = false,
+                saksbehandlerOid = saksbehandler.id,
+                fødselsnummer = person.id.value,
+                aktørId = person.aktørId,
+                vedtaksperiodeId = vedtaksperiode.id.value,
+                skjæringstidspunkt = behandling.skjæringstidspunkt,
+                arbeidsgivere =
+                    listOf(
+                        SkjønnsfastsattArbeidsgiver(
+                            organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                            årlig = skjønnsfastsattBeløp.toDouble(),
+                            fraÅrlig = omregnetÅrsinntekt.toDouble(),
+                        ),
+                    ),
+                årsak = "Skjønnsfastsettelse ved mer enn 25 % avvik (§ 8-30 andre avsnitt)",
+                type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.ANNET,
+                begrunnelseMal = begrunnelseMal,
+                begrunnelseFritekst = begrunnelseFritekst,
+                begrunnelseKonklusjon = begrunnelseKonklusjon,
+                lovhjemmel =
+                    Lovhjemmel(
+                        paragraf = "8-30",
+                        ledd = "2",
+                        bokstav = null,
+                        lovverk = "folketrygdloven",
+                        lovverksversjon = "2019-01-01",
+                    ),
+            ).also {
+                sessionContext.overstyringRepository.lagre(
+                    overstyringer = listOf(it),
+                    totrinnsvurderingId =
+                        Totrinnsvurdering
+                            .ny(person.id.value)
+                            .also(sessionContext.totrinnsvurderingRepository::lagre)
+                            .id(),
+                )
+            }
 
     private fun initGodkjenningsbehov() {
         val godkjenningsbehovId = UUID.randomUUID()

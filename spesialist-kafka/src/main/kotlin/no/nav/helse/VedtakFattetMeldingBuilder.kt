@@ -281,6 +281,7 @@ class VedtakFattetMeldingBuilder(
     fun byggVedtakFattetMeldingForArbeidstaker(
         skjønnsfastsatteSykepengegrunnlag: List<BegrunnelseForSkjønnsfastsattSykepengegrunnlag>,
     ): VedtakFattetMelding {
+        val skjønnsfastsatteSykepengegrunnlagSortertPåOpprettet = skjønnsfastsatteSykepengegrunnlag.sortedBy { it.opprettet }
         val vedtaksperiode =
             sessionContext.vedtaksperiodeRepository.finnOrNull(behandling.vedtaksperiodeId)
                 ?: error("Fant ikke vedtaksperiode")
@@ -299,7 +300,8 @@ class VedtakFattetMeldingBuilder(
 
                 FASTSATT_ETTER_SKJØNN -> {
                     val skjønnsfastsattSykepengegrunnlag =
-                        skjønnsfastsatteSykepengegrunnlag.last { it.skjæringstidspunkt == behandling.skjæringstidspunkt }
+                        skjønnsfastsatteSykepengegrunnlagSortertPåOpprettet
+                            .last { it.skjæringstidspunkt == behandling.skjæringstidspunkt }
                     byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
                         packet = packet,
                         tags = behandling.tags,
@@ -316,7 +318,7 @@ class VedtakFattetMeldingBuilder(
         val begrunnelser =
             if (fastsatt == FASTSATT_ETTER_SKJØNN) {
                 val skjønnsfastsattSykepengegrunnlag =
-                    skjønnsfastsatteSykepengegrunnlag.last { it.skjæringstidspunkt == behandling.skjæringstidspunkt }
+                    skjønnsfastsatteSykepengegrunnlagSortertPåOpprettet.last { it.skjæringstidspunkt == behandling.skjæringstidspunkt }
 
                 listOf(
                     VedtakFattetMelding.Begrunnelse(
