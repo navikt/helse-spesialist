@@ -56,6 +56,8 @@ class Varsel private constructor(
 
     fun erVarselOmNegativtBeløp(): Boolean = this.kode == "RV_UT_23"
 
+    fun erVarselOmNavUtland(): Boolean = this.kode == "SB_EX_5"
+
     fun erInaktivt(): Boolean = this.status == Status.INAKTIV
 
     fun kanAvvises() = status in listOf(Status.AKTIV, Status.VURDERT)
