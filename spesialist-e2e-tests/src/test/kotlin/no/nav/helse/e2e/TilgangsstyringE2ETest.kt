@@ -34,12 +34,13 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         berikPersonMedPersoninfo()
 
-        every { snapshothenter.hentPerson(FØDSELSNUMMER) } returns SnapshotPerson(
-            arbeidsgivere = emptyList(),
-            dodsdato = null,
-            fodselsnummer = FØDSELSNUMMER,
-            vilkarsgrunnlag = emptyList(),
-        )
+        every { snapshothenter.hentPerson(FØDSELSNUMMER) } returns
+            SnapshotPerson(
+                arbeidsgivere = emptyList(),
+                dodsdato = null,
+                fodselsnummer = FØDSELSNUMMER,
+                vilkarsgrunnlag = emptyList(),
+            )
 
         assertKanHentePerson()
         assertIkkeUtgåendeMelding("klargjør_person_for_visning")
