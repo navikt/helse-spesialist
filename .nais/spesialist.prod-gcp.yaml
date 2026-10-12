@@ -29,7 +29,6 @@ spec:
           - id: 54273224-e40a-4e3d-b3cb-2219603058f9 # speil-riksrevisjonen-lesetilgang
           - id: c5f26254-c6fa-4942-b81b-5cdff847d3df # 0000-CA-Speil_Lesetilgang
           - id: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0 # 4448-CA-speil-dialogmelding_til_behandler
-          - id: e98138a8-d4fa-4414-9ebc-c95539cadfe5 # graderte-andre-ytelser
           - id: 5224b99d-6c30-4b22-9151-4acac288087f # porteføljestyring
           - id: 16d8fb0a-1e3b-4d0c-9aea-65ddce8c8607 # coach
           - id: c8dba1f4-5a32-4b30-9eee-386984d5648d # fagkoordinator
@@ -111,8 +110,6 @@ spec:
       value: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0,c0227409-2085-4eb2-b487-c4ba270986a3 # 4448-CA-speil-dialogmelding_til_behandler, nais-team-tbd
     - name: ROLLE_PORTEFOLJESTYRING
       value: 5224b99d-6c30-4b22-9151-4acac288087f,c0227409-2085-4eb2-b487-c4ba270986a3,f787f900-6697-440d-a086-d5bb56e26a9c # porteføljestyring, nais-team-tbd, tbd
-    - name: ROLLE_GRADERTE_ANDRE_YTELSER
-      value: e98138a8-d4fa-4414-9ebc-c95539cadfe5 # graderte-andre-ytelser
     - name: ROLLE_COACH
       value: 16d8fb0a-1e3b-4d0c-9aea-65ddce8c8607 # coach
     - name: ROLLE_FAGKOORDINATOR

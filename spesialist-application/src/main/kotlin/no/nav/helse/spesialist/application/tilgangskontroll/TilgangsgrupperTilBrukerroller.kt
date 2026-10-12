@@ -12,7 +12,6 @@ class TilgangsgrupperTilBrukerroller(
     val utvikler: List<UUID>,
     val dialogmelding: List<UUID>,
     val porteføljestyring: List<UUID>,
-    val graderteAndreYtelser: List<UUID>,
     val coach: List<UUID>,
     val fagkoordinator: List<UUID>,
     val supersaksbehandler: List<UUID>,
@@ -29,7 +28,6 @@ class TilgangsgrupperTilBrukerroller(
             Brukerrolle.Utvikler -> utvikler
             Brukerrolle.Dialogmelding -> dialogmelding
             Brukerrolle.Porteføljestyring -> porteføljestyring
-            Brukerrolle.GraderteAndreYtelser -> graderteAndreYtelser
             Brukerrolle.Coach -> coach
             Brukerrolle.Fagkoordinator -> fagkoordinator
             Brukerrolle.Supersaksbehandler -> supersaksbehandler

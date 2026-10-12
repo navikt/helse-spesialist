@@ -9,7 +9,6 @@ enum class Brukerrolle {
     Utvikler,
     Dialogmelding,
     Porteføljestyring,
-    GraderteAndreYtelser,
     Coach,
     Fagkoordinator,
     Supersaksbehandler,

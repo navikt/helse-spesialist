@@ -150,7 +150,6 @@ private fun tilgangsgrupperTilBrukerroller(env: Map<String, String>): Tilgangsgr
         utvikler = env.getUUIDList("ROLLE_UTVIKLER"),
         dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
         porteføljestyring = env.getUUIDList("ROLLE_PORTEFOLJESTYRING"),
-        graderteAndreYtelser = env.getUUIDList("ROLLE_GRADERTE_ANDRE_YTELSER"),
         coach = env.getUUIDList("ROLLE_COACH"),
         fagkoordinator = env.getUUIDList("ROLLE_FAGKOORDINATOR"),
         supersaksbehandler = env.getUUIDList("ROLLE_SUPERSAKSBEHANDLER"),
