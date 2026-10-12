@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class TilgangsgrupperTilBrukerrollerTest {
-    private val næringsdrivendeGruppeId = UUID.randomUUID()
+    private val beslutterGruppeId = UUID.randomUUID()
     private val porteføljestyringGruppeId = UUID.randomUUID()
     private val annenGruppeId1 = UUID.randomUUID()
     private val annenGruppeId2 = UUID.randomUUID()
 
     private val tilgangsgrupperTilBrukerroller =
         tilgangsgrupperTilBrukerroller(
-            næringsdrivendeBeta = listOf(næringsdrivendeGruppeId),
+            beslutter = listOf(beslutterGruppeId),
             porteføljestyring = listOf(porteføljestyringGruppeId),
         )
 
@@ -26,12 +26,12 @@ class TilgangsgrupperTilBrukerrollerTest {
     }
 
     @Test
-    fun `har næringsdrivende beta-gruppe blant to grupper`() {
-        val grupper = listOf(annenGruppeId1, næringsdrivendeGruppeId)
+    fun `har beslutter-gruppe blant to grupper`() {
+        val grupper = listOf(annenGruppeId1, beslutterGruppeId)
         val roller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(grupper)
 
         assertEquals(1, roller.size)
-        assertTrue(roller.contains(Brukerrolle.SelvstendigNæringsdrivendeBeta))
+        assertTrue(roller.contains(Brukerrolle.Beslutter))
     }
 
     @Test
@@ -64,7 +64,7 @@ class TilgangsgrupperTilBrukerrollerTest {
     }
 
     @Test
-    fun `tre grupper uten næringsdrivende beta-gruppe gir ingen roller`() {
+    fun `tre grupper uten rollegrupper gir ingen roller`() {
         val grupper = listOf(annenGruppeId1, annenGruppeId2, UUID.randomUUID())
         val roller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(grupper)
 

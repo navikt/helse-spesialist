@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 class PostAnmodOmForkastingIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
@@ -60,7 +60,7 @@ class PostAnmodOmForkastingIntegrationTest {
                     }
                     """.trimIndent(),
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta),
+                brukerroller = setOf(Brukerrolle.Coach),
             )
 
         // Then:
@@ -114,7 +114,7 @@ class PostAnmodOmForkastingIntegrationTest {
                 url = "/api/vedtaksperioder/$vedtaksperiodeId/anmod-om-forkasting",
                 body = """{ "årsaker": [], "kommentar": "En kommentar" }""",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta),
+                brukerroller = setOf(Brukerrolle.Coach),
             )
 
         // Then:
@@ -152,7 +152,7 @@ class PostAnmodOmForkastingIntegrationTest {
                 url = "/api/vedtaksperioder/$vedtaksperiodeId/anmod-om-forkasting",
                 body = """{ "årsaker": [{ "key": "årsak-1", "årsak": "Feil periode" }], "kommentar": null }""",
                 saksbehandler = saksbehandler,
-                brukerroller = setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta),
+                brukerroller = setOf(Brukerrolle.Coach),
             )
 
         // Then:
@@ -174,5 +174,39 @@ class PostAnmodOmForkastingIntegrationTest {
                 årsak = "anmodning om forkasting av vedtaksperiode",
             ),
         )
+    }
+
+    @Test
+    fun `anmodning om forkasting uten coach-, fagkoordinator- eller supersaksbehandlerrolle gir 403`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiodeId = UUID.randomUUID()
+
+        val person =
+            lagPerson(
+                id = Identitetsnummer.fraString(fødselsnummer),
+            ).also(sessionContext.personRepository::lagre)
+
+        val vedtaksperiode =
+            lagVedtaksperiode(
+                id = VedtaksperiodeId(vedtaksperiodeId),
+                identitetsnummer = person.id,
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+            ).also(sessionContext.vedtaksperiodeRepository::lagre)
+
+        lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+            .also(sessionContext.behandlingRepository::lagre)
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/vedtaksperioder/$vedtaksperiodeId/anmod-om-forkasting",
+                body = """{ "årsaker": [{ "key": "årsak-1", "årsak": "Feil periode" }], "kommentar": null }""",
+                saksbehandler = lagSaksbehandler(),
+                brukerroller = setOf(Brukerrolle.Beslutter),
+            )
+
+        // Then:
+        assertEquals(403, response.status)
     }
 }

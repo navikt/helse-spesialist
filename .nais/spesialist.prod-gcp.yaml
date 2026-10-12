@@ -25,7 +25,6 @@ spec:
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
           - id: 59f26eef-0a4f-4038-bf46-3a5b2f252155 # 0000-GA-SYK-BESLUTTER
           - id: e382880a-e12f-4d56-a92e-2283d7da43af # 0000-AZ-speil-stikkprøvekontroll
-          - id: 08d345c6-e369-4065-b202-6209c9f31987 # speil-saksbehandler-næringsdrivende-beta
           - id: 54273224-e40a-4e3d-b3cb-2219603058f9 # speil-riksrevisjonen-lesetilgang
           - id: c5f26254-c6fa-4942-b81b-5cdff847d3df # 0000-CA-Speil_Lesetilgang
           - id: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0 # 4448-CA-speil-dialogmelding_til_behandler
@@ -102,8 +101,6 @@ spec:
       value: e98efc34-12d1-401f-b059-f17e62834065 # 0000-GA-Fortrolig_Adresse
     - name: ROLLE_STIKKPROVE
       value: e382880a-e12f-4d56-a92e-2283d7da43af # 0000-AZ-speil-stikkprøvekontroll
-    - name: ROLLE_SELVSTENDIG_BETA
-      value: 08d345c6-e369-4065-b202-6209c9f31987,f787f900-6697-440d-a086-d5bb56e26a9c # speil-saksbehandler-næringsdrivende-beta, tbd
     - name: ROLLE_UTVIKLER
       value: c0227409-2085-4eb2-b487-c4ba270986a3 # nais-team-tbd
     - name: ROLLE_DIALOGMELDING

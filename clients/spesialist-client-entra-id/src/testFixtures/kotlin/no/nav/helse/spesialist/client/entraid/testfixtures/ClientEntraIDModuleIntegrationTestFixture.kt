@@ -10,7 +10,6 @@ import java.util.*
 class ClientEntraIDModuleIntegrationTestFixture(
     val tilgangsgrupperTilBrukerroller: TilgangsgrupperTilBrukerroller =
         TilgangsgrupperTilBrukerroller(
-            næringsdrivendeBeta = (1..2).map { UUID.randomUUID() },
             beslutter = (1..2).map { UUID.randomUUID() },
             egenAnsatt = (1..2).map { UUID.randomUUID() },
             kode7 = (1..2).map { UUID.randomUUID() },

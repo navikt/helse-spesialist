@@ -1,13 +1,8 @@
 package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import no.nav.helse.modell.melding.AnmodningOmForkastingEvent
-import no.nav.helse.spesialist.api.rest.ApiAnmodOmForkastingRequest
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.PostBehandler
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Vedtaksperioder
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Vedtaksperiode
@@ -17,7 +12,8 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 
 class PostAnmodOmForkastingBehandler : PostBehandler<Vedtaksperioder.VedtaksperiodeId.AnmodOmForkasting, ApiAnmodOmForkastingRequest, Unit, ApiPostAnmodOmForkastingErrorCode> {
     override val påkrevdTilgang = Tilgang.Skriv
-    override val påkrevdeBrukerroller = setOf(Brukerrolle.SelvstendigNæringsdrivendeBeta)
+    override val påkrevdeBrukerroller =
+        setOf(Brukerrolle.Coach, Brukerrolle.Fagkoordinator, Brukerrolle.Supersaksbehandler)
     override val tag = Tags.VEDTAKSPERIODER
 
     override fun behandle(

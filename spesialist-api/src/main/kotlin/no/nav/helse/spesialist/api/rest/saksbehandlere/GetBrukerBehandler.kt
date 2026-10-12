@@ -19,7 +19,6 @@ class GetBrukerBehandler : GetBehandler<Bruker, ApiBruker, GetBrukerErrorCode> {
                     kallKontekst.brukerroller
                         .map {
                             when (it) {
-                                Brukerrolle.SelvstendigNæringsdrivendeBeta -> ApiBrukerrolle.SELVSTENDIG_NÆRINGSDRIVENDE_BETA
                                 Brukerrolle.Beslutter -> ApiBrukerrolle.BESLUTTER
                                 Brukerrolle.EgenAnsatt -> ApiBrukerrolle.EGEN_ANSATT
                                 Brukerrolle.Kode7 -> ApiBrukerrolle.KODE_7

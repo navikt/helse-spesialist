@@ -109,7 +109,6 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
             Brukerrolle.EgenAnsatt -> egenAnsatt
             Brukerrolle.Kode7 -> kode7
             Brukerrolle.Beslutter -> beslutter
-            Brukerrolle.SelvstendigNæringsdrivendeBeta -> næringsdrivendeBeta
             Brukerrolle.Stikkprøve -> stikkprøve
             Brukerrolle.Utvikler -> utvikler
             Brukerrolle.Dialogmelding -> dialogmelding

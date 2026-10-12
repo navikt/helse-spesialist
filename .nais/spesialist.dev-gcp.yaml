@@ -79,8 +79,6 @@ spec:
       value: 2e1dc582-f762-4510-a660-88bf68fb7128 # 0000-GA-Fortrolig_Adresse
     - name: ROLLE_STIKKPROVE
       value: eb0c8da8-e73b-4be2-bd09-1fa71001eb29 # 0000-CA-Speil-Stikkprove
-    - name: ROLLE_SELVSTENDIG_BETA
-      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_UTVIKLER
       value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_DIALOGMELDING

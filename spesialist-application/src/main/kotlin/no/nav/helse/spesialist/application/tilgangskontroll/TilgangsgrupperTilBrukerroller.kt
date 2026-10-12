@@ -4,7 +4,6 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
 import java.util.*
 
 class TilgangsgrupperTilBrukerroller(
-    val næringsdrivendeBeta: List<UUID>,
     val beslutter: List<UUID>,
     val egenAnsatt: List<UUID>,
     val kode7: List<UUID>,
@@ -20,7 +19,6 @@ class TilgangsgrupperTilBrukerroller(
 
     private fun uuiderFor(rolle: Brukerrolle): List<UUID> =
         when (rolle) {
-            Brukerrolle.SelvstendigNæringsdrivendeBeta -> næringsdrivendeBeta
             Brukerrolle.Beslutter -> beslutter
             Brukerrolle.EgenAnsatt -> egenAnsatt
             Brukerrolle.Kode7 -> kode7
