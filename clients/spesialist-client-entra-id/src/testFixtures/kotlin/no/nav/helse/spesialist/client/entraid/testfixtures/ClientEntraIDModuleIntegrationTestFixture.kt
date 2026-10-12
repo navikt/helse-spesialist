@@ -19,6 +19,9 @@ class ClientEntraIDModuleIntegrationTestFixture(
             dialogmelding = (1..2).map { UUID.randomUUID() },
             porteføljestyring = (1..2).map { UUID.randomUUID() },
             graderteAndreYtelser = (1..2).map { UUID.randomUUID() },
+            coach = (1..2).map { UUID.randomUUID() },
+            fagkoordinator = (1..2).map { UUID.randomUUID() },
+            supersaksbehandler = (1..2).map { UUID.randomUUID() },
         ),
 ) {
     val msGraphWireMockServer: WireMockServer =

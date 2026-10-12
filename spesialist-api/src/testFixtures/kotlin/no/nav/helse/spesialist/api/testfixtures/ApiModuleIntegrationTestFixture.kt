@@ -115,6 +115,9 @@ fun TilgangsgrupperTilBrukerroller.uuiderFor(brukerroller: Set<Brukerrolle>): Li
             Brukerrolle.Dialogmelding -> dialogmelding
             Brukerrolle.Porteføljestyring -> porteføljestyring
             Brukerrolle.GraderteAndreYtelser -> graderteAndreYtelser
+            Brukerrolle.Coach -> coach
+            Brukerrolle.Fagkoordinator -> fagkoordinator
+            Brukerrolle.Supersaksbehandler -> supersaksbehandler
         }
     }
 

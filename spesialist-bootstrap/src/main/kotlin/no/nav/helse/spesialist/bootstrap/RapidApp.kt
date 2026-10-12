@@ -151,6 +151,9 @@ private fun tilgangsgrupperTilBrukerroller(env: Map<String, String>): Tilgangsgr
         dialogmelding = env.getUUIDList("ROLLE_DIALOGMELDING"),
         porteføljestyring = env.getUUIDList("ROLLE_PORTEFOLJESTYRING"),
         graderteAndreYtelser = env.getUUIDList("ROLLE_GRADERTE_ANDRE_YTELSER"),
+        coach = env.getUUIDList("ROLLE_COACH"),
+        fagkoordinator = env.getUUIDList("ROLLE_FAGKOORDINATOR"),
+        supersaksbehandler = env.getUUIDList("ROLLE_SUPERSAKSBEHANDLER"),
     )
 
 private fun Map<String, String>.getUUIDList(key: String): List<UUID> = this[key]?.split(",")?.map { UUID.fromString(it.trim()) } ?: emptyList()

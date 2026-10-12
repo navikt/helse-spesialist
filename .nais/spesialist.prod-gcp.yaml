@@ -31,6 +31,9 @@ spec:
           - id: a857cdaf-9a02-4f3d-8e37-ecc81a0160d0 # 4448-CA-speil-dialogmelding_til_behandler
           - id: e98138a8-d4fa-4414-9ebc-c95539cadfe5 # graderte-andre-ytelser
           - id: 5224b99d-6c30-4b22-9151-4acac288087f # porteføljestyring
+          - id: 16d8fb0a-1e3b-4d0c-9aea-65ddce8c8607 # coach
+          - id: c8dba1f4-5a32-4b30-9eee-386984d5648d # fagkoordinator
+          - id: 39f760dc-a9bd-4503-8da3-cc817c0d7089 # supersaksbehandler
   accessPolicy:
     inbound:
       rules:
@@ -110,6 +113,12 @@ spec:
       value: 5224b99d-6c30-4b22-9151-4acac288087f,c0227409-2085-4eb2-b487-c4ba270986a3,f787f900-6697-440d-a086-d5bb56e26a9c # porteføljestyring, nais-team-tbd, tbd
     - name: ROLLE_GRADERTE_ANDRE_YTELSER
       value: e98138a8-d4fa-4414-9ebc-c95539cadfe5 # graderte-andre-ytelser
+    - name: ROLLE_COACH
+      value: 16d8fb0a-1e3b-4d0c-9aea-65ddce8c8607 # coach
+    - name: ROLLE_FAGKOORDINATOR
+      value: c8dba1f4-5a32-4b30-9eee-386984d5648d # fagkoordinator
+    - name: ROLLE_SUPERSAKSBEHANDLER
+      value: 39f760dc-a9bd-4503-8da3-cc817c0d7089 # supersaksbehandler
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR #Kan settes til 1 for å slå av automatisering

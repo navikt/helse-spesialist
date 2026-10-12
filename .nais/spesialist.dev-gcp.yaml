@@ -89,6 +89,12 @@ spec:
       value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: ROLLE_GRADERTE_ANDRE_YTELSER
       value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+    - name: ROLLE_COACH
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+    - name: ROLLE_FAGKOORDINATOR
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
+    - name: ROLLE_SUPERSAKSBEHANDLER
+      value: cda797bb-ac3b-4440-b661-2cd5eb3edba0 # 0000-CA-Speil-Saksbehandler
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_CLIENT_LOGG_RESPONS

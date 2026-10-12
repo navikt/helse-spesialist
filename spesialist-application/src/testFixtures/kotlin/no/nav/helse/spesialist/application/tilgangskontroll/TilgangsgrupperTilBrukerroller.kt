@@ -12,6 +12,9 @@ fun tilgangsgrupperTilBrukerroller(
     dialogmelding: List<UUID> = listOf(UUID.randomUUID()),
     porteføljestyring: List<UUID> = listOf(UUID.randomUUID()),
     graderteAndreYtelser: List<UUID> = listOf(UUID.randomUUID()),
+    coach: List<UUID> = listOf(UUID.randomUUID()),
+    fagkoordinator: List<UUID> = listOf(UUID.randomUUID()),
+    supersaksbehandler: List<UUID> = listOf(UUID.randomUUID()),
 ): TilgangsgrupperTilBrukerroller =
     TilgangsgrupperTilBrukerroller(
         næringsdrivendeBeta = næringsdrivendeBeta,
@@ -23,4 +26,7 @@ fun tilgangsgrupperTilBrukerroller(
         dialogmelding = dialogmelding,
         porteføljestyring = porteføljestyring,
         graderteAndreYtelser = graderteAndreYtelser,
+        coach = coach,
+        fagkoordinator = fagkoordinator,
+        supersaksbehandler = supersaksbehandler,
     )

@@ -44,6 +44,26 @@ class TilgangsgrupperTilBrukerrollerTest {
     }
 
     @Test
+    fun `nye roller coach, fagkoordinator og supersaksbehandler mappes fra sine grupper`() {
+        val coachGruppeId = UUID.randomUUID()
+        val fagkoordinatorGruppeId = UUID.randomUUID()
+        val supersaksbehandlerGruppeId = UUID.randomUUID()
+        val tilgangsgrupperTilBrukerroller =
+            tilgangsgrupperTilBrukerroller(
+                coach = listOf(coachGruppeId),
+                fagkoordinator = listOf(fagkoordinatorGruppeId),
+                supersaksbehandler = listOf(supersaksbehandlerGruppeId),
+            )
+
+        val roller =
+            tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(
+                listOf(coachGruppeId, fagkoordinatorGruppeId, supersaksbehandlerGruppeId),
+            )
+
+        assertEquals(setOf(Brukerrolle.Coach, Brukerrolle.Fagkoordinator, Brukerrolle.Supersaksbehandler), roller)
+    }
+
+    @Test
     fun `tre grupper uten næringsdrivende beta-gruppe gir ingen roller`() {
         val grupper = listOf(annenGruppeId1, annenGruppeId2, UUID.randomUUID())
         val roller = tilgangsgrupperTilBrukerroller.finnBrukerrollerFraTilgangsgrupper(grupper)

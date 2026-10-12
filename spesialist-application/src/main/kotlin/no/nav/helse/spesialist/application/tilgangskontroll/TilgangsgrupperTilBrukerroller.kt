@@ -13,6 +13,9 @@ class TilgangsgrupperTilBrukerroller(
     val dialogmelding: List<UUID>,
     val porteføljestyring: List<UUID>,
     val graderteAndreYtelser: List<UUID>,
+    val coach: List<UUID>,
+    val fagkoordinator: List<UUID>,
+    val supersaksbehandler: List<UUID>,
 ) {
     fun finnBrukerrollerFraTilgangsgrupper(tilgangsgrupper: Collection<UUID>): Set<Brukerrolle> = Brukerrolle.entries.filter { rolle -> tilgangsgrupper.any { it in uuiderFor(rolle) } }.toSet()
 
@@ -27,6 +30,9 @@ class TilgangsgrupperTilBrukerroller(
             Brukerrolle.Dialogmelding -> dialogmelding
             Brukerrolle.Porteføljestyring -> porteføljestyring
             Brukerrolle.GraderteAndreYtelser -> graderteAndreYtelser
+            Brukerrolle.Coach -> coach
+            Brukerrolle.Fagkoordinator -> fagkoordinator
+            Brukerrolle.Supersaksbehandler -> supersaksbehandler
         }
 
     fun alleUuider(): Set<UUID> = Brukerrolle.entries.flatMap(::uuiderFor).toSet()
