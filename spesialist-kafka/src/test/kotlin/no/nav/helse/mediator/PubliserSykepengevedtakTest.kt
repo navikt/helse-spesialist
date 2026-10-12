@@ -84,6 +84,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
                 utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
@@ -158,6 +159,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
                 utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
@@ -246,6 +248,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
                 utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(spleis)
@@ -353,6 +356,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
                 utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
@@ -482,6 +486,7 @@ internal class PubliserSykepengevedtakTest {
                 automatiskFattet = false,
                 dekning = null,
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = null,
                 utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)

@@ -321,6 +321,7 @@ object Testmeldingfabrikk {
         arbeidssituasjon: Arbeidssituasjon? = null,
         relevanteSøknader: List<UUID> = listOf(UUID.randomUUID()),
         forsikringsvurderingId: UUID? = null,
+        opptjeningsvurderingId: UUID? = null,
         foreløpigBeregnetSluttPåSykepenger: LocalDate = LocalDate.of(2018, 12, 1),
     ) = nyHendelse(
         id,
@@ -346,6 +347,7 @@ object Testmeldingfabrikk {
                     "kanAvvises" to kanAvvises,
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId,
                     "forsikringsvurderingId" to forsikringsvurderingId,
+                    "opptjeningsvurderingId" to opptjeningsvurderingId,
                     "behandlingId" to spleisBehandlingId,
                     "tags" to tags,
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,

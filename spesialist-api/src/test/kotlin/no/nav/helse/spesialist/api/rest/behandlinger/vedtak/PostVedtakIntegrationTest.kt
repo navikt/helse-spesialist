@@ -832,6 +832,7 @@ class PostVedtakIntegrationTest {
             spleisBehandlingId = behandling.spleisBehandlingId!!.value,
             vilkårsgrunnlagId = UUID.randomUUID(),
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
             tags = behandling.tags.toList(),
             periodeFom = behandling.fom,
             periodeTom = behandling.tom,

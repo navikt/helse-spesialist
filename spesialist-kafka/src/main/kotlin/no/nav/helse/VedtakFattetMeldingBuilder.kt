@@ -151,6 +151,7 @@ class VedtakFattetMeldingBuilder(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             dekning = dekning,
             forsikringsvurderingId = godkjenningsbehov.forsikringsvurderingId,
+            opptjeningsvurderingId = godkjenningsbehov.opptjeningsvurderingId,
             utbetalingsdager = godkjenningsbehov.utbetalingsdager,
         )
     }

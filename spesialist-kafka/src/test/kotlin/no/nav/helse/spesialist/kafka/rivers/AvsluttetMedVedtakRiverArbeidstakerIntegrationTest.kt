@@ -58,7 +58,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.behandlingTags = setOf("Behandling tag 1", "Behandling tag 2")
         setup()
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
-        initGodkjenningsbehov()
+        val opptjeningsvurderingId = UUID.randomUUID()
+        initGodkjenningsbehov(opptjeningsvurderingId = opptjeningsvurderingId)
 
         // When:
         testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = omregnetÅrsinntekt))
@@ -116,6 +117,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ],
               "automatiskFattet": true,
+              "opptjeningsvurderingId": "$opptjeningsvurderingId",
               "utbetalingsdager" : [ {
                 "utbetaling" : "medFriStruktur"
               } ]
@@ -938,7 +940,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 )
             }
 
-    private fun initGodkjenningsbehov() {
+    private fun initGodkjenningsbehov(opptjeningsvurderingId: UUID? = null) {
         val godkjenningsbehovId = UUID.randomUUID()
         val godkjenningsbehovJson =
             lagGodkjenningsbehov(
@@ -947,6 +949,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 fødselsnummer = person.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!.value,
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                opptjeningsvurderingId = opptjeningsvurderingId,
                 sykepengegrunnlagsfakta =
                     godkjenningsbehovFastsattEtterHovedregel(
                         arbeidsgivere =

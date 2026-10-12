@@ -42,6 +42,7 @@ class Godkjenningsbehov(
     val spleisBehandlingId: UUID,
     private val vilkårsgrunnlagId: UUID,
     val forsikringsvurderingId: UUID?,
+    val opptjeningsvurderingId: UUID?,
     private val tags: List<String>,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
@@ -126,6 +127,10 @@ class Godkjenningsbehov(
                     godkjenning["forsikringsvurderingId"]
                         ?.takeUnless { it.isNull }
                         ?.takeUnless { it.asString() == "null" } // Serialisert feil én gang, nå et evig kompatibilitetsbehov...
+                        ?.asUUID(),
+                opptjeningsvurderingId =
+                    godkjenning["opptjeningsvurderingId"]
+                        ?.takeUnless { it.isNull }
                         ?.asUUID(),
                 tags = godkjenning["tags"].toList().map { it.asString() },
                 periodeFom = godkjenning["periodeFom"].asLocalDate(),

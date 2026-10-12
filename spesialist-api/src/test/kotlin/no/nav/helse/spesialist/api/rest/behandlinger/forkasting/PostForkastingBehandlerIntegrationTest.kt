@@ -379,6 +379,7 @@ class PostForkastingBehandlerIntegrationTest {
             yrkesaktivitetstype = behandling.yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiode.id.value,
             forsikringsvurderingId = null,
+            opptjeningsvurderingId = null,
             spleisBehandlinger = emptyList(),
             utbetalingId = behandling.utbetalingId?.value!!,
             spleisBehandlingId = behandling.spleisBehandlingId!!.value,

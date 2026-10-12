@@ -4,6 +4,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
+import java.util.UUID
 import kotlin.test.assertEquals
 
 class GodkjenningsbehovTest {
@@ -40,6 +41,18 @@ class GodkjenningsbehovTest {
                 spleisBehandling.yrkesaktivitet,
             )
         }
+    }
+
+    @Test
+    fun `skal kunne parse godkjenningsbehov med opptjeningsvurderingId`() {
+        val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderMedYrkesaktivitet)
+        assertEquals(UUID.fromString("5c1e0f3a-8d2b-4a7e-9f61-2b3c4d5e6f70"), behov.opptjeningsvurderingId)
+    }
+
+    @Test
+    fun `skal kunne parse godkjenningsbehov uten opptjeningsvurderingId`() {
+        val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderUtenYrkesaktivitet)
+        assertNull(behov.opptjeningsvurderingId)
     }
 }
 
@@ -125,6 +138,7 @@ private val godkjenningMedSpleisperioderMedYrkesaktivitet =
     "forbrukteSykedager" : 6,
     "relevanteSøknader" : [ "df4d39f1-b338-45dd-bebe-8904a7be373a" ],
     "vilkårsgrunnlagId" : "441f6e0d-f512-4a28-98a2-f1bc62138bfb",
+    "opptjeningsvurderingId" : "5c1e0f3a-8d2b-4a7e-9f61-2b3c4d5e6f70",
     "skjæringstidspunkt" : "2018-01-03",
     "gjenståendeSykedager" : 242,
     "førstegangsbehandling" : true,
