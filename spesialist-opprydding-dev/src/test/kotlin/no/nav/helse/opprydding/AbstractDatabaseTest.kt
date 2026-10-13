@@ -154,6 +154,9 @@ internal abstract class AbstractDatabaseTest {
             INSERT INTO totrinnsvurdering(id, saksbehandler, beslutter, person_ref, tilstand, opprettet, oppdatert)
             VALUES (${sequence_number}, '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, 'AVVENTER_SAKSBEHANDLER', now(), null);
             
+            INSERT INTO saksbehandlerhandling(id, identitetsnummer, handling_id, handling_type, saksbehandler_ident, tidspunkt, totrinnsvurdering_id)
+            VALUES (gen_random_uuid(), '$fødselsnummer', gen_random_uuid(), 'MANUELT_VURDERT_OPPTJENING', 'I123456', now(), ${sequence_number});
+            
             INSERT INTO dialog(id, opprettet)
             VALUES (${periodehistorikk_dialog_id}, now());
             INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, opprettet, dialog_ref)

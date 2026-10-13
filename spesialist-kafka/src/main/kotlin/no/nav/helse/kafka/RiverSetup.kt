@@ -62,6 +62,7 @@ class RiverSetup(
             MinuttRiver(sessionFactory),
             BehandlingOpprettetRiver(),
             BehandlingLukketRiver(),
+            SaksbehandlerhandlingRiver(),
             KommandokjedePåminnelseRiver(mediator),
             VeilederStansRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),

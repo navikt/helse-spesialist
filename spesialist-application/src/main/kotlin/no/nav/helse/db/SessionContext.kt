@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.SaksbehandlerStansRepository
+import no.nav.helse.spesialist.application.SaksbehandlerhandlingRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VarselRepository
@@ -70,4 +71,5 @@ interface SessionContext {
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
     val opptegnelseRepository: OpptegnelseRepository
     val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository
+    val saksbehandlerhandlingRepository: SaksbehandlerhandlingRepository
 }

@@ -60,4 +60,5 @@ class DBSessionContext(
     override val vedtakBegrunnelseDao: VedtakBegrunnelseDao = PgVedtakBegrunnelseDao(session)
     override val opptegnelseRepository: OpptegnelseRepository = PgOpptegnelseRepository(session)
     override val venterPåKvitteringForOverstyringRepository: VenterPåKvitteringForOverstyringRepository = PgVenterPåKvitteringForOverstyringRepository(session)
+    override val saksbehandlerhandlingRepository: SaksbehandlerhandlingRepository = PgSaksbehandlerhandlingRepository(session)
 }

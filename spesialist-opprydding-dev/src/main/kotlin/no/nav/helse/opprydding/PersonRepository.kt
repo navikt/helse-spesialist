@@ -28,6 +28,7 @@ internal class PersonRepository(
                 it.slettOpptegnelse(personId)
                 it.slettPåVent(personId)
                 it.slettPeriodehistorikk(personId)
+                it.slettSaksbehandlerhandling(fødselsnummer)
                 it.slettTotrinnsvurdering(personId)
                 it.slettUtbetaling(personId)
                 it.slettKommentarer(personId)
@@ -511,6 +512,13 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = "DELETE FROM dokumenter WHERE person_ref = ?"
         run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettSaksbehandlerhandling(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query =
+            "DELETE FROM saksbehandlerhandling WHERE identitetsnummer = :fodselsnummer"
+        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
     private fun TransactionalSession.slettTotrinnsvurdering(personRef: Int) {

@@ -52,4 +52,5 @@ class InMemorySessionContext(
     override val saksbehandlerStansRepository: SaksbehandlerStansRepository,
     override val veilederStansRepository: VeilederStansRepository,
     override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository,
+    override val saksbehandlerhandlingRepository: InMemorySaksbehandlerhandlingRepository,
 ) : SessionContext
