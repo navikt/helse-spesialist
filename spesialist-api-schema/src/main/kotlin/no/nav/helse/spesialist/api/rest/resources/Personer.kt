@@ -105,6 +105,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("saksbehandlerhandlinger")
+        class Saksbehandlerhandlinger(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("vurderinger")
         class Vurderinger(
             val parent: PersonPseudoId,

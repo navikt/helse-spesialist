@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.domain.overstyringer.MinimumSykdomsgrad
 import no.nav.helse.spesialist.domain.overstyringer.OverstyringId
 import no.nav.helse.spesialist.domain.overstyringer.OverstyrtArbeidsforhold
@@ -12,7 +13,10 @@ import no.nav.helse.spesialist.domain.overstyringer.SkjønnsfastsattSykepengegru
 class InMemoryTotrinnsvurderingRepository :
     AbstractLateIdInMemoryRepository<TotrinnsvurderingId, Totrinnsvurdering>(),
     TotrinnsvurderingRepository {
-    override fun finnAktivForPersonOrNull(fødselsnummer: String) = alle().find { it.fødselsnummer == fødselsnummer }
+    override fun finnAktivForPersonOrNull(fødselsnummer: String) =
+        alle()
+            .filter { it.fødselsnummer == fødselsnummer && it.tilstand != TotrinnsvurderingTilstand.GODKJENT && !it.vedtaksperiodeForkastet }
+            .maxByOrNull { it.opprettet }
 
     override fun tildelIderSomMangler(root: Totrinnsvurdering) {
         if (!root.harFåttTildeltId()) {

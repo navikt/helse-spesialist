@@ -48,5 +48,27 @@ class Saksbehandlerhandling private constructor(
             behandlingId = behandlingId,
             totrinnsvurderingId = totrinnsvurderingId,
         )
+
+        fun fraLagring(
+            id: SaksbehandlerhandlingId,
+            identitetsnummer: Identitetsnummer,
+            handlingId: UUID,
+            handlingType: HandlingType,
+            saksbehandlerIdent: String,
+            tidspunkt: Instant,
+            skjæringstidspunkt: LocalDate?,
+            behandlingId: SpleisBehandlingId?,
+            totrinnsvurderingId: TotrinnsvurderingId?,
+        ) = Saksbehandlerhandling(
+            id = id,
+            identitetsnummer = identitetsnummer,
+            handlingId = handlingId,
+            handlingType = handlingType,
+            saksbehandlerIdent = saksbehandlerIdent,
+            tidspunkt = tidspunkt,
+            skjæringstidspunkt = skjæringstidspunkt,
+            behandlingId = behandlingId,
+            totrinnsvurderingId = totrinnsvurderingId,
+        )
     }
 }

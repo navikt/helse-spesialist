@@ -95,6 +95,8 @@ fun Routing.restRoutes(
             get(GetSaksbehandlerStansBehandler(), restAdapter)
             patch(PatchSaksbehandlerStansBehandler(), restAdapter)
 
+            get(GetSaksbehandlerhandlingerForPersonBehandler(), restAdapter)
+
             get(GetVeilederStansBehandler(), restAdapter)
             patch(PatchVeilederStansBehandler(), restAdapter)
 

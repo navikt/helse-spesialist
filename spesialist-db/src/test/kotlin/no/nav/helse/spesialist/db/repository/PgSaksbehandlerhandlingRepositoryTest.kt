@@ -70,9 +70,40 @@ class PgSaksbehandlerhandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(1, hentRader(person.id).size)
     }
 
+    @Test
+    fun `finnAlle henter handlinger for personen med nyeste først`() {
+        val person = opprettPerson()
+        val annenPerson = opprettPerson()
+        val totrinnsvurderingId = opprettTotrinnsvurdering(person)
+        val eldst =
+            lagSaksbehandlerhandling(
+                identitetsnummer = person.id,
+                tidspunkt = Instant.parse("2026-10-01T10:00:00Z"),
+                totrinnsvurderingId = totrinnsvurderingId,
+                skjæringstidspunkt = LocalDate.of(2026, 9, 1),
+                behandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            )
+        val nyest = lagSaksbehandlerhandling(identitetsnummer = person.id, tidspunkt = Instant.parse("2026-10-02T10:00:00Z"))
+        listOf(eldst, nyest, lagSaksbehandlerhandling(identitetsnummer = annenPerson.id)).forEach(repository::lagre)
+
+        val funnet = repository.finnAlle(person.id)
+
+        assertEquals(listOf(nyest.id, eldst.id), funnet.map { it.id })
+        val funnetEldst = funnet.last()
+        assertEquals(eldst.identitetsnummer, funnetEldst.identitetsnummer)
+        assertEquals(eldst.handlingId, funnetEldst.handlingId)
+        assertEquals(eldst.handlingType, funnetEldst.handlingType)
+        assertEquals(eldst.saksbehandlerIdent, funnetEldst.saksbehandlerIdent)
+        assertEquals(eldst.tidspunkt, funnetEldst.tidspunkt)
+        assertEquals(eldst.totrinnsvurderingId?.value, funnetEldst.totrinnsvurderingId?.value)
+        assertEquals(eldst.skjæringstidspunkt, funnetEldst.skjæringstidspunkt)
+        assertEquals(eldst.behandlingId, funnetEldst.behandlingId)
+    }
+
     private fun lagSaksbehandlerhandling(
         identitetsnummer: Identitetsnummer,
         handlingId: UUID = UUID.randomUUID(),
+        tidspunkt: Instant = Instant.now(),
         totrinnsvurderingId: TotrinnsvurderingId? = null,
         skjæringstidspunkt: LocalDate? = null,
         behandlingId: SpleisBehandlingId? = null,
@@ -82,7 +113,7 @@ class PgSaksbehandlerhandlingRepositoryTest : AbstractDBIntegrationTest() {
         handlingId = handlingId,
         handlingType = HandlingType.MANUELT_VURDERT_OPPTJENING,
         saksbehandlerIdent = "A123456",
-        tidspunkt = Instant.now(),
+        tidspunkt = tidspunkt,
         skjæringstidspunkt = skjæringstidspunkt,
         behandlingId = behandlingId,
         totrinnsvurderingId = totrinnsvurderingId,

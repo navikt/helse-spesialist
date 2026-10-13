@@ -1,11 +1,17 @@
 package no.nav.helse.spesialist.db.repository
 
+import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.spesialist.application.SaksbehandlerhandlingRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
+import no.nav.helse.spesialist.domain.saksbehandlerhandling.SaksbehandlerhandlingId
 
 class PgSaksbehandlerhandlingRepository(
     session: Session,
@@ -50,4 +56,27 @@ class PgSaksbehandlerhandlingRepository(
             "behandling_id" to saksbehandlerhandling.behandlingId?.value,
         ).update()
     }
+
+    override fun finnAlle(identitetsnummer: Identitetsnummer): List<Saksbehandlerhandling> =
+        asSQL(
+            """
+            SELECT * FROM saksbehandlerhandling
+            WHERE identitetsnummer = :identitetsnummer
+            ORDER BY tidspunkt DESC
+            """.trimIndent(),
+            "identitetsnummer" to identitetsnummer.value,
+        ).list { it.tilSaksbehandlerhandling() }
+
+    private fun Row.tilSaksbehandlerhandling(): Saksbehandlerhandling =
+        Saksbehandlerhandling.fraLagring(
+            id = SaksbehandlerhandlingId(uuid("id")),
+            identitetsnummer = Identitetsnummer.fraString(string("identitetsnummer")),
+            handlingId = uuid("handling_id"),
+            handlingType = enumValueOf<HandlingType>(string("handling_type")),
+            saksbehandlerIdent = string("saksbehandler_ident"),
+            tidspunkt = instant("tidspunkt"),
+            skjæringstidspunkt = localDateOrNull("skjaeringstidspunkt"),
+            behandlingId = uuidOrNull("behandling_id")?.let(::SpleisBehandlingId),
+            totrinnsvurderingId = longOrNull("totrinnsvurdering_id")?.let(::TotrinnsvurderingId),
+        )
 }
