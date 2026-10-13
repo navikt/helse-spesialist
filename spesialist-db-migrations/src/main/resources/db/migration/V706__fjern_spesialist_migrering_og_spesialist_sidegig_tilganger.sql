@@ -1,16 +1,14 @@
 DO $$BEGIN
     IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'spesialist-migrering')
     THEN
-        REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM "spesialist-migrering";
-        REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM "spesialist-migrering";
-        REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM "spesialist-migrering";
+        REASSIGN OWNED BY "spesialist-migrering" TO CURRENT_USER;
+        DROP OWNED BY "spesialist-migrering";
         DROP USER "spesialist-migrering";
     END IF;
     IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'spesialist-sidegig')
     THEN
-        REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM "spesialist-sidegig";
-        REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM "spesialist-sidegig";
-        REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM "spesialist-sidegig";
+        REASSIGN OWNED BY "spesialist-sidegig" TO CURRENT_USER;
+        DROP OWNED BY "spesialist-sidegig";
         DROP USER "spesialist-sidegig";
     END IF;
 END$$;
