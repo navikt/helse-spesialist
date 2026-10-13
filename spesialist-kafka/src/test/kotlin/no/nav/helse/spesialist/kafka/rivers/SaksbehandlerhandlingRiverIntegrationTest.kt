@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Instant
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertNull
 
 class SaksbehandlerhandlingRiverIntegrationTest {
@@ -110,6 +110,28 @@ class SaksbehandlerhandlingRiverIntegrationTest {
         val handling = sessionContext.saksbehandlerhandlingRepository.alle().single()
         assertNull(handling.skjæringstidspunkt)
         assertNull(handling.behandlingId)
+    }
+
+    @Test
+    fun `lagrer ny automatisk opptjeningsvurdering uten totrinnsvurdering`() {
+        // Given:
+        val identitetsnummer = lagPerson().id
+
+        // When:
+        testRapid.sendTestMessage(
+            saksbehandlerhandlingMelding(
+                identitetsnummer = identitetsnummer,
+                handlingType = "NY_AUTOMATISK_OPPTJENINGSVURDERING",
+                kreverTotrinnsvurdering = false,
+                skjæringstidspunkt = LocalDate.parse("2026-01-01"),
+            ),
+        )
+
+        // Then:
+        val handling = sessionContext.saksbehandlerhandlingRepository.alle().single()
+        assertEquals(HandlingType.NY_AUTOMATISK_OPPTJENINGSVURDERING, handling.handlingType)
+        assertNull(handling.totrinnsvurderingId)
+        assertEquals(0, sessionContext.totrinnsvurderingRepository.alle().size)
     }
 
     @Test

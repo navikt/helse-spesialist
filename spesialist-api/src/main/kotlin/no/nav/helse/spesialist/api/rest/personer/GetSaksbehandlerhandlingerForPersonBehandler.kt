@@ -1,13 +1,7 @@
 package no.nav.helse.spesialist.api.rest.personer
 
-import io.ktor.http.HttpStatusCode
-import no.nav.helse.spesialist.api.rest.ApiErrorCode
-import no.nav.helse.spesialist.api.rest.ApiHandlingType
-import no.nav.helse.spesialist.api.rest.ApiSaksbehandlerhandling
-import no.nav.helse.spesialist.api.rest.GetBehandler
-import no.nav.helse.spesialist.api.rest.KallKontekst
-import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.Tags
+import io.ktor.http.*
+import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -68,4 +62,5 @@ private fun Saksbehandlerhandling.tilApiSaksbehandlerhandling(aktivTotrinnsvurde
 private fun HandlingType.tilApiHandlingType() =
     when (this) {
         HandlingType.MANUELT_VURDERT_OPPTJENING -> ApiHandlingType.MANUELT_VURDERT_OPPTJENING
+        HandlingType.NY_AUTOMATISK_OPPTJENINGSVURDERING -> ApiHandlingType.NY_AUTOMATISK_OPPTJENINGSVURDERING
     }

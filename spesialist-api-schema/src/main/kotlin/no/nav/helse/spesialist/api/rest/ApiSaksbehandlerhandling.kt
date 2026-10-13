@@ -9,7 +9,7 @@ package no.nav.helse.spesialist.api.rest
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Serializable
 data class ApiSaksbehandlerhandling(
@@ -25,4 +25,5 @@ data class ApiSaksbehandlerhandling(
 @Serializable
 enum class ApiHandlingType {
     MANUELT_VURDERT_OPPTJENING,
+    NY_AUTOMATISK_OPPTJENINGSVURDERING,
 }
