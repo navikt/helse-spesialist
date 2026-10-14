@@ -20,7 +20,7 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
@@ -52,6 +52,10 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
         person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+        val aktivTotrinnsvurderingId =
+            kallKontekst.transaksjon.totrinnsvurderingRepository
+                .finnAktivForPersonOrNull(person.id.value)
+                ?.id()
         val tilkomneInntektskilder =
             kallKontekst.transaksjon.tilkommenInntektRepository
                 .finnAlleForIdentitetsnummer(identitetsnummer = person.id)
@@ -60,7 +64,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
                     tilApiTilkommenInntektskilde(
                         organisasjonsnummer = organisasjonsnummer,
                         inntekter = inntekter,
-                        kallKontekst = kallKontekst,
+                        aktivTotrinnsvurderingId = aktivTotrinnsvurderingId,
                     )
                 }.sortedBy { it.organisasjonsnummer }
 
@@ -72,20 +76,20 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
     private fun tilApiTilkommenInntektskilde(
         organisasjonsnummer: String,
         inntekter: List<TilkommenInntekt>,
-        kallKontekst: KallKontekst,
+        aktivTotrinnsvurderingId: TotrinnsvurderingId?,
     ): ApiTilkommenInntektskilde =
         ApiTilkommenInntektskilde(
             organisasjonsnummer = organisasjonsnummer,
             inntekter =
                 inntekter
-                    .map { tilApiTilkommenInntekt(it, organisasjonsnummer, kallKontekst) }
+                    .map { tilApiTilkommenInntekt(it, organisasjonsnummer, aktivTotrinnsvurderingId) }
                     .sortedBy { it.periode.fom },
         )
 
     private fun tilApiTilkommenInntekt(
         tilkommenInntekt: TilkommenInntekt,
         organisasjonsnummer: String,
-        kallKontekst: KallKontekst,
+        aktivTotrinnsvurderingId: TotrinnsvurderingId?,
     ): ApiTilkommenInntekt =
         ApiTilkommenInntekt(
             tilkommenInntektId = tilkommenInntekt.id.value,
@@ -94,10 +98,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
             periodebelop = tilkommenInntekt.periodebeløp,
             ekskluderteUkedager = tilkommenInntekt.ekskluderteUkedager.sorted(),
             fjernet = tilkommenInntekt.fjernet,
-            erDelAvAktivTotrinnsvurdering =
-                kallKontekst.transaksjon.totrinnsvurderingRepository
-                    .finnOrNull(id = tilkommenInntekt.totrinnsvurderingId)
-                    ?.tilstand != TotrinnsvurderingTilstand.GODKJENT,
+            erDelAvAktivTotrinnsvurdering = tilkommenInntekt.totrinnsvurderingId == aktivTotrinnsvurderingId,
             events = tilkommenInntekt.events.map { it.tilApiTilkommenInntektEvent() },
         )
 

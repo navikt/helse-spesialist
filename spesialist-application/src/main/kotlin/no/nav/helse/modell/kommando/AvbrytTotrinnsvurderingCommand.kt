@@ -3,11 +3,13 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
-import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 
 internal class AvbrytTotrinnsvurderingCommand(
     private val identitetsnummer: Identitetsnummer,
@@ -23,6 +25,7 @@ internal class AvbrytTotrinnsvurderingCommand(
             sessionContext.vedtaksperiodeRepository
                 .finnAlleForPerson(identitetsnummer)
                 .filterNot { it.forkastet }
+                .map { AktivVedtaksperiode(it.id, sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(it.id)) }
 
         val aktiveVedtaksperioderForOverstyringer = aktiveVedtaksperioderForOverstyringer(totrinnsvurdering, aktiveVedtaksperioder)
         val aktiveVedtaksperioderForSaksbehandlerhandlinger =
@@ -30,9 +33,14 @@ internal class AvbrytTotrinnsvurderingCommand(
                 .finnAlle(identitetsnummer)
                 .filter { it.totrinnsvurderingId != null && it.totrinnsvurderingId == totrinnsvurdering.id() }
                 .flatMap { it.aktiveVedtaksperioder(aktiveVedtaksperioder, sessionContext) }
+        val aktiveVedtaksperioderForTilkomneInntekter =
+            sessionContext.tilkommenInntektRepository
+                .finnAlleForIdentitetsnummer(identitetsnummer)
+                .filter { !it.fjernet && it.totrinnsvurderingId == totrinnsvurdering.id() }
+                .flatMap { it.aktiveVedtaksperioder(aktiveVedtaksperioder) }
 
         val vedtaksperioderSomHolderTotrinnsvurderingenILive =
-            (aktiveVedtaksperioderForOverstyringer + aktiveVedtaksperioderForSaksbehandlerhandlinger).distinct()
+            (aktiveVedtaksperioderForOverstyringer + aktiveVedtaksperioderForSaksbehandlerhandlinger + aktiveVedtaksperioderForTilkomneInntekter).distinct()
 
         if (vedtaksperioderSomHolderTotrinnsvurderingenILive.isEmpty()) {
             loggInfo(
@@ -58,9 +66,14 @@ internal class AvbrytTotrinnsvurderingCommand(
     }
 }
 
+private class AktivVedtaksperiode(
+    val id: VedtaksperiodeId,
+    val nyesteBehandling: Behandling?,
+)
+
 private fun aktiveVedtaksperioderForOverstyringer(
     totrinnsvurdering: Totrinnsvurdering,
-    aktiveVedtaksperioder: List<Vedtaksperiode>,
+    aktiveVedtaksperioder: List<AktivVedtaksperiode>,
 ): List<VedtaksperiodeId> {
     val vedtaksperiodeIder = totrinnsvurdering.overstyringer.map { VedtaksperiodeId(it.vedtaksperiodeId) }.toSet()
     return aktiveVedtaksperioder.map { it.id }.filter { it in vedtaksperiodeIder }
@@ -68,7 +81,7 @@ private fun aktiveVedtaksperioderForOverstyringer(
 
 // behandlingId går foran skjæringstidspunkt. Uten noen av delene gjelder handlingen hele personen.
 private fun Saksbehandlerhandling.aktiveVedtaksperioder(
-    aktiveVedtaksperioder: List<Vedtaksperiode>,
+    aktiveVedtaksperioder: List<AktivVedtaksperiode>,
     sessionContext: SessionContext,
 ): List<VedtaksperiodeId> {
     val aktiveIder = aktiveVedtaksperioder.map { it.id }
@@ -89,10 +102,17 @@ private fun Saksbehandlerhandling.aktiveVedtaksperioder(
         }
 
         skjæringstidspunkt != null ->
-            aktiveIder.filter {
-                sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(it)?.skjæringstidspunkt == skjæringstidspunkt
-            }
+            aktiveVedtaksperioder
+                .filter { it.nyesteBehandling?.skjæringstidspunkt == skjæringstidspunkt }
+                .map { it.id }
 
         else -> aktiveIder
     }
 }
+
+private fun TilkommenInntekt.aktiveVedtaksperioder(aktiveVedtaksperioder: List<AktivVedtaksperiode>): List<VedtaksperiodeId> =
+    aktiveVedtaksperioder
+        .filter { aktiv ->
+            val behandling = aktiv.nyesteBehandling ?: return@filter false
+            (behandling.fom tilOgMed behandling.tom) overlapper periode
+        }.map { it.id }

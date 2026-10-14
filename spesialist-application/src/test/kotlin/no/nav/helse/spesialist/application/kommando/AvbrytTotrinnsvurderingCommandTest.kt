@@ -2,6 +2,9 @@ package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.spesialist.domain.NAVIdent
+import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
@@ -9,6 +12,7 @@ import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.SaksbehandlerhandlingId
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -159,6 +163,81 @@ internal class AvbrytTotrinnsvurderingCommandTest : ApplicationTest() {
         assertTrue(hent(totrinnsvurdering).vedtaksperiodeForkastet)
     }
 
+    @Test
+    fun `beholder totrinnsvurdering når tilkommen inntekt overlapper aktiv periode`() {
+        lagPeriode(skjæringstidspunkt = 1.jan(2018), forkastet = true)
+        lagPeriode(skjæringstidspunkt = 1.mar(2018))
+        val totrinnsvurdering = lagTotrinnsvurdering()
+        lagTilkommenInntekt(totrinnsvurdering.id(), periode = 5.mar(2018) tilOgMed 10.mar(2018))
+
+        utfør()
+
+        assertFalse(hent(totrinnsvurdering).vedtaksperiodeForkastet)
+    }
+
+    @Test
+    fun `forkaster totrinnsvurdering når alle perioder som overlapper tilkommen inntekt er forkastet`() {
+        lagPeriode(skjæringstidspunkt = 1.jan(2018), forkastet = true)
+        lagPeriode(skjæringstidspunkt = 1.mar(2018))
+        val totrinnsvurdering = lagTotrinnsvurdering()
+        lagTilkommenInntekt(totrinnsvurdering.id(), periode = 5.jan(2018) tilOgMed 10.jan(2018))
+
+        utfør()
+
+        assertTrue(hent(totrinnsvurdering).vedtaksperiodeForkastet)
+    }
+
+    @Test
+    fun `beholder totrinnsvurdering når overstyrt periode er forkastet, men tilkommen inntekt overlapper aktiv periode`() {
+        val forkastet = lagPeriode(skjæringstidspunkt = 1.jan(2018), forkastet = true)
+        lagPeriode(skjæringstidspunkt = 1.mar(2018))
+        val totrinnsvurdering = lagTotrinnsvurdering(overstyringFor = listOf(forkastet))
+        lagTilkommenInntekt(totrinnsvurdering.id(), periode = 5.mar(2018) tilOgMed 10.mar(2018))
+
+        utfør()
+
+        assertFalse(hent(totrinnsvurdering).vedtaksperiodeForkastet)
+    }
+
+    @Test
+    fun `ignorerer fjernet tilkommen inntekt`() {
+        lagPeriode(skjæringstidspunkt = 1.jan(2018), forkastet = true)
+        lagPeriode(skjæringstidspunkt = 1.mar(2018))
+        val totrinnsvurdering = lagTotrinnsvurdering()
+        lagTilkommenInntekt(totrinnsvurdering.id(), periode = 5.mar(2018) tilOgMed 10.mar(2018), fjernet = true)
+
+        utfør()
+
+        assertTrue(hent(totrinnsvurdering).vedtaksperiodeForkastet)
+    }
+
+    @Test
+    fun `ignorerer tilkommen inntekt som peker på en annen totrinnsvurdering`() {
+        lagPeriode(skjæringstidspunkt = 1.jan(2018), forkastet = true)
+        lagPeriode(skjæringstidspunkt = 1.mar(2018))
+        val totrinnsvurdering = lagTotrinnsvurdering()
+        lagTilkommenInntekt(
+            TotrinnsvurderingId(totrinnsvurdering.id().value + 1000),
+            periode = 5.mar(2018) tilOgMed 10.mar(2018),
+        )
+
+        utfør()
+
+        assertTrue(hent(totrinnsvurdering).vedtaksperiodeForkastet)
+    }
+
+    @Test
+    fun `tilkommen inntekt som overlapper aktiv periode med én dag holder totrinnsvurderingen i live`() {
+        lagPeriode(skjæringstidspunkt = 1.jan(2018), forkastet = true)
+        lagPeriode(skjæringstidspunkt = 1.mar(2018))
+        val totrinnsvurdering = lagTotrinnsvurdering()
+        lagTilkommenInntekt(totrinnsvurdering.id(), periode = 20.feb(2018) tilOgMed 1.mar(2018))
+
+        utfør()
+
+        assertFalse(hent(totrinnsvurdering).vedtaksperiodeForkastet)
+    }
+
     private fun utfør() {
         assertTrue(
             AvbrytTotrinnsvurderingCommand(identitetsnummer).execute(CommandContext(UUID.randomUUID()), sessionContext, outbox),
@@ -203,6 +282,32 @@ internal class AvbrytTotrinnsvurderingCommandTest : ApplicationTest() {
             }
             sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
+
+    private fun lagTilkommenInntekt(
+        totrinnsvurderingId: TotrinnsvurderingId,
+        periode: Periode,
+        fjernet: Boolean = false,
+    ) {
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = NAVIdent("A123456"),
+                notatTilBeslutter = "notat",
+                totrinnsvurderingId = totrinnsvurderingId,
+                organisasjonsnummer = "999999999",
+                periode = periode,
+                periodebeløp = BigDecimal("10000"),
+                ekskluderteUkedager = emptySet(),
+            )
+        if (fjernet) {
+            tilkommenInntekt.fjern(
+                saksbehandlerIdent = NAVIdent("A123456"),
+                notatTilBeslutter = "fjernet",
+                totrinnsvurderingId = totrinnsvurderingId,
+            )
+        }
+        sessionContext.tilkommenInntektRepository.lagre(tilkommenInntekt)
+    }
 
     private fun lagHandling(
         totrinnsvurderingId: TotrinnsvurderingId?,
