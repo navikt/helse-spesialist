@@ -9,14 +9,14 @@
 
 package no.nav.helse.spesialist.api.rest.resources
 
-import io.ktor.resources.Resource
+import io.ktor.resources.*
 import no.nav.helse.spesialist.api.rest.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.rest.ApiSorteringsrekkefølge
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Resource("oppgaver")
 data class Oppgaver(
@@ -31,6 +31,7 @@ data class Oppgaver(
     val sidestoerrelse: Int? = null,
     val ekskluderVarsler: String? = null, // Kommaseparert
     val tillatteVarsler: String? = null, // Kommaseparert
+    val minstEttAvVarslene: String? = null, // Kommaseparert
     val behandlingOpprettetFom: LocalDate? = null,
     val behandlingOpprettetTom: LocalDate? = null,
     val oppgaveKlarFom: LocalDate? = null,

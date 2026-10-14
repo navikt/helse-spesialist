@@ -4,9 +4,7 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.mediator.oppgave.OppgaveRepository.BehandletOppgaveProjeksjon
-import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
-import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
+import no.nav.helse.mediator.oppgave.OppgaveRepository.*
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -16,7 +14,7 @@ import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class InMemoryOppgaveRepository(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
@@ -68,6 +66,7 @@ class InMemoryOppgaveRepository(
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
         tillatteVarsler: Set<String>,
+        minstEttAvVarslene: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
         oppgaveKlarFom: LocalDate?,

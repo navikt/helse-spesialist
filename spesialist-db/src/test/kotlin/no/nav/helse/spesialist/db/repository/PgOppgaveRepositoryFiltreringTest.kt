@@ -537,6 +537,7 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         sidestørrelse: Int = 10,
         ekskluderVarsler: Set<String> = emptySet(),
         tillatteVarsler: Set<String> = emptySet(),
+        minstEttAvVarslene: Set<String> = emptySet(),
         behandlingOpprettetFom: LocalDate? = null,
         behandlingOpprettetTom: LocalDate? = null,
         oppgaveKlarFom: LocalDate? = null,
@@ -554,6 +555,7 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         sidestørrelse = sidestørrelse,
         ekskluderVarsler = ekskluderVarsler,
         tillatteVarsler = tillatteVarsler,
+        minstEttAvVarslene = minstEttAvVarslene,
         behandlingOpprettetFom = behandlingOpprettetFom,
         behandlingOpprettetTom = behandlingOpprettetTom,
         oppgaveKlarFom = oppgaveKlarFom,
@@ -631,6 +633,52 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         sessionContext.varselRepository.lagre(varsel)
 
         val resultat = finnOppgaveProjeksjoner(tillatteVarsler = setOf("RV_MV_3"))
+
+        assertEquals(0, resultat.totaltAntall)
+    }
+
+    @Test
+    fun `inkluderer oppgave med påkrevd varsel også når andre varsler finnes`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+        opprettVarsel(behandling, "RV_MV_3")
+        opprettVarsel(behandling, "SB_EX_1")
+
+        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = setOf("RV_MV_3"))
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `ekskluderer oppgave uten påkrevd varsel når minstEttAvVarslene er satt`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        opprettOppgave(vedtaksperiode, behandling)
+        opprettVarsel(behandling, "SB_EX_1")
+
+        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = setOf("RV_MV_3"))
+
+        assertEquals(0, resultat.totaltAntall)
+    }
+
+    @Test
+    fun `ignorerer inaktivt varsel ved minstEttAvVarslene-filtrering`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        opprettOppgave(vedtaksperiode, behandling)
+        val varsel = opprettVarsel(behandling, "RV_MV_3")
+        varsel.deaktiver()
+        sessionContext.varselRepository.lagre(varsel)
+
+        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = setOf("RV_MV_3"))
 
         assertEquals(0, resultat.totaltAntall)
     }

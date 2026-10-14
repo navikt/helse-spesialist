@@ -216,6 +216,7 @@ class PgOppgaveRepository private constructor(
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
         tillatteVarsler: Set<String>,
+        minstEttAvVarslene: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
         oppgaveKlarFom: LocalDate?,
@@ -325,6 +326,19 @@ class PgOppgaveRepository private constructor(
                         """,
                     )
                     parameterMap["tillatteVarsler"] = tillatteVarsler.joinToString(prefix = "{", postfix = "}")
+                }
+                if (minstEttAvVarslene.isNotEmpty()) {
+                    append(
+                        """
+                        AND EXISTS (
+                            SELECT 1 FROM varsel sv_min
+                            WHERE sv_min.behandling_ref = b.id
+                            AND sv_min.status = 'AKTIV'
+                            AND sv_min.kode = ANY(:minstEttAvVarslene::varchar[])
+                        )
+                        """,
+                    )
+                    parameterMap["minstEttAvVarslene"] = minstEttAvVarslene.joinToString(prefix = "{", postfix = "}")
                 }
                 if (behandlingOpprettetFom != null) {
                     append(

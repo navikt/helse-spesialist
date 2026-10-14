@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.domain.oppgave.OppgaveId
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 interface OppgaveRepository {
     fun lagre(oppgave: Oppgave)
@@ -45,6 +45,7 @@ interface OppgaveRepository {
         sidestørrelse: Int,
         ekskluderVarsler: Set<String>,
         tillatteVarsler: Set<String>,
+        minstEttAvVarslene: Set<String>,
         behandlingOpprettetFom: LocalDate?,
         behandlingOpprettetTom: LocalDate?,
         oppgaveKlarFom: LocalDate?,

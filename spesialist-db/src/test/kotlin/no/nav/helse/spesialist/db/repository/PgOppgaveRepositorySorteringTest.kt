@@ -131,6 +131,7 @@ class PgOppgaveRepositorySorteringTest : AbstractDBIntegrationTest() {
             sidestørrelse = antallRader,
             ekskluderVarsler = emptySet(),
             tillatteVarsler = emptySet(),
+            minstEttAvVarslene = emptySet(),
             behandlingOpprettetFom = null,
             behandlingOpprettetTom = null,
             oppgaveKlarFom = null,
