@@ -1,7 +1,7 @@
 [versions]
-kotlin = "2.4.20"
-flyway = "13.9.0"
-graphqlKotlin = "10.2.2"
+kotlin = "2.4.21"
+flyway = "13.10.0"
+graphqlKotlin = "11.0.0"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026091610031789545782"
 tbdLibs = "20261013.1613"
@@ -57,7 +57,7 @@ mockk = "io.mockk:mockk:1.14.11"
 mockOauth2Server = "no.nav.security:mock-oauth2-server:6.0.4"
 opentelemetry-instrumentation-annotations = 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.32.0'
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.10"
-postgresJdbcDriver = "org.postgresql:postgresql:42.7.13"
+postgresJdbcDriver = "org.postgresql:postgresql:42.7.14"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.30.0"
 
 rapidsAndRivers = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapidsAndRivers" }
