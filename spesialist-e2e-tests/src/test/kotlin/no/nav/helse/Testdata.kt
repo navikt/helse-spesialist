@@ -95,6 +95,7 @@ object Testdata {
                                                 periodetilstand = SnapshotPeriodetilstand.TILGODKJENNING,
                                                 pensjonsgivendeInntekter = emptyList(),
                                                 annulleringskandidater = emptyList(),
+                                                grunnbeløpsjustertGjennomsnitt = null,
                                             ),
                                         ),
                                 ),

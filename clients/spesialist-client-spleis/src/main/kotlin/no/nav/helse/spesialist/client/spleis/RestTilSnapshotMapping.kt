@@ -177,6 +177,7 @@ internal fun BeregnetPeriode.tilSnapshotBeregnetPeriode() =
         vilkarsgrunnlagId = vilkarsgrunnlagId,
         pensjonsgivendeInntekter = pensjonsgivendeInntekter.map { it.tilSnapshotPensjonsgivendeInntekt() },
         annulleringskandidater = annulleringskandidater.map { it.tilSnapshotAnnulleringskandidat() },
+        grunnbeløpsjustertGjennomsnitt = grunnbeløpsjustertGjennomsnitt,
     )
 
 internal fun Dag.tilSnapshotDag() =

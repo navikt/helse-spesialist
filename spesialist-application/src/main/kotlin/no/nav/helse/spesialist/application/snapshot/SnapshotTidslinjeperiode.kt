@@ -1,8 +1,9 @@
 package no.nav.helse.spesialist.application.snapshot
 
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 sealed interface SnapshotTidslinjeperiode {
     val behandlingId: UUID
@@ -55,6 +56,7 @@ data class SnapshotBeregnetPeriode(
     val vilkarsgrunnlagId: UUID?,
     val pensjonsgivendeInntekter: List<SnapshotPensjonsgivendeInntekt>,
     val annulleringskandidater: List<SnapshotAnnulleringskandidat>,
+    val grunnbeløpsjustertGjennomsnitt: BigDecimal?,
 ) : SnapshotTidslinjeperiode
 
 data class SnapshotUkjentTidslinjeperiode(

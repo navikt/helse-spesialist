@@ -2,9 +2,10 @@ package no.nav.helse.spleis.rest.hentperson
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal enum class Inntektstype {
     EnArbeidsgiver,
@@ -223,6 +224,7 @@ internal data class BeregnetPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<Hendelse>,
     override val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>,
+    val grunnbeløpsjustertGjennomsnitt: BigDecimal?,
     val beregningId: UUID,
     val gjenstaendeSykedager: Int?,
     val forbrukteSykedager: Int?,

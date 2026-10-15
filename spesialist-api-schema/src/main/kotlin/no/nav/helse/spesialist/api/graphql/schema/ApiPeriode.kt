@@ -4,7 +4,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @GraphQLName("Inntektstype")
 enum class ApiInntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
@@ -345,6 +345,7 @@ class ApiBeregnetPeriode(
     override val varsler: List<ApiVarselDTO>,
     override val hendelser: List<ApiHendelse>,
     override val historikkinnslag: List<ApiHistorikkinnslag>,
+    val grunnbelopsjustertGjennomsnitt: BigDecimal?,
     val oppgave: ApiOppgaveForPeriodevisning?,
     val handlinger: List<ApiHandling>,
     val egenskaper: List<ApiOppgaveegenskap>,

@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import graphql.GraphQLException
 import io.mockk.every
+import no.nav.helse.mediator.asBigDecimal
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
@@ -42,6 +43,7 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 import tools.jackson.module.kotlin.convertValue
 import tools.jackson.module.kotlin.treeToValue
+import java.math.BigDecimal
 import java.util.*
 import kotlin.test.assertContains
 
@@ -144,7 +146,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
-        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse)
+        populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse)
         opprettVedtaksperiode(opprettPerson())
 
         val logglytter = Logglytter()
@@ -184,7 +187,8 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av skjermede personer`() {
-        populasjonstilgangskontrollProvider.resultat = TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.EgenAnsatt)
+        populasjonstilgangskontrollProvider.resultat =
+            TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.EgenAnsatt)
         opprettVedtaksperiode(opprettPerson())
 
         val logglytter = Logglytter()
@@ -378,6 +382,27 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `periode med grunnbeløpsjustert gjennomsnitt`() {
+        val personRef = opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef)
+        val (id, fom, tom) = PERIODE
+        val grunnbeløpsjustertGjennomsnitt = BigDecimal("500000.0")
+        val beregnetPeriode =
+            opprettBeregnetPeriode(fom, tom, id).copy(
+                grunnbeløpsjustertGjennomsnitt = grunnbeløpsjustertGjennomsnitt,
+            )
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(beregnetPeriode))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = runPersonQuery()
+
+        val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
+        assertEquals(grunnbeløpsjustertGjennomsnitt, periode["grunnbelopsjustertGjennomsnitt"].asBigDecimal())
+    }
+
+    @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
         val person =
@@ -406,7 +431,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 }
         val behandling =
             lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-                .also { sessionFactory.transactionalSessionScope { transaction -> transaction.behandlingRepository.lagre(it) } }
+                .also {
+                    sessionFactory.transactionalSessionScope { transaction ->
+                        transaction.behandlingRepository.lagre(
+                            it,
+                        )
+                    }
+                }
         val saksbehandler =
             lagSaksbehandler().also {
                 sessionFactory.transactionalSessionScope { transaction ->
@@ -528,6 +559,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                                 }
                                 ... on BeregnetPeriode {
                                     vedtaksperiodeId
+                                    grunnbelopsjustertGjennomsnitt
                                     handlinger { type, tillatt, begrunnelse }
                                     varsler {
                                         behandlingId

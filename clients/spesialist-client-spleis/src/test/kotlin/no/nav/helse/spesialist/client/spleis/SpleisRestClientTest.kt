@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.application.snapshot.*
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.math.BigDecimal
 import java.net.URI
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -69,6 +70,7 @@ class SpleisRestClientTest {
         assertIs<SnapshotSoknadNav>(hendelser[1])
 
         assertEquals("AG123", beregnetPeriode.utbetaling.arbeidsgiverFagsystemId)
+        assertEquals(BigDecimal("500000.0"), beregnetPeriode.grunnbeløpsjustertGjennomsnitt)
 
         val vilkarsgrunnlag = snapshotPerson.vilkarsgrunnlag
         assertEquals(2, vilkarsgrunnlag.size)
@@ -225,6 +227,7 @@ class SpleisRestClientTest {
                           "skjaeringstidspunkt": "2023-01-01",
                           "hendelser": [],
                           "pensjonsgivendeInntekter": [],
+                          "grunnbeløpsjustertGjennomsnitt": 500000.0,
                           "beregningId": "00000000-0000-0000-0000-000000000030",
                           "gjenstaendeSykedager": 200,
                           "forbrukteSykedager": 48,

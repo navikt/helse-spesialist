@@ -282,6 +282,7 @@ class PersonQueryHandler(
                                                                 vedtaksperiodeId = periode.vedtaksperiodeId,
                                                                 periodetilstand = periodetilstand,
                                                                 skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                                grunnbelopsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
                                                                 varsler =
                                                                     if (behandlingIndex == 0) {
                                                                         daos.varselApiRepository
@@ -620,6 +621,7 @@ class PersonQueryHandler(
                                                             vedtaksperiodeId = periode.vedtaksperiodeId,
                                                             periodetilstand = periodetilstand,
                                                             skjaeringstidspunkt = periode.skjaeringstidspunkt,
+                                                            grunnbelopsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
                                                             varsler =
                                                                 if (behandlingIndex == 0) {
                                                                     daos.varselApiRepository
