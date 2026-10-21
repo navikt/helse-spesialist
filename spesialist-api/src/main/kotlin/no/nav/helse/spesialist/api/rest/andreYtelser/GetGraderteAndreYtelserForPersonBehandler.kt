@@ -19,7 +19,7 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiGraderteAndreYtelser>, ApiGetGraderteAndreYtelserForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetGraderteAndreYtelserForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetGraderteAndreYtelserForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

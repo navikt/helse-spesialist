@@ -18,7 +18,7 @@ class GetSaksbehandlerhandlingerForPersonBehandler : GetBehandler<Personer.Perso
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiSaksbehandlerhandling>, ApiGetSaksbehandlerhandlingerForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetSaksbehandlerhandlingerForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetSaksbehandlerhandlingerForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

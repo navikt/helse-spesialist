@@ -21,7 +21,7 @@ class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, Ap
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPutTildelingErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiPutTildelingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {

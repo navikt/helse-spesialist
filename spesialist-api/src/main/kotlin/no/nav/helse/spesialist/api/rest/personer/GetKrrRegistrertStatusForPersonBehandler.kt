@@ -25,7 +25,7 @@ class GetKrrRegistrertStatusForPersonBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<ApiKrrRegistrertStatus, ApiGetKrrRegistrertStatusForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetKrrRegistrertStatusForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetKrrRegistrertStatusForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(person) }

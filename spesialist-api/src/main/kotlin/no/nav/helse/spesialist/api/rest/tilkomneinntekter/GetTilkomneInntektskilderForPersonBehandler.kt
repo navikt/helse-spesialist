@@ -41,7 +41,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

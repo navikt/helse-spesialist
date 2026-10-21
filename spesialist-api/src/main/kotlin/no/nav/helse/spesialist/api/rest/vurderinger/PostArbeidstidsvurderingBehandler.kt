@@ -31,7 +31,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiArbeidstidsvurderingErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiArbeidstidsvurderingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(request, person, kallKontekst) }

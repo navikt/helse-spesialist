@@ -24,7 +24,7 @@ class GetInfotrygdperioderForPersonBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiInfotrygdperiode>, ApiGetInfotrygdperioderForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetInfotrygdperioderForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetInfotrygdperioderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(person, kallKontekst) }

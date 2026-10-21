@@ -19,7 +19,7 @@ class GetForsikringsvurderingForPersonBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<ApiForsikringsvurdering, ApiGetForsikringsvurderingForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetForsikringsvurderingForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetForsikringsvurderingForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

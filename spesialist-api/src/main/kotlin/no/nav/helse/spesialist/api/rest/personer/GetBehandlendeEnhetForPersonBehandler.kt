@@ -24,7 +24,7 @@ class GetBehandlendeEnhetForPersonBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<ApiBehandlendeEnhet, ApiGetBehandlendeEnhetForPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetBehandlendeEnhetForPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetBehandlendeEnhetForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(person) }

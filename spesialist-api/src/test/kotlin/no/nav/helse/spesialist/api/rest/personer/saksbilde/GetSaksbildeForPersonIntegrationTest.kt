@@ -40,6 +40,25 @@ class GetSaksbildeForPersonIntegrationTest {
     }
 
     @Test
+    fun `gir 400 om personPseudoId ikke er en UUID`() {
+        // When:
+        val response = integrationTestFixture.get(url = "/api/personer/ikke-en-uuid/saksbilde")
+
+        // Then:
+        assertUgyldigForespørsel(response)
+        verify { integrationTestFixture.snapshothenterMock wasNot Called }
+    }
+
+    @Test
+    fun `gir 400 også for andre id-er i path som ikke kan parses`() {
+        // When:
+        val response = integrationTestFixture.get(url = "/api/vedtaksperioder/ikke-en-uuid/notater")
+
+        // Then:
+        assertUgyldigForespørsel(response)
+    }
+
+    @Test
     fun `gir feilmelding om personen ikke finnes`() {
         // Given:
         val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(lagPerson().id)
@@ -122,6 +141,22 @@ class GetSaksbildeForPersonIntegrationTest {
               "status" : $status,
               "title" : "$title",
               "code" : "$code"
+            }
+            """.trimIndent(),
+            body,
+        )
+    }
+
+    private fun assertUgyldigForespørsel(response: IntegrationTestFixture.Response) {
+        assertEquals(400, response.status)
+        val body = response.bodyAsJsonNode
+        assertNotNull(body)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "status" : 400,
+              "title" : "Bad Request"
             }
             """.trimIndent(),
             body,

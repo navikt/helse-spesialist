@@ -25,7 +25,7 @@ class PostSykepengegrunnlagBehandler : PostBehandler<Personer.PersonPseudoId.Syk
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPostSykepengegrunnlagErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiPostSykepengegrunnlagErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPostSykepengegrunnlagErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

@@ -20,7 +20,7 @@ class GetVeilederStansBehandler : GetBehandler<Personer.PersonPseudoId.Stans.Vei
         kallKontekst: KallKontekst,
     ): RestResponse<ApiVeilederStans, ApiGetVeilederStansErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetVeilederStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetVeilederStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

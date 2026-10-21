@@ -20,7 +20,7 @@ class PatchSaksbehandlerStansBehandler : PatchBehandler<Personer.PersonPseudoId.
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiPatchSaksbehandlerStansErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiPatchSaksbehandlerStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPatchSaksbehandlerStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

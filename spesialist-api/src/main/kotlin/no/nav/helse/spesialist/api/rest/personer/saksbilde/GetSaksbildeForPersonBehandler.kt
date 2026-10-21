@@ -22,7 +22,7 @@ class GetSaksbildeForPersonBehandler(
         resource: Personer.PersonPseudoId.Saksbilde,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiSaksbildePerson, ApiGetSaksbildeForPersonErrorCode> {
-        val personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId)
+        val personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId)
         return kallKontekst.medMdcOgAttribute(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
             val identitetsnummer =
                 kallKontekst.personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)

@@ -20,7 +20,7 @@ class GetPersonBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<ApiPerson, ApiGetPersonErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetPersonErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetPersonErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

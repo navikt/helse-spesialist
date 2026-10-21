@@ -1,7 +1,9 @@
 package no.nav.helse.spesialist.api.plugins
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
@@ -30,6 +32,19 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
         } else {
             onThrowable(call, cause)
         }
+    }
+    exception<BadRequestException> { call: ApplicationCall, cause: BadRequestException ->
+        loggWarn(
+            "Ugyldig forespørsel",
+            cause,
+            "metode" to call.request.httpMethod.value,
+            "uri" to call.request.uri,
+        )
+        call.respondText(
+            text = """{"type":"about:blank","status":400,"title":"Bad Request"}""",
+            contentType = ContentType.Application.ProblemJson,
+            status = HttpStatusCode.BadRequest,
+        )
     }
     exception<Throwable> { call, cause ->
         onThrowable(call, cause)

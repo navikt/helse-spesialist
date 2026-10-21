@@ -27,7 +27,7 @@ class PatchVeilederStansBehandler : PatchBehandler<Personer.PersonPseudoId.Stans
         if (request.stans) return RestResponse.Error(ApiPatchVeilederStansErrorCode.KAN_IKKE_OPPRETTE_VEILEDER_STANS)
 
         return kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiPatchVeilederStansErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPatchVeilederStansErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person ->

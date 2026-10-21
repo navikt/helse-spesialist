@@ -10,5 +10,7 @@ value class PersonPseudoId private constructor(
         fun ny(): PersonPseudoId = PersonPseudoId(UUID.randomUUID())
 
         fun fraString(value: String): PersonPseudoId = PersonPseudoId(UUID.fromString(value))
+
+        fun fraUUID(value: UUID): PersonPseudoId = PersonPseudoId(value)
     }
 }

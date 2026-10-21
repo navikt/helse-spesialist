@@ -22,7 +22,7 @@ class GetInntektsmeldingBehandler(
         kallKontekst: KallKontekst,
     ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.parent.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.parent.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetInntektsmeldingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(resource, person, kallKontekst) }

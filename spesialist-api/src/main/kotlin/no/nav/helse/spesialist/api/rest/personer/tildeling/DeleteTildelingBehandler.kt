@@ -19,7 +19,7 @@ class DeleteTildelingBehandler : DeleteBehandler<Personer.PersonPseudoId.Tildeli
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiDeleteTildelingErrorCode> {
         return kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiDeleteTildelingErrorCode.OPPGAVE_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiDeleteTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {

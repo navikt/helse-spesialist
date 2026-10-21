@@ -22,7 +22,7 @@ class GetNotatVedtaksperiodeIderForPersonBehandler : GetBehandler<Personer.Perso
         kallKontekst: KallKontekst,
     ): RestResponse<List<ApiNotatVedtaksperiodeId>, ApiGetNotatVedtaksperiodeIderErrorCode> =
         kallKontekst.medPerson(
-            personPseudoId = PersonPseudoId.fraString(resource.parent.pseudoId),
+            personPseudoId = PersonPseudoId.fraUUID(resource.parent.pseudoId),
             personPseudoIdIkkeFunnet = { ApiGetNotatVedtaksperiodeIderErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiGetNotatVedtaksperiodeIderErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) { person -> behandleForPerson(person, kallKontekst) }

@@ -26,7 +26,7 @@ class Personer {
     @Resource("{pseudoId}")
     class PersonPseudoId(
         val parent: Personer = Personer(),
-        val pseudoId: String,
+        val pseudoId: UUID,
     ) {
         @Resource("saksbilde")
         class Saksbilde(
