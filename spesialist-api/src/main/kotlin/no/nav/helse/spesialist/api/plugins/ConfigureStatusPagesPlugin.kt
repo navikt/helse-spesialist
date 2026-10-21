@@ -57,10 +57,9 @@ private suspend fun StatusPagesConfig.onThrowable(
 ) {
     val uri = call.request.uri
     val verb = call.request.httpMethod.value
-    loggError("Unhandled: $verb $uri", cause)
+    loggError("Uhåndtert feil i kall", cause, "metode" to verb, "uri" to uri)
     call.respondText(
         text = "Det skjedde en uventet feil",
         status = HttpStatusCode.InternalServerError,
     )
-    call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
 }
