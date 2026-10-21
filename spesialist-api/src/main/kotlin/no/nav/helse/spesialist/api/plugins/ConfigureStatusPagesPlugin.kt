@@ -8,7 +8,6 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import no.nav.helse.spesialist.api.erKlientFrakoblingUnderSerialisering
-import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
@@ -16,10 +15,6 @@ import tools.jackson.databind.DatabindException
 import java.util.concurrent.CancellationException
 
 fun StatusPagesConfig.configureStatusPagesPlugin() {
-    exception<Modellfeil> { call: ApplicationCall, modellfeil: Modellfeil ->
-        modellfeil.logger()
-        call.respond(status = modellfeil.httpkode, message = modellfeil.tilFeilDto())
-    }
     exception<CancellationException> { call: ApplicationCall, exception: CancellationException ->
         val uri = call.request.uri
         if (uri.endsWith("/sse")) {
