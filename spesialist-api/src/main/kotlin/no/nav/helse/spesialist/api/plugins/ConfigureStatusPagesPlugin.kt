@@ -8,7 +8,7 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import no.nav.helse.spesialist.api.erKlientFrakoblingUnderSerialisering
-import no.nav.helse.spesialist.api.graphql.Modellfeil
+import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn

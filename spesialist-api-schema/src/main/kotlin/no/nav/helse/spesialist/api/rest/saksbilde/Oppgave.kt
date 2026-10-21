@@ -9,7 +9,6 @@
 
 package no.nav.helse.spesialist.api.rest.saksbilde
 
-import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseContextualSerialization
 import java.math.BigDecimal
@@ -18,7 +17,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-@GraphQLName("Egenskap")
 @Serializable
 enum class ApiEgenskap {
     RISK_QA,
@@ -57,7 +55,6 @@ enum class ApiEgenskap {
     FORSIKRING,
 }
 
-@GraphQLName("Kategori")
 @Serializable
 enum class ApiKategori {
     Mottaker,
@@ -70,20 +67,17 @@ enum class ApiKategori {
     Status,
 }
 
-@GraphQLName("Oppgaveegenskap")
 @Serializable
 data class ApiOppgaveegenskap(
     val egenskap: ApiEgenskap,
     val kategori: ApiKategori,
 )
 
-@GraphQLName("OppgaveForPeriodevisning")
 @Serializable
 data class ApiOppgaveForPeriodevisning(
     val id: String,
 )
 
-@GraphQLName("Totrinnsvurdering")
 @Serializable
 data class ApiTotrinnsvurdering(
     val erRetur: Boolean,

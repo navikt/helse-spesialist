@@ -1,5 +1,9 @@
 package no.nav.helse.spesialist.api.rest.personer.saksbilde
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
 import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
 import io.mockk.Called
@@ -9,7 +13,13 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.parallel.ResourceLock
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import org.slf4j.LoggerFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -42,20 +52,26 @@ class GetSaksbildeForPersonIntegrationTest {
         verify { integrationTestFixture.snapshothenterMock wasNot Called }
     }
 
-    @Test
-    fun `gir feilmelding om saksbehandler ikke har tilgang til personen`() {
+    @ParameterizedTest
+    @EnumSource(TilgangSomMangler::class)
+    @ResourceLock("auditlogg-lytter")
+    fun `gir feilmelding og auditlogger når saksbehandler mangler tilgang til personen`(tilgangSomMangler: TilgangSomMangler) {
         // Given:
+        val logglytter = Logglytter()
+        val saksbehandler = lagSaksbehandler()
         integrationTestFixture.populasjonstilgangskontrollProvider.resultat =
-            TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.StrengtFortroligAdresse)
+            TilgangskontrollResultat.ManglerTilgang(tilgangSomMangler)
         val person = lagPerson().also(personRepository::lagre)
         val personPseudoId = personPseudoIdProvider.nyPersonPseudoId(person.id)
 
         // When:
-        val response = integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/saksbilde")
+        val response =
+            integrationTestFixture.get(url = "/api/personer/${personPseudoId.value}/saksbilde", saksbehandler = saksbehandler)
 
         // Then:
         assertFeilrespons(response, 403, "Mangler tilgang til person", "MANGLER_TILGANG_TIL_PERSON")
         verify { integrationTestFixture.snapshothenterMock wasNot Called }
+        logglytter.assertBleLogget("suid=${saksbehandler.ident.value} duid=${person.id.value} flexString1=Deny", Level.WARN)
     }
 
     @Test
@@ -110,5 +126,20 @@ class GetSaksbildeForPersonIntegrationTest {
             """.trimIndent(),
             body,
         )
+    }
+
+    private class Logglytter {
+        private val appender =
+            ListAppender<ILoggingEvent>().apply {
+                (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
+                start()
+            }
+
+        fun assertBleLogget(
+            melding: String,
+            level: Level,
+        ) = assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
+            "Forventet ett $level-innslag i auditloggen som inneholder «$melding», men fikk: ${appender.list}"
+        }
     }
 }

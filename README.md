@@ -79,7 +79,7 @@ Spleis-testdata fyrer av et kafka-event som spesialist-opprydding-dev lytter på
 
 ## Spleis snapshot-API
 
-Spleis-typene genereres ikke, men vedlikeholdes manuelt. Nye typer fra Spleis sitt snapshot-API må legges til i de tilsvarende GraphQL-filene i `clients/spesialist-client-spleis`-modulen.
+Spleis-typene genereres ikke, men vedlikeholdes manuelt. Nye typer fra Spleis sitt snapshot-API må legges til i REST-typene i `clients/spesialist-client-spleis` (pakken `no.nav.helse.spleis.rest.hentperson`).
 
 ## Henvendelser
 

@@ -14,7 +14,6 @@ dependencies {
 
     testImplementation(libs.bundles.ktor.server)
     testImplementation(libs.bundles.ktor.server.test)
-    testImplementation(libs.graphqlKotlin.server.ktor)
 
     testImplementation(libs.bundles.ktor.client)
     testImplementation(libs.apache.httpclient5.fluent)

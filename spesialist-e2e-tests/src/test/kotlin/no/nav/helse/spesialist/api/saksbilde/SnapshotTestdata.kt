@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.graphql
+package no.nav.helse.spesialist.api.saksbilde
 
 import no.nav.helse.spesialist.application.snapshot.SnapshotAlder
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
@@ -132,7 +132,7 @@ object SnapshotTestdata {
         hendelser = emptyList(),
     )
 
-    fun graphQLSpleisVilkarsgrunnlag(
+    fun opprettSpleisVilkarsgrunnlag(
         organisasjonsnummer: String,
         id: UUID = UUID.randomUUID(),
     ) = SnapshotSpleisVilkarsgrunnlag(

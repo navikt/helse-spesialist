@@ -1,218 +1,62 @@
-package no.nav.helse.spesialist.api.graphql.query
+package no.nav.helse.spesialist.api.saksbilde
 
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
-import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangSomMangler
-import com.github.navikt.tbd_libs.populasjonstilgang.api.TilgangskontrollResultat
-import graphql.GraphQLException
-import io.mockk.every
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import no.nav.helse.mediator.asBigDecimal
 import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
-import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettBeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotGenerasjon
-import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotHendelse
-import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettUberegnetPeriode
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiAvslagstype
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiHandling
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodehandling
-import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettBeregnetPeriode
+import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettSnapshotArbeidsgiver
+import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettSnapshotGenerasjon
+import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettSnapshotHendelse
+import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettUberegnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
-import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
-import no.nav.helse.spesialist.domain.testfixtures.*
+import no.nav.helse.spesialist.domain.testfixtures.apr
+import no.nav.helse.spesialist.domain.testfixtures.feb
+import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.mar
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagDNummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Brukerrolle
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.ResourceLock
-import org.slf4j.LoggerFactory
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 import tools.jackson.module.kotlin.convertValue
 import tools.jackson.module.kotlin.treeToValue
 import java.math.BigDecimal
-import java.util.*
+import java.time.YearMonth
+import java.util.UUID
 import kotlin.test.assertContains
 
-class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
+class SaksbildeHenterTest : AbstractSaksbildeTest() {
     @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `henter person med personPseudoId som parameter`() {
-        // Given
-        mockSnapshot()
-        val logglytter = Logglytter()
-        opprettVedtaksperiode(opprettPerson())
-        val pseudoId = opprettPersonPseudoId()
-
-        // When
-        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
-
-        // Then
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
-            Level.INFO,
-        )
-    }
-
-    @Test
-    fun `får 404-feil når personen man søker etter ikke finnes`() {
-        val personPseudoId = PersonPseudoId.ny().value
-        val body = runQuery("""{ person(personPseudoId: "$personPseudoId") { aktorId } }""")
-
-        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            "Exception while fetching data (/person) : PseudoId er ugyldig eller utgått",
-            body["errors"].first()["message"].asString(),
-        )
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `får 400-feil når personen man sender inn en personPseudoId på feil format`() {
-        val body = runQuery("""{ person(personPseudoId: "abc123") { aktorId } }""")
-
-        assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
-        assertEquals(
-            "Exception while fetching data (/person) : Ugyldig format på personPseudoId",
-            body["errors"].first()["message"].asString(),
-        )
-    }
-
-    @Test
-    fun `enhet er ikke lenger et felt på person`() {
-        val body =
-            runQuery("""{ person(personPseudoId: "${PersonPseudoId.ny().value}") { enhet { id } } }""")
-
-        assertContains(
-            body["errors"].first()["message"].asString(),
-            "Field 'enhet' in type 'Person' is undefined",
-        )
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
     fun `får personens fødselsnummer-identer når hen har flere`() {
-        // Given
         mockSnapshot()
         val dNummer = lagDNummer()
-        val logglytter = Logglytter()
         opprettPerson(fødselsnummer = dNummer, aktørId = AKTØRID)
         opprettVedtaksperiode(opprettPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØRID))
-        val pseudoId = opprettPersonPseudoId()
 
-        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { andreFodselsnummer { fodselsnummer } } }""")
+        val body = hentSaksbilde()
 
-        assertEquals(1, body["data"]["person"]["andreFodselsnummer"].size())
-        assertEquals(dNummer, body["data"]["person"]["andreFodselsnummer"][0]["fodselsnummer"].asString())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
-            Level.INFO,
-        )
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `kan slå opp kode7-personer med riktige tilganger`() {
-        mockSnapshot()
-        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig))
-
-        val logglytter = Logglytter()
-        val pseudoId = opprettPersonPseudoId()
-
-        val body =
-            runQuery(
-                query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
-                brukerrolle = Brukerrolle.Kode7,
-            )
-
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
-        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER", Level.INFO)
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
-        populasjonstilgangskontrollProvider.resultat =
-            TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.FortroligAdresse)
-        opprettVedtaksperiode(opprettPerson())
-
-        val logglytter = Logglytter()
-        val pseudoId = opprettPersonPseudoId()
-
-        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
-
-        assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER flexString1=Deny",
-            Level.WARN,
-        )
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `kan slå opp skjermede personer med riktige tilganger`() {
-        mockSnapshot()
-        opprettVedtaksperiode(opprettPerson(erEgenAnsatt = true))
-
-        val logglytter = Logglytter()
-        val pseudoId = opprettPersonPseudoId()
-
-        val body =
-            runQuery(
-                query = """{ person(personPseudoId: "$pseudoId") { aktorId } }""",
-                brukerrolle = Brukerrolle.EgenAnsatt,
-            )
-
-        assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asString())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER",
-            Level.INFO,
-        )
-    }
-
-    @Test
-    @ResourceLock("auditlogg-lytter")
-    fun `får 403-feil ved oppslag av skjermede personer`() {
-        populasjonstilgangskontrollProvider.resultat =
-            TilgangskontrollResultat.ManglerTilgang(TilgangSomMangler.EgenAnsatt)
-        opprettVedtaksperiode(opprettPerson())
-
-        val logglytter = Logglytter()
-        val pseudoId = opprettPersonPseudoId()
-
-        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
-
-        assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
-        logglytter.assertBleLogget(
-            "suid=${SAKSBEHANDLER.ident.value} duid=$FØDSELSNUMMER flexString1=Deny",
-            Level.WARN,
-        )
-    }
-
-    @Test
-    fun `får 501-feil når oppdatering av snapshot feiler`() {
-        every { snapshothenter.hentPerson(FØDSELSNUMMER) } throws GraphQLException("Oops")
-        opprettVedtaksperiode(opprettPerson())
-
-        val pseudoId = opprettPersonPseudoId()
-
-        val body = runQuery("""{ person(personPseudoId: "$pseudoId") { aktorId } }""")
-
-        assertEquals(500, body["errors"].first()["extensions"]["code"].asInt())
+        assertEquals(1, body["andreFodselsnummer"].size())
+        assertEquals(dNummer, body["andreFodselsnummer"][0]["fodselsnummer"].asString())
     }
 
     @Test
@@ -231,14 +75,14 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 periode = uberegnetPeriode,
                 skjæringstidspunkt = 2 jan 2018,
             )
-        val graphQLUberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
+        val uberegnetPeriodeSnapshot = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
+        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(uberegnetPeriodeSnapshot, periodeMedOppgaveSnapshot))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef, status = "AKTIV")
-        val periode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id)
+        val periode = hentSaksbilde().plukkUtPeriodeMed(uberegnetPeriode.id)
         val forventetVarsel = setOf(PersonQueryTestVarsel(behandlingId, "EN_KODE"))
 
         assertEquals(forventetVarsel, periode.varsler)
@@ -257,7 +101,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, behandlingRef = behandlingRef, status = "AKTIV")
 
-        val periode = runPersonQuery().plukkUtPeriodeMed(vedtaksperiodeId)
+        val periode = hentSaksbilde().plukkUtPeriodeMed(vedtaksperiodeId)
 
         assertTrue(periode.varsler.isEmpty())
     }
@@ -288,20 +132,20 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 periode = uberegnetPeriode,
                 skjæringstidspunkt = 2 jan 2018,
             )
-        val graphQLUberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
+        val uberegnetPeriodeSnapshot = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
+        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
         val snapshotBehandling1 =
-            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotBehandlingId1)
+            opprettSnapshotGenerasjon(listOf(uberegnetPeriodeSnapshot, periodeMedOppgaveSnapshot), snapshotBehandlingId1)
         val snapshotBehandling2 =
-            opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotBehandlingId2)
+            opprettSnapshotGenerasjon(listOf(uberegnetPeriodeSnapshot, periodeMedOppgaveSnapshot), snapshotBehandlingId2)
         val arbeidsgiver =
             opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling1, snapshotBehandling2))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef1, status = "AKTIV")
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, behandlingRef = behandlingRef2, status = "AKTIV")
-        val førsteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotBehandlingId2)
-        val sisteBehandlingForPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotBehandlingId1)
+        val førsteBehandlingForPeriode = hentSaksbilde().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotBehandlingId2)
+        val sisteBehandlingForPeriode = hentSaksbilde().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotBehandlingId1)
         val forventedeVarsler =
             setOf(PersonQueryTestVarsel(behandlingId1, "EN_KODE"), PersonQueryTestVarsel(behandlingId2, "EN_KODE"))
 
@@ -324,9 +168,9 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery()
+        val body = hentSaksbilde()
 
-        val perioder = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
+        val perioder = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
         assertEquals(2, perioder.size())
         val responseperiode1 = perioder.first { it["vedtaksperiodeId"].stringValue() == periode1.id.toString() }
         val responseperiode2 = perioder.first { it["vedtaksperiodeId"].stringValue() == periode2.id.toString() }
@@ -344,14 +188,14 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode(personRef)
         val (id, fom, tom) = PERIODE
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(fom, tom, id)
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(periodeMedOppgaveSnapshot))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery()
+        val body = hentSaksbilde()
 
-        val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
+        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
         assertFalse(periode["handlinger"].isEmpty)
         assertTrue(periode["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
@@ -363,16 +207,16 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(personRef)
         val (id, fom, tom) = PERIODE
         val eksternDokumentId = UUID.randomUUID()
-        val graphQLHendelse = opprettSnapshotHendelse(eksternDokumentId)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id, hendelser = listOf(graphQLHendelse))
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val hendelseSnapshot = opprettSnapshotHendelse(eksternDokumentId)
+        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(fom, tom, id, hendelser = listOf(hendelseSnapshot))
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(periodeMedOppgaveSnapshot))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery()
+        val body = hentSaksbilde()
 
         val hendelse =
-            body["data"]["person"]["arbeidsgivere"]
+            body["arbeidsgivere"]
                 .first()["behandlinger"]
                 .first()["perioder"]
                 .first()["hendelser"]
@@ -396,9 +240,9 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery()
+        val body = hentSaksbilde()
 
-        val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
+        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
         assertEquals(grunnbeløpsjustertGjennomsnitt, periode["grunnbelopsjustertGjennomsnitt"].asBigDecimal())
     }
 
@@ -481,10 +325,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 ),
         )
 
-        val body = runPersonQuery(person.id)
+        val body = hentSaksbilde(person.id)
 
         val avslag =
-            body["data"]["person"]["arbeidsgivere"]
+            body["arbeidsgivere"]
                 .first()["behandlinger"]
                 .first()["perioder"]
                 .first()["avslag"]
@@ -497,17 +341,17 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `kanAvvises-flagget inkluderes i GraphQL-svaret`() {
+    fun `kanAvvises-flagget inkluderes i saksbildet`() {
         opprettVedtaksperiode(opprettPerson(), kanAvvises = false)
         val (id, fom, tom) = PERIODE
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(fom, tom, id)
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(periodeMedOppgaveSnapshot))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery()
+        val body = hentSaksbilde()
 
-        val periode = body["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
+        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
         val forventedeHandlinger =
             setOf(
                 ApiHandling(ApiPeriodehandling.UTBETALE, true, null),
@@ -518,92 +362,108 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `andre fødsesnummer inkluderes i GraphQL-svaret`() {
+    fun `andre fødselsnumre inkluderes i saksbildet`() {
         val annetFødselsnummer = lagFødselsnummer()
         opprettPerson(fødselsnummer = annetFødselsnummer, aktørId = AKTØRID)
         opprettVedtaksperiode(opprettPerson(aktørId = AKTØRID))
         val (id, fom, tom) = PERIODE
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
+        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(fom, tom, id)
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(periodeMedOppgaveSnapshot))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery()
+        val body = hentSaksbilde()
 
         assertContains(
-            body["data"]["person"]["andreFodselsnummer"].toList().map { it["fodselsnummer"].asString() },
+            body["andreFodselsnummer"].toList().map { it["fodselsnummer"].asString() },
             annetFødselsnummer,
         )
     }
 
-    private fun runPersonQuery(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)) =
-        runQuery(
-            """
-            { 
-                person(personPseudoId: "${opprettPersonPseudoId(identitetsnummer)}") { 
-                    aktorId
-                    andreFodselsnummer {
-                        fodselsnummer
-                        personPseudoId
-                    }
-                    arbeidsgivere {
-                        behandlinger {
-                            id
-                            perioder {
-                                ... on UberegnetPeriode {
-                                    vedtaksperiodeId
-                                    varsler {
-                                        behandlingId
-                                        kode
-                                    }                      
-                                }
-                                ... on BeregnetPeriode {
-                                    vedtaksperiodeId
-                                    grunnbelopsjustertGjennomsnitt
-                                    handlinger { type, tillatt, begrunnelse }
-                                    varsler {
-                                        behandlingId
-                                        kode
-                                    }         
-                                    avslag {
-                                        type, begrunnelse, opprettet, saksbehandlerIdent, invalidert
-                                    }
-                                }
-                                hendelser {
-                                    ... on SoknadArbeidsledig {
-                                        id
-                                        fom
-                                        tom
-                                        eksternDokumentId
-                                        rapportertDato
-                                        sendtNav
-                                        type
-                                    }
-                                    ... on SoknadNav {
-                                        id
-                                        fom
-                                        tom
-                                        eksternDokumentId
-                                        rapportertDato
-                                        sendtNav
-                                        type
-                                    }
-                                }
-                            }               
-                        }    
-                    }
-                } 
-            }
-        """,
-        )
+    @Test
+    fun `henter refusjonsopplysninger`() {
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettVedtaksperiode(opprettPerson())
+        opprettAvviksvurdering(vilkårsgrunnlagId = vilkårsgrunnlagId)
 
-    private fun opprettPersonPseudoId(identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(FØDSELSNUMMER)): UUID =
-        personPseudoIdProvider
-            .nyPersonPseudoId(identitetsnummer)
-            .value
+        val body =
+            hentSaksbilde()
+        val refusjonsopplysning =
+            body["vilkarsgrunnlagV2"]
+                .first()["arbeidsgiverrefusjoner"]
+                .first()
+                .get("refusjonsopplysninger")
+                .first()
+        assertEquals("2020-01-01", refusjonsopplysning["fom"].asString())
+        assertTrue(refusjonsopplysning["tom"].isNull)
+        assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
+    }
+
+    @Test
+    fun `beriker vilkårsgrunnlag med data fra avviksvurdering`() {
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettAvviksvurdering(avviksprosent = 26.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettVedtaksperiode(opprettPerson())
+
+        val body =
+            hentSaksbilde()
+
+        val vilkårsgrunnlag = body["vilkarsgrunnlagV2"].first()
+        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["beregningsgrunnlag"].asString())
+        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["sammenligningsgrunnlag"].asString())
+        assertEquals("26", vilkårsgrunnlag["avviksvurdering"]["avviksprosent"].asString())
+        assertEquals(2, vilkårsgrunnlag["inntekter"].size())
+
+        val sammenligningsgrunnlag1 = vilkårsgrunnlag["inntekter"][0]["sammenligningsgrunnlag"]
+        assertEquals(4000.0, sammenligningsgrunnlag1["belop"].asDouble())
+        assertEquals(2, sammenligningsgrunnlag1["inntektFraAOrdningen"].size())
+
+        val inntekt1_1 = sammenligningsgrunnlag1["inntektFraAOrdningen"][0]
+        assertEquals(YearMonth.from(1 jan 2018), inntekt1_1["maned"].asYearMonth())
+        assertEquals(2000.0, inntekt1_1["sum"].asDouble())
+        val inntekt1_2 = sammenligningsgrunnlag1["inntektFraAOrdningen"][1]
+        assertEquals(YearMonth.from(1 feb 2018), inntekt1_2["maned"].asYearMonth())
+        assertEquals(2000.0, inntekt1_2["sum"].asDouble())
+
+        val sammenligningsgrunnlag2 = vilkårsgrunnlag["inntekter"][1]["sammenligningsgrunnlag"]
+        assertEquals(6000.0, sammenligningsgrunnlag2["belop"].asDouble())
+        assertEquals(4, sammenligningsgrunnlag2["inntektFraAOrdningen"].size())
+
+        val inntekt2_1 = sammenligningsgrunnlag2["inntektFraAOrdningen"][0]
+        assertEquals(YearMonth.from(1 jan 2018), inntekt2_1["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_1["sum"].asDouble())
+        val inntekt2_2 = sammenligningsgrunnlag2["inntektFraAOrdningen"][1]
+        assertEquals(YearMonth.from(1 feb 2018), inntekt2_2["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_2["sum"].asDouble())
+        val inntekt2_3 = sammenligningsgrunnlag2["inntektFraAOrdningen"][2]
+        assertEquals(YearMonth.from(1 mar 2018), inntekt2_3["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_3["sum"].asDouble())
+        val inntekt2_4 = sammenligningsgrunnlag2["inntektFraAOrdningen"][3]
+        assertEquals(YearMonth.from(1 apr 2018), inntekt2_4["maned"].asYearMonth())
+        assertEquals(1500.0, inntekt2_4["sum"].asDouble())
+    }
+
+    @Test
+    fun `henter sykepengegrunnlagsgrense`() {
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettAvviksvurdering(avviksprosent = 0.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettVedtaksperiode(opprettPerson())
+
+        val body =
+            hentSaksbilde()
+        val sykepengegrunnlagsgrense =
+            body["vilkarsgrunnlagV2"].first()["sykepengegrunnlagsgrense"]
+
+        assertEquals(100_000, sykepengegrunnlagsgrense["grunnbelop"].asInt())
+        assertEquals(600_000, sykepengegrunnlagsgrense["grense"].asInt())
+        assertEquals("2020-01-01", sykepengegrunnlagsgrense["virkningstidspunkt"].asString())
+    }
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {
-        val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
+        val jsonNode = this["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
         val perioder = objectMapper.treeToValue<List<PersonQueryTestPeriode>>(jsonNode)
         return perioder.first { periode -> vedtaksperiodeId == periode.vedtaksperiodeId }
     }
@@ -612,46 +472,29 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
     ): PersonQueryTestPeriode {
-        val jsonNode = this["data"]["person"]["arbeidsgivere"].first()["behandlinger"]
+        val jsonNode = this["arbeidsgivere"].first()["behandlinger"]
         val behandlinger = objectMapper.treeToValue<List<PersonQueryTestBehandling>>(jsonNode)
         val behandling = behandlinger.first { behandling -> behandlingId == behandling.id }
         return behandling.perioder.first { periode -> vedtaksperiodeId == periode.vedtaksperiodeId }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private data class PersonQueryTestBehandling(
         val id: UUID,
         val perioder: List<PersonQueryTestPeriode>,
     )
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private data class PersonQueryTestPeriode(
         val vedtaksperiodeId: UUID,
         val varsler: Set<PersonQueryTestVarsel>,
     )
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private data class PersonQueryTestVarsel(
         val behandlingId: UUID,
         val kode: String,
     )
 
     private fun Periode.tilBeregnetPeriode(): SnapshotBeregnetPeriode = opprettBeregnetPeriode(fom, tom, id)
-
-    private class Logglytter {
-        private val appender =
-            ListAppender<ILoggingEvent>().apply {
-                (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
-                start()
-            }
-
-        fun assertBleLogget(
-            melding: String,
-            level: Level,
-        ) = assertTrue(appender.list.count { it.message.contains(melding) && it.level == level } == 1) {
-            """
-            Forventet at loggen skulle inneholde ett $level-innslag som inneholder teksten:
-                $melding
-            Dette ble logget:
-                ${appender.list}}
-            """.trimIndent()
-        }
-    }
 }

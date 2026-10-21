@@ -9,7 +9,6 @@
 
 package no.nav.helse.spesialist.api.rest.saksbilde
 
-import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -23,7 +22,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-@GraphQLName("VilkarsgrunnlagV2")
 @OptIn(ExperimentalSerializationApi::class)
 @JsonClassDiscriminator("type")
 @JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -36,7 +34,6 @@ sealed interface ApiVilkårsgrunnlagV2 {
     val sykepengegrunnlag: Double
 }
 
-@GraphQLName("VilkarsgrunnlagInfotrygdV2")
 @Serializable
 @SerialName("ApiVilkårsgrunnlagInfotrygdV2")
 data class ApiVilkårsgrunnlagInfotrygdV2(
@@ -49,7 +46,6 @@ data class ApiVilkårsgrunnlagInfotrygdV2(
     val opptjeningsvurderingId: UUID,
 ) : ApiVilkårsgrunnlagV2
 
-@GraphQLName("VilkarsgrunnlagSpleisV2")
 @Serializable
 @SerialName("ApiVilkårsgrunnlagSpleisV2")
 data class ApiVilkårsgrunnlagSpleisV2(
@@ -73,7 +69,6 @@ data class ApiVilkårsgrunnlagSpleisV2(
     val forsikringsvurderingId: UUID?,
 ) : ApiVilkårsgrunnlagV2
 
-@GraphQLName("VilkarsgrunnlagAvviksvurdering")
 @Serializable
 data class ApiVilkårsgrunnlagAvviksvurdering(
     @get:JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -84,7 +79,6 @@ data class ApiVilkårsgrunnlagAvviksvurdering(
     val sammenligningsgrunnlag: BigDecimal,
 )
 
-@GraphQLName("VilkarsgrunnlagVurdering")
 @Serializable
 enum class ApiVilkårsgrunnlagVurdering {
     OPPFYLT,
@@ -92,7 +86,6 @@ enum class ApiVilkårsgrunnlagVurdering {
     IKKE_VURDERT,
 }
 
-@GraphQLName("Sykepengegrunnlagsgrense")
 @Serializable
 data class ApiSykepengegrunnlagsgrense(
     val grunnbelop: Int,

@@ -7,9 +7,6 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
-import no.nav.helse.spesialist.api.graphql.SpesialistSchema
-import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
-import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
 import no.nav.helse.spesialist.api.rest.personer.saksbilde.ApiOppgaveService
 import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
@@ -66,25 +63,10 @@ class ApiModule(
 
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao)
 
-    private val spesialistSchema =
-        SpesialistSchema(
-            queryHandlers =
-                QueryHandlers(
-                    person =
-                        PersonQueryHandler(
-                            saksbildeHenter = saksbildeHenter,
-                            sessionFactory = sessionFactory,
-                            personPseudoIdProvider = personPseudoIdProvider,
-                            populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
-                        ),
-                ),
-        )
-
     fun setUpApi(application: Application) {
         configureKtorApplication(
             ktorApplication = application,
             apiModuleConfiguration = configuration,
-            spesialistSchema = spesialistSchema,
             sessionFactory = sessionFactory,
             opptegnelseListener = opptegnelseListener,
             meldingPubliserer = meldingPubliserer,

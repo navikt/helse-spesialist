@@ -38,8 +38,8 @@ Onion architecture with strict dependency direction — outer layers depend inwa
 
 ```
 spesialist-bootstrap                 ← App entry point, wires all modules together
-  ├── spesialist-api                 ← REST (Ktor + OpenAPI) and GraphQL (graphql-kotlin) endpoints
-  │     └── spesialist-api-schema    ← GraphQL schema definitions, REST resource types
+  ├── spesialist-api                 ← REST endpoints (Ktor + OpenAPI)
+  │     └── spesialist-api-schema    ← REST resource and response types
   ├── spesialist-kafka               ← Rapids & Rivers message handlers (40+ rivers)
   ├── spesialist-db                  ← PostgreSQL Repository and DAO implementations (Kotliquery)
   │     └── spesialist-db-migrations ← Flyway migration scripts (SQL), builds as a self-contained runtime
@@ -72,9 +72,7 @@ spesialist-bootstrap                 ← App entry point, wires all modules toge
 
 ### API Layer (spesialist-api)
 
-- **Migrering fra GraphQL til REST pågår** — nye endepunkter skal lages som REST, ikke GraphQL
 - REST: Ktor typed routing with `@Resource` annotations and `RestBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>` handler interfaces
-- GraphQL (utfases): Query and Mutation handler classes (e.g., `PersonQueryHandler`, `TildelingMutationHandler`)
 - JWT authentication via Nimbus JOSE
 
 ### Database (spesialist-db)

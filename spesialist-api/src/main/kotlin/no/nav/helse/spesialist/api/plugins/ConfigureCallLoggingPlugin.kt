@@ -23,5 +23,5 @@ fun CallLoggingConfig.configureCallLoggingPlugin() {
         .forEach { mdcKey ->
             mdc(mdcKey.value) { it.mdcMapAttribute[mdcKey] }
         }
-    filter { call -> call.request.path().let { it.startsWith("/graphql") || it.startsWith("/api/") } }
+    filter { call -> call.request.path().startsWith("/api/") }
 }

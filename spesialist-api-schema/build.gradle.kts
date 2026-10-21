@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.graphqlKotlin.server.ktor)
     implementation(libs.ktor.server.resources)
+    implementation(libs.bundles.jackson)
     implementation(libs.kotlinx.serialization.json)
 }

@@ -18,8 +18,8 @@ class PgPeriodehistorikkApiDao internal constructor(
         utbetalingId: UUID?,
         spleisBehandlingId: UUID,
     ) = asSQL(
-        // Fiklete greier, for å unngå sequential scan. Spørringen gjøres mange ganger når GraphQL skal bygge
-        // person-dataene.
+        // Fiklete greier, for å unngå sequential scan. Spørringen gjøres mange ganger når saksbildet
+        // for en person bygges.
         """
         WITH innslag_med_utbetaling_id AS
         (

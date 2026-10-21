@@ -1,8 +1,16 @@
 package no.nav.helse.spesialist.e2etests.tests
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.ResourceLock
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -35,6 +43,31 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                 "arbeidsgivere.behandlinger.perioder.varsler.handling",
             )
         }
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
+    fun `auditlogger oppslag i saksbildet`() {
+        // Given:
+        søknadOgGodkjenningbehovKommerInn()
+        val auditlogg =
+            ListAppender<ILoggingEvent>().apply {
+                (LoggerFactory.getLogger("auditLogger") as Logger).addAppender(this)
+                start()
+            }
+
+        medPersonISpeil {
+            auditlogg.list.clear()
+
+            // When:
+            hentOppdatertPerson()
+        }
+
+        // Then:
+        val innslag = auditlogg.list.filter { "duid=${testContext.person.fødselsnummer}" in it.message }
+        assertEquals(1, innslag.size)
+        assertEquals(Level.INFO, innslag.single().level)
+        assertTrue("suid=${saksbehandlerIdent().value}" in innslag.single().message)
     }
 
     // language=json

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.testfixtures
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -71,9 +70,6 @@ class ApiModuleIntegrationTestFixture(
                 get("/local-token") {
                     return@get call.respond<String>(message = token)
                 }
-                get("playground") {
-                    call.respondText(buildPlaygroundHtml(), ContentType.Text.Html)
-                }
                 get("/bruker") {
                     return@get call.respond(
                         mapOf(
@@ -88,14 +84,6 @@ class ApiModuleIntegrationTestFixture(
             }
         }
     }
-
-    private fun buildPlaygroundHtml() =
-        Application::class.java.classLoader
-            .getResource("graphql-playground.html")
-            ?.readText()
-            ?.replace("\${graphQLEndpoint}", "graphql")
-            ?.replace("\${subscriptionsEndpoint}", "subscriptions")
-            ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
 
     companion object {
         private const val CLIENT_ID = "en-client-id"

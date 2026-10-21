@@ -9,7 +9,6 @@
 
 package no.nav.helse.spesialist.api.rest.saksbilde
 
-import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseContextualSerialization
 import java.math.BigDecimal
@@ -18,14 +17,12 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-@GraphQLName("Saksbehandler")
 @Serializable
 data class ApiSaksbehandler(
     val navn: String,
     val ident: String?,
 )
 
-@GraphQLName("Tildeling")
 @Serializable
 data class ApiSaksbildeTildeling(
     val navn: String,
@@ -33,14 +30,12 @@ data class ApiSaksbildeTildeling(
     val oid: UUID,
 )
 
-@GraphQLName("PaVent")
 @Serializable
 data class ApiPaVent(
     val frist: LocalDate?,
     val oid: UUID,
 )
 
-@GraphQLName("Avslag")
 @Serializable
 data class ApiAvslag(
     val type: ApiAvslagstype,
@@ -50,7 +45,6 @@ data class ApiAvslag(
     val invalidert: Boolean,
 )
 
-@GraphQLName("VedtakBegrunnelse")
 @Serializable
 data class ApiVedtakBegrunnelse(
     val utfall: ApiVedtakUtfall,
@@ -59,7 +53,6 @@ data class ApiVedtakBegrunnelse(
     val saksbehandlerIdent: String,
 )
 
-@GraphQLName("Annullering")
 @Serializable
 data class ApiAnnullering(
     val saksbehandlerIdent: String,
@@ -71,14 +64,12 @@ data class ApiAnnullering(
     val vedtaksperiodeId: UUID,
 )
 
-@GraphQLName("AnnetFodselsnummer")
 @Serializable
 data class ApiAnnetFodselsnummer(
     val fodselsnummer: String,
     val personPseudoId: UUID,
 )
 
-@GraphQLName("Person")
 @Serializable
 data class ApiSaksbildePerson(
     val aktorId: String,

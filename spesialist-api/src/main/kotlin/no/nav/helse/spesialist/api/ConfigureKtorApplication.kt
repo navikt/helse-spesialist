@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import com.auth0.jwk.JwkProviderBuilder
-import com.expediagroup.graphql.server.ktor.GraphQL
 import com.github.navikt.tbd_libs.populasjonstilgang.api.PopulasjonstilgangskontrollProvider
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.ktor.server.application.Application
@@ -21,9 +20,6 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.auth.configureJwtAuthentication
-import no.nav.helse.spesialist.api.graphql.SpesialistSchema
-import no.nav.helse.spesialist.api.graphql.configureGraphQLPlugin
-import no.nav.helse.spesialist.api.graphql.graphQLRoute
 import no.nav.helse.spesialist.api.plugins.configureCallIdPlugin
 import no.nav.helse.spesialist.api.plugins.configureCallLoggingPlugin
 import no.nav.helse.spesialist.api.plugins.configureContentNegotiationPlugin
@@ -49,7 +45,6 @@ import java.net.URI
 fun configureKtorApplication(
     ktorApplication: Application,
     apiModuleConfiguration: ApiModule.Configuration,
-    spesialistSchema: SpesialistSchema,
     sessionFactory: SessionFactory,
     opptegnelseListener: OpptegnelseListener,
     meldingPubliserer: MeldingPubliserer,
@@ -79,7 +74,6 @@ fun configureKtorApplication(
         }
         install(SSE)
         install(Resources) { configureResourcesPlugin() }
-        val graphQLPlugin = install(GraphQL.Plugin) { configureGraphQLPlugin(spesialistSchema) }
 
         authentication {
             jwt("oidc") {
@@ -94,7 +88,6 @@ fun configureKtorApplication(
         }
 
         routing {
-            graphQLRoute(graphQLPlugin)
             restRoutes(
                 restAdapter =
                     RestAdapter(

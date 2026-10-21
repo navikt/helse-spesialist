@@ -15,7 +15,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.application.Forsikringsvurdering
 import no.nav.helse.spesialist.application.ForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.InMemoryPersonPseudoIdProvider
@@ -70,7 +69,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         private set
     val snapshothenter = mockk<Snapshothenter>()
     val personPseudoIdProvider = InMemoryPersonPseudoIdProvider()
-    val populasjonstilgangskontrollProvider = InMemoryPopulasjonstilgangskontrollProvider()
     private val testRapid = TestRapid()
     val inspektør get() = testRapid.inspektør
     private val meldingssender = Meldingssender(testRapid)

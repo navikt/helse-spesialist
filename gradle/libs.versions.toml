@@ -1,7 +1,6 @@
 [versions]
 kotlin = "2.4.20"
 flyway = "13.9.0"
-graphqlKotlin = "10.2.2"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026091610031789545782"
 tbdLibs = "20261013.1613"
@@ -18,7 +17,6 @@ caffeine = "com.github.ben-manes.caffeine:caffeine:3.3.0"
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 
-graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphqlKotlin" }
 
 hikari = "com.zaxxer:HikariCP:7.1.0"
 
