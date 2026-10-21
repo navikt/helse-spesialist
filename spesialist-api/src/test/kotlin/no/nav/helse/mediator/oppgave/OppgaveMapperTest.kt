@@ -1,10 +1,10 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilEgenskaperForVisning
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.OppgaveMapper.tilEgenskaperForVisning
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiEgenskap
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiKategori
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiOppgaveegenskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

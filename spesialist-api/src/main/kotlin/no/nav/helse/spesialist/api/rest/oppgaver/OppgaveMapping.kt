@@ -2,11 +2,11 @@ package no.nav.helse.spesialist.api.rest.oppgaver
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjon
 import no.nav.helse.spesialist.api.rest.ApiOppgaveProjeksjonSide
 import no.nav.helse.spesialist.api.rest.ApiPersonnavn
 import no.nav.helse.spesialist.api.rest.ApiTildeling
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiEgenskap
 import no.nav.helse.spesialist.application.PersonPseudoIdProvider
 import no.nav.helse.spesialist.domain.*
 import no.nav.helse.spesialist.domain.oppgave.Egenskap

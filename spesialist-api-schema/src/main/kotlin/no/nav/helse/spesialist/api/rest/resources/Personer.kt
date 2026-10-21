@@ -28,6 +28,11 @@ class Personer {
         val parent: Personer = Personer(),
         val pseudoId: String,
     ) {
+        @Resource("saksbilde")
+        class Saksbilde(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("behandlende-enhet")
         class BehandlendeEnhet(
             val parent: PersonPseudoId,

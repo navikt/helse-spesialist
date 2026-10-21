@@ -1,15 +1,34 @@
-package no.nav.helse.spesialist.api.graphql.schema
+@file:UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+    YearMonth::class,
+)
+
+package no.nav.helse.spesialist.api.rest.saksbilde
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseContextualSerialization
+import kotlinx.serialization.json.JsonClassDiscriminator
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.time.YearMonth
+import java.util.UUID
 
 @GraphQLName("Inntektstype")
+@Serializable
 enum class ApiInntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
 
 @GraphQLName("Periodetype")
+@Serializable
 enum class ApiPeriodetype {
     FORLENGELSE,
     FORSTEGANGSBEHANDLING,
@@ -18,6 +37,7 @@ enum class ApiPeriodetype {
 }
 
 @GraphQLName("Periodetilstand")
+@Serializable
 enum class ApiPeriodetilstand {
     UtbetalingFeilet,
     RevurderingFeilet,
@@ -40,6 +60,7 @@ enum class ApiPeriodetilstand {
 }
 
 @GraphQLName("Utbetalingstatus")
+@Serializable
 enum class ApiUtbetalingstatus {
     ANNULLERT,
     FORKASTET,
@@ -55,6 +76,7 @@ enum class ApiUtbetalingstatus {
 }
 
 @GraphQLName("Utbetalingtype")
+@Serializable
 enum class ApiUtbetalingtype {
     ANNULLERING,
     ETTERUTBETALING,
@@ -65,7 +87,8 @@ enum class ApiUtbetalingtype {
 }
 
 @GraphQLName("Varselstatus")
-enum class ApiVarselstatus {
+@Serializable
+enum class ApiSaksbildeVarselstatus {
     AKTIV,
     VURDERT,
     GODKJENT,
@@ -73,6 +96,7 @@ enum class ApiVarselstatus {
 }
 
 @GraphQLName("Vurdering")
+@Serializable
 data class ApiVurdering(
     val automatisk: Boolean,
     val godkjent: Boolean,
@@ -81,6 +105,7 @@ data class ApiVurdering(
 )
 
 @GraphQLName("Simuleringslinje")
+@Serializable
 data class ApiSimuleringslinje(
     val fom: LocalDate,
     val tom: LocalDate,
@@ -89,6 +114,7 @@ data class ApiSimuleringslinje(
 )
 
 @GraphQLName("Simuleringsdetaljer")
+@Serializable
 data class ApiSimuleringsdetaljer(
     val fom: LocalDate,
     val tom: LocalDate,
@@ -106,6 +132,7 @@ data class ApiSimuleringsdetaljer(
 )
 
 @GraphQLName("Simuleringsutbetaling")
+@Serializable
 data class ApiSimuleringsutbetaling(
     val mottakerId: String,
     val mottakerNavn: String,
@@ -115,6 +142,7 @@ data class ApiSimuleringsutbetaling(
 )
 
 @GraphQLName("Simuleringsperiode")
+@Serializable
 data class ApiSimuleringsperiode(
     val fom: LocalDate,
     val tom: LocalDate,
@@ -122,6 +150,7 @@ data class ApiSimuleringsperiode(
 )
 
 @GraphQLName("Simulering")
+@Serializable
 data class ApiSimulering(
     val fagsystemId: String,
     val tidsstempel: LocalDateTime,
@@ -131,6 +160,7 @@ data class ApiSimulering(
 )
 
 @GraphQLName("Utbetaling")
+@Serializable
 data class ApiUtbetaling(
     val id: UUID,
     val arbeidsgiverFagsystemId: String,
@@ -145,13 +175,15 @@ data class ApiUtbetaling(
 )
 
 @GraphQLName("Periodevilkar")
+@Serializable
 data class ApiPeriodevilkar(
     val alder: ApiAlder,
     val sykepengedager: ApiSykepengedager,
 )
 
 @GraphQLName("Kommentar")
-data class ApiKommentar(
+@Serializable
+data class ApiSaksbildeKommentar(
     val id: Int,
     val tekst: String,
     val opprettet: LocalDateTime,
@@ -160,104 +192,127 @@ data class ApiKommentar(
 )
 
 @GraphQLName("Historikkinnslag")
+@OptIn(ExperimentalSerializationApi::class)
+@JsonClassDiscriminator("type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@Serializable
 sealed interface ApiHistorikkinnslag {
     val id: Int
-    val type: ApiPeriodehistorikkType
+
+    @GraphQLName("type")
+    val historikktype: ApiPeriodehistorikkType
     val timestamp: LocalDateTime
     val saksbehandlerIdent: String?
     val dialogRef: Int?
 }
 
 @GraphQLName("LagtPaVent")
+@Serializable
+@SerialName("ApiLagtPaVent")
 data class ApiLagtPaVent(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
     val arsaker: List<String>,
     val frist: LocalDate?,
     val notattekst: String?,
-    val kommentarer: List<ApiKommentar>,
+    val kommentarer: List<ApiSaksbildeKommentar>,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("EndrePaVent")
+@Serializable
+@SerialName("ApiEndrePaVent")
 data class ApiEndrePaVent(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
     val arsaker: List<String>,
     val frist: LocalDate?,
     val notattekst: String?,
-    val kommentarer: List<ApiKommentar>,
+    val kommentarer: List<ApiSaksbildeKommentar>,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("FjernetFraPaVent")
+@Serializable
+@SerialName("ApiFjernetFraPaVent")
 data class ApiFjernetFraPaVent(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("TotrinnsvurderingRetur")
+@Serializable
+@SerialName("ApiTotrinnsvurderingRetur")
 data class ApiTotrinnsvurderingRetur(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
     val notattekst: String?,
-    val kommentarer: List<ApiKommentar>,
+    val kommentarer: List<ApiSaksbildeKommentar>,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("StansAutomatiskBehandlingSaksbehandler")
+@Serializable
+@SerialName("ApiStansAutomatiskBehandlingSaksbehandler")
 data class ApiStansAutomatiskBehandlingSaksbehandler(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
     val notattekst: String?,
-    val kommentarer: List<ApiKommentar>,
+    val kommentarer: List<ApiSaksbildeKommentar>,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("OpphevStansAutomatiskBehandlingSaksbehandler")
+@Serializable
+@SerialName("ApiOpphevStansAutomatiskBehandlingSaksbehandler")
 data class ApiOpphevStansAutomatiskBehandlingSaksbehandler(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
     val notattekst: String?,
-    val kommentarer: List<ApiKommentar>,
+    val kommentarer: List<ApiSaksbildeKommentar>,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("PeriodeHistorikkElementNy")
+@Serializable
+@SerialName("ApiPeriodeHistorikkElementNy")
 data class ApiPeriodeHistorikkElementNy(
     override val id: Int,
-    override val type: ApiPeriodehistorikkType,
+    @GraphQLName("type") override val historikktype: ApiPeriodehistorikkType,
     override val timestamp: LocalDateTime,
     override val saksbehandlerIdent: String?,
     override val dialogRef: Int?,
 ) : ApiHistorikkinnslag
 
 @GraphQLName("Faresignal")
+@Serializable
 data class ApiFaresignal(
     val beskrivelse: String,
     val kategori: List<String>,
 )
 
 @GraphQLName("Risikovurdering")
+@Serializable
 data class ApiRisikovurdering(
     val funn: List<ApiFaresignal>?,
     val kontrollertOk: List<ApiFaresignal>,
 )
 
 @GraphQLName("VarselDTO")
+@Serializable
 data class ApiVarselDTO(
     val id: UUID,
     val behandlingId: UUID,
@@ -268,16 +323,21 @@ data class ApiVarselDTO(
     val forklaring: String?,
     val handling: String?,
     val vurdering: ApiVarselvurderingDTO?,
-) {
-    @GraphQLName("VarselvurderingDTO")
-    data class ApiVarselvurderingDTO(
-        val ident: String,
-        val tidsstempel: LocalDateTime,
-        val status: ApiVarselstatus,
-    )
-}
+)
+
+@GraphQLName("VarselvurderingDTO")
+@Serializable
+data class ApiVarselvurderingDTO(
+    val ident: String,
+    val tidsstempel: LocalDateTime,
+    val status: ApiSaksbildeVarselstatus,
+)
 
 @GraphQLName("Periode")
+@OptIn(ExperimentalSerializationApi::class)
+@JsonClassDiscriminator("type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@Serializable
 sealed interface ApiPeriode {
     val behandlingId: UUID
     val erForkastet: Boolean
@@ -297,6 +357,8 @@ sealed interface ApiPeriode {
 }
 
 @GraphQLName("UberegnetPeriode")
+@Serializable
+@SerialName("ApiUberegnetPeriode")
 data class ApiUberegnetPeriode(
     override val behandlingId: UUID,
     override val erForkastet: Boolean,
@@ -316,12 +378,14 @@ data class ApiUberegnetPeriode(
 ) : ApiPeriode
 
 @GraphQLName("Periodehandling")
+@Serializable
 enum class ApiPeriodehandling {
     UTBETALE,
     AVVISE,
 }
 
 @GraphQLName("Handling")
+@Serializable
 data class ApiHandling(
     val type: ApiPeriodehandling,
     val tillatt: Boolean,
@@ -329,6 +393,8 @@ data class ApiHandling(
 )
 
 @GraphQLName("BeregnetPeriode")
+@Serializable
+@SerialName("ApiBeregnetPeriode")
 class ApiBeregnetPeriode(
     override val behandlingId: UUID,
     override val erForkastet: Boolean,
@@ -345,6 +411,7 @@ class ApiBeregnetPeriode(
     override val varsler: List<ApiVarselDTO>,
     override val hendelser: List<ApiHendelse>,
     override val historikkinnslag: List<ApiHistorikkinnslag>,
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING)
     val grunnbelopsjustertGjennomsnitt: BigDecimal?,
     val oppgave: ApiOppgaveForPeriodevisning?,
     val handlinger: List<ApiHandling>,
@@ -366,6 +433,7 @@ class ApiBeregnetPeriode(
 ) : ApiPeriode
 
 @GraphQLName("PeriodehistorikkType")
+@Serializable
 enum class ApiPeriodehistorikkType {
     TOTRINNSVURDERING_TIL_GODKJENNING,
     TOTRINNSVURDERING_RETUR,
@@ -380,12 +448,14 @@ enum class ApiPeriodehistorikkType {
 }
 
 @GraphQLName("Alder")
+@Serializable
 data class ApiAlder(
     val alderSisteSykedag: Int,
     val oppfylt: Boolean,
 )
 
 @GraphQLName("Sykepengedager")
+@Serializable
 data class ApiSykepengedager(
     val forbrukteSykedager: Int? = null,
     val gjenstaendeSykedager: Int? = null,
@@ -395,12 +465,15 @@ data class ApiSykepengedager(
 )
 
 @GraphQLName("PensjonsgivendeInntekt")
+@Serializable
 data class ApiPensjonsgivendeInntekt(
+    @get:JsonFormat(shape = JsonFormat.Shape.STRING)
     val arligBelop: BigDecimal,
     val inntektsar: Int,
 )
 
 @GraphQLName("Annulleringskandidat")
+@Serializable
 data class ApiAnnulleringskandidat(
     val fom: LocalDate,
     val organisasjonsnummer: String,

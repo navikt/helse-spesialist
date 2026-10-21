@@ -68,6 +68,7 @@ class IntegrationTestFixture {
     val krrRegistrertStatusHenterMock: KrrRegistrertStatusHenter = mockk(relaxed = true)
     val behandlendeEnhetHenterMock: BehandlendeEnhetHenter = mockk(relaxed = true)
     val personinfoHenterMock: PersoninfoHenter = mockk(relaxed = true)
+    val snapshothenterMock: Snapshothenter = mockk(relaxed = true)
     val forsikringsvurderingHenterMock: ForsikringsvurderingHenter = mockk(relaxed = true)
     val alleIdenterHenterMock: AlleIdenterHenter = mockk(relaxed = true)
     val infotrygdperiodeHenterMock: InfotrygdperiodeHenter = mockk(relaxed = true)
@@ -95,7 +96,7 @@ class IntegrationTestFixture {
                     }
                 },
             environmentToggles = mockk(relaxed = true),
-            snapshothenter = mockk(relaxed = true),
+            snapshothenter = snapshothenterMock,
             krrRegistrertStatusHenter = krrRegistrertStatusHenterMock,
             behandlendeEnhetHenter = behandlendeEnhetHenterMock,
             forsikringsvurderingHenter = forsikringsvurderingHenterMock,

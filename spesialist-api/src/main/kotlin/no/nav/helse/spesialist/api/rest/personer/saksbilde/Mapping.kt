@@ -1,11 +1,11 @@
-package no.nav.helse.spesialist.api.graphql.mapping
+package no.nav.helse.spesialist.api.rest.personer.saksbilde
 
 import no.nav.helse.db.api.VarselDbDto
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehistorikkType
-import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
-import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO.ApiVarselvurderingDTO
-import no.nav.helse.spesialist.api.graphql.schema.ApiVarselstatus
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodehistorikkType
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSaksbildeVarselstatus
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVarselDTO
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varselstatus
 
 fun VarselDbDto.toVarselDto(): ApiVarselDTO {
@@ -26,7 +26,7 @@ fun VarselDbDto.toVarselDto(): ApiVarselDTO {
                     ident = varselvurdering.ident,
                     tidsstempel = varselvurdering.tidsstempel,
                     status =
-                        ApiVarselstatus.valueOf(
+                        ApiSaksbildeVarselstatus.valueOf(
                             status
                                 .let { status ->
                                     when (status) {

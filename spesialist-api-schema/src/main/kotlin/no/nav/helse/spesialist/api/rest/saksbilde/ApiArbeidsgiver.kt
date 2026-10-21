@@ -1,12 +1,30 @@
-package no.nav.helse.spesialist.api.graphql.schema
+@file:UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+    YearMonth::class,
+)
+
+package no.nav.helse.spesialist.api.rest.saksbilde
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDeprecated
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseContextualSerialization
+import kotlinx.serialization.json.JsonClassDiscriminator
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 @GraphQLName("Arbeidsforhold")
+@Serializable
 data class ApiArbeidsforhold(
     val stillingstittel: String,
     val stillingsprosent: Int,
@@ -15,19 +33,25 @@ data class ApiArbeidsforhold(
 )
 
 @GraphQLName("Behandling")
+@Serializable
 data class ApiBehandling(
     val id: UUID,
     val perioder: List<ApiPeriode>,
 )
 
 @GraphQLName("ArbeidsgiverInntekterFraAOrdningen")
+@Serializable
 data class ApiArbeidsgiverInntekterFraAOrdningen(
     val skjaeringstidspunkt: String,
     val inntekter: List<ApiInntektFraAOrdningen>,
 )
 
 @GraphQLName("Overstyring")
-interface ApiOverstyring {
+@OptIn(ExperimentalSerializationApi::class)
+@JsonClassDiscriminator("type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@Serializable
+sealed interface ApiOverstyring {
     val hendelseId: UUID
     val timestamp: LocalDateTime
     val saksbehandler: ApiSaksbehandler
@@ -36,6 +60,8 @@ interface ApiOverstyring {
 }
 
 @GraphQLName("Dagoverstyring")
+@Serializable
+@SerialName("ApiDagoverstyring")
 data class ApiDagoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
@@ -44,18 +70,21 @@ data class ApiDagoverstyring(
     val dager: List<ApiOverstyrtDag>,
     val begrunnelse: String,
     override val vedtaksperiodeId: UUID,
-) : ApiOverstyring {
-    @GraphQLName("OverstyrtDag")
-    data class ApiOverstyrtDag(
-        val dato: LocalDate,
-        val type: ApiDagtype,
-        val fraType: ApiDagtype?,
-        val grad: Int?,
-        val fraGrad: Int?,
-    )
-}
+) : ApiOverstyring
+
+@GraphQLName("OverstyrtDag")
+@Serializable
+data class ApiOverstyrtDag(
+    val dato: LocalDate,
+    val type: ApiDagtype,
+    val fraType: ApiDagtype?,
+    val grad: Int?,
+    val fraGrad: Int?,
+)
 
 @GraphQLName("Inntektoverstyring")
+@Serializable
+@SerialName("ApiInntektoverstyring")
 data class ApiInntektoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
@@ -63,27 +92,31 @@ data class ApiInntektoverstyring(
     override val ferdigstilt: Boolean,
     val inntekt: ApiOverstyrtInntekt,
     override val vedtaksperiodeId: UUID,
-) : ApiOverstyring {
-    @GraphQLName("OverstyrtInntekt")
-    data class ApiOverstyrtInntekt(
-        val forklaring: String,
-        val begrunnelse: String,
-        val manedligInntekt: Double,
-        val fraManedligInntekt: Double?,
-        val skjaeringstidspunkt: LocalDate,
-        val refusjonsopplysninger: List<ApiRefusjonsopplysning>?,
-        val fraRefusjonsopplysninger: List<ApiRefusjonsopplysning>?,
-    )
+) : ApiOverstyring
 
-    @GraphQLName("Refusjonsopplysning")
-    data class ApiRefusjonsopplysning(
-        val fom: LocalDate,
-        val tom: LocalDate?,
-        val belop: Double,
-    )
-}
+@GraphQLName("OverstyrtInntekt")
+@Serializable
+data class ApiOverstyrtInntekt(
+    val forklaring: String,
+    val begrunnelse: String,
+    val manedligInntekt: Double,
+    val fraManedligInntekt: Double?,
+    val skjaeringstidspunkt: LocalDate,
+    val refusjonsopplysninger: List<ApiRefusjonsopplysning>?,
+    val fraRefusjonsopplysninger: List<ApiRefusjonsopplysning>?,
+)
+
+@GraphQLName("Refusjonsopplysning")
+@Serializable
+data class ApiRefusjonsopplysning(
+    val fom: LocalDate,
+    val tom: LocalDate?,
+    val belop: Double,
+)
 
 @GraphQLName("MinimumSykdomsgradOverstyring")
+@Serializable
+@SerialName("ApiMinimumSykdomsgradOverstyring")
 data class ApiMinimumSykdomsgradOverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
@@ -91,24 +124,28 @@ data class ApiMinimumSykdomsgradOverstyring(
     override val ferdigstilt: Boolean,
     val minimumSykdomsgrad: ApiOverstyrtMinimumSykdomsgrad,
     override val vedtaksperiodeId: UUID,
-) : ApiOverstyring {
-    @GraphQLName("OverstyrtMinimumSykdomsgrad")
-    data class ApiOverstyrtMinimumSykdomsgrad(
-        val perioderVurdertOk: List<ApiOverstyrtMinimumSykdomsgradPeriode>,
-        val perioderVurdertIkkeOk: List<ApiOverstyrtMinimumSykdomsgradPeriode>,
-        val begrunnelse: String,
-        @GraphQLDeprecated("Bruk vedtaksperiodeId i stedet")
-        val initierendeVedtaksperiodeId: UUID,
-    )
+) : ApiOverstyring
 
-    @GraphQLName("OverstyrtMinimumSykdomsgradPeriode")
-    data class ApiOverstyrtMinimumSykdomsgradPeriode(
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
-}
+@GraphQLName("OverstyrtMinimumSykdomsgrad")
+@Serializable
+data class ApiOverstyrtMinimumSykdomsgrad(
+    val perioderVurdertOk: List<ApiOverstyrtMinimumSykdomsgradPeriode>,
+    val perioderVurdertIkkeOk: List<ApiOverstyrtMinimumSykdomsgradPeriode>,
+    val begrunnelse: String,
+    @GraphQLDeprecated("Bruk vedtaksperiodeId i stedet")
+    val initierendeVedtaksperiodeId: UUID,
+)
+
+@GraphQLName("OverstyrtMinimumSykdomsgradPeriode")
+@Serializable
+data class ApiOverstyrtMinimumSykdomsgradPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+)
 
 @GraphQLName("Sykepengegrunnlagskjonnsfastsetting")
+@Serializable
+@SerialName("ApiSykepengegrunnlagskjonnsfastsetting")
 data class ApiSykepengegrunnlagskjonnsfastsetting(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
@@ -116,22 +153,25 @@ data class ApiSykepengegrunnlagskjonnsfastsetting(
     override val ferdigstilt: Boolean,
     val skjonnsfastsatt: ApiSkjonnsfastsattSykepengegrunnlag,
     override val vedtaksperiodeId: UUID,
-) : ApiOverstyring {
-    @GraphQLName("SkjonnsfastsattSykepengegrunnlag")
-    data class ApiSkjonnsfastsattSykepengegrunnlag(
-        val arsak: String,
-        val type: ApiSkjonnsfastsettingstype?,
-        val begrunnelse: String?,
-        val begrunnelseMal: String?,
-        val begrunnelseFritekst: String?,
-        val begrunnelseKonklusjon: String?,
-        val arlig: Double,
-        val fraArlig: Double?,
-        val skjaeringstidspunkt: LocalDate,
-    )
-}
+) : ApiOverstyring
+
+@GraphQLName("SkjonnsfastsattSykepengegrunnlag")
+@Serializable
+data class ApiSkjonnsfastsattSykepengegrunnlag(
+    val arsak: String,
+    val type: ApiSkjonnsfastsettingstype?,
+    val begrunnelse: String?,
+    val begrunnelseMal: String?,
+    val begrunnelseFritekst: String?,
+    val begrunnelseKonklusjon: String?,
+    val arlig: Double,
+    val fraArlig: Double?,
+    val skjaeringstidspunkt: LocalDate,
+)
 
 @GraphQLName("Arbeidsforholdoverstyring")
+@Serializable
+@SerialName("ApiArbeidsforholdoverstyring")
 data class ApiArbeidsforholdoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
@@ -145,6 +185,7 @@ data class ApiArbeidsforholdoverstyring(
 ) : ApiOverstyring
 
 @GraphQLName("GhostPeriode")
+@Serializable
 data class ApiGhostPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
@@ -157,6 +198,7 @@ data class ApiGhostPeriode(
 }
 
 @GraphQLName("Arbeidsgiver")
+@Serializable
 data class ApiArbeidsgiver(
     val organisasjonsnummer: String,
     val navn: String,

@@ -1,10 +1,25 @@
-package no.nav.helse.spesialist.api.graphql.schema
+@file:UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+    YearMonth::class,
+)
+
+package no.nav.helse.spesialist.api.rest.saksbilde
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseContextualSerialization
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 @GraphQLName("Kildetype")
+@Serializable
 enum class ApiKildetype {
     INNTEKTSMELDING,
     SAKSBEHANDLER,
@@ -14,6 +29,7 @@ enum class ApiKildetype {
 }
 
 @GraphQLName("Sykdomsdagtype")
+@Serializable
 enum class ApiSykdomsdagtype {
     ARBEIDSDAG,
     ARBEIDSGIVERDAG,
@@ -40,6 +56,7 @@ enum class ApiSykdomsdagtype {
 }
 
 @GraphQLName("Utbetalingsdagtype")
+@Serializable
 enum class ApiUtbetalingsdagtype {
     ARBEIDSDAG,
     ARBEIDSGIVERPERIODEDAG,
@@ -54,6 +71,7 @@ enum class ApiUtbetalingsdagtype {
 }
 
 @GraphQLName("Begrunnelse")
+@Serializable
 enum class ApiBegrunnelse {
     EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE,
     ETTER_DODSDATO,
@@ -72,12 +90,14 @@ enum class ApiBegrunnelse {
 }
 
 @GraphQLName("Kilde")
+@Serializable
 data class ApiKilde(
     val id: UUID,
     val type: ApiKildetype,
 )
 
 @GraphQLName("Utbetalingsinfo")
+@Serializable
 data class ApiUtbetalingsinfo(
     val arbeidsgiverbelop: Int?,
     val inntekt: Int?,
@@ -88,6 +108,7 @@ data class ApiUtbetalingsinfo(
 )
 
 @GraphQLName("Dag")
+@Serializable
 data class ApiDag(
     val dato: LocalDate,
     val grad: Double?,

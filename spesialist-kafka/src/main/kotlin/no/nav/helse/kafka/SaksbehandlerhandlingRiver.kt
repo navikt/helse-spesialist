@@ -38,22 +38,26 @@ class SaksbehandlerhandlingRiver : TransaksjonellRiver() {
         val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asString())
         val kreverTotrinnsvurdering = packet["kreverTotrinnsvurdering"].asBoolean()
 
-        val totrinnsvurdering = if (kreverTotrinnsvurdering) {
-            transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
-            ?: Totrinnsvurdering.ny(fødselsnummer = identitetsnummer.value).also(transaksjon.totrinnsvurderingRepository::lagre)
-        } else null
+        val totrinnsvurdering =
+            if (kreverTotrinnsvurdering) {
+                transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
+                    ?: Totrinnsvurdering.ny(fødselsnummer = identitetsnummer.value).also(transaksjon.totrinnsvurderingRepository::lagre)
+            } else {
+                null
+            }
 
-        val saksbehandlerhandling = Saksbehandlerhandling.ny(
-            id = SaksbehandlerhandlingId(UUID.randomUUID()),
-            identitetsnummer = identitetsnummer,
-            totrinnsvurderingId = totrinnsvurdering?.id(),
-            handlingId = packet["handlingId"].asUUID(),
-            handlingType = enumValueOf<HandlingType>(packet["handlingType"].asString()),
-            saksbehandlerIdent = packet["saksbehandlerIdent"].asString(),
-            tidspunkt = packet["tidspunkt"].asInstant(),
-            skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDateOrNull(),
-            behandlingId = packet["behandlingId"].asUUIDOrNull()?.let { SpleisBehandlingId(it) },
-        )
+        val saksbehandlerhandling =
+            Saksbehandlerhandling.ny(
+                id = SaksbehandlerhandlingId(UUID.randomUUID()),
+                identitetsnummer = identitetsnummer,
+                totrinnsvurderingId = totrinnsvurdering?.id(),
+                handlingId = packet["handlingId"].asUUID(),
+                handlingType = enumValueOf<HandlingType>(packet["handlingType"].asString()),
+                saksbehandlerIdent = packet["saksbehandlerIdent"].asString(),
+                tidspunkt = packet["tidspunkt"].asInstant(),
+                skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDateOrNull(),
+                behandlingId = packet["behandlingId"].asUUIDOrNull()?.let { SpleisBehandlingId(it) },
+            )
 
         transaksjon.saksbehandlerhandlingRepository.lagre(saksbehandlerhandling)
     }

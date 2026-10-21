@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.api.plugins.configureResourcesPlugin
 import no.nav.helse.spesialist.api.plugins.configureStatusPagesPlugin
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.application.AlleIdenterHenter
 import no.nav.helse.spesialist.application.BehandlendeEnhetHenter
@@ -65,6 +66,7 @@ fun configureKtorApplication(
     personPseudoIdProvider: PersonPseudoIdProvider,
     populasjonstilgangskontrollProvider: PopulasjonstilgangskontrollProvider,
     behandlingsstatistikkService: BehandlingsstatistikkService,
+    saksbildeHenter: SaksbildeHenter,
 ) {
     with(ktorApplication) {
         install(CallId) { configureCallIdPlugin() }
@@ -115,6 +117,7 @@ fun configureKtorApplication(
                 infotrygdperiodeHenter = infotrygdperiodeHenter,
                 personPseudoIdProvider = personPseudoIdProvider,
                 behandlingsstatistikkService = behandlingsstatistikkService,
+                saksbildeHenter = saksbildeHenter,
             )
         }
     }

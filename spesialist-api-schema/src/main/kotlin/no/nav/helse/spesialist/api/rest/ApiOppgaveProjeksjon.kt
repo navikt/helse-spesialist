@@ -10,7 +10,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import kotlinx.serialization.Serializable
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiEgenskap
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate

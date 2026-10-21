@@ -8,8 +8,8 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.ApiOppgaveService
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.DataSourceDbQuery

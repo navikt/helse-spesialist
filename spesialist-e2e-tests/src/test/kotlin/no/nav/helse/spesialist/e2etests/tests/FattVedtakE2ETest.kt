@@ -249,7 +249,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                         }
                     }
                 }
-            assertContains(historikkinnslag.map { it["type"].asString() }, "TOTRINNSVURDERING_ATTESTERT")
+            assertContains(historikkinnslag.map { it["historikktype"].asString() }, "TOTRINNSVURDERING_ATTESTERT")
         }
 
         assertGjeldendeOppgavestatus("Ferdigstilt")

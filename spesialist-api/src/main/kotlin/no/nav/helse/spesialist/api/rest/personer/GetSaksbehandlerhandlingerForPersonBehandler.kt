@@ -10,8 +10,7 @@ import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
 import java.time.ZoneId
 
-class GetSaksbehandlerhandlingerForPersonBehandler :
-    GetBehandler<Personer.PersonPseudoId.Saksbehandlerhandlinger, List<ApiSaksbehandlerhandling>, ApiGetSaksbehandlerhandlingerForPersonErrorCode> {
+class GetSaksbehandlerhandlingerForPersonBehandler : GetBehandler<Personer.PersonPseudoId.Saksbehandlerhandlinger, List<ApiSaksbehandlerhandling>, ApiGetSaksbehandlerhandlingerForPersonErrorCode> {
     override val tag = Tags.PERSONER
 
     override fun behandle(

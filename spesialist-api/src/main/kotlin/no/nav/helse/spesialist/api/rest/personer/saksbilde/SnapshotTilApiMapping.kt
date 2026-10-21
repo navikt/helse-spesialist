@@ -1,39 +1,39 @@
-package no.nav.helse.spesialist.api.graphql.mapping
+package no.nav.helse.spesialist.api.rest.personer.saksbilde
 
 import no.nav.helse.db.AvviksvurderingRepository
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
-import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
-import no.nav.helse.spesialist.api.graphql.schema.ApiDag
-import no.nav.helse.spesialist.api.graphql.schema.ApiHendelse
-import no.nav.helse.spesialist.api.graphql.schema.ApiHendelsetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektHentetFraAOrdningen
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektskilde
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektsmelding
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntektstype
-import no.nav.helse.spesialist.api.graphql.schema.ApiKilde
-import no.nav.helse.spesialist.api.graphql.schema.ApiKildetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiOmregnetArsinntekt
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjonselement
-import no.nav.helse.spesialist.api.graphql.schema.ApiSammenligningsgrunnlag
-import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsledig
-import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadFrilans
-import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadNav
-import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadSelvstendig
-import no.nav.helse.spesialist.api.graphql.schema.ApiSykdomsdagtype
-import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagsgrense
-import no.nav.helse.spesialist.api.graphql.schema.ApiSykmelding
-import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsdagtype
-import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsinfo
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagAvviksvurdering
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagInfotrygdV2
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagSpleisV2
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagV2
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagVurdering
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiArbeidsgiverinntekt
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiArbeidsgiverrefusjon
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiBegrunnelse
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiDag
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiHendelse
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiHendelsetype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektFraAOrdningen
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektHentetFraAOrdningen
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektskilde
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektsmelding
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektstype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiKilde
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiKildetype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiOmregnetArsinntekt
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodetilstand
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodetype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonselement
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSammenligningsgrunnlag
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSoknadArbeidsgiver
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSoknadArbeidsledig
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSoknadFrilans
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSoknadNav
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSoknadSelvstendig
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSykdomsdagtype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSykepengegrunnlagsgrense
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiSykmelding
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiUtbetalingsdagtype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiUtbetalingsinfo
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagAvviksvurdering
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagInfotrygdV2
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagSpleisV2
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagV2
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagVurdering
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotBegrunnelse
 import no.nav.helse.spesialist.application.snapshot.SnapshotDag
@@ -172,7 +172,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotInntektsmelding ->
             ApiInntektsmelding(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.INNTEKTSMELDING,
+                hendelsetype = ApiHendelsetype.INNTEKTSMELDING,
                 mottattDato = mottattDato,
                 beregnetInntekt = beregnetInntekt,
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
@@ -181,7 +181,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotSoknadArbeidsgiver ->
             ApiSoknadArbeidsgiver(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.SENDT_SOKNAD_ARBEIDSGIVER,
+                hendelsetype = ApiHendelsetype.SENDT_SOKNAD_ARBEIDSGIVER,
                 fom = fom,
                 tom = tom,
                 rapportertDato = rapportertDato,
@@ -192,7 +192,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotSoknadNav ->
             ApiSoknadNav(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.SENDT_SOKNAD_NAV,
+                hendelsetype = ApiHendelsetype.SENDT_SOKNAD_NAV,
                 fom = fom,
                 tom = tom,
                 rapportertDato = rapportertDato,
@@ -203,7 +203,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotSoknadArbeidsledig ->
             ApiSoknadArbeidsledig(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.SENDT_SOKNAD_ARBEIDSLEDIG,
+                hendelsetype = ApiHendelsetype.SENDT_SOKNAD_ARBEIDSLEDIG,
                 fom = fom,
                 tom = tom,
                 rapportertDato = rapportertDato,
@@ -214,7 +214,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotSoknadFrilans ->
             ApiSoknadFrilans(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.SENDT_SOKNAD_FRILANS,
+                hendelsetype = ApiHendelsetype.SENDT_SOKNAD_FRILANS,
                 fom = fom,
                 tom = tom,
                 rapportertDato = rapportertDato,
@@ -225,7 +225,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotSoknadSelvstendig ->
             ApiSoknadSelvstendig(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.SENDT_SOKNAD_SELVSTENDIG,
+                hendelsetype = ApiHendelsetype.SENDT_SOKNAD_SELVSTENDIG,
                 fom = fom,
                 tom = tom,
                 rapportertDato = rapportertDato,
@@ -236,7 +236,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotSykmelding ->
             ApiSykmelding(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.NY_SOKNAD,
+                hendelsetype = ApiHendelsetype.NY_SOKNAD,
                 fom = fom,
                 tom = tom,
                 rapportertDato = rapportertDato,
@@ -245,7 +245,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         is SnapshotInntektFraAOrdningen ->
             ApiInntektHentetFraAOrdningen(
                 id = UUID.fromString(id),
-                type = ApiHendelsetype.INNTEKT_HENTET_FRA_AORDNINGEN,
+                hendelsetype = ApiHendelsetype.INNTEKT_HENTET_FRA_AORDNINGEN,
                 mottattDato = mottattDato,
             )
 

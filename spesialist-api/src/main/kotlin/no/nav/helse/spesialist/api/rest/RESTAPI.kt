@@ -26,6 +26,8 @@ import no.nav.helse.spesialist.api.rest.oppgaver.GetOppgaverBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.DeletePåVentBehandler
 import no.nav.helse.spesialist.api.rest.oppgaver.påVent.PutPåVentBehandler
 import no.nav.helse.spesialist.api.rest.personer.*
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.GetSaksbildeForPersonBehandler
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
 import no.nav.helse.spesialist.api.rest.personer.sykefraværstilfeller.sykepengegrunnlag.PostSykepengegrunnlagBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.DeleteTildelingBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.PutTildelingBehandler
@@ -63,6 +65,7 @@ fun Routing.restRoutes(
     opptegnelseListener: OpptegnelseListener,
     personPseudoIdProvider: PersonPseudoIdProvider,
     behandlingsstatistikkService: BehandlingsstatistikkService,
+    saksbildeHenter: SaksbildeHenter,
 ) {
     route("/api") {
         if (configuration.eksponerOpenApi) {
@@ -146,6 +149,8 @@ fun Routing.restRoutes(
             get(GetBehandlendeEnhetForPersonBehandler(behandlendeEnhetHenter), restAdapter)
 
             get(GetPersonBehandler(personinfoHenter, alleIdenterHenter), restAdapter)
+
+            get(GetSaksbildeForPersonBehandler(saksbildeHenter), restAdapter)
 
             get(GetNotatVedtaksperiodeIderForPersonBehandler(), restAdapter)
 

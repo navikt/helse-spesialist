@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.api.rest.oppgaver
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Oppgaver
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiEgenskap
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.oppgave.Egenskap

@@ -211,7 +211,7 @@ class OverstyringE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(3, overstyringer.size)
 
             val tidslinjeOverstyring = overstyringer[0]
-            assertEquals("Dagoverstyring", tidslinjeOverstyring["__typename"].asString())
+            assertEquals("ApiDagoverstyring", tidslinjeOverstyring["type"].asString())
             assertEquals(vedtaksperiode.vedtaksperiodeId.toString(), tidslinjeOverstyring["vedtaksperiodeId"].asString())
             assertEquals("begrunnelse for tidslinje", tidslinjeOverstyring["begrunnelse"].asString())
             assertEquals(saksbehandlerIdent().value, tidslinjeOverstyring["saksbehandler"]["ident"].asString())
@@ -224,7 +224,7 @@ class OverstyringE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(100, overstyrtDag["fraGrad"].asInt())
 
             val inntektOverstyring = overstyringer[1]
-            assertEquals("Inntektoverstyring", inntektOverstyring["__typename"].asString())
+            assertEquals("ApiInntektoverstyring", inntektOverstyring["type"].asString())
             assertEquals(vedtaksperiode.vedtaksperiodeId.toString(), inntektOverstyring["vedtaksperiodeId"].asString())
             assertEquals(saksbehandlerIdent().value, inntektOverstyring["saksbehandler"]["ident"].asString())
             assertEquals(false, inntektOverstyring["ferdigstilt"].asBoolean())
@@ -236,7 +236,7 @@ class OverstyringE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(25001.0, overstyrtInntekt["fraManedligInntekt"].asDouble())
 
             val arbeidsforholdOverstyring = overstyringer[2]
-            assertEquals("Arbeidsforholdoverstyring", arbeidsforholdOverstyring["__typename"].asString())
+            assertEquals("ApiArbeidsforholdoverstyring", arbeidsforholdOverstyring["type"].asString())
             assertEquals(vedtaksperiode.vedtaksperiodeId.toString(), arbeidsforholdOverstyring["vedtaksperiodeId"].asString())
             assertEquals(saksbehandlerIdent().value, arbeidsforholdOverstyring["saksbehandler"]["ident"].asString())
             assertEquals(false, arbeidsforholdOverstyring["ferdigstilt"].asBoolean())

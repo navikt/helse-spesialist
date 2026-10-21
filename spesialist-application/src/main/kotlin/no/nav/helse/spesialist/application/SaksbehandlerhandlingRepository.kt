@@ -4,9 +4,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
 
 interface SaksbehandlerhandlingRepository {
-
     fun lagre(saksbehandlerhandling: Saksbehandlerhandling)
 
     fun finnAlle(identitetsnummer: Identitetsnummer): List<Saksbehandlerhandling>
-
 }

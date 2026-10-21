@@ -95,3 +95,17 @@ object UUIDStringSerializer : KSerializer<java.util.UUID> {
 
     override fun deserialize(decoder: Decoder): java.util.UUID = java.util.UUID.fromString(decoder.decodeString())
 }
+
+object YearMonthIsoSerializer : KSerializer<java.time.YearMonth> {
+    override val descriptor =
+        PrimitiveSerialDescriptor(java.time.YearMonth::class.qualifiedName!!, PrimitiveKind.STRING)
+
+    override fun serialize(
+        encoder: Encoder,
+        value: java.time.YearMonth,
+    ) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): java.time.YearMonth = java.time.YearMonth.parse(decoder.decodeString())
+}

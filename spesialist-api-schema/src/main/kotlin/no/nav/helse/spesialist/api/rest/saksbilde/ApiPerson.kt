@@ -1,30 +1,47 @@
-package no.nav.helse.spesialist.api.graphql.schema
+@file:UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+    YearMonth::class,
+)
+
+package no.nav.helse.spesialist.api.rest.saksbilde
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseContextualSerialization
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.time.YearMonth
+import java.util.UUID
 
 @GraphQLName("Saksbehandler")
+@Serializable
 data class ApiSaksbehandler(
     val navn: String,
     val ident: String?,
 )
 
 @GraphQLName("Tildeling")
-data class ApiTildeling(
+@Serializable
+data class ApiSaksbildeTildeling(
     val navn: String,
     val epost: String,
     val oid: UUID,
 )
 
 @GraphQLName("PaVent")
+@Serializable
 data class ApiPaVent(
     val frist: LocalDate?,
     val oid: UUID,
 )
 
 @GraphQLName("Avslag")
+@Serializable
 data class ApiAvslag(
     val type: ApiAvslagstype,
     val begrunnelse: String,
@@ -34,6 +51,7 @@ data class ApiAvslag(
 )
 
 @GraphQLName("VedtakBegrunnelse")
+@Serializable
 data class ApiVedtakBegrunnelse(
     val utfall: ApiVedtakUtfall,
     val begrunnelse: String?,
@@ -42,6 +60,7 @@ data class ApiVedtakBegrunnelse(
 )
 
 @GraphQLName("Annullering")
+@Serializable
 data class ApiAnnullering(
     val saksbehandlerIdent: String,
     val arbeidsgiverFagsystemId: String?,
@@ -53,18 +72,20 @@ data class ApiAnnullering(
 )
 
 @GraphQLName("AnnetFodselsnummer")
+@Serializable
 data class ApiAnnetFodselsnummer(
     val fodselsnummer: String,
     val personPseudoId: UUID,
 )
 
 @GraphQLName("Person")
-data class ApiPerson(
+@Serializable
+data class ApiSaksbildePerson(
     val aktorId: String,
     val fodselsnummer: String,
     val andreFodselsnummer: List<ApiAnnetFodselsnummer>,
     val dodsdato: LocalDate?,
-    val tildeling: ApiTildeling?,
+    val tildeling: ApiSaksbildeTildeling?,
     val tilleggsinfoForInntektskilder: List<ApiTilleggsinfoForInntektskilde>,
     val arbeidsgivere: List<ApiArbeidsgiver>,
     val selvstendigNaering: ApiSelvstendigNaering?,

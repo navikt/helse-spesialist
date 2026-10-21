@@ -138,7 +138,7 @@ class SpeilPersonReceiver(
                 .flatMap { it["behandlinger"] }
                 .flatMap { it["perioder"] }
                 .flatMap { it["historikkinnslag"] }
-                .find { it["__typename"].asString() == "LagtPaVent" }
+                .find { it["type"].asString() == "ApiLagtPaVent" }
                 ?.get("dialogRef")
                 ?.asInt()
                 ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
@@ -159,7 +159,7 @@ class SpeilPersonReceiver(
                 .flatMap { it["historikkinnslag"] }
         val dialogRef =
             historikkinnslag
-                .find { it["__typename"].asString() == "LagtPaVent" }
+                .find { it["type"].asString() == "ApiLagtPaVent" }
                 ?.get("dialogRef")
                 ?.asInt()
                 ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")
@@ -631,18 +631,9 @@ class SpeilPersonReceiver(
         )
     }
 
-    private fun fetchPerson(personPseudoId: String): JsonNode {
-        val fetchPersonResponse =
-            callGraphQL(
-                operationName = "FetchPerson",
-                variables =
-                    mapOf(
-                        "personPseudoId" to personPseudoId,
-                    ),
-            )
-        return fetchPersonResponse["data"]["person"].takeUnless { it.isNull }
-            ?: error("Fikk ikke data.person i respons fra FetchPerson. Responsen var: ${fetchPersonResponse.toPrettyString()}")
-    }
+    private fun fetchPerson(personPseudoId: String): JsonNode =
+        callHttpGet("api/personer/$personPseudoId/saksbilde")
+            ?: error("Fikk ikke saksbilde i respons fra GET /api/personer/{pseudoId}/saksbilde")
 
     fun callGetTilkomneInntektskilder(): JsonNode = callHttpGet("api/personer/$personPseudoId/tilkomne-inntektskilder")!!
 
@@ -655,11 +646,6 @@ class SpeilPersonReceiver(
         )!!
 
     private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asString()
-
-    private fun callGraphQL(
-        operationName: String,
-        variables: Map<String, Any>,
-    ) = GraphQL.call(operationName, saksbehandler, tilganger, brukerroller, variables)
 
     private fun callHttpGet(relativeUrl: String) =
         REST.get(

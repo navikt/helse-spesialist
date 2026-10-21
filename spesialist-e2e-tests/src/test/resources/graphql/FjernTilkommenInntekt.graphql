@@ -1,9 +1,0 @@
-mutation FjernTilkommenInntekt(
-    $tilkommenInntektId: UUID!,
-    $notatTilBeslutter: String!
-) {
-    fjernTilkommenInntekt(
-        tilkommenInntektId: $tilkommenInntektId
-        notatTilBeslutter: $notatTilBeslutter
-    )
-}

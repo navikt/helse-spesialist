@@ -9,7 +9,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
-
 @JvmInline
 value class SaksbehandlerhandlingId(
     val value: UUID,
@@ -24,8 +23,8 @@ class Saksbehandlerhandling private constructor(
     val tidspunkt: Instant,
     val totrinnsvurderingId: TotrinnsvurderingId?,
     val skjæringstidspunkt: LocalDate?,
-    val behandlingId: SpleisBehandlingId?
-    ) : AggregateRoot<SaksbehandlerhandlingId>(id) {
+    val behandlingId: SpleisBehandlingId?,
+) : AggregateRoot<SaksbehandlerhandlingId>(id) {
     companion object {
         fun ny(
             id: SaksbehandlerhandlingId,
@@ -36,7 +35,7 @@ class Saksbehandlerhandling private constructor(
             tidspunkt: Instant,
             skjæringstidspunkt: LocalDate?,
             behandlingId: SpleisBehandlingId?,
-            totrinnsvurderingId: TotrinnsvurderingId?
+            totrinnsvurderingId: TotrinnsvurderingId?,
         ) = Saksbehandlerhandling(
             id = id,
             identitetsnummer = identitetsnummer,

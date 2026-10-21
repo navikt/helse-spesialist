@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
 import no.nav.helse.spesialist.application.InMemoryPersoninfoHenter
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.domain.*
@@ -170,13 +171,17 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         PersonQuery(
             handler =
                 PersonQueryHandler(
-                    daos = daos,
-                    apiOppgaveService = mockk(relaxed = true),
-                    snapshothenter = snapshothenter,
+                    saksbildeHenter =
+                        SaksbildeHenter(
+                            daos = daos,
+                            apiOppgaveService = mockk(relaxed = true),
+                            snapshothenter = snapshothenter,
+                            personPseudoIdProvider = personPseudoIdProvider,
+                            personinfoHenter = personinfoHenter,
+                        ),
                     sessionFactory = sessionFactory,
                     personPseudoIdProvider = personPseudoIdProvider,
                     populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
-                    personinfoHenter = personinfoHenter,
                 ),
         )
 }

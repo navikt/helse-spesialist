@@ -82,7 +82,7 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
                                 periode["historikkinnslag"].toList()
                             }
                         }
-                    }.single { it["type"].asString() == "TOTRINNSVURDERING_RETUR" }
+                    }.single { it["historikktype"].asString() == "TOTRINNSVURDERING_RETUR" }
 
             assertEquals("Trenger ny vurdering", returHistorikkinnslag["notattekst"].asString())
         }

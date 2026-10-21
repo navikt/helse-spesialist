@@ -7,10 +7,12 @@ import no.nav.helse.spesialist.api.serialization.InstantIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateTimeIsoSerializer
 import no.nav.helse.spesialist.api.serialization.UUIDStringSerializer
+import no.nav.helse.spesialist.api.serialization.YearMonthIsoSerializer
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 val customSerializersModule =
@@ -21,4 +23,5 @@ val customSerializersModule =
         contextual(LocalDate::class, LocalDateIsoSerializer)
         contextual(LocalDateTime::class, LocalDateTimeIsoSerializer)
         contextual(UUID::class, UUIDStringSerializer)
+        contextual(YearMonth::class, YearMonthIsoSerializer)
     }

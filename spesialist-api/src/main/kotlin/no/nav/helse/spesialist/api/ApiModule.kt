@@ -7,11 +7,12 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
-import no.nav.helse.spesialist.api.graphql.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema.QueryHandlers
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.rest.dokumenter.DokumentMediator
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.ApiOppgaveService
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilBrukerroller
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgrupperTilTilganger
@@ -54,6 +55,15 @@ class ApiModule(
             oppgaveDao = daos.oppgaveDao,
         )
 
+    private val saksbildeHenter =
+        SaksbildeHenter(
+            daos = daos,
+            apiOppgaveService = apiOppgaveService,
+            snapshothenter = snapshothenter,
+            personPseudoIdProvider = personPseudoIdProvider,
+            personinfoHenter = personinfoHenter,
+        )
+
     private val behandlingsstatistikkService = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao)
 
     private val spesialistSchema =
@@ -62,13 +72,10 @@ class ApiModule(
                 QueryHandlers(
                     person =
                         PersonQueryHandler(
-                            daos = daos,
-                            apiOppgaveService = apiOppgaveService,
-                            snapshothenter = snapshothenter,
+                            saksbildeHenter = saksbildeHenter,
                             sessionFactory = sessionFactory,
                             personPseudoIdProvider = personPseudoIdProvider,
                             populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
-                            personinfoHenter = personinfoHenter,
                         ),
                 ),
         )
@@ -94,6 +101,7 @@ class ApiModule(
             personPseudoIdProvider = personPseudoIdProvider,
             behandlingsstatistikkService = behandlingsstatistikkService,
             populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
+            saksbildeHenter = saksbildeHenter,
         )
     }
 }

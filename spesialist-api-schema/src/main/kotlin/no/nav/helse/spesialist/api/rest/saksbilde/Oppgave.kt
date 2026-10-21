@@ -1,9 +1,25 @@
-package no.nav.helse.spesialist.api.graphql.schema
+@file:UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+    YearMonth::class,
+)
+
+package no.nav.helse.spesialist.api.rest.saksbilde
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import java.util.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseContextualSerialization
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 
 @GraphQLName("Egenskap")
+@Serializable
 enum class ApiEgenskap {
     RISK_QA,
     FORTROLIG_ADRESSE,
@@ -42,6 +58,7 @@ enum class ApiEgenskap {
 }
 
 @GraphQLName("Kategori")
+@Serializable
 enum class ApiKategori {
     Mottaker,
     Inntektskilde,
@@ -54,17 +71,20 @@ enum class ApiKategori {
 }
 
 @GraphQLName("Oppgaveegenskap")
+@Serializable
 data class ApiOppgaveegenskap(
     val egenskap: ApiEgenskap,
     val kategori: ApiKategori,
 )
 
 @GraphQLName("OppgaveForPeriodevisning")
+@Serializable
 data class ApiOppgaveForPeriodevisning(
     val id: String,
 )
 
 @GraphQLName("Totrinnsvurdering")
+@Serializable
 data class ApiTotrinnsvurdering(
     val erRetur: Boolean,
     val saksbehandler: UUID?,

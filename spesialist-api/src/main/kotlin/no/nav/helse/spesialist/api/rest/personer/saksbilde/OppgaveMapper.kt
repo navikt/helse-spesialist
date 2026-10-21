@@ -1,9 +1,9 @@
-package no.nav.helse.spesialist.api.graphql
+package no.nav.helse.spesialist.api.rest.personer.saksbilde
 
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiEgenskap
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiKategori
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiOppgaveegenskap
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 
 internal object OppgaveMapper {

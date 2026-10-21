@@ -17,7 +17,6 @@ class PgSaksbehandlerhandlingRepository(
     session: Session,
 ) : QueryRunner by MedSession(session),
     SaksbehandlerhandlingRepository {
-
     override fun lagre(saksbehandlerhandling: Saksbehandlerhandling) {
         asSQL(
             """

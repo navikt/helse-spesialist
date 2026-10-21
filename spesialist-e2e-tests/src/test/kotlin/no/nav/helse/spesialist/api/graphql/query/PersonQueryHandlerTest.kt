@@ -17,11 +17,11 @@ import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotArbei
 import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotHendelse
 import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettUberegnetPeriode
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
-import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiAvslagstype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiHandling
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodehandling
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand

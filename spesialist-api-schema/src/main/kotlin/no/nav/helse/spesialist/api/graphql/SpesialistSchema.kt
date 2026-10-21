@@ -12,7 +12,7 @@ class SpesialistSchema(
     )
 
     fun setup(schemaConfiguration: GraphQLConfiguration.SchemaConfiguration) {
-        schemaConfiguration.packages = listOf("no.nav.helse.spesialist.api.graphql")
+        schemaConfiguration.packages = listOf("no.nav.helse.spesialist.api.graphql", "no.nav.helse.spesialist.api.rest.saksbilde")
 
         schemaConfiguration.queries =
             listOf(

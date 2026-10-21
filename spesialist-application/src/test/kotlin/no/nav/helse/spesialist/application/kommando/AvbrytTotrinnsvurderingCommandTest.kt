@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.SaksbehandlerhandlingId
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -21,6 +20,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.mar
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -244,8 +244,7 @@ internal class AvbrytTotrinnsvurderingCommandTest : ApplicationTest() {
         )
     }
 
-    private fun hent(totrinnsvurdering: Totrinnsvurdering): Totrinnsvurdering =
-        sessionContext.totrinnsvurderingRepository.finnOrNull(totrinnsvurdering.id())!!
+    private fun hent(totrinnsvurdering: Totrinnsvurdering): Totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnOrNull(totrinnsvurdering.id())!!
 
     private fun lagPeriode(
         skjæringstidspunkt: LocalDate,

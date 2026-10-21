@@ -1,8 +1,8 @@
-package no.nav.helse.spesialist.api.graphql
+package no.nav.helse.spesialist.api.rest.personer.saksbilde
 
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.spesialist.api.graphql.OppgaveMapper.tilEgenskaperForVisning
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.OppgaveMapper.tilEgenskaperForVisning
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiOppgaveegenskap
 import java.util.UUID
 
 class ApiOppgaveService(

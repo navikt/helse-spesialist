@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotArbei
 import no.nav.helse.spesialist.api.graphql.SnapshotTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
 import no.nav.helse.spesialist.api.rest.withSaksbehandlerIdentMdc
 import no.nav.helse.spesialist.api.testfixtures.InMemoryPopulasjonstilgangskontrollProvider
 import no.nav.helse.spesialist.api.testfixtures.uuiderFor
@@ -85,13 +86,17 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     SpesialistSchema.QueryHandlers(
                         person =
                             PersonQueryHandler(
-                                daos = daos,
-                                apiOppgaveService = apiOppgaveService,
-                                snapshothenter = snapshothenter,
+                                saksbildeHenter =
+                                    SaksbildeHenter(
+                                        daos = daos,
+                                        apiOppgaveService = apiOppgaveService,
+                                        snapshothenter = snapshothenter,
+                                        personPseudoIdProvider = personPseudoIdProvider,
+                                        personinfoHenter = personinfoHenter,
+                                    ),
                                 sessionFactory = sessionFactory,
                                 personPseudoIdProvider = personPseudoIdProvider,
                                 populasjonstilgangskontrollProvider = populasjonstilgangskontrollProvider,
-                                personinfoHenter = personinfoHenter,
                             ),
                     ),
             )
