@@ -27,16 +27,9 @@ class VedtaksperiodeReberegnetRiverTest {
             }
         }
 
-    @ParameterizedTest
-    @CsvSource(
-        "AVVENTER_GODKJENNING, AVVENTER_HISTORIKK",
-        "SELVSTENDIG_AVVENTER_GODKJENNING, AVVENTER_HISTORIKK",
-    )
-    fun `riveren tar inn aktuelle meldinger`(
-        forrigeTilstand: String,
-        gjeldendeTilstand: String,
-    ) {
-        sendMelding(forrigeTilstand, gjeldendeTilstand)
+    @Test
+    fun `riveren tar inn aktuelle meldinger med forrigeTilstand AVVENTER_GODKJENNING og gjeldendeTilstand AVVENTER_HISTORIKK`() {
+        sendMelding("AVVENTER_GODKJENNING", "AVVENTER_HISTORIKK")
         assertTrue { meldingenBleSendtVidere }
     }
 
@@ -46,7 +39,6 @@ class VedtaksperiodeReberegnetRiverTest {
         "AVVENTER_GODKJENNING_REVURDERING, TIL_INFOTRYGD",
         "AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING",
         "AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET",
-        "SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_TIL_UTBETALING",
         "TIL_INFOTRYGD, AVVENTER_SIMULERING",
         "TIL_UTBETALING, AVVENTER_GODKJENNING",
         "AVSLUTTET, AVVENTER_GODKJENNING",

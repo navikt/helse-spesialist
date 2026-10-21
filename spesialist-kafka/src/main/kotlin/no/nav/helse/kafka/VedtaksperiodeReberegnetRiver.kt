@@ -21,9 +21,7 @@ class VedtaksperiodeReberegnetRiver(
                 "gjeldendeTilstand",
                 listOf(
                     "AVSLUTTET",
-                    "SELVSTENDIG_AVSLUTTET",
                     "TIL_UTBETALING",
-                    "SELVSTENDIG_TIL_UTBETALING",
                     "TIL_INFOTRYGD",
                 ),
             )
