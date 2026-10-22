@@ -4,6 +4,7 @@ import io.github.smiley4.ktoropenapi.documentation
 import io.ktor.server.http.HttpRequestLifecycle
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
 import kotlinx.coroutines.Job
@@ -25,9 +26,20 @@ internal fun Route.sse(
     opptegnelseListener: OpptegnelseListener,
     personPseudoIdProvider: PersonPseudoIdProvider,
 ) {
-    install(HttpRequestLifecycle) {
-        cancelCallOnClose = true
+    route("/personer/{personPseudoId}/sse") {
+        // Må installeres på SSE-ruta alene, ellers kanselleres alle REST-kall når klienten kobler fra
+        install(HttpRequestLifecycle) {
+            cancelCallOnClose = true
+        }
+        sseRute(sessionFactory, opptegnelseListener, personPseudoIdProvider)
     }
+}
+
+private fun Route.sseRute(
+    sessionFactory: SessionFactory,
+    opptegnelseListener: OpptegnelseListener,
+    personPseudoIdProvider: PersonPseudoIdProvider,
+) {
     documentation({
         description = "Operasjon for Server Sent Events. NB: Gir en strøm av elementer." +
             " Ikke ment for bruk som normal GET-operasjon med f. eks. autogenerert Tanstack Query-hook!"
@@ -42,7 +54,7 @@ internal fun Route.sse(
             }
         }
     }) {
-        sse("/personer/{personPseudoId}/sse") {
+        sse {
             heartbeat {
                 period = 10.seconds
             }

@@ -7,13 +7,31 @@ import io.ktor.server.routing.get
 import io.ktor.server.testing.testApplication
 import no.nav.helse.spesialist.api.plugins.configureStatusPagesPlugin
 import tools.jackson.databind.DatabindException
+import java.io.Closeable
+import java.util.concurrent.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class StatusPagesTest {
     class MyDatabindException(
         msg: String,
-    ) : DatabindException(msg)
+        cause: Throwable? = null,
+    ) : DatabindException(null as Closeable?, msg, cause)
+
+    @Test
+    fun `kansellert kall under serialisering gir ikke 500`() {
+        testApplication {
+            install(StatusPages) { configureStatusPagesPlugin() }
+            routing {
+                get("/test") {
+                    val cause = CancellationException("Call context was cancelled by `HttpRequestLifecycle` plugin")
+                    throw MyDatabindException(cause.message!!, cause)
+                }
+            }
+            val response = client.get("/test")
+            assertEquals(499, response.status.value)
+        }
+    }
 
     @Test
     fun `broken pipe i DatabindException gir ikke 500`() {
