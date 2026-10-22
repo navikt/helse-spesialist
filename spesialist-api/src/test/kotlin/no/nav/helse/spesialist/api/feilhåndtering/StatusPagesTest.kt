@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.routing.get
 import io.ktor.server.testing.testApplication
+import kotlinx.coroutines.CompletableDeferred
 import no.nav.helse.spesialist.api.plugins.configureStatusPagesPlugin
 import tools.jackson.databind.DatabindException
 import java.io.Closeable
@@ -17,6 +18,22 @@ internal class StatusPagesTest {
         msg: String,
         cause: Throwable? = null,
     ) : DatabindException(null as Closeable?, msg, cause)
+
+    // Uten svar fra handleren logger Ktor-fallbacken ERROR og svarer 500
+    @Test
+    fun `kansellering ved nedstenging gir 503`() {
+        testApplication {
+            install(StatusPages) { configureStatusPagesPlugin() }
+            routing {
+                get("/test") {
+                    // await på kansellert Deferred kaster en ekte JobCancellationException, som ved nedstenging
+                    CompletableDeferred<Unit>().apply { cancel() }.await()
+                }
+            }
+            val response = client.get("/test")
+            assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
+        }
+    }
 
     @Test
     fun `kansellert kall under serialisering gir ikke 500`() {

@@ -9,6 +9,8 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.erKlientFrakoblingUnderSerialisering
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -21,8 +23,12 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
         val uri = call.request.uri
         if (uri.endsWith("/sse")) {
             loggInfo("SSE-tilkobling lukket")
-        } else {
-            loggWarn("Klienten koblet fra før svaret ble sendt", exception)
+            return@exception
+        }
+        loggWarn("Kallet ble kansellert før svaret ble sendt", exception)
+        // Uten svar kaster StatusPages exception videre, og Ktor logger den som ERROR
+        withContext(NonCancellable) {
+            runCatching { call.respond(HttpStatusCode.ServiceUnavailable) }
         }
     }
     exception<DatabindException> { call: ApplicationCall, cause: DatabindException ->
