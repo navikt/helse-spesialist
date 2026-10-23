@@ -11,7 +11,15 @@ class Risikovurderingløsning(
     private val opprettet: LocalDateTime,
     val kanGodkjennesAutomatisk: Boolean,
     private val løsning: JsonNode,
+    val andreVedtaksperioder: List<AnnenVedtaksperiode> = emptyList(),
 ) {
+    // Risikovurdering av en annen vedtaksperiode (med samme skjæringstidspunkt) som riskmodulen har gjort i samme slengen
+    class AnnenVedtaksperiode(
+        val vedtaksperiodeId: UUID,
+        val kanGodkjennesAutomatisk: Boolean,
+        val løsning: JsonNode,
+    )
+
     internal fun lagre(risikovurderingDao: RisikovurderingDao) {
         logg.info("Mottok risikovurdering for vedtaksperiode $vedtaksperiodeId")
         risikovurderingDao.lagre(
@@ -19,6 +27,21 @@ class Risikovurderingløsning(
             opprettet = opprettet,
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
             data = løsning,
+        )
+    }
+
+    internal fun lagre(
+        annenVedtaksperiode: AnnenVedtaksperiode,
+        risikovurderingDao: RisikovurderingDao,
+    ) {
+        logg.info(
+            "Lagrer risikovurdering for vedtaksperiode ${annenVedtaksperiode.vedtaksperiodeId}, mottatt sammen med risikovurdering av vedtaksperiode $vedtaksperiodeId",
+        )
+        risikovurderingDao.lagre(
+            vedtaksperiodeId = annenVedtaksperiode.vedtaksperiodeId,
+            opprettet = opprettet,
+            kanGodkjennesAutomatisk = annenVedtaksperiode.kanGodkjennesAutomatisk,
+            data = annenVedtaksperiode.løsning,
         )
     }
 

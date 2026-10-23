@@ -1,0 +1,151 @@
+Risikovurdering av parallelle vedtaksperioder
+=============================================
+
+Dato: 2026-10-23
+Status: Implementert, ikke committet. Alle tester grønne (application 305, kafka 152, e2e 181).
+
+
+1. Bakgrunn / problem
+---------------------
+Spesialist ber om Risikovurdering for én vedtaksperiode (én arbeidsgiver) av gangen, og riskmodulen
+vurderer hver periode isolert. Har en person søknader for to arbeidsgivere (AG1 og AG2) i samme
+tidsrom, blir AG1 riskvurdert og godkjent først. Først deretter blir AG2 riskvurdert, og AG2 kan da
+gi et riskvarsel (SB_RV_1 / RISK_QA) som saksbehandler helst skulle sett før AG1 ble godkjent.
+
+Risikovurdering-behovet inneholder allerede "perioderMedSammeSkjæringstidspunkt". Får riskmodulen i
+tillegg inntekten per periode, kan den i prinsippet vurdere alle parallelle perioder samtidig og
+svare med en vurdering både for perioden det ble spurt om og for de andre periodene.
+
+
+2. Hva er gjort
+---------------
+
+2.1 Utgående behov: inntekt per periode
+  - Behov.kt (spesialist-domain): StpPeriodeTilRisk har fått feltet "inntekt: InntektTilRisk?".
+  - VurderVurderingsmomenter.kt: inntektFor(yrkesaktivitet) finner inntekten for hver periode i
+    perioderMedSammeSkjæringstidspunkt:
+      * Arbeidstaker: inntekt for arbeidsgiverens organisasjonsnummer.
+      * Selvstendig næringsdrivende: bare når yrkesaktivitetstype == "SELVSTENDIG".
+      * Infotrygd / ukjent: null.
+  - Dette er den eneste endringen som alltid gjelder, også når riskmodulen ikke har tatt i bruk den
+    nye funksjonaliteten. Den endrer ikke oppførselen i Spesialist, men riskmodulen må tåle ukjente
+    felter.
+
+2.2 Innkommende løsning: valgfritt felt "andreVedtaksperioder"
+  - Format i @løsning.Risikovurdering:
+      "andreVedtaksperioder": [
+        {
+          "vedtaksperiodeId": "<uuid>",
+          "kanGodkjennesAutomatisk": <boolean>,
+          "funn": [...],
+          "kontrollertOk": [...]
+        }
+      ]
+  - VurderingsmomenterLøsningRiver.kt: feltet leses med interestedIn (er altså valgfritt). Parseren
+    er tolerant: elementer uten gyldig vedtaksperiodeId (UUID), kanGodkjennesAutomatisk (boolean) og
+    funn/kontrollertOk (arrays) hoppes over med en advarsel i loggen. Én ugyldig periode skal ikke
+    hindre behandlingen av hovedløsningen. funn og kontrollertOk er påkrevd fordi Speil leser dem
+    (PgRisikovurderingApiDao).
+  - Risikovurderingløsning.kt: nytt felt andreVedtaksperioder (standard emptyList()) og en ny
+    klasse AnnenVedtaksperiode. lagre(annenVedtaksperiode, dao) lagrer med samme "opprettet"-tidspunkt
+    som hovedløsningen.
+
+2.3 Lagring av vurderingen og varsel på den parallelle perioden
+  - VurderVurderingsmomenter.kt: Først lagres egen løsning og eventuelt SB_RV_1 som før. Deretter
+    behandles hvert element i andreVedtaksperioder slik:
+      * Ignoreres hvis det er egen vedtaksperiodeId.
+      * Ignoreres hvis perioden ikke finnes blant personens Spleis-vedtaksperioder.
+      * Ignoreres hvis perioden allerede er riskvurdert. Det overskriver aldri en eksisterende
+        vurdering.
+      * Ignoreres hvis perioden ikke har en åpen behandling (tilstand VidereBehandlingAvklares eller
+        KlarTilBehandling), eller hvis vedtaksperioden er forkastet.
+      * Ellers lagres risikovurderingen for perioden. Er kanGodkjennesAutomatisk == false, legges
+        SB_RV_1 på perioden sin nyeste behandling.
+  - Når AG2 senere kommer med eget godkjenningsbehov, slår den eksisterende sjekken
+    "risikovurderingAlleredeGjort" til. Det sendes da ikke noe nytt Risikovurdering-behov, og den
+    forhåndslagrede vurderingen brukes.
+
+2.4 RISK_QA på oppgaven ved riskvarsel på andre behandlinger i pakken (bak toggle)
+  - OpprettSaksbehandleroppgave.kt: Oppgaven får egenskapen RISK_QA hvis en ANNEN behandling i
+    behandlingspakken har et AKTIVT SB_RV_1-varsel.
+  - Styres av konstanten
+      private const val RISK_QA_VED_RISKVARSEL_PÅ_ANDRE_BEHANDLINGER_I_PAKKEN = true
+    i companion object nederst i OpprettSaksbehandleroppgave.kt.
+
+2.5 Tester
+  - VurderVurderingsmomenterTest: inntekt i behovet og 9 nye tester for andreVedtaksperioder.
+  - BehovMessageBuilderTest: inntekt i stp-periodene.
+  - VurderingsmomenterLøsningRiverTest (ny): 3 tester for parsing, inkludert ugyldige elementer.
+  - OpprettSaksbehandleroppgaveTest: 3 nye tester for RISK_QA-toggelen.
+  - E2E (RisikovurderingE2ETest + RisikovurderingBehovLøser):
+      * Riskvarsel og funn vises på AG2 mens AG1 er til godkjenning, og vedtak på AG1 avvises
+        (400) til varslene er vurdert.
+      * Når AG2 senere sender godkjenningsbehov, sendes det ikke noe nytt Risikovurdering-behov,
+        og SB_RV_1 er GODKJENT.
+
+
+3. Avgjørelser og begrunnelser
+------------------------------
+
+3.1 Lik oppførsel som i dag når riskmodulen ikke sender andreVedtaksperioder
+  - Krav fra oss: Så lenge riskmodulen ikke svarer med andreVedtaksperioder, skal Spesialist
+    oppføre seg akkurat som i dag.
+  - Uten feltet er kodestiene i VurderVurderingsmomenter og i riveren de samme som før. Det
+    eneste nye er inntekt i det utgående behovet (se 2.1).
+  - Forbehold om RISK_QA-toggelen (se 3.5).
+
+3.2 Enkel variant uten databaseendringer
+  - Vi vurderte å markere forhåndslagrede vurderinger, med egen kolonne eller felt i JSON, men valgte
+    den enkle varianten uten endringer i databasen. Den forhåndslagrede vurderingen lagres som en
+    helt vanlig risikovurdering for perioden.
+  - Konsekvens: Spesialist skiller ikke mellom en vurdering som kom fra eget behov og en som ble
+    forhåndslagret via en annen periode.
+
+3.3 Varselet på AG2 vises i Speil og må vurderes før AG1 kan godkjennes
+  - Behandlingspakken = nyeste behandling per ikke-forkastet vedtaksperiode med samme
+    skjæringstidspunkt og fom <= egen tom (alle arbeidsgivere, egen og tidligere perioder, ikke
+    senere perioder). Den er IKKE hele sykefraværstilfellet.
+  - Aktive varsler på AG2 i pakken blokkerer automatisering av AG1 og må vurderes før vedtak på AG1
+    (VARSLER_MANGLER_VURDERING). Ved vedtak godkjennes de sammen med AG1.
+  - SB_RV_1 legges når vurderingen forhåndslagres, ikke senere i "allerede gjort"-sporet. Siden
+    ingen har vurdert varselet, blir det synlig i Speil.
+  - Nye brukere / timing: behandling_opprettet kommer alltid før godkjenningsbehovet, og
+    ForberedBehandlingAvGodkjenningsbehov oppdaterer fom/tom/skjæringstidspunkt for alle
+    Spleis-behandlinger. Derfor finnes AG2-behandlingen med riktig skjæringstidspunkt når
+    vurderingen skal lagres.
+
+3.4 "Én gang riskvurdert = alltid riskvurdert" og revurderinger
+  - Problemstillingen er kjent (endrede inntekter ved revurdering, godkjente riskvarsler som ikke
+    vises etter revurdering fordi godkjente varsler blir liggende på den gamle behandlingen). Den
+    håndteres ikke her.
+  - Riskvurdering gjøres ikke på nytt ved revurdering. Revurdering sender altså ingen nye
+    andreVedtaksperioder.
+
+3.5 RISK_QA-toggelen
+  - Oppgaver er per vedtaksperiode (én arbeidsgiver). Uten toggelen kommer RISK_QA bare fra
+    periodens egen risikovurdering. Toggelen gir RISK_QA også når en annen behandling i pakken har
+    aktivt SB_RV_1.
+  - Den teller bare AKTIVE varsler. Ved vedtak godkjennes varslene i pakken, så hvert riskvarsel gir
+    RISK_QA på høyst én annen oppgave (den første som har varselet i pakken sin). Varselet sprer seg
+    ikke videre til forlengelser eller senere perioder.
+  - Revurdering: Toggelen er ikke unntatt for revurderinger, i motsetning til regelen for egen
+    risiko. Vi kom fram til at det i praksis ikke skjer at en parallell periode har aktivt riskvarsel
+    mens en revurdering er til godkjenning, så unntaket ville ikke utgjort noen forskjell. Regelen ble
+    derfor ikke endret.
+  - FORBEHOLD: Med toggelen på er oppførselen IKKE garantert identisk med i dag, selv uten
+    andreVedtaksperioder. Sjeldent tilfelle: AG2 får eget SB_RV_1, oppgaven ugyldiggjøres før vedtak
+    (for eksempel ny beregning etter ny inntektsmelding fra AG1), varselet flytter med som AKTIVT, og
+    AG1 kommer til godkjenning først. Da får AG1-oppgaven RISK_QA. Varselet blokkerer AG1 også i dag,
+    så det eneste som endres er egenskapen på oppgaven.
+  - Vil vi ha garantert lik oppførsel, kan toggelen settes til false til riskmodulen faktisk sender
+    andreVedtaksperioder. Alternativet er å markere forhåndslagrede vurderinger, som krever endring i
+    databasen.
+
+
+4. Åpne punkter / mulige videre steg
+------------------------------------
+  - Bestemme verdien på RISK_QA_VED_RISKVARSEL_PÅ_ANDRE_BEHANDLINGER_I_PAKKEN (true nå, se 3.5).
+  - Riskmodulen kan sende vurderinger for fremtidige perioder med samme skjæringstidspunkt
+    (forlengelser). I så fall havner hvert varsel på hver sin senere oppgave. Lagringen kan om ønskelig
+    begrenses til perioder som overlapper perioden det ble spurt om.
+  - Avtale formatet for andreVedtaksperioder med riskmodulen (se 2.2).

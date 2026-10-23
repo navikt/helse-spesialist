@@ -14,6 +14,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -94,6 +95,7 @@ internal class VurderVurderingsmomenter(
                                 organisasjonsnummer = it.yrkesaktivitet?.organisasjonsnummer,
                                 yrkesaktivitetstype = it.yrkesaktivitet?.yrkesaktivitetstype,
                                 vedtaksperiodeId = it.vedtaksperiodeId,
+                                inntekt = inntektFor(it.yrkesaktivitet),
                             )
                         },
                 ),
@@ -106,11 +108,77 @@ internal class VurderVurderingsmomenter(
             val varsel = Varsel.nytt(behandlingUnikId = behandling.id, behandling.spleisBehandlingId, SB_RV_1)
             sessionContext.varselRepository.lagre(varsel)
         }
+        løsning.andreVedtaksperioder.forEach { lagreRisikovurderingForAnnenVedtaksperiode(it, løsning, behandling.vedtaksperiodeId, sessionContext) }
         return true
+    }
+
+    private fun lagreRisikovurderingForAnnenVedtaksperiode(
+        annenVedtaksperiode: Risikovurderingløsning.AnnenVedtaksperiode,
+        løsning: Risikovurderingløsning,
+        egenVedtaksperiodeId: VedtaksperiodeId,
+        sessionContext: SessionContext,
+    ) {
+        val vedtaksperiodeId = VedtaksperiodeId(annenVedtaksperiode.vedtaksperiodeId)
+        if (vedtaksperiodeId == egenVedtaksperiodeId || spleisVedtaksperioder.none { it.vedtaksperiodeId == vedtaksperiodeId.value }) {
+            loggInfo("Ignorerer risikovurdering for vedtaksperiode ${vedtaksperiodeId.value}, den var ikke blant perioderMedSammeSkjæringstidspunkt")
+            return
+        }
+        if (risikovurderingAlleredeGjort(sessionContext, vedtaksperiodeId)) {
+            loggInfo("Ignorerer risikovurdering for vedtaksperiode ${vedtaksperiodeId.value}, den er allerede risikovurdert")
+            return
+        }
+        // Vurderingen lagres bare dersom vi samtidig kan legge eventuelt varsel på en åpen behandling. Ellers får
+        // vedtaksperioden sitt eget risikovurderingsbehov når den selv kommer til godkjenning, slik som før.
+        val annenBehandling = sessionContext.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiodeId)
+        if (annenBehandling == null || annenBehandling.tilstand !in åpneTilstander) {
+            loggInfo("Ignorerer risikovurdering for vedtaksperiode ${vedtaksperiodeId.value}, fant ingen åpen behandling")
+            return
+        }
+
+        løsning.lagre(annenVedtaksperiode, sessionContext.risikovurderingDao)
+        if (!annenVedtaksperiode.kanGodkjennesAutomatisk) {
+            val varsel = Varsel.nytt(behandlingUnikId = annenBehandling.id, annenBehandling.spleisBehandlingId, SB_RV_1)
+            sessionContext.varselRepository.lagre(varsel)
+        }
     }
 
     private fun risikovurderingAlleredeGjort(
         sessionContext: SessionContext,
         vedtaksperiodeId: VedtaksperiodeId,
     ) = sessionContext.risikovurderingDao.hentRisikovurdering(vedtaksperiodeId.value) != null
+
+    private fun inntektFor(yrkesaktivitet: SpleisBehandling.Yrkesaktivitet?): InntektTilRisk? =
+        when (sykepengegrunnlagsfakta) {
+            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd -> {
+                null
+            }
+
+            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker -> {
+                yrkesaktivitet?.organisasjonsnummer?.let { organisasjonsnummer ->
+                    sykepengegrunnlagsfakta.arbeidsgivere
+                        .find { it.organisasjonsnummer == organisasjonsnummer }
+                        ?.let {
+                            InntektTilRisk(
+                                omregnetÅrsinntekt = it.omregnetÅrsinntekt,
+                                inntektskilde = it.inntektskilde.name,
+                            )
+                        }
+                }
+            }
+
+            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende -> {
+                if (yrkesaktivitet?.yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG.name) {
+                    InntektTilRisk(
+                        omregnetÅrsinntekt = sykepengegrunnlagsfakta.selvstendig.beregningsgrunnlag.toDouble(),
+                        inntektskilde = "Sigrun", // TODO: Hardkodet, verdi - avklar med Risk og Spleis
+                    )
+                } else {
+                    null
+                }
+            }
+        }
+
+    private companion object {
+        private val åpneTilstander = setOf(Behandling.Tilstand.VidereBehandlingAvklares, Behandling.Tilstand.KlarTilBehandling)
+    }
 }

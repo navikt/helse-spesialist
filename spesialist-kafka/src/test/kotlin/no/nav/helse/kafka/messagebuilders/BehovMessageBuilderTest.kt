@@ -99,6 +99,11 @@ class BehovMessageBuilderTest {
                                 vedtaksperiodeId = annenVedtaksperiodeId,
                                 organisasjonsnummer = "NOEANNET",
                                 yrkesaktivitetstype = "en yrkesaktivitetstype",
+                                inntekt =
+                                    InntektTilRisk(
+                                        omregnetÅrsinntekt = 654321.0,
+                                        inntektskilde = "AOrdningen",
+                                    ),
                             ),
                         ),
                 ).somJson()
@@ -128,6 +133,11 @@ class BehovMessageBuilderTest {
                             "tom" to LocalDate.of(2026, 7, 25),
                             "organisasjonsnummer" to "NOEANNET",
                             "yrkesaktivitetstype" to "en yrkesaktivitetstype",
+                            "inntekt" to
+                                mapOf(
+                                    "omregnetÅrsinntekt" to 654321.0,
+                                    "inntektskilde" to "AOrdningen",
+                                ),
                         ),
                     ),
             ),

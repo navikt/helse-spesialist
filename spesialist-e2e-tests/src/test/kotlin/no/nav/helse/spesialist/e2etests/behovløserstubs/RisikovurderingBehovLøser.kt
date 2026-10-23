@@ -6,11 +6,13 @@ class RisikovurderingBehovLøser : AbstractBehovLøser("Risikovurdering") {
     var kanGodkjenneAutomatisk = true
     var funn = emptyList<Any>()
     var kontrollertOk = emptyList<Any>()
+    var andreVedtaksperioder = emptyList<Map<String, Any>>()
 
     override fun løsning(behovJson: JsonNode) =
-        mapOf(
-            "kanGodkjennesAutomatisk" to kanGodkjenneAutomatisk,
-            "funn" to funn,
-            "kontrollertOk" to kontrollertOk,
-        )
+        buildMap {
+            put("kanGodkjennesAutomatisk", kanGodkjenneAutomatisk)
+            put("funn", funn)
+            put("kontrollertOk", kontrollertOk)
+            if (andreVedtaksperioder.isNotEmpty()) put("andreVedtaksperioder", andreVedtaksperioder)
+        }
 }

@@ -74,4 +74,5 @@ data class StpPeriodeTilRisk(
     val vedtaksperiodeId: UUID,
     val yrkesaktivitetstype: String?,
     val organisasjonsnummer: String?,
+    val inntekt: InntektTilRisk?,
 )

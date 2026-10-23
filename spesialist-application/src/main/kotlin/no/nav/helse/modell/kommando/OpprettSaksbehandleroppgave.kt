@@ -6,6 +6,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.person.Adressebeskyttelse.*
 import no.nav.helse.modell.person.HentEnhetløsning
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.*
@@ -71,7 +72,7 @@ internal class OpprettSaksbehandleroppgave(
                 adressebeskyttelse(fødselsnummer, sessionContext)
                 oppgavetype(oppgavetype)
                 stikkprøve(vedtaksperiodeId, hendelseId)
-                vurderingsmomenter(vedtaksperiodeId, utbetalingtype, sessionContext)
+                vurderingsmomenter(vedtaksperiodeId, utbetalingtype, sessionContext, varslerForBehandlingspakke, behandling)
                 vergemål(fødselsnummer, sessionContext)
                 enhetUtland(fødselsnummer, sessionContext)
                 mottaker(mottaker)
@@ -158,8 +159,15 @@ internal class OpprettSaksbehandleroppgave(
         vedtaksperiodeId: UUID,
         utbetalingtype: Utbetalingtype,
         sessionContext: SessionContext,
+        varslerForBehandlingspakke: List<Varsel>,
+        behandling: Behandling,
     ) {
         if (utbetalingtype != Utbetalingtype.REVURDERING && sessionContext.risikovurderingDao.måTilManuell(vedtaksperiodeId)) {
+            add(RISK_QA)
+        }
+        if (RISK_QA_VED_RISKVARSEL_PÅ_ANDRE_BEHANDLINGER_I_PAKKEN &&
+            varslerForBehandlingspakke.any { it.behandlingUnikId != behandling.id && it.kode == Varselkode.SB_RV_1.name }
+        ) {
             add(RISK_QA)
         }
     }
@@ -270,5 +278,11 @@ internal class OpprettSaksbehandleroppgave(
         if (forsikringsvurderingId == null) return
         val forsikringsvurdering = forsikringsvurderingHenter.hent(ForsikringsvurderingId(forsikringsvurderingId))
         if (forsikringsvurdering?.harForsikring() == true) add(FORSIKRING)
+    }
+
+    private companion object {
+        // Gir oppgaven RISK_QA dersom en annen behandling i behandlingspakken (f.eks. en parallell arbeidsgiver) har et
+        // aktivt riskvarsel, typisk fordi riskmodulen har risikovurdert den i samme slengen som denne vedtaksperioden.
+        private const val RISK_QA_VED_RISKVARSEL_PÅ_ANDRE_BEHANDLINGER_I_PAKKEN = true
     }
 }

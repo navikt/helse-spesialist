@@ -21,9 +21,11 @@ import no.nav.helse.spesialist.application.MockForsikringsvurderingHenter
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.testfixtures.lagForsikringsvurdering
 import no.nav.helse.spesialist.application.testfixtures.lagKollektivForsikring
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.ARBEIDSTAKER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
@@ -49,7 +51,9 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -104,6 +108,44 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
             FORSTEGANGSBEHANDLING,
             ARBEIDSTAKER,
         )
+    }
+
+    @Test
+    fun `oppretter risk QA dersom en annen behandling i behandlingspakken har aktivt riskvarsel`() {
+        parallellBehandling().nyttVarsel("SB_RV_1")
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(
+            SØKNAD,
+            RISK_QA,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING,
+            ARBEIDSTAKER,
+        )
+    }
+
+    @Test
+    fun `oppretter ikke risk QA dersom riskvarselet på en annen behandling i behandlingspakken er godkjent`() {
+        parallellBehandling().nyttVarsel("SB_RV_1", status = Varsel.Status.GODKJENT)
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    @Test
+    fun `oppretter ikke risk QA dersom riskvarselet ligger på en behandling utenfor behandlingspakken`() {
+        behandling2.nyttVarsel("SB_RV_1")
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    private fun parallellBehandling(): Behandling {
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also { sessionContext.vedtaksperiodeRepository.lagre(it) }
+        return lagBehandling(
+            vedtaksperiodeId = vedtaksperiode.id,
+            fom = behandling1.fom,
+            tom = behandling1.tom,
+            skjæringstidspunkt = behandling1.skjæringstidspunkt,
+        ).also { sessionContext.behandlingRepository.lagre(it) }
     }
 
     @Test

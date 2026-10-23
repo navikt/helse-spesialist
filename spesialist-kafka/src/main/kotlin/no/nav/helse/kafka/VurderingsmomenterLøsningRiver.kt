@@ -9,6 +9,8 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
+import no.nav.helse.spesialist.application.logg.loggWarn
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 class VurderingsmomenterLøsningRiver(
@@ -34,6 +36,7 @@ class VurderingsmomenterLøsningRiver(
                 "@løsning.Risikovurdering.kontrollertOk",
             )
             it.requireKey("sti")
+            it.interestedIn("@løsning.Risikovurdering.andreVedtaksperioder")
         }
 
     override fun onPacket(
@@ -50,6 +53,7 @@ class VurderingsmomenterLøsningRiver(
                 opprettet = packet["@opprettet"].asLocalDateTime(),
                 kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean(),
                 løsning = løsning,
+                andreVedtaksperioder = andreVedtaksperioder(packet["@løsning.Risikovurdering.andreVedtaksperioder"]),
             )
 
         meldingMediator.løsning(
@@ -60,5 +64,23 @@ class VurderingsmomenterLøsningRiver(
             kontekstbasertPubliserer = MessageContextMeldingPubliserer(context = context),
             sti = packet["sti"].toList().map { it.asInt() },
         )
+    }
+
+    private fun andreVedtaksperioder(node: JsonNode): List<Risikovurderingløsning.AnnenVedtaksperiode> {
+        if (!node.isArray) return emptyList()
+        return node.mapNotNull { element ->
+            val vedtaksperiodeId = element["vedtaksperiodeId"]?.takeIf { it.isString }?.asString()?.let { runCatching { UUID.fromString(it) }.getOrNull() }
+            val kanGodkjennesAutomatisk = element["kanGodkjennesAutomatisk"]?.takeIf { it.isBoolean }?.asBoolean()
+            val harFunnOgKontrollertOk = element["funn"]?.isArray == true && element["kontrollertOk"]?.isArray == true
+            if (vedtaksperiodeId == null || kanGodkjennesAutomatisk == null || !harFunnOgKontrollertOk) {
+                loggWarn("Ignorerer ugyldig element i @løsning.Risikovurdering.andreVedtaksperioder")
+                return@mapNotNull null
+            }
+            Risikovurderingløsning.AnnenVedtaksperiode(
+                vedtaksperiodeId = vedtaksperiodeId,
+                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                løsning = element,
+            )
+        }
     }
 }
