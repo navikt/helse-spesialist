@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="no.nav.helse.spesialist.application.logg.SkipKansellertVedNedstengingFilter"/>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <!-- Inkluder bare spesifikke MDC-felter, ettersom noen MDC-felter kan inneholde personinformasjon -->
             <includeMdcKeyName>callId</includeMdcKeyName>
@@ -28,6 +29,8 @@
     </logger>
 
     <appender name="team-logs" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- Må stå før SkipTeamLogsMarkerFilter, som svarer ACCEPT og stopper videre filtrering -->
+        <filter class="no.nav.helse.spesialist.application.logg.SkipKansellertVedNedstengingFilter"/>
         <filter class="no.nav.helse.spesialist.application.logg.SkipTeamLogsMarkerFilter"/>
         <destination>team-logs.nais-system:5170</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
