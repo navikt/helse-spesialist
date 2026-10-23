@@ -1,24 +1,22 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.CompletableDeferred
+import no.nav.helse.spesialist.api.plugins.configureContentNegotiationPlugin
 import no.nav.helse.spesialist.api.plugins.configureStatusPagesPlugin
-import tools.jackson.databind.DatabindException
-import java.io.Closeable
-import java.util.concurrent.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class StatusPagesTest {
-    class MyDatabindException(
-        msg: String,
-        cause: Throwable? = null,
-    ) : DatabindException(null as Closeable?, msg, cause)
-
     // Uten svar fra handleren logger Ktor-fallbacken ERROR og svarer 500
     @Test
     fun `kansellering ved nedstenging gir 503`() {
@@ -36,60 +34,40 @@ internal class StatusPagesTest {
     }
 
     @Test
-    fun `kansellert kall under serialisering gir ikke 500`() {
+    fun `JSON-svar serialiseres ferdig før sending`() {
         testApplication {
+            install(ContentNegotiation) { configureContentNegotiationPlugin() }
             install(StatusPages) { configureStatusPagesPlugin() }
             routing {
-                get("/test") {
-                    val cause = CancellationException("Call context was cancelled by `HttpRequestLifecycle` plugin")
-                    throw MyDatabindException(cause.message!!, cause)
-                }
+                get("/test") { call.respond(Svar(verdi = 1)) }
             }
             val response = client.get("/test")
-            assertEquals(499, response.status.value)
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals("""{"verdi":1}""", response.bodyAsText())
+            assertEquals("11", response.headers[HttpHeaders.ContentLength])
+            assertNull(response.headers[HttpHeaders.TransferEncoding])
         }
     }
 
     @Test
-    fun `broken pipe i DatabindException gir ikke 500`() {
+    fun `feil under serialisering gir 500, ikke 200 med avkuttet kropp`() {
         testApplication {
+            install(ContentNegotiation) { configureContentNegotiationPlugin() }
             install(StatusPages) { configureStatusPagesPlugin() }
             routing {
-                get("/test") {
-                    throw MyDatabindException("Broken pipe")
-                }
+                get("/test") { call.respond(SvarSomFeiler()) }
             }
-            val response = client.get("/test")
-            assertEquals(499, response.status.value)
-        }
-    }
-
-    @Test
-    fun `Connection reset by peer i DatabindException gir ikke 500`() {
-        testApplication {
-            install(StatusPages) { configureStatusPagesPlugin() }
-            routing {
-                get("/test") {
-                    throw MyDatabindException("Connection reset by peer")
-                }
-            }
-            val response = client.get("/test")
-            assertEquals(499, response.status.value)
-        }
-    }
-
-    @Test
-    fun `annen DatabindException gir 500`() {
-        testApplication {
-            install(StatusPages) { configureStatusPagesPlugin() }
-            routing {
-                get("/test") {
-                    throw MyDatabindException("noko gale")
-                }
-            }
-
             val response = client.get("/test")
             assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
     }
+}
+
+private data class Svar(
+    val verdi: Int,
+)
+
+private class SvarSomFeiler {
+    @Suppress("unused")
+    val verdi: Int get() = error("Feil under serialisering")
 }

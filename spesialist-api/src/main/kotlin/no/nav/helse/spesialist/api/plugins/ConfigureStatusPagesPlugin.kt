@@ -11,11 +11,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
-import no.nav.helse.spesialist.api.erKlientFrakoblingUnderSerialisering
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggWarn
-import tools.jackson.databind.DatabindException
 import java.util.concurrent.CancellationException
 
 fun StatusPagesConfig.configureStatusPagesPlugin() {
@@ -29,14 +27,6 @@ fun StatusPagesConfig.configureStatusPagesPlugin() {
         // Uten svar kaster StatusPages exception videre, og Ktor logger den som ERROR
         withContext(NonCancellable) {
             runCatching { call.respond(HttpStatusCode.ServiceUnavailable) }
-        }
-    }
-    exception<DatabindException> { call: ApplicationCall, cause: DatabindException ->
-        if (cause.erKlientFrakoblingUnderSerialisering()) {
-            loggWarn("Klienten koblet fra under serialisering av svar", cause)
-            call.respond(HttpStatusCode(499, "Client Closed Request"))
-        } else {
-            onThrowable(call, cause)
         }
     }
     exception<BadRequestException> { call: ApplicationCall, cause: BadRequestException ->

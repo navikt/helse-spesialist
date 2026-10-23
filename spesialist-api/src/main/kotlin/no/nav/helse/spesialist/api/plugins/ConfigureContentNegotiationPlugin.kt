@@ -8,8 +8,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiationConfig
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.charsets.Charset
-import io.ktor.utils.io.readRemaining
-import io.ktor.utils.io.readText
+import io.ktor.utils.io.discard
 import no.nav.helse.spesialist.api.objectMapper
 import tools.jackson.databind.ObjectMapper
 
@@ -18,23 +17,24 @@ fun ContentNegotiationConfig.configureContentNegotiationPlugin() {
 }
 
 private class UnitFriendlyJacksonConverter(
-    private val objectMapper: ObjectMapper,
+    objectMapper: ObjectMapper,
 ) : ContentConverter {
+    // Serialiserer hele svaret før sending. Ved strømming pakker Jackson inn «Broken pipe» i DatabindException
+    // etter at 200 er sendt, og Ktor logger det som ERROR i stedet for DEBUG.
+    private val jacksonConverter = JacksonConverter(objectMapper, streamBody = false)
+
     override suspend fun deserialize(
         charset: Charset,
         typeInfo: TypeInfo,
         content: ByteReadChannel,
     ): Any? {
-        // Håndter Unit som body eksplisitt
+        // Unit-body: les og forkast innholdet, uansett hva klienten sender (også "{}")
         if (typeInfo.type == Unit::class) {
-            if (content.isClosedForRead) return Unit
-
-            val text = content.readRemaining().readText()
-            if (text.isBlank()) return Unit
-            return Unit // til og med om noen sender "{}"
+            content.discard()
+            return Unit
         }
 
-        return JacksonConverter(objectMapper).deserialize(charset, typeInfo, content)
+        return jacksonConverter.deserialize(charset, typeInfo, content)
     }
 
     override suspend fun serialize(
@@ -42,5 +42,5 @@ private class UnitFriendlyJacksonConverter(
         charset: Charset,
         typeInfo: TypeInfo,
         value: Any?,
-    ): OutgoingContent = JacksonConverter(objectMapper).serialize(contentType, charset, typeInfo, value)
+    ): OutgoingContent = jacksonConverter.serialize(contentType, charset, typeInfo, value)
 }
