@@ -249,6 +249,25 @@ class VurderBehovForAvviksvurderingTest : ApplicationTest() {
         behandling1.assertHarVarsel("RV_IV_2", Varsel.Status.AKTIV)
     }
 
+    @Test
+    fun `vurdert varsel om avvik erstattes av uvurdert varsel når skjønnsfastsettelsen er borte`() {
+        // given
+        behandling1.nyttVarsel("RV_IV_2", Varsel.Status.VURDERT)
+        val command = vurderBehovForAvviksvurderingCommand()
+        repository.lagre(enAvviksvurdering(avviksvurderingId = avviksvurderingId))
+        val context = CommandContext(UUID.randomUUID())
+        context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
+
+        // when
+        command.resume(context, sessionContext, outbox)
+
+        // then
+        val avviksvarsler = sessionContext.varselRepository.finnVarslerFor(behandling1.id).filter { it.erVarselOmAvvik() }
+        val avviksvarsel = avviksvarsler.single()
+        assertEquals(Varsel.Status.AKTIV, avviksvarsel.status)
+        assertNull(avviksvarsel.vurdering)
+    }
+
     private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering =
         Avviksvurdering(
             unikId = avviksvurderingId,
