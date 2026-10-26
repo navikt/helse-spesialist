@@ -55,7 +55,7 @@ spec:
         tier: db-f1-micro
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "on"
           - name: pgaudit.log
             value: 'write'
         databases:

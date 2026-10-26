@@ -69,7 +69,7 @@ spec:
         retainedBackups: 14
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "on"
           - name: max_connections
             value: "1000"
           - name: pgaudit.log
