@@ -89,12 +89,12 @@ class PgGraderteAndreYtelserRepository(
                 "notat_til_beslutter" to event.metadata.notatTilBeslutter,
                 "totrinnsvurdering_id" to event.metadata.totrinnsvurderingId.value,
                 "type" to event.tilDBEventType().name,
-                "data_json" to event.tilDBEventData()?.let(objectMapper::writeValueAsString),
+                "data_json" to objectMapper.writeValueAsString(event.tilDBEventData()),
             ).update()
         }
     }
 
-    private fun Row.tilGraderteAndreYtelserEvent(): GraderteAndreYtelserEvent {
+    private fun Row.tilGraderteAndreYtelserEvent(): GraderteAndreYtelserOpprettetEvent {
         val metadata =
             GraderteAndreYtelserEvent.Metadata(
                 graderteAndreYtelserId = GraderteAndreYtelserId(uuid("graderte_andre_ytelser_id")),
@@ -115,46 +115,8 @@ class PgGraderteAndreYtelserRepository(
                     graderteAndreYtelserType = data.graderteAndreYtelserType.tilGraderteAndreYtelserType(),
                 )
             }
-
-            DBEventType.ENDRET -> {
-                val data = objectMapper.readValue(string("data_json"), DBEndretEventData::class.java)
-                GraderteAndreYtelserEndretEvent(
-                    metadata = metadata,
-                    endringer = data.endringer.tilEndringer(),
-                )
-            }
-
-            DBEventType.FJERNET -> {
-                GraderteAndreYtelserFjernetEvent(metadata = metadata)
-            }
-
-            DBEventType.GJENOPPRETTET -> {
-                val data = objectMapper.readValue(string("data_json"), DBGjenopprettetEventData::class.java)
-                GraderteAndreYtelserGjenopprettetEvent(
-                    metadata = metadata,
-                    endringer = data.endringer.tilEndringer(),
-                )
-            }
         }
     }
-
-    private fun DBEndringer.tilEndringer(): GraderteAndreYtelserEvent.Endringer =
-        GraderteAndreYtelserEvent.Endringer(
-            graderteAndreYtelserPerioder =
-                graderteAndreYtelserPerioder?.let {
-                    Endring(
-                        fra = it.fra.map { periode -> periode.tilGraderteAndreYtelserPeriode() },
-                        til = it.til.map { periode -> periode.tilGraderteAndreYtelserPeriode() },
-                    )
-                },
-            graderteAndreYtelserType =
-                graderteAndreYtelserType?.let {
-                    Endring(
-                        fra = it.fra.tilGraderteAndreYtelserType(),
-                        til = it.til.tilGraderteAndreYtelserType(),
-                    )
-                },
-        )
 
     private fun DBGraderteAndreYtelserPeriode.tilGraderteAndreYtelserPeriode() =
         GraderteAndreYtelserPeriode(
@@ -173,17 +135,14 @@ class PgGraderteAndreYtelserRepository(
 
     private fun DBPeriode.tilPeriode(): Periode = Periode(fom = fom, tom = tom)
 
-    private fun List<GraderteAndreYtelserEvent>.tilGraderteAndreYtelser(): GraderteAndreYtelser = GraderteAndreYtelser.fraLagring(events = sortedBy { it.metadata.sekvensnummer })
+    private fun List<GraderteAndreYtelserOpprettetEvent>.tilGraderteAndreYtelser(): GraderteAndreYtelser = GraderteAndreYtelser.fraLagring(single())
 
     private fun GraderteAndreYtelserEvent.tilDBEventType(): DBEventType =
         when (this) {
             is GraderteAndreYtelserOpprettetEvent -> DBEventType.OPPRETTET
-            is GraderteAndreYtelserEndretEvent -> DBEventType.ENDRET
-            is GraderteAndreYtelserFjernetEvent -> DBEventType.FJERNET
-            is GraderteAndreYtelserGjenopprettetEvent -> DBEventType.GJENOPPRETTET
         }
 
-    private fun GraderteAndreYtelserEvent.tilDBEventData(): DBEventData? =
+    private fun GraderteAndreYtelserEvent.tilDBEventData(): DBEventData =
         when (this) {
             is GraderteAndreYtelserOpprettetEvent -> {
                 DBOpprettetEventData(
@@ -191,41 +150,7 @@ class PgGraderteAndreYtelserRepository(
                     graderteAndreYtelserType = graderteAndreYtelserType.tilDBGraderteAndreYtelserType(),
                 )
             }
-
-            is GraderteAndreYtelserEndretEvent -> {
-                DBEndretEventData(
-                    endringer = endringer.tilDBEndringer(),
-                )
-            }
-
-            is GraderteAndreYtelserFjernetEvent -> {
-                null
-            }
-
-            is GraderteAndreYtelserGjenopprettetEvent -> {
-                DBGjenopprettetEventData(
-                    endringer = endringer.tilDBEndringer(),
-                )
-            }
         }
-
-    private fun GraderteAndreYtelserEvent.Endringer.tilDBEndringer() =
-        DBEndringer(
-            graderteAndreYtelserPerioder =
-                graderteAndreYtelserPerioder?.let {
-                    DBEndringer.DBEndring(
-                        fra = it.fra.map { periode -> periode.tilDBGraderteAndreYtelserPeriode() },
-                        til = it.til.map { periode -> periode.tilDBGraderteAndreYtelserPeriode() },
-                    )
-                },
-            graderteAndreYtelserType =
-                graderteAndreYtelserType?.let {
-                    DBEndringer.DBEndring(
-                        fra = it.fra.tilDBGraderteAndreYtelserType(),
-                        til = it.til.tilDBGraderteAndreYtelserType(),
-                    )
-                },
-        )
 
     private fun GraderteAndreYtelserPeriode.tilDBGraderteAndreYtelserPeriode() =
         DBGraderteAndreYtelserPeriode(
@@ -246,9 +171,6 @@ class PgGraderteAndreYtelserRepository(
 
     private enum class DBEventType {
         OPPRETTET,
-        ENDRET,
-        FJERNET,
-        GJENOPPRETTET,
     }
 
     private enum class DBGraderteAndreYtelserType {
@@ -264,25 +186,7 @@ class PgGraderteAndreYtelserRepository(
         val graderteAndreYtelserType: DBGraderteAndreYtelserType,
     ) : DBEventData
 
-    private data class DBEndretEventData(
-        val endringer: DBEndringer,
-    ) : DBEventData
-
-    private data class DBGjenopprettetEventData(
-        val endringer: DBEndringer,
-    ) : DBEventData
-
     private interface DBEventData
-
-    private data class DBEndringer(
-        val graderteAndreYtelserPerioder: DBEndring<List<DBGraderteAndreYtelserPeriode>>?,
-        val graderteAndreYtelserType: DBEndring<DBGraderteAndreYtelserType>?,
-    ) {
-        data class DBEndring<T>(
-            val fra: T,
-            val til: T,
-        )
-    }
 
     private data class DBGraderteAndreYtelserPeriode(
         val periode: DBPeriode,

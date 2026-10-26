@@ -17,11 +17,6 @@ sealed interface GraderteAndreYtelserEvent {
         val notatTilBeslutter: String,
         val totrinnsvurderingId: TotrinnsvurderingId,
     )
-
-    data class Endringer(
-        val graderteAndreYtelserPerioder: Endring<List<GraderteAndreYtelserPeriode>>?,
-        val graderteAndreYtelserType: Endring<GraderteAndreYtelserType>?,
-    )
 }
 
 data class GraderteAndreYtelserOpprettetEvent(
@@ -30,22 +25,3 @@ data class GraderteAndreYtelserOpprettetEvent(
     val graderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
     val graderteAndreYtelserType: GraderteAndreYtelserType,
 ) : GraderteAndreYtelserEvent
-
-data class GraderteAndreYtelserEndretEvent(
-    override val metadata: Metadata,
-    val endringer: GraderteAndreYtelserEvent.Endringer,
-) : GraderteAndreYtelserEvent
-
-data class GraderteAndreYtelserFjernetEvent(
-    override val metadata: Metadata,
-) : GraderteAndreYtelserEvent
-
-data class GraderteAndreYtelserGjenopprettetEvent(
-    override val metadata: Metadata,
-    val endringer: GraderteAndreYtelserEvent.Endringer,
-) : GraderteAndreYtelserEvent
-
-data class Endring<T>(
-    val fra: T,
-    val til: T,
-)

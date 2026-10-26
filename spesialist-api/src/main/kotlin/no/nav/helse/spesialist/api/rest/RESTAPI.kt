@@ -112,9 +112,6 @@ fun Routing.restRoutes(
 
             get(GetGraderteAndreYtelserForPersonBehandler(), restAdapter)
             post(PostGraderteAndreYtelserBehandler(), restAdapter)
-            patch(PatchEndreGraderteAndreYtelserBehandler(), restAdapter)
-            post(PostFjernGraderteAndreYtelserBehandler(), restAdapter)
-            post(PostGjenopprettGraderteAndreYtelserBehandler(), restAdapter)
 
             post(PostSykepengegrunnlagBehandler(), restAdapter)
 

@@ -39,35 +39,14 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
             andreYtelserId = id.value,
             perioder = mapTilApiPerioder(perioder),
             andreYtelserType = Mapping.tilApiGraderteAndreYtelserType(graderteAndreYtelserType),
-            fjernet = fjernet,
             events = events.map(Mapping::tilApiGraderteAndreYtelserEvent),
         )
 
     object Mapping {
         fun tilApiGraderteAndreYtelserEvent(event: GraderteAndreYtelserEvent): ApiGraderteAndreYtelserEvent =
             when (event) {
-                is GraderteAndreYtelserEndretEvent -> event.tilApiGraderteAndreYtelserEndretEvent()
-                is GraderteAndreYtelserFjernetEvent -> event.tilApiGraderteAndreYtelserFjernetEvent()
-                is GraderteAndreYtelserGjenopprettetEvent -> event.tilApiGraderteAndreYtelserGjenopprettetEvent()
                 is GraderteAndreYtelserOpprettetEvent -> event.tilApiGraderteAndreYtelserOpprettetEvent()
             }
-
-        private fun GraderteAndreYtelserGjenopprettetEvent.tilApiGraderteAndreYtelserGjenopprettetEvent(): ApiGraderteAndreYtelserGjenopprettetEvent =
-            ApiGraderteAndreYtelserGjenopprettetEvent(
-                metadata = tilApiGraderteAndreYtelserEventMetadata(),
-                endringer = endringer.tilApiEndringer(),
-            )
-
-        private fun GraderteAndreYtelserFjernetEvent.tilApiGraderteAndreYtelserFjernetEvent(): ApiGraderteAndreYtelserFjernetEvent =
-            ApiGraderteAndreYtelserFjernetEvent(
-                metadata = tilApiGraderteAndreYtelserEventMetadata(),
-            )
-
-        private fun GraderteAndreYtelserEndretEvent.tilApiGraderteAndreYtelserEndretEvent(): ApiGraderteAndreYtelserEndretEvent =
-            ApiGraderteAndreYtelserEndretEvent(
-                metadata = tilApiGraderteAndreYtelserEventMetadata(),
-                endringer = endringer.tilApiEndringer(),
-            )
 
         private fun GraderteAndreYtelserOpprettetEvent.tilApiGraderteAndreYtelserOpprettetEvent(): ApiGraderteAndreYtelserOpprettetEvent =
             ApiGraderteAndreYtelserOpprettetEvent(
@@ -83,35 +62,6 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                 utfortAvSaksbehandlerIdent = metadata.utførtAvSaksbehandlerIdent.value,
                 notatTilBeslutter = metadata.notatTilBeslutter,
             )
-
-        private fun mapPeriodeliste(domenetype: List<GraderteAndreYtelserPeriode>): List<ApiGraderteAndreYtelserEvent.ApiGradertAnnenYtelse> =
-            domenetype.map {
-                ApiGraderteAndreYtelserEvent.ApiGradertAnnenYtelse(
-                    periode = ApiDatoPeriode(it.periode.fom, it.periode.tom),
-                    grad = it.grad,
-                )
-            }
-
-        private fun GraderteAndreYtelserEvent.Endringer.tilApiEndringer(): ApiGraderteAndreYtelserEvent.Endringer {
-            val perioder =
-                graderteAndreYtelserPerioder?.let { perioder ->
-                    ApiGraderteAndreYtelserEvent.ListGradertAnnenYtelseEndring(
-                        fra = mapPeriodeliste(perioder.fra),
-                        til = mapPeriodeliste(perioder.til),
-                    )
-                }
-            val type =
-                graderteAndreYtelserType?.let { type ->
-                    ApiGraderteAndreYtelserEvent.GradertAnnenYtelseTypeEndring(
-                        fra = tilApiGraderteAndreYtelserType(type.fra),
-                        til = tilApiGraderteAndreYtelserType(type.til),
-                    )
-                }
-            return ApiGraderteAndreYtelserEvent.Endringer(
-                perioder = perioder,
-                andreYtelserType = type,
-            )
-        }
 
         fun tilApiGraderteAndreYtelserType(type: GraderteAndreYtelserType) =
             when (type) {

@@ -63,7 +63,6 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 expectedAndreYtelserId = andreYtelserId,
                 expectedPerioder = domainPerioder,
                 expectedAndreYtelserType = domainAndreYtelserType,
-                expectedFjernet = false,
             )
         }
         val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
@@ -134,295 +133,14 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 expectedAndreYtelserId = førsteAndreYtelserId,
                 expectedPerioder = domainFørstePerioder,
                 expectedAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                expectedFjernet = false,
             )
             assertGraderteAndreYtelser(
                 graderteAndreYtelser = requireNotNull(graderteAndreYtelserPerId[andreAndreYtelserId]),
                 expectedAndreYtelserId = andreAndreYtelserId,
                 expectedPerioder = domainAndrePerioder,
                 expectedAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                expectedFjernet = false,
             )
         }
-    }
-
-    @Test
-    fun `saksbehandler endrer type og perioder for graderte andre ytelser`() {
-        // Given:
-        førsteVedtaksperiode().apply {
-            fom = 1 jan 2021
-            tom = 31 jan 2021
-        }
-        val opprinneligeApiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 2 jan 2021,
-                    tom = 20 jan 2021,
-                    grad = 50,
-                ),
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 21 jan 2021,
-                    tom = 31 jan 2021,
-                    grad = 80,
-                ),
-            )
-        val endredeApiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 5 jan 2021,
-                    tom = 10 jan 2021,
-                    grad = 20,
-                ),
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 11 jan 2021,
-                    tom = 25 jan 2021,
-                    grad = 60,
-                ),
-            )
-        val endredeDomainPerioder =
-            endredeApiPerioder.map { apiPeriode ->
-                GraderteAndreYtelserPeriode(
-                    periode = apiPeriode.fom tilOgMed apiPeriode.tom,
-                    grad = apiPeriode.grad,
-                )
-            }
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn()
-
-        medPersonISpeil {
-            val andreYtelserId =
-                saksbehandlerLeggerTilGraderteAndreYtelser(
-                    perioder = opprinneligeApiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
-                    notatTilBeslutter = "opprinnelig notat",
-                )
-
-            // When:
-            val andreYtelserIdEtterEndring =
-                saksbehandlerEndrerGraderteAndreYtelser(
-                    graderteAndreYtelserId = andreYtelserId,
-                    perioder = endredeApiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.PLEIEPENGER,
-                    notatTilBeslutter = "oppdaterer perioder og type",
-                )
-
-            // Then:
-            assertEquals(andreYtelserId, andreYtelserIdEtterEndring)
-            assertEquals(1, graderteAndreYtelser.size())
-            assertGraderteAndreYtelser(
-                graderteAndreYtelser = graderteAndreYtelser[0],
-                expectedAndreYtelserId = andreYtelserId,
-                expectedPerioder = endredeDomainPerioder,
-                expectedAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                expectedFjernet = false,
-            )
-        }
-        val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
-        assertEquals(fødselsnummer(), endringsmelding["fødselsnummer"].asString())
-        assertEquals(5 jan 2021, endringsmelding["fom"].asLocalDate())
-    }
-
-    @Test
-    fun `saksbehandler endrer graderte andre ytelser fra en periode til tre perioder`() {
-        // Given:
-        førsteVedtaksperiode().apply {
-            fom = 1 jan 2021
-            tom = 31 jan 2021
-        }
-        val opprinneligeApiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 2 jan 2021,
-                    tom = 31 jan 2021,
-                    grad = 50,
-                ),
-            )
-        val endredeApiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 2 jan 2021,
-                    tom = 10 jan 2021,
-                    grad = 20,
-                ),
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 11 jan 2021,
-                    tom = 20 jan 2021,
-                    grad = 40,
-                ),
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 21 jan 2021,
-                    tom = 31 jan 2021,
-                    grad = 60,
-                ),
-            )
-        val endredeDomainPerioder =
-            endredeApiPerioder.map { apiPeriode ->
-                GraderteAndreYtelserPeriode(
-                    periode = apiPeriode.fom tilOgMed apiPeriode.tom,
-                    grad = apiPeriode.grad,
-                )
-            }
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn()
-
-        medPersonISpeil {
-            val andreYtelserId =
-                saksbehandlerLeggerTilGraderteAndreYtelser(
-                    perioder = opprinneligeApiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
-                    notatTilBeslutter = "opprinnelig notat",
-                )
-
-            // When:
-            val andreYtelserIdEtterEndring =
-                saksbehandlerEndrerGraderteAndreYtelser(
-                    graderteAndreYtelserId = andreYtelserId,
-                    perioder = endredeApiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
-                    notatTilBeslutter = "deler opp i tre perioder",
-                )
-
-            // Then:
-            assertEquals(andreYtelserId, andreYtelserIdEtterEndring)
-            assertEquals(1, graderteAndreYtelser.size())
-            assertGraderteAndreYtelser(
-                graderteAndreYtelser = graderteAndreYtelser[0],
-                expectedAndreYtelserId = andreYtelserId,
-                expectedPerioder = endredeDomainPerioder,
-                expectedAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                expectedFjernet = false,
-            )
-        }
-        val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
-        assertEquals(fødselsnummer(), endringsmelding["fødselsnummer"].asString())
-        assertEquals(2 jan 2021, endringsmelding["fom"].asLocalDate())
-    }
-
-    @Test
-    fun `saksbehandler fjerner graderte andre ytelser`() {
-        førsteVedtaksperiode().apply {
-            fom = 1 jan 2021
-            tom = 31 jan 2021
-        }
-        val apiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 2 jan 2021,
-                    tom = 20 jan 2021,
-                    grad = 50,
-                ),
-            )
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn()
-
-        medPersonISpeil {
-            val andreYtelserId =
-                saksbehandlerLeggerTilGraderteAndreYtelser(
-                    perioder = apiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
-                    notatTilBeslutter = "opprinnelig notat",
-                )
-
-            val andreYtelserIdEtterFjerning =
-                saksbehandlerFjernerGraderteAndreYtelser(
-                    graderteAndreYtelserId = andreYtelserId,
-                    notatTilBeslutter = "fjerner ytelsen",
-                )
-
-            assertEquals(andreYtelserId, andreYtelserIdEtterFjerning)
-            assertEquals(1, graderteAndreYtelser.size())
-            assertGraderteAndreYtelser(
-                graderteAndreYtelser = graderteAndreYtelser[0],
-                expectedAndreYtelserId = andreYtelserId,
-                expectedPerioder =
-                    apiPerioder.map { apiPeriode ->
-                        GraderteAndreYtelserPeriode(
-                            periode = apiPeriode.fom tilOgMed apiPeriode.tom,
-                            grad = apiPeriode.grad,
-                        )
-                    },
-                expectedAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                expectedFjernet = true,
-            )
-        }
-        val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
-        assertEquals(fødselsnummer(), endringsmelding["fødselsnummer"].asString())
-        assertEquals(2 jan 2021, endringsmelding["fom"].asLocalDate())
-    }
-
-    @Test
-    fun `saksbehandler gjenoppretter graderte andre ytelser`() {
-        førsteVedtaksperiode().apply {
-            fom = 1 jan 2021
-            tom = 31 jan 2021
-        }
-        val opprinneligeApiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 2 jan 2021,
-                    tom = 20 jan 2021,
-                    grad = 50,
-                ),
-            )
-        val gjenopprettedeApiPerioder =
-            listOf(
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 5 jan 2021,
-                    tom = 10 jan 2021,
-                    grad = 20,
-                ),
-                ApiGraderteAndreYtelserPeriode(
-                    fom = 11 jan 2021,
-                    tom = 20 jan 2021,
-                    grad = 60,
-                ),
-            )
-        val gjenopprettedeDomainPerioder =
-            gjenopprettedeApiPerioder.map { apiPeriode ->
-                GraderteAndreYtelserPeriode(
-                    periode = apiPeriode.fom tilOgMed apiPeriode.tom,
-                    grad = apiPeriode.grad,
-                )
-            }
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn()
-
-        medPersonISpeil {
-            val andreYtelserId =
-                saksbehandlerLeggerTilGraderteAndreYtelser(
-                    perioder = opprinneligeApiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.FORELDREPENGER,
-                    notatTilBeslutter = "opprinnelig notat",
-                )
-
-            val andreYtelserIdEtterFjerning =
-                saksbehandlerFjernerGraderteAndreYtelser(
-                    graderteAndreYtelserId = andreYtelserId,
-                    notatTilBeslutter = "fjerner ytelsen",
-                )
-
-            val andreYtelserIdEtterGjenoppretting =
-                saksbehandlerGjenoppretterGraderteAndreYtelser(
-                    graderteAndreYtelserId = andreYtelserId,
-                    perioder = gjenopprettedeApiPerioder,
-                    andreYtelserType = ApiGraderteAndreYtelserType.PLEIEPENGER,
-                    notatTilBeslutter = "gjenoppretter ytelsen",
-                )
-
-            assertEquals(andreYtelserId, andreYtelserIdEtterFjerning)
-            assertEquals(andreYtelserId, andreYtelserIdEtterGjenoppretting)
-            assertEquals(1, graderteAndreYtelser.size())
-            assertGraderteAndreYtelser(
-                graderteAndreYtelser = graderteAndreYtelser[0],
-                expectedAndreYtelserId = andreYtelserId,
-                expectedPerioder = gjenopprettedeDomainPerioder,
-                expectedAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                expectedFjernet = false,
-            )
-        }
-        val endringsmelding = sisteSendteMeldingMedEventName("graderte_andre_ytelser_endret")
-        assertEquals(fødselsnummer(), endringsmelding["fødselsnummer"].asString())
-        assertEquals(5 jan 2021, endringsmelding["fom"].asLocalDate())
     }
 
     private fun assertGraderteAndreYtelser(
@@ -430,11 +148,9 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
         expectedAndreYtelserId: UUID,
         expectedPerioder: List<GraderteAndreYtelserPeriode>,
         expectedAndreYtelserType: GraderteAndreYtelserType,
-        expectedFjernet: Boolean,
     ) {
         assertEquals(expectedAndreYtelserId, graderteAndreYtelser["andreYtelserId"].asUUID())
         assertEquals(expectedAndreYtelserType.name, graderteAndreYtelser["andreYtelserType"].asString())
-        assertEquals(expectedFjernet, graderteAndreYtelser["fjernet"].asBoolean())
         assertEquals(expectedPerioder.size, graderteAndreYtelser["perioder"].size())
         graderteAndreYtelser["perioder"].forEachIndexed { index, periode ->
             assertEquals(expectedPerioder[index].periode.fom.toString(), periode["fom"].asString())

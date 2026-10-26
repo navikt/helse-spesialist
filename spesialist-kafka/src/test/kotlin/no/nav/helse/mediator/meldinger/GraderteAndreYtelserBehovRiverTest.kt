@@ -45,11 +45,6 @@ internal class GraderteAndreYtelserBehovRiverTest {
             type = GraderteAndreYtelserType.OMSORGSPENGER,
             perioder = listOf(GraderteAndreYtelserPeriode((1.februar() tilOgMed 2.februar()), 20)),
         )
-        lagreFjernetGradertYtelse(
-            type = GraderteAndreYtelserType.PLEIEPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((7.januar() tilOgMed 8.januar()), 60)),
-        )
-
         rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
 
         val svar = rapid.inspektør.message(0)
@@ -184,31 +179,6 @@ internal class GraderteAndreYtelserBehovRiverTest {
                     graderteAndreYtelserType = type,
                 ),
             )
-        }
-    }
-
-    private fun lagreFjernetGradertYtelse(
-        type: GraderteAndreYtelserType,
-        perioder: List<GraderteAndreYtelserPeriode>,
-    ) {
-        val identitetsnummer = Identitetsnummer.fraString(testperson.fødselsnummer)
-        val saksbehandlerIdent = lagSaksbehandler().ident
-        val graderteAndreYtelser =
-            GraderteAndreYtelser.ny(
-                identitetsnummer = identitetsnummer,
-                saksbehandlerIdent = saksbehandlerIdent,
-                notatTilBeslutter = "notat",
-                totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                graderteAndreYtelserPerioder = perioder,
-                graderteAndreYtelserType = type,
-            )
-        graderteAndreYtelser.fjern(
-            saksbehandlerIdent = saksbehandlerIdent,
-            notatTilBeslutter = "fjernet",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-        )
-        inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
-            it.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
         }
     }
 

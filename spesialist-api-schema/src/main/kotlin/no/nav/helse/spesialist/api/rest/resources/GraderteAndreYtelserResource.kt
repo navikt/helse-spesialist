@@ -17,20 +17,4 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Resource("graderte-andre-ytelser")
-class GraderteAndreYtelserResource {
-    @Resource("{graderteAndreYtelserId}")
-    class Id(
-        val parent: GraderteAndreYtelserResource = GraderteAndreYtelserResource(),
-        val graderteAndreYtelserId: UUID,
-    ) {
-        @Resource("fjern")
-        class Fjern(
-            val parent: Id,
-        )
-
-        @Resource("gjenopprett")
-        class Gjenopprett(
-            val parent: Id,
-        )
-    }
-}
+class GraderteAndreYtelserResource

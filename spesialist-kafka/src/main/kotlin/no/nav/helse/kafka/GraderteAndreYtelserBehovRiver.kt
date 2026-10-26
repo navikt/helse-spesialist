@@ -45,7 +45,6 @@ class GraderteAndreYtelserBehovRiver : TransaksjonellRiver() {
         val løsning =
             transaksjon.graderteAndreYtelserRepository
                 .finnAlleForIdentitetsnummer(identitetsnummer)
-                .filterNot { it.fjernet }
                 .map { graderteAndreYtelser ->
                     mapOf(
                         "graderteAndreYtelserType" to graderteAndreYtelser.graderteAndreYtelserType.name,

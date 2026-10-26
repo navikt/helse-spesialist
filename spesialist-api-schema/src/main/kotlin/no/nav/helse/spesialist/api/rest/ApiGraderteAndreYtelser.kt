@@ -54,43 +54,7 @@ data class ApiGraderteAndreYtelser(
     val andreYtelserId: UUID,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelserType: ApiGraderteAndreYtelserType,
-    val fjernet: Boolean,
     val events: List<ApiGraderteAndreYtelserEvent>,
-)
-
-@Serializable
-data class ApiPatchEndreGraderteAndreYtelserRequest(
-    val graderteAndreYtelserId: UUID,
-    val perioder: List<ApiGraderteAndreYtelserPeriode>,
-    val andreYtelserType: ApiGraderteAndreYtelserType,
-    val notatTilBeslutter: String,
-)
-
-@Serializable
-data class ApiPostFjernGraderteAndreYtelserRequest(
-    val notatTilBeslutter: String,
-)
-
-@Serializable
-data class ApiPostGjenopprettGraderteAndreYtelserRequest(
-    val perioder: List<ApiGraderteAndreYtelserPeriode>,
-    val andreYtelserType: ApiGraderteAndreYtelserType,
-    val notatTilBeslutter: String,
-)
-
-@Serializable
-data class ApiPatchEndreGraderteAndreYtelserResponse(
-    val andreYtelserId: UUID,
-)
-
-@Serializable
-data class ApiPostFjernGraderteAndreYtelserResponse(
-    val andreYtelserId: UUID,
-)
-
-@Serializable
-data class ApiPostGjenopprettGraderteAndreYtelserResponse(
-    val andreYtelserId: UUID,
 )
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -107,30 +71,6 @@ sealed interface ApiGraderteAndreYtelserEvent {
         val utfortAvSaksbehandlerIdent: String,
         val notatTilBeslutter: String,
     )
-
-    @Serializable
-    data class Endringer(
-        val perioder: ListGradertAnnenYtelseEndring?,
-        val andreYtelserType: GradertAnnenYtelseTypeEndring?,
-    )
-
-    @Serializable
-    data class ListGradertAnnenYtelseEndring(
-        val fra: List<ApiGradertAnnenYtelse>,
-        val til: List<ApiGradertAnnenYtelse>,
-    )
-
-    @Serializable
-    data class GradertAnnenYtelseTypeEndring(
-        val fra: ApiGraderteAndreYtelserType,
-        val til: ApiGraderteAndreYtelserType,
-    )
-
-    @Serializable
-    data class ApiGradertAnnenYtelse(
-        val periode: ApiDatoPeriode,
-        val grad: Int,
-    )
 }
 
 @Serializable
@@ -139,24 +79,4 @@ data class ApiGraderteAndreYtelserOpprettetEvent(
     override val metadata: ApiGraderteAndreYtelserEvent.Metadata,
     val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelserType: ApiGraderteAndreYtelserType,
-) : ApiGraderteAndreYtelserEvent
-
-@Serializable
-@SerialName("ApiGraderteAndreYtelserEndretEvent")
-data class ApiGraderteAndreYtelserEndretEvent(
-    override val metadata: ApiGraderteAndreYtelserEvent.Metadata,
-    val endringer: ApiGraderteAndreYtelserEvent.Endringer,
-) : ApiGraderteAndreYtelserEvent
-
-@Serializable
-@SerialName("ApiGraderteAndreYtelserFjernetEvent")
-data class ApiGraderteAndreYtelserFjernetEvent(
-    override val metadata: ApiGraderteAndreYtelserEvent.Metadata,
-) : ApiGraderteAndreYtelserEvent
-
-@Serializable
-@SerialName("ApiGraderteAndreYtelserGjenopprettetEvent")
-data class ApiGraderteAndreYtelserGjenopprettetEvent(
-    override val metadata: ApiGraderteAndreYtelserEvent.Metadata,
-    val endringer: ApiGraderteAndreYtelserEvent.Endringer,
 ) : ApiGraderteAndreYtelserEvent
