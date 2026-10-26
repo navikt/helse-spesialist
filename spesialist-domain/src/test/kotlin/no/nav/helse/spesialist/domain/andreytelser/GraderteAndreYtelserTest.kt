@@ -1,9 +1,6 @@
 package no.nav.helse.spesialist.domain.andreytelser
 
-import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
-import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import kotlin.random.Random
@@ -15,13 +12,6 @@ class GraderteAndreYtelserTest {
         // Given:
         val identitetsnummer = lagIdentitetsnummer()
         val saksbehandlerIdent = lagSaksbehandler().ident
-        val perioder =
-            listOf(
-                GraderteAndreYtelserPeriode(
-                    periode = (1 jan 2024) tilOgMed (31 jan 2024),
-                    grad = 50,
-                ),
-            )
 
         // When:
         val graderteAndreYtelser =
@@ -30,7 +20,6 @@ class GraderteAndreYtelserTest {
                 saksbehandlerIdent = saksbehandlerIdent,
                 notatTilBeslutter = "et notat til beslutter",
                 totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                graderteAndreYtelserPerioder = perioder,
                 graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
             )
 
@@ -40,7 +29,6 @@ class GraderteAndreYtelserTest {
         val opprettetEvent = graderteAndreYtelser.events.last() as GraderteAndreYtelserOpprettetEvent
 
         assertEquals(identitetsnummer.value, opprettetEvent.fødselsnummer)
-        assertEquals(perioder, opprettetEvent.graderteAndreYtelserPerioder)
         assertEquals(GraderteAndreYtelserType.FORELDREPENGER, opprettetEvent.graderteAndreYtelserType)
         assertEquals("et notat til beslutter", opprettetEvent.metadata.notatTilBeslutter)
         assertEquals(saksbehandlerIdent, opprettetEvent.metadata.utførtAvSaksbehandlerIdent)
@@ -48,7 +36,6 @@ class GraderteAndreYtelserTest {
         assertNotNull(opprettetEvent.metadata.graderteAndreYtelserId)
 
         assertEquals(identitetsnummer, graderteAndreYtelser.identitetsnummer)
-        assertEquals(perioder, graderteAndreYtelser.perioder)
         assertEquals(GraderteAndreYtelserType.FORELDREPENGER, graderteAndreYtelser.graderteAndreYtelserType)
         assertEquals(1, graderteAndreYtelser.versjon)
     }
@@ -57,13 +44,6 @@ class GraderteAndreYtelserTest {
     fun `ny genererer unik id for hver instans`() {
         // Given:
         val identitetsnummer = lagIdentitetsnummer()
-        val perioder =
-            listOf(
-                GraderteAndreYtelserPeriode(
-                    periode = (1 jan 2024) tilOgMed (31 jan 2024),
-                    grad = 50,
-                ),
-            )
 
         // When:
         val første =
@@ -72,7 +52,6 @@ class GraderteAndreYtelserTest {
                 saksbehandlerIdent = lagSaksbehandler().ident,
                 notatTilBeslutter = "notat",
                 totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                graderteAndreYtelserPerioder = perioder,
                 graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
             )
         val andre =
@@ -81,7 +60,6 @@ class GraderteAndreYtelserTest {
                 saksbehandlerIdent = lagSaksbehandler().ident,
                 notatTilBeslutter = "notat",
                 totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                graderteAndreYtelserPerioder = perioder,
                 graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
             )
 

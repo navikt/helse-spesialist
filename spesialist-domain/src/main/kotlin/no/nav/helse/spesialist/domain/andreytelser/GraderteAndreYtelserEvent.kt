@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.domain.andreytelser
 
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEvent.Metadata
 import java.time.Instant
 
@@ -22,6 +21,5 @@ sealed interface GraderteAndreYtelserEvent {
 data class GraderteAndreYtelserOpprettetEvent(
     override val metadata: Metadata,
     val fødselsnummer: String,
-    val graderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
     val graderteAndreYtelserType: GraderteAndreYtelserType,
 ) : GraderteAndreYtelserEvent

@@ -3,12 +3,10 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserEvent.Metadata
-import no.nav.helse.spesialist.api.rest.andreYtelser.GetGraderteAndreYtelserForPersonBehandler.Mapping.mapTilApiPerioder
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.andreytelser.*
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import java.time.ZoneId
 
 class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPseudoId.GraderteAndreYtelser, List<ApiGraderteAndreYtelser>, ApiGetGraderteAndreYtelserForPersonErrorCode> {
@@ -27,7 +25,6 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                 kallKontekst.transaksjon.graderteAndreYtelserRepository
                     .finnAlleForIdentitetsnummer(person.id)
                     .map { it.tilApiGraderteAndreYtelser() }
-                    .sortedBy { graderteAndreYtelser -> graderteAndreYtelser.perioder.minOf { it.fom } }
 
             loggInfo("Hentet ${ytelser.size} graderte andre ytelser")
 
@@ -37,7 +34,6 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
     private fun GraderteAndreYtelser.tilApiGraderteAndreYtelser() =
         ApiGraderteAndreYtelser(
             andreYtelserId = id.value,
-            perioder = mapTilApiPerioder(perioder),
             andreYtelserType = Mapping.tilApiGraderteAndreYtelserType(graderteAndreYtelserType),
             events = events.map(Mapping::tilApiGraderteAndreYtelserEvent),
         )
@@ -52,7 +48,6 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
             ApiGraderteAndreYtelserOpprettetEvent(
                 metadata = tilApiGraderteAndreYtelserEventMetadata(),
                 andreYtelserType = tilApiGraderteAndreYtelserType(graderteAndreYtelserType),
-                perioder = mapTilApiPerioder(graderteAndreYtelserPerioder),
             )
 
         private fun GraderteAndreYtelserEvent.tilApiGraderteAndreYtelserEventMetadata(): Metadata =
@@ -70,15 +65,6 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                 GraderteAndreYtelserType.OMSORGSPENGER -> ApiGraderteAndreYtelserType.OMSORGSPENGER
                 GraderteAndreYtelserType.PLEIEPENGER -> ApiGraderteAndreYtelserType.PLEIEPENGER
                 GraderteAndreYtelserType.OPPLARINGSPENGER -> ApiGraderteAndreYtelserType.OPPLARINGSPENGER
-            }
-
-        fun mapTilApiPerioder(domeneperioder: Collection<GraderteAndreYtelserPeriode>): List<ApiGraderteAndreYtelserPeriode> =
-            domeneperioder.map { gradertAnnenYtelsePeriode ->
-                ApiGraderteAndreYtelserPeriode(
-                    fom = gradertAnnenYtelsePeriode.periode.fom,
-                    tom = gradertAnnenYtelsePeriode.periode.tom,
-                    grad = gradertAnnenYtelsePeriode.grad,
-                )
             }
     }
 }

@@ -4,9 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.GraderteAndreYtelserBehovRiver
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -15,7 +13,6 @@ import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import kotlin.random.Random
@@ -28,57 +25,8 @@ internal class GraderteAndreYtelserBehovRiverTest {
     private val testperson = TestPerson()
 
     @Test
-    fun `publiserer overlappende graderte andre ytelser gruppert per type og bevarer packet`() {
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.FORELDREPENGER,
-            perioder =
-                listOf(
-                    GraderteAndreYtelserPeriode((1.januar() tilOgMed 2.januar()), 50),
-                    GraderteAndreYtelserPeriode((5.januar() tilOgMed 6.januar()), 80),
-                ),
-        )
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.SVANGERSKAPSPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((3.januar() tilOgMed 4.januar()), 40)),
-        )
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.OMSORGSPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((1.februar() tilOgMed 2.februar()), 20)),
-        )
-        rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
-
-        val svar = rapid.inspektør.message(0)
-        val løsning = svar["@løsning"]["GraderteAndreYtelserForBeregning"]
-        assertEquals("behov-123", svar["@behovId"].asString())
-        assertEquals("behandling-123", svar["behandlingId"].asString())
-        assertEquals(2, løsning.size())
-        assertLøsningsrad(
-            løsning[0],
-            "FORELDREPENGER",
-            listOf(
-                Triple(1.januar(), 2.januar(), 50),
-                Triple(5.januar(), 6.januar(), 80),
-            ),
-        )
-        assertLøsningsrad(
-            løsning[1],
-            "SVANGERSKAPSPENGER",
-            listOf(
-                Triple(3.januar(), 4.januar(), 40),
-            ),
-        )
-    }
-
-    @Test
-    fun `publiserer forventet json-struktur - untatt @ feltene satt av R&R`() {
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.PLEIEPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((1.november2023() tilOgMed 1.mars2024()), 50)),
-        )
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.SVANGERSKAPSPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((10.januar() tilOgMed 12.januar()), 20)),
-        )
+    fun `svarer med tom løsning og bevarer packet`() {
+        lagreGraderteAndreYtelser(type = GraderteAndreYtelserType.PLEIEPENGER)
 
         rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
 
@@ -95,57 +43,11 @@ internal class GraderteAndreYtelserBehovRiverTest {
                 "tom": "2024-01-31"
               },
               "@løsning": {
-                "GraderteAndreYtelserForBeregning": [
-                  {
-                    "graderteAndreYtelserType": "PLEIEPENGER",
-                    "graderteAndreYtelserPerioder": [
-                    {
-                        "fom": "2024-01-01",
-                        "tom": "2024-01-31",
-                        "grad": 50
-                      }
-                    ]
-                  },
-                  {
-                    "graderteAndreYtelserType": "SVANGERSKAPSPENGER",
-                    "graderteAndreYtelserPerioder": [{
-                      "fom": "2024-01-10",
-                      "tom": "2024-01-12",
-                      "grad": 20
-                    }]
-                  }
-                ]
+                "GraderteAndreYtelserForBeregning": []
               }
             }
             """.trimIndent(),
         )
-    }
-
-    @Test
-    fun `avgrenser perioder i løsningen til forespurt fom og tom`() {
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.PLEIEPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((1.november2023() tilOgMed 1.mars2024()), 50)),
-        )
-
-        rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
-
-        val løsning = rapid.inspektør.message(0)["@løsning"]["GraderteAndreYtelserForBeregning"]
-        assertEquals(1, løsning.size())
-        assertLøsningsrad(løsning[0], "PLEIEPENGER", listOf(Triple(1.januar(), 31.januar(), 50)))
-    }
-
-    @Test
-    fun `publiserer tom liste når ingen perioder overlapper`() {
-        lagreGraderteAndreYtelser(
-            type = GraderteAndreYtelserType.FORELDREPENGER,
-            perioder = listOf(GraderteAndreYtelserPeriode((1.februar() tilOgMed 2.februar()), 50)),
-        )
-
-        rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
-
-        val løsning = rapid.inspektør.message(0)["@løsning"]["GraderteAndreYtelserForBeregning"]
-        assertEquals(0, løsning.size())
     }
 
     @Test
@@ -162,10 +64,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
         }
     }
 
-    private fun lagreGraderteAndreYtelser(
-        type: GraderteAndreYtelserType,
-        perioder: List<GraderteAndreYtelserPeriode>,
-    ) {
+    private fun lagreGraderteAndreYtelser(type: GraderteAndreYtelserType) {
         val identitetsnummer = Identitetsnummer.fraString(testperson.fødselsnummer)
         val saksbehandlerIdent = lagSaksbehandler().ident
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
@@ -175,25 +74,9 @@ internal class GraderteAndreYtelserBehovRiverTest {
                     saksbehandlerIdent = saksbehandlerIdent,
                     notatTilBeslutter = "notat",
                     totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-                    graderteAndreYtelserPerioder = perioder,
                     graderteAndreYtelserType = type,
                 ),
             )
-        }
-    }
-
-    private fun assertLøsningsrad(
-        jsonNode: JsonNode,
-        graderteAndreYtelserType: String,
-        perioder: List<Triple<LocalDate, LocalDate, Int>>,
-    ) {
-        assertEquals(graderteAndreYtelserType, jsonNode["graderteAndreYtelserType"].asString())
-        val perioderNode = jsonNode["graderteAndreYtelserPerioder"]
-        assertEquals(perioder.size, perioderNode.size())
-        perioder.forEachIndexed { index, (fom, tom, grad) ->
-            assertEquals(fom.toString(), perioderNode[index]["fom"].asString())
-            assertEquals(tom.toString(), perioderNode[index]["tom"].asString())
-            assertEquals(grad, perioderNode[index]["grad"].asInt())
         }
     }
 
@@ -265,10 +148,4 @@ internal class GraderteAndreYtelserBehovRiverTest {
         """.trimIndent()
 
     private fun Int.januar() = LocalDate.of(2024, 1, this)
-
-    private fun Int.februar() = LocalDate.of(2024, 2, this)
-
-    private fun Int.november2023() = LocalDate.of(2023, 11, this)
-
-    private fun Int.mars2024() = LocalDate.of(2024, 3, this)
 }

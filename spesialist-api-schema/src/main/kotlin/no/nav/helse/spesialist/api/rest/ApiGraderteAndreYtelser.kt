@@ -23,7 +23,6 @@ import java.util.*
 @Serializable
 data class ApiLeggTilGraderteAndreYtelserRequest(
     val fodselsnummer: String,
-    val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelserType: ApiGraderteAndreYtelserType,
     val notatTilBeslutter: String,
 )
@@ -38,13 +37,6 @@ enum class ApiGraderteAndreYtelserType {
 }
 
 @Serializable
-data class ApiGraderteAndreYtelserPeriode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val grad: Int,
-)
-
-@Serializable
 data class ApiLeggTilGraderteAndreYtelserResponse(
     val andreYtelserId: UUID,
 )
@@ -52,7 +44,6 @@ data class ApiLeggTilGraderteAndreYtelserResponse(
 @Serializable
 data class ApiGraderteAndreYtelser(
     val andreYtelserId: UUID,
-    val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelserType: ApiGraderteAndreYtelserType,
     val events: List<ApiGraderteAndreYtelserEvent>,
 )
@@ -77,6 +68,5 @@ sealed interface ApiGraderteAndreYtelserEvent {
 @SerialName("ApiGraderteAndreYtelserOpprettetEvent")
 data class ApiGraderteAndreYtelserOpprettetEvent(
     override val metadata: ApiGraderteAndreYtelserEvent.Metadata,
-    val perioder: List<ApiGraderteAndreYtelserPeriode>,
     val andreYtelserType: ApiGraderteAndreYtelserType,
 ) : ApiGraderteAndreYtelserEvent

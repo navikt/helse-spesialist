@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.domain.andreytelser
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.Instant
@@ -21,7 +20,6 @@ class GraderteAndreYtelser private constructor(
 
     val identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(opprettetEvent.fødselsnummer)
     val totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.metadata.totrinnsvurderingId
-    val perioder: List<GraderteAndreYtelserPeriode> = opprettetEvent.graderteAndreYtelserPerioder
     val graderteAndreYtelserType: GraderteAndreYtelserType = opprettetEvent.graderteAndreYtelserType
     val versjon: Int = opprettetEvent.metadata.sekvensnummer
 
@@ -33,7 +31,6 @@ class GraderteAndreYtelser private constructor(
             saksbehandlerIdent: NAVIdent,
             notatTilBeslutter: String,
             totrinnsvurderingId: TotrinnsvurderingId,
-            graderteAndreYtelserPerioder: List<GraderteAndreYtelserPeriode>,
             graderteAndreYtelserType: GraderteAndreYtelserType,
         ) = GraderteAndreYtelser(
             GraderteAndreYtelserOpprettetEvent(
@@ -47,7 +44,6 @@ class GraderteAndreYtelser private constructor(
                         totrinnsvurderingId = totrinnsvurderingId,
                     ),
                 fødselsnummer = identitetsnummer.value,
-                graderteAndreYtelserPerioder = graderteAndreYtelserPerioder,
                 graderteAndreYtelserType = graderteAndreYtelserType,
             ),
         )

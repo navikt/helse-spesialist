@@ -3,16 +3,12 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.GraderteAndreYtelserResource
-import no.nav.helse.spesialist.api.rest.tilkomneinntekter.alleGjeldendeBehandlingerForPerson
 import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
-import no.nav.helse.spesialist.domain.andreytelser.validerGraderteAndreYtelserPeriode
 
 class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserResource, ApiLeggTilGraderteAndreYtelserRequest, ApiLeggTilGraderteAndreYtelserResponse, ApiPostAndreYtelserErrorCode> {
     override val tag = Tags.GRADERTE_ANDRE_YTELSER
@@ -35,20 +31,6 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
         person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<ApiLeggTilGraderteAndreYtelserResponse, ApiPostAndreYtelserErrorCode> {
-        validerGraderteAndreYtelserPeriode(
-            eksisterendeGraderteAndreYtelser =
-                kallKontekst.transaksjon.graderteAndreYtelserRepository.finnAlleForIdentitetsnummer(person.id),
-            nyGraderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelserType.name),
-            nyGraderteAndreYtelserPerioder =
-                request.perioder.map {
-                    GraderteAndreYtelserPeriode(
-                        periode = Periode(it.fom, it.tom),
-                        grad = it.grad,
-                    )
-                },
-            behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(person.id),
-        )
-
         val graderteAndreYtelser =
             GraderteAndreYtelser.ny(
                 identitetsnummer = person.id,
@@ -59,21 +41,9 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<GraderteAndreYtelserReso
                         identitetsnummer = person.id,
                         totrinnsvurderingRepository = kallKontekst.transaksjon.totrinnsvurderingRepository,
                     ).id(),
-                graderteAndreYtelserPerioder =
-                    request.perioder.map {
-                        GraderteAndreYtelserPeriode(
-                            periode = Periode(it.fom, it.tom),
-                            grad = it.grad,
-                        )
-                    },
                 graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(request.andreYtelserType.name),
             )
         kallKontekst.transaksjon.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
-
-        kallKontekst.leggTilGraderteAndreYtelserEndringshendelse(
-            graderteAndreYtelser = graderteAndreYtelser,
-            årsak = "graderte andre ytelser lagt til",
-        )
 
         loggInfo("La til graderte andre ytelser (graderteAndreYtelserId: ${graderteAndreYtelser.id}")
 

@@ -3,10 +3,8 @@ package no.nav.helse.kafka
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.kafka.objectMapper
 import tools.jackson.databind.node.ObjectNode
 
@@ -37,30 +35,10 @@ class GraderteAndreYtelserBehovRiver : TransaksjonellRiver() {
         transaksjon: SessionContext,
         eventMetadata: EventMetadata,
     ) {
-        val fom = packet["$behovNavn.fom"].asLocalDate()
-        val tom = packet["$behovNavn.tom"].asLocalDate()
         val identitetsnummer = Identitetsnummer.fraString(packet["fødselsnummer"].asString())
-        val forespurtPeriode = Periode(fom, tom)
 
-        val løsning =
-            transaksjon.graderteAndreYtelserRepository
-                .finnAlleForIdentitetsnummer(identitetsnummer)
-                .map { graderteAndreYtelser ->
-                    mapOf(
-                        "graderteAndreYtelserType" to graderteAndreYtelser.graderteAndreYtelserType.name,
-                        "graderteAndreYtelserPerioder" to
-                            graderteAndreYtelser.perioder
-                                .filter { it.periode overlapper forespurtPeriode }
-                                .map { periode ->
-                                    mapOf(
-                                        "fom" to maxOf(periode.periode.fom, forespurtPeriode.fom),
-                                        "tom" to minOf(periode.periode.tom, forespurtPeriode.tom),
-                                        "grad" to periode.grad,
-                                    )
-                                }.sortedBy { it.getValue("fom").toString() },
-                    )
-                }.filter { (it.getValue("graderteAndreYtelserPerioder") as List<*>).isNotEmpty() }
-                .sortedBy { it.getValue("graderteAndreYtelserType") as String }
+        // Graderte andre ytelser har foreløpig ingen dager å svare med; dagene legges til i neste steg.
+        val løsning = emptyList<Map<String, Any>>()
 
         val løstPacket =
             (objectMapper.readTree(packet.toJson()) as ObjectNode).also { original ->

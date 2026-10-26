@@ -209,7 +209,6 @@ class SpeilPersonReceiver(
         }
 
     fun saksbehandlerLeggerTilGraderteAndreYtelser(
-        perioder: Collection<ApiGraderteAndreYtelserPeriode>,
         andreYtelserType: ApiGraderteAndreYtelserType,
         notatTilBeslutter: String,
     ): UUID =
@@ -218,14 +217,6 @@ class SpeilPersonReceiver(
             request =
                 mapOf(
                     "fodselsnummer" to testContext.person.fødselsnummer,
-                    "perioder" to
-                        perioder.map {
-                            mapOf(
-                                "fom" to it.fom.toString(),
-                                "tom" to it.tom.toString(),
-                                "grad" to it.grad,
-                            )
-                        },
                     "andreYtelserType" to andreYtelserType.name,
                     "notatTilBeslutter" to notatTilBeslutter,
                 ),

@@ -9,11 +9,8 @@ import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.andreytelser.*
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
-import java.time.LocalDate
 
 class PgGraderteAndreYtelserRepository(
     session: Session,
@@ -111,18 +108,11 @@ class PgGraderteAndreYtelserRepository(
                 GraderteAndreYtelserOpprettetEvent(
                     metadata = metadata,
                     fødselsnummer = string("fødselsnummer"),
-                    graderteAndreYtelserPerioder = data.graderteAndreYtelserPerioder.map { it.tilGraderteAndreYtelserPeriode() },
                     graderteAndreYtelserType = data.graderteAndreYtelserType.tilGraderteAndreYtelserType(),
                 )
             }
         }
     }
-
-    private fun DBGraderteAndreYtelserPeriode.tilGraderteAndreYtelserPeriode() =
-        GraderteAndreYtelserPeriode(
-            periode = periode.tilPeriode(),
-            grad = grad,
-        )
 
     private fun DBGraderteAndreYtelserType.tilGraderteAndreYtelserType() =
         when (this) {
@@ -132,8 +122,6 @@ class PgGraderteAndreYtelserRepository(
             DBGraderteAndreYtelserType.PLEIEPENGER -> GraderteAndreYtelserType.PLEIEPENGER
             DBGraderteAndreYtelserType.OPPLARINGSPENGER -> GraderteAndreYtelserType.OPPLARINGSPENGER
         }
-
-    private fun DBPeriode.tilPeriode(): Periode = Periode(fom = fom, tom = tom)
 
     private fun List<GraderteAndreYtelserOpprettetEvent>.tilGraderteAndreYtelser(): GraderteAndreYtelser = GraderteAndreYtelser.fraLagring(single())
 
@@ -146,17 +134,10 @@ class PgGraderteAndreYtelserRepository(
         when (this) {
             is GraderteAndreYtelserOpprettetEvent -> {
                 DBOpprettetEventData(
-                    graderteAndreYtelserPerioder = graderteAndreYtelserPerioder.map { it.tilDBGraderteAndreYtelserPeriode() },
                     graderteAndreYtelserType = graderteAndreYtelserType.tilDBGraderteAndreYtelserType(),
                 )
             }
         }
-
-    private fun GraderteAndreYtelserPeriode.tilDBGraderteAndreYtelserPeriode() =
-        DBGraderteAndreYtelserPeriode(
-            periode = periode.tilDBPeriode(),
-            grad = grad,
-        )
 
     private fun GraderteAndreYtelserType.tilDBGraderteAndreYtelserType() =
         when (this) {
@@ -166,8 +147,6 @@ class PgGraderteAndreYtelserRepository(
             GraderteAndreYtelserType.PLEIEPENGER -> DBGraderteAndreYtelserType.PLEIEPENGER
             GraderteAndreYtelserType.OPPLARINGSPENGER -> DBGraderteAndreYtelserType.OPPLARINGSPENGER
         }
-
-    private fun Periode.tilDBPeriode(): DBPeriode = DBPeriode(fom = fom, tom = tom)
 
     private enum class DBEventType {
         OPPRETTET,
@@ -182,19 +161,8 @@ class PgGraderteAndreYtelserRepository(
     }
 
     private data class DBOpprettetEventData(
-        val graderteAndreYtelserPerioder: List<DBGraderteAndreYtelserPeriode>,
         val graderteAndreYtelserType: DBGraderteAndreYtelserType,
     ) : DBEventData
 
     private interface DBEventData
-
-    private data class DBGraderteAndreYtelserPeriode(
-        val periode: DBPeriode,
-        val grad: Int,
-    )
-
-    private data class DBPeriode(
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
 }

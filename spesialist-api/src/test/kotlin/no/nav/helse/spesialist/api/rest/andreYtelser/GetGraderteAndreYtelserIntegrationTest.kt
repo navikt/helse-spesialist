@@ -5,16 +5,11 @@ import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
-import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.andreytelser.AndreYtelserPeriode.GraderteAndreYtelserPeriode
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
-import no.nav.helse.spesialist.domain.testfixtures.okt
-import no.nav.helse.spesialist.domain.testfixtures.sep
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import kotlin.random.Random
@@ -73,13 +68,6 @@ class GetGraderteAndreYtelserIntegrationTest {
             [
               {
                 "andreYtelserId": "${enGradertAnnenYtelse.id.value}",
-                "perioder": [
-                  {
-                    "fom": "2024-09-12",
-                    "tom": "2024-10-02",
-                    "grad": 66
-                  }
-                ],
                 "andreYtelserType": "SVANGERSKAPSPENGER",
                 "events": [
                   {
@@ -89,13 +77,6 @@ class GetGraderteAndreYtelserIntegrationTest {
                       "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
                       "notatTilBeslutter": "et notat til beslutter"
                     },
-                    "perioder": [
-                      {
-                        "fom": "2024-09-12",
-                        "tom": "2024-10-02",
-                        "grad": 66
-                      }
-                    ],
                     "andreYtelserType": "SVANGERSKAPSPENGER"
                   }
                 ]
@@ -111,14 +92,12 @@ class GetGraderteAndreYtelserIntegrationTest {
     private fun opprettEnGradertAnnenYtelse(
         person: Person,
         saksbehandler: Saksbehandler,
-        periode: Periode = 12 sep 2024 tilOgMed (2 okt 2024),
     ): GraderteAndreYtelser =
         GraderteAndreYtelser.ny(
             identitetsnummer = person.id,
             saksbehandlerIdent = saksbehandler.ident,
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            graderteAndreYtelserPerioder = listOf(GraderteAndreYtelserPeriode(periode = periode, grad = 66)),
             graderteAndreYtelserType = GraderteAndreYtelserType.SVANGERSKAPSPENGER,
         )
 }

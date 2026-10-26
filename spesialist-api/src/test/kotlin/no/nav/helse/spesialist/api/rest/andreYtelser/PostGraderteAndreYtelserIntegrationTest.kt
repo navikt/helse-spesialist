@@ -37,13 +37,6 @@ class PostGraderteAndreYtelserIntegrationTest {
                     """
                     {
                       "fodselsnummer": "${person.id.value}",
-                      "perioder": [
-                        {
-                          "fom": "2024-09-13",
-                          "tom": "2024-10-03",
-                          "grad": 67
-                        }
-                      ],
                       "andreYtelserType": "SVANGERSKAPSPENGER",
                       "notatTilBeslutter": "notat om en gradert annen ytelse"
                     }
