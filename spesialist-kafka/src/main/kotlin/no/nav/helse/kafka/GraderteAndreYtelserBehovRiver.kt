@@ -45,6 +45,7 @@ class GraderteAndreYtelserBehovRiver : TransaksjonellRiver() {
                 .finnAlleForIdentitetsnummer(identitetsnummer)
                 .map { graderteAndreYtelser ->
                     mapOf(
+                        "id" to graderteAndreYtelser.versjon,
                         graderteAndreYtelser.id.organisasjonsnummer?.let { "organisasjonsnummer" to it }
                             ?: ("yrkesaktivitetstype" to graderteAndreYtelser.id.yrkesaktivitet.name),
                         "dager" to

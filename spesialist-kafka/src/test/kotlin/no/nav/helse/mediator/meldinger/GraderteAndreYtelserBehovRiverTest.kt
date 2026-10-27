@@ -27,15 +27,16 @@ internal class GraderteAndreYtelserBehovRiverTest {
 
     @Test
     fun `publiserer kun dager innenfor forespurt periode og bevarer packet`() {
-        lagreGraderteAndreYtelser(
-            dager =
-                listOf(
-                    dag(dato = 1.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50)),
-                    dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 80), sykdomsgrad = 20),
-                    dag(dato = 3.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.OMSORGSPENGER to 20)),
-                ),
-            organisasjonsnummer = "123456789",
-        )
+        val graderteAndreYtelser =
+            lagreGraderteAndreYtelser(
+                dager =
+                    listOf(
+                        dag(dato = 1.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50)),
+                        dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 80), sykdomsgrad = 20),
+                        dag(dato = 3.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.OMSORGSPENGER to 20)),
+                    ),
+                organisasjonsnummer = "123456789",
+            )
 
         rapid.sendTestMessage(behovmelding(fom = 2.januar(), tom = 2.januar()))
 
@@ -44,6 +45,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
         assertEquals("behov-123", svar["@behovId"].asString())
         assertEquals("behandling-123", svar["behandlingId"].asString())
         assertEquals(1, løsning.size())
+        assertEquals(graderteAndreYtelser.versjon.toString(), løsning[0]["id"].asString())
         assertEquals("123456789", løsning[0]["organisasjonsnummer"].asString())
         assertEquals(1, løsning[0]["dager"].size())
         assertEquals("2024-01-02", løsning[0]["dager"][0]["dato"].asString())
@@ -51,24 +53,33 @@ internal class GraderteAndreYtelserBehovRiverTest {
     }
 
     @Test
-    fun `svarer med tilstanden etter at alle eventene er spilt av`() {
-        lagreGraderteAndreYtelser(
-            dager =
-                listOf(
-                    dag(dato = 1.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50)),
-                    dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50)),
-                ),
-            endringer =
-                listOf(
-                    listOf(dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 30), sykdomsgrad = 70)),
-                    listOf(dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 10), sykdomsgrad = 90)),
-                ),
-            organisasjonsnummer = "123456789",
-        )
+    fun `svarer med tilstanden og versjonen etter at alle eventene er spilt av`() {
+        val graderteAndreYtelser =
+            lagreGraderteAndreYtelser(
+                dager =
+                    listOf(
+                        dag(dato = 1.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50)),
+                        dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50)),
+                    ),
+                endringer =
+                    listOf(
+                        listOf(dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 30), sykdomsgrad = 70)),
+                        listOf(dag(dato = 2.januar(), andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 10), sykdomsgrad = 90)),
+                    ),
+                organisasjonsnummer = "123456789",
+            )
 
         rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
 
-        val dager = rapid.inspektør.message(0)["@løsning"]["GraderteAndreYtelserForBeregning"][0]["dager"]
+        val løsning = rapid.inspektør.message(0)["@løsning"]["GraderteAndreYtelserForBeregning"][0]
+        assertEquals(
+            graderteAndreYtelser.events
+                .last()
+                .versjon
+                .toString(),
+            løsning["id"].asString(),
+        )
+        val dager = løsning["dager"]
         assertEquals(2, dager.size())
         assertEquals(50, dager[0]["andreYtelserGrader"]["FORELDREPENGER"].asInt())
         assertEquals(10, dager[1]["andreYtelserGrader"]["FORELDREPENGER"].asInt())
@@ -77,30 +88,32 @@ internal class GraderteAndreYtelserBehovRiverTest {
 
     @Test
     fun `publiserer forventet json-struktur - untatt @ feltene satt av R&R`() {
-        lagreGraderteAndreYtelser(
-            dager =
-                listOf(
-                    dag(
-                        dato = 10.januar(),
-                        andreYtelserGrader = mapOf(GraderteAndreYtelserType.PLEIEPENGER to 50),
-                        sykdomsgrad = 30,
-                        arbeidsgrad = 20,
+        val arbeidstaker =
+            lagreGraderteAndreYtelser(
+                dager =
+                    listOf(
+                        dag(
+                            dato = 10.januar(),
+                            andreYtelserGrader = mapOf(GraderteAndreYtelserType.PLEIEPENGER to 50),
+                            sykdomsgrad = 30,
+                            arbeidsgrad = 20,
+                        ),
                     ),
-                ),
-            organisasjonsnummer = "123456789",
-        )
-        lagreGraderteAndreYtelser(
-            dager =
-                listOf(
-                    dag(
-                        dato = 10.januar(),
-                        andreYtelserGrader = mapOf(GraderteAndreYtelserType.SVANGERSKAPSPENGER to 40),
-                        sykdomsgrad = 60,
-                        arbeidsgrad = 0,
+                organisasjonsnummer = "123456789",
+            )
+        val frilans =
+            lagreGraderteAndreYtelser(
+                dager =
+                    listOf(
+                        dag(
+                            dato = 10.januar(),
+                            andreYtelserGrader = mapOf(GraderteAndreYtelserType.SVANGERSKAPSPENGER to 40),
+                            sykdomsgrad = 60,
+                            arbeidsgrad = 0,
+                        ),
                     ),
-                ),
-            yrkesaktivitet = Yrkesaktivitetstype.FRILANS,
-        )
+                yrkesaktivitet = Yrkesaktivitetstype.FRILANS,
+            )
 
         rapid.sendTestMessage(behovmelding(fom = 1.januar(), tom = 31.januar()))
 
@@ -119,6 +132,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
               "@løsning": {
                 "GraderteAndreYtelserForBeregning": [
                   {
+                    "id": "${arbeidstaker.versjon}",
                     "organisasjonsnummer": "123456789",
                     "dager": [
                       {
@@ -130,6 +144,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
                     ]
                   },
                   {
+                    "id": "${frilans.versjon}",
                     "yrkesaktivitetstype": "FRILANS",
                     "dager": [
                       {
@@ -204,7 +219,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
         endringer: List<List<GraderteAndreYtelserDag>> = emptyList(),
         yrkesaktivitet: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         organisasjonsnummer: String? = null,
-    ) {
+    ): GraderteAndreYtelser {
         val saksbehandlerIdent = lagSaksbehandler().ident
         val graderteAndreYtelser =
             GraderteAndreYtelser.ny(
@@ -222,6 +237,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
         inMemoryRepositoriesAndDaos.sessionFactory.transactionalSessionScope {
             it.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
         }
+        return graderteAndreYtelser
     }
 
     private fun assertPublisertJson(
