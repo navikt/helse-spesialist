@@ -20,6 +20,7 @@ import java.util.*
 data class ApiEndreGraderteAndreYtelserRequest(
     val yrkesaktivitet: ApiYrkesaktivitetstype,
     val organisasjonsnummer: String?,
+    val versjon: UUID?,
     val dager: List<ApiGraderteAndreYtelserDag>,
     val notatTilBeslutter: String,
 )

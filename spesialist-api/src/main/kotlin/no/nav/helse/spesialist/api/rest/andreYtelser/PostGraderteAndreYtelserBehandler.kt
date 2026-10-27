@@ -49,21 +49,26 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
                 return RestResponse.Error(ApiPostGraderteAndreYtelserErrorCode.TOTAL_GRAD_OVER_100)
         }
 
-        val id =
+        val graderteAndreYtelserId =
             GraderteAndreYtelserId(
                 identitetsnummer = person.id,
                 yrkesaktivitet = Yrkesaktivitetstype.valueOf(request.yrkesaktivitet.name),
                 organisasjonsnummer = request.organisasjonsnummer,
             )
         val repository = kallKontekst.transaksjon.graderteAndreYtelserRepository
-        val eksisterende = repository.finnOrNull(id)
+        val eksisterende = repository.finnOrNull(graderteAndreYtelserId)
+
+        if (request.versjon != eksisterende?.versjon) {
+            loggInfo("Versjonen i forespørselen (${request.versjon}) matcher ikke versjon (${eksisterende?.versjon})")
+            return RestResponse.Error(ApiPostGraderteAndreYtelserErrorCode.UTDATERT_TILSTAND)
+        }
 
         val graderteAndreYtelser: GraderteAndreYtelser
         val event: GraderteAndreYtelserEndretEvent?
         if (eksisterende == null) {
             graderteAndreYtelser =
                 GraderteAndreYtelser.ny(
-                    id = id,
+                    id = graderteAndreYtelserId,
                     dager = dager,
                     saksbehandlerIdent = kallKontekst.saksbehandler.ident,
                     notatTilBeslutter = request.notatTilBeslutter,
@@ -124,4 +129,5 @@ enum class ApiPostGraderteAndreYtelserErrorCode(
     TOTAL_GRAD_OVER_100("Total grad for en dag kan ikke overstige 100", HttpStatusCode.BadRequest),
     MANGLER_ENDRINGER("Mangler endringer", HttpStatusCode.BadRequest),
     NEGATIV_GRAD("Grad kan ikke være negativ", HttpStatusCode.BadRequest),
+    UTDATERT_TILSTAND("Graderte andre ytelser er endret siden de ble hentet", HttpStatusCode.Conflict),
 }

@@ -96,7 +96,7 @@ CREATE INDEX graderte_andre_ytelser_events_stream_idx
 
 ## 5. API
 - One write endpoint: `POST /api/personer/{pseudoId}/graderte-andre-ytelser`
-  with body `{ yrkesaktivitet, organisasjonsnummer?, dager, notatTilBeslutter }`, where `dager` = only the edited days.
+  with body `{ yrkesaktivitet, organisasjonsnummer?, versjon?, dager, notatTilBeslutter }`, where `dager` = only the edited days.
   The first time it creates the stream, after that it adds a new event. Response: `{ versjon }`.
   - Same path as the GET, and the person is identified by pseudoId like the other `Personer` endpoints.
   - POST because each call adds a change (only the edited days); it doesn't replace the whole state.
@@ -106,7 +106,9 @@ CREATE INDEX graderte_andre_ytelser_events_stream_idx
   (history with versjon/tidspunkt/saksbehandler/notat and the days changed in each event).
 - Remove `andreYtelserType` (top level) from the request, the response and the events.
 - Error codes: remove `GRADERT_ANNEN_YTELSE_FOR_YRKESAKTIVITET_FINNES`. Keep MANGLER_ENDRINGER, NEGATIV_GRAD,
-  TOTAL_GRAD_OVER_100.
+  TOTAL_GRAD_OVER_100. Add UTDATERT_TILSTAND (409).
+- Speil sends the `versjon` it last saw (null if no GAY exists yet for the stream). If it isn't the stream's current
+  version → 409 `UTDATERT_TILSTAND`, nothing stored, no ping. Order: validerDager (400) → versjon check (409) → ny/endre.
 - A request where all days are identical to the current state: 200 with the existing `versjon`.
 - The new POST behandler does **not** call `finnEllerOpprettTotrinnsvurdering`, as today's POST does. That waits for the
   saksbehandlerhandling step.
@@ -126,13 +128,14 @@ CREATE INDEX graderte_andre_ytelser_events_stream_idx
 - Repository (DB): store/fetch the stream, replay in the right order, idempotent lagre, separate streams per
   yrkesaktivitet, two ARBEIDSTAKER streams with different orgnr stay separate, lookup of streams without orgnr (NULL).
 - API: first POST creates, the second only changes the days it contains, GET shows the resulting days + history
-  with deltas, validation errors.
+  with deltas, validation errors, 409 on outdated versjon / missing versjon for an existing stream / versjon for a
+  stream that doesn't exist.
 - Endringsevent: `fom` = the earliest date in the event, also when the stream has earlier days.
 - River: answers with the replayed state; orgnr key if present, otherwise yrkesaktivitetstype.
 - E2E + opprydding-dev.
 
 ## Later
-- Old values (`fra`) per day in the event, like `fraType`/`fraGrad` in tidslinjeoverstyring.
+- Show old values in history in Speil by replaying up to the previous event.
 
 ## Open questions
 None at the moment.

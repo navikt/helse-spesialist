@@ -35,6 +35,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             // When:
             val førsteVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
+                    versjon = null,
                     dager = dager,
                     yrkesaktivitet = ApiYrkesaktivitetstype.ARBEIDSTAKER,
                     organisasjonsnummer = "123456789",
@@ -49,6 +50,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             // When:
             val andreVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
+                    versjon = førsteVersjon,
                     dager = listOf(endretDag),
                     yrkesaktivitet = ApiYrkesaktivitetstype.ARBEIDSTAKER,
                     organisasjonsnummer = "123456789",
@@ -82,6 +84,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             val arbeidstakerVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
+                    versjon = null,
                     dager = arbeidstakerDager,
                     yrkesaktivitet = ApiYrkesaktivitetstype.ARBEIDSTAKER,
                     organisasjonsnummer = "123456789",
@@ -89,6 +92,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
                 )
             val frilansVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
+                    versjon = null,
                     dager = frilansDager,
                     yrkesaktivitet = ApiYrkesaktivitetstype.FRILANS,
                     organisasjonsnummer = null,

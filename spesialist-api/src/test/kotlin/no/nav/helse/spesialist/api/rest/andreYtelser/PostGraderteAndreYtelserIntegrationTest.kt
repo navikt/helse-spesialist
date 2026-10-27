@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.testfixtures.sep
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -81,6 +82,7 @@ class PostGraderteAndreYtelserIntegrationTest {
             postGraderteAndreYtelser(
                 person = person,
                 saksbehandler = saksbehandler,
+                versjon = første.bodyAsJsonNode?.get("versjon")?.asUUID(),
                 dagerJson = dagJson(dato = "2024-09-24", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 30 }""", sykdomsgrad = 70, arbeidsgrad = 0),
             )
 
@@ -113,7 +115,13 @@ class PostGraderteAndreYtelserIntegrationTest {
         val dag = dagJson(dato = "2024-09-23", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0)
         val første = postGraderteAndreYtelser(person = person, saksbehandler = saksbehandler, dagerJson = dag)
 
-        val andre = postGraderteAndreYtelser(person = person, saksbehandler = saksbehandler, dagerJson = dag)
+        val andre =
+            postGraderteAndreYtelser(
+                person = person,
+                saksbehandler = saksbehandler,
+                versjon = første.bodyAsJsonNode?.get("versjon")?.asUUID(),
+                dagerJson = dag,
+            )
 
         assertEquals(HttpStatusCode.OK.value, andre.status)
         assertEquals(første.bodyAsJsonNode?.get("versjon")?.asUUID(), andre.bodyAsJsonNode?.get("versjon")?.asUUID())
@@ -122,6 +130,72 @@ class PostGraderteAndreYtelserIntegrationTest {
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             { assertEquals(GraderteAndreYtelserEndringerEvent(person.id, 23 sep 2024), it.hendelse) },
         )
+    }
+
+    @Test
+    fun `avviser endring med utdatert versjon`() {
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+        val første =
+            postGraderteAndreYtelser(
+                person = person,
+                saksbehandler = saksbehandler,
+                dagerJson = dagJson(dato = "2024-09-23", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0),
+            )
+        val førsteVersjon = første.bodyAsJsonNode?.get("versjon")?.asUUID()
+        postGraderteAndreYtelser(
+            person = person,
+            saksbehandler = saksbehandler,
+            versjon = førsteVersjon,
+            dagerJson = dagJson(dato = "2024-09-24", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0),
+        )
+
+        val response =
+            postGraderteAndreYtelser(
+                person = person,
+                saksbehandler = saksbehandler,
+                versjon = førsteVersjon,
+                dagerJson = dagJson(dato = "2024-09-25", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0),
+            )
+
+        assertUtdatertTilstand(response, person, forventetAntallEvents = 2)
+    }
+
+    @Test
+    fun `avviser endring uten versjon når graderte andre ytelser finnes`() {
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+        postGraderteAndreYtelser(
+            person = person,
+            saksbehandler = saksbehandler,
+            dagerJson = dagJson(dato = "2024-09-23", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0),
+        )
+
+        val response =
+            postGraderteAndreYtelser(
+                person = person,
+                saksbehandler = saksbehandler,
+                versjon = null,
+                dagerJson = dagJson(dato = "2024-09-24", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0),
+            )
+
+        assertUtdatertTilstand(response, person, forventetAntallEvents = 1)
+    }
+
+    @Test
+    fun `avviser versjon når graderte andre ytelser ikke finnes`() {
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+
+        val response =
+            postGraderteAndreYtelser(
+                person = person,
+                saksbehandler = saksbehandler,
+                versjon = UUID.randomUUID(),
+                dagerJson = dagJson(dato = "2024-09-23", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 50 }""", sykdomsgrad = 50, arbeidsgrad = 0),
+            )
+
+        assertFeil(response, person, "UTDATERT_TILSTAND", HttpStatusCode.Conflict)
     }
 
     @Test
@@ -211,6 +285,7 @@ class PostGraderteAndreYtelserIntegrationTest {
         person: Person,
         saksbehandler: Saksbehandler,
         dagerJson: String,
+        versjon: UUID? = null,
         yrkesaktivitet: String = "FRILANS",
         organisasjonsnummer: String? = null,
     ): IntegrationTestFixture.Response {
@@ -223,6 +298,7 @@ class PostGraderteAndreYtelserIntegrationTest {
                 {
                   "yrkesaktivitet": "$yrkesaktivitet",
                   "organisasjonsnummer": ${organisasjonsnummer?.let { "\"$it\"" }},
+                  "versjon": ${versjon?.let { "\"$it\"" }},
                   "dager": [$dagerJson],
                   "notatTilBeslutter": "notat om en gradert annen ytelse"
                 }
@@ -244,12 +320,25 @@ class PostGraderteAndreYtelserIntegrationTest {
         }
         """.trimIndent()
 
+    private fun assertUtdatertTilstand(
+        response: IntegrationTestFixture.Response,
+        person: Person,
+        forventetAntallEvents: Int,
+    ) {
+        assertEquals(HttpStatusCode.Conflict.value, response.status)
+        assertEquals("UTDATERT_TILSTAND", response.bodyAsJsonNode?.get("code")?.asString())
+        val lagret = sessionContext.graderteAndreYtelserRepository.finnOrNull(lagId(person, Yrkesaktivitetstype.FRILANS, null))
+        assertEquals(forventetAntallEvents, lagret?.events?.size)
+        assertEquals(forventetAntallEvents, integrationTestFixture.meldingPubliserer.publiserteUtgåendeHendelser.size)
+    }
+
     private fun assertFeil(
         response: IntegrationTestFixture.Response,
         person: Person,
         forventetKode: String,
+        forventetStatus: HttpStatusCode = HttpStatusCode.BadRequest,
     ) {
-        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(forventetStatus.value, response.status)
         assertEquals(forventetKode, response.bodyAsJsonNode?.get("code")?.asString())
         assertTrue(sessionContext.graderteAndreYtelserRepository.finnAlleForIdentitetsnummer(person.id).isEmpty())
         integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
