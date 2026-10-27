@@ -208,19 +208,30 @@ class SpeilPersonReceiver(
             hentOppdaterteTilkomneInntektskilder()
         }
 
-    fun saksbehandlerLeggerTilGraderteAndreYtelser(
-        andreYtelserType: ApiGraderteAndreYtelserType,
+    fun saksbehandlerEndrerGraderteAndreYtelser(
+        dager: Collection<ApiGraderteAndreYtelserDag>,
+        yrkesaktivitet: ApiYrkesaktivitetstype,
+        organisasjonsnummer: String?,
         notatTilBeslutter: String,
     ): UUID =
         callHttpPost(
-            relativeUrl = "api/graderte-andre-ytelser",
+            relativeUrl = "api/personer/$personPseudoId/graderte-andre-ytelser",
             request =
                 mapOf(
-                    "fodselsnummer" to testContext.person.fødselsnummer,
-                    "andreYtelserType" to andreYtelserType.name,
+                    "dager" to
+                        dager.map {
+                            mapOf(
+                                "dato" to it.dato.toString(),
+                                "andreYtelserGrader" to it.andreYtelserGrader.mapKeys { (type, _) -> type.name },
+                                "sykdomsgrad" to it.sykdomsgrad,
+                                "arbeidsgrad" to it.arbeidsgrad,
+                            )
+                        },
                     "notatTilBeslutter" to notatTilBeslutter,
+                    "yrkesaktivitet" to yrkesaktivitet.name,
+                    "organisasjonsnummer" to organisasjonsnummer,
                 ),
-        )!!["andreYtelserId"].asUUID().also {
+        )!!["versjon"].asUUID().also {
             hentOppdaterteGraderteAndreYtelser()
         }
 

@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
 import no.nav.helse.spesialist.api.rest.*
-import no.nav.helse.spesialist.api.rest.ApiGraderteAndreYtelserEvent.Metadata
+import no.nav.helse.spesialist.api.rest.andreYtelser.GetGraderteAndreYtelserForPersonBehandler.Mapping.mapTilApiDag
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -25,6 +25,7 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                 kallKontekst.transaksjon.graderteAndreYtelserRepository
                     .finnAlleForIdentitetsnummer(person.id)
                     .map { it.tilApiGraderteAndreYtelser() }
+                    .sortedBy { graderteAndreYtelser -> graderteAndreYtelser.dager.minOf { it.dato } }
 
             loggInfo("Hentet ${ytelser.size} graderte andre ytelser")
 
@@ -33,29 +34,21 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
 
     private fun GraderteAndreYtelser.tilApiGraderteAndreYtelser() =
         ApiGraderteAndreYtelser(
-            andreYtelserId = id.value,
-            andreYtelserType = Mapping.tilApiGraderteAndreYtelserType(graderteAndreYtelserType),
-            events = events.map(Mapping::tilApiGraderteAndreYtelserEvent),
+            yrkesaktivitet = ApiYrkesaktivitetstype.valueOf(id.yrkesaktivitet.name),
+            organisasjonsnummer = id.organisasjonsnummer,
+            versjon = versjon,
+            dager = mapTilApiDag(dager),
+            events = events.map(Mapping::tilApiGraderteAndreYtelserEndretEvent),
         )
 
     object Mapping {
-        fun tilApiGraderteAndreYtelserEvent(event: GraderteAndreYtelserEvent): ApiGraderteAndreYtelserEvent =
-            when (event) {
-                is GraderteAndreYtelserOpprettetEvent -> event.tilApiGraderteAndreYtelserOpprettetEvent()
-            }
-
-        private fun GraderteAndreYtelserOpprettetEvent.tilApiGraderteAndreYtelserOpprettetEvent(): ApiGraderteAndreYtelserOpprettetEvent =
-            ApiGraderteAndreYtelserOpprettetEvent(
-                metadata = tilApiGraderteAndreYtelserEventMetadata(),
-                andreYtelserType = tilApiGraderteAndreYtelserType(graderteAndreYtelserType),
-            )
-
-        private fun GraderteAndreYtelserEvent.tilApiGraderteAndreYtelserEventMetadata(): Metadata =
-            Metadata(
-                sekvensnummer = metadata.sekvensnummer,
-                tidspunkt = metadata.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
-                utfortAvSaksbehandlerIdent = metadata.utførtAvSaksbehandlerIdent.value,
-                notatTilBeslutter = metadata.notatTilBeslutter,
+        fun tilApiGraderteAndreYtelserEndretEvent(event: GraderteAndreYtelserEndretEvent) =
+            ApiGraderteAndreYtelserEndretEvent(
+                versjon = event.versjon,
+                tidspunkt = event.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
+                utfortAvSaksbehandlerIdent = event.utførtAvSaksbehandlerIdent.value,
+                notatTilBeslutter = event.notatTilBeslutter,
+                dager = mapTilApiDag(event.dager),
             )
 
         fun tilApiGraderteAndreYtelserType(type: GraderteAndreYtelserType) =
@@ -65,6 +58,16 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                 GraderteAndreYtelserType.OMSORGSPENGER -> ApiGraderteAndreYtelserType.OMSORGSPENGER
                 GraderteAndreYtelserType.PLEIEPENGER -> ApiGraderteAndreYtelserType.PLEIEPENGER
                 GraderteAndreYtelserType.OPPLARINGSPENGER -> ApiGraderteAndreYtelserType.OPPLARINGSPENGER
+            }
+
+        fun mapTilApiDag(dag: Collection<GraderteAndreYtelserDag>): List<ApiGraderteAndreYtelserDag> =
+            dag.map { gradertAnnenYtelserDag ->
+                ApiGraderteAndreYtelserDag(
+                    dato = gradertAnnenYtelserDag.dato,
+                    andreYtelserGrader = gradertAnnenYtelserDag.andreYtelserGrader.mapKeys { (key, _) -> tilApiGraderteAndreYtelserType(key) },
+                    sykdomsgrad = gradertAnnenYtelserDag.sykdomsgrad,
+                    arbeidsgrad = gradertAnnenYtelserDag.arbeidsgrad,
+                )
             }
     }
 }

@@ -9,11 +9,7 @@
 
 package no.nav.helse.spesialist.api.rest
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonClassDiscriminator
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -21,10 +17,21 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Serializable
-data class ApiLeggTilGraderteAndreYtelserRequest(
-    val fodselsnummer: String,
-    val andreYtelserType: ApiGraderteAndreYtelserType,
+data class ApiEndreGraderteAndreYtelserRequest(
+    val yrkesaktivitet: ApiYrkesaktivitetstype,
+    val organisasjonsnummer: String?,
+    val dager: List<ApiGraderteAndreYtelserDag>,
     val notatTilBeslutter: String,
+)
+
+typealias Grad = Int
+
+@Serializable
+data class ApiGraderteAndreYtelserDag(
+    val dato: LocalDate,
+    val andreYtelserGrader: Map<ApiGraderteAndreYtelserType, Grad>,
+    val sykdomsgrad: Grad,
+    val arbeidsgrad: Grad,
 )
 
 @Serializable
@@ -37,36 +44,32 @@ enum class ApiGraderteAndreYtelserType {
 }
 
 @Serializable
-data class ApiLeggTilGraderteAndreYtelserResponse(
-    val andreYtelserId: UUID,
+enum class ApiYrkesaktivitetstype {
+    ARBEIDSTAKER,
+    FRILANS,
+    ARBEIDSLEDIG,
+    SELVSTENDIG,
+}
+
+@Serializable
+data class ApiEndreGraderteAndreYtelserResponse(
+    val versjon: UUID,
 )
 
 @Serializable
 data class ApiGraderteAndreYtelser(
-    val andreYtelserId: UUID,
-    val andreYtelserType: ApiGraderteAndreYtelserType,
-    val events: List<ApiGraderteAndreYtelserEvent>,
+    val yrkesaktivitet: ApiYrkesaktivitetstype,
+    val organisasjonsnummer: String?,
+    val versjon: UUID,
+    val dager: List<ApiGraderteAndreYtelserDag>,
+    val events: List<ApiGraderteAndreYtelserEndretEvent>,
 )
 
-@OptIn(ExperimentalSerializationApi::class)
-@JsonClassDiscriminator("type")
-@JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @Serializable
-sealed interface ApiGraderteAndreYtelserEvent {
-    val metadata: Metadata
-
-    @Serializable
-    data class Metadata(
-        val sekvensnummer: Int,
-        val tidspunkt: LocalDateTime,
-        val utfortAvSaksbehandlerIdent: String,
-        val notatTilBeslutter: String,
-    )
-}
-
-@Serializable
-@SerialName("ApiGraderteAndreYtelserOpprettetEvent")
-data class ApiGraderteAndreYtelserOpprettetEvent(
-    override val metadata: ApiGraderteAndreYtelserEvent.Metadata,
-    val andreYtelserType: ApiGraderteAndreYtelserType,
-) : ApiGraderteAndreYtelserEvent
+data class ApiGraderteAndreYtelserEndretEvent(
+    val versjon: UUID,
+    val tidspunkt: LocalDateTime,
+    val utfortAvSaksbehandlerIdent: String,
+    val notatTilBeslutter: String,
+    val dager: List<ApiGraderteAndreYtelserDag>,
+)

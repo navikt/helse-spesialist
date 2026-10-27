@@ -2,17 +2,20 @@ package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
 import no.nav.helse.mediator.asLocalDateTime
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
+import no.nav.helse.spesialist.domain.testfixtures.sep
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import kotlin.random.Random
+import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -49,8 +52,14 @@ class GetGraderteAndreYtelserIntegrationTest {
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
-        val enGradertAnnenYtelse = opprettEnGradertAnnenYtelse(person, saksbehandler)
-        integrationTestFixture.sessionContext.graderteAndreYtelserRepository.lagre(enGradertAnnenYtelse)
+        val graderteAndreYtelser = opprettEnGradertAnnenYtelse(person, saksbehandler)
+        graderteAndreYtelser.endre(
+            dager = listOf(dag(13 sep 2024, svangerskapspenger = 50, sykdomsgrad = 50)),
+            saksbehandlerIdent = saksbehandler.ident,
+            notatTilBeslutter = "et nytt notat",
+        )
+        integrationTestFixture.sessionContext.graderteAndreYtelserRepository.lagre(graderteAndreYtelser)
+        val (førsteEvent, andreEvent) = graderteAndreYtelser.events
 
         // When:
         val response =
@@ -67,26 +76,64 @@ class GetGraderteAndreYtelserIntegrationTest {
             """
             [
               {
-                "andreYtelserId": "${enGradertAnnenYtelse.id.value}",
-                "andreYtelserType": "SVANGERSKAPSPENGER",
+                "yrkesaktivitet": "ARBEIDSTAKER",
+                "organisasjonsnummer": "123456789",
+                "versjon": "${andreEvent.versjon}",
+                "dager": [
+                  {
+                    "dato": "2024-09-12",
+                    "andreYtelserGrader": { "SVANGERSKAPSPENGER": 66 },
+                    "sykdomsgrad": 34,
+                    "arbeidsgrad": 0
+                  },
+                  {
+                    "dato": "2024-09-13",
+                    "andreYtelserGrader": { "SVANGERSKAPSPENGER": 50 },
+                    "sykdomsgrad": 50,
+                    "arbeidsgrad": 0
+                  }
+                ],
                 "events": [
                   {
-                    "type": "ApiGraderteAndreYtelserOpprettetEvent",
-                    "metadata": {
-                      "sekvensnummer": 1,
-                      "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
-                      "notatTilBeslutter": "et notat til beslutter"
-                    },
-                    "andreYtelserType": "SVANGERSKAPSPENGER"
+                    "versjon": "${førsteEvent.versjon}",
+                    "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                    "notatTilBeslutter": "et notat til beslutter",
+                    "dager": [
+                      {
+                        "dato": "2024-09-12",
+                        "andreYtelserGrader": { "SVANGERSKAPSPENGER": 66 },
+                        "sykdomsgrad": 34,
+                        "arbeidsgrad": 0
+                      },
+                      {
+                        "dato": "2024-09-13",
+                        "andreYtelserGrader": { "SVANGERSKAPSPENGER": 66 },
+                        "sykdomsgrad": 34,
+                        "arbeidsgrad": 0
+                      }
+                    ]
+                  },
+                  {
+                    "versjon": "${andreEvent.versjon}",
+                    "utfortAvSaksbehandlerIdent": "${saksbehandler.ident.value}",
+                    "notatTilBeslutter": "et nytt notat",
+                    "dager": [
+                      {
+                        "dato": "2024-09-13",
+                        "andreYtelserGrader": { "SVANGERSKAPSPENGER": 50 },
+                        "sykdomsgrad": 50,
+                        "arbeidsgrad": 0
+                      }
+                    ]
                   }
                 ]
               }
             ]
             """.trimIndent(),
             body,
-            "events.metadata.tidspunkt",
+            "events.tidspunkt",
         )
-        assertMindreEnnNSekunderSiden(15, body.first()["events"].first()["metadata"]["tidspunkt"].asLocalDateTime())
+        assertMindreEnnNSekunderSiden(15, body.first()["events"].first()["tidspunkt"].asLocalDateTime())
     }
 
     private fun opprettEnGradertAnnenYtelse(
@@ -94,10 +141,20 @@ class GetGraderteAndreYtelserIntegrationTest {
         saksbehandler: Saksbehandler,
     ): GraderteAndreYtelser =
         GraderteAndreYtelser.ny(
-            identitetsnummer = person.id,
+            id = GraderteAndreYtelserId(person.id, Yrkesaktivitetstype.ARBEIDSTAKER, "123456789"),
+            dager = listOf(dag(12 sep 2024), dag(13 sep 2024)),
             saksbehandlerIdent = saksbehandler.ident,
             notatTilBeslutter = "et notat til beslutter",
-            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
-            graderteAndreYtelserType = GraderteAndreYtelserType.SVANGERSKAPSPENGER,
         )
+
+    private fun dag(
+        dato: LocalDate,
+        svangerskapspenger: Int = 66,
+        sykdomsgrad: Int = 34,
+    ) = GraderteAndreYtelserDag(
+        dato = dato,
+        andreYtelserGrader = mapOf(GraderteAndreYtelserType.SVANGERSKAPSPENGER to svangerskapspenger),
+        sykdomsgrad = sykdomsgrad,
+        arbeidsgrad = 0,
+    )
 }
