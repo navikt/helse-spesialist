@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.repository
 
 import kotliquery.Row
 import kotliquery.Session
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.GraderteAndreYtelserRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
@@ -9,8 +10,12 @@ import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
-import no.nav.helse.spesialist.domain.andreytelser.*
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
+import java.time.LocalDate
 
 class PgGraderteAndreYtelserRepository(
     session: Session,
@@ -21,98 +26,94 @@ class PgGraderteAndreYtelserRepository(
             """
             SELECT * FROM graderte_andre_ytelser_events
             WHERE fødselsnummer = :fodselsnummer
+            ORDER BY versjon
             """.trimIndent(),
             "fodselsnummer" to identitetsnummer.value,
-        ).list { it.tilGraderteAndreYtelserEvent() }
-            .groupBy { it.metadata.graderteAndreYtelserId }
-            .map { (_, events) -> events.tilGraderteAndreYtelser() }
+        ).list { it.tilGraderteAndreYtelserIdOgEvent() }
+            .groupBy(keySelector = { it.first }, valueTransform = { it.second })
+            .map { (id, events) -> GraderteAndreYtelser.fraLagring(id, events) }
 
-    override fun finnOrNull(id: GraderteAndreYtelserId): GraderteAndreYtelser? {
-        val events =
-            asSQL(
-                """
-                SELECT * FROM graderte_andre_ytelser_events
-                WHERE graderte_andre_ytelser_id = :graderte_andre_ytelser_id
-                """.trimIndent(),
-                "graderte_andre_ytelser_id" to id.value,
-            ).list { it.tilGraderteAndreYtelserEvent() }
-        return events.takeUnless { it.isEmpty() }?.tilGraderteAndreYtelser()
-    }
+    override fun finnOrNull(id: GraderteAndreYtelserId): GraderteAndreYtelser? =
+        asSQL(
+            """
+            SELECT * FROM graderte_andre_ytelser_events
+            WHERE fødselsnummer = :fodselsnummer
+              AND yrkesaktivitetstype = :yrkesaktivitetstype
+              AND organisasjonsnummer IS NOT DISTINCT FROM :organisasjonsnummer
+            ORDER BY versjon
+            """.trimIndent(),
+            "fodselsnummer" to id.identitetsnummer.value,
+            "yrkesaktivitetstype" to id.yrkesaktivitet.tilDBYrkesaktivitetstype().name,
+            "organisasjonsnummer" to id.organisasjonsnummer,
+        ).list { it.tilGraderteAndreYtelserIdOgEvent().second }
+            .takeUnless { it.isEmpty() }
+            ?.let { events -> GraderteAndreYtelser.fraLagring(id, events) }
 
     override fun lagre(graderteAndreYtelser: GraderteAndreYtelser) {
-        val sistePersisterteSekvensnummer =
-            asSQL(
-                """
-                SELECT MAX(sekvensnummer) FROM graderte_andre_ytelser_events
-                WHERE graderte_andre_ytelser_id = :graderte_andre_ytelser_id
-                """.trimIndent(),
-                "graderte_andre_ytelser_id" to graderteAndreYtelser.id.value,
-            ).singleOrNull { it.intOrNull(1) }
-        if (sistePersisterteSekvensnummer != null) {
-            graderteAndreYtelser.events.filter { it.metadata.sekvensnummer > sistePersisterteSekvensnummer }
-        } else {
-            graderteAndreYtelser.events
-        }.forEach { event ->
+        val id = graderteAndreYtelser.id
+        graderteAndreYtelser.events.forEach { event ->
             asSQL(
                 """
                 INSERT INTO graderte_andre_ytelser_events (
+                  versjon,
                   fødselsnummer,
-                  graderte_andre_ytelser_id,
-                  sekvensnummer,
+                  yrkesaktivitetstype,
+                  organisasjonsnummer,
                   tidspunkt,
                   utført_av_saksbehandler_ident,
                   notat_til_beslutter,
-                  totrinnsvurdering_id,
-                  type,
                   data_json
                 )
                 VALUES (
+                  :versjon,
                   :fodselsnummer,
-                  :graderte_andre_ytelser_id,
-                  :sekvensnummer,
+                  :yrkesaktivitetstype,
+                  :organisasjonsnummer,
                   :tidspunkt,
                   :utfort_av_saksbehandler_ident,
                   :notat_til_beslutter,
-                  :totrinnsvurdering_id,
-                  :type,
-                  :data_json
+                  :data_json::jsonb
                 )
+                ON CONFLICT (versjon) DO NOTHING
                 """.trimIndent(),
-                "fodselsnummer" to graderteAndreYtelser.identitetsnummer.value,
-                "graderte_andre_ytelser_id" to event.metadata.graderteAndreYtelserId.value,
-                "sekvensnummer" to event.metadata.sekvensnummer,
-                "tidspunkt" to event.metadata.tidspunkt,
-                "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent.value,
-                "notat_til_beslutter" to event.metadata.notatTilBeslutter,
-                "totrinnsvurdering_id" to event.metadata.totrinnsvurderingId.value,
-                "type" to event.tilDBEventType().name,
-                "data_json" to objectMapper.writeValueAsString(event.tilDBEventData()),
+                "versjon" to event.versjon,
+                "fodselsnummer" to id.identitetsnummer.value,
+                "yrkesaktivitetstype" to id.yrkesaktivitet.tilDBYrkesaktivitetstype().name,
+                "organisasjonsnummer" to id.organisasjonsnummer,
+                "tidspunkt" to event.tidspunkt,
+                "utfort_av_saksbehandler_ident" to event.utførtAvSaksbehandlerIdent.value,
+                "notat_til_beslutter" to event.notatTilBeslutter,
+                "data_json" to objectMapper.writeValueAsString(DBEventData(dager = event.dager.map { it.tilDBGraderteAndreYtelserDag() })),
             ).update()
         }
     }
 
-    private fun Row.tilGraderteAndreYtelserEvent(): GraderteAndreYtelserOpprettetEvent {
-        val metadata =
-            GraderteAndreYtelserEvent.Metadata(
-                graderteAndreYtelserId = GraderteAndreYtelserId(uuid("graderte_andre_ytelser_id")),
-                sekvensnummer = int("sekvensnummer"),
+    private fun Row.tilGraderteAndreYtelserIdOgEvent(): Pair<GraderteAndreYtelserId, GraderteAndreYtelserEndretEvent> {
+        val id =
+            GraderteAndreYtelserId(
+                identitetsnummer = Identitetsnummer.fraString(string("fødselsnummer")),
+                yrkesaktivitet = enumValueOf<DBYrkesaktivitetstype>(string("yrkesaktivitetstype")).tilYrkesaktivitetstype(),
+                organisasjonsnummer = stringOrNull("organisasjonsnummer"),
+            )
+        val data = objectMapper.readValue(string("data_json"), DBEventData::class.java)
+        val event =
+            GraderteAndreYtelserEndretEvent(
+                versjon = uuid("versjon"),
                 tidspunkt = instant("tidspunkt"),
                 utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
                 notatTilBeslutter = string("notat_til_beslutter"),
-                totrinnsvurderingId = TotrinnsvurderingId(long("totrinnsvurdering_id")),
+                dager = data.dager.map { it.tilGraderteAndreYtelserDag() },
             )
-
-        return when (enumValueOf<DBEventType>(string("type"))) {
-            DBEventType.OPPRETTET -> {
-                val data = objectMapper.readValue(string("data_json"), DBOpprettetEventData::class.java)
-                GraderteAndreYtelserOpprettetEvent(
-                    metadata = metadata,
-                    fødselsnummer = string("fødselsnummer"),
-                    graderteAndreYtelserType = data.graderteAndreYtelserType.tilGraderteAndreYtelserType(),
-                )
-            }
-        }
+        return id to event
     }
+
+    private fun DBGraderteAndreYtelserDag.tilGraderteAndreYtelserDag() =
+        GraderteAndreYtelserDag(
+            dato = dato,
+            andreYtelserGrader = andreYtelserGrader.mapKeys { it.key.tilGraderteAndreYtelserType() },
+            sykdomsgrad = sykdomsgrad,
+            arbeidsgrad = arbeidsgrad,
+        )
 
     private fun DBGraderteAndreYtelserType.tilGraderteAndreYtelserType() =
         when (this) {
@@ -123,21 +124,13 @@ class PgGraderteAndreYtelserRepository(
             DBGraderteAndreYtelserType.OPPLARINGSPENGER -> GraderteAndreYtelserType.OPPLARINGSPENGER
         }
 
-    private fun List<GraderteAndreYtelserOpprettetEvent>.tilGraderteAndreYtelser(): GraderteAndreYtelser = GraderteAndreYtelser.fraLagring(single())
-
-    private fun GraderteAndreYtelserEvent.tilDBEventType(): DBEventType =
-        when (this) {
-            is GraderteAndreYtelserOpprettetEvent -> DBEventType.OPPRETTET
-        }
-
-    private fun GraderteAndreYtelserEvent.tilDBEventData(): DBEventData =
-        when (this) {
-            is GraderteAndreYtelserOpprettetEvent -> {
-                DBOpprettetEventData(
-                    graderteAndreYtelserType = graderteAndreYtelserType.tilDBGraderteAndreYtelserType(),
-                )
-            }
-        }
+    private fun GraderteAndreYtelserDag.tilDBGraderteAndreYtelserDag() =
+        DBGraderteAndreYtelserDag(
+            dato = dato,
+            andreYtelserGrader = andreYtelserGrader.mapKeys { it.key.tilDBGraderteAndreYtelserType() },
+            sykdomsgrad = sykdomsgrad,
+            arbeidsgrad = arbeidsgrad,
+        )
 
     private fun GraderteAndreYtelserType.tilDBGraderteAndreYtelserType() =
         when (this) {
@@ -148,9 +141,21 @@ class PgGraderteAndreYtelserRepository(
             GraderteAndreYtelserType.OPPLARINGSPENGER -> DBGraderteAndreYtelserType.OPPLARINGSPENGER
         }
 
-    private enum class DBEventType {
-        OPPRETTET,
-    }
+    private fun Yrkesaktivitetstype.tilDBYrkesaktivitetstype() =
+        when (this) {
+            Yrkesaktivitetstype.ARBEIDSTAKER -> DBYrkesaktivitetstype.ARBEIDSTAKER
+            Yrkesaktivitetstype.FRILANS -> DBYrkesaktivitetstype.FRILANS
+            Yrkesaktivitetstype.ARBEIDSLEDIG -> DBYrkesaktivitetstype.ARBEIDSLEDIG
+            Yrkesaktivitetstype.SELVSTENDIG -> DBYrkesaktivitetstype.SELVSTENDIG
+        }
+
+    private fun DBYrkesaktivitetstype.tilYrkesaktivitetstype() =
+        when (this) {
+            DBYrkesaktivitetstype.ARBEIDSTAKER -> Yrkesaktivitetstype.ARBEIDSTAKER
+            DBYrkesaktivitetstype.FRILANS -> Yrkesaktivitetstype.FRILANS
+            DBYrkesaktivitetstype.ARBEIDSLEDIG -> Yrkesaktivitetstype.ARBEIDSLEDIG
+            DBYrkesaktivitetstype.SELVSTENDIG -> Yrkesaktivitetstype.SELVSTENDIG
+        }
 
     private enum class DBGraderteAndreYtelserType {
         FORELDREPENGER,
@@ -160,9 +165,21 @@ class PgGraderteAndreYtelserRepository(
         OPPLARINGSPENGER,
     }
 
-    private data class DBOpprettetEventData(
-        val graderteAndreYtelserType: DBGraderteAndreYtelserType,
-    ) : DBEventData
+    private enum class DBYrkesaktivitetstype {
+        ARBEIDSTAKER,
+        FRILANS,
+        ARBEIDSLEDIG,
+        SELVSTENDIG,
+    }
 
-    private interface DBEventData
+    private data class DBEventData(
+        val dager: List<DBGraderteAndreYtelserDag>,
+    )
+
+    private data class DBGraderteAndreYtelserDag(
+        val dato: LocalDate,
+        val andreYtelserGrader: Map<DBGraderteAndreYtelserType, Int>,
+        val sykdomsgrad: Int,
+        val arbeidsgrad: Int,
+    )
 }
