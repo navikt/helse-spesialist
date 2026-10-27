@@ -1,52 +1,80 @@
 package no.nav.helse.spesialist.domain.andreytelser
 
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.Instant
-import java.util.*
+import java.time.LocalDate
+import java.util.UUID
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlin.uuid.toJavaUuid
 
-@JvmInline
-value class GraderteAndreYtelserId(
-    val value: UUID,
+data class GraderteAndreYtelserId(
+    val identitetsnummer: Identitetsnummer,
+    val yrkesaktivitet: Yrkesaktivitetstype,
+    val organisasjonsnummer: String?,
 ) : ValueObject
 
 class GraderteAndreYtelser private constructor(
-    opprettetEvent: GraderteAndreYtelserOpprettetEvent,
-) : AggregateRoot<GraderteAndreYtelserId>(opprettetEvent.metadata.graderteAndreYtelserId) {
-    val events: List<GraderteAndreYtelserEvent> = listOf(opprettetEvent)
+    id: GraderteAndreYtelserId,
+) : AggregateRoot<GraderteAndreYtelserId>(id) {
+    private val _events = mutableListOf<GraderteAndreYtelserEndretEvent>()
+    val events: List<GraderteAndreYtelserEndretEvent> get() = _events
 
-    val identitetsnummer: Identitetsnummer = Identitetsnummer.fraString(opprettetEvent.fødselsnummer)
-    val totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.metadata.totrinnsvurderingId
-    val graderteAndreYtelserType: GraderteAndreYtelserType = opprettetEvent.graderteAndreYtelserType
-    val versjon: Int = opprettetEvent.metadata.sekvensnummer
+    private var dagerPerDato: Map<LocalDate, GraderteAndreYtelserDag> = emptyMap()
+    val dager: List<GraderteAndreYtelserDag> get() = dagerPerDato.values.sortedBy { it.dato }
+
+    val versjon: UUID get() = _events.last().versjon
+
+    fun endre(
+        dager: List<GraderteAndreYtelserDag>,
+        saksbehandlerIdent: NAVIdent,
+        notatTilBeslutter: String,
+    ): GraderteAndreYtelserEndretEvent? {
+        val dagerMedEndring = dager.filter { dag -> dagerPerDato[dag.dato] != dag }
+        if (dagerMedEndring.isEmpty()) return null
+
+        val event =
+            GraderteAndreYtelserEndretEvent(
+                versjon = nyVersjon(),
+                tidspunkt = Instant.now(),
+                utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                notatTilBeslutter = notatTilBeslutter,
+                dager = dagerMedEndring,
+            )
+        apply(event)
+        return event
+    }
+
+    private fun apply(event: GraderteAndreYtelserEndretEvent) {
+        dagerPerDato = dagerPerDato + event.dager.associateBy { it.dato }
+        _events.add(event)
+    }
 
     companion object {
-        fun fraLagring(event: GraderteAndreYtelserOpprettetEvent): GraderteAndreYtelser = GraderteAndreYtelser(event)
-
         fun ny(
-            identitetsnummer: Identitetsnummer,
+            id: GraderteAndreYtelserId,
+            dager: List<GraderteAndreYtelserDag>,
             saksbehandlerIdent: NAVIdent,
             notatTilBeslutter: String,
-            totrinnsvurderingId: TotrinnsvurderingId,
-            graderteAndreYtelserType: GraderteAndreYtelserType,
-        ) = GraderteAndreYtelser(
-            GraderteAndreYtelserOpprettetEvent(
-                metadata =
-                    GraderteAndreYtelserEvent.Metadata(
-                        graderteAndreYtelserId = GraderteAndreYtelserId(UUID.randomUUID()),
-                        sekvensnummer = 1,
-                        tidspunkt = Instant.now(),
-                        utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-                        notatTilBeslutter = notatTilBeslutter,
-                        totrinnsvurderingId = totrinnsvurderingId,
-                    ),
-                fødselsnummer = identitetsnummer.value,
-                graderteAndreYtelserType = graderteAndreYtelserType,
-            ),
-        )
+        ): GraderteAndreYtelser =
+            GraderteAndreYtelser(id).also {
+                it.endre(dager, saksbehandlerIdent, notatTilBeslutter)
+            }
+
+        fun fraLagring(
+            id: GraderteAndreYtelserId,
+            events: List<GraderteAndreYtelserEndretEvent>,
+        ): GraderteAndreYtelser =
+            GraderteAndreYtelser(id).also { graderteAndreYtelser ->
+                events.sortedBy { it.versjon }.forEach(graderteAndreYtelser::apply)
+            }
+
+        @OptIn(ExperimentalUuidApi::class)
+        private fun nyVersjon(): UUID = Uuid.generateV7().toJavaUuid()
     }
 }
 
