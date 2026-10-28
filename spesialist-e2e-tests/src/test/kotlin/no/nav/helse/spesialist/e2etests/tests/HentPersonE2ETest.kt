@@ -542,15 +542,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                 "historikkinnslag" : [ ],
                 "grunnbelopsjustertGjennomsnitt" : null,
                 "oppgave" : { },
-                "handlinger" : [ {
-                  "type" : "UTBETALE",
-                  "tillatt" : true,
-                  "begrunnelse" : null
-                }, {
-                  "type" : "AVVISE",
-                  "tillatt" : true,
-                  "begrunnelse" : null
-                } ],
                 "egenskaper" : [ {
                   "egenskap" : "SOKNAD",
                   "kategori" : "Oppgavetype"

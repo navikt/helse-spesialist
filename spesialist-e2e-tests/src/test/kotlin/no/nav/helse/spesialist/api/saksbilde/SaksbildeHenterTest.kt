@@ -7,15 +7,11 @@ import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiAvslagstype
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiHandling
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodehandling
 import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettBeregnetPeriode
 import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettSnapshotHendelse
 import no.nav.helse.spesialist.api.saksbilde.SnapshotTestdata.opprettUberegnetPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.IndividuellBegrunnelse
@@ -37,8 +33,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.JsonNode
-import tools.jackson.databind.node.ObjectNode
-import tools.jackson.module.kotlin.convertValue
 import tools.jackson.module.kotlin.treeToValue
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -151,53 +145,6 @@ class SaksbildeHenterTest : AbstractSaksbildeTest() {
 
         assertTrue(førsteBehandlingForPeriode.varsler.isEmpty())
         assertEquals(forventedeVarsler, sisteBehandlingForPeriode.varsler)
-    }
-
-    @Test
-    fun `inkluderer handlinger`() {
-        val personRef = opprettPerson()
-        opprettArbeidsgiver()
-        val periode1 = 1 jan 2023 til (23 jan 2023)
-        val periode2 = 24 jan 2023 til (31 jan 2023)
-        val vedtakId = opprettVedtaksperiode(personRef, periode = periode1)
-        ferdigstillOppgave(vedtakId)
-        opprettVedtaksperiode(personRef, periode = periode2)
-        val førstePeriode = periode1.tilBeregnetPeriode().copy(periodetilstand = SnapshotPeriodetilstand.UTBETALT)
-        val andrePeriode = periode2.tilBeregnetPeriode()
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(førstePeriode, andrePeriode))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
-        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
-
-        val body = hentSaksbilde()
-
-        val perioder = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"]
-        assertEquals(2, perioder.size())
-        val responseperiode1 = perioder.first { it["vedtaksperiodeId"].stringValue() == periode1.id.toString() }
-        val responseperiode2 = perioder.first { it["vedtaksperiodeId"].stringValue() == periode2.id.toString() }
-        assertFalse(
-            responseperiode1["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
-        )
-        assertTrue(
-            responseperiode2["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue(),
-        )
-    }
-
-    @Test
-    fun `utbetaling av risk-oppgave tillatt for alle`() {
-        val personRef = opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(personRef)
-        val (id, fom, tom) = PERIODE
-        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(periodeMedOppgaveSnapshot))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
-        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
-
-        val body = hentSaksbilde()
-
-        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
-        assertFalse(periode["handlinger"].isEmpty)
-        assertTrue(periode["handlinger"].first { it["type"].stringValue() == ApiPeriodehandling.UTBETALE.name }["tillatt"].booleanValue())
     }
 
     @Test
@@ -341,27 +288,6 @@ class SaksbildeHenterTest : AbstractSaksbildeTest() {
     }
 
     @Test
-    fun `kanAvvises-flagget inkluderes i saksbildet`() {
-        opprettVedtaksperiode(opprettPerson(), kanAvvises = false)
-        val (id, fom, tom) = PERIODE
-        val periodeMedOppgaveSnapshot = opprettBeregnetPeriode(fom, tom, id)
-        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(periodeMedOppgaveSnapshot))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
-        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
-
-        val body = hentSaksbilde()
-
-        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
-        val forventedeHandlinger =
-            setOf(
-                ApiHandling(ApiPeriodehandling.UTBETALE, true, null),
-                ApiHandling(ApiPeriodehandling.AVVISE, false, "Spleis støtter ikke å avvise perioden"),
-            )
-        assertFalse(periode["handlinger"].isEmpty)
-        assertEquals(objectMapper.convertValue<Set<ObjectNode>>(forventedeHandlinger), periode["handlinger"].toSet())
-    }
-
-    @Test
     fun `andre fødselsnumre inkluderes i saksbildet`() {
         val annetFødselsnummer = lagFødselsnummer()
         opprettPerson(fødselsnummer = annetFødselsnummer, aktørId = AKTØRID)
@@ -495,6 +421,4 @@ class SaksbildeHenterTest : AbstractSaksbildeTest() {
         val behandlingId: UUID,
         val kode: String,
     )
-
-    private fun Periode.tilBeregnetPeriode(): SnapshotBeregnetPeriode = opprettBeregnetPeriode(fom, tom, id)
 }

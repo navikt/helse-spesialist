@@ -347,19 +347,6 @@ data class ApiUberegnetPeriode(
 ) : ApiPeriode
 
 @Serializable
-enum class ApiPeriodehandling {
-    UTBETALE,
-    AVVISE,
-}
-
-@Serializable
-data class ApiHandling(
-    val type: ApiPeriodehandling,
-    val tillatt: Boolean,
-    val begrunnelse: String? = null,
-)
-
-@Serializable
 @SerialName("ApiBeregnetPeriode")
 class ApiBeregnetPeriode(
     override val behandlingId: UUID,
@@ -380,7 +367,6 @@ class ApiBeregnetPeriode(
     @get:JsonFormat(shape = JsonFormat.Shape.STRING)
     val grunnbelopsjustertGjennomsnitt: BigDecimal?,
     val oppgave: ApiOppgaveForPeriodevisning?,
-    val handlinger: List<ApiHandling>,
     val egenskaper: List<ApiOppgaveegenskap>,
     val forbrukteSykedager: Int?,
     val gjenstaendeSykedager: Int?,

@@ -221,41 +221,6 @@ class SaksbildeHenter(
                                                                             id = oppgaveDto.id,
                                                                         )
                                                                     },
-                                                                handlinger =
-                                                                    if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
-                                                                        listOf(
-                                                                            ApiHandling(
-                                                                                ApiPeriodehandling.UTBETALE,
-                                                                                false,
-                                                                                "perioden er ikke til godkjenning",
-                                                                            ),
-                                                                        )
-                                                                    } else {
-                                                                        val handlinger =
-                                                                            listOf(
-                                                                                ApiHandling(
-                                                                                    ApiPeriodehandling.UTBETALE,
-                                                                                    true,
-                                                                                ),
-                                                                            )
-                                                                        handlinger +
-                                                                            when (oppgaveDto?.kanAvvises) {
-                                                                                true -> {
-                                                                                    ApiHandling(
-                                                                                        ApiPeriodehandling.AVVISE,
-                                                                                        true,
-                                                                                    )
-                                                                                }
-
-                                                                                else -> {
-                                                                                    ApiHandling(
-                                                                                        ApiPeriodehandling.AVVISE,
-                                                                                        false,
-                                                                                        "Spleis støtter ikke å avvise perioden",
-                                                                                    )
-                                                                                }
-                                                                            }
-                                                                    },
                                                                 egenskaper =
                                                                     apiOppgaveService.hentEgenskaper(
                                                                         periode.vedtaksperiodeId,
@@ -485,42 +450,6 @@ class SaksbildeHenter(
                                                             }
                                                         }
 
-                                                        fun byggHandlinger(): List<ApiHandling> =
-                                                            if (periodetilstand != ApiPeriodetilstand.TilGodkjenning) {
-                                                                listOf(
-                                                                    ApiHandling(
-                                                                        ApiPeriodehandling.UTBETALE,
-                                                                        false,
-                                                                        "perioden er ikke til godkjenning",
-                                                                    ),
-                                                                )
-                                                            } else {
-                                                                val handlinger =
-                                                                    listOf(
-                                                                        ApiHandling(
-                                                                            ApiPeriodehandling.UTBETALE,
-                                                                            true,
-                                                                        ),
-                                                                    )
-                                                                handlinger +
-                                                                    when (oppgaveDto?.kanAvvises) {
-                                                                        true -> {
-                                                                            ApiHandling(
-                                                                                ApiPeriodehandling.AVVISE,
-                                                                                true,
-                                                                            )
-                                                                        }
-
-                                                                        else -> {
-                                                                            ApiHandling(
-                                                                                ApiPeriodehandling.AVVISE,
-                                                                                false,
-                                                                                "Spleis støtter ikke å avvise perioden",
-                                                                            )
-                                                                        }
-                                                                    }
-                                                            }
-
                                                         ApiBeregnetPeriode(
                                                             behandlingId = periode.behandlingId,
                                                             erForkastet = periode.erForkastet,
@@ -560,7 +489,6 @@ class SaksbildeHenter(
                                                                         id = oppgaveDto.id,
                                                                     )
                                                                 },
-                                                            handlinger = byggHandlinger(),
                                                             egenskaper =
                                                                 apiOppgaveService.hentEgenskaper(
                                                                     periode.vedtaksperiodeId,
