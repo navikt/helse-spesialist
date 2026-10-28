@@ -1,10 +1,10 @@
 [versions]
 kotlin = "2.4.21"
-flyway = "13.10.3"
+flyway = "13.11.0"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026091610031789545782"
 tbdLibs = "20261013.1613"
-sykepengerGradlePlugins = "20261026.1611"
+sykepengerGradlePlugins = "20261028.1441"
 testcontainers = "2.0.5"
 smiley4KtorOpenapiTools = "5.7.0"
 smiley4SchemaKenerator = "2.7.2"
