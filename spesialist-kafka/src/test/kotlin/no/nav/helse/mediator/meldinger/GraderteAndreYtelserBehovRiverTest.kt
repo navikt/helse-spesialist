@@ -45,7 +45,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
         assertEquals("behov-123", svar["@behovId"].asString())
         assertEquals("behandling-123", svar["behandlingId"].asString())
         assertEquals(1, løsning.size())
-        assertEquals(graderteAndreYtelser.versjon.toString(), løsning[0]["id"].asString())
+        assertEquals(graderteAndreYtelser.versjon.toString(), løsning[0]["graderteAndreYtelserVersjon"].asString())
         assertEquals("123456789", løsning[0]["organisasjonsnummer"].asString())
         assertEquals(1, løsning[0]["dager"].size())
         assertEquals("2024-01-02", løsning[0]["dager"][0]["dato"].asString())
@@ -77,7 +77,7 @@ internal class GraderteAndreYtelserBehovRiverTest {
                 .last()
                 .versjon
                 .toString(),
-            løsning["id"].asString(),
+            løsning["graderteAndreYtelserVersjon"].asString(),
         )
         val dager = løsning["dager"]
         assertEquals(2, dager.size())
@@ -132,7 +132,8 @@ internal class GraderteAndreYtelserBehovRiverTest {
               "@løsning": {
                 "GraderteAndreYtelserForBeregning": [
                   {
-                    "id": "${arbeidstaker.versjon}",
+                    "graderteAndreYtelserVersjon": "${arbeidstaker.versjon}",
+                    "yrkesaktivitetstype": "ARBEIDSTAKER",
                     "organisasjonsnummer": "123456789",
                     "dager": [
                       {
@@ -144,8 +145,9 @@ internal class GraderteAndreYtelserBehovRiverTest {
                     ]
                   },
                   {
-                    "id": "${frilans.versjon}",
+                    "graderteAndreYtelserVersjon": "${frilans.versjon}",
                     "yrkesaktivitetstype": "FRILANS",
+                    "organisasjonsnummer": null,
                     "dager": [
                       {
                         "dato": "2024-01-10",
