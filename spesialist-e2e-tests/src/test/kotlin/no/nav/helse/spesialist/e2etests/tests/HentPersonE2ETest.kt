@@ -78,7 +78,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
           "fodselsnummer" : "${testContext.person.fødselsnummer}",
           "andreFodselsnummer" : [ ],
           "dodsdato" : null,
-          "tildeling" : null,
           "tilleggsinfoForInntektskilder" : [ {
             "orgnummer" : "${testContext.arbeidsgiver.organisasjonsnummer}",
             "navn" : "Navn for ${testContext.arbeidsgiver.organisasjonsnummer}"

@@ -499,8 +499,7 @@ class SpeilPersonReceiver(
     }
 
     fun assertTildelt() {
-        val tildelingNode =
-            person["tildeling"]
+        val tildelingNode = callGetTildeling()["tildeling"]
         assertFalse(tildelingNode.isMissingOrNull(), "Forventer at tildeling ikke er null")
         assertEquals(saksbehandler.id.value, tildelingNode["oid"].asUUID())
         assertEquals(saksbehandler.navn, tildelingNode["navn"].asString())
@@ -508,7 +507,7 @@ class SpeilPersonReceiver(
     }
 
     fun assertIkkeTildelt() {
-        val tildelingNode = person["tildeling"]
+        val tildelingNode = callGetTildeling()["tildeling"]
         assertTrue(tildelingNode.isMissingOrNull(), "Forventer at tildeling er null")
     }
 
@@ -592,6 +591,8 @@ class SpeilPersonReceiver(
             ?: error("Personen har ingen aktiv oppgave")
 
     private fun callGetAktivOppgave(): JsonNode = callHttpGet("api/personer/$personPseudoId/aktiv-oppgave")!!
+
+    private fun callGetTildeling(): JsonNode = callHttpGet("api/personer/$personPseudoId/tildeling")!!
 
     private fun callHttpGet(relativeUrl: String) =
         REST.get(

@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonsopplysning
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -117,7 +116,6 @@ class SaksbildeHenter(
             fodselsnummer = identitetsnummer.value,
             andreFodselsnummer = andreFødselsnumre(transaction, personEntity, identitetsnummer),
             dodsdato = snapshot.dodsdato,
-            tildeling = daos.tildelingApiDao.tildelingForPerson(identitetsnummer.value)?.tilApiTildeling(),
             tilleggsinfoForInntektskilder =
                 snapshot.vilkarsgrunnlag
                     .flatMap { vilkårsgrunnlag ->
@@ -1080,10 +1078,3 @@ private fun SnapshotUtbetalingstatus.tilApiUtbetalingstatus(): ApiUtbetalingstat
         SnapshotUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
         SnapshotUtbetalingstatus.UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
     }
-
-private fun TildelingApiDto.tilApiTildeling(): ApiSaksbildeTildeling =
-    ApiSaksbildeTildeling(
-        navn = navn,
-        epost = epost,
-        oid = oid,
-    )

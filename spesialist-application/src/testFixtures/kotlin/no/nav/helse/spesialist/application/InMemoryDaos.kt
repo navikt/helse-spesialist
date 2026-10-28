@@ -28,7 +28,6 @@ class InMemoryDaos(
     override val saksbehandlerDao: DelegatingSaksbehandlerDao,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
     override val tildelingDao: DelegatingTildelingDao,
-    override val tildelingApiDao: UnimplementedTildelingApiDao,
     override val varselApiRepository: UnimplementedVarselApiRepository,
     override val vedtakBegrunnelseDao: InMemoryVedtakBegrunnelseDao,
     override val vedtakDao: DelegatingVedtakDao,

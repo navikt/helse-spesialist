@@ -24,13 +24,6 @@ data class ApiSaksbehandler(
 )
 
 @Serializable
-data class ApiSaksbildeTildeling(
-    val navn: String,
-    val epost: String,
-    val oid: UUID,
-)
-
-@Serializable
 data class ApiPaVent(
     val frist: LocalDate?,
     val oid: UUID,
@@ -76,7 +69,6 @@ data class ApiSaksbildePerson(
     val fodselsnummer: String,
     val andreFodselsnummer: List<ApiAnnetFodselsnummer>,
     val dodsdato: LocalDate?,
-    val tildeling: ApiSaksbildeTildeling?,
     val tilleggsinfoForInntektskilder: List<ApiTilleggsinfoForInntektskilde>,
     val arbeidsgivere: List<ApiArbeidsgiver>,
     val selvstendigNaering: ApiSelvstendigNaering?,
