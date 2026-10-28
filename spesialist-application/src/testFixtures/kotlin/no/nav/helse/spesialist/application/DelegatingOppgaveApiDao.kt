@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.domain.oppgave.Oppgave
-import java.util.UUID
 
 class DelegatingOppgaveApiDao(
     private val oppgaveRepository: InMemoryOppgaveRepository,
@@ -19,10 +17,4 @@ class DelegatingOppgaveApiDao(
             ?.id
             ?.value
     }
-
-    override fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? =
-        oppgaveRepository
-            .alle()
-            .firstOrNull { it.vedtaksperiodeId.value == vedtaksperiodeId && it.tilstand == Oppgave.Tilstand.AvventerSaksbehandler }
-            ?.let { OppgaveForPeriodevisningDto(id = it.id.value.toString(), kanAvvises = it.kanAvvises) }
 }

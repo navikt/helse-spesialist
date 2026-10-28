@@ -72,16 +72,3 @@ data class ApiOppgaveegenskap(
     val egenskap: ApiEgenskap,
     val kategori: ApiKategori,
 )
-
-@Serializable
-data class ApiOppgaveForPeriodevisning(
-    val id: String,
-)
-
-@Serializable
-data class ApiTotrinnsvurdering(
-    val erRetur: Boolean,
-    val saksbehandler: UUID?,
-    val beslutter: UUID?,
-    val erBeslutteroppgave: Boolean,
-)

@@ -14,7 +14,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
         }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
@@ -61,7 +61,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
         }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
@@ -78,7 +78,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
         }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
@@ -123,7 +123,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn(utbetalingtype = Utbetalingtype.REVURDERING, personbeløp = 1)
 
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
         }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
@@ -147,7 +147,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
         )
 
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
         }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
@@ -162,7 +162,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
         )
 
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
         }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }

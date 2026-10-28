@@ -366,7 +366,6 @@ class ApiBeregnetPeriode(
     override val historikkinnslag: List<ApiHistorikkinnslag>,
     @get:JsonFormat(shape = JsonFormat.Shape.STRING)
     val grunnbelopsjustertGjennomsnitt: BigDecimal?,
-    val oppgave: ApiOppgaveForPeriodevisning?,
     val egenskaper: List<ApiOppgaveegenskap>,
     val forbrukteSykedager: Int?,
     val gjenstaendeSykedager: Int?,
@@ -375,7 +374,6 @@ class ApiBeregnetPeriode(
     val utbetaling: ApiUtbetaling,
     val vilkarsgrunnlagId: UUID?,
     val risikovurdering: ApiRisikovurdering?,
-    val totrinnsvurdering: ApiTotrinnsvurdering?,
     val paVent: ApiPaVent?,
     val avslag: List<ApiAvslag>,
     val vedtakBegrunnelser: List<ApiVedtakBegrunnelse>,

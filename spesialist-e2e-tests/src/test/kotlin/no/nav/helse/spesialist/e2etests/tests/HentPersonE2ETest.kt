@@ -541,7 +541,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                 } ],
                 "historikkinnslag" : [ ],
                 "grunnbelopsjustertGjennomsnitt" : null,
-                "oppgave" : { },
                 "egenskaper" : [ {
                   "egenskap" : "SOKNAD",
                   "kategori" : "Oppgavetype"
@@ -628,7 +627,6 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "funn" : [ ],
                   "kontrollertOk" : [ ]
                 },
-                "totrinnsvurdering" : null,
                 "paVent" : null,
                 "avslag" : [ ],
                 "vedtakBegrunnelser" : [ ],

@@ -19,7 +19,7 @@ class OppgaveE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         medPersonISpeil {
-            assertPeriodeHarIkkeOppgave()
+            assertHarIkkeAktivOppgave()
             assertGjeldendeOppgavestatus("Invalidert")
         }
     }

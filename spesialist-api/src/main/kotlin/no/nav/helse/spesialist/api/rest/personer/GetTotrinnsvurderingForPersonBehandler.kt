@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.api.rest.personer
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.ApiTotrinnsvurderingForPerson
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiTotrinnsvurdering
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER

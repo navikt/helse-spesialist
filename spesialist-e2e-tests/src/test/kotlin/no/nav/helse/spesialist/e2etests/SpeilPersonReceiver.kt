@@ -524,10 +524,10 @@ class SpeilPersonReceiver(
         assertTrue(egenskaper.none { it in egenskaperSomSkalMangle.toSet() }) { "Forventet å ikke finne ${egenskaperSomSkalMangle.toSet()} i $egenskaper" }
     }
 
-    fun assertPeriodeHarIkkeOppgave() {
-        assertTrue(person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].isNull) {
-            "Forventet at oppgave var null for perioden, men den var: " +
-                person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"].toPrettyString()
+    fun assertHarIkkeAktivOppgave() {
+        val aktivOppgave = callGetAktivOppgave()["aktivOppgave"]
+        assertTrue(aktivOppgave.isMissingOrNull()) {
+            "Forventet at personen ikke hadde aktiv oppgave, men den var: " + aktivOppgave.toPrettyString()
         }
     }
 
@@ -586,7 +586,12 @@ class SpeilPersonReceiver(
             request = mapOf("identitetsnummer" to fødselsnummer),
         )!!
 
-    private fun getOppgaveId(): String = person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["oppgave"]["id"].asString()
+    private fun getOppgaveId(): String =
+        callGetAktivOppgave()["aktivOppgave"]["id"]
+            ?.asString()
+            ?: error("Personen har ingen aktiv oppgave")
+
+    private fun callGetAktivOppgave(): JsonNode = callHttpGet("api/personer/$personPseudoId/aktiv-oppgave")!!
 
     private fun callHttpGet(relativeUrl: String) =
         REST.get(

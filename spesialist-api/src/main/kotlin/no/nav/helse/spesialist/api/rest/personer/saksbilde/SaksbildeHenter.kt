@@ -8,11 +8,9 @@ import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.isMissingOrNull
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.overstyring.*
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.rest.personer.tilApiTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.saksbilde.*
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtDag
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtInntekt
@@ -73,7 +71,6 @@ class SaksbildeHenter(
         val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgave?.id?.value)
         val alleOverstyringer = daos.overstyringApiDao.finnOverstyringer(identitetsnummer.value)
         val risikovurderinger = daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
-        val totrinnsvurdering = transaction.totrinnsvurderingRepository.finnAktivForPersonOrNull(identitetsnummer.value)
 
         return mapTilApiPerson(
             personEntity = personEntity,
@@ -82,7 +79,6 @@ class SaksbildeHenter(
             snapshot = snapshot,
             perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
             risikovurderinger = risikovurderinger,
-            totrinnsvurdering = totrinnsvurdering,
             alleOverstyringer = alleOverstyringer,
         )
     }
@@ -114,7 +110,6 @@ class SaksbildeHenter(
         snapshot: SnapshotPerson,
         perioderSomSkalViseAktiveVarsler: Set<UUID>,
         risikovurderinger: Map<UUID, RisikovurderingApiDto>,
-        totrinnsvurdering: Totrinnsvurdering?,
         alleOverstyringer: List<OverstyringDto>,
     ): ApiSaksbildePerson =
         ApiSaksbildePerson(
@@ -171,15 +166,6 @@ class SaksbildeHenter(
                                                                 periode.periodetilstand.tilApiPeriodetilstand(
                                                                     behandlingIndex == 0,
                                                                 )
-                                                            val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-                                                                if (behandlingIndex == 0) {
-                                                                    daos.oppgaveApiDao.finnPeriodeoppgave(
-                                                                        periode.vedtaksperiodeId,
-                                                                    )
-                                                                } else {
-                                                                    null
-                                                                }
-                                                            }
 
                                                             ApiBeregnetPeriode(
                                                                 behandlingId = periode.behandlingId,
@@ -214,12 +200,6 @@ class SaksbildeHenter(
                                                                             ).map { it.toVarselDto() }
                                                                     },
                                                                 hendelser = periode.hendelser.map { it.tilApiHendelse() },
-                                                                oppgave =
-                                                                    oppgaveDto?.let { oppgaveDto ->
-                                                                        ApiOppgaveForPeriodevisning(
-                                                                            id = oppgaveDto.id,
-                                                                        )
-                                                                    },
                                                                 egenskaper =
                                                                     apiOppgaveService.hentEgenskaper(
                                                                         periode.vedtaksperiodeId,
@@ -257,12 +237,6 @@ class SaksbildeHenter(
                                                                 utbetaling = periode.utbetaling.tilApiUtbetaling(),
                                                                 vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                                 risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                                totrinnsvurdering =
-                                                                    if (oppgaveDto == null) {
-                                                                        null
-                                                                    } else {
-                                                                        totrinnsvurdering?.tilApiTotrinnsvurdering()
-                                                                    },
                                                                 paVent =
                                                                     daos.påVentApiDao
                                                                         .hentAktivPåVent(periode.vedtaksperiodeId)
@@ -434,13 +408,6 @@ class SaksbildeHenter(
                                                             periode.periodetilstand.tilApiPeriodetilstand(
                                                                 behandlingIndex == 0,
                                                             )
-                                                        val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-                                                            if (behandlingIndex == 0) {
-                                                                daos.oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
-                                                            } else {
-                                                                null
-                                                            }
-                                                        }
 
                                                         ApiBeregnetPeriode(
                                                             behandlingId = periode.behandlingId,
@@ -475,12 +442,6 @@ class SaksbildeHenter(
                                                                         ).map { it.toVarselDto() }
                                                                 },
                                                             hendelser = periode.hendelser.map { it.tilApiHendelse() },
-                                                            oppgave =
-                                                                oppgaveDto?.let { oppgaveDto ->
-                                                                    ApiOppgaveForPeriodevisning(
-                                                                        id = oppgaveDto.id,
-                                                                    )
-                                                                },
                                                             egenskaper =
                                                                 apiOppgaveService.hentEgenskaper(
                                                                     periode.vedtaksperiodeId,
@@ -518,14 +479,6 @@ class SaksbildeHenter(
                                                             utbetaling = periode.utbetaling.tilApiUtbetaling(),
                                                             vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
                                                             risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                            totrinnsvurdering =
-                                                                run {
-                                                                    if (oppgaveDto == null) {
-                                                                        null
-                                                                    } else {
-                                                                        totrinnsvurdering?.tilApiTotrinnsvurdering()
-                                                                    }
-                                                                },
                                                             paVent =
                                                                 daos.påVentApiDao
                                                                     .hentAktivPåVent(periode.vedtaksperiodeId)
