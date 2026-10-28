@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.sse
 
 import io.github.smiley4.ktoropenapi.documentation
+import io.ktor.http.HttpMethod
 import io.ktor.server.http.HttpRequestLifecycle
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.method
 import io.ktor.server.routing.route
 import io.ktor.server.sse.heartbeat
 import io.ktor.server.sse.sse
@@ -54,56 +56,59 @@ private fun Route.sseRute(
             }
         }
     }) {
-        sse {
-            heartbeat {
-                period = 10.seconds
-            }
-
-            currentCoroutineContext()[Job]?.invokeOnCompletion {
-                loggDebug("SSE-tilkobling lukket")
-            }
-
-            val personPseudoId =
-                call.parameters["personPseudoId"]
-                    ?.let { PersonPseudoId.fraString(it) }
-                    ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
-
-            coMedMdc(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
-                val (identitetsnummer, sisteSekvensnummerVedInitiering) =
-                    sessionFactory.transactionalSessionScope {
-                        val identitetsnummer =
-                            personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
-                        val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
-                        identitetsnummer to sisteSekvensnummer
-                    }
-
-                if (identitetsnummer == null) {
-                    loggWarn("SSE-tilkobling forsøkt for personPseudoId uten tilhørende identitetsnummer")
-                    return@coMedMdc
+        // SSE-ruta må ha HTTP-metoden under documentation, ellers kommer den ikke med i OpenAPI-spesifikasjonen
+        method(HttpMethod.Get) {
+            sse {
+                heartbeat {
+                    period = 10.seconds
                 }
 
-                coMedMdc(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
-                    loggDebug("SSE-tilkobling startet")
-                    var sisteSekvensnummer = sisteSekvensnummerVedInitiering
+                currentCoroutineContext()[Job]?.invokeOnCompletion {
+                    loggDebug("SSE-tilkobling lukket")
+                }
 
-                    opptegnelseListener.onOpptegnelse(identitetsnummer) {
-                        runCatching {
-                            sessionFactory.transactionalSessionScope {
-                                it.opptegnelseRepository.finnAlleForPersonEtter(
-                                    sisteSekvensnummer,
-                                    identitetsnummer,
+                val personPseudoId =
+                    call.parameters["personPseudoId"]
+                        ?.let { PersonPseudoId.fraString(it) }
+                        ?: throw BadRequestException("Mangler påkrevd query param: personPseudoId")
+
+                coMedMdc(MdcKey.PERSON_PSEUDO_ID to personPseudoId.value.toString()) {
+                    val (identitetsnummer, sisteSekvensnummerVedInitiering) =
+                        sessionFactory.transactionalSessionScope {
+                            val identitetsnummer =
+                                personPseudoIdProvider.hentIdentitetsnummer(personPseudoId)
+                            val sisteSekvensnummer = it.opptegnelseRepository.finnNyesteSekvensnummer()
+                            identitetsnummer to sisteSekvensnummer
+                        }
+
+                    if (identitetsnummer == null) {
+                        loggWarn("SSE-tilkobling forsøkt for personPseudoId uten tilhørende identitetsnummer")
+                        return@coMedMdc
+                    }
+
+                    coMedMdc(MdcKey.IDENTITETSNUMMER to identitetsnummer.value) {
+                        loggDebug("SSE-tilkobling startet")
+                        var sisteSekvensnummer = sisteSekvensnummerVedInitiering
+
+                        opptegnelseListener.onOpptegnelse(identitetsnummer) {
+                            runCatching {
+                                sessionFactory.transactionalSessionScope {
+                                    it.opptegnelseRepository.finnAlleForPersonEtter(
+                                        sisteSekvensnummer,
+                                        identitetsnummer,
+                                    )
+                                }
+                            }.onFailure {
+                                loggWarn(
+                                    "Feil ved henting av opptegnelse for person - hopper over notifikasjon",
+                                    it,
                                 )
+                            }.onSuccess { opptegnelser ->
+                                if (opptegnelser.isNotEmpty()) {
+                                    sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
+                                }
+                                opptegnelser.forEach { send(event = it.type.tilEvent(), data = "{}") }
                             }
-                        }.onFailure {
-                            loggWarn(
-                                "Feil ved henting av opptegnelse for person - hopper over notifikasjon",
-                                it,
-                            )
-                        }.onSuccess { opptegnelser ->
-                            if (opptegnelser.isNotEmpty()) {
-                                sisteSekvensnummer = opptegnelser.map { it.id() }.maxBy { it.value }
-                            }
-                            opptegnelser.forEach { send(event = it.type.tilEvent(), data = "{}") }
                         }
                     }
                 }
