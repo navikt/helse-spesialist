@@ -33,6 +33,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("aktiv-oppgave")
+        class AktivOppgave(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("behandlende-enhet")
         class BehandlendeEnhet(
             val parent: PersonPseudoId,

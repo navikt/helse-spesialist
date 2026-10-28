@@ -92,6 +92,8 @@ fun Routing.restRoutes(
             post(PostSendTilGodkjenningBehandler(), restAdapter)
             post(PostSendIReturBehandler(), restAdapter)
 
+            get(GetAktivOppgaveForPersonBehandler(), restAdapter)
+
             put(PutTildelingBehandler(), restAdapter)
             delete(DeleteTildelingBehandler(), restAdapter)
 
