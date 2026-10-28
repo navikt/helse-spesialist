@@ -62,4 +62,5 @@ private fun HandlingType.tilApiHandlingType() =
     when (this) {
         HandlingType.MANUELT_VURDERT_OPPTJENING -> ApiHandlingType.MANUELT_VURDERT_OPPTJENING
         HandlingType.NY_AUTOMATISK_OPPTJENINGSVURDERING -> ApiHandlingType.NY_AUTOMATISK_OPPTJENINGSVURDERING
+        HandlingType.GRADERTE_ANDRE_YTELSER_ENDRET -> ApiHandlingType.GRADERTE_ANDRE_YTELSER_ENDRET
     }

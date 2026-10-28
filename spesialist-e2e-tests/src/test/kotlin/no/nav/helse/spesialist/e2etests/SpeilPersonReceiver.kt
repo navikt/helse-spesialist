@@ -210,6 +210,7 @@ class SpeilPersonReceiver(
 
     fun saksbehandlerEndrerGraderteAndreYtelser(
         versjon: UUID?,
+        behandlingId: UUID,
         dager: Collection<ApiGraderteAndreYtelserDag>,
         yrkesaktivitet: ApiYrkesaktivitetstype,
         organisasjonsnummer: String?,
@@ -232,6 +233,7 @@ class SpeilPersonReceiver(
                     "yrkesaktivitet" to yrkesaktivitet.name,
                     "organisasjonsnummer" to organisasjonsnummer,
                     "versjon" to versjon?.toString(),
+                    "behandlingId" to behandlingId.toString(),
                 ),
         )!!["versjon"].asUUID().also {
             hentOppdaterteGraderteAndreYtelser()

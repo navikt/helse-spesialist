@@ -30,12 +30,14 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
         val endretDag = dag(3 jan 2021, ApiGraderteAndreYtelserType.FORELDREPENGER to 30, sykdomsgrad = 70)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
+        val behandlingId = førsteVedtaksperiode().spleisBehandlingId!!
 
         medPersonISpeil {
             // When:
             val førsteVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
                     versjon = null,
+                    behandlingId = behandlingId,
                     dager = dager,
                     yrkesaktivitet = ApiYrkesaktivitetstype.ARBEIDSTAKER,
                     organisasjonsnummer = "123456789",
@@ -51,6 +53,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val andreVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
                     versjon = førsteVersjon,
+                    behandlingId = behandlingId,
                     dager = listOf(endretDag),
                     yrkesaktivitet = ApiYrkesaktivitetstype.ARBEIDSTAKER,
                     organisasjonsnummer = "123456789",
@@ -79,12 +82,14 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
         val frilansDager = listOf(dag(16 jan 2021, ApiGraderteAndreYtelserType.OMSORGSPENGER to 99, sykdomsgrad = 1))
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
+        val behandlingId = førsteVedtaksperiode().spleisBehandlingId!!
 
         // When:
         medPersonISpeil {
             val arbeidstakerVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
                     versjon = null,
+                    behandlingId = behandlingId,
                     dager = arbeidstakerDager,
                     yrkesaktivitet = ApiYrkesaktivitetstype.ARBEIDSTAKER,
                     organisasjonsnummer = "123456789",
@@ -93,6 +98,7 @@ class GraderteAndreYtelserE2ETest : AbstractE2EIntegrationTest() {
             val frilansVersjon =
                 saksbehandlerEndrerGraderteAndreYtelser(
                     versjon = null,
+                    behandlingId = behandlingId,
                     dager = frilansDager,
                     yrkesaktivitet = ApiYrkesaktivitetstype.FRILANS,
                     organisasjonsnummer = null,

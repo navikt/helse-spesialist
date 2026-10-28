@@ -103,13 +103,19 @@ class GetGraderteAndreYtelserIntegrationTest {
                         "dato": "2024-09-12",
                         "andreYtelserGrader": { "SVANGERSKAPSPENGER": 66 },
                         "sykdomsgrad": 34,
-                        "arbeidsgrad": 0
+                        "arbeidsgrad": 0,
+                        "fraAndreYtelserGrader": null,
+                        "fraSykdomsgrad": null,
+                        "fraArbeidsgrad": null
                       },
                       {
                         "dato": "2024-09-13",
                         "andreYtelserGrader": { "SVANGERSKAPSPENGER": 66 },
                         "sykdomsgrad": 34,
-                        "arbeidsgrad": 0
+                        "arbeidsgrad": 0,
+                        "fraAndreYtelserGrader": null,
+                        "fraSykdomsgrad": null,
+                        "fraArbeidsgrad": null
                       }
                     ]
                   },
@@ -122,7 +128,10 @@ class GetGraderteAndreYtelserIntegrationTest {
                         "dato": "2024-09-13",
                         "andreYtelserGrader": { "SVANGERSKAPSPENGER": 50 },
                         "sykdomsgrad": 50,
-                        "arbeidsgrad": 0
+                        "arbeidsgrad": 0,
+                        "fraAndreYtelserGrader": { "SVANGERSKAPSPENGER": 66 },
+                        "fraSykdomsgrad": 34,
+                        "fraArbeidsgrad": 0
                       }
                     ]
                   }

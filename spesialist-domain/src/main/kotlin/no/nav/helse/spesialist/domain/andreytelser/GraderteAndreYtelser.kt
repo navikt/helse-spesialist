@@ -43,16 +43,29 @@ class GraderteAndreYtelser private constructor(
                 tidspunkt = Instant.now(),
                 utførtAvSaksbehandlerIdent = saksbehandlerIdent,
                 notatTilBeslutter = notatTilBeslutter,
-                dager = dagerMedEndring,
+                dager = dagerMedEndring.map { dag -> dag.endretFra(dagerPerDato[dag.dato]) },
             )
         apply(event)
         return event
     }
 
+    fun finnEvent(versjon: UUID): GraderteAndreYtelserEndretEvent? = _events.find { it.versjon == versjon }
+
     private fun apply(event: GraderteAndreYtelserEndretEvent) {
-        dagerPerDato = dagerPerDato + event.dager.associateBy { it.dato }
+        dagerPerDato = dagerPerDato + event.dager.map { it.tilGraderteAndreYtelserDag() }.associateBy { it.dato }
         _events.add(event)
     }
+
+    private fun GraderteAndreYtelserDag.endretFra(fra: GraderteAndreYtelserDag?) =
+        GraderteAndreYtelserEndretDag(
+            dato = dato,
+            andreYtelserGrader = andreYtelserGrader,
+            sykdomsgrad = sykdomsgrad,
+            arbeidsgrad = arbeidsgrad,
+            fraAndreYtelserGrader = fra?.andreYtelserGrader,
+            fraSykdomsgrad = fra?.sykdomsgrad,
+            fraArbeidsgrad = fra?.arbeidsgrad,
+        )
 
     companion object {
         fun ny(

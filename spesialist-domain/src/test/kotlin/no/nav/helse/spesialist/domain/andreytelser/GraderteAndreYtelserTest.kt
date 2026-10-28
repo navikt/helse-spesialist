@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -30,7 +31,7 @@ class GraderteAndreYtelserTest {
         assertEquals(id, graderteAndreYtelser.id)
         assertEquals(dager, graderteAndreYtelser.dager)
         val event = graderteAndreYtelser.events.single()
-        assertEquals(dager, event.dager)
+        assertEquals(dager, event.dager.map { it.tilGraderteAndreYtelserDag() })
         assertEquals("et notat", event.notatTilBeslutter)
         assertEquals(saksbehandlerIdent, event.utførtAvSaksbehandlerIdent)
         assertEquals(event.versjon, graderteAndreYtelser.versjon)
@@ -42,7 +43,7 @@ class GraderteAndreYtelserTest {
 
         val event = graderteAndreYtelser.endre(listOf(dag(2 jan 2024, sykdomsgrad = 20)), saksbehandlerIdent, "endring")
 
-        assertEquals(listOf(dag(2 jan 2024, sykdomsgrad = 20)), event?.dager)
+        assertEquals(listOf(dag(2 jan 2024, sykdomsgrad = 20)), event?.dager?.map { it.tilGraderteAndreYtelserDag() })
         assertEquals(
             listOf(dag(1 jan 2024), dag(2 jan 2024, sykdomsgrad = 20), dag(3 jan 2024)),
             graderteAndreYtelser.dager,
@@ -71,7 +72,57 @@ class GraderteAndreYtelserTest {
                 "endring",
             )
 
-        assertEquals(listOf(dag(2 jan 2024, andreYtelserGrader = mapOf(OMSORGSPENGER to 50))), event?.dager)
+        assertEquals(
+            listOf(dag(2 jan 2024, andreYtelserGrader = mapOf(OMSORGSPENGER to 50))),
+            event?.dager?.map { it.tilGraderteAndreYtelserDag() },
+        )
+    }
+
+    @Test
+    fun `eventet tar med verdiene dagen hadde før endringen`() {
+        val graderteAndreYtelser = ny(listOf(dag(1 jan 2024)))
+
+        val event =
+            graderteAndreYtelser.endre(
+                listOf(dag(1 jan 2024, andreYtelserGrader = mapOf(OMSORGSPENGER to 40), sykdomsgrad = 60, arbeidsgrad = 0)),
+                saksbehandlerIdent,
+                "endring",
+            )
+
+        assertEquals(
+            listOf(
+                GraderteAndreYtelserEndretDag(
+                    dato = 1 jan 2024,
+                    andreYtelserGrader = mapOf(OMSORGSPENGER to 40),
+                    sykdomsgrad = 60,
+                    arbeidsgrad = 0,
+                    fraAndreYtelserGrader = mapOf(FORELDREPENGER to 50),
+                    fraSykdomsgrad = 30,
+                    fraArbeidsgrad = 20,
+                ),
+            ),
+            event?.dager,
+        )
+    }
+
+    @Test
+    fun `eventet har ingen fra-verdier for dager som ikke fantes fra før`() {
+        val graderteAndreYtelser = ny(listOf(dag(1 jan 2024)))
+
+        val event = graderteAndreYtelser.endre(listOf(dag(2 jan 2024)), saksbehandlerIdent, "endring")
+
+        val endretDag = event?.dager?.single()
+        assertEquals(2 jan 2024, endretDag?.dato)
+        assertNull(endretDag?.fraAndreYtelserGrader)
+        assertNull(endretDag?.fraSykdomsgrad)
+        assertNull(endretDag?.fraArbeidsgrad)
+    }
+
+    @Test
+    fun `fra-verdiene er null når strømmen opprettes`() {
+        val event = ny(listOf(dag(1 jan 2024))).events.single()
+
+        assertTrue(event.dager.all { it.fraAndreYtelserGrader == null && it.fraSykdomsgrad == null && it.fraArbeidsgrad == null })
     }
 
     @Test
@@ -117,6 +168,15 @@ class GraderteAndreYtelserTest {
         assertEquals(original.dager, gjenoppbygd.dager)
         assertEquals(original.events, gjenoppbygd.events)
         assertEquals(original.versjon, gjenoppbygd.versjon)
+    }
+
+    @Test
+    fun `finnEvent finner eventet med gitt versjon`() {
+        val graderteAndreYtelser = ny(listOf(dag(1 jan 2024)))
+        val event = graderteAndreYtelser.endre(listOf(dag(1 jan 2024, sykdomsgrad = 10)), saksbehandlerIdent, "endring")!!
+
+        assertEquals(event, graderteAndreYtelser.finnEvent(event.versjon))
+        assertNull(graderteAndreYtelser.finnEvent(UUID.randomUUID()))
     }
 
     private fun ny(dager: List<GraderteAndreYtelserDag>) =

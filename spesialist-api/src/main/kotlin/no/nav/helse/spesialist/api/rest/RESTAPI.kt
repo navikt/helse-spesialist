@@ -99,6 +99,7 @@ fun Routing.restRoutes(
             patch(PatchSaksbehandlerStansBehandler(), restAdapter)
 
             get(GetSaksbehandlerhandlingerForPersonBehandler(), restAdapter)
+            get(GetSaksbehandlerhandlingVisningBehandler(), restAdapter)
 
             get(GetVeilederStansBehandler(), restAdapter)
             patch(PatchVeilederStansBehandler(), restAdapter)

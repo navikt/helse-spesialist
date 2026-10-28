@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretDag
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
@@ -102,17 +102,20 @@ class PgGraderteAndreYtelserRepository(
                 tidspunkt = instant("tidspunkt"),
                 utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
                 notatTilBeslutter = string("notat_til_beslutter"),
-                dager = data.dager.map { it.tilGraderteAndreYtelserDag() },
+                dager = data.dager.map { it.tilGraderteAndreYtelserEndretDag() },
             )
         return id to event
     }
 
-    private fun DBGraderteAndreYtelserDag.tilGraderteAndreYtelserDag() =
-        GraderteAndreYtelserDag(
+    private fun DBGraderteAndreYtelserDag.tilGraderteAndreYtelserEndretDag() =
+        GraderteAndreYtelserEndretDag(
             dato = dato,
             andreYtelserGrader = andreYtelserGrader.mapKeys { it.key.tilGraderteAndreYtelserType() },
             sykdomsgrad = sykdomsgrad,
             arbeidsgrad = arbeidsgrad,
+            fraAndreYtelserGrader = fraAndreYtelserGrader?.mapKeys { it.key.tilGraderteAndreYtelserType() },
+            fraSykdomsgrad = fraSykdomsgrad,
+            fraArbeidsgrad = fraArbeidsgrad,
         )
 
     private fun DBGraderteAndreYtelserType.tilGraderteAndreYtelserType() =
@@ -124,12 +127,15 @@ class PgGraderteAndreYtelserRepository(
             DBGraderteAndreYtelserType.OPPLARINGSPENGER -> GraderteAndreYtelserType.OPPLARINGSPENGER
         }
 
-    private fun GraderteAndreYtelserDag.tilDBGraderteAndreYtelserDag() =
+    private fun GraderteAndreYtelserEndretDag.tilDBGraderteAndreYtelserDag() =
         DBGraderteAndreYtelserDag(
             dato = dato,
             andreYtelserGrader = andreYtelserGrader.mapKeys { it.key.tilDBGraderteAndreYtelserType() },
             sykdomsgrad = sykdomsgrad,
             arbeidsgrad = arbeidsgrad,
+            fraAndreYtelserGrader = fraAndreYtelserGrader?.mapKeys { it.key.tilDBGraderteAndreYtelserType() },
+            fraSykdomsgrad = fraSykdomsgrad,
+            fraArbeidsgrad = fraArbeidsgrad,
         )
 
     private fun GraderteAndreYtelserType.tilDBGraderteAndreYtelserType() =
@@ -181,5 +187,8 @@ class PgGraderteAndreYtelserRepository(
         val andreYtelserGrader: Map<DBGraderteAndreYtelserType, Int>,
         val sykdomsgrad: Int,
         val arbeidsgrad: Int,
+        val fraAndreYtelserGrader: Map<DBGraderteAndreYtelserType, Int>? = null,
+        val fraSykdomsgrad: Int? = null,
+        val fraArbeidsgrad: Int? = null,
     )
 }

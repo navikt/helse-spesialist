@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretDag
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -12,6 +13,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -63,7 +65,20 @@ class PgGraderteAndreYtelserRepositoryTest : AbstractDBIntegrationTest() {
         assertNotNull(hentetIgjen)
         assertEquals(listOf(dag(1 jan 2024), dag(2 jan 2024, sykdomsgrad = 20), dag(3 jan 2024)), hentetIgjen.dager)
         assertEquals(hentet.events.map { it.versjon }, hentetIgjen.events.map { it.versjon })
-        assertEquals(listOf(dag(2 jan 2024, sykdomsgrad = 10)), hentetIgjen.events[1].dager)
+        assertEquals(
+            listOf(
+                GraderteAndreYtelserEndretDag(
+                    dato = 2 jan 2024,
+                    andreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50),
+                    sykdomsgrad = 10,
+                    arbeidsgrad = 20,
+                    fraAndreYtelserGrader = mapOf(GraderteAndreYtelserType.FORELDREPENGER to 50),
+                    fraSykdomsgrad = 30,
+                    fraArbeidsgrad = 20,
+                ),
+            ),
+            hentetIgjen.events[1].dager,
+        )
         assertEquals(3, antallRader(id.identitetsnummer))
     }
 
@@ -108,6 +123,41 @@ class PgGraderteAndreYtelserRepositoryTest : AbstractDBIntegrationTest() {
         repository.lagre(graderteAndreYtelser)
 
         assertEquals(1, antallRader(id.identitetsnummer))
+    }
+
+    @Test
+    fun `kan lese events som er lagret uten fra-verdier`() {
+        val id = lagId()
+        dbQuery.update(
+            """
+            INSERT INTO graderte_andre_ytelser_events (
+              versjon, fødselsnummer, yrkesaktivitetstype, organisasjonsnummer, tidspunkt,
+              utført_av_saksbehandler_ident, notat_til_beslutter, data_json
+            )
+            VALUES (
+              :versjon, :fodselsnummer, 'ARBEIDSTAKER', :organisasjonsnummer, now(),
+              :ident, 'notat', :data_json::jsonb
+            )
+            """.trimIndent(),
+            "versjon" to UUID.randomUUID(),
+            "fodselsnummer" to id.identitetsnummer.value,
+            "organisasjonsnummer" to id.organisasjonsnummer,
+            "ident" to saksbehandlerIdent.value,
+            "data_json" to """{"dager":[{"dato":"2024-01-01","andreYtelserGrader":{"FORELDREPENGER":50},"sykdomsgrad":30,"arbeidsgrad":20}]}""",
+        )
+
+        val hentet = repository.finnOrNull(id)
+
+        assertNotNull(hentet)
+        assertEquals(listOf(dag(1 jan 2024)), hentet.dager)
+        val endretDag =
+            hentet.events
+                .single()
+                .dager
+                .single()
+        assertNull(endretDag.fraAndreYtelserGrader)
+        assertNull(endretDag.fraSykdomsgrad)
+        assertNull(endretDag.fraArbeidsgrad)
     }
 
     private fun antallRader(identitetsnummer: Identitetsnummer) =

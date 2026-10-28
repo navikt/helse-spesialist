@@ -21,6 +21,7 @@ data class ApiEndreGraderteAndreYtelserRequest(
     val yrkesaktivitet: ApiYrkesaktivitetstype,
     val organisasjonsnummer: String?,
     val versjon: UUID?,
+    val behandlingId: UUID,
     val dager: List<ApiGraderteAndreYtelserDag>,
     val notatTilBeslutter: String,
 )
@@ -72,5 +73,16 @@ data class ApiGraderteAndreYtelserEndretEvent(
     val tidspunkt: LocalDateTime,
     val utfortAvSaksbehandlerIdent: String,
     val notatTilBeslutter: String,
-    val dager: List<ApiGraderteAndreYtelserDag>,
+    val dager: List<ApiGraderteAndreYtelserEndretDag>,
+)
+
+@Serializable
+data class ApiGraderteAndreYtelserEndretDag(
+    val dato: LocalDate,
+    val andreYtelserGrader: Map<ApiGraderteAndreYtelserType, Grad>,
+    val sykdomsgrad: Grad,
+    val arbeidsgrad: Grad,
+    val fraAndreYtelserGrader: Map<ApiGraderteAndreYtelserType, Grad>?,
+    val fraSykdomsgrad: Grad?,
+    val fraArbeidsgrad: Grad?,
 )

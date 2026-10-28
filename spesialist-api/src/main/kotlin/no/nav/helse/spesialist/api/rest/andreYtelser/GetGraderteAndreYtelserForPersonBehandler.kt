@@ -48,7 +48,18 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
                 tidspunkt = event.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
                 utfortAvSaksbehandlerIdent = event.utførtAvSaksbehandlerIdent.value,
                 notatTilBeslutter = event.notatTilBeslutter,
-                dager = mapTilApiDag(event.dager),
+                dager = event.dager.map(::tilApiGraderteAndreYtelserEndretDag),
+            )
+
+        private fun tilApiGraderteAndreYtelserEndretDag(dag: GraderteAndreYtelserEndretDag) =
+            ApiGraderteAndreYtelserEndretDag(
+                dato = dag.dato,
+                andreYtelserGrader = dag.andreYtelserGrader.mapKeys { (type, _) -> tilApiGraderteAndreYtelserType(type) },
+                sykdomsgrad = dag.sykdomsgrad,
+                arbeidsgrad = dag.arbeidsgrad,
+                fraAndreYtelserGrader = dag.fraAndreYtelserGrader?.mapKeys { (type, _) -> tilApiGraderteAndreYtelserType(type) },
+                fraSykdomsgrad = dag.fraSykdomsgrad,
+                fraArbeidsgrad = dag.fraArbeidsgrad,
             )
 
         fun tilApiGraderteAndreYtelserType(type: GraderteAndreYtelserType) =

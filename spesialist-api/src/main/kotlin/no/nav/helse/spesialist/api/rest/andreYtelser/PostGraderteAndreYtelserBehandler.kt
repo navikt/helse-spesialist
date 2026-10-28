@@ -4,15 +4,21 @@ import io.ktor.http.*
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.api.rest.tilkomneinntekter.finnEllerOpprettTotrinnsvurdering
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserValidator
+import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
+import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
+import no.nav.helse.spesialist.domain.saksbehandlerhandling.SaksbehandlerhandlingId
+import java.util.UUID
 
 class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.GraderteAndreYtelser, ApiEndreGraderteAndreYtelserRequest, ApiEndreGraderteAndreYtelserResponse, ApiPostGraderteAndreYtelserErrorCode> {
     override val tag = Tags.GRADERTE_ANDRE_YTELSER
@@ -90,6 +96,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
         }
 
         repository.lagre(graderteAndreYtelser)
+        lagreSaksbehandlerhandling(event, person, request.behandlingId, kallKontekst)
 
         kallKontekst.leggTilGraderteAndreYtelserEndringsevent(
             identitetsnummer = person.id,
@@ -100,6 +107,32 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
         loggInfo("Lagret ny versjon av graderte andre ytelser (versjon: ${event.versjon})")
 
         return RestResponse.OK(ApiEndreGraderteAndreYtelserResponse(event.versjon))
+    }
+
+    private fun lagreSaksbehandlerhandling(
+        event: GraderteAndreYtelserEndretEvent,
+        person: Person,
+        behandlingId: UUID,
+        kallKontekst: KallKontekst,
+    ) {
+        val totrinnsvurdering =
+            finnEllerOpprettTotrinnsvurdering(
+                identitetsnummer = person.id,
+                totrinnsvurderingRepository = kallKontekst.transaksjon.totrinnsvurderingRepository,
+            )
+        kallKontekst.transaksjon.saksbehandlerhandlingRepository.lagre(
+            Saksbehandlerhandling.ny(
+                id = SaksbehandlerhandlingId(UUID.randomUUID()),
+                identitetsnummer = person.id,
+                handlingId = event.versjon,
+                handlingType = HandlingType.GRADERTE_ANDRE_YTELSER_ENDRET,
+                saksbehandlerIdent = event.utførtAvSaksbehandlerIdent.value,
+                tidspunkt = event.tidspunkt,
+                skjæringstidspunkt = null,
+                behandlingId = SpleisBehandlingId(behandlingId),
+                totrinnsvurderingId = totrinnsvurdering.id(),
+            ),
+        )
     }
 
     private fun ApiGraderteAndreYtelserDag.tilGraderteAndreYtelserDag() =

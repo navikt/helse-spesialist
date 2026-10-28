@@ -8,9 +8,11 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
+import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.testfixtures.sep
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -19,6 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PostGraderteAndreYtelserIntegrationTest {
@@ -30,6 +33,8 @@ class PostGraderteAndreYtelserIntegrationTest {
         val person = lagPerson().also(sessionContext.personRepository::lagre)
         val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
 
+        val behandlingId = UUID.randomUUID()
+
         val response =
             postGraderteAndreYtelser(
                 person = person,
@@ -37,6 +42,7 @@ class PostGraderteAndreYtelserIntegrationTest {
                 dagerJson = dagJson(dato = "2024-09-23", andreYtelserGrader = """{ "SVANGERSKAPSPENGER": 60 }""", sykdomsgrad = 40, arbeidsgrad = 0),
                 yrkesaktivitet = "ARBEIDSTAKER",
                 organisasjonsnummer = "123456789",
+                behandlingId = behandlingId,
             )
 
         assertEquals(HttpStatusCode.OK.value, response.status)
@@ -53,6 +59,16 @@ class PostGraderteAndreYtelserIntegrationTest {
                 ),
             ),
             lagret.dager,
+        )
+        val handling = sessionContext.saksbehandlerhandlingRepository.finnAlle(person.id).single()
+        assertEquals(lagret.versjon, handling.handlingId)
+        assertEquals(HandlingType.GRADERTE_ANDRE_YTELSER_ENDRET, handling.handlingType)
+        assertEquals(saksbehandler.ident.value, handling.saksbehandlerIdent)
+        assertEquals(SpleisBehandlingId(behandlingId), handling.behandlingId)
+        assertNull(handling.skjæringstidspunkt)
+        assertEquals(
+            sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)?.id(),
+            handling.totrinnsvurderingId,
         )
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
@@ -102,6 +118,9 @@ class PostGraderteAndreYtelserIntegrationTest {
             ),
             lagret.dager,
         )
+        val handlinger = sessionContext.saksbehandlerhandlingRepository.finnAlle(person.id)
+        assertEquals(setOf(førsteVersjon, andreVersjon), handlinger.map { it.handlingId }.toSet())
+        assertEquals(1, handlinger.map { it.totrinnsvurderingId }.distinct().size)
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             { assertEquals(GraderteAndreYtelserEndringerEvent(person.id, 23 sep 2024), it.hendelse) },
             { assertEquals(GraderteAndreYtelserEndringerEvent(person.id, 24 sep 2024), it.hendelse) },
@@ -127,6 +146,7 @@ class PostGraderteAndreYtelserIntegrationTest {
         assertEquals(første.bodyAsJsonNode?.get("versjon")?.asUUID(), andre.bodyAsJsonNode?.get("versjon")?.asUUID())
         val lagret = sessionContext.graderteAndreYtelserRepository.finnOrNull(lagId(person, Yrkesaktivitetstype.FRILANS, null))
         assertEquals(1, lagret?.events?.size)
+        assertEquals(1, sessionContext.saksbehandlerhandlingRepository.finnAlle(person.id).size)
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             { assertEquals(GraderteAndreYtelserEndringerEvent(person.id, 23 sep 2024), it.hendelse) },
         )
@@ -288,6 +308,7 @@ class PostGraderteAndreYtelserIntegrationTest {
         versjon: UUID? = null,
         yrkesaktivitet: String = "FRILANS",
         organisasjonsnummer: String? = null,
+        behandlingId: UUID = UUID.randomUUID(),
     ): IntegrationTestFixture.Response {
         val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
         return integrationTestFixture.post(
@@ -299,6 +320,7 @@ class PostGraderteAndreYtelserIntegrationTest {
                   "yrkesaktivitet": "$yrkesaktivitet",
                   "organisasjonsnummer": ${organisasjonsnummer?.let { "\"$it\"" }},
                   "versjon": ${versjon?.let { "\"$it\"" }},
+                  "behandlingId": "$behandlingId",
                   "dager": [$dagerJson],
                   "notatTilBeslutter": "notat om en gradert annen ytelse"
                 }
@@ -329,6 +351,7 @@ class PostGraderteAndreYtelserIntegrationTest {
         assertEquals("UTDATERT_TILSTAND", response.bodyAsJsonNode?.get("code")?.asString())
         val lagret = sessionContext.graderteAndreYtelserRepository.finnOrNull(lagId(person, Yrkesaktivitetstype.FRILANS, null))
         assertEquals(forventetAntallEvents, lagret?.events?.size)
+        assertEquals(forventetAntallEvents, sessionContext.saksbehandlerhandlingRepository.finnAlle(person.id).size)
         assertEquals(forventetAntallEvents, integrationTestFixture.meldingPubliserer.publiserteUtgåendeHendelser.size)
     }
 
@@ -341,6 +364,7 @@ class PostGraderteAndreYtelserIntegrationTest {
         assertEquals(forventetStatus.value, response.status)
         assertEquals(forventetKode, response.bodyAsJsonNode?.get("code")?.asString())
         assertTrue(sessionContext.graderteAndreYtelserRepository.finnAlleForIdentitetsnummer(person.id).isEmpty())
+        assertTrue(sessionContext.saksbehandlerhandlingRepository.finnAlle(person.id).isEmpty())
         integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 }
