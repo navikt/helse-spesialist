@@ -38,12 +38,12 @@ class GetGraderteAndreYtelserForPersonBehandler : GetBehandler<Personer.PersonPs
             organisasjonsnummer = id.organisasjonsnummer,
             versjon = versjon,
             dager = mapTilApiDag(dager),
-            events = events.map(Mapping::tilApiGraderteAndreYtelserEndretEvent),
+            events = events.map(Mapping::tilApiGraderteAndreYtelserEvent),
         )
 
     object Mapping {
-        fun tilApiGraderteAndreYtelserEndretEvent(event: GraderteAndreYtelserEndretEvent) =
-            ApiGraderteAndreYtelserEndretEvent(
+        fun tilApiGraderteAndreYtelserEvent(event: GraderteAndreYtelserEvent) =
+            ApiGraderteAndreYtelserEvent(
                 versjon = event.versjon,
                 tidspunkt = event.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
                 utfortAvSaksbehandlerIdent = event.utførtAvSaksbehandlerIdent.value,

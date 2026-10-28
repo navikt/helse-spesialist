@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest.andreYtelser
 
 import io.ktor.http.*
+import no.nav.helse.modell.melding.GraderteAndreYtelserEndringerEvent
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.Personer
@@ -11,7 +12,7 @@ import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEvent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserValidator
@@ -70,7 +71,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
         }
 
         val graderteAndreYtelser: GraderteAndreYtelser
-        val event: GraderteAndreYtelserEndretEvent?
+        val event: GraderteAndreYtelserEvent?
         if (eksisterende == null) {
             graderteAndreYtelser =
                 GraderteAndreYtelser.ny(
@@ -98,9 +99,9 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
         repository.lagre(graderteAndreYtelser)
         lagreSaksbehandlerhandling(event, person, request.behandlingId, kallKontekst)
 
-        kallKontekst.leggTilGraderteAndreYtelserEndringsevent(
+        kallKontekst.outbox.leggTil(
             identitetsnummer = person.id,
-            event = event,
+            hendelse = GraderteAndreYtelserEndringerEvent(fødselsnummer = person.id, fom = event.dager.minOf { it.dato }),
             årsak = "graderte andre ytelser endret",
         )
 
@@ -110,7 +111,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
     }
 
     private fun lagreSaksbehandlerhandling(
-        event: GraderteAndreYtelserEndretEvent,
+        event: GraderteAndreYtelserEvent,
         person: Person,
         behandlingId: UUID,
         kallKontekst: KallKontekst,

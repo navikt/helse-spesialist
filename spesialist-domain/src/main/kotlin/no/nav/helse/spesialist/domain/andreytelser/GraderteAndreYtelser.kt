@@ -21,8 +21,8 @@ data class GraderteAndreYtelserId(
 class GraderteAndreYtelser private constructor(
     id: GraderteAndreYtelserId,
 ) : AggregateRoot<GraderteAndreYtelserId>(id) {
-    private val _events = mutableListOf<GraderteAndreYtelserEndretEvent>()
-    val events: List<GraderteAndreYtelserEndretEvent> get() = _events
+    private val _events = mutableListOf<GraderteAndreYtelserEvent>()
+    val events: List<GraderteAndreYtelserEvent> get() = _events
 
     private var dagerPerDato: Map<LocalDate, GraderteAndreYtelserDag> = emptyMap()
     val dager: List<GraderteAndreYtelserDag> get() = dagerPerDato.values.sortedBy { it.dato }
@@ -33,12 +33,12 @@ class GraderteAndreYtelser private constructor(
         dager: List<GraderteAndreYtelserDag>,
         saksbehandlerIdent: NAVIdent,
         notatTilBeslutter: String,
-    ): GraderteAndreYtelserEndretEvent? {
+    ): GraderteAndreYtelserEvent? {
         val dagerMedEndring = dager.filter { dag -> dagerPerDato[dag.dato] != dag }
         if (dagerMedEndring.isEmpty()) return null
 
         val event =
-            GraderteAndreYtelserEndretEvent(
+            GraderteAndreYtelserEvent(
                 versjon = nyVersjon(),
                 tidspunkt = Instant.now(),
                 utførtAvSaksbehandlerIdent = saksbehandlerIdent,
@@ -49,9 +49,9 @@ class GraderteAndreYtelser private constructor(
         return event
     }
 
-    fun finnEvent(versjon: UUID): GraderteAndreYtelserEndretEvent? = _events.find { it.versjon == versjon }
+    fun finnEvent(versjon: UUID): GraderteAndreYtelserEvent? = _events.find { it.versjon == versjon }
 
-    private fun apply(event: GraderteAndreYtelserEndretEvent) {
+    private fun apply(event: GraderteAndreYtelserEvent) {
         dagerPerDato = dagerPerDato + event.dager.map { it.tilGraderteAndreYtelserDag() }.associateBy { it.dato }
         _events.add(event)
     }
@@ -80,7 +80,7 @@ class GraderteAndreYtelser private constructor(
 
         fun fraLagring(
             id: GraderteAndreYtelserId,
-            events: List<GraderteAndreYtelserEndretEvent>,
+            events: List<GraderteAndreYtelserEvent>,
         ): GraderteAndreYtelser =
             GraderteAndreYtelser(id).also { graderteAndreYtelser ->
                 events.sortedBy { it.versjon }.forEach(graderteAndreYtelser::apply)

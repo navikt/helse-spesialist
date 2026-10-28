@@ -2,11 +2,11 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEvent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 
 class InMemoryGraderteAndreYtelserRepository : GraderteAndreYtelserRepository {
-    private val eventsPerStream = mutableMapOf<GraderteAndreYtelserId, List<GraderteAndreYtelserEndretEvent>>()
+    private val eventsPerStream = mutableMapOf<GraderteAndreYtelserId, List<GraderteAndreYtelserEvent>>()
 
     override fun finnAlleForIdentitetsnummer(identitetsnummer: Identitetsnummer): List<GraderteAndreYtelser> =
         eventsPerStream

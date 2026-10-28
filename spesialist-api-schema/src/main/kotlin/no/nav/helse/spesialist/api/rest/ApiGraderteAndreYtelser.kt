@@ -64,11 +64,11 @@ data class ApiGraderteAndreYtelser(
     val organisasjonsnummer: String?,
     val versjon: UUID,
     val dager: List<ApiGraderteAndreYtelserDag>,
-    val events: List<ApiGraderteAndreYtelserEndretEvent>,
+    val events: List<ApiGraderteAndreYtelserEvent>,
 )
 
 @Serializable
-data class ApiGraderteAndreYtelserEndretEvent(
+data class ApiGraderteAndreYtelserEvent(
     val versjon: UUID,
     val tidspunkt: LocalDateTime,
     val utfortAvSaksbehandlerIdent: String,

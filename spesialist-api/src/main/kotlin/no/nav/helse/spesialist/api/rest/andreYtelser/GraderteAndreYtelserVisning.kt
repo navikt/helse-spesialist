@@ -6,14 +6,14 @@ import no.nav.helse.spesialist.api.rest.ApiHandlingsvisning
 import no.nav.helse.spesialist.api.rest.ApiVisningsfelt
 import no.nav.helse.spesialist.domain.andreytelser.Grad
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretDag
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEvent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 private val datoformat = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-internal fun GraderteAndreYtelserEndretEvent.tilHandlingsvisning() =
+internal fun GraderteAndreYtelserEvent.tilHandlingsvisning() =
     ApiHandlingsvisning(
         felter =
             listOfNotNull(

@@ -5,7 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
-data class GraderteAndreYtelserEndretEvent(
+data class GraderteAndreYtelserEvent(
     val versjon: UUID,
     val tidspunkt: Instant,
     val utførtAvSaksbehandlerIdent: NAVIdent,

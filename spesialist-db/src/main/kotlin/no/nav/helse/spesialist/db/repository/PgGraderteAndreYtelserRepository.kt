@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretDag
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEndretEvent
+import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEvent
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
 import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
 import java.time.LocalDate
@@ -88,7 +88,7 @@ class PgGraderteAndreYtelserRepository(
         }
     }
 
-    private fun Row.tilGraderteAndreYtelserIdOgEvent(): Pair<GraderteAndreYtelserId, GraderteAndreYtelserEndretEvent> {
+    private fun Row.tilGraderteAndreYtelserIdOgEvent(): Pair<GraderteAndreYtelserId, GraderteAndreYtelserEvent> {
         val id =
             GraderteAndreYtelserId(
                 identitetsnummer = Identitetsnummer.fraString(string("fødselsnummer")),
@@ -97,7 +97,7 @@ class PgGraderteAndreYtelserRepository(
             )
         val data = objectMapper.readValue(string("data_json"), DBEventData::class.java)
         val event =
-            GraderteAndreYtelserEndretEvent(
+            GraderteAndreYtelserEvent(
                 versjon = uuid("versjon"),
                 tidspunkt = instant("tidspunkt"),
                 utførtAvSaksbehandlerIdent = NAVIdent(string("utført_av_saksbehandler_ident")),
