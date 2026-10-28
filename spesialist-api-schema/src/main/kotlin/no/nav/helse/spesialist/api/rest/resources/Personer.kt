@@ -38,6 +38,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("totrinnsvurdering")
+        class Totrinnsvurdering(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("behandlende-enhet")
         class BehandlendeEnhet(
             val parent: PersonPseudoId,

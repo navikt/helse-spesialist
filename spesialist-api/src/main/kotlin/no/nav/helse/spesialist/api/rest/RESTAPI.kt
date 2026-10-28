@@ -93,6 +93,7 @@ fun Routing.restRoutes(
             post(PostSendIReturBehandler(), restAdapter)
 
             get(GetAktivOppgaveForPersonBehandler(), restAdapter)
+            get(GetTotrinnsvurderingForPersonBehandler(), restAdapter)
 
             put(PutTildelingBehandler(), restAdapter)
             delete(DeleteTildelingBehandler(), restAdapter)

@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.overstyring.*
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.rest.personer.tilApiTotrinnsvurdering
 import no.nav.helse.spesialist.api.rest.saksbilde.*
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtDag
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtInntekt
@@ -26,8 +27,6 @@ import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.snapshot.*
 import no.nav.helse.spesialist.domain.*
-import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
-import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.*
@@ -262,14 +261,7 @@ class SaksbildeHenter(
                                                                     if (oppgaveDto == null) {
                                                                         null
                                                                     } else {
-                                                                        totrinnsvurdering?.let {
-                                                                            ApiTotrinnsvurdering(
-                                                                                erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                                                                                saksbehandler = it.saksbehandler?.value,
-                                                                                beslutter = it.beslutter?.value,
-                                                                                erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
-                                                                            )
-                                                                        }
+                                                                        totrinnsvurdering?.tilApiTotrinnsvurdering()
                                                                     },
                                                                 paVent =
                                                                     daos.påVentApiDao
@@ -531,14 +523,7 @@ class SaksbildeHenter(
                                                                     if (oppgaveDto == null) {
                                                                         null
                                                                     } else {
-                                                                        totrinnsvurdering?.let {
-                                                                            ApiTotrinnsvurdering(
-                                                                                erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                                                                                saksbehandler = it.saksbehandler?.value,
-                                                                                beslutter = it.beslutter?.value,
-                                                                                erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
-                                                                            )
-                                                                        }
+                                                                        totrinnsvurdering?.tilApiTotrinnsvurdering()
                                                                     }
                                                                 },
                                                             paVent =
