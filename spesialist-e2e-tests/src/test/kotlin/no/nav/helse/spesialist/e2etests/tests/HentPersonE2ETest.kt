@@ -722,6 +722,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
             "oppfyllerKravOmOpptjening" : true,
             "opptjeningFra" : "2003-03-28",
             "opptjeningsvurderingId" : "b89e2ae5-59e3-388e-98cd-42a8e7350773",
+            "medlemskapsvurderingId" : "4c2a8f1e-7b3d-3e5a-9c1f-2d6e8a0b4f7c",
             "beregningsgrunnlag" : "25.0",
             "forsikringsvurderingId" : null
           } ]

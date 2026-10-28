@@ -388,6 +388,7 @@ internal fun InfotrygdVilkarsgrunnlag.tilSnapshotInfotrygdVilkarsgrunnlag() =
         skjaeringstidspunkt = skjaeringstidspunkt,
         sykepengegrunnlag = sykepengegrunnlag,
         opptjeningsvurderingId = opptjeningsvurderingId,
+        medlemskapsvurderingId = medlemskapsvurderingId,
     )
 
 internal fun SpleisVilkarsgrunnlag.tilSnapshotSpleisVilkarsgrunnlag() =
@@ -407,6 +408,7 @@ internal fun SpleisVilkarsgrunnlag.tilSnapshotSpleisVilkarsgrunnlag() =
         oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
         opptjeningFra = opptjeningFra,
         opptjeningsvurderingId = opptjeningsvurderingId,
+        medlemskapsvurderingId = medlemskapsvurderingId,
         beregingsgrunnlag = BigDecimal.valueOf(beregningsgrunnlag),
         forsikringsvurderingId = forsikringsvurderingId,
     )

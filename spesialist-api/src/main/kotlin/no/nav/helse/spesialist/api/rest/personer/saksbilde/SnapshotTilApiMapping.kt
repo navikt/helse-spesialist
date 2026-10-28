@@ -398,6 +398,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
                 opptjeningFra = opptjeningFra,
                 opptjeningsvurderingId = opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
                 avviksvurdering =
                     avviksvurdering?.let {
                         ApiVilkårsgrunnlagAvviksvurdering(
@@ -429,6 +430,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 skjaeringstidspunkt = skjaeringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
                 opptjeningsvurderingId = opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
             )
 
         is SnapshotUkjentVilkarsgrunnlag -> error("Ukjent vilkårsgrunnlag ${this.javaClass.name}")

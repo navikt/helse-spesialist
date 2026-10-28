@@ -10,6 +10,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.math.BigDecimal
 import java.net.URI
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -74,8 +75,10 @@ class SpleisRestClientTest {
 
         val vilkarsgrunnlag = snapshotPerson.vilkarsgrunnlag
         assertEquals(2, vilkarsgrunnlag.size)
-        assertIs<SnapshotSpleisVilkarsgrunnlag>(vilkarsgrunnlag[0])
-        assertIs<SnapshotInfotrygdVilkarsgrunnlag>(vilkarsgrunnlag[1])
+        val spleisgrunnlag = assertIs<SnapshotSpleisVilkarsgrunnlag>(vilkarsgrunnlag[0])
+        val infotrygdgrunnlag = assertIs<SnapshotInfotrygdVilkarsgrunnlag>(vilkarsgrunnlag[1])
+        assertEquals(UUID.fromString("00000000-0000-0000-0000-000000000006"), spleisgrunnlag.medlemskapsvurderingId)
+        assertEquals(null, infotrygdgrunnlag.medlemskapsvurderingId)
     }
 
     @Test
@@ -285,7 +288,8 @@ class SpleisRestClientTest {
                   "oppfyllerKravOmOpptjening": true,
                   "oppfyllerKravOmMedlemskap": true,
                   "forsikringsvurderingId": null,
-                  "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000005"
+                  "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000005",
+                  "medlemskapsvurderingId": "00000000-0000-0000-0000-000000000006"
                 },
                 {
                   "type": "InfotrygdVilkarsgrunnlag",

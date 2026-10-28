@@ -21,6 +21,7 @@ data class SnapshotInfotrygdVilkarsgrunnlag(
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
     val opptjeningsvurderingId: UUID,
+    val medlemskapsvurderingId: UUID? = null,
 ) : SnapshotVilkarsgrunnlag
 
 data class SnapshotSpleisVilkarsgrunnlag(
@@ -39,6 +40,7 @@ data class SnapshotSpleisVilkarsgrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
     val opptjeningsvurderingId: UUID,
+    val medlemskapsvurderingId: UUID? = null,
     val beregingsgrunnlag: BigDecimal,
     val forsikringsvurderingId: UUID?,
 ) : SnapshotVilkarsgrunnlag
