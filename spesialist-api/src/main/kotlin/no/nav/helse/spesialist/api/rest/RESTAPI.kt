@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.rest.personer.saksbilde.GetSaksbildeForPerson
 import no.nav.helse.spesialist.api.rest.personer.saksbilde.SaksbildeHenter
 import no.nav.helse.spesialist.api.rest.personer.sykefraværstilfeller.sykepengegrunnlag.PostSykepengegrunnlagBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.DeleteTildelingBehandler
+import no.nav.helse.spesialist.api.rest.personer.tildeling.GetTildelingForPersonBehandler
 import no.nav.helse.spesialist.api.rest.personer.tildeling.PutTildelingBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetAktiveSaksbehandlereBehandler
 import no.nav.helse.spesialist.api.rest.saksbehandlere.GetBrukerBehandler
@@ -95,6 +96,7 @@ fun Routing.restRoutes(
             get(GetAktivOppgaveForPersonBehandler(), restAdapter)
             get(GetTotrinnsvurderingForPersonBehandler(), restAdapter)
 
+            get(GetTildelingForPersonBehandler(), restAdapter)
             put(PutTildelingBehandler(), restAdapter)
             delete(DeleteTildelingBehandler(), restAdapter)
 
