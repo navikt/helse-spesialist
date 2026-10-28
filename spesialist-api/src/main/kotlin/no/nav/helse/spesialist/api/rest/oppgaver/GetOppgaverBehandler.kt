@@ -46,7 +46,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                     sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
                     ekskluderVarsler = resource.ekskluderVarsler?.tilStringSet() ?: emptySet(),
                     tillatteVarsler = resource.tillatteVarsler?.tilStringSet() ?: emptySet(),
-                    minstEttAvVarslene = resource.minstEttAvVarslene?.tilStringSet() ?: emptySet(),
+                    minstEttAvVarslene = resource.minstEttAvVarslene.map { it.tilStringSet() }.filter { it.isNotEmpty() },
                     behandlingOpprettetFom = resource.behandlingOpprettetFom,
                     behandlingOpprettetTom = resource.behandlingOpprettetTom,
                     oppgaveKlarFom = resource.oppgaveKlarFom,
@@ -115,6 +115,9 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
     override fun openApi(config: RouteConfig) {
         config.request {
             queryParameter<List<String>?>(Oppgaver::minstEnAvEgenskapene.name) {
+                explode = true
+            }
+            queryParameter<List<String>?>(Oppgaver::minstEttAvVarslene.name) {
                 explode = true
             }
         }

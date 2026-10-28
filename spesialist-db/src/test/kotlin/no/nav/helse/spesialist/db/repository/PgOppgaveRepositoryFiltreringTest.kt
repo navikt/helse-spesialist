@@ -537,7 +537,7 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         sidestørrelse: Int = 10,
         ekskluderVarsler: Set<String> = emptySet(),
         tillatteVarsler: Set<String> = emptySet(),
-        minstEttAvVarslene: Set<String> = emptySet(),
+        minstEttAvVarslene: List<Set<String>> = emptyList(),
         behandlingOpprettetFom: LocalDate? = null,
         behandlingOpprettetTom: LocalDate? = null,
         oppgaveKlarFom: LocalDate? = null,
@@ -647,7 +647,7 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         opprettVarsel(behandling, "RV_MV_3")
         opprettVarsel(behandling, "SB_EX_1")
 
-        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = setOf("RV_MV_3"))
+        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = listOf(setOf("RV_MV_3")))
 
         assertEquals(1, resultat.totaltAntall)
         assertEquals(oppgave.id.value, resultat.elementer.single().id)
@@ -662,7 +662,7 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         opprettOppgave(vedtaksperiode, behandling)
         opprettVarsel(behandling, "SB_EX_1")
 
-        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = setOf("RV_MV_3"))
+        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = listOf(setOf("RV_MV_3")))
 
         assertEquals(0, resultat.totaltAntall)
     }
@@ -678,7 +678,43 @@ class PgOppgaveRepositoryFiltreringTest : AbstractDBIntegrationTest() {
         varsel.deaktiver()
         sessionContext.varselRepository.lagre(varsel)
 
-        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = setOf("RV_MV_3"))
+        val resultat = finnOppgaveProjeksjoner(minstEttAvVarslene = listOf(setOf("RV_MV_3")))
+
+        assertEquals(0, resultat.totaltAntall)
+    }
+
+    @Test
+    fun `inkluderer oppgave med minst ett varsel fra hver gruppe i minstEttAvVarslene`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        val oppgave = opprettOppgave(vedtaksperiode, behandling)
+        opprettVarsel(behandling, "RV_OV_1")
+        opprettVarsel(behandling, "RV_AY_4")
+
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEttAvVarslene = listOf(setOf("RV_OV_1"), setOf("RV_AY_4", "RV_AY_5")),
+            )
+
+        assertEquals(1, resultat.totaltAntall)
+        assertEquals(oppgave.id.value, resultat.elementer.single().id)
+    }
+
+    @Test
+    fun `ekskluderer oppgave som mangler varsel fra en av gruppene i minstEttAvVarslene`() {
+        val person = opprettPerson()
+        val arbeidsgiver = opprettArbeidsgiver()
+        val vedtaksperiode = opprettVedtaksperiode(person, arbeidsgiver)
+        val behandling = opprettBehandling(vedtaksperiode)
+        opprettOppgave(vedtaksperiode, behandling)
+        opprettVarsel(behandling, "RV_OV_1")
+
+        val resultat =
+            finnOppgaveProjeksjoner(
+                minstEttAvVarslene = listOf(setOf("RV_OV_1"), setOf("RV_AY_4", "RV_AY_5")),
+            )
 
         assertEquals(0, resultat.totaltAntall)
     }

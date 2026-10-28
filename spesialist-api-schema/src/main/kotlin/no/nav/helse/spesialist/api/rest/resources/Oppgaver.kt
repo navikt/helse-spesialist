@@ -31,7 +31,7 @@ data class Oppgaver(
     val sidestoerrelse: Int? = null,
     val ekskluderVarsler: String? = null, // Kommaseparert
     val tillatteVarsler: String? = null, // Kommaseparert
-    val minstEttAvVarslene: String? = null, // Kommaseparert
+    val minstEttAvVarslene: List<String> = emptyList(), // Kommaseparerte
     val behandlingOpprettetFom: LocalDate? = null,
     val behandlingOpprettetTom: LocalDate? = null,
     val oppgaveKlarFom: LocalDate? = null,
