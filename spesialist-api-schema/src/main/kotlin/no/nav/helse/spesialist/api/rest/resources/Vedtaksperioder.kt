@@ -24,6 +24,11 @@ class Vedtaksperioder {
             val parent: VedtaksperiodeId,
         )
 
+        @Resource("annullering")
+        class Annullering(
+            val parent: VedtaksperiodeId,
+        )
+
         @Resource("annuller")
         class Annuller(
             val parent: VedtaksperiodeId,

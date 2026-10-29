@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.api.rest.totrinnsvurdering.PostSendTilGodkjenning
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetAnnulleringForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.GetRisikovurderingForVedtaksperiodeBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostAnmodOmForkastingBehandler
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.PostVedtaksperiodeAnnullerBehandler
@@ -127,6 +128,7 @@ fun Routing.restRoutes(
             post(PostForkastingBehandler(), restAdapter)
 
             get(GetRisikovurderingForVedtaksperiodeBehandler(), restAdapter)
+            get(GetAnnulleringForVedtaksperiodeBehandler(), restAdapter)
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
             post(PostAnmodOmForkastingBehandler(), restAdapter)
 

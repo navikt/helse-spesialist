@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgradPeriode
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonsopplysning
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.tilApiAnnullering
 import no.nav.helse.spesialist.api.rest.vedtaksperioder.tilApiRisikovurdering
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.*
@@ -297,15 +298,7 @@ class SaksbildeHenter(
                                                                                         it.saksbehandlerOid,
                                                                                     )
                                                                                         ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
-                                                                                ApiAnnullering(
-                                                                                    saksbehandlerIdent = saksbehandler.ident.value,
-                                                                                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-                                                                                    personFagsystemId = it.personFagsystemId,
-                                                                                    tidspunkt = it.tidspunkt,
-                                                                                    arsaker = it.årsaker,
-                                                                                    begrunnelse = it.kommentar,
-                                                                                    vedtaksperiodeId = it.vedtaksperiodeId,
-                                                                                )
+                                                                                it.tilApiAnnullering(saksbehandler)
                                                                             }
                                                                     } else {
                                                                         null
@@ -537,15 +530,7 @@ class SaksbildeHenter(
                                                                             val saksbehandler =
                                                                                 daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
                                                                                     ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
-                                                                            ApiAnnullering(
-                                                                                saksbehandlerIdent = saksbehandler.ident.value,
-                                                                                arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-                                                                                personFagsystemId = it.personFagsystemId,
-                                                                                tidspunkt = it.tidspunkt,
-                                                                                arsaker = it.årsaker,
-                                                                                begrunnelse = it.kommentar,
-                                                                                vedtaksperiodeId = it.vedtaksperiodeId,
-                                                                            )
+                                                                            it.tilApiAnnullering(saksbehandler)
                                                                         }
                                                                 } else {
                                                                     null
