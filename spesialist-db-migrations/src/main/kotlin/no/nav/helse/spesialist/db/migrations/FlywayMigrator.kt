@@ -25,6 +25,8 @@ class FlywayMigrator(
             Flyway
                 .configure()
                 .dataSource(dataSource)
+                // Transaksjonell lås får CREATE INDEX CONCURRENTLY til å vente på Flyways egen låstransaksjon for alltid
+                .configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
                 .lockRetryCount(-1)
                 .validateMigrationNaming(true)
                 .load()
