@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.YearMonth
 
 class HentPersonE2ETest : AbstractE2EIntegrationTest() {
@@ -637,20 +636,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                 "annulleringskandidater" : [ ]
               } ]
             } ],
-            "overstyringer" : [ ],
-            "arbeidsforhold" : [ {
-              "stillingstittel" : "en-stillingstittel",
-              "stillingsprosent" : 100,
-              "startdato" : "${LocalDate.now()}",
-              "sluttdato" : null
-            } ],
-            "inntekterFraAordningen" : [ {
-              "skjaeringstidspunkt" : "2018-01-01",
-              "inntekter" : [ {
-                "maned" : "${YearMonth.now().minusMonths(1)}",
-                "sum" : 20000.0
-              } ]
-            } ]
+            "overstyringer" : [ ]
           } ],
           "selvstendigNaering" : null,
           "vilkarsgrunnlagV2" : [ {

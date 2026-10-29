@@ -30,7 +30,6 @@ class DBDaos(
     override val vedtakDao = PgVedtakDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
 
-    override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     override val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     override val overstyringApiDao = PgOverstyringApiDao(dataSource)
     override val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)

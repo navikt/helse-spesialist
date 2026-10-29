@@ -12,7 +12,6 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
 import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
@@ -99,7 +98,6 @@ abstract class AbstractDBIntegrationTest {
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val periodehistorikkDao = daos.periodehistorikkDao
     internal val arbeidsforholdDao = sessionContext.arbeidsforholdDao
-    internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
     internal val vedtakDao = daos.vedtakDao
     protected val apiVarselRepository = PgVarselApiRepository(dataSource)
     internal val commandContextDao = daos.commandContextDao

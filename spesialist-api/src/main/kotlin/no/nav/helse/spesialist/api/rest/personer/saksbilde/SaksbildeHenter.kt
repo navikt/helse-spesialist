@@ -310,36 +310,6 @@ class SaksbildeHenter(
                                                 is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
                                             }
                                         },
-                                arbeidsforhold =
-                                    daos.arbeidsgiverApiDao
-                                        .finnArbeidsforhold(
-                                            identitetsnummer.value,
-                                            arbeidsgiver.organisasjonsnummer,
-                                        ).map {
-                                            ApiArbeidsforhold(
-                                                stillingstittel = it.stillingstittel,
-                                                stillingsprosent = it.stillingsprosent,
-                                                startdato = it.startdato,
-                                                sluttdato = it.sluttdato,
-                                            )
-                                        },
-                                inntekterFraAordningen =
-                                    daos.arbeidsgiverApiDao
-                                        .finnArbeidsgiverInntekterFraAordningen(
-                                            identitetsnummer.value,
-                                            arbeidsgiver.organisasjonsnummer,
-                                        ).map { fraAO ->
-                                            ApiArbeidsgiverInntekterFraAOrdningen(
-                                                skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
-                                                inntekter =
-                                                    fraAO.inntekter.map { inntekt ->
-                                                        ApiInntektFraAOrdningen(
-                                                            maned = inntekt.maned,
-                                                            sum = inntekt.sum,
-                                                        )
-                                                    },
-                                            )
-                                        },
                             )
                         }
                 },

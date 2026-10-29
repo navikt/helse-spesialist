@@ -25,7 +25,6 @@ interface Daos {
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
 
-    val arbeidsgiverApiDao: ArbeidsgiverApiDao
     val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao
     val periodehistorikkApiDao: PeriodehistorikkApiDao

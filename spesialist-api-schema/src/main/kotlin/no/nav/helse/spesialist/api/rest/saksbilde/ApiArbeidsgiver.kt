@@ -22,23 +22,9 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Serializable
-data class ApiArbeidsforhold(
-    val stillingstittel: String,
-    val stillingsprosent: Int,
-    val startdato: LocalDate,
-    val sluttdato: LocalDate?,
-)
-
-@Serializable
 data class ApiBehandling(
     val id: UUID,
     val perioder: List<ApiPeriode>,
-)
-
-@Serializable
-data class ApiArbeidsgiverInntekterFraAOrdningen(
-    val skjaeringstidspunkt: String,
-    val inntekter: List<ApiInntektFraAOrdningen>,
 )
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -185,6 +171,4 @@ data class ApiArbeidsgiver(
     val ghostPerioder: List<ApiGhostPeriode>,
     val behandlinger: List<ApiBehandling>,
     val overstyringer: List<ApiOverstyring>,
-    val arbeidsforhold: List<ApiArbeidsforhold>,
-    val inntekterFraAordningen: List<ApiArbeidsgiverInntekterFraAOrdningen>,
 )

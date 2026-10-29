@@ -48,7 +48,6 @@ class InMemoryRepositoriesAndDaos {
     private val sykefraværstilfelleDao = DelegatingBegrunnelseForSkjønnsfastsettelseRepository(overstyringRepository)
 
     private val arbeidsforholdDao = InMemoryArbeidsforholdDao()
-    private val arbeidsgiverApiDao = UnimplementedArbeidsgiverApiDao()
     private val automatiseringDao = InMemoryAutomatiseringDao()
     private val behandlingsstatistikkDao = InMemoryBehandlingsstatistikkDao()
     private val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
@@ -69,7 +68,6 @@ class InMemoryRepositoriesAndDaos {
     val daos =
         InMemoryDaos(
             annulleringRepository = annulleringRepository,
-            arbeidsgiverApiDao = arbeidsgiverApiDao,
             behandlingsstatistikkDao = behandlingsstatistikkDao,
             commandContextDao = commandContextDao,
             dialogDao = dialogDao,
