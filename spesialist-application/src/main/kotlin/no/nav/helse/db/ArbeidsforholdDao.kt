@@ -8,6 +8,8 @@ interface ArbeidsforholdDao {
         arbeidsgiverIdentifikator: String,
     ): List<KomplettArbeidsforholdDto>
 
+    fun finnAlleForPerson(fødselsnummer: String): List<KomplettArbeidsforholdDto>
+
     fun upsertArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,

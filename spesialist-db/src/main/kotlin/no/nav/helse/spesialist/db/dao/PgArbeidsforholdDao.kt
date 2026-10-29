@@ -34,6 +34,27 @@ class PgArbeidsforholdDao internal constructor(
         )
     }
 
+    override fun finnAlleForPerson(fødselsnummer: String) =
+        asSQL(
+            """
+            SELECT arbeidsgiver_identifikator, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert
+            FROM arbeidsforhold
+            WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
+            ORDER BY arbeidsgiver_identifikator, startdato;
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+        ).list(session) { row ->
+            KomplettArbeidsforholdDto(
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = row.string("arbeidsgiver_identifikator"),
+                startdato = row.localDate("startdato"),
+                sluttdato = row.localDateOrNull("sluttdato"),
+                stillingsprosent = row.int("stillingsprosent"),
+                stillingstittel = row.string("stillingstittel"),
+                oppdatert = row.localDateTime("oppdatert"),
+            )
+        }
+
     override fun upsertArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,

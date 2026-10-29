@@ -15,6 +15,8 @@ class InMemoryArbeidsforholdDao : ArbeidsforholdDao {
             it.fødselsnummer == fødselsnummer && it.organisasjonsnummer == arbeidsgiverIdentifikator
         }
 
+    override fun finnAlleForPerson(fødselsnummer: String): List<KomplettArbeidsforholdDto> = eksisterendeArbeidsforhold.filter { it.fødselsnummer == fødselsnummer }
+
     override fun upsertArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,

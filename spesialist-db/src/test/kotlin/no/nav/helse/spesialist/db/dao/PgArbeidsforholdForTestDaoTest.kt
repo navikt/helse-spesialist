@@ -148,6 +148,36 @@ internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
         assertEquals(1, arbeidsforholdDao.findArbeidsforhold(person.id.value, ORGNUMMER).size)
     }
 
+    @Test
+    fun `finner alle arbeidsforhold for personen`() {
+        val annenPerson = opprettPerson().id.value
+        val annetOrgnummer = "987654321"
+        arbeidsforholdDao.upsertArbeidsforhold(person.id.value, ORGNUMMER, listOf(enKomplettArbeidsforholdDto()))
+        arbeidsforholdDao.upsertArbeidsforhold(
+            person.id.value,
+            annetOrgnummer,
+            listOf(enKomplettArbeidsforholdDto(organisasjonsnummer = annetOrgnummer, stillingstittel = "Annen stilling")),
+        )
+        arbeidsforholdDao.upsertArbeidsforhold(
+            annenPerson,
+            ORGNUMMER,
+            listOf(enKomplettArbeidsforholdDto(fødselsnummer = annenPerson)),
+        )
+
+        val arbeidsforhold = arbeidsforholdDao.finnAlleForPerson(person.id.value)
+
+        assertEquals(
+            setOf(ORGNUMMER to STILLINGSTITTEL, annetOrgnummer to "Annen stilling"),
+            arbeidsforhold.map { it.organisasjonsnummer to it.stillingstittel }.toSet(),
+        )
+        assertTrue(arbeidsforhold.all { it.fødselsnummer == person.id.value })
+    }
+
+    @Test
+    fun `finner ingen arbeidsforhold for person uten arbeidsforhold`() {
+        assertTrue(arbeidsforholdDao.finnAlleForPerson(person.id.value).isEmpty())
+    }
+
     private fun enKomplettArbeidsforholdDto(
         fødselsnummer: String = person.id.value,
         organisasjonsnummer: String = ORGNUMMER,
