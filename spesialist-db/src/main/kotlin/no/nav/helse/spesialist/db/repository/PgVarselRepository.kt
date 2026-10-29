@@ -29,7 +29,7 @@ class PgVarselRepository private constructor(
     override fun finnOrNull(varselId: VarselId): Varsel? =
         dbQuery.singleOrNull(
             """
-                SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
+                SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, COALESCE(sv.spleis_behandling_id, b.spleis_behandling_id) AS spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -43,7 +43,7 @@ class PgVarselRepository private constructor(
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
+                SELECT sv.unik_id, COALESCE(sv.spleis_behandling_id, b.spleis_behandling_id) AS spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -57,7 +57,7 @@ class PgVarselRepository private constructor(
     override fun finnVarslerFor(behandlingUnikId: BehandlingUnikId): List<Varsel> =
         dbQuery.list(
             """
-                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
+                SELECT sv.unik_id, COALESCE(sv.spleis_behandling_id, b.spleis_behandling_id) AS spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                 JOIN behandling b ON sv.behandling_ref = b.id
                 LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -72,7 +72,7 @@ class PgVarselRepository private constructor(
         if (behandlingUnikIder.isEmpty()) return emptyList()
         return dbQuery.listWithListParameter(
             """
-                    SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
+                    SELECT sv.unik_id, COALESCE(sv.spleis_behandling_id, b.spleis_behandling_id) AS spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM varsel sv 
                     JOIN behandling b ON sv.behandling_ref = b.id
                     LEFT JOIN varseldefinisjon avd ON sv.definisjon_ref = avd.id
                     LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
@@ -115,6 +115,7 @@ class PgVarselRepository private constructor(
                   kode=:kode,
                   vedtaksperiode_id=(SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
                   behandling_ref=(SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId),
+                  spleis_behandling_id=:spleisBehandlingId,
                   definisjon_ref=(SELECT id FROM varseldefinisjon av WHERE av.unik_id = :definisjonId),
                   status=:status,
                   status_endret_ident=(SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
@@ -123,6 +124,7 @@ class PgVarselRepository private constructor(
                 """.trimIndent(),
                 "kode" to varsel.kode,
                 "behandlingUnikId" to varsel.behandlingUnikId.value,
+                "spleisBehandlingId" to varsel.spleisBehandlingId?.value,
                 "definisjonId" to varsel.vurdering?.vurdertDefinisjonId?.value,
                 "status" to
                     when (varsel.status) {
@@ -140,13 +142,14 @@ class PgVarselRepository private constructor(
         } else {
             dbQuery.update(
                 """
-                    INSERT INTO varsel (unik_id, kode, status, vedtaksperiode_id, behandling_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
+                    INSERT INTO varsel (unik_id, kode, status, vedtaksperiode_id, behandling_ref, spleis_behandling_id, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
                     VALUES (
                         :unikId, 
                         :kode, 
                         :status,
                         (SELECT vedtaksperiode_id FROM behandling b WHERE b.unik_id = :behandlingUnikId), 
                         (SELECT id FROM behandling b WHERE b.unik_id = :behandlingUnikId), 
+                        :spleisBehandlingId,
                         (SELECT id FROM varseldefinisjon av WHERE av.unik_id = :definisjonId),
                         :opprettet, 
                         (SELECT ident FROM saksbehandler WHERE oid = :statusEndretOid),
@@ -165,6 +168,7 @@ class PgVarselRepository private constructor(
                         Varsel.Status.AVVIKLET -> "AVVIKLET"
                     },
                 "behandlingUnikId" to varsel.behandlingUnikId.value,
+                "spleisBehandlingId" to varsel.spleisBehandlingId?.value,
                 "definisjonId" to varsel.vurdering?.vurdertDefinisjonId?.value,
                 "opprettet" to varsel.opprettetTidspunkt,
                 "statusEndretOid" to varsel.vurdering?.saksbehandlerId?.value,

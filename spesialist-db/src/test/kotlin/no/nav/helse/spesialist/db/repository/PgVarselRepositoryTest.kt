@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -330,4 +331,52 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val varslerPåNyBehandling = repository.finnVarslerFor(nyBehandling.id)
         assertEquals(1, varslerPåNyBehandling.size)
     }
+
+    @Test
+    fun `lagrer spleisBehandlingId på varselet`() {
+        // when
+        val varsel = opprettVarsel(behandling, kode = "RV_IV_1")
+
+        // then
+        assertEquals(behandling.spleisBehandlingId?.value, spleisBehandlingIdPåVarsel(varsel))
+    }
+
+    @Test
+    fun `flytting oppdaterer spleisBehandlingId på varselet`() {
+        // given
+        val varsel = opprettVarsel(behandling, kode = "RV_IV_1")
+        val nyBehandling = opprettBehandling(vedtaksperiode)
+        varsel.flyttTil(nyBehandling.id, nyBehandling.spleisBehandlingId)
+
+        // when
+        repository.lagre(varsel)
+
+        // then
+        assertEquals(nyBehandling.spleisBehandlingId?.value, spleisBehandlingIdPåVarsel(varsel))
+    }
+
+    @Test
+    fun `bruker spleisBehandlingId fra varselet når behandlingen mangler den`() {
+        // given
+        val behandlingUtenSpleisId = opprettBehandling(vedtaksperiode, spleisBehandlingId = null)
+        val varsel = opprettVarsel(behandlingUtenSpleisId, kode = "RV_IV_1")
+        val spleisBehandlingId = UUID.randomUUID()
+        dbQuery.update(
+            "UPDATE varsel SET spleis_behandling_id = :spleisBehandlingId WHERE unik_id = :unikId",
+            "spleisBehandlingId" to spleisBehandlingId,
+            "unikId" to varsel.id.value,
+        )
+
+        // when
+        val funnet = repository.finnOrNull(varsel.id)
+
+        // then
+        assertEquals(spleisBehandlingId, funnet?.spleisBehandlingId?.value)
+    }
+
+    private fun spleisBehandlingIdPåVarsel(varsel: Varsel): UUID? =
+        dbQuery.singleOrNull(
+            "SELECT spleis_behandling_id FROM varsel WHERE unik_id = :unikId",
+            "unikId" to varsel.id.value,
+        ) { it.uuidOrNull("spleis_behandling_id") }
 }
