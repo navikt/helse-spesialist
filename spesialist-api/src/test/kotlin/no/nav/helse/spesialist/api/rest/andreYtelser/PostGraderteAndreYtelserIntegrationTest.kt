@@ -16,13 +16,8 @@ import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.testfixtures.sep
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import java.util.*
+import kotlin.test.*
 
 class PostGraderteAndreYtelserIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
@@ -70,6 +65,7 @@ class PostGraderteAndreYtelserIntegrationTest {
             sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)?.id(),
             handling.totrinnsvurderingId,
         )
+        assertEquals(saksbehandler, sessionContext.reservasjonDao.hentReservasjonFor(person.id.value)?.reservertTil)
         integrationTestFixture.assertPubliserteUtgåendeHendelser(
             InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
                 fødselsnummer = person.id.value,

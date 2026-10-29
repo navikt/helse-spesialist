@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -135,6 +136,65 @@ class SaksbehandlerhandlingRiverIntegrationTest {
     }
 
     @Test
+    fun `reserverer personen til saksbehandleren som utførte handlingen`() {
+        // Given:
+        val identitetsnummer = lagPerson().id
+        val saksbehandler = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+
+        // When:
+        testRapid.sendTestMessage(
+            saksbehandlerhandlingMelding(
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = saksbehandler.ident.value,
+                kreverTotrinnsvurdering = false,
+            ),
+        )
+
+        // Then:
+        assertEquals(saksbehandler, sessionContext.reservasjonDao.hentReservasjonFor(identitetsnummer.value)?.reservertTil)
+    }
+
+    @Test
+    fun `lagrer handlingen uten å reservere når saksbehandleren ikke finnes`() {
+        // Given:
+        val identitetsnummer = lagPerson().id
+
+        // When:
+        testRapid.sendTestMessage(
+            saksbehandlerhandlingMelding(identitetsnummer = identitetsnummer, kreverTotrinnsvurdering = false),
+        )
+
+        // Then:
+        assertEquals(1, sessionContext.saksbehandlerhandlingRepository.alle().size)
+        assertNull(sessionContext.reservasjonDao.hentReservasjonFor(identitetsnummer.value))
+    }
+
+    @Test
+    fun `lagrer handlingen uten å reservere når saksbehandlerIdent har ugyldig format`() {
+        // Given:
+        val identitetsnummer = lagPerson().id
+
+        // When:
+        testRapid.sendTestMessage(
+            saksbehandlerhandlingMelding(
+                identitetsnummer = identitetsnummer,
+                saksbehandlerIdent = "ugyldig",
+                kreverTotrinnsvurdering = false,
+            ),
+        )
+
+        // Then:
+        assertEquals(
+            "ugyldig",
+            sessionContext.saksbehandlerhandlingRepository
+                .alle()
+                .single()
+                .saksbehandlerIdent,
+        )
+        assertNull(sessionContext.reservasjonDao.hentReservasjonFor(identitetsnummer.value))
+    }
+
+    @Test
     fun `feiler på melding uten kreverTotrinnsvurdering`() {
         // Given:
         val identitetsnummer = lagPerson().id
@@ -174,6 +234,7 @@ class SaksbehandlerhandlingRiverIntegrationTest {
         identitetsnummer: Identitetsnummer,
         handlingId: UUID = UUID.randomUUID(),
         handlingType: String = "MANUELT_VURDERT_OPPTJENING",
+        saksbehandlerIdent: String = "A123456",
         tidspunkt: Instant = Instant.now(),
         kreverTotrinnsvurdering: Boolean?,
         skjæringstidspunkt: LocalDate? = null,
@@ -194,7 +255,7 @@ class SaksbehandlerhandlingRiverIntegrationTest {
               "@id": "${UUID.randomUUID()}",
               "@opprettet": "2026-10-12T12:00:00",
               "fødselsnummer": "${identitetsnummer.value}",
-              "saksbehandlerIdent": "A123456",
+              "saksbehandlerIdent": "$saksbehandlerIdent",
               "handlingId": "$handlingId",
               "handlingType": "$handlingType",
               "tidspunkt": "$tidspunkt"$valgfrieFelter

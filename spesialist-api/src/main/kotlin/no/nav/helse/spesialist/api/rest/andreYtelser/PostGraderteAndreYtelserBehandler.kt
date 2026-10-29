@@ -10,16 +10,11 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelser
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserDag
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserEvent
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserId
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserType
-import no.nav.helse.spesialist.domain.andreytelser.GraderteAndreYtelserValidator
+import no.nav.helse.spesialist.domain.andreytelser.*
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.Saksbehandlerhandling
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.SaksbehandlerhandlingId
-import java.util.UUID
+import java.util.*
 
 class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.GraderteAndreYtelser, ApiEndreGraderteAndreYtelserRequest, ApiEndreGraderteAndreYtelserResponse, ApiPostGraderteAndreYtelserErrorCode> {
     override val tag = Tags.GRADERTE_ANDRE_YTELSER
@@ -98,6 +93,7 @@ class PostGraderteAndreYtelserBehandler : PostBehandler<Personer.PersonPseudoId.
 
         repository.lagre(graderteAndreYtelser)
         lagreSaksbehandlerhandling(event, person, request.behandlingId, kallKontekst)
+        kallKontekst.transaksjon.reservasjonDao.reserverPerson(kallKontekst.saksbehandler.id.value, person.id.value)
 
         kallKontekst.outbox.leggTil(
             identitetsnummer = person.id,

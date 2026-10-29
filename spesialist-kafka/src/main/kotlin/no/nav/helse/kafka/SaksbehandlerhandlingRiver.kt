@@ -8,7 +8,9 @@ import no.nav.helse.mediator.asLocalDateOrNull
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.asUUIDOrNull
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.saksbehandlerhandling.HandlingType
@@ -60,5 +62,27 @@ class SaksbehandlerhandlingRiver : TransaksjonellRiver() {
             )
 
         transaksjon.saksbehandlerhandlingRepository.lagre(saksbehandlerhandling)
+
+        reserverPersonTilSaksbehandler(transaksjon, identitetsnummer, saksbehandlerhandling.saksbehandlerIdent)
+    }
+
+    private fun reserverPersonTilSaksbehandler(
+        transaksjon: SessionContext,
+        identitetsnummer: Identitetsnummer,
+        saksbehandlerIdent: String,
+    ) {
+        val saksbehandler =
+            runCatching { NAVIdent(saksbehandlerIdent) }
+                .getOrNull()
+                ?.let(transaksjon.saksbehandlerRepository::finnOrNull)
+        if (saksbehandler == null) {
+            loggWarn(
+                "Fant ikke saksbehandler som utførte saksbehandlerhandling, reserverer ikke person",
+                "saksbehandlerIdent" to saksbehandlerIdent,
+                "identitetsnummer" to identitetsnummer.value,
+            )
+            return
+        }
+        transaksjon.reservasjonDao.reserverPerson(saksbehandler.id.value, identitetsnummer.value)
     }
 }
