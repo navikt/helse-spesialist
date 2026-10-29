@@ -20,5 +20,4 @@ import java.util.UUID
 @Serializable
 data class ApiSelvstendigNaering(
     val behandlinger: List<ApiBehandling>,
-    val overstyringer: List<ApiOverstyring>,
 )

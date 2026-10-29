@@ -207,8 +207,9 @@ class OverstyringE2ETest : AbstractE2EIntegrationTest() {
                     ),
             )
 
-            val overstyringer = person["arbeidsgivere"][0]["overstyringer"].toList()
+            val overstyringer = hentOverstyringer()
             assertEquals(3, overstyringer.size)
+            overstyringer.forEach { assertEquals(organisasjonsnummer(), it["organisasjonsnummer"].asString()) }
 
             val tidslinjeOverstyring = overstyringer[0]
             assertEquals("ApiDagoverstyring", tidslinjeOverstyring["type"].asString())

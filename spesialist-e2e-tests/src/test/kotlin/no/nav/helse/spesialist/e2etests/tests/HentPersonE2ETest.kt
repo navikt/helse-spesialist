@@ -635,8 +635,7 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                 } ],
                 "annulleringskandidater" : [ ]
               } ]
-            } ],
-            "overstyringer" : [ ]
+            } ]
           } ],
           "selvstendigNaering" : null,
           "vilkarsgrunnlagV2" : [ {

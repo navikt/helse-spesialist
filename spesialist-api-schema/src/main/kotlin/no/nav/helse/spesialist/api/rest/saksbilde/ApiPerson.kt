@@ -18,12 +18,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Serializable
-data class ApiSaksbehandler(
-    val navn: String,
-    val ident: String?,
-)
-
-@Serializable
 data class ApiAvslag(
     val type: ApiAvslagstype,
     val begrunnelse: String,

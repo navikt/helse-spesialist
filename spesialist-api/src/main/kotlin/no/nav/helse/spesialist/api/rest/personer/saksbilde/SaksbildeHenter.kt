@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.*
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.spesialist.api.rest.personer.tilApiOverstyring
 import no.nav.helse.spesialist.api.rest.saksbilde.*
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggError
@@ -61,7 +60,6 @@ class SaksbildeHenter(
         }
 
         val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgave?.id?.value)
-        val alleOverstyringer = transaction.overstyringDao.finnAlleForPerson(identitetsnummer.value)
 
         return mapTilApiPerson(
             personEntity = personEntity,
@@ -69,7 +67,6 @@ class SaksbildeHenter(
             transaction = transaction,
             snapshot = snapshot,
             perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
-            alleOverstyringer = alleOverstyringer,
         )
     }
 
@@ -99,7 +96,6 @@ class SaksbildeHenter(
         transaction: SessionContext,
         snapshot: SnapshotPerson,
         perioderSomSkalViseAktiveVarsler: Set<UUID>,
-        alleOverstyringer: List<OverstyringDto>,
     ): ApiSaksbildePerson =
         ApiSaksbildePerson(
             aktorId = personEntity.aktørId,
@@ -293,10 +289,6 @@ class SaksbildeHenter(
                                                 },
                                         )
                                     },
-                                overstyringer =
-                                    alleOverstyringer
-                                        .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
-                                        .map { it.tilApiOverstyring() },
                             )
                         }
                 },
@@ -464,10 +456,6 @@ class SaksbildeHenter(
                                             },
                                     )
                                 },
-                            overstyringer =
-                                alleOverstyringer
-                                    .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
-                                    .map { it.tilApiOverstyring() },
                         )
                     },
             vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },

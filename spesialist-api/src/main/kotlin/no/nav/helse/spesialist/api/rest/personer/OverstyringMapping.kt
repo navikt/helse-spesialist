@@ -8,21 +8,21 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiArbeidsforholdoverstyring
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiDagoverstyring
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiDagtype
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektoverstyring
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiMinimumSykdomsgradOverstyring
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyring
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtDag
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtInntekt
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgrad
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgradPeriode
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonsopplysning
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiSaksbehandler
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsattSykepengegrunnlag
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsettingstype
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiSykepengegrunnlagskjonnsfastsetting
+import no.nav.helse.spesialist.api.rest.ApiArbeidsforholdoverstyring
+import no.nav.helse.spesialist.api.rest.ApiDagoverstyring
+import no.nav.helse.spesialist.api.rest.ApiDagtype
+import no.nav.helse.spesialist.api.rest.ApiInntektoverstyring
+import no.nav.helse.spesialist.api.rest.ApiMinimumSykdomsgradOverstyring
+import no.nav.helse.spesialist.api.rest.ApiOverstyring
+import no.nav.helse.spesialist.api.rest.ApiOverstyrtDag
+import no.nav.helse.spesialist.api.rest.ApiOverstyrtInntekt
+import no.nav.helse.spesialist.api.rest.ApiOverstyrtMinimumSykdomsgrad
+import no.nav.helse.spesialist.api.rest.ApiOverstyrtMinimumSykdomsgradPeriode
+import no.nav.helse.spesialist.api.rest.ApiRefusjonsopplysning
+import no.nav.helse.spesialist.api.rest.ApiSaksbehandler
+import no.nav.helse.spesialist.api.rest.ApiSkjonnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.api.rest.ApiSkjonnsfastsettingstype
+import no.nav.helse.spesialist.api.rest.ApiSykepengegrunnlagskjonnsfastsetting
 
 internal fun OverstyringDto.tilApiOverstyring(): ApiOverstyring =
     when (this) {

@@ -592,6 +592,8 @@ class SpeilPersonReceiver(
 
     private fun callGetPaVent(): JsonNode = callHttpGet("api/personer/$personPseudoId/pa-vent")!!
 
+    fun hentOverstyringer(): List<JsonNode> = callHttpGet("api/personer/$personPseudoId/overstyringer")!!["overstyringer"].toList()
+
     private fun callGetTildeling(): JsonNode = callHttpGet("api/personer/$personPseudoId/tildeling")!!
 
     private fun callHttpGet(relativeUrl: String) =
