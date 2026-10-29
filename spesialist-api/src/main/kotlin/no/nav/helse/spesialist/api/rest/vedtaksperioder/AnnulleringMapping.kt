@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.api.rest.vedtaksperioder
 
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiAnnullering
+import no.nav.helse.spesialist.api.rest.ApiAnnullering
 import no.nav.helse.spesialist.domain.Annullering
 import no.nav.helse.spesialist.domain.Saksbehandler
 

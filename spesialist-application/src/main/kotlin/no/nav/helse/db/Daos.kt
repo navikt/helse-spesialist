@@ -29,8 +29,6 @@ interface Daos {
     val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao
     val periodehistorikkApiDao: PeriodehistorikkApiDao
-    val påVentApiDao: PåVentApiDao
-    val risikovurderingApiDao: RisikovurderingApiDao
     val varselApiRepository: VarselApiRepository
     val oppgaveRepository: OppgaveRepository
     val saksbehandlerRepository: SaksbehandlerRepository

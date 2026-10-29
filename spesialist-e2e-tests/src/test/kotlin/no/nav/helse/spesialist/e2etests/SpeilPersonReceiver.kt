@@ -486,15 +486,13 @@ class SpeilPersonReceiver(
     }
 
     fun assertPåVent(frist: LocalDate) {
-        val påVentNode =
-            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["paVent"]
+        val påVentNode = callGetPaVent()["paVent"]
         assertFalse(påVentNode.isMissingOrNull(), "Forventer at paVent ikke er null")
         assertEquals(frist, påVentNode["frist"].asLocalDate())
     }
 
     fun assertIkkePåVent() {
-        val påVentNode =
-            person["arbeidsgivere"][0]["behandlinger"][0]["perioder"][0]["paVent"]
+        val påVentNode = callGetPaVent()["paVent"]
         assertTrue(påVentNode.isMissingOrNull(), "Forventer at paVent er null")
     }
 
@@ -591,6 +589,8 @@ class SpeilPersonReceiver(
             ?: error("Personen har ingen aktiv oppgave")
 
     private fun callGetAktivOppgave(): JsonNode = callHttpGet("api/personer/$personPseudoId/aktiv-oppgave")!!
+
+    private fun callGetPaVent(): JsonNode = callHttpGet("api/personer/$personPseudoId/pa-vent")!!
 
     private fun callGetTildeling(): JsonNode = callHttpGet("api/personer/$personPseudoId/tildeling")!!
 

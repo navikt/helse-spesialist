@@ -18,9 +18,6 @@ import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgradPeriode
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonsopplysning
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsattSykepengegrunnlag
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.tilApiAnnullering
-import no.nav.helse.spesialist.api.rest.vedtaksperioder.tilApiRisikovurdering
-import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -70,7 +67,6 @@ class SaksbildeHenter(
 
         val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgave?.id?.value)
         val alleOverstyringer = daos.overstyringApiDao.finnOverstyringer(identitetsnummer.value)
-        val risikovurderinger = daos.risikovurderingApiDao.finnRisikovurderinger(identitetsnummer.value)
 
         return mapTilApiPerson(
             personEntity = personEntity,
@@ -78,7 +74,6 @@ class SaksbildeHenter(
             transaction = transaction,
             snapshot = snapshot,
             perioderSomSkalViseAktiveVarsler = perioderSomSkalViseAktiveVarsler,
-            risikovurderinger = risikovurderinger,
             alleOverstyringer = alleOverstyringer,
         )
     }
@@ -109,7 +104,6 @@ class SaksbildeHenter(
         transaction: SessionContext,
         snapshot: SnapshotPerson,
         perioderSomSkalViseAktiveVarsler: Set<UUID>,
-        risikovurderinger: Map<UUID, RisikovurderingApiDto>,
         alleOverstyringer: List<OverstyringDto>,
     ): ApiSaksbildePerson =
         ApiSaksbildePerson(
@@ -235,16 +229,6 @@ class SaksbildeHenter(
                                                                     ),
                                                                 utbetaling = periode.utbetaling.tilApiUtbetaling(),
                                                                 vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
-                                                                risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                                paVent =
-                                                                    daos.påVentApiDao
-                                                                        .hentAktivPåVent(periode.vedtaksperiodeId)
-                                                                        ?.let {
-                                                                            ApiPaVent(
-                                                                                frist = it.frist,
-                                                                                oid = it.oid,
-                                                                            )
-                                                                        },
                                                                 avslag =
                                                                     daos.vedtakBegrunnelseDao
                                                                         .finnAlleVedtakBegrunnelser(
@@ -288,21 +272,6 @@ class SaksbildeHenter(
                                                                                 saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
                                                                             )
                                                                         },
-                                                                annullering =
-                                                                    if (behandlingIndex == 0) {
-                                                                        daos.annulleringRepository
-                                                                            .finnOrNull(periode.vedtaksperiodeId)
-                                                                            ?.let {
-                                                                                val saksbehandler =
-                                                                                    daos.saksbehandlerRepository.finnOrNull(
-                                                                                        it.saksbehandlerOid,
-                                                                                    )
-                                                                                        ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
-                                                                                it.tilApiAnnullering(saksbehandler)
-                                                                            }
-                                                                    } else {
-                                                                        null
-                                                                    },
                                                                 pensjonsgivendeInntekter =
                                                                     periode.pensjonsgivendeInntekter.map {
                                                                         ApiPensjonsgivendeInntekt(
@@ -469,16 +438,6 @@ class SaksbildeHenter(
                                                                 ),
                                                             utbetaling = periode.utbetaling.tilApiUtbetaling(),
                                                             vilkarsgrunnlagId = periode.vilkarsgrunnlagId,
-                                                            risikovurdering = risikovurderinger[periode.vedtaksperiodeId]?.tilApiRisikovurdering(),
-                                                            paVent =
-                                                                daos.påVentApiDao
-                                                                    .hentAktivPåVent(periode.vedtaksperiodeId)
-                                                                    ?.let {
-                                                                        ApiPaVent(
-                                                                            frist = it.frist,
-                                                                            oid = it.oid,
-                                                                        )
-                                                                    },
                                                             avslag =
                                                                 daos.vedtakBegrunnelseDao
                                                                     .finnAlleVedtakBegrunnelser(
@@ -522,19 +481,6 @@ class SaksbildeHenter(
                                                                             saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
                                                                         )
                                                                     },
-                                                            annullering =
-                                                                if (behandlingIndex == 0) {
-                                                                    daos.annulleringRepository
-                                                                        .finnOrNull(periode.vedtaksperiodeId)
-                                                                        ?.let {
-                                                                            val saksbehandler =
-                                                                                daos.saksbehandlerRepository.finnOrNull(it.saksbehandlerOid)
-                                                                                    ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
-                                                                            it.tilApiAnnullering(saksbehandler)
-                                                                        }
-                                                                } else {
-                                                                    null
-                                                                },
                                                             pensjonsgivendeInntekter =
                                                                 periode.pensjonsgivendeInntekter.map {
                                                                     ApiPensjonsgivendeInntekt(

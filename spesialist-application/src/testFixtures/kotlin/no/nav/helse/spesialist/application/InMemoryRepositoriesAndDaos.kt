@@ -56,9 +56,7 @@ class InMemoryRepositoriesAndDaos {
     private val overstyringApiDao = UnimplementedOverstyringApiDao()
     private val periodehistorikkDao = InMemoryPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
-    private val påVentApiDao = UnimplementedPåVentApiDao()
     private val risikovurderingDao = InMemoryRisikovurderingDao()
-    private val risikovurderingApiDao = UnimplementedRisikovurderingApiDao()
     private val tildelingDao = DelegatingTildelingDao(oppgaveRepository, saksbehandlerRepository)
     private val utbetalingDao = InMemoryUtbetalingDao()
     private val varselApiRepository = UnimplementedVarselApiRepository()
@@ -89,9 +87,7 @@ class InMemoryRepositoriesAndDaos {
             personDao = personDao,
             poisonPillDao = poisonPillDao,
             påVentDao = påVentDao,
-            påVentApiDao = påVentApiDao,
             reservasjonDao = reservasjonDao,
-            risikovurderingApiDao = risikovurderingApiDao,
             saksbehandlerDao = saksbehandlerDao,
             saksbehandlerRepository = saksbehandlerRepository,
             tildelingDao = tildelingDao,

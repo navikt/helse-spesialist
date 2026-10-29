@@ -24,12 +24,6 @@ data class ApiSaksbehandler(
 )
 
 @Serializable
-data class ApiPaVent(
-    val frist: LocalDate?,
-    val oid: UUID,
-)
-
-@Serializable
 data class ApiAvslag(
     val type: ApiAvslagstype,
     val begrunnelse: String,
@@ -44,17 +38,6 @@ data class ApiVedtakBegrunnelse(
     val begrunnelse: String?,
     val opprettet: LocalDateTime,
     val saksbehandlerIdent: String,
-)
-
-@Serializable
-data class ApiAnnullering(
-    val saksbehandlerIdent: String,
-    val arbeidsgiverFagsystemId: String?,
-    val personFagsystemId: String?,
-    val tidspunkt: LocalDateTime,
-    val arsaker: List<String>,
-    val begrunnelse: String?,
-    val vedtaksperiodeId: UUID,
 )
 
 @Serializable

@@ -622,14 +622,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "perioder" : null
                   }
                 },
-                "risikovurdering" : {
-                  "funn" : [ ],
-                  "kontrollertOk" : [ ]
-                },
-                "paVent" : null,
                 "avslag" : [ ],
                 "vedtakBegrunnelser" : [ ],
-                "annullering" : null,
                 "pensjonsgivendeInntekter" : [ {
                   "arligBelop" : "120230.0",
                   "inntektsar" : 2023

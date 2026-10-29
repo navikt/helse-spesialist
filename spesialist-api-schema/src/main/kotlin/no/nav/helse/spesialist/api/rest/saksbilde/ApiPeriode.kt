@@ -273,18 +273,6 @@ data class ApiPeriodeHistorikkElementNy(
 ) : ApiHistorikkinnslag
 
 @Serializable
-data class ApiFaresignal(
-    val beskrivelse: String,
-    val kategori: List<String>,
-)
-
-@Serializable
-data class ApiRisikovurdering(
-    val funn: List<ApiFaresignal>?,
-    val kontrollertOk: List<ApiFaresignal>,
-)
-
-@Serializable
 data class ApiVarselDTO(
     val id: UUID,
     val behandlingId: UUID,
@@ -373,11 +361,8 @@ class ApiBeregnetPeriode(
     val periodevilkar: ApiPeriodevilkar,
     val utbetaling: ApiUtbetaling,
     val vilkarsgrunnlagId: UUID?,
-    val risikovurdering: ApiRisikovurdering?,
-    val paVent: ApiPaVent?,
     val avslag: List<ApiAvslag>,
     val vedtakBegrunnelser: List<ApiVedtakBegrunnelse>,
-    val annullering: ApiAnnullering?,
     val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>,
     val annulleringskandidater: List<ApiAnnulleringskandidat>,
 ) : ApiPeriode

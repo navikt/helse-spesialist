@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.api.rest.personer
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiPaVent
 import no.nav.helse.spesialist.api.rest.ApiPaVentForPerson
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.KallKontekst
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiPaVent
 import no.nav.helse.spesialist.application.PersonPseudoId
 
 class GetPaVentForPersonBehandler : GetBehandler<Personer.PersonPseudoId.PaVent, ApiPaVentForPerson, ApiGetPaVentForPersonErrorCode> {

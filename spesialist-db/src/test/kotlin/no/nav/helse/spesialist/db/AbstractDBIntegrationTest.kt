@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
 import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
-import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
@@ -109,7 +108,6 @@ abstract class AbstractDBIntegrationTest {
     internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = sessionContext.risikovurderingDao
-    internal val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
     internal val automatiseringDao = sessionContext.automatiseringDao
     internal val åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao
     internal val utbetalingDao = sessionContext.utbetalingDao

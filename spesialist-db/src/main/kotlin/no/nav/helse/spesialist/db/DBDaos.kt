@@ -34,8 +34,6 @@ class DBDaos(
     override val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     override val overstyringApiDao = PgOverstyringApiDao(dataSource)
     override val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    override val påVentApiDao = PgPåVentApiDao(dataSource)
-    override val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
     override val varselApiRepository = PgVarselApiRepository(dataSource)
     override val oppgaveRepository = PgOppgaveRepository(dataSource)
     override val saksbehandlerRepository = PgSaksbehandlerRepository(dataSource)
