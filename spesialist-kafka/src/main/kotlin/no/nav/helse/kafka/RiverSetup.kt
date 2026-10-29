@@ -68,6 +68,7 @@ class RiverSetup(
             AvviksvurderingLøsningRiver(mediator),
             OvervåkOverstyringerRiver(sessionFactory),
             MeldingOmMeldingHåndtertRiver(sessionFactory),
+            SpleisBehandlingskoblingRiver(),
         ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao, sessionFactory, versjonAvKode) }
 
     fun registrerRivers(rapidsConnection: RapidsConnection) {

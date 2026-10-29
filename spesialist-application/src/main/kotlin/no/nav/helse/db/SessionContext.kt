@@ -38,6 +38,7 @@ interface SessionContext {
     val påVentDao: PåVentDao
     val reservasjonDao: ReservasjonDao
     val risikovurderingDao: RisikovurderingDao
+    val spleisBehandlingskoblingDao: SpleisBehandlingskoblingDao
     val saksbehandlerDao: SaksbehandlerDao
     val begrunnelseForSkjønnsfastsettelseRepository: BegrunnelseForSkjønnsfastsettelseRepository
     val tildelingDao: TildelingDao

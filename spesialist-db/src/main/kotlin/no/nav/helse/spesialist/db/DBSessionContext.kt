@@ -27,6 +27,7 @@ class DBSessionContext(
     override val påVentDao = PgPåVentDao(session)
     override val reservasjonDao = PgReservasjonDao(session)
     override val risikovurderingDao = PgRisikovurderingDao(session)
+    override val spleisBehandlingskoblingDao = PgSpleisBehandlingskoblingDao(session)
     override val saksbehandlerDao = PgSaksbehandlerDao(session)
     override val begrunnelseForSkjønnsfastsettelseRepository = PgBegrunnelseForSkjønnsfastsettelseRepository(session)
     override val tildelingDao = PgTildelingDao(session)
