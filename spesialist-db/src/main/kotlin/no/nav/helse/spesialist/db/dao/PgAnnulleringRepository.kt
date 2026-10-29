@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.db.AnnulleringRepository
-import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.SessionDbQuery
@@ -11,13 +10,11 @@ import no.nav.helse.spesialist.domain.Annullering
 import no.nav.helse.spesialist.domain.AnnulleringId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgAnnulleringRepository private constructor(
     private val dbQuery: DbQuery,
 ) : AnnulleringRepository {
     internal constructor(session: Session) : this(SessionDbQuery(session))
-    internal constructor(dataSource: DataSource) : this(DataSourceDbQuery(dataSource))
 
     override fun lagreAnnullering(annullering: Annullering) {
         val begrunnelseId =

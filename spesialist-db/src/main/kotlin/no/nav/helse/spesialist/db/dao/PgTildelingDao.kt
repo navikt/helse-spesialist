@@ -4,18 +4,15 @@ import kotliquery.Session
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TildelingDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import javax.sql.DataSource
 
 class PgTildelingDao internal constructor(
     queryRunner: QueryRunner,
 ) : TildelingDao,
     QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     fun tildel(
         oppgaveId: Long,

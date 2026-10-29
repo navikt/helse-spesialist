@@ -13,7 +13,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
@@ -23,14 +22,12 @@ import no.nav.helse.spesialist.domain.oppgave.Mottaker.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import javax.sql.DataSource
 
 class PgOppgaveRepository private constructor(
     queryRunner: QueryRunner,
 ) : QueryRunner by queryRunner,
     OppgaveRepository {
     constructor(session: Session) : this(MedSession(session))
-    constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     private val tildelingDao: PgTildelingDao = PgTildelingDao(queryRunner)
 

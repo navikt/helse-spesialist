@@ -3,18 +3,15 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgPåVentDao private constructor(
     private val queryRunner: QueryRunner,
 ) : PåVentDao,
     QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun slettPåVent(oppgaveId: Long) =
         asSQL(

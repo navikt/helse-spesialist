@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
     private val person = opprettPerson()
     private val arbeidsgiver = opprettArbeidsgiver()
-    private val behandlingDao = daos.legacyBehandlingDao
+    private val behandlingDao = sessionContext.legacyBehandlingDao
 
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {

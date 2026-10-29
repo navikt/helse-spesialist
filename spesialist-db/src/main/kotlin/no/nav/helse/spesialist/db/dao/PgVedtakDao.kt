@@ -5,17 +5,14 @@ import no.nav.helse.db.VedtakDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgVedtakDao private constructor(
     queryRunner: QueryRunner,
 ) : VedtakDao,
     QueryRunner by queryRunner {
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
 
     override fun leggTilVedtaksperiodetype(

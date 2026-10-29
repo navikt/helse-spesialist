@@ -12,7 +12,6 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
@@ -94,15 +93,14 @@ abstract class AbstractDBIntegrationTest {
 
     internal val personDao = PgPersonDao(session)
     internal val oppgaveDao = daos.oppgaveDao
-    internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    internal val periodehistorikkDao = daos.periodehistorikkDao
+    internal val periodehistorikkDao = sessionContext.periodehistorikkDao
     internal val arbeidsforholdDao = sessionContext.arbeidsforholdDao
-    internal val vedtakDao = daos.vedtakDao
+    internal val vedtakDao = sessionContext.vedtakDao
     protected val apiVarselRepository = PgVarselApiRepository(dataSource)
     internal val commandContextDao = daos.commandContextDao
-    internal val tildelingDao = daos.tildelingDao
-    internal val saksbehandlerDao = daos.saksbehandlerDao
+    internal val tildelingDao = sessionContext.tildelingDao
+    internal val saksbehandlerDao = sessionContext.saksbehandlerDao
     internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = sessionContext.risikovurderingDao
@@ -112,7 +110,7 @@ abstract class AbstractDBIntegrationTest {
     internal val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
     internal val dokumentDao = daos.dokumentDao
-    internal val annulleringRepository = daos.annulleringRepository
+    internal val annulleringRepository = sessionContext.annulleringRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
 

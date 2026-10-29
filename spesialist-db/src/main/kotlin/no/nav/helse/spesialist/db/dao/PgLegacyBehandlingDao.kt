@@ -10,20 +10,17 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgLegacyBehandlingDao private constructor(
     private val queryRunner: QueryRunner,
 ) : LegacyBehandlingDao,
     QueryRunner by queryRunner {
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
 
     override fun finnLegacyBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto> =

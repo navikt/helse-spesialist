@@ -15,19 +15,16 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgPeriodehistorikkDao private constructor(
     private val queryRunner: QueryRunner,
 ) : PeriodehistorikkDao,
     QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagreMedOppgaveId(
         historikkinnslag: Historikkinnslag,

@@ -4,7 +4,6 @@ import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.NAVIdent
@@ -12,14 +11,12 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgSaksbehandlerRepository private constructor(
     private val queryRunner: QueryRunner,
 ) : SaksbehandlerRepository,
     QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun finnOrNull(oid: SaksbehandlerOid): Saksbehandler? =
         asSQL(

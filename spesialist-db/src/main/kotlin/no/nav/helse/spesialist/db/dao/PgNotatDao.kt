@@ -3,19 +3,16 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.NotatDao
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.NotatType
 import java.util.UUID
-import javax.sql.DataSource
 
 class PgNotatDao private constructor(
     queryRunner: QueryRunner,
 ) : NotatDao,
     QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagreForOppgaveId(
         oppgaveId: Long,

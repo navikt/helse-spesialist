@@ -41,7 +41,6 @@ class InMemoryRepositoriesAndDaos {
     private val notatDao = DelegatingNotatDao(oppgaveRepository, notatRepository)
     private val oppgaveDao =
         DelegatingOppgaveDao(oppgaveRepository, behandlingRepository, vedtaksperiodeRepository)
-    private val oppgaveApiDao = DelegatingOppgaveApiDao(oppgaveRepository, vedtaksperiodeRepository)
     private val personDao = DelegatingPersonDao(personRepository, inntektRepository)
     private val påVentDao = DelegatingPåVentDao(påVentRepository, oppgaveRepository)
     private val saksbehandlerDao = DelegatingSaksbehandlerDao(saksbehandlerRepository)
@@ -67,31 +66,18 @@ class InMemoryRepositoriesAndDaos {
 
     val daos =
         InMemoryDaos(
-            annulleringRepository = annulleringRepository,
             behandlingsstatistikkDao = behandlingsstatistikkDao,
             commandContextDao = commandContextDao,
-            dialogDao = dialogDao,
             dokumentDao = dokumentDao,
-            legacyBehandlingDao = legacyBehandlingDao,
             meldingDao = meldingDao,
             meldingDuplikatkontrollDao = meldingDuplikatkontrollDao,
-            notatDao = notatDao,
             oppgaveDao = oppgaveDao,
-            oppgaveApiDao = oppgaveApiDao,
-            oppgaveRepository = oppgaveRepository,
             overstyringApiDao = overstyringApiDao,
-            periodehistorikkDao = periodehistorikkDao,
             periodehistorikkApiDao = periodehistorikkApiDao,
             personDao = personDao,
             poisonPillDao = poisonPillDao,
-            påVentDao = påVentDao,
-            reservasjonDao = reservasjonDao,
-            saksbehandlerDao = saksbehandlerDao,
-            saksbehandlerRepository = saksbehandlerRepository,
-            tildelingDao = tildelingDao,
             varselApiRepository = varselApiRepository,
             vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-            vedtakDao = vedtakDao,
         )
 
     val sessionContext =

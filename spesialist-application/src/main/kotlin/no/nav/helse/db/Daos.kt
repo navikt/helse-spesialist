@@ -1,34 +1,19 @@
 package no.nav.helse.db
 
 import no.nav.helse.db.api.*
-import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.spesialist.application.SaksbehandlerRepository
 
 interface Daos {
-    val annulleringRepository: AnnulleringRepository
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
     val commandContextDao: CommandContextDao
-    val dialogDao: DialogDao
     val dokumentDao: DokumentDao
-    val legacyBehandlingDao: LegacyBehandlingDao
     val meldingDao: MeldingDao
     val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
-    val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
-    val periodehistorikkDao: PeriodehistorikkDao
     val personDao: PersonDao
     val poisonPillDao: PoisonPillDao
-    val påVentDao: PåVentDao
-    val reservasjonDao: ReservasjonDao
-    val saksbehandlerDao: SaksbehandlerDao
-    val tildelingDao: TildelingDao
-    val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
 
-    val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao
     val periodehistorikkApiDao: PeriodehistorikkApiDao
     val varselApiRepository: VarselApiRepository
-    val oppgaveRepository: OppgaveRepository
-    val saksbehandlerRepository: SaksbehandlerRepository
 }
