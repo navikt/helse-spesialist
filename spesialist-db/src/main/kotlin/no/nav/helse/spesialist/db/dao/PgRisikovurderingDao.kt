@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.modell.automatisering.sjekker.Risikovurdering
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
@@ -24,6 +25,16 @@ class PgRisikovurderingDao internal constructor(
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { it.boolean("kan_godkjennes_automatisk") }
             ?.let(Risikovurdering::restore)
+
+    override fun hentRisikovurderingsdata(vedtaksperiodeId: UUID) =
+        asSQL(
+            """
+            SELECT data FROM risikovurdering_2021
+            WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC LIMIT 1
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).singleOrNull { objectMapper.readTree(it.string("data")) }
+            ?.let { RisikovurderingApiDto(funn = it["funn"].toList(), kontrollertOk = it["kontrollertOk"].toList()) }
 
     override fun måTilManuell(vedtaksperiodeId: UUID) =
         asSQL(

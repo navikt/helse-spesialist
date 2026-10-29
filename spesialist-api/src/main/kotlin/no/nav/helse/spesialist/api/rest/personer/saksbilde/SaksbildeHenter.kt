@@ -18,13 +18,13 @@ import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgradPeriode
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonsopplysning
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.api.rest.vedtaksperioder.tilApiRisikovurdering
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.snapshot.*
 import no.nav.helse.spesialist.domain.*
-import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.*
 
@@ -1001,8 +1001,6 @@ private fun SnapshotOppdrag.tilSimulering(): ApiSimulering =
             },
     )
 
-private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { objectMapper.treeToValue(it, ApiFaresignal::class.java) }
-
 private fun mapLagtPåVentJson(json: String): Triple<List<String>, LocalDate?, String?> {
     val node = objectMapper.readTree(json)
     val påVentÅrsaker = node["årsaker"].toList().map { it["årsak"].asString() }
@@ -1038,12 +1036,6 @@ private fun SnapshotUtbetaling.tilApiUtbetaling(): ApiUtbetaling =
         vurdering = vurdering?.tilApiVurdering(),
         arbeidsgiversimulering = arbeidsgiveroppdrag?.tilSimulering(),
         personsimulering = personoppdrag?.tilSimulering(),
-    )
-
-private fun RisikovurderingApiDto.tilApiRisikovurdering(): ApiRisikovurdering =
-    ApiRisikovurdering(
-        funn = funn.tilFaresignaler(),
-        kontrollertOk = kontrollertOk.tilFaresignaler(),
     )
 
 private fun SnapshotVurdering.tilApiVurdering(): ApiVurdering =

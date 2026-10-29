@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.modell.automatisering.sjekker.Risikovurdering
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,6 +18,11 @@ class InMemoryRisikovurderingDao : RisikovurderingDao {
     private val risikovurderinger = mutableListOf<LagretRisikovurdering>()
 
     override fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering? = risikovurderinger.lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }?.let { Risikovurdering.restore(it.kanGodkjennesAutomatisk) }
+
+    override fun hentRisikovurderingsdata(vedtaksperiodeId: UUID): RisikovurderingApiDto? =
+        risikovurderinger.lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }?.data?.let {
+            RisikovurderingApiDto(funn = it["funn"].toList(), kontrollertOk = it["kontrollertOk"].toList())
+        }
 
     override fun måTilManuell(vedtaksperiodeId: UUID): Boolean = risikovurderinger.lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }?.kanGodkjennesAutomatisk?.not() ?: false
 

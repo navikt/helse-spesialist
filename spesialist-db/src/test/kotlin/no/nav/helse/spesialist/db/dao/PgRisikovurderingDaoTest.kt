@@ -62,6 +62,28 @@ internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
         }
     }
 
+    @Test
+    fun `henter funn og kontrollertOk fra siste risikovurdering`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val gammel = objectMapper.readTree("""{ "funn": [], "kontrollertOk": [] }""")
+        val ny =
+            objectMapper.readTree(
+                """{ "funn": [{ "beskrivelse": "Et funn", "kategori": ["8-4"] }], "kontrollertOk": [] }""",
+            )
+        risikovurderingDao.lagre(vedtaksperiodeId, false, gammel, LocalDate.of(2020, 9, 22).atStartOfDay())
+        risikovurderingDao.lagre(vedtaksperiodeId, false, ny, LocalDate.of(2020, 9, 23).atStartOfDay())
+
+        val data = risikovurderingDao.hentRisikovurderingsdata(vedtaksperiodeId)
+
+        assertEquals(ny["funn"].toList(), data?.funn)
+        assertEquals(emptyList<JsonNode>(), data?.kontrollertOk)
+    }
+
+    @Test
+    fun `henter ingen risikovurderingsdata når vedtaksperioden ikke har risikovurdering`() {
+        assertEquals(null, risikovurderingDao.hentRisikovurderingsdata(UUID.randomUUID()))
+    }
+
     private fun risikovurdering(vedtaksperiodeId: UUID) =
         dbQuery.list(
             "SELECT * FROM risikovurdering_2021 WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC",

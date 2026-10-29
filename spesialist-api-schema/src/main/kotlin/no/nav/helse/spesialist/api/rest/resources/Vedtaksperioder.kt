@@ -19,6 +19,11 @@ class Vedtaksperioder {
             val parent: VedtaksperiodeId,
         )
 
+        @Resource("risikovurdering")
+        class Risikovurdering(
+            val parent: VedtaksperiodeId,
+        )
+
         @Resource("annuller")
         class Annuller(
             val parent: VedtaksperiodeId,
