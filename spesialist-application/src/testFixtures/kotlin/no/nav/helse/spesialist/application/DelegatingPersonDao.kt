@@ -20,6 +20,8 @@ class DelegatingPersonDao(
         skjæringstidspunkt: LocalDate,
     ): List<Inntekter>? = inntektRepository.finn(fødselsnummer, skjæringstidspunkt)
 
+    override fun finnInntekterFraAordningen(fødselsnummer: String): Map<LocalDate, List<Inntekter>> = inntektRepository.finnAlle(fødselsnummer)
+
     override fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,

@@ -88,6 +88,30 @@ internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
         )
     }
 
+    @Test
+    fun `finner alle inntekter fra a-ordningen for personen`() {
+        val person = opprettPerson()
+        val annenPerson = opprettPerson()
+        val novemberInntekter = listOf(Inntekter(YearMonth.parse("2022-11"), listOf(Inntekter.Inntekt(20000.0, ORGNUMMER))))
+        val marsInntekter = listOf(Inntekter(YearMonth.parse("2022-03"), listOf(Inntekter.Inntekt(10000.0, ORGNUMMER))))
+        personDao.lagreInntekter(person.id.value, LocalDate.parse("2022-11-11"), novemberInntekter)
+        personDao.lagreInntekter(person.id.value, LocalDate.parse("2022-03-03"), marsInntekter)
+        personDao.lagreInntekter(annenPerson.id.value, LocalDate.parse("2022-11-11"), novemberInntekter)
+
+        assertEquals(
+            mapOf(
+                LocalDate.parse("2022-03-03") to marsInntekter,
+                LocalDate.parse("2022-11-11") to novemberInntekter,
+            ),
+            personDao.finnInntekterFraAordningen(person.id.value),
+        )
+    }
+
+    @Test
+    fun `finner ingen inntekter fra a-ordningen for person uten inntekter`() {
+        assertEquals(emptyMap<LocalDate, List<Inntekter>>(), personDao.finnInntekterFraAordningen(opprettPerson().id.value))
+    }
+
     private fun inntekter(): List<Inntekter> =
         dbQuery.singleOrNull("SELECT inntekter from inntekt") { row ->
             objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))

@@ -99,6 +99,7 @@ fun Routing.restRoutes(
             get(GetTotrinnsvurderingForPersonBehandler(), restAdapter)
             get(GetPaVentForPersonBehandler(), restAdapter)
             get(GetArbeidsforholdForPersonBehandler(), restAdapter)
+            get(GetInntekterFraAordningenForPersonBehandler(), restAdapter)
 
             get(GetTildelingForPersonBehandler(), restAdapter)
             put(PutTildelingBehandler(), restAdapter)

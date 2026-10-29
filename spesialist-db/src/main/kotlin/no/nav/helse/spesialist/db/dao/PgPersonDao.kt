@@ -60,6 +60,18 @@ class PgPersonDao internal constructor(
         "skjaeringstidspunkt" to skjæringstidspunkt,
     ).singleOrNull { objectMapper.readValue<List<Inntekter>>(it.string("inntekter")) }
 
+    override fun finnInntekterFraAordningen(fødselsnummer: String): Map<LocalDate, List<Inntekter>> =
+        asSQL(
+            """
+            SELECT skjaeringstidspunkt, inntekter FROM inntekt
+            WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :foedselsnummer)
+            ORDER BY skjaeringstidspunkt;
+            """.trimIndent(),
+            "foedselsnummer" to fødselsnummer,
+        ).list { row ->
+            row.localDate("skjaeringstidspunkt") to objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
+        }.toMap()
+
     override fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,

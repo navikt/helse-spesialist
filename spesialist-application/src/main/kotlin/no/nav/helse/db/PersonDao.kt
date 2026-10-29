@@ -13,6 +13,8 @@ interface PersonDao {
         skjæringstidspunkt: LocalDate,
     ): List<Inntekter>?
 
+    fun finnInntekterFraAordningen(fødselsnummer: String): Map<LocalDate, List<Inntekter>>
+
     fun lagreInntekter(
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,

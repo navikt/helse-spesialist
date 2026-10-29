@@ -18,4 +18,10 @@ class InMemoryInntektRepository {
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate,
     ): List<Inntekter>? = inntekter[fødselsnummer to skjæringstidspunkt]
+
+    fun finnAlle(fødselsnummer: String): Map<LocalDate, List<Inntekter>> =
+        inntekter
+            .filterKeys { (fnr, _) -> fnr == fødselsnummer }
+            .mapKeys { (nøkkel, _) -> nøkkel.second }
+            .toSortedMap()
 }
