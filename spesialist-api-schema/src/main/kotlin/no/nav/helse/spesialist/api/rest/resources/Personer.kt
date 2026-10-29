@@ -53,6 +53,11 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
+        @Resource("overstyringer")
+        class Overstyringer(
+            val parent: PersonPseudoId,
+        )
+
         @Resource("pa-vent")
         class PaVent(
             val parent: PersonPseudoId,

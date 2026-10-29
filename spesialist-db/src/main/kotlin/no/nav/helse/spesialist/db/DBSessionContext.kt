@@ -6,6 +6,7 @@ import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepo
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.db.dao.*
+import no.nav.helse.spesialist.db.dao.PgOverstyringDao
 import no.nav.helse.spesialist.db.repository.*
 
 class DBSessionContext(
@@ -20,6 +21,7 @@ class DBSessionContext(
     override val metrikkDao = PgMetrikkDao(session)
     override val notatDao = PgNotatDao(session)
     override val oppgaveDao = PgOppgaveDao(session)
+    override val overstyringDao = PgOverstyringDao(session)
     override val periodehistorikkDao = PgPeriodehistorikkDao(session)
     override val personDao = PgPersonDao(session)
     override val påVentDao = PgPåVentDao(session)

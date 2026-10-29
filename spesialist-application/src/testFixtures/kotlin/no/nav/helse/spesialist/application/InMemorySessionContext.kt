@@ -24,6 +24,7 @@ class InMemorySessionContext(
     override val oppgaveDao: DelegatingOppgaveDao,
     override val oppgaveRepository: InMemoryOppgaveRepository,
     override val overstyringRepository: InMemoryOverstyringRepository,
+    override val overstyringDao: InMemoryOverstyringDao,
     override val periodehistorikkDao: InMemoryPeriodehistorikkDao,
     override val personDao: DelegatingPersonDao,
     override val personRepository: InMemoryPersonRepository,

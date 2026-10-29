@@ -9,7 +9,6 @@ class InMemoryDaos(
     override val meldingDao: InMemoryMeldingDao,
     override val meldingDuplikatkontrollDao: NoopMeldingDuplikatkontrollDao,
     override val oppgaveDao: DelegatingOppgaveDao,
-    override val overstyringApiDao: UnimplementedOverstyringApiDao,
     override val periodehistorikkApiDao: UnimplementedPeriodehistorikkApiDao,
     override val personDao: DelegatingPersonDao,
     override val poisonPillDao: NoopPoisonPillDao,

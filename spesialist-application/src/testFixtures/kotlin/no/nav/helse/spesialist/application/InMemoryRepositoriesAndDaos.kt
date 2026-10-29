@@ -51,7 +51,7 @@ class InMemoryRepositoriesAndDaos {
     private val behandlingsstatistikkDao = InMemoryBehandlingsstatistikkDao()
     private val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
     private val metrikkDao = UnimplementedMetrikkDao()
-    private val overstyringApiDao = UnimplementedOverstyringApiDao()
+    private val overstyringDao = InMemoryOverstyringDao()
     private val periodehistorikkDao = InMemoryPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
     private val risikovurderingDao = InMemoryRisikovurderingDao()
@@ -72,7 +72,6 @@ class InMemoryRepositoriesAndDaos {
             meldingDao = meldingDao,
             meldingDuplikatkontrollDao = meldingDuplikatkontrollDao,
             oppgaveDao = oppgaveDao,
-            overstyringApiDao = overstyringApiDao,
             periodehistorikkApiDao = periodehistorikkApiDao,
             personDao = personDao,
             poisonPillDao = poisonPillDao,
@@ -100,6 +99,7 @@ class InMemoryRepositoriesAndDaos {
             oppgaveDao = oppgaveDao,
             oppgaveRepository = oppgaveRepository,
             overstyringRepository = overstyringRepository,
+            overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             personDao = personDao,
             personRepository = personRepository,

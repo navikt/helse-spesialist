@@ -1,9 +1,8 @@
-package no.nav.helse.spesialist.db.dao.api
+package no.nav.helse.spesialist.db.dao
 
-import kotliquery.TransactionalSession
+import kotliquery.Session
 import kotliquery.queryOf
-import kotliquery.sessionOf
-import no.nav.helse.db.api.OverstyringApiDao
+import no.nav.helse.db.OverstyringDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -15,23 +14,18 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.db.objectMapper
 import org.intellij.lang.annotations.Language
 import tools.jackson.module.kotlin.readValue
-import javax.sql.DataSource
 
-class PgOverstyringApiDao internal constructor(
-    private val dataSource: DataSource,
-) : OverstyringApiDao {
-    override fun finnOverstyringer(fødselsnummer: String): List<OverstyringDto> =
-        sessionOf(dataSource).use { session ->
-            session.transaction {
-                it.finnTidslinjeoverstyringer(fødselsnummer) +
-                    it.finnInntektsoverstyringer(fødselsnummer) +
-                    it.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) +
-                    it.finnArbeidsforholdoverstyringer(fødselsnummer) +
-                    it.finnMinimumSykdomsgradsoverstyringer(fødselsnummer)
-            }
-        }
+class PgOverstyringDao internal constructor(
+    private val session: Session,
+) : OverstyringDao {
+    override fun finnAlleForPerson(fødselsnummer: String): List<OverstyringDto> =
+        session.finnTidslinjeoverstyringer(fødselsnummer) +
+            session.finnInntektsoverstyringer(fødselsnummer) +
+            session.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer) +
+            session.finnArbeidsforholdoverstyringer(fødselsnummer) +
+            session.finnMinimumSykdomsgradsoverstyringer(fødselsnummer)
 
-    private fun TransactionalSession.finnTidslinjeoverstyringer(fødselsnummer: String): List<OverstyringTidslinjeDto> {
+    private fun Session.finnTidslinjeoverstyringer(fødselsnummer: String): List<OverstyringTidslinjeDto> {
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
@@ -80,7 +74,7 @@ class PgOverstyringApiDao internal constructor(
         )
     }
 
-    private fun TransactionalSession.finnInntektsoverstyringer(fødselsnummer: String): List<OverstyringInntektDto> {
+    private fun Session.finnInntektsoverstyringer(fødselsnummer: String): List<OverstyringInntektDto> {
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
@@ -122,7 +116,7 @@ class PgOverstyringApiDao internal constructor(
         )
     }
 
-    private fun TransactionalSession.finnSkjønnsfastsatteSykepengegrunnlag(
+    private fun Session.finnSkjønnsfastsatteSykepengegrunnlag(
         fødselsnummer: String,
     ): List<SkjønnsfastsettingSykepengegrunnlagDto> {
         @Language("PostgreSQL")
@@ -168,7 +162,7 @@ class PgOverstyringApiDao internal constructor(
         )
     }
 
-    private fun TransactionalSession.finnMinimumSykdomsgradsoverstyringer(fødselsnummer: String): List<OverstyringMinimumSykdomsgradDto> {
+    private fun Session.finnMinimumSykdomsgradsoverstyringer(fødselsnummer: String): List<OverstyringMinimumSykdomsgradDto> {
         @Language("PostgreSQL")
         val finnOverstyringMinimumSykdomsgradQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 
@@ -228,7 +222,7 @@ class PgOverstyringApiDao internal constructor(
         )
     }
 
-    private fun TransactionalSession.finnArbeidsforholdoverstyringer(fødselsnummer: String): List<OverstyringArbeidsforholdDto> {
+    private fun Session.finnArbeidsforholdoverstyringer(fødselsnummer: String): List<OverstyringArbeidsforholdDto> {
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
                 SELECT o.id, o.tidspunkt, o.person_ref, o.hendelse_ref, o.saksbehandler_ref, o.ekstern_hendelse_id, 

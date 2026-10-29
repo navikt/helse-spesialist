@@ -100,6 +100,7 @@ fun Routing.restRoutes(
             get(GetPaVentForPersonBehandler(), restAdapter)
             get(GetArbeidsforholdForPersonBehandler(), restAdapter)
             get(GetInntekterFraAordningenForPersonBehandler(), restAdapter)
+            get(GetOverstyringerForPersonBehandler(), restAdapter)
 
             get(GetTildelingForPersonBehandler(), restAdapter)
             put(PutTildelingBehandler(), restAdapter)

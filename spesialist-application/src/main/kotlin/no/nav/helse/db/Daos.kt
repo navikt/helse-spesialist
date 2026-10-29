@@ -13,7 +13,6 @@ interface Daos {
     val poisonPillDao: PoisonPillDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
 
-    val overstyringApiDao: OverstyringApiDao
     val periodehistorikkApiDao: PeriodehistorikkApiDao
     val varselApiRepository: VarselApiRepository
 }

@@ -11,13 +11,8 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.*
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.rest.personer.tilApiOverstyring
 import no.nav.helse.spesialist.api.rest.saksbilde.*
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtDag
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtInntekt
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgrad
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiOverstyrtMinimumSykdomsgradPeriode
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiRefusjonsopplysning
-import no.nav.helse.spesialist.api.rest.saksbilde.ApiSkjonnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.application.*
 import no.nav.helse.spesialist.application.logg.loggError
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -66,7 +61,7 @@ class SaksbildeHenter(
         }
 
         val perioderSomSkalViseAktiveVarsler = daos.varselApiRepository.perioderSomSkalViseVarsler(oppgave?.id?.value)
-        val alleOverstyringer = daos.overstyringApiDao.finnOverstyringer(identitetsnummer.value)
+        val alleOverstyringer = transaction.overstyringDao.finnAlleForPerson(identitetsnummer.value)
 
         return mapTilApiPerson(
             personEntity = personEntity,
@@ -301,15 +296,7 @@ class SaksbildeHenter(
                                 overstyringer =
                                     alleOverstyringer
                                         .filter { it.relevantFor(arbeidsgiver.organisasjonsnummer) }
-                                        .map { overstyring ->
-                                            when (overstyring) {
-                                                is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
-                                                is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
-                                                is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
-                                                is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
-                                                is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
-                                            }
-                                        },
+                                        .map { it.tilApiOverstyring() },
                             )
                         }
                 },
@@ -480,15 +467,7 @@ class SaksbildeHenter(
                             overstyringer =
                                 alleOverstyringer
                                     .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
-                                    .map { overstyring ->
-                                        when (overstyring) {
-                                            is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
-                                            is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
-                                            is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
-                                            is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
-                                            is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
-                                        }
-                                    },
+                                    .map { it.tilApiOverstyring() },
                         )
                     },
             vilkarsgrunnlagV2 = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(transaction.avviksvurderingRepository) },
@@ -677,170 +656,6 @@ class SaksbildeHenter(
             ?.navn
             ?.navn
 }
-
-private fun OverstyringTidslinjeDto.tilDagoverstyring() =
-    ApiDagoverstyring(
-        hendelseId = hendelseId,
-        begrunnelse = begrunnelse,
-        timestamp = timestamp,
-        saksbehandler =
-            ApiSaksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        dager =
-            overstyrteDager.map { dag ->
-                ApiOverstyrtDag(
-                    dato = dag.dato,
-                    type = dag.type.tilApiDagtype(),
-                    fraType = dag.fraType?.tilApiDagtype(),
-                    grad = dag.grad,
-                    fraGrad = dag.fraGrad,
-                )
-            },
-        ferdigstilt = ferdigstilt,
-        vedtaksperiodeId = vedtaksperiodeId,
-    )
-
-private fun Dagtype.tilApiDagtype() =
-    when (this) {
-        Dagtype.Sykedag -> ApiDagtype.Sykedag
-        Dagtype.SykedagNav -> ApiDagtype.SykedagNav
-        Dagtype.Feriedag -> ApiDagtype.Feriedag
-        Dagtype.Egenmeldingsdag -> ApiDagtype.Egenmeldingsdag
-        Dagtype.Permisjonsdag -> ApiDagtype.Permisjonsdag
-        Dagtype.Arbeidsdag -> ApiDagtype.Arbeidsdag
-        Dagtype.ArbeidIkkeGjenopptattDag -> ApiDagtype.ArbeidIkkeGjenopptattDag
-        Dagtype.Foreldrepengerdag -> ApiDagtype.Foreldrepengerdag
-        Dagtype.AAPdag -> ApiDagtype.AAPdag
-        Dagtype.Omsorgspengerdag -> ApiDagtype.Omsorgspengerdag
-        Dagtype.Pleiepengerdag -> ApiDagtype.Pleiepengerdag
-        Dagtype.Svangerskapspengerdag -> ApiDagtype.Svangerskapspengerdag
-        Dagtype.Opplaringspengerdag -> ApiDagtype.Opplaringspengerdag
-        Dagtype.Dagpengerdag -> ApiDagtype.Dagpengerdag
-        Dagtype.Avvistdag -> ApiDagtype.Avvistdag
-        Dagtype.Helg -> ApiDagtype.Helg
-        Dagtype.MeldingTilNavdag -> ApiDagtype.MeldingTilNavdag
-        Dagtype.AvslattMeldingTilNavdag -> ApiDagtype.AvslattMeldingTilNavdag
-    }
-
-private fun OverstyringInntektDto.tilInntektoverstyring() =
-    ApiInntektoverstyring(
-        hendelseId = hendelseId,
-        timestamp = timestamp,
-        saksbehandler =
-            ApiSaksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        inntekt =
-            ApiOverstyrtInntekt(
-                forklaring = forklaring,
-                begrunnelse = begrunnelse,
-                manedligInntekt = månedligInntekt,
-                fraManedligInntekt = fraMånedligInntekt,
-                skjaeringstidspunkt = skjæringstidspunkt,
-                refusjonsopplysninger =
-                    refusjonsopplysninger?.map {
-                        ApiRefusjonsopplysning(
-                            fom = it.fom,
-                            tom = it.tom,
-                            belop = it.beløp,
-                        )
-                    } ?: emptyList(),
-                fraRefusjonsopplysninger =
-                    fraRefusjonsopplysninger?.map {
-                        ApiRefusjonsopplysning(
-                            fom = it.fom,
-                            tom = it.tom,
-                            belop = it.beløp,
-                        )
-                    } ?: emptyList(),
-            ),
-        ferdigstilt = ferdigstilt,
-        vedtaksperiodeId = vedtaksperiodeId,
-    )
-
-private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
-    ApiArbeidsforholdoverstyring(
-        hendelseId = hendelseId,
-        begrunnelse = begrunnelse,
-        timestamp = timestamp,
-        saksbehandler =
-            ApiSaksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        deaktivert = deaktivert,
-        skjaeringstidspunkt = skjæringstidspunkt,
-        forklaring = forklaring,
-        ferdigstilt = ferdigstilt,
-        vedtaksperiodeId = vedtaksperiodeId,
-    )
-
-private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønnsfastsetting() =
-    ApiSykepengegrunnlagskjonnsfastsetting(
-        hendelseId = hendelseId,
-        timestamp = timestamp,
-        saksbehandler =
-            ApiSaksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        skjonnsfastsatt =
-            ApiSkjonnsfastsattSykepengegrunnlag(
-                arsak = årsak,
-                type = type.tilApiSkjonnsfastsettingstype(),
-                begrunnelse = begrunnelse,
-                begrunnelseMal = begrunnelseMal,
-                begrunnelseFritekst = begrunnelseFritekst,
-                begrunnelseKonklusjon = begrunnelseKonklusjon,
-                arlig = årlig,
-                fraArlig = fraÅrlig,
-                skjaeringstidspunkt = skjæringstidspunkt,
-            ),
-        ferdigstilt = ferdigstilt,
-        vedtaksperiodeId = vedtaksperiodeId,
-    )
-
-private fun Skjonnsfastsettingstype.tilApiSkjonnsfastsettingstype() =
-    when (this) {
-        Skjonnsfastsettingstype.OMREGNET_ARSINNTEKT -> ApiSkjonnsfastsettingstype.OMREGNET_ARSINNTEKT
-        Skjonnsfastsettingstype.RAPPORTERT_ARSINNTEKT -> ApiSkjonnsfastsettingstype.RAPPORTERT_ARSINNTEKT
-        Skjonnsfastsettingstype.ANNET -> ApiSkjonnsfastsettingstype.ANNET
-    }
-
-private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() =
-    ApiMinimumSykdomsgradOverstyring(
-        hendelseId = hendelseId,
-        timestamp = timestamp,
-        saksbehandler =
-            ApiSaksbehandler(
-                navn = saksbehandlerNavn,
-                ident = saksbehandlerIdent,
-            ),
-        minimumSykdomsgrad =
-            ApiOverstyrtMinimumSykdomsgrad(
-                perioderVurdertOk =
-                    perioderVurdertOk.map {
-                        ApiOverstyrtMinimumSykdomsgradPeriode(
-                            fom = it.fom,
-                            tom = it.tom,
-                        )
-                    },
-                perioderVurdertIkkeOk =
-                    perioderVurdertIkkeOk.map {
-                        ApiOverstyrtMinimumSykdomsgradPeriode(
-                            fom = it.fom,
-                            tom = it.tom,
-                        )
-                    },
-                begrunnelse = begrunnelse,
-                initierendeVedtaksperiodeId = vedtaksperiodeId,
-            ),
-        ferdigstilt = ferdigstilt,
-        vedtaksperiodeId = vedtaksperiodeId,
-    )
 
 private fun SnapshotGhostPeriode.tilGhostPeriode(organisasjonsnummer: String): ApiGhostPeriode =
     ApiGhostPeriode(

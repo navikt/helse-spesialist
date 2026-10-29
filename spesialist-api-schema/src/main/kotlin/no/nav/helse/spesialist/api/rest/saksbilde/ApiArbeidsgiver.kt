@@ -37,6 +37,7 @@ sealed interface ApiOverstyring {
     val saksbehandler: ApiSaksbehandler
     val ferdigstilt: Boolean
     val vedtaksperiodeId: UUID
+    val organisasjonsnummer: String
 }
 
 @Serializable
@@ -49,6 +50,7 @@ data class ApiDagoverstyring(
     val dager: List<ApiOverstyrtDag>,
     val begrunnelse: String,
     override val vedtaksperiodeId: UUID,
+    override val organisasjonsnummer: String,
 ) : ApiOverstyring
 
 @Serializable
@@ -69,6 +71,7 @@ data class ApiInntektoverstyring(
     override val ferdigstilt: Boolean,
     val inntekt: ApiOverstyrtInntekt,
     override val vedtaksperiodeId: UUID,
+    override val organisasjonsnummer: String,
 ) : ApiOverstyring
 
 @Serializable
@@ -98,6 +101,7 @@ data class ApiMinimumSykdomsgradOverstyring(
     override val ferdigstilt: Boolean,
     val minimumSykdomsgrad: ApiOverstyrtMinimumSykdomsgrad,
     override val vedtaksperiodeId: UUID,
+    override val organisasjonsnummer: String,
 ) : ApiOverstyring
 
 @Serializable
@@ -123,6 +127,7 @@ data class ApiSykepengegrunnlagskjonnsfastsetting(
     override val ferdigstilt: Boolean,
     val skjonnsfastsatt: ApiSkjonnsfastsattSykepengegrunnlag,
     override val vedtaksperiodeId: UUID,
+    override val organisasjonsnummer: String,
 ) : ApiOverstyring
 
 @Serializable
@@ -150,6 +155,7 @@ data class ApiArbeidsforholdoverstyring(
     val forklaring: String,
     val begrunnelse: String,
     override val vedtaksperiodeId: UUID,
+    override val organisasjonsnummer: String,
 ) : ApiOverstyring
 
 @Serializable

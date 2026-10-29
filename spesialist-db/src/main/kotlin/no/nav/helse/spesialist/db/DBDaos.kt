@@ -18,7 +18,6 @@ class DBDaos(
     override val poisonPillDao = PgPoisonPillDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
 
-    override val overstyringApiDao = PgOverstyringApiDao(dataSource)
     override val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     override val varselApiRepository = PgVarselApiRepository(dataSource)
 }
