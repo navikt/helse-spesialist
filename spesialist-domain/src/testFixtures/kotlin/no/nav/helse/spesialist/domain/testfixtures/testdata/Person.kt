@@ -34,7 +34,7 @@ fun lagPerson(
         ),
     infoSistOppdatert: LocalDate? = info?.let { LocalDate.now() },
     erEgenAnsatt: Boolean? = false,
-    enhet: Int? = Random.nextInt(from = 1, until = 10000),
+    enhet: Int? = lagEnhetSomIkkeErUtland(),
     enhetSistOppdatert: LocalDate? = enhet?.let { LocalDate.now() },
 ): Person =
     Person.Factory.fraLagring(
@@ -52,6 +52,13 @@ fun lagPerson(
         enhetRef = enhet,
         enhetRefOppdatert = enhetSistOppdatert,
     )
+
+// Utlandsenheter (0393, 2101) gir egne egenskaper og automatiseringsregler, så de må velges eksplisitt
+private val UTLANDSENHETER = setOf(393, 2101)
+
+fun lagEnhetSomIkkeErUtland(): Int =
+    generateSequence { Random.nextInt(from = 1, until = 10000) }
+        .first { it !in UTLANDSENHETER }
 
 fun lagPersoninfo(
     fornavn: String = lagFornavn(),
