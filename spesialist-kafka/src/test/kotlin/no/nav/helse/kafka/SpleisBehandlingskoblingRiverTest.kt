@@ -27,39 +27,56 @@ internal class SpleisBehandlingskoblingRiverTest {
     @Test
     fun `rad med kjent spleis-id beholder den, og tidsregelen kontrolleres`() {
         assertEquals(
-            Kobling(Utfall.KJENT, spleis2.behandlingId, Kontroll.ENIG),
+            Kobling(Utfall.KJENT, spleis2.behandlingId, Kontroll.ENIG, spleis2.behandlingId),
             kobl(rad(t0.plusDays(11), spleisBehandlingId = spleis2.behandlingId), alleSpleis),
         )
         assertEquals(
-            Kobling(Utfall.KJENT, spleis2.behandlingId, Kontroll.UENIG),
+            Kobling(Utfall.KJENT, spleis2.behandlingId, Kontroll.UENIG_FOR_SENT, spleis3.behandlingId),
             kobl(rad(t0.plusDays(21), spleisBehandlingId = spleis2.behandlingId), alleSpleis),
+        )
+    }
+
+    @Test
+    fun `uenighet der tidsregelen velger en tidligere behandling`() {
+        assertEquals(
+            Kobling(Utfall.KJENT, spleis2.behandlingId, Kontroll.UENIG_FOR_TIDLIG, spleis1.behandlingId),
+            kobl(rad(t0.plusDays(9), spleisBehandlingId = spleis2.behandlingId), alleSpleis),
+        )
+    }
+
+    @Test
+    fun `uenighet der fasiten ikke finnes i meldingen`() {
+        val ukjent = UUID.randomUUID()
+        assertEquals(
+            Kobling(Utfall.KJENT, ukjent, Kontroll.UENIG_FASIT_MANGLER, spleis1.behandlingId),
+            kobl(rad(t0.plusDays(1), spleisBehandlingId = ukjent), alleSpleis),
         )
     }
 
     @Test
     fun `eksakt treff på en av utbetalingene til spleis-behandlingen`() {
         assertEquals(
-            Kobling(Utfall.EKSAKT, spleis2.behandlingId, Kontroll.ENIG),
+            Kobling(Utfall.EKSAKT, spleis2.behandlingId, Kontroll.ENIG, spleis2.behandlingId),
             kobl(rad(t0.plusDays(12), utbetalingId = spleis2.utbetalinger.last()), alleSpleis),
         )
     }
 
     @Test
     fun `tidsregel gir spleis-behandlingen som var opprettet da raden ble opprettet`() {
-        assertEquals(Kobling(Utfall.TIDSREGEL, spleis1.behandlingId, null), kobl(rad(t0.plusDays(9)), alleSpleis))
-        assertEquals(Kobling(Utfall.TIDSREGEL, spleis2.behandlingId, null), kobl(rad(t0.plusDays(10)), alleSpleis))
-        assertEquals(Kobling(Utfall.TIDSREGEL, spleis3.behandlingId, null), kobl(rad(t0.plusDays(30)), alleSpleis))
+        assertEquals(Kobling(Utfall.TIDSREGEL, spleis1.behandlingId, null, spleis1.behandlingId), kobl(rad(t0.plusDays(9)), alleSpleis))
+        assertEquals(Kobling(Utfall.TIDSREGEL, spleis2.behandlingId, null, spleis2.behandlingId), kobl(rad(t0.plusDays(10)), alleSpleis))
+        assertEquals(Kobling(Utfall.TIDSREGEL, spleis3.behandlingId, null, spleis3.behandlingId), kobl(rad(t0.plusDays(30)), alleSpleis))
     }
 
     @Test
     fun `rad opprettet før første spleis-behandling får den første`() {
-        assertEquals(Kobling(Utfall.TIDSREGEL, spleis1.behandlingId, null), kobl(rad(t0.minusDays(1)), alleSpleis))
+        assertEquals(Kobling(Utfall.TIDSREGEL, spleis1.behandlingId, null, spleis1.behandlingId), kobl(rad(t0.minusDays(1)), alleSpleis))
     }
 
     @Test
     fun `utbetaling uten treff faller tilbake på tidsregelen`() {
         assertEquals(
-            Kobling(Utfall.TIDSREGEL, spleis1.behandlingId, null),
+            Kobling(Utfall.TIDSREGEL, spleis1.behandlingId, null, spleis1.behandlingId),
             kobl(rad(t0.plusDays(1), utbetalingId = UUID.randomUUID()), alleSpleis),
         )
     }

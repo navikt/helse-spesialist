@@ -9,6 +9,7 @@ import no.nav.helse.db.SpleisBehandlingskoblingDao.SpesialistBehandling
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggInfo
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -48,8 +49,12 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
                             utbetalinger = behandling["utbetalinger"].values().map { it.asUUID() },
                         )
                     }
-                dao.finnBehandlinger(vedtaksperiode["vedtaksperiodeId"].asUUID()).map { rad ->
+                val vedtaksperiodeId = vedtaksperiode["vedtaksperiodeId"].asUUID()
+                dao.finnBehandlinger(vedtaksperiodeId).map { rad ->
                     val kobling = kobl(rad, spleisBehandlinger)
+                    if (kobling.kontroll?.erUenig == true) {
+                        loggUenighet(packet["fødselsnummer"].asString(), vedtaksperiodeId, rad, kobling, spleisBehandlinger)
+                    }
                     val antallVarsler =
                         if (kobling.spleisBehandlingId == null || dryrun) {
                             dao.antallVarslerUtenSpleisBehandlingId(rad.id)
@@ -82,6 +87,30 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
         )
     }
 
+    private fun loggUenighet(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        rad: SpesialistBehandling,
+        kobling: Kobling,
+        spleisBehandlinger: List<SpleisBehandling>,
+    ) {
+        val fasit = spleisBehandlinger.find { it.behandlingId == kobling.spleisBehandlingId }
+        val etterTid = spleisBehandlinger.find { it.behandlingId == kobling.tidsregel }
+        loggInfo(
+            "Behandlingskobling: tidsregelen er uenig (${kobling.kontroll?.name})",
+            "fødselsnummer" to fødselsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId.toString(),
+            "radId" to rad.id.toString(),
+            "radOpprettet" to rad.opprettet.toString(),
+            "utfall" to kobling.utfall.name,
+            "fasitBehandlingId" to kobling.spleisBehandlingId.toString(),
+            "fasitOpprettet" to fasit?.opprettet.toString(),
+            "tidsregelBehandlingId" to kobling.tidsregel.toString(),
+            "tidsregelOpprettet" to etterTid?.opprettet.toString(),
+            "minutterFraFasitTilRad" to fasit?.let { Duration.between(it.opprettet, rad.opprettet).toMinutes() }.toString(),
+        )
+    }
+
     internal data class SpleisBehandling(
         val behandlingId: UUID,
         val opprettet: LocalDateTime,
@@ -101,12 +130,26 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
     }
 
     // Tidsregelen sammenlignet med fasiten, for rader der fasiten er kjent
-    internal enum class Kontroll { ENIG, UENIG }
+    internal enum class Kontroll(
+        val erUenig: Boolean,
+    ) {
+        ENIG(false),
+
+        // Tidsregelen valgte en spleis-behandling opprettet før fasiten
+        UENIG_FOR_TIDLIG(true),
+
+        // Tidsregelen valgte en spleis-behandling opprettet etter fasiten
+        UENIG_FOR_SENT(true),
+
+        // Fasiten finnes ikke blant spleis-behandlingene i meldingen
+        UENIG_FASIT_MANGLER(true),
+    }
 
     internal data class Kobling(
         val utfall: Utfall,
         val spleisBehandlingId: UUID?,
         val kontroll: Kontroll?,
+        val tidsregel: UUID? = null,
     )
 
     internal companion object {
@@ -116,26 +159,32 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
         ): Kobling {
             val etterTid = tidsregel(rad.opprettet, spleisBehandlinger)
 
-            fun kontroll(fasit: UUID) = etterTid?.let { if (it == fasit) Kontroll.ENIG else Kontroll.UENIG }
+            fun kontroll(fasit: UUID): Kontroll? {
+                if (etterTid == null) return null
+                if (etterTid.behandlingId == fasit) return Kontroll.ENIG
+                val fasitOpprettet =
+                    spleisBehandlinger.find { it.behandlingId == fasit }?.opprettet ?: return Kontroll.UENIG_FASIT_MANGLER
+                return if (etterTid.opprettet.isBefore(fasitOpprettet)) Kontroll.UENIG_FOR_TIDLIG else Kontroll.UENIG_FOR_SENT
+            }
 
             rad.spleisBehandlingId?.let { kjent ->
-                return Kobling(Utfall.KJENT, kjent, kontroll(kjent))
+                return Kobling(Utfall.KJENT, kjent, kontroll(kjent), etterTid?.behandlingId)
             }
             val eksakt = rad.utbetalingId?.let { utbetalingId -> spleisBehandlinger.singleOrNull { utbetalingId in it.utbetalinger } }
             if (eksakt != null) {
-                return Kobling(Utfall.EKSAKT, eksakt.behandlingId, kontroll(eksakt.behandlingId))
+                return Kobling(Utfall.EKSAKT, eksakt.behandlingId, kontroll(eksakt.behandlingId), etterTid?.behandlingId)
             }
             if (etterTid == null) return Kobling(Utfall.INGEN_SPLEISBEHANDLINGER, null, null)
-            return Kobling(Utfall.TIDSREGEL, etterTid, null)
+            return Kobling(Utfall.TIDSREGEL, etterTid.behandlingId, null, etterTid.behandlingId)
         }
 
         // Den siste spleis-behandlingen som var opprettet da raden ble opprettet. Rader fra før første behandling får den første.
         private fun tidsregel(
             opprettet: LocalDateTime,
             spleisBehandlinger: List<SpleisBehandling>,
-        ): UUID? {
+        ): SpleisBehandling? {
             val sortert = spleisBehandlinger.sortedBy { it.opprettet }
-            return (sortert.lastOrNull { !it.opprettet.isAfter(opprettet) } ?: sortert.firstOrNull())?.behandlingId
+            return sortert.lastOrNull { !it.opprettet.isAfter(opprettet) } ?: sortert.firstOrNull()
         }
     }
 }
