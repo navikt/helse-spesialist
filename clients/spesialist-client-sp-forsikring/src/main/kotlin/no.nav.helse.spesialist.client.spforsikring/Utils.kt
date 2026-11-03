@@ -16,7 +16,7 @@ class ClientUtils {
                     return block()
                 } catch (e: RetryableException) {
                     val delayMs = initialDelayMs * 3.0.pow(attempt.toDouble()).toLong()
-                    loggWarn("Forsøk ${attempt + 1} av $maxRetries feilet: ${e.message}. Prøver igjen om ${delayMs}ms...")
+                    loggWarn("Forsøk ${attempt + 1} av $maxRetries feilet. Prøver igjen om ${delayMs}ms...", e)
                     if (attempt < maxRetries - 1) {
                         Thread.sleep(delayMs)
                     }
