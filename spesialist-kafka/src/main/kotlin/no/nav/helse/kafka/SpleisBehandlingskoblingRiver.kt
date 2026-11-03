@@ -141,6 +141,9 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
         // Tidsregelen valgte en spleis-behandling opprettet etter fasiten
         UENIG_FOR_SENT(true),
 
+        // Tidsregelen valgte en annen spleis-behandling med samme tidsstempel som fasiten
+        UENIG_UAVGJORT(true),
+
         // Fasiten finnes ikke blant spleis-behandlingene i meldingen
         UENIG_FASIT_MANGLER(true),
     }
@@ -164,7 +167,11 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
                 if (etterTid.behandlingId == fasit) return Kontroll.ENIG
                 val fasitOpprettet =
                     spleisBehandlinger.find { it.behandlingId == fasit }?.opprettet ?: return Kontroll.UENIG_FASIT_MANGLER
-                return if (etterTid.opprettet.isBefore(fasitOpprettet)) Kontroll.UENIG_FOR_TIDLIG else Kontroll.UENIG_FOR_SENT
+                return when {
+                    etterTid.opprettet == fasitOpprettet -> Kontroll.UENIG_UAVGJORT
+                    etterTid.opprettet.isBefore(fasitOpprettet) -> Kontroll.UENIG_FOR_TIDLIG
+                    else -> Kontroll.UENIG_FOR_SENT
+                }
             }
 
             rad.spleisBehandlingId?.let { kjent ->
@@ -179,12 +186,14 @@ class SpleisBehandlingskoblingRiver : TransaksjonellRiver() {
         }
 
         // Den siste spleis-behandlingen som var opprettet da raden ble opprettet. Rader fra før første behandling får den første.
+        // Har flere behandlinger samme tidsstempel, velges den første av dem i rekkefølgen fra spleis.
         private fun tidsregel(
             opprettet: LocalDateTime,
             spleisBehandlinger: List<SpleisBehandling>,
         ): SpleisBehandling? {
             val sortert = spleisBehandlinger.sortedBy { it.opprettet }
-            return sortert.lastOrNull { !it.opprettet.isAfter(opprettet) } ?: sortert.firstOrNull()
+            val valgtTidspunkt = (sortert.lastOrNull { !it.opprettet.isAfter(opprettet) } ?: sortert.firstOrNull())?.opprettet
+            return sortert.firstOrNull { it.opprettet == valgtTidspunkt }
         }
     }
 }

@@ -45,6 +45,19 @@ internal class SpleisBehandlingskoblingRiverTest {
     }
 
     @Test
+    fun `ved likt tidsstempel velger tidsregelen den første behandlingen`() {
+        val første = SpleisBehandling(UUID.randomUUID(), t0, emptyList())
+        val andre = SpleisBehandling(UUID.randomUUID(), t0, listOf(UUID.randomUUID()))
+        val behandlinger = listOf(første, andre)
+        assertEquals(Kobling(Utfall.TIDSREGEL, første.behandlingId, null, første.behandlingId), kobl(rad(t0.plusSeconds(1)), behandlinger))
+        assertEquals(Kobling(Utfall.TIDSREGEL, første.behandlingId, null, første.behandlingId), kobl(rad(t0.minusSeconds(1)), behandlinger))
+        assertEquals(
+            Kobling(Utfall.EKSAKT, andre.behandlingId, Kontroll.UENIG_UAVGJORT, første.behandlingId),
+            kobl(rad(t0.plusSeconds(1), utbetalingId = andre.utbetalinger.single()), behandlinger),
+        )
+    }
+
+    @Test
     fun `uenighet der fasiten ikke finnes i meldingen`() {
         val ukjent = UUID.randomUUID()
         assertEquals(
