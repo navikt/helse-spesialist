@@ -82,6 +82,27 @@ class SpleisRestClientTest {
     }
 
     @Test
+    fun `mapper begrunnelsen Oppholdskrav på en avvist dag`() {
+        setupStub(okJson(REALISTISK_PERSON_RESPONS.replaceFirst("\"begrunnelser\": []", "\"begrunnelser\": [\"Oppholdskrav\"]")))
+
+        val person = lagKlient().hentPerson("11111111111")
+
+        assertNotNull(person)
+        val dag =
+            person
+                .tilSnapshotPerson()
+                .arbeidsgivere
+                .single()
+                .behandlinger
+                .single()
+                .perioder
+                .first()
+                .tidslinje
+                .single()
+        assertEquals(listOf(SnapshotBegrunnelse.OPPHOLDSKRAV), dag.begrunnelser)
+    }
+
+    @Test
     fun `feiler ikke ved ukjente felter i responsen (fremtidssikring mot nye felter fra spleis)`() {
         setupStub(
             okJson(

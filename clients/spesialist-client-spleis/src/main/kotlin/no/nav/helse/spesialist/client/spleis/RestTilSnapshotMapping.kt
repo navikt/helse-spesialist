@@ -518,6 +518,7 @@ internal fun Begrunnelse.tilSnapshotBegrunnelse() =
         Begrunnelse.SykepengedagerOppbruktOver67 -> SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67
         Begrunnelse.AvslattMeldingTilNavDag -> SnapshotBegrunnelse.AVSLATTMELDINGTILNAVDAG
         Begrunnelse.MeldingTilNavDagUtenforVentetid -> SnapshotBegrunnelse.MELDINGTILNAVDAGUTENFORVENTETID
+        Begrunnelse.Oppholdskrav -> SnapshotBegrunnelse.OPPHOLDSKRAV
     }
 
 internal fun Hendelsetype.tilSnapshotHendelsetype() =

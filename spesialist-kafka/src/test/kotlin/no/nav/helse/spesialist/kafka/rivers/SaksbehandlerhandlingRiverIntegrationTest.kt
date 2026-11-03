@@ -136,6 +136,32 @@ class SaksbehandlerhandlingRiverIntegrationTest {
     }
 
     @Test
+    fun `lagrer endrede avslagsdager med behandlingId i totrinnsvurderingen`() {
+        // Given:
+        val identitetsnummer = lagPerson().id
+        val behandlingId = UUID.randomUUID()
+
+        // When:
+        testRapid.sendTestMessage(
+            saksbehandlerhandlingMelding(
+                identitetsnummer = identitetsnummer,
+                handlingType = "AVSLAGSDAGER_ENDRET",
+                kreverTotrinnsvurdering = true,
+                skjæringstidspunkt = null,
+                behandlingId = behandlingId,
+            ),
+        )
+
+        // Then:
+        val handling = sessionContext.saksbehandlerhandlingRepository.alle().single()
+        assertEquals(HandlingType.AVSLAGSDAGER_ENDRET, handling.handlingType)
+        assertEquals(SpleisBehandlingId(behandlingId), handling.behandlingId)
+        assertNull(handling.skjæringstidspunkt)
+        val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.alle().single()
+        assertEquals(totrinnsvurdering.id().value, handling.totrinnsvurderingId?.value)
+    }
+
+    @Test
     fun `reserverer personen til saksbehandleren som utførte handlingen`() {
         // Given:
         val identitetsnummer = lagPerson().id

@@ -76,6 +76,7 @@ internal enum class Begrunnelse {
     ManglerMedlemskap,
     ManglerOpptjening,
     Over70,
+    Oppholdskrav,
 }
 
 internal enum class Periodetilstand {

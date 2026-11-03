@@ -164,6 +164,7 @@ private fun SnapshotBegrunnelse.tilApiBegrunnelse() =
         SnapshotBegrunnelse.ANDREYTELSER -> ApiBegrunnelse.ANDREYTELSER
         SnapshotBegrunnelse.AVSLATTMELDINGTILNAVDAG -> ApiBegrunnelse.AVSLATT_MELDING_TIL_NAV_DAG
         SnapshotBegrunnelse.MELDINGTILNAVDAGUTENFORVENTETID -> ApiBegrunnelse.MELDING_TIL_NAV_DAG_UTENFOR_VENTETID
+        SnapshotBegrunnelse.OPPHOLDSKRAV -> ApiBegrunnelse.OPPHOLDSKRAV
         SnapshotBegrunnelse.UNKNOWN_VALUE -> ApiBegrunnelse.UKJENT
     }
 
