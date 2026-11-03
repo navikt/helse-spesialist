@@ -25,7 +25,9 @@ class PutTildelingBehandler : PutBehandler<Personer.PersonPseudoId.Tildeling, Ap
             personPseudoIdIkkeFunnet = { ApiPutTildelingErrorCode.PERSON_PSEUDO_ID_IKKE_FUNNET },
             manglerTilgangTilPerson = { ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_PERSON },
         ) {
-            val oppgave = kallKontekst.transaksjon.oppgaveRepository.finnAktivForPersonOrNull(it.id) ?: error("Fant ikke oppgave")
+            val oppgave =
+                kallKontekst.transaksjon.oppgaveRepository.finnAktivForPersonOrNull(it.id)
+                    ?: return@medPerson RestResponse.Error(ApiPutTildelingErrorCode.OPPGAVE_IKKE_FUNNET)
 
             if (!oppgave.kanTildelesTil(brukerroller = kallKontekst.brukerroller)) {
                 return@medPerson RestResponse.Error(ApiPutTildelingErrorCode.MANGLER_TILGANG_TIL_OPPGAVE)
@@ -54,6 +56,7 @@ enum class ApiPutTildelingErrorCode(
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
     PERSON_PSEUDO_ID_IKKE_FUNNET("Personpseudoid ikke funnet", HttpStatusCode.NotFound),
+    OPPGAVE_IKKE_FUNNET("Oppgave ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     MANGLER_TILGANG_TIL_OPPGAVE("Mangler tilgang til oppgave", HttpStatusCode.Forbidden),
     OPPGAVE_TILDELT_ANNEN_SAKSBEHANDLER("Oppgaven er allerede tildelt en annen saksbehandler", HttpStatusCode.Conflict),

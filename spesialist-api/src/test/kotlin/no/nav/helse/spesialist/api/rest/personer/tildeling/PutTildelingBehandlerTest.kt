@@ -1,17 +1,28 @@
 package no.nav.helse.spesialist.api.rest.personer.tildeling
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
+import no.nav.helse.spesialist.domain.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import org.slf4j.LoggerFactory
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PutTildelingBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
@@ -20,6 +31,55 @@ class PutTildelingBehandlerTest {
     private val vedtaksperiodeRepository = integrationTestFixture.sessionContext.vedtaksperiodeRepository
     private val behandlingRepository = integrationTestFixture.sessionContext.behandlingRepository
     private val saksbehandlerRepository = integrationTestFixture.sessionContext.saksbehandlerRepository
+
+    @ParameterizedTest
+    @EnumSource(Oppgave.Tilstand::class, names = ["AvventerSystem", "Ferdigstilt", "Invalidert"])
+    fun `not found og warn hvis oppgaven ikke lenger er aktiv`(tilstand: Oppgave.Tilstand) {
+        val person = lagPerson().also(personRepository::lagre)
+        val personPseudoId = integrationTestFixture.personPseudoIdProvider.nyPersonPseudoId(person.id)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id).also(vedtaksperiodeRepository::lagre)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id).also(behandlingRepository::lagre)
+        val opprinneligSaksbehandler = lagSaksbehandler()
+        val oppgave =
+            lagOppgave(behandling.spleisBehandlingId!!, UUID.randomUUID(), vedtaksperiode.id).also {
+                it.tildelTil(opprinneligSaksbehandler, emptySet())
+                when (tilstand) {
+                    Oppgave.Tilstand.AvventerSystem -> it.avventerSystem(opprinneligSaksbehandler.ident, opprinneligSaksbehandler.id.value)
+                    Oppgave.Tilstand.Ferdigstilt -> {
+                        it.avventerSystem(opprinneligSaksbehandler.ident, opprinneligSaksbehandler.id.value)
+                        it.ferdigstill()
+                    }
+                    Oppgave.Tilstand.Invalidert -> it.avbryt()
+                    Oppgave.Tilstand.AvventerSaksbehandler -> error("Testen krever en inaktiv oppgave")
+                }
+                oppgaveRepository.lagre(it)
+                it.konsumerHendelser()
+            }
+        val saksbehandler = lagSaksbehandler()
+        val logger = LoggerFactory.getLogger(RestAdapter::class.java) as Logger
+        val appender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(appender)
+
+        try {
+            val response =
+                integrationTestFixture.put(
+                    url = "/api/personer/${personPseudoId.value}/tildeling",
+                    saksbehandler = saksbehandler,
+                    body = """{"navident":"${saksbehandler.ident.value}"}""",
+                )
+
+            assertEquals(HttpStatusCode.NotFound.value, response.status)
+            assertEquals("OPPGAVE_IKKE_FUNNET", response.bodyAsJsonNode?.get("code")?.asString())
+            assertEquals(tilstand, oppgave.tilstand)
+            assertEquals(opprinneligSaksbehandler.id, oppgave.tildeltTil)
+            integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+            assertTrue(appender.list.any { it.level == Level.WARN && it.formattedMessage == "Returnerer HTTP 404 - Oppgave ikke funnet" })
+            assertFalse(appender.list.any { it.level == Level.ERROR })
+        } finally {
+            logger.detachAppender(appender)
+            appender.stop()
+        }
+    }
 
     @Test
     fun `happy path`() {
