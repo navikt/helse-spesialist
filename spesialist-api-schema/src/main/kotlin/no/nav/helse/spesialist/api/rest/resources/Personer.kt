@@ -135,26 +135,10 @@ class Personer {
             val parent: PersonPseudoId,
         )
 
-        @Resource("graderte-andre-ytelser")
-        class GraderteAndreYtelser(
-            val parent: PersonPseudoId,
-        )
-
         @Resource("saksbehandlerhandlinger")
         class Saksbehandlerhandlinger(
             val parent: PersonPseudoId,
-        ) {
-            @Resource("{handlingId}")
-            class HandlingId(
-                val parent: Saksbehandlerhandlinger,
-                val handlingId: UUID,
-            ) {
-                @Resource("visning")
-                class Visning(
-                    val parent: HandlingId,
-                )
-            }
-        }
+        )
 
         @Resource("vurderinger")
         class Vurderinger(

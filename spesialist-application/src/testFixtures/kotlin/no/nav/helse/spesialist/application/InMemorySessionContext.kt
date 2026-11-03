@@ -52,7 +52,6 @@ class InMemorySessionContext(
     override val opptegnelseRepository: InMemoryOpptegnelseRepository,
     override val saksbehandlerStansRepository: SaksbehandlerStansRepository,
     override val veilederStansRepository: VeilederStansRepository,
-    override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository,
     override val saksbehandlerhandlingRepository: InMemorySaksbehandlerhandlingRepository,
     override val spleisBehandlingskoblingDao: InMemorySpleisBehandlingskoblingDao =
         InMemorySpleisBehandlingskoblingDao(),

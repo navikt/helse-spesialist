@@ -1,0 +1,1 @@
+DROP TABLE graderte_andre_ytelser_events;

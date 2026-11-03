@@ -218,7 +218,6 @@ internal abstract class AbstractDatabaseTest {
                 "risikovurdering_faresignal",
                 "overstyringer_for_vedtaksperioder",
                 "tilkommen_inntekt_events",
-                "graderte_andre_ytelser_events",
                 "ukoblede_annulleringer",
                 "midlertidig_behandling_vedtak_fattet",
                 "tmp_slettede_varsler",

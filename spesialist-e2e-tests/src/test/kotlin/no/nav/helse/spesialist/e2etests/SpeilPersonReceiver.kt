@@ -28,7 +28,6 @@ class SpeilPersonReceiver(
     val personPseudoId: String = callPostPersonerSok(testContext.person.fødselsnummer)["personPseudoId"].asString()
     var person: JsonNode = fetchPerson(personPseudoId)
     var tilkomneInntektskilder: JsonNode = callGetTilkomneInntektskilder()
-    var graderteAndreYtelser: JsonNode = callGetGraderteAndreYtelser()
 
     fun hentOppdatertPerson() {
         logg.info("Henter oppdatert person...")
@@ -38,11 +37,6 @@ class SpeilPersonReceiver(
     fun hentOppdaterteTilkomneInntektskilder() {
         logg.info("Henter oppdaterte tilkomne inntektskilder...")
         tilkomneInntektskilder = callGetTilkomneInntektskilder()
-    }
-
-    fun hentOppdaterteGraderteAndreYtelser() {
-        logg.info("Henter oppdaterte graderte andre ytelser...")
-        graderteAndreYtelser = callGetGraderteAndreYtelser()
     }
 
     fun saksbehandlerGodkjennerAlleVarsler() {
@@ -206,37 +200,6 @@ class SpeilPersonReceiver(
                 ),
         )!!["tilkommenInntektId"].asUUID().also {
             hentOppdaterteTilkomneInntektskilder()
-        }
-
-    fun saksbehandlerEndrerGraderteAndreYtelser(
-        versjon: UUID?,
-        behandlingId: UUID,
-        dager: Collection<ApiGraderteAndreYtelserDag>,
-        yrkesaktivitet: ApiYrkesaktivitetstype,
-        organisasjonsnummer: String?,
-        notatTilBeslutter: String,
-    ): UUID =
-        callHttpPost(
-            relativeUrl = "api/personer/$personPseudoId/graderte-andre-ytelser",
-            request =
-                mapOf(
-                    "dager" to
-                        dager.map {
-                            mapOf(
-                                "dato" to it.dato.toString(),
-                                "andreYtelserGrader" to it.andreYtelserGrader.mapKeys { (type, _) -> type.name },
-                                "sykdomsgrad" to it.sykdomsgrad,
-                                "arbeidsgrad" to it.arbeidsgrad,
-                            )
-                        },
-                    "notatTilBeslutter" to notatTilBeslutter,
-                    "yrkesaktivitet" to yrkesaktivitet.name,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "versjon" to versjon?.toString(),
-                    "behandlingId" to behandlingId.toString(),
-                ),
-        )!!["versjon"].asUUID().also {
-            hentOppdaterteGraderteAndreYtelser()
         }
 
     fun saksbehandlerEndrerTilkommenInntekt(
@@ -574,8 +537,6 @@ class SpeilPersonReceiver(
             ?: error("Fikk ikke saksbilde i respons fra GET /api/personer/{pseudoId}/saksbilde")
 
     fun callGetTilkomneInntektskilder(): JsonNode = callHttpGet("api/personer/$personPseudoId/tilkomne-inntektskilder")!!
-
-    fun callGetGraderteAndreYtelser(): JsonNode = callHttpGet("api/personer/$personPseudoId/graderte-andre-ytelser")!!
 
     fun callPostPersonerSok(fødselsnummer: String): JsonNode =
         callHttpPost(

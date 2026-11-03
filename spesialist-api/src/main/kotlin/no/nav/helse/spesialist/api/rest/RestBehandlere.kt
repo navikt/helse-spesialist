@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 enum class Tags(
     val value: String,
 ) {
-    GRADERTE_ANDRE_YTELSER("Graderte andre ytelser"),
     BEHANDLINGER("Behandlinger"),
     BEHANDLINGSSTATISTIKK("Behandlingsstatistikk"),
     DIALOGER("Dialoger"),

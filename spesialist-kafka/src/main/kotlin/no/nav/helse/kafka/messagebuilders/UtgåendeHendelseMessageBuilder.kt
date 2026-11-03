@@ -54,7 +54,6 @@ internal fun UtgåendeHendelse.eventName() =
         is VarselEndret -> "varsel_endret"
 
         is InntektsendringerEvent -> "inntektsendringer"
-        is GraderteAndreYtelserEndringerEvent -> "graderte_andre_ytelser_endret"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
@@ -78,7 +77,6 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is SkjønnsfastsattSykepengegrunnlagEvent -> this.detaljer()
         is VarselEndret -> this.detaljer()
         is InntektsendringerEvent -> this.detaljer()
-        is GraderteAndreYtelserEndringerEvent -> this.detaljer()
     }
 
 private fun Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
@@ -393,5 +391,3 @@ private fun InntektsendringerEvent.detaljer(): Map<String, Any> =
             },
         )
     }
-
-private fun GraderteAndreYtelserEndringerEvent.detaljer(): Map<String, Any> = mapOf("fom" to fom)

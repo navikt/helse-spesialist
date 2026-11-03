@@ -4,7 +4,6 @@ import no.nav.helse.db.overstyring.venting.VenterPåKvitteringForOverstyringRepo
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
-import no.nav.helse.spesialist.application.GraderteAndreYtelserRepository
 import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OpptegnelseRepository
@@ -59,7 +58,6 @@ interface SessionContext {
     val oppgaveRepository: OppgaveRepository
     val behandlingRepository: BehandlingRepository
     val tilkommenInntektRepository: TilkommenInntektRepository
-    val graderteAndreYtelserRepository: GraderteAndreYtelserRepository
     val arbeidsgiverRepository: ArbeidsgiverRepository
     val annulleringRepository: AnnulleringRepository
     val påVentRepository: PåVentRepository

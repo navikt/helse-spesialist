@@ -9,7 +9,6 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.rest.andreYtelser.*
 import no.nav.helse.spesialist.api.rest.behandlinger.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.behandlingsstatistikk.GetBehandlingsstatistikkBehandler
@@ -110,7 +109,6 @@ fun Routing.restRoutes(
             patch(PatchSaksbehandlerStansBehandler(), restAdapter)
 
             get(GetSaksbehandlerhandlingerForPersonBehandler(), restAdapter)
-            get(GetSaksbehandlerhandlingVisningBehandler(), restAdapter)
 
             get(GetVeilederStansBehandler(), restAdapter)
             patch(PatchVeilederStansBehandler(), restAdapter)
@@ -121,9 +119,6 @@ fun Routing.restRoutes(
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)
             patch(PatchTilkommenInntektBehandler(), restAdapter)
-
-            get(GetGraderteAndreYtelserForPersonBehandler(), restAdapter)
-            post(PostGraderteAndreYtelserBehandler(), restAdapter)
 
             post(PostSykepengegrunnlagBehandler(), restAdapter)
 

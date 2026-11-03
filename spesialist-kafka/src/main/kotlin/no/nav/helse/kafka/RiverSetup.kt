@@ -31,7 +31,6 @@ class RiverSetup(
     private val rivers =
         listOf(
             GodkjenningsbehovRiver(mediator),
-            GraderteAndreYtelserBehovRiver(),
             SøknadSendtRiver(),
             PersoninfoløsningRiver(mediator),
             FlerePersoninfoRiver(mediator),

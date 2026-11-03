@@ -47,7 +47,6 @@ class DBSessionContext(
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
     override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(session)
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
-    override val graderteAndreYtelserRepository: GraderteAndreYtelserRepository = PgGraderteAndreYtelserRepository(session)
     override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
     override val arbeidsgiverRepository: ArbeidsgiverRepository = PgArbeidsgiverRepository(session)
     override val annulleringRepository: PgAnnulleringRepository = PgAnnulleringRepository(session)
