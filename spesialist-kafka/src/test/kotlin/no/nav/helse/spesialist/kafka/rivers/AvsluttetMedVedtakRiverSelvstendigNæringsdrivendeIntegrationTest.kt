@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.kafka.rivers
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Forsikringsvurdering
@@ -150,7 +149,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         sessionContext.vedtakRepository.lagre(Vedtak.automatisk(behandling.spleisBehandlingId!!))
 
         val forsikringsvurderingId = UUID.randomUUID()
-        initGodkjenningsbehov(erJordbruker = true, forsikringsvurderingId = forsikringsvurderingId)
+        initGodkjenningsbehov(forsikringsvurderingId = forsikringsvurderingId)
 
         // When:
         testRapid.sendTestMessage(fastsattEtterHovedregelMelding(sykepengegrunnlag = beregningsgrunnlag))
@@ -357,7 +356,6 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
     }
 
     private fun initGodkjenningsbehov(
-        erJordbruker: Boolean = false,
         forsikringsvurderingId: UUID?,
     ) {
         val godkjenningsbehovId = UUID.randomUUID()
@@ -368,7 +366,6 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
                 fødselsnummer = person.id.value,
                 spleisBehandlingId = behandling.spleisBehandlingId!!.value,
                 yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
-                arbeidssituasjon = if (erJordbruker) Arbeidssituasjon.JORDBRUKER else null,
                 sykepengegrunnlagsfakta =
                     godkjenningsbehovSelvstendigNæringsdrivende(
                         sykepengegrunnlag = BigDecimal(600000),

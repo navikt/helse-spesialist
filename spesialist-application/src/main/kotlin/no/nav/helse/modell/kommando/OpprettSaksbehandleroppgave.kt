@@ -77,7 +77,6 @@ internal class OpprettSaksbehandleroppgave(
                 mottaker(mottaker)
                 inntektskilde(inntektskilde)
                 inntektsforhold(inntektsforhold)
-                arbeidssituasjon(behovData.arbeidssituasjon)
                 periodetype(periodetype)
                 påVent(vedtaksperiodeId, sessionContext)
                 skjønnsfastsettelse(varslerForBehandlingspakke)
@@ -176,10 +175,6 @@ internal class OpprettSaksbehandleroppgave(
         sessionContext: SessionContext,
     ) {
         if (HentEnhetløsning.erEnhetUtland(sessionContext.personDao.finnEnhetId(fødselsnummer))) add(UTLAND)
-    }
-
-    private fun MutableSet<Egenskap>.arbeidssituasjon(arbeidssituasjon: Arbeidssituasjon?) {
-        if (arbeidssituasjon == Arbeidssituasjon.JORDBRUKER) add(JORDBRUKER_REINDRIFT)
     }
 
     private fun MutableSet<Egenskap>.mottaker(mottaker: Mottaker) {

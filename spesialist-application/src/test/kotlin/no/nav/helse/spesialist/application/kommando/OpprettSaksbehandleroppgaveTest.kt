@@ -9,7 +9,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -36,11 +35,9 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.HASTER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.INGEN_UTBETALING
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.JORDBRUKER_REINDRIFT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.REVURDERING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.RISK_QA
-import no.nav.helse.spesialist.domain.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -50,7 +47,12 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIV
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.UTLAND
 import no.nav.helse.spesialist.domain.testfixtures.lagPåVent
-import no.nav.helse.spesialist.domain.testfixtures.testdata.*
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektsforhold
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnInntektskilde
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnMottaker
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnOppgavetype
+import no.nav.helse.spesialist.domain.testfixtures.testdata.finnPeriodetype
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.node.JsonNodeFactory
@@ -358,24 +360,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
     }
 
     @Test
-    fun `oppretter oppgave med egenskap JORDBRUKER_REINDRIFT`() {
-        assertTrue(
-            opprettSaksbehandlerOppgaveCommand(
-                arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
-                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
-            ).execute(context, sessionContext, outbox),
-        )
-        assertForventedeEgenskaper(
-            SØKNAD,
-            INGEN_UTBETALING,
-            EN_ARBEIDSGIVER,
-            FORSTEGANGSBEHANDLING,
-            JORDBRUKER_REINDRIFT,
-            SELVSTENDIG_NÆRINGSDRIVENDE,
-        )
-    }
-
-    @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
         lagreRisikovurdering(kanGodkjennesAutomatisk = false)
         assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context, sessionContext, outbox))
@@ -483,7 +467,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
         tags: List<String> = emptyList(),
-        arbeidssituasjon: Arbeidssituasjon? = null,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         forsikringsvurderingId: UUID? = null,
     ) = OpprettSaksbehandleroppgave(
@@ -499,7 +482,6 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
                 utbetalingtype = utbetalingtype,
                 kanAvvises = kanAvvises,
                 tags = tags,
-                arbeidssituasjon = arbeidssituasjon,
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 forsikringsvurderingId = forsikringsvurderingId,
             ),

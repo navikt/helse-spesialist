@@ -101,7 +101,6 @@ private val godkjenningMedSpleisperioderUtenYrkesaktivitet =
     },
     "foreløpigBeregnetSluttPåSykepenger" : "2018-12-01",
     "relevanteSøknader" : [ "bff705d5-9e16-4f1f-8c30-93e90514d013" ],
-    "arbeidssituasjon" : null,
     "utbetalingsdager" : [ {
       "utbetaling" : "medFriStruktur"
     } ]
@@ -131,7 +130,6 @@ private val godkjenningMedSpleisperioderMedYrkesaktivitet =
     "behandlingId" : "dd92a8fa-d517-489a-b9d4-1c183ad580d3",
     "inntektskilde" : "EN_ARBEIDSGIVER",
     "utbetalingtype" : "UTBETALING",
-    "arbeidssituasjon" : "ARBEIDSTAKER",
     "utbetalingsdager" : [ {
       "utbetaling" : "medFriStruktur"
     } ],
@@ -206,7 +204,6 @@ private val godkjenningMedSpleisperioderMedYrkesaktivitetMenUtenOrgnr =
     "behandlingId" : "dd92a8fa-d517-489a-b9d4-1c183ad580d3",
     "inntektskilde" : "EN_ARBEIDSGIVER",
     "utbetalingtype" : "UTBETALING",
-    "arbeidssituasjon" : "ARBEIDSTAKER",
     "utbetalingsdager" : [ {
       "utbetaling" : "medFriStruktur"
     } ],

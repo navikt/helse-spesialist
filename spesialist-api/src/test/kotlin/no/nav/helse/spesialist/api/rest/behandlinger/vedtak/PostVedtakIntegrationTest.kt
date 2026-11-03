@@ -857,7 +857,6 @@ class PostVedtakIntegrationTest {
                     sykepengegrunnlag = BigDecimal("700000.0"),
                 ),
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
-            arbeidssituasjon = null,
             relevanteSøknader = listOf(UUID.randomUUID()),
             utbetalingsdager = listOf(mapOf("utbetaling" to "medFriStruktur")),
             json = "{}",

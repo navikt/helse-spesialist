@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
@@ -318,7 +317,6 @@ object Testmeldingfabrikk {
                         ),
                     ),
             ),
-        arbeidssituasjon: Arbeidssituasjon? = null,
         relevanteSøknader: List<UUID> = listOf(UUID.randomUUID()),
         forsikringsvurderingId: UUID? = null,
         opptjeningsvurderingId: UUID? = null,
@@ -354,7 +352,6 @@ object Testmeldingfabrikk {
                     "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
                     "foreløpigBeregnetSluttPåSykepenger" to foreløpigBeregnetSluttPåSykepenger.toString(),
                     "relevanteSøknader" to relevanteSøknader,
-                    "arbeidssituasjon" to arbeidssituasjon,
                     "utbetalingsdager" to listOf(mapOf("utbetaling" to "medFriStruktur")),
                 ),
         ),

@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -14,12 +13,11 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class GodkjenningsbehovRiverTest {
     private val HENDELSE = UUID.randomUUID()
@@ -107,7 +105,6 @@ internal class GodkjenningsbehovRiverTest {
                             ),
                             it.sykepengegrunnlagsfakta,
                         )
-                        assertNull(it.arbeidssituasjon)
                     },
                 kontekstbasertPubliserer = any(),
             )
@@ -309,81 +306,6 @@ internal class GodkjenningsbehovRiverTest {
                             ),
                             it.sykepengegrunnlagsfakta,
                         )
-                        assertNull(it.arbeidssituasjon)
-                    },
-                kontekstbasertPubliserer = any(),
-            )
-        }
-    }
-
-    @Test
-    fun `leser Godkjenningbehov for jordbruker`() {
-        val vilkårsgrunnlagId = UUID.randomUUID()
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagGodkjenningsbehov(
-                aktørId = AKTØR,
-                fødselsnummer = FNR,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                utbetalingId = UTBETALING_ID,
-                organisasjonsnummer = "",
-                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
-                arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
-                periodeFom = FOM,
-                periodeTom = TOM,
-                skjæringstidspunkt = FOM,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-                førstegangsbehandling = true,
-                utbetalingtype = Utbetalingtype.UTBETALING,
-                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-                orgnummereMedRelevanteArbeidsforhold = emptyList(),
-                kanAvvises = true,
-                id = HENDELSE,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                sykepengegrunnlagsfakta =
-                    Testmeldingfabrikk.godkjenningsbehovSelvstendigNæringsdrivende(
-                        sykepengegrunnlag = BigDecimal("600000.00"),
-                        seksG = BigDecimal("666666.66"),
-                        beregningsgrunnlag = BigDecimal("600000.00"),
-                        pensjonsgivendeInntekter = (2022..2024).map { år -> år to BigDecimal(200000) },
-                    ),
-            ),
-        )
-        verify(exactly = 1) {
-            mediator.mottaMelding(
-                melding =
-                    withArg<Godkjenningsbehov> {
-                        assertEquals(HENDELSE, it.id)
-                        assertEquals(FNR, it.fødselsnummer())
-                        assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
-                        assertEquals("", it.organisasjonsnummer)
-                        assertEquals(Yrkesaktivitetstype.SELVSTENDIG, it.yrkesaktivitetstype)
-                        assertEquals(FOM, it.periodeFom)
-                        assertEquals(TOM, it.periodeTom)
-                        assertEquals(FOM, it.skjæringstidspunkt)
-                        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, it.inntektskilde)
-                        assertEquals(true, it.kanAvvises)
-                        assertEquals(true, it.førstegangsbehandling)
-                        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
-                        assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
-                        assertEquals(
-                            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
-                                sykepengegrunnlag = BigDecimal("600000.0"),
-                                seksG = 666666.66,
-                                selvstendig =
-                                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
-                                        beregningsgrunnlag = BigDecimal("600000.0"),
-                                        pensjonsgivendeInntekter =
-                                            (2022..2024).map { år ->
-                                                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig.PensjonsgivendeInntekt(
-                                                    årstall = år,
-                                                    beløp = BigDecimal("200000"),
-                                                )
-                                            },
-                                    ),
-                            ),
-                            it.sykepengegrunnlagsfakta,
-                        )
-                        assertEquals(Arbeidssituasjon.JORDBRUKER, it.arbeidssituasjon)
                     },
                 kontekstbasertPubliserer = any(),
             )

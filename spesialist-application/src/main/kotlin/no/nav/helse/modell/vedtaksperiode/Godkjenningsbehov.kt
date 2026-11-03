@@ -55,7 +55,6 @@ class Godkjenningsbehov(
     val skjæringstidspunkt: LocalDate,
     val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     val foreløpigBeregnetSluttPåSykepenger: LocalDate,
-    val arbeidssituasjon: Arbeidssituasjon?,
     val relevanteSøknader: List<UUID>,
     val utbetalingsdager: List<Map<String, Any?>>?,
     private val json: String,
@@ -79,7 +78,6 @@ class Godkjenningsbehov(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             yrkesaktivitetstype = yrkesaktivitetstype,
-            arbeidssituasjon = arbeidssituasjon,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlinger = spleisBehandlinger,
             utbetalingId = utbetalingId,
@@ -149,7 +147,6 @@ class Godkjenningsbehov(
                 sykepengegrunnlagsfakta =
                     godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
                 foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
-                arbeidssituasjon = if (godkjenning["arbeidssituasjon"].asString() == "JORDBRUKER") godkjenning["arbeidssituasjon"].asEnum<Arbeidssituasjon>() else null,
                 relevanteSøknader = godkjenning["relevanteSøknader"].toList().map { it.asUUID() },
                 utbetalingsdager =
                     godkjenning["utbetalingsdager"]
