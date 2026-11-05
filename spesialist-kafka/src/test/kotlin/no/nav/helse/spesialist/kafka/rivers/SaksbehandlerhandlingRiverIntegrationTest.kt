@@ -136,7 +136,7 @@ class SaksbehandlerhandlingRiverIntegrationTest {
     }
 
     @Test
-    fun `lagrer endrede avslagsdager med behandlingId i totrinnsvurderingen`() {
+    fun `lagrer manuell vurdering av oppholdskrav med behandlingId i totrinnsvurderingen`() {
         // Given:
         val identitetsnummer = lagPerson().id
         val behandlingId = UUID.randomUUID()
@@ -145,7 +145,7 @@ class SaksbehandlerhandlingRiverIntegrationTest {
         testRapid.sendTestMessage(
             saksbehandlerhandlingMelding(
                 identitetsnummer = identitetsnummer,
-                handlingType = "AVSLAGSDAGER_ENDRET",
+                handlingType = "MANUELT_VURDERT_OPPHOLDSKRAV",
                 kreverTotrinnsvurdering = true,
                 skjæringstidspunkt = null,
                 behandlingId = behandlingId,
@@ -154,7 +154,7 @@ class SaksbehandlerhandlingRiverIntegrationTest {
 
         // Then:
         val handling = sessionContext.saksbehandlerhandlingRepository.alle().single()
-        assertEquals(HandlingType.AVSLAGSDAGER_ENDRET, handling.handlingType)
+        assertEquals(HandlingType.MANUELT_VURDERT_OPPHOLDSKRAV, handling.handlingType)
         assertEquals(SpleisBehandlingId(behandlingId), handling.behandlingId)
         assertNull(handling.skjæringstidspunkt)
         val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.alle().single()
