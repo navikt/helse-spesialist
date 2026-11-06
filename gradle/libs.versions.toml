@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.4.21"
-flyway = "13.11.1"
+flyway = "13.12.0"
 kotlinx-coroutines = "1.11.0"
 rapidsAndRivers = "2026091610031789545782"
 tbdLibs = "20261029.1843"
