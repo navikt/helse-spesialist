@@ -2,7 +2,7 @@
 kotlin = "2.4.21"
 flyway = "13.12.0"
 kotlinx-coroutines = "1.11.0"
-rapidsAndRivers = "2026091610031789545782"
+rapidsAndRivers = "2026110308421793691732"
 tbdLibs = "20261029.1843"
 sykepengerGradlePlugins = "20261029.1945"
 testcontainers = "2.0.5"
