@@ -105,7 +105,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-02",
                   "grad" : 100.0,
@@ -116,7 +117,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-03",
                   "grad" : 100.0,
@@ -127,7 +129,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-04",
                   "grad" : 100.0,
@@ -138,7 +141,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-05",
                   "grad" : 100.0,
@@ -149,7 +153,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-06",
                   "grad" : 100.0,
@@ -160,7 +165,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-07",
                   "grad" : 100.0,
@@ -171,7 +177,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-08",
                   "grad" : 100.0,
@@ -182,7 +189,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-09",
                   "grad" : 100.0,
@@ -193,7 +201,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-10",
                   "grad" : 100.0,
@@ -204,7 +213,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-11",
                   "grad" : 100.0,
@@ -215,7 +225,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-12",
                   "grad" : 100.0,
@@ -226,7 +237,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-13",
                   "grad" : 100.0,
@@ -237,7 +249,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-14",
                   "grad" : 100.0,
@@ -248,7 +261,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-15",
                   "grad" : 100.0,
@@ -259,7 +273,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-16",
                   "grad" : 100.0,
@@ -270,7 +285,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYKEDAG",
                   "utbetalingsdagtype" : "ARBEIDSGIVERPERIODEDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-17",
                   "grad" : 100.0,
@@ -288,7 +304,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-18",
                   "grad" : 100.0,
@@ -306,7 +323,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-19",
                   "grad" : 100.0,
@@ -324,7 +342,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-20",
                   "grad" : 100.0,
@@ -342,7 +361,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-21",
                   "grad" : 100.0,
@@ -353,7 +373,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "NAVHELGDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-22",
                   "grad" : 100.0,
@@ -364,7 +385,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "NAVHELGDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-23",
                   "grad" : 100.0,
@@ -382,7 +404,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-24",
                   "grad" : 100.0,
@@ -400,7 +423,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-25",
                   "grad" : 100.0,
@@ -418,7 +442,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-26",
                   "grad" : 100.0,
@@ -436,7 +461,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-27",
                   "grad" : 100.0,
@@ -454,7 +480,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-28",
                   "grad" : 100.0,
@@ -465,7 +492,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "NAVHELGDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-29",
                   "grad" : 100.0,
@@ -476,7 +504,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "sykdomsdagtype" : "SYK_HELGEDAG",
                   "utbetalingsdagtype" : "NAVHELGDAG",
                   "utbetalingsinfo" : null,
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-30",
                   "grad" : 100.0,
@@ -494,7 +523,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 }, {
                   "dato" : "2024-12-31",
                   "grad" : 100.0,
@@ -512,7 +542,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                     "totalGrad" : 100.0,
                     "utbetaling" : 692
                   },
-                  "begrunnelser" : null
+                  "begrunnelser" : null,
+                  "vurderingerAvLøpendeVilkår" : [ ]
                 } ],
                 "periodetilstand" : "TilGodkjenning",
                 "skjaeringstidspunkt" : "2024-12-01",
