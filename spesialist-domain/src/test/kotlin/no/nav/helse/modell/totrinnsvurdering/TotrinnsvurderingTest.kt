@@ -65,6 +65,39 @@ internal class TotrinnsvurderingTest {
     }
 
     @Test
+    fun `fjerner beslutter når saken har vært hos saksbehandler i mer enn en uke`() {
+        val nå = LocalDateTime.now()
+        val beslutter = nySaksbehandler()
+        val totrinnsvurdering =
+            nyTotrinnsvurdering(
+                beslutter = beslutter,
+                oppdatert = nå.minusWeeks(1).minusNanos(1),
+            )
+
+        totrinnsvurdering.fjernUtdatertBeslutter(nå)
+
+        assertEquals(null, totrinnsvurdering.beslutter)
+        assertEquals(nå, totrinnsvurdering.oppdatert)
+    }
+
+    @Test
+    fun `beholder beslutter når saken har vært hos saksbehandler i en uke eller mindre`() {
+        val nå = LocalDateTime.now()
+        val beslutter = nySaksbehandler()
+        val oppdatert = nå.minusWeeks(1)
+        val totrinnsvurdering =
+            nyTotrinnsvurdering(
+                beslutter = beslutter,
+                oppdatert = oppdatert,
+            )
+
+        totrinnsvurdering.fjernUtdatertBeslutter(nå)
+
+        assertEquals(beslutter, totrinnsvurdering.beslutter)
+        assertEquals(oppdatert, totrinnsvurdering.oppdatert)
+    }
+
+    @Test
     fun ferdigstill() {
         val totrinnsvurdering = nyTotrinnsvurdering()
         val behandlendeSaksbehandler = nySaksbehandler()
@@ -242,13 +275,14 @@ internal class TotrinnsvurderingTest {
         saksbehandler: SaksbehandlerOid? = null,
         beslutter: SaksbehandlerOid? = null,
         overstyringer: List<Overstyring> = emptyList(),
+        oppdatert: LocalDateTime? = LocalDateTime.now(),
     ) = Totrinnsvurdering.fraLagring(
         id = TotrinnsvurderingId(nextLong()),
         fødselsnummer = "1234",
         saksbehandler = saksbehandler,
         beslutter = beslutter,
         opprettet = LocalDateTime.now(),
-        oppdatert = LocalDateTime.now(),
+        oppdatert = oppdatert,
         overstyringer = overstyringer,
         tilstand = tilstand,
         vedtaksperiodeForkastet = false,
