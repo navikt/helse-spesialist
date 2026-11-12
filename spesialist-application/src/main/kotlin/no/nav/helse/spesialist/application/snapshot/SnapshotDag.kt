@@ -10,4 +10,5 @@ data class SnapshotDag(
     val sykdomsdagtype: SnapshotSykdomsdagtype,
     val utbetalingsdagtype: SnapshotUtbetalingsdagType,
     val utbetalingsinfo: SnapshotUtbetalingsinfo?,
+    val vurderingerAvLøpendeVilkår: List<SnapshotVurderingAvLøpendeVilkår>,
 )

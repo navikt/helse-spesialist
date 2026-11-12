@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektsmelding
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiInntektstype
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiKilde
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiKildetype
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiLøpendeVilkår
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiOmregnetArsinntekt
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodetilstand
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiPeriodetype
@@ -29,11 +30,13 @@ import no.nav.helse.spesialist.api.rest.saksbilde.ApiSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiSykmelding
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiUtbetalingsdagtype
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiUtbetalingsinfo
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiUtfallAvLøpendeVilkår
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagAvviksvurdering
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagInfotrygdV2
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagSpleisV2
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagV2
 import no.nav.helse.spesialist.api.rest.saksbilde.ApiVilkårsgrunnlagVurdering
+import no.nav.helse.spesialist.api.rest.saksbilde.ApiVurderingAvLøpendeVilkår
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotBegrunnelse
 import no.nav.helse.spesialist.application.snapshot.SnapshotDag
@@ -44,6 +47,7 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotInntekterFraAOrdning
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektskilde
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektsmelding
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
+import no.nav.helse.spesialist.application.snapshot.SnapshotLøpendeVilkår
 import no.nav.helse.spesialist.application.snapshot.SnapshotOmregnetArsinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetype
@@ -65,7 +69,9 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotUkjentHendelse
 import no.nav.helse.spesialist.application.snapshot.SnapshotUkjentVilkarsgrunnlag
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsdagType
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsinfo
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtfallAvLøpendeVilkår
 import no.nav.helse.spesialist.application.snapshot.SnapshotVilkarsgrunnlag
+import no.nav.helse.spesialist.application.snapshot.SnapshotVurderingAvLøpendeVilkår
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -78,6 +84,21 @@ fun SnapshotDag.tilApiDag() =
         utbetalingsdagtype = utbetalingsdagtype.tilApiUtbetalingsdagtype(),
         utbetalingsinfo = utbetalingsinfo?.tilApiUtbetalingsinfo(),
         begrunnelser = begrunnelser?.map { it.tilApiBegrunnelse() },
+        vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår.map { it.tilApiVurdering() },
+    )
+
+private fun SnapshotVurderingAvLøpendeVilkår.tilApiVurdering() =
+    ApiVurderingAvLøpendeVilkår(
+        vilkår =
+            when (vilkår) {
+                SnapshotLøpendeVilkår.OPPHOLDSKRAV -> ApiLøpendeVilkår.OPPHOLDSKRAV
+            },
+        vurderingId = vurderingId,
+        utfall =
+            when (utfall) {
+                SnapshotUtfallAvLøpendeVilkår.OPPFYLT -> ApiUtfallAvLøpendeVilkår.OPPFYLT
+                SnapshotUtfallAvLøpendeVilkår.IKKE_OPPFYLT -> ApiUtfallAvLøpendeVilkår.IKKE_OPPFYLT
+            },
     )
 
 private fun SnapshotSykdomsdagkilde.tilApiKilde() =

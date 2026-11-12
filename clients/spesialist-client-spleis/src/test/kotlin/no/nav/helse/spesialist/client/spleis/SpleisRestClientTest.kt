@@ -103,6 +103,37 @@ class SpleisRestClientTest {
     }
 
     @Test
+    fun `mapper vurderinger av løpende vilkår på en dag`() {
+        val vurderingId = UUID.randomUUID()
+        setupStub(
+            okJson(
+                REALISTISK_PERSON_RESPONS.replaceFirst(
+                    "\"begrunnelser\": []",
+                    """"begrunnelser": [], "vurderingerAvLøpendeVilkår": [{ "vilkår": "Oppholdskrav", "vurderingId": "$vurderingId", "utfall": "Oppfylt" }]""",
+                ),
+            ),
+        )
+
+        val person = lagKlient().hentPerson("11111111111")
+
+        assertNotNull(person)
+        assertEquals(
+            listOf(SnapshotVurderingAvLøpendeVilkår(SnapshotLøpendeVilkår.OPPHOLDSKRAV, vurderingId, SnapshotUtfallAvLøpendeVilkår.OPPFYLT)),
+            person.førsteDag().vurderingerAvLøpendeVilkår,
+        )
+    }
+
+    @Test
+    fun `dag uten vurderinger av løpende vilkår får tom liste`() {
+        setupStub(okJson(REALISTISK_PERSON_RESPONS))
+
+        val person = lagKlient().hentPerson("11111111111")
+
+        assertNotNull(person)
+        assertEquals(emptyList(), person.førsteDag().vurderingerAvLøpendeVilkår)
+    }
+
+    @Test
     fun `feiler ikke ved ukjente felter i responsen (fremtidssikring mot nye felter fra spleis)`() {
         setupStub(
             okJson(
@@ -154,6 +185,17 @@ class SpleisRestClientTest {
     private fun setupStub(response: ResponseDefinitionBuilder) {
         wireMock.stubFor(post(urlEqualTo("/api/person")).willReturn(response))
     }
+
+    private fun no.nav.helse.spleis.rest.hentperson.Person.førsteDag() =
+        tilSnapshotPerson()
+            .arbeidsgivere
+            .single()
+            .behandlinger
+            .single()
+            .perioder
+            .first()
+            .tidslinje
+            .single()
 
     private fun lagKlient() =
         SpleisRestClient(

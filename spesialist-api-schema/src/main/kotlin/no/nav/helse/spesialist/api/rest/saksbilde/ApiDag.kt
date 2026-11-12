@@ -110,4 +110,23 @@ data class ApiDag(
     val utbetalingsdagtype: ApiUtbetalingsdagtype,
     val utbetalingsinfo: ApiUtbetalingsinfo?,
     val begrunnelser: List<ApiBegrunnelse>?,
+    val vurderingerAvLøpendeVilkår: List<ApiVurderingAvLøpendeVilkår>,
 )
+
+@Serializable
+data class ApiVurderingAvLøpendeVilkår(
+    val vilkår: ApiLøpendeVilkår,
+    val vurderingId: UUID,
+    val utfall: ApiUtfallAvLøpendeVilkår,
+)
+
+@Serializable
+enum class ApiLøpendeVilkår {
+    OPPHOLDSKRAV,
+}
+
+@Serializable
+enum class ApiUtfallAvLøpendeVilkår {
+    OPPFYLT,
+    IKKE_OPPFYLT,
+}

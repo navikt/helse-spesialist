@@ -170,7 +170,23 @@ internal data class Dag(
     val grad: Double?,
     val utbetalingsinfo: Utbetalingsinfo?,
     val begrunnelser: List<Begrunnelse>?,
+    val vurderingerAvLøpendeVilkår: List<VurderingAvLøpendeVilkår> = emptyList(),
 )
+
+internal data class VurderingAvLøpendeVilkår(
+    val vilkår: LøpendeVilkår,
+    val vurderingId: UUID,
+    val utfall: UtfallAvLøpendeVilkår,
+)
+
+internal enum class LøpendeVilkår {
+    Oppholdskrav,
+}
+
+internal enum class UtfallAvLøpendeVilkår {
+    Oppfylt,
+    IkkeOppfylt,
+}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(

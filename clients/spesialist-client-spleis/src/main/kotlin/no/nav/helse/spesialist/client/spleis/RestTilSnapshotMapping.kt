@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotInntekterFraAOrdning
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektskilde
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektsmelding
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
+import no.nav.helse.spesialist.application.snapshot.SnapshotLøpendeVilkår
 import no.nav.helse.spesialist.application.snapshot.SnapshotOmregnetArsinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
 import no.nav.helse.spesialist.application.snapshot.SnapshotPensjonsgivendeInntekt
@@ -49,7 +50,9 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsinfo
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingslinje
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtfallAvLøpendeVilkår
 import no.nav.helse.spesialist.application.snapshot.SnapshotVurdering
+import no.nav.helse.spesialist.application.snapshot.SnapshotVurderingAvLøpendeVilkår
 import no.nav.helse.spleis.rest.hentperson.Arbeidsgiver
 import no.nav.helse.spleis.rest.hentperson.Arbeidsgiverinntekt
 import no.nav.helse.spleis.rest.hentperson.Arbeidsgiverrefusjon
@@ -65,6 +68,7 @@ import no.nav.helse.spleis.rest.hentperson.InntektFraAOrdningen
 import no.nav.helse.spleis.rest.hentperson.InntekterFraAOrdningen
 import no.nav.helse.spleis.rest.hentperson.Inntektskilde
 import no.nav.helse.spleis.rest.hentperson.Inntektsmelding
+import no.nav.helse.spleis.rest.hentperson.LøpendeVilkår
 import no.nav.helse.spleis.rest.hentperson.OmregnetArsinntekt
 import no.nav.helse.spleis.rest.hentperson.Oppdrag
 import no.nav.helse.spleis.rest.hentperson.PensjonsgivendeInntekt
@@ -96,8 +100,10 @@ import no.nav.helse.spleis.rest.hentperson.Utbetalingsinfo
 import no.nav.helse.spleis.rest.hentperson.Utbetalingslinje
 import no.nav.helse.spleis.rest.hentperson.Utbetalingstatus
 import no.nav.helse.spleis.rest.hentperson.Utbetalingtype
+import no.nav.helse.spleis.rest.hentperson.UtfallAvLøpendeVilkår
 import no.nav.helse.spleis.rest.hentperson.Vilkarsgrunnlag
 import no.nav.helse.spleis.rest.hentperson.Vurdering
+import no.nav.helse.spleis.rest.hentperson.VurderingAvLøpendeVilkår
 import java.math.BigDecimal
 
 /**
@@ -189,6 +195,21 @@ internal fun Dag.tilSnapshotDag() =
         sykdomsdagtype = sykdomsdagtype.tilSnapshotSykdomsdagtype(),
         utbetalingsdagtype = utbetalingsdagtype.tilSnapshotUtbetalingsdagType(),
         utbetalingsinfo = utbetalingsinfo?.tilSnapshotUtbetalingsinfo(),
+        vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår.map { it.tilSnapshotVurdering() },
+    )
+
+private fun VurderingAvLøpendeVilkår.tilSnapshotVurdering() =
+    SnapshotVurderingAvLøpendeVilkår(
+        vilkår =
+            when (vilkår) {
+                LøpendeVilkår.Oppholdskrav -> SnapshotLøpendeVilkår.OPPHOLDSKRAV
+            },
+        vurderingId = vurderingId,
+        utfall =
+            when (utfall) {
+                UtfallAvLøpendeVilkår.Oppfylt -> SnapshotUtfallAvLøpendeVilkår.OPPFYLT
+                UtfallAvLøpendeVilkår.IkkeOppfylt -> SnapshotUtfallAvLøpendeVilkår.IKKE_OPPFYLT
+            },
     )
 
 internal fun Sykdomsdagkilde.tilSnapshotSykdomsdagkilde() =
