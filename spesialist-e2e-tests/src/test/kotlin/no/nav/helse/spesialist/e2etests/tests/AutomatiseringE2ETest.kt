@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
     @Test
@@ -26,6 +27,18 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
             // When:
             aktivitetsloggNyAktivitet(listOf("RV_IV_1"))
         }
+
+        // Then:
+        medPersonISpeil {
+            assertGjeldendeOppgavestatus("AvventerSaksbehandler")
+        }
+        assertGodkjenningsbehovIkkeBesvart()
+    }
+
+    @Test
+    fun `fatter ikke automatisk vedtak når dager mangler vurdering av oppholdskravet`() {
+        // When:
+        søknadOgGodkjenningbehovKommerInn(dagerUtenVurderingAvOppholdskrav = listOf(LocalDate.of(2018, 1, 22)))
 
         // Then:
         medPersonISpeil {

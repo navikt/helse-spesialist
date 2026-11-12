@@ -44,6 +44,7 @@ class Godkjenningsbehov(
     val forsikringsvurderingId: UUID?,
     val opptjeningsvurderingId: UUID?,
     private val tags: List<String>,
+    private val dagerUtenVurderingAvOppholdskrav: List<LocalDate>,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
     val periodetype: Periodetype,
@@ -85,6 +86,7 @@ class Godkjenningsbehov(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             forsikringsvurderingId = forsikringsvurderingId,
             tags = tags,
+            dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             periodetype = periodetype,
@@ -131,6 +133,11 @@ class Godkjenningsbehov(
                         ?.takeUnless { it.isNull }
                         ?.asUUID(),
                 tags = godkjenning["tags"].toList().map { it.asString() },
+                dagerUtenVurderingAvOppholdskrav =
+                    godkjenning["dagerUtenVurderingAvOppholdskrav"]
+                        ?.toList()
+                        ?.map { it.asLocalDate() }
+                        .orEmpty(),
                 periodeFom = godkjenning["periodeFom"].asLocalDate(),
                 periodeTom = godkjenning["periodeTom"].asLocalDate(),
                 periodetype = godkjenning["periodetype"].asEnum<Periodetype>(),

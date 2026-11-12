@@ -102,6 +102,7 @@ abstract class AbstractE2EIntegrationTest {
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
         maksdato: LocalDate = LocalDate.of(2018, 12, 1),
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
         tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {},
     ): Vedtaksperiode {
         personSenderSøknad()
@@ -124,6 +125,7 @@ abstract class AbstractE2EIntegrationTest {
             inntektskilde = inntektskilde,
             utbetalingtype = utbetalingtype,
             maksdato = maksdato,
+            dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
         )
         return vedtaksperiode
     }
@@ -487,6 +489,7 @@ abstract class AbstractE2EIntegrationTest {
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         maksdato: LocalDate = LocalDate.of(2018, 12, 1),
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
     ) {
         testRapid.publish(
             testContext.person.fødselsnummer,
@@ -504,6 +507,7 @@ abstract class AbstractE2EIntegrationTest {
                 inntektskilde = inntektskilde,
                 utbetalingtype = utbetalingtype,
                 maksdato = maksdato,
+                dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
             ),
         )
     }

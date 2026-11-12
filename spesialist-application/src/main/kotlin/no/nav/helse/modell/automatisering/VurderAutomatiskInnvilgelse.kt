@@ -45,6 +45,7 @@ internal class VurderAutomatiskInnvilgelse(
                 yrkesaktivitetstype = godkjenningsbehov.yrkesaktivitetstype,
                 maksdato = godkjenningsbehov.foreløpigBeregnetSluttPåSykepenger,
                 tags = godkjenningsbehov.tags,
+                dagerUtenVurderingAvOppholdskrav = godkjenningsbehov.dagerUtenVurderingAvOppholdskrav,
             )
 
         when (resultat) {

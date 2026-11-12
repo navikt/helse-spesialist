@@ -111,6 +111,14 @@ internal class AutomatiseringTest : ApplicationTest() {
     }
 
     @Test
+    fun `periode med dager som mangler vurdering av oppholdskravet er ikke automatiserbar`() {
+        val resultat = forsøkAutomatisering(dagerUtenVurderingAvOppholdskrav = listOf(22 jan 2018))
+        assertKanIkkeAutomatiseres(resultat)
+        check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
+        assertEquals(setOf("Dager med opphold utenfor EØS mangler vurdering av oppholdskravet"), resultat.problemer.toSet())
+    }
+
+    @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
         val gjeldendeBehandling = enBehandling()
         sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
@@ -415,6 +423,7 @@ internal class AutomatiseringTest : ApplicationTest() {
         utbetaling: Utbetaling = enUtbetaling(),
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
     ) = automatisering.utfør(
         fødselsnummer = person.id.value,
         vedtaksperiodeId = vedtaksperiode1.id,
@@ -425,6 +434,7 @@ internal class AutomatiseringTest : ApplicationTest() {
         yrkesaktivitetstype = yrkesaktivitetstype,
         maksdato = maksdato,
         tags = tags,
+        dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
     )
 
     private fun enUtbetaling(

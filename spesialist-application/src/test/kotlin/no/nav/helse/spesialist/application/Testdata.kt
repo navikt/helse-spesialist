@@ -29,6 +29,7 @@ object Testdata {
         inntektsopplysningkilde: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde = Arbeidsgiver,
         json: String = "{}",
         skjæringstidspunkt: LocalDate = 1 jan 2018,
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
     ): GodkjenningsbehovData =
         GodkjenningsbehovData(
             id = id,
@@ -42,6 +43,7 @@ object Testdata {
             vilkårsgrunnlagId = UUID.randomUUID(),
             forsikringsvurderingId = forsikringsvurderingId,
             tags = tags,
+            dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
             periodeFom = 1 jan 2018,
             periodeTom = 31 jan 2018,
             periodetype = periodetype,

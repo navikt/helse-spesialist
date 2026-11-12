@@ -111,6 +111,7 @@ object Meldingsbygger {
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         maksdato: LocalDate = LocalDate.of(2018, 12, 1),
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -133,6 +134,7 @@ object Meldingsbygger {
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             tags = tags,
             foreløpigBeregnetSluttPåSykepenger = maksdato,
+            dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
             perioderMedSammeSkjæringstidspunkt =
                 (perioderMedSammeSkjæringstidspunkt ?: listOf(vedtaksperiode)).map { periode ->
                     mapOf(

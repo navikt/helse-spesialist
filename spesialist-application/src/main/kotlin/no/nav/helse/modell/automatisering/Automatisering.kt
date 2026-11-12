@@ -65,6 +65,7 @@ internal class Automatisering(
         yrkesaktivitetstype: Yrkesaktivitetstype,
         maksdato: LocalDate,
         tags: List<String>,
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate>,
     ): Automatiseringsresultat {
         val behandlingspakke = sessionContext.behandlingRepository.finnBehandlingspakke(gjeldendeBehandling, fødselsnummer)
         if (sessionContext.automatiseringDao.skalTvingeAutomatisering(vedtaksperiodeId.value)) {
@@ -84,6 +85,7 @@ internal class Automatisering(
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 maksdato = maksdato,
                 tags = tags,
+                dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
             )
         if (sjekkerSomHindrerAutomatisering.isNotEmpty()) {
             return Automatiseringsresultat.KanIkkeAutomatiseres(
@@ -205,6 +207,7 @@ internal class Automatisering(
         yrkesaktivitetstype: Yrkesaktivitetstype,
         maksdato: LocalDate,
         tags: List<String>,
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate>,
     ): List<AutomatiseringValidering> {
         val risikovurdering =
             sessionContext.risikovurderingDao.hentRisikovurdering(vedtaksperiodeId.value)
@@ -243,6 +246,7 @@ internal class Automatisering(
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Perioden skal til totrinnskontroll") { !harKravOmTotrinnsvurdering },
+            validering("Dager med opphold utenfor EØS mangler vurdering av oppholdskravet") { dagerUtenVurderingAvOppholdskrav.isEmpty() },
             IkkeAutomatiserNåddMaksdatoOgRefusjonAG(maksdato, tags, gjeldendeBehandling, sessionContext.varselRepository),
         )
     }

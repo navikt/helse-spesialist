@@ -22,6 +22,7 @@ data class GodkjenningsbehovData(
     val vilkårsgrunnlagId: UUID,
     val forsikringsvurderingId: UUID?,
     val tags: List<String>,
+    val dagerUtenVurderingAvOppholdskrav: List<LocalDate>,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
     val periodetype: Periodetype,

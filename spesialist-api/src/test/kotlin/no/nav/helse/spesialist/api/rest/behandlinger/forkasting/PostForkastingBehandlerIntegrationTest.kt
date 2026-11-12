@@ -385,6 +385,7 @@ class PostForkastingBehandlerIntegrationTest {
             spleisBehandlingId = behandling.spleisBehandlingId!!.value,
             vilkårsgrunnlagId = UUID.randomUUID(),
             tags = behandling.tags.toList(),
+            dagerUtenVurderingAvOppholdskrav = emptyList(),
             periodeFom = behandling.fom,
             periodeTom = behandling.tom,
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,

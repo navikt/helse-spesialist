@@ -297,6 +297,7 @@ object Testmeldingfabrikk {
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
         perioderMedSammeSkjæringstidspunkt: List<Map<String, Any>> =
             listOf(
                 mapOf(
@@ -348,6 +349,7 @@ object Testmeldingfabrikk {
                     "opptjeningsvurderingId" to opptjeningsvurderingId,
                     "behandlingId" to spleisBehandlingId,
                     "tags" to tags,
+                    "dagerUtenVurderingAvOppholdskrav" to dagerUtenVurderingAvOppholdskrav.map { it.toString() },
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
                     "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
                     "foreløpigBeregnetSluttPåSykepenger" to foreløpigBeregnetSluttPåSykepenger.toString(),

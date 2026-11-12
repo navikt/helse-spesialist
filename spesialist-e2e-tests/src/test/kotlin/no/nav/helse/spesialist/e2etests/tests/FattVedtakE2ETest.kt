@@ -11,6 +11,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.math.BigDecimal
+import java.time.LocalDate
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -33,6 +34,27 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertBehandlingTilstand("VedtakFattet")
         assertVedtakFattetEtterHovedregel()
         assertSykepengegrunnlagfakta()
+    }
+
+    @Test
+    fun `saksbehandler kan ikke fatte vedtak når dager mangler vurdering av oppholdskravet`() {
+        // Given:
+        søknadOgGodkjenningbehovKommerInn(dagerUtenVurderingAvOppholdskrav = listOf(LocalDate.of(2018, 1, 22)))
+
+        // When:
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerGodkjennerAlleVarsler()
+            assertThrows<AssertionError> {
+                saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
+            }.also {
+                assertContains(it.message!!, "POST-kall ga status 400")
+            }
+        }
+
+        // Then:
+        assertEquals(0, meldinger().count { it["@event_name"].asString() == "vedtak_fattet" })
+        assertGodkjenningsbehovIkkeBesvart()
     }
 
     @Test

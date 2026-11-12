@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgang
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -546,6 +547,50 @@ class PostVedtakIntegrationTest {
     }
 
     @Test
+    fun `gir bad request hvis dager mangler vurdering av oppholdskravet`() {
+        // Given:
+        val person =
+            lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling =
+            lagBehandling(
+                vedtaksperiodeId = vedtaksperiode.id,
+            )
+        val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode, dagerUtenVurderingAvOppholdskrav = listOf(behandling.fom))
+
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
+        sessionContext.oppgaveRepository.lagre(oppgave)
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
+                body = "{}",
+                saksbehandler = saksbehandler,
+                tilganger = setOf(Tilgang.Skriv),
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertJsonEquals(
+            """
+            {
+              "type": "about:blank",
+              "status": 400,
+              "title": "Dager med opphold utenfor EØS mangler vurdering av oppholdskravet",
+              "code": "DAGER_MANGLER_VURDERING_AV_OPPHOLDSKRAV" 
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!,
+        )
+    }
+
+    @Test
     fun `gir bad request hvis det finnes relevante varsler som ikke er vurdert`() {
         // Given:
         val person = lagPerson().also(sessionContext.personRepository::lagre)
@@ -819,6 +864,7 @@ class PostVedtakIntegrationTest {
     private fun lagGodkjenningsbehov(
         behandling: Behandling,
         vedtaksperiode: Vedtaksperiode,
+        dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
     ): Godkjenningsbehov =
         Godkjenningsbehov(
             id = UUID.randomUUID(),
@@ -834,6 +880,7 @@ class PostVedtakIntegrationTest {
             forsikringsvurderingId = null,
             opptjeningsvurderingId = null,
             tags = behandling.tags.toList(),
+            dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
             periodeFom = behandling.fom,
             periodeTom = behandling.tom,
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,

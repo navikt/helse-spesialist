@@ -4,6 +4,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.assertEquals
 
@@ -53,6 +54,18 @@ class GodkjenningsbehovTest {
     fun `skal kunne parse godkjenningsbehov uten opptjeningsvurderingId`() {
         val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderUtenYrkesaktivitet)
         assertNull(behov.opptjeningsvurderingId)
+    }
+
+    @Test
+    fun `skal kunne parse godkjenningsbehov med dager uten vurdering av oppholdskravet`() {
+        val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderMedYrkesaktivitet)
+        assertEquals(listOf(LocalDate.parse("2018-01-22"), LocalDate.parse("2018-01-23")), behov.data().dagerUtenVurderingAvOppholdskrav)
+    }
+
+    @Test
+    fun `godkjenningsbehov uten dager uten vurdering av oppholdskravet gir tom liste`() {
+        val behov = Godkjenningsbehov.fraJson(godkjenningMedSpleisperioderUtenYrkesaktivitet)
+        assertEquals(emptyList(), behov.data().dagerUtenVurderingAvOppholdskrav)
     }
 }
 
@@ -122,6 +135,7 @@ private val godkjenningMedSpleisperioderMedYrkesaktivitet =
   "@opprettet" : "2026-07-17T09:46:43.461492",
   "@event_name" : "behov",
   "Godkjenning" : {
+    "dagerUtenVurderingAvOppholdskrav" : [ "2018-01-22", "2018-01-23" ],
     "tags" : [ "Førstegangsbehandling", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "Innvilget", "EnArbeidsgiver" ],
     "kanAvvises" : true,
     "periodeFom" : "2018-01-03",

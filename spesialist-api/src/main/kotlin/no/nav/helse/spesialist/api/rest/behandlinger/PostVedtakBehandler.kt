@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.Tags
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.BEHANDLING_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.DAGER_MANGLER_VURDERING_AV_OPPHOLDSKRAV
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.behandlinger.ApiPostVedtakErrorCode.OPPGAVE_FEIL_TILSTAND
@@ -168,6 +169,8 @@ class PostVedtakBehandler(
         outbox: Outbox,
     ) {
         if (overlapperMedInfotrygd()) throw FattVedtakException(OVERLAPPER_MED_INFOTRYGD)
+        val godkjenningsbehov = transaksjon.meldingDao.finnGodkjenningsbehov(oppgave.godkjenningsbehovId).data()
+        if (godkjenningsbehov.dagerUtenVurderingAvOppholdskrav.isNotEmpty()) throw FattVedtakException(DAGER_MANGLER_VURDERING_AV_OPPHOLDSKRAV)
         val saksbehandlerOid = saksbehandler.id
         validerOgGodkjennVarsler(
             behandlingRepository = transaksjon.behandlingRepository,
@@ -358,6 +361,10 @@ enum class ApiPostVedtakErrorCode(
     ),
     OVERLAPPER_MED_INFOTRYGD(
         "Kan ikke fatte vedtak fordi perioden overlapper med infotrygd",
+        HttpStatusCode.BadRequest,
+    ),
+    DAGER_MANGLER_VURDERING_AV_OPPHOLDSKRAV(
+        "Dager med opphold utenfor EØS mangler vurdering av oppholdskravet",
         HttpStatusCode.BadRequest,
     ),
     BEHANDLING_IKKE_FUNNET("Fant ikke behandling", HttpStatusCode.NotFound),

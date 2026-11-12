@@ -93,6 +93,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             nytt.spleisBehandlingId != gammelt.spleisBehandlingId ||
             nytt.vilkårsgrunnlagId != gammelt.vilkårsgrunnlagId ||
             nytt.tags.sorted() != gammelt.tags.sorted() ||
+            nytt.dagerUtenVurderingAvOppholdskrav.sorted() != gammelt.dagerUtenVurderingAvOppholdskrav.sorted() ||
             nytt.periodeFom != gammelt.periodeFom ||
             nytt.periodeTom != gammelt.periodeTom ||
             nytt.periodetype != gammelt.periodetype ||
