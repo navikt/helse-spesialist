@@ -8,7 +8,6 @@ import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
-import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varselvurdering
