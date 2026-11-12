@@ -124,6 +124,16 @@ class SpleisRestClientTest {
     }
 
     @Test
+    fun `mapper dagtypen SykUtenforEøs`() {
+        setupStub(okJson(REALISTISK_PERSON_RESPONS.replaceFirst("\"sykdomsdagtype\": \"Sykedag\"", "\"sykdomsdagtype\": \"SykUtenforEøs\"")))
+
+        val person = lagKlient().hentPerson("11111111111")
+
+        assertNotNull(person)
+        assertEquals(SnapshotSykdomsdagtype.SYKUTENFOREOS, person.førsteDag().sykdomsdagtype)
+    }
+
+    @Test
     fun `dag uten vurderinger av løpende vilkår får tom liste`() {
         setupStub(okJson(REALISTISK_PERSON_RESPONS))
 

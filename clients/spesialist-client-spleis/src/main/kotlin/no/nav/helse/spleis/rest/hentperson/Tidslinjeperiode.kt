@@ -39,6 +39,7 @@ internal enum class Sykdomsdagtype {
     AndreYtelserSvangerskapspenger,
     AndreYtelserOpplaringspenger,
     AndreYtelserDagpenger,
+    SykUtenforEøs,
 }
 
 internal enum class UtbetalingsdagType {

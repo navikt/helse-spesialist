@@ -627,6 +627,7 @@ internal fun Sykdomsdagtype.tilSnapshotSykdomsdagtype() =
         Sykdomsdagtype.Ubestemtdag -> SnapshotSykdomsdagtype.UBESTEMTDAG
         Sykdomsdagtype.MeldingTilNavDag -> SnapshotSykdomsdagtype.MELDINGTILNAVDAG
         Sykdomsdagtype.AvslattMeldingTilNavDag -> SnapshotSykdomsdagtype.AVSLATTMELDINGTILNAVDAG
+        Sykdomsdagtype.SykUtenforEøs -> SnapshotSykdomsdagtype.SYKUTENFOREOS
     }
 
 internal fun no.nav.helse.spleis.rest.hentperson.UtbetalingsdagType.tilSnapshotUtbetalingsdagType() =
