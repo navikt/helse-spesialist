@@ -185,6 +185,7 @@ object SnapshotTestdata {
         oppfyllerKravOmOpptjening = true,
         opptjeningFra = 1 jan 2000,
         opptjeningsvurderingId = UUID.randomUUID(),
+        medlemskapsvurderingId = UUID.randomUUID(),
         arbeidsgiverrefusjoner =
             listOf(
                 SnapshotArbeidsgiverrefusjon(

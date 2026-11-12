@@ -44,7 +44,7 @@ data class ApiVilkårsgrunnlagInfotrygdV2(
     override val sykepengegrunnlag: Double,
     val omregnetArsinntekt: Double,
     val opptjeningsvurderingId: UUID,
-    val medlemskapsvurderingId: UUID?,
+    val medlemskapsvurderingId: UUID,
 ) : ApiVilkårsgrunnlagV2
 
 @Serializable
@@ -65,7 +65,7 @@ data class ApiVilkårsgrunnlagSpleisV2(
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
     val opptjeningsvurderingId: UUID,
-    val medlemskapsvurderingId: UUID?,
+    val medlemskapsvurderingId: UUID,
     @get:JsonFormat(shape = JsonFormat.Shape.STRING)
     val beregningsgrunnlag: BigDecimal,
     val forsikringsvurderingId: UUID?,

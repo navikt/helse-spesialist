@@ -78,7 +78,7 @@ class SpleisRestClientTest {
         val spleisgrunnlag = assertIs<SnapshotSpleisVilkarsgrunnlag>(vilkarsgrunnlag[0])
         val infotrygdgrunnlag = assertIs<SnapshotInfotrygdVilkarsgrunnlag>(vilkarsgrunnlag[1])
         assertEquals(UUID.fromString("00000000-0000-0000-0000-000000000006"), spleisgrunnlag.medlemskapsvurderingId)
-        assertEquals(null, infotrygdgrunnlag.medlemskapsvurderingId)
+        assertEquals(UUID.fromString("00000000-0000-0000-0000-000000000007"), infotrygdgrunnlag.medlemskapsvurderingId)
     }
 
     @Test
@@ -320,7 +320,8 @@ class SpleisRestClientTest {
                   "sykepengegrunnlag": 400000.0,
                   "inntekter": [],
                   "arbeidsgiverrefusjoner": [],
-                  "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000005"
+                  "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000005",
+                  "medlemskapsvurderingId": "00000000-0000-0000-0000-000000000007"
                 }
               ]
             }

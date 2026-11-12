@@ -19,7 +19,7 @@ internal sealed interface Vilkarsgrunnlag {
     val inntekter: List<Arbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
     val opptjeningsvurderingId: UUID
-    val medlemskapsvurderingId: UUID?
+    val medlemskapsvurderingId: UUID
 }
 
 internal data class SpleisVilkarsgrunnlag(
@@ -39,7 +39,7 @@ internal data class SpleisVilkarsgrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
     override val opptjeningsvurderingId: UUID,
-    override val medlemskapsvurderingId: UUID? = null,
+    override val medlemskapsvurderingId: UUID,
     val skjonnsmessigFastsattAarlig: Double? = null,
 ) : Vilkarsgrunnlag
 
@@ -51,7 +51,7 @@ internal data class InfotrygdVilkarsgrunnlag(
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val opptjeningsvurderingId: UUID,
-    override val medlemskapsvurderingId: UUID? = null,
+    override val medlemskapsvurderingId: UUID,
 ) : Vilkarsgrunnlag
 
 internal data class Sykepengegrunnlagsgrense(
