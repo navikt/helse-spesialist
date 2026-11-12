@@ -22,8 +22,8 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand.GODKJENT
-import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varsel.Companion.forhindrerAutomatisering
+import no.nav.helse.spesialist.domain.Varsel.Companion.reaktiverEksisterendeEllerOpprettNytt
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -180,8 +180,10 @@ internal class Automatisering(
         val antallTidligereKorrigeringer =
             sessionContext.meldingDao.antallGangerVedtaksperiodeErAutomatisertMedKorrigertSøknad(vedtaksperiodeId)
         if (antallTidligereKorrigeringer >= 2) {
-            val varsel = Varsel.nytt(gjeldendeBehandling.id, gjeldendeBehandling.spleisBehandlingId, Varselkode.SB_SØ_1)
-            sessionContext.varselRepository.lagre(varsel)
+            sessionContext.varselRepository
+                .finnVarslerFor(gjeldendeBehandling.id)
+                .reaktiverEksisterendeEllerOpprettNytt(Varselkode.SB_SØ_1, gjeldendeBehandling)
+                ?.also { sessionContext.varselRepository.lagre(it) }
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Antall ganger vedtaksperioden er automatisk godkjent med korrigert søknad er to eller mer",
             )

@@ -129,6 +129,59 @@ internal class AutomatiseringTest : ApplicationTest() {
     }
 
     @Test
+    fun `reaktiverer inaktivt varsel om korrigert søknad i stedet for å opprette nytt`() {
+        val gjeldendeBehandling = enBehandling()
+        val eksisterendeVarsel = Varsel.nytt(gjeldendeBehandling.id, gjeldendeBehandling.spleisBehandlingId, Varselkode.SB_SØ_1)
+        eksisterendeVarsel.deaktiver()
+        sessionContext.varselRepository.lagre(eksisterendeVarsel)
+        sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
+            person.id.value,
+            vedtaksperiode1.id.value,
+            hendelseId,
+        )
+        repeat(2) {
+            sessionContext.meldingDao.opprettAutomatiseringMedKorrigertSøknad(vedtaksperiode1.id.value, UUID.randomUUID())
+        }
+
+        blirManuellOppgave(gjeldendeBehandling = gjeldendeBehandling)
+
+        val varsler = sessionContext.varselRepository.finnVarslerFor(gjeldendeBehandling.id)
+        assertEquals(1, varsler.size)
+        assertEquals(eksisterendeVarsel.id, varsler.single().id)
+        assertEquals(Varsel.Status.AKTIV, varsler.single().status)
+    }
+
+    @Test
+    fun `oppretter ikke nytt varsel om korrigert søknad når behandlingen allerede har et godkjent varsel`() {
+        val gjeldendeBehandling = enBehandling()
+        val eksisterendeVarsel =
+            Varsel.fraLagring(
+                id = VarselId(UUID.randomUUID()),
+                spleisBehandlingId = gjeldendeBehandling.spleisBehandlingId,
+                behandlingUnikId = gjeldendeBehandling.id,
+                status = Varsel.Status.GODKJENT,
+                kode = Varselkode.SB_SØ_1.name,
+                opprettetTidspunkt = LocalDateTime.now(),
+                vurdering = null,
+            )
+        sessionContext.varselRepository.lagre(eksisterendeVarsel)
+        sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
+            person.id.value,
+            vedtaksperiode1.id.value,
+            hendelseId,
+        )
+        repeat(2) {
+            sessionContext.meldingDao.opprettAutomatiseringMedKorrigertSøknad(vedtaksperiode1.id.value, UUID.randomUUID())
+        }
+
+        blirManuellOppgave(gjeldendeBehandling = gjeldendeBehandling)
+
+        val varsler = sessionContext.varselRepository.finnVarslerFor(gjeldendeBehandling.id)
+        assertEquals(1, varsler.size)
+        assertEquals(Varsel.Status.GODKJENT, varsler.single().status)
+    }
+
+    @Test
     fun `vedtaksperiode som mottok første søknad for mer enn 6 måneder er ikke automatiserbar`() {
         sessionContext.meldingDao.registrerBehandlingOpprettetKorrigertSøknad(
             person.id.value,
