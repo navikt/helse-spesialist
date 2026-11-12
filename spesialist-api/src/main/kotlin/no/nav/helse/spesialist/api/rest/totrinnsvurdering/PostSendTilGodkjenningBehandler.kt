@@ -44,6 +44,7 @@ class PostSendTilGodkjenningBehandler : PostBehandler<OppgaverBase.OppgaveId.Tot
                 kallKontekst.transaksjon.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)
                     ?: return@medOppgave RestResponse.Error(ApiPostSendTilGodkjenningErrorCode.TOTRINNSVURDERING_IKKE_FUNNET)
             try {
+                totrinnsvurdering.fjernUtdatertBeslutter()
                 håndterVedtakBegrunnelse(
                     utfall = behandling.utfall(),
                     begrunnelse = request.begrunnelse,

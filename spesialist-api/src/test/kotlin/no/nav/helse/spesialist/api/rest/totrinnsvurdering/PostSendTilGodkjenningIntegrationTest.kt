@@ -8,6 +8,7 @@ import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Totrinnsvurdering
+import no.nav.helse.spesialist.domain.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varselvurdering
@@ -227,6 +228,55 @@ class PostSendTilGodkjenningIntegrationTest {
         val historikk = sessionContext.periodehistorikkDao.finnForOppgave(oppgave.id.value)
         assertEquals(1, historikk.size)
         assertInstanceOf<AvventerTotrinnsvurdering>(historikk.single())
+    }
+
+    @Test
+    fun `fjerner tidligere beslutter når saken sendes til godkjenning etter mer enn en uke`() {
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        val behandling =
+            lagBehandling(
+                vedtaksperiodeId = vedtaksperiode.id,
+                tags = setOf("Innvilget"),
+            )
+        sessionContext.behandlingRepository.lagre(behandling)
+        val tidligereSaksbehandler = lagSaksbehandler()
+        val tidligereBeslutter = lagSaksbehandler().also(sessionContext.saksbehandlerRepository::lagre)
+        val oppgave =
+            lagOppgave(
+                behandlingId = behandling.spleisBehandlingId!!,
+                godkjenningsbehovId = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiode.id,
+            ).also(sessionContext.oppgaveRepository::lagre)
+        val totrinnsvurdering = Totrinnsvurdering.ny(person.id.value)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id.value, tidligereSaksbehandler.id)
+        totrinnsvurdering.sendIRetur(oppgave.id.value, tidligereBeslutter.id)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        sessionContext.totrinnsvurderingRepository.lagre(
+            Totrinnsvurdering.fraLagring(
+                id = totrinnsvurdering.id(),
+                fødselsnummer = totrinnsvurdering.fødselsnummer,
+                saksbehandler = totrinnsvurdering.saksbehandler,
+                beslutter = totrinnsvurdering.beslutter,
+                opprettet = totrinnsvurdering.opprettet,
+                oppdatert = LocalDateTime.now().minusWeeks(1).minusSeconds(1),
+                overstyringer = totrinnsvurdering.overstyringer,
+                tilstand = totrinnsvurdering.tilstand,
+                vedtaksperiodeForkastet = totrinnsvurdering.vedtaksperiodeForkastet,
+            ),
+        )
+
+        val response =
+            integrationTestFixture.post(
+                url = "/api/oppgaver/${oppgave.id.value}/totrinnsvurdering/send-til-godkjenning",
+                body = """{"begrunnelse":"En begrunnelse"}""",
+                saksbehandler = tidligereBeslutter,
+            )
+
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        assertEquals(null, sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(person.id.value)?.beslutter)
+        assertEquals(null, sessionContext.oppgaveRepository.finnOrNull(oppgave.id)?.tildeltTil)
     }
 
     @Test
