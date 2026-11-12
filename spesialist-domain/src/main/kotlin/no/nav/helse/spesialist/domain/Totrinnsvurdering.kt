@@ -62,6 +62,14 @@ class Totrinnsvurdering private constructor(
             this.beslutter = beslutter
         }
 
+    fun fjernUtdatertBeslutter(nå: LocalDateTime = LocalDateTime.now()) {
+        val sistOppdatert = oppdatert
+        if (beslutter != null && (sistOppdatert == null || sistOppdatert.isBefore(nå.minusWeeks(1)))) {
+            beslutter = null
+            oppdatert = nå
+        }
+    }
+
     fun nyOverstyring(overstyring: Overstyring) =
         oppdatering {
             _overstyringer.add(overstyring)
