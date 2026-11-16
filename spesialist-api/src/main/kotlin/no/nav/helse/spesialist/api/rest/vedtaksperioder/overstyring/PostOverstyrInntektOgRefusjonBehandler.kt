@@ -41,6 +41,10 @@ class PostOverstyrInntektOgRefusjonBehandler : PostBehandler<Vedtaksperioder.Ved
         person: Person,
         kallKontekst: KallKontekst,
     ): RestResponse<Unit, ApiOverstyrInntektOgRefusjonErrorCode> {
+        if (request.harRefusjonsopplysningMedTomFørFom()) {
+            return RestResponse.Error(ApiOverstyrInntektOgRefusjonErrorCode.REFUSJONSOPPLYSNING_TOM_FØR_FOM)
+        }
+
         val overstyring =
             OverstyrtInntektOgRefusjon.ny(
                 saksbehandlerOid = kallKontekst.saksbehandler.id,
@@ -96,6 +100,11 @@ class PostOverstyrInntektOgRefusjonBehandler : PostBehandler<Vedtaksperioder.Ved
 
         return RestResponse.NoContent()
     }
+
+    private fun ApiOverstyrInntektOgRefusjonRequest.harRefusjonsopplysningMedTomFørFom() =
+        arbeidsgivere
+            .flatMap { it.refusjonsopplysninger.orEmpty() }
+            .any { it.tom?.isBefore(it.fom) == true }
 }
 
 enum class ApiOverstyrInntektOgRefusjonErrorCode(
@@ -104,4 +113,5 @@ enum class ApiOverstyrInntektOgRefusjonErrorCode(
 ) : ApiErrorCode {
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    REFUSJONSOPPLYSNING_TOM_FØR_FOM("Refusjonsopplysning har tom før fom", HttpStatusCode.BadRequest),
 }

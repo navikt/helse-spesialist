@@ -122,6 +122,57 @@ class PostOverstyrInntektOgRefusjonIntegrationTest {
     }
 
     @Test
+    fun `refusjonsopplysning med tom før fom gir 400`() {
+        val fødselsnummer = lagFødselsnummer()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val saksbehandler = lagSaksbehandler()
+        val vedtaksperiodeId = UUID.randomUUID()
+
+        val person =
+            lagPerson(id = Identitetsnummer.fraString(fødselsnummer))
+                .also(sessionContext.personRepository::lagre)
+
+        lagVedtaksperiode(
+            id = VedtaksperiodeId(vedtaksperiodeId),
+            identitetsnummer = person.id,
+            organisasjonsnummer = organisasjonsnummer,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+
+        val response =
+            integrationTestFixture.post(
+                url = "/api/vedtaksperioder/$vedtaksperiodeId/overstyringer/inntekt-og-refusjon",
+                body =
+                    """
+                    {
+                        "skjæringstidspunkt": "2021-01-01",
+                        "arbeidsgivere": [
+                            {
+                                "organisasjonsnummer": "$organisasjonsnummer",
+                                "månedligInntekt": 25000.0,
+                                "fraMånedligInntekt": 25001.0,
+                                "refusjonsopplysninger": [
+                                    { "fom": "2021-01-01", "tom": "2021-01-13", "beløp": 25000.0 },
+                                    { "fom": "2021-01-14", "tom": "2021-01-13", "beløp": 25000.0 }
+                                ],
+                                "fraRefusjonsopplysninger": null,
+                                "begrunnelse": "begrunnelse",
+                                "forklaring": "testbortforklaring",
+                                "lovhjemmel": null,
+                                "fom": null,
+                                "tom": null
+                            }
+                        ]
+                    }
+                    """.trimIndent(),
+                saksbehandler = saksbehandler,
+            )
+
+        assertEquals(400, response.status)
+        assertEquals(0, totrinnsvurderingRepository.alle().count { it.fødselsnummer == fødselsnummer })
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
+    }
+
+    @Test
     fun `mangler tilgang til person gir 403`() {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
