@@ -79,6 +79,7 @@ internal class OpprettSaksbehandleroppgave(
                 inntektsforhold(inntektsforhold)
                 periodetype(periodetype)
                 påVent(vedtaksperiodeId, sessionContext)
+                retur(fødselsnummer, sessionContext)
                 skjønnsfastsettelse(varslerForBehandlingspakke)
                 tilbakedatert(varslerForBehandlingspakke)
                 kunÅpenGosysOppgave(varslerForBehandlingspakke)
@@ -214,6 +215,17 @@ internal class OpprettSaksbehandleroppgave(
         sessionContext: SessionContext,
     ) {
         if (sessionContext.påVentDao.erPåVent(vedtaksperiodeId)) add(PÅ_VENT)
+    }
+
+    // Saksbehandler er satt når saken har vært hos beslutter. Er den tilbake hos saksbehandler, er den i retur (manuelt eller automatisk).
+    private fun MutableSet<Egenskap>.retur(
+        fødselsnummer: String,
+        sessionContext: SessionContext,
+    ) {
+        val totrinnsvurdering = sessionContext.totrinnsvurderingRepository.finnAktivForPersonOrNull(fødselsnummer) ?: return
+        if (totrinnsvurdering.tilstand == TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER && totrinnsvurdering.saksbehandler != null) {
+            add(RETUR)
+        }
     }
 
     private fun MutableSet<Egenskap>.skjønnsfastsettelse(varsler: List<Varsel>) {

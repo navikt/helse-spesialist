@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.application.testfixtures.lagKollektivForsikring
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.Totrinnsvurdering
 import no.nav.helse.spesialist.domain.oppgave.Egenskap
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.ARBEIDSTAKER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.DELVIS_REFUSJON
@@ -36,6 +37,7 @@ import no.nav.helse.spesialist.domain.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.HASTER
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.PÅ_VENT
+import no.nav.helse.spesialist.domain.oppgave.Egenskap.RETUR
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.REVURDERING
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.RISK_QA
 import no.nav.helse.spesialist.domain.oppgave.Egenskap.SKJØNNSFASTSETTELSE
@@ -413,6 +415,48 @@ internal class OpprettSaksbehandleroppgaveTest : ApplicationTest() {
             FORSTEGANGSBEHANDLING,
             ARBEIDSTAKER,
         )
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap RETUR dersom totrinnsvurderingen er sendt i retur av beslutter`() {
+        lagreTotrinnsvurdering {
+            sendTilBeslutter(1L, SaksbehandlerOid(UUID.randomUUID()))
+            sendIRetur(1L, SaksbehandlerOid(UUID.randomUUID()))
+        }
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, RETUR)
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap RETUR dersom totrinnsvurderingen har fått automatisk retur`() {
+        lagreTotrinnsvurdering {
+            sendTilBeslutter(1L, SaksbehandlerOid(UUID.randomUUID()))
+            settAvventerSaksbehandler()
+        }
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, RETUR)
+    }
+
+    @Test
+    fun `oppretter ikke oppgave med egenskap RETUR dersom totrinnsvurderingen ikke har vært hos beslutter`() {
+        lagreTotrinnsvurdering()
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    @Test
+    fun `oppretter ikke oppgave med egenskap RETUR dersom totrinnsvurderingen er godkjent`() {
+        lagreTotrinnsvurdering {
+            sendTilBeslutter(1L, SaksbehandlerOid(UUID.randomUUID()))
+            sendIRetur(1L, SaksbehandlerOid(UUID.randomUUID()))
+            ferdigstill()
+        }
+        assertTrue(command.execute(context, sessionContext, outbox))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    private fun lagreTotrinnsvurdering(endring: Totrinnsvurdering.() -> Unit = {}) {
+        sessionContext.totrinnsvurderingRepository.lagre(Totrinnsvurdering.ny(person.id.value).apply(endring))
     }
 
     private fun lagrePerson(

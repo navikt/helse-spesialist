@@ -90,6 +90,57 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
     }
 
     @Test
+    fun `oppgaven beholder returegenskapen når spleis beregner perioden på nytt etter retur`() {
+        // Given:
+        val vedtaksperiode =
+            førsteVedtaksperiode().apply {
+                fom = 1 jan 2021
+                tom = 31 jan 2021
+            }
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+        saksbehandlerSenderTilBeslutter()
+        beslutterMedPersonISpeil {
+            saksbehandlerSenderIRetur("Trenger ny vurdering")
+        }
+
+        // When:
+        spleisReberegnerAutomatisk(vedtaksperiode)
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+
+        // Then:
+        assertOppgavestatuserKronoligisk("Invalidert", "AvventerSaksbehandler")
+        medPersonISpeil {
+            assertHarOppgaveegenskap("RETUR")
+            assertHarIkkeOppgaveegenskap("BESLUTTER")
+        }
+    }
+
+    @Test
+    fun `oppgaven får returegenskap når spleis beregner perioden på nytt mens den er hos beslutter`() {
+        // Given:
+        val vedtaksperiode =
+            førsteVedtaksperiode().apply {
+                fom = 1 jan 2021
+                tom = 31 jan 2021
+            }
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+        saksbehandlerSenderTilBeslutter()
+
+        // When:
+        spleisReberegnerAutomatisk(vedtaksperiode)
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+
+        // Then:
+        assertOppgavestatuserKronoligisk("Invalidert", "AvventerSaksbehandler")
+        medPersonISpeil {
+            assertHarOppgaveegenskap("RETUR")
+            assertHarIkkeOppgaveegenskap("BESLUTTER")
+        }
+    }
+
+    @Test
     fun `send til godkjenning via REST lagrer vedtakbegrunnelse`() {
         // Given:
         førsteVedtaksperiode().apply {
@@ -162,5 +213,20 @@ class TotrinnsvurderingRestApiE2ETest : AbstractE2EIntegrationTest() {
             assertHarIkkeOppgaveegenskap("BESLUTTER")
         }
         assertGjeldendeOppgavestatus("AvventerSaksbehandler", vedtaksperiode)
+    }
+
+    private fun saksbehandlerSenderTilBeslutter() {
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken()
+            saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+                periode = (2 jan 2021) tilOgMed (31 jan 2021),
+                periodebeløp = BigDecimal("1111.11"),
+                ekskluderteUkedager = emptyList(),
+                notatTilBeslutter = "notat",
+            )
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerSenderTilGodkjenning()
+        }
     }
 }
