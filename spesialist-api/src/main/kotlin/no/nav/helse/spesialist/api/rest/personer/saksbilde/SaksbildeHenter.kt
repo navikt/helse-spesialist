@@ -279,6 +279,7 @@ class SaksbildeHenter(
                                                                             vedtaksperiodeId = it.vedtaksperiodeId,
                                                                         )
                                                                     },
+                                                                graderteAndreYtelserVersjon = periode.graderteAndreYtelserVersjon,
                                                             )
                                                         }
 
@@ -446,6 +447,7 @@ class SaksbildeHenter(
                                                                         vedtaksperiodeId = it.vedtaksperiodeId,
                                                                     )
                                                                 },
+                                                            graderteAndreYtelserVersjon = periode.graderteAndreYtelserVersjon,
                                                         )
                                                     }
 

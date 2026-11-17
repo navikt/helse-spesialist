@@ -194,6 +194,44 @@ class SaksbildeHenterTest : AbstractSaksbildeTest() {
     }
 
     @Test
+    fun `periode med versjon av graderte andre ytelser`() {
+        val personRef = opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef)
+        val (id, fom, tom) = PERIODE
+        val graderteAndreYtelserVersjon = UUID.randomUUID()
+        val beregnetPeriode =
+            opprettBeregnetPeriode(fom, tom, id).copy(
+                graderteAndreYtelserVersjon = graderteAndreYtelserVersjon,
+            )
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(beregnetPeriode))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = hentSaksbilde()
+
+        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
+        assertEquals(graderteAndreYtelserVersjon.toString(), periode["graderteAndreYtelserVersjon"].asString())
+    }
+
+    @Test
+    fun `periode uten versjon av graderte andre ytelser`() {
+        val personRef = opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(personRef)
+        val (id, fom, tom) = PERIODE
+        val snapshotBehandling = opprettSnapshotGenerasjon(listOf(opprettBeregnetPeriode(fom, tom, id)))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotBehandling))
+        mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
+
+        val body = hentSaksbilde()
+
+        val periode = body["arbeidsgivere"].first()["behandlinger"].first()["perioder"].first()
+        assertTrue(periode.has("graderteAndreYtelserVersjon"))
+        assertTrue(periode["graderteAndreYtelserVersjon"].isNull)
+    }
+
+    @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
         val person =

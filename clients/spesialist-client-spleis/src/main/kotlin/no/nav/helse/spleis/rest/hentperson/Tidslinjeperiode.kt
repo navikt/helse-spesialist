@@ -251,6 +251,7 @@ internal data class BeregnetPeriode(
     val periodevilkar: Periodevilkar,
     val vilkarsgrunnlagId: UUID?,
     val annulleringskandidater: List<Annulleringskandidat>,
+    val graderteAndreYtelserVersjon: UUID?,
     override val inntektstype: Inntektstype = Inntektstype.EnArbeidsgiver,
 ) : Tidslinjeperiode
 

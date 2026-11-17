@@ -664,7 +664,8 @@ class HentPersonE2ETest : AbstractE2EIntegrationTest() {
                   "arligBelop" : "320210.0",
                   "inntektsar" : 2021
                 } ],
-                "annulleringskandidater" : [ ]
+                "annulleringskandidater" : [ ],
+                "graderteAndreYtelserVersjon" : null
               } ]
             } ]
           } ],

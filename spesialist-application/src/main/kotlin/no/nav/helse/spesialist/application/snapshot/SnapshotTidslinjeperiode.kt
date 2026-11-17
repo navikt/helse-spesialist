@@ -57,6 +57,7 @@ data class SnapshotBeregnetPeriode(
     val pensjonsgivendeInntekter: List<SnapshotPensjonsgivendeInntekt>,
     val annulleringskandidater: List<SnapshotAnnulleringskandidat>,
     val grunnbeløpsjustertGjennomsnitt: BigDecimal?,
+    val graderteAndreYtelserVersjon: UUID?,
 ) : SnapshotTidslinjeperiode
 
 data class SnapshotUkjentTidslinjeperiode(

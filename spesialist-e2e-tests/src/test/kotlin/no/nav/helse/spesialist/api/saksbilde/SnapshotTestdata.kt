@@ -110,6 +110,7 @@ object SnapshotTestdata {
         pensjonsgivendeInntekter = emptyList(),
         annulleringskandidater = emptyList(),
         grunnbeløpsjustertGjennomsnitt = null,
+        graderteAndreYtelserVersjon = null,
     )
 
     fun opprettUberegnetPeriode(

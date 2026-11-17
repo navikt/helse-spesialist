@@ -96,6 +96,7 @@ object Testdata {
                                                 pensjonsgivendeInntekter = emptyList(),
                                                 annulleringskandidater = emptyList(),
                                                 grunnbeløpsjustertGjennomsnitt = null,
+                                                graderteAndreYtelserVersjon = null,
                                             ),
                                         ),
                                 ),

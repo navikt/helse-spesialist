@@ -72,6 +72,7 @@ class SpleisRestClientTest {
 
         assertEquals("AG123", beregnetPeriode.utbetaling.arbeidsgiverFagsystemId)
         assertEquals(BigDecimal("500000.0"), beregnetPeriode.grunnbeløpsjustertGjennomsnitt)
+        assertEquals(UUID.fromString("00000000-0000-0000-0000-000000000040"), beregnetPeriode.graderteAndreYtelserVersjon)
 
         val vilkarsgrunnlag = snapshotPerson.vilkarsgrunnlag
         assertEquals(2, vilkarsgrunnlag.size)
@@ -332,6 +333,7 @@ class SpleisRestClientTest {
                           },
                           "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000003",
                           "annulleringskandidater": [],
+                          "graderteAndreYtelserVersjon": "00000000-0000-0000-0000-000000000040",
                           "inntektstype": "EnArbeidsgiver"
                         }
                       ]

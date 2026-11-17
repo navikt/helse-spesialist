@@ -365,6 +365,7 @@ class ApiBeregnetPeriode(
     val vedtakBegrunnelser: List<ApiVedtakBegrunnelse>,
     val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>,
     val annulleringskandidater: List<ApiAnnulleringskandidat>,
+    val graderteAndreYtelserVersjon: UUID?,
 ) : ApiPeriode
 
 @Serializable
