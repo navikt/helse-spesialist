@@ -5,6 +5,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.*
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.NAVIdent
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
@@ -61,46 +62,16 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         val saksbehandlerIdent = kallKontekst.saksbehandler.ident
         val notatTilBeslutter = request.notatTilBeslutter
-        if (endringer.fjernet?.fra == true && endringer.fjernet?.til == false) {
-            // Gjenopprettelse har endringer bakt inn i seg, så vi kaller bare endre hvis vi ikke gjenoppretter samtidig
+        val behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(tilkommenInntekt.identitetsnummer)
+        if (endringer.erRenFjerning()) {
             loggInfo(
-                "Behandler forespørselen som gjenoppretting av tilkommen inntekt",
+                "Behandler forespørselen som fjerning av tilkommen inntekt",
                 "tilkommenInntektId" to tilkommenInntekt.id,
             )
-            gjenopprett(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
+            fjernUtenValidering(tilkommenInntekt, behandlinger, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
         } else {
-            loggInfo(
-                "Behandler forespørselen som endring av tilkommen inntekt",
-                "tilkommenInntektId" to tilkommenInntekt.id,
-            )
-            endre(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
-        }
-        val valideringResultat =
-            TilkommenInntektPeriodeValidator.validerPeriode(
-                periode = tilkommenInntekt.periode,
-                organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
-                andreTilkomneInntekter =
-                    kallKontekst.transaksjon.tilkommenInntektRepository
-                        .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
-                        .minus(tilkommenInntekt),
-                behandlinger = kallKontekst.alleGjeldendeBehandlingerForPerson(tilkommenInntekt.identitetsnummer),
-            )
-
-        when (valideringResultat) {
-            is TilkommenInntektPeriodeValidator.Resultat.OK -> {}
-            is TilkommenInntektPeriodeValidator.Resultat.GårUtenforSykefraværstilfelle ->
-                return RestResponse.Error(
-                    ApiPatchTilkommenInntektErrorCode.GÅR_UTENFOR_SYKEFRAVÆRSTILFELLE,
-                )
-
-            is TilkommenInntektPeriodeValidator.Resultat.OverlapperAnnenTilkommenInntekt ->
-                return RestResponse.Error(
-                    ApiPatchTilkommenInntektErrorCode.OVERLAPPER_ANNEN_TILKOMMEN_INNTEKT,
-                )
-        }
-
-        if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {
-            fjern(tilkommenInntekt, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
+            val feil = endreOgValider(tilkommenInntekt, endringer, behandlinger, saksbehandlerIdent, notatTilBeslutter, kallKontekst)
+            if (feil != null) return RestResponse.Error(feil)
         }
 
         kallKontekst.transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
@@ -125,6 +96,82 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
 
         return RestResponse.NoContent()
     }
+
+    private fun endreOgValider(
+        tilkommenInntekt: TilkommenInntekt,
+        endringer: ApiTilkommenInntektPatch.ApiTilkommenInntektEndringer,
+        behandlinger: List<Behandling>,
+        saksbehandlerIdent: NAVIdent,
+        notatTilBeslutter: String,
+        kallKontekst: KallKontekst,
+    ): ApiPatchTilkommenInntektErrorCode? {
+        if (endringer.fjernet?.fra == true && endringer.fjernet?.til == false) {
+            // Gjenopprettelse har endringer bakt inn i seg, så vi kaller bare endre hvis vi ikke gjenoppretter samtidig
+            loggInfo(
+                "Behandler forespørselen som gjenoppretting av tilkommen inntekt",
+                "tilkommenInntektId" to tilkommenInntekt.id,
+            )
+            gjenopprett(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
+        } else {
+            loggInfo(
+                "Behandler forespørselen som endring av tilkommen inntekt",
+                "tilkommenInntektId" to tilkommenInntekt.id,
+            )
+            endre(tilkommenInntekt, endringer, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
+        }
+        val valideringResultat =
+            TilkommenInntektPeriodeValidator.validerPeriode(
+                periode = tilkommenInntekt.periode,
+                organisasjonsnummer = tilkommenInntekt.organisasjonsnummer,
+                andreTilkomneInntekter =
+                    kallKontekst.transaksjon.tilkommenInntektRepository
+                        .finnAlleForIdentitetsnummer(tilkommenInntekt.identitetsnummer)
+                        .minus(tilkommenInntekt),
+                behandlinger = behandlinger,
+            )
+
+        when (valideringResultat) {
+            is TilkommenInntektPeriodeValidator.Resultat.OK -> {}
+            is TilkommenInntektPeriodeValidator.Resultat.GårUtenforSykefraværstilfelle ->
+                return ApiPatchTilkommenInntektErrorCode.GÅR_UTENFOR_SYKEFRAVÆRSTILFELLE
+
+            is TilkommenInntektPeriodeValidator.Resultat.OverlapperAnnenTilkommenInntekt ->
+                return ApiPatchTilkommenInntektErrorCode.OVERLAPPER_ANNEN_TILKOMMEN_INNTEKT
+        }
+
+        if (endringer.fjernet?.fra == false && endringer.fjernet?.til == true) {
+            fjern(tilkommenInntekt, saksbehandlerIdent, notatTilBeslutter, kallKontekst.transaksjon)
+        }
+        return null
+    }
+
+    // Ren fjerning valideres ikke mot sykefraværstilfellene, slik at inntekter kan fjernes etter at periodene er forkastet.
+    // Utenfor aktive sykefraværstilfeller påvirker ikke fjerningen noen beregning, så vi oppretter ingen ny totrinnsvurdering.
+    private fun fjernUtenValidering(
+        tilkommenInntekt: TilkommenInntekt,
+        behandlinger: List<Behandling>,
+        saksbehandlerIdent: NAVIdent,
+        notatTilBeslutter: String,
+        transaksjon: SessionContext,
+    ) {
+        if (TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(tilkommenInntekt.periode, behandlinger)) {
+            fjern(tilkommenInntekt, saksbehandlerIdent, notatTilBeslutter, transaksjon)
+        } else {
+            tilkommenInntekt.fjern(
+                saksbehandlerIdent = saksbehandlerIdent,
+                notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId = tilkommenInntekt.totrinnsvurderingId,
+            )
+        }
+    }
+
+    private fun ApiTilkommenInntektPatch.ApiTilkommenInntektEndringer.erRenFjerning() =
+        fjernet?.fra == false &&
+            fjernet?.til == true &&
+            organisasjonsnummer == null &&
+            periode == null &&
+            periodebeløp == null &&
+            ekskluderteUkedager == null
 
     private fun endre(
         tilkommenInntekt: TilkommenInntekt,
