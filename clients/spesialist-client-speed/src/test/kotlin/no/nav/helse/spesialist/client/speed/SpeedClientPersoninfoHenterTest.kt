@@ -1,12 +1,15 @@
 package no.nav.helse.spesialist.client.speed
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.serverError
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
+import com.github.tomakehurst.wiremock.stubbing.Scenario
 import no.nav.helse.spesialist.application.Cache
 import no.nav.helse.spesialist.application.testfixtures.InMemoryAccessTokenProvider
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -73,6 +76,31 @@ class SpeedClientPersoninfoHenterTest {
         assertIs<RuntimeException>(exception)
     }
 
+    @Test
+    fun `prøver på nytt når tilkoblingen blir brutt`() {
+        wireMock.stubFor(
+            post(urlEqualTo("/api/person"))
+                .inScenario("brutt tilkobling")
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER))
+                .willSetStateTo("tilkoblet"),
+        )
+        wireMock.stubFor(
+            post(urlEqualTo("/api/person"))
+                .inScenario("brutt tilkobling")
+                .whenScenarioStateIs("tilkoblet")
+                .willReturn(
+                    okJson(
+                        """{ "fødselsdato": "1990-01-15", "dødsdato": null, "fornavn": "Ola", "mellomnavn": null, "etternavn": "Nordmann", "adressebeskyttelse": "UGRADERT", "kjønn": "MANN", "kilde": "PDL" }""",
+                    ),
+                ),
+        )
+
+        val result = lagKlient().hentPersoninfo(Identitetsnummer.fraString("11111111111"))
+
+        assertEquals("Ola", result?.fornavn)
+    }
+
     private fun setupStub(response: ResponseDefinitionBuilder) {
         wireMock.stubFor(post(urlEqualTo("/api/person")).willReturn(response))
     }
@@ -95,5 +123,6 @@ class SpeedClientPersoninfoHenterTest {
                         hentUtenomCache: () -> T,
                     ) = hentUtenomCache()
                 },
+            httpClient = lagSpeedHttpClient(),
         )
 }

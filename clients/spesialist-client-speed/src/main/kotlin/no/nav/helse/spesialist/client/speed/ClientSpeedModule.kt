@@ -13,11 +13,14 @@ class ClientSpeedModule(
         val scope: String,
     )
 
+    private val httpClient = lagSpeedHttpClient()
+
     val alleIdenterHenter =
         SpeedClientAlleIdenterHenter(
             configuration = configuration,
             accessTokenProvider = accessTokenProvider,
             cache = cache,
+            httpClient = httpClient,
         )
 
     val personinfoHenter =
@@ -25,5 +28,6 @@ class ClientSpeedModule(
             configuration = configuration,
             accessTokenProvider = accessTokenProvider,
             cache = cache,
+            httpClient = httpClient,
         )
 }

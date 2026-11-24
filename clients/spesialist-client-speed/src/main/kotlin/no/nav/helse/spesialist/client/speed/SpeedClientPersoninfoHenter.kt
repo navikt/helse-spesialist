@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.client.speed.dto.PersonResponse
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
 import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
 import org.apache.hc.core5.http.ContentType
 import org.apache.hc.core5.http.io.entity.EntityUtils
 import java.time.Duration
@@ -22,6 +23,7 @@ class SpeedClientPersoninfoHenter(
     private val configuration: ClientSpeedModule.Configuration,
     private val accessTokenProvider: AccessTokenProvider,
     private val cache: Cache,
+    private val httpClient: CloseableHttpClient,
 ) : PersoninfoHenter {
     override fun hentPersoninfo(identitetsnummer: Identitetsnummer): Personinfo? =
         cache
@@ -47,7 +49,7 @@ class SpeedClientPersoninfoHenter(
             .setHeader("Accept", ContentType.APPLICATION_JSON.mimeType)
             .setHeader("callId", UUID.randomUUID().toString())
             .bodyString(requestBody, ContentType.APPLICATION_JSON)
-            .execute()
+            .execute(httpClient)
             .handleResponse { response ->
                 when (response.code) {
                     200 -> {
