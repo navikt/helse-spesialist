@@ -1,8 +1,8 @@
 [versions]
 kotlin = "2.4.21"
-flyway = "13.12.2"
+flyway = "13.13.0"
 kotlinx-coroutines = "1.11.0"
-rapidsAndRivers = "2026110308421793691732"
+rapidsAndRivers = "2026111908531795074794"
 tbdLibs = "20261125.1015"
 sykepengerGradlePlugins = "20261029.1945"
 testcontainers = "2.0.5"
@@ -47,13 +47,13 @@ ktor-server-statusPages = { module = "io.ktor:ktor-server-status-pages" }
 ktor-server-testHost = { module = "io.ktor:ktor-server-test-host" }
 ktor-server-sse = { module = "io.ktor:ktor-server-sse" }
 
-logback-classic = "ch.qos.logback:logback-classic:1.6.7"
+logback-classic = "ch.qos.logback:logback-classic:1.6.8"
 logback-logstashEncoder = "net.logstash.logback:logstash-logback-encoder:9.0"
 logback-syslog4j = "com.papertrailapp:logback-syslog4j:1.0.0"
-micrometer-prometheus = "io.micrometer:micrometer-registry-prometheus:1.17.2"
+micrometer-prometheus = "io.micrometer:micrometer-registry-prometheus:1.18.0"
 mockk = "io.mockk:mockk:1.14.12"
 mockOauth2Server = "no.nav.security:mock-oauth2-server:7.0.1"
-opentelemetry-instrumentation-annotations = 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.33.1'
+opentelemetry-instrumentation-annotations = 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.34.0'
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.10"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.14"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.31.0"
